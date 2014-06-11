@@ -1,0 +1,391 @@
+//
+//  filter.cpp
+//  epidb
+//
+//  Created by Felipe Albrecht on 22.09.13.
+//  Copyright (c) 2013,2014 Max Planck Institute for Computer Science. All rights reserved.
+//
+
+#ifndef EPIDB_DBA_FILTER_HPP
+#define EPIDB_DBA_FILTER_HPP
+
+#include <cmath>
+#include <limits>
+#include <string>
+#include <vector>
+
+#include <boost/foreach.hpp>
+
+#include "../extras/utils.hpp"
+
+namespace epidb {
+  namespace dba {
+
+    class Filter {
+    public:
+      enum Type {
+        STRING,
+        NUMBER
+      };
+
+
+    protected:
+      Type type;
+
+      std::string s_value;
+      double n_value;
+
+      bool check(Type t)
+      {
+        return type == t;
+      }
+
+
+    public:
+      Filter(const std::string &value)
+      {
+        type = STRING;
+        s_value = value;
+      }
+
+      Filter(const double value)
+      {
+        type = NUMBER;
+        n_value = value;
+      }
+
+      virtual bool is(const std::string &value) = 0;
+      virtual bool is(const double value) = 0;
+
+      virtual ~Filter() {}
+    };
+
+    class EqualsFilter: public Filter {
+    public:
+      EqualsFilter(const std::string &value): Filter(value) { }
+      EqualsFilter(const double value): Filter(value) { }
+
+      bool is(const std::string &value)
+      {
+        if (check(STRING) && value.compare(s_value) == 0) {
+          return true;
+        } else if (check(NUMBER)) {
+          double d;
+          if (!utils::string_to_double(value, d)) {
+            return false;
+          }
+          return std::fabs(d - n_value) < std::numeric_limits<double>::epsilon();
+        }
+        return false;
+      }
+
+      bool is(const double value)
+      {
+        if (!check(NUMBER)) {
+          return false;
+        }
+        return std::fabs(value - n_value) < std::numeric_limits<double>::epsilon();
+      }
+    };
+
+    class NotEqualsFilter: public Filter {
+    public:
+      NotEqualsFilter(const std::string &value): Filter(value) { }
+      NotEqualsFilter(const double value): Filter(value) { }
+
+      bool is(const std::string &value)
+      {
+        if (check(STRING) && value.compare(s_value) == 0) {
+          return true;
+        } else if (check(NUMBER)) {
+          double d;
+          if (!utils::string_to_double(value, d)) {
+            return false;
+          }
+          return std::fabs(d - n_value) > std::numeric_limits<double>::epsilon();
+        }
+        return false;
+      }
+
+      bool is(const double value)
+      {
+        if (!check(NUMBER)) {
+          return false;
+        }
+        return std::fabs(value - n_value) > std::numeric_limits<double>::epsilon();
+      }
+    };
+
+    class GreaterFilter: public Filter {
+    public:
+      GreaterFilter(const std::string &value): Filter(value) { }
+      GreaterFilter(const double value): Filter(value) { }
+
+      bool is(const std::string &value)
+      {
+        if (!check(NUMBER)) {
+          return false;
+        }
+        double d;
+        if (!utils::string_to_double(value, d)) {
+          return false;
+        }
+        return d > n_value;
+      }
+
+      bool is(const double value)
+      {
+        if (!check(NUMBER)) {
+          return false;
+        }
+        return value > n_value;
+      }
+    };
+
+    class GreaterEqualsFilter: public Filter {
+    public:
+      GreaterEqualsFilter(const std::string &value): Filter(value) { }
+      GreaterEqualsFilter(const double value): Filter(value) { }
+
+      bool is(const std::string &value)
+      {
+        if (!check(NUMBER)) {
+          return false;
+        }
+        double d;
+        if (!utils::string_to_double(value, d)) {
+          return false;
+        }
+        return d >= n_value;
+      }
+
+      bool is(const double value)
+      {
+        if (!check(NUMBER)) {
+          return false;
+        }
+        return value >= n_value;
+      }
+    };
+
+    class LessFilter: public Filter {
+    public:
+      LessFilter(const std::string &value): Filter(value) { }
+      LessFilter(const double value): Filter(value) { }
+
+      bool is(const std::string &value)
+      {
+        if (!check(NUMBER)) {
+          return false;
+        }
+        double d;
+        if (!utils::string_to_double(value, d)) {
+          return false;
+        }
+        return d < n_value;
+      }
+
+      bool is(const double value)
+      {
+        if (!check(NUMBER)) {
+          return false;
+        }
+        return value < n_value;
+      }
+    };
+
+    class LessEqualsFilter: public Filter {
+    public:
+      LessEqualsFilter(const std::string &value): Filter(value) { }
+      LessEqualsFilter(const double value): Filter(value) { }
+
+      bool is(const std::string &value)
+      {
+        if (!check(NUMBER)) {
+          return false;
+        }
+        double d;
+        if (!utils::string_to_double(value, d)) {
+          return false;
+        }
+        return d <= n_value;
+      }
+
+      bool is(const double value)
+      {
+        if (!check(NUMBER)) {
+          return false;
+        }
+        return value <= n_value;
+      }
+    };
+
+    class FilterBuilder {
+
+    public:
+
+      class {
+        // TODO: move to utils directory
+      public:
+        template<typename T>
+        operator boost::shared_ptr<T>()
+        {
+          return boost::shared_ptr<T>();
+        }
+      } nullPtr;
+
+
+      static FilterBuilder &getInstance()
+      {
+        static FilterBuilder instance;
+        return instance;
+      }
+
+      typedef boost::shared_ptr<Filter> FilterPtr;
+
+    private:
+      std::vector<std::string> operations;
+
+      FilterBuilder( )
+      {
+        operations.push_back("==");
+        operations.push_back("=!");
+        operations.push_back(">");
+        operations.push_back(">=");
+        operations.push_back("<");
+        operations.push_back("<=");
+      }
+      FilterBuilder(const FilterBuilder &);
+
+      bool check_name(const std::string &s, const std::string &type, std::string &msg)
+      {
+        if (s.length() == 0) {
+          msg = "The given value for " + type + " is empty.";
+          return false;
+        }
+
+        if (s.find('$') != std::string::npos) {
+          msg = "The given value(" + s + ") for " + type + " is invalid. Please, do not use '$'";
+          return false;
+        }
+
+        return true;
+      }
+
+      bool check_value(const std::string &s, const std::string &type, std::string &msg)
+      {
+        if (s.length() == 0) {
+          msg = "The given value for " + type + " is empty.";
+          return false;
+        }
+
+        if (s.find('$') != std::string::npos) {
+          msg = "The given value(" + s + ") for " + type + " is invalid. Please, do not use '$'";
+          return false;
+        }
+
+        return true;
+      }
+
+      bool check_operation(const std::string &operation, const std::string &type, std::string &msg)
+      {
+        if (type.compare("string") == 0) {
+          if ((operation.compare("==") == 0) || (operation.compare("!=") == 0)) {
+            return true;
+          } else {
+            msg = "Only equals (==) or not equals (!=) are available for strings";
+            return false;
+          }
+        } else if (type.compare("number") == 0) {
+          BOOST_FOREACH(std::string op, operations) {
+            if (operation.compare(op) == 0) {
+              return true;
+            }
+          }
+        }
+        msg = "Operation (" + operation + ") is not supported.";
+        return false;
+      }
+
+    public:
+      FilterPtr build(const std::string &field, const std::string &op, const std::string &value,
+                      bool &error, std::string &msg)
+      {
+        if (!check_name(field, "field", msg)) {
+          error = true;
+          return nullPtr;
+        }
+
+        if (!check_name(value, "value", msg)) {
+          error = true;
+          return nullPtr;
+        }
+
+        if (!check_operation(op, "string", msg)) {
+          error = true;
+          return nullPtr;
+        }
+
+        if (op.compare("==") == 0) {
+          error = false;
+          return boost::shared_ptr<Filter>(new EqualsFilter(value));
+        }
+
+        if (op.compare("!=") == 0) {
+          error = false;
+          return boost::shared_ptr<Filter>(new NotEqualsFilter(value));
+        }
+
+        error = true;
+        msg = "Invalid command";
+        return nullPtr;
+      }
+
+      FilterPtr build(const std::string &field, const std::string &op, const double value,
+                      bool &error, std::string &msg)
+      {
+        if (!check_name(field, "field", msg)) {
+          error = true;
+          return nullPtr;
+        }
+
+        if (op.compare("==") == 0) {
+          error = false;
+          return boost::shared_ptr<Filter>(new  EqualsFilter(value));
+        }
+
+        if (op.compare("!=") == 0) {
+          error = false;
+          return boost::shared_ptr<Filter>(new  NotEqualsFilter(value));
+        }
+
+        if (op.compare(">") == 0) {
+          error = false;
+          return boost::shared_ptr<Filter>(new  GreaterFilter(value));
+        }
+
+        if (op.compare(">=") == 0) {
+          error = false;
+          return boost::shared_ptr<Filter>(new  GreaterEqualsFilter(value));
+        }
+
+        if (op.compare("<") == 0) {
+          error = false;
+          return boost::shared_ptr<Filter>(new  LessFilter(value));
+        }
+
+        if (op.compare("<=") == 0) {
+          error = false;
+          return boost::shared_ptr<Filter>(new  LessEqualsFilter(value));
+        }
+
+        error = true;
+        msg = "Operation (" + op + ") is not supported.";
+        return nullPtr;
+      }
+
+    };
+  }
+}
+
+#endif

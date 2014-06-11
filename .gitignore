@@ -19,3 +19,10 @@
 *.exe
 *.out
 *.app
+
+# Sublime
+*.sublime-project
+*.sublime-workspace
+
+# Mac OS X
+.DS_Store

@@ -1,0 +1,112 @@
+#! /bin/sh
+### BEGIN INIT INFO
+# Provides:          mongod_shard
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: MongoDB shards
+# Description:       Starts a configured number of shards and can start/stop
+#                    individual shards
+### END INIT INFO
+
+# Author: Fabian Reinartz <fab.reinartz@gmail.com>
+
+PATH=/bin:/usr/bin
+DESC="mongodb shard deamon"
+NAME=mongod
+BIN=/opt/mongodb/mongodb/bin/$NAME
+CONF=/opt/mongodb/epidb/src/epidb/mongo/etc/mongod_shard.conf
+
+# Exit if the binary is not installed
+[ -x "$BIN" ] || { echo "$BIN not found"; exit 0; }
+
+# Read configuration variable file if it is present, exit otherwise
+[ -r $CONF ] && . $CONF || { echo "$CONF not found"; exit 0; }
+
+start_shard()
+{
+  if [ -z $1 ]; then
+    return 1
+  fi
+
+  local PIDFILEPATH="$PIDPATH_PREFIX/$1.$PIDFILE"
+  local DBPATH="$DBPATH_PREFIX/$1"
+  local LOGPATH="$LOGPATH_PREFIX.$1"
+  local PORT=$(expr $START_PORT + $1 - 1)
+
+  mkdir -p $DBPATH
+
+  if [ -r $PIDFILEPATH ]; then
+    local PID=$(cat $PIDFILEPATH)
+  fi
+  if [ -n "$PID" ] && ps -p $PID > /dev/null; then
+    echo "mongodb shard $1 already running"
+    return 2
+  else
+    echo "starting mongodb shard on port $PORT"
+    echo "cmd: $BIN -fork -port $PORT -dbpath $DBPATH --nssize 2047 -logpath $LOGPATH -pidfilepath $PIDFILEPATH"
+    $BIN -fork -port $PORT -dbpath $DBPATH --nssize 2047 -logpath $LOGPATH -pidfilepath $PIDFILEPATH
+  fi
+
+  return 0
+}
+
+stop_shard()
+{
+  if [ -z $1 ]; then
+    return 1
+  fi
+
+  local PIDFILEPATH="$PIDPATH_PREFIX/$1/$PIDFILE"
+
+  echo "checking if mongodb shard $1 is running"
+  if [ -r $PIDFILEPATH ]; then
+    local PID=$(cat $PIDFILEPATH)
+  fi
+  if [ -z "$PID" ]; then
+    echo "mongodb shard $1 not running"
+    return 2
+  fi
+  echo "stopping mongodb shard $1"
+  kill -2 $PID
+  rm -f $PIDFILEPATH
+  return 0
+}
+
+do_start()
+{
+  if [ -z $1 ]; then
+    for i in $(seq 1 $DEFAULT_NUM); do
+      start_shard $i
+    done
+  else
+    start_shard $1
+  fi
+}
+
+do_stop()
+{
+  if [ -z $1 ]; then
+    for i in $(seq 1 $DEFAULT_NUM); do
+      stop_shard $i
+    done
+  else
+    stop_shard $1
+  fi
+}
+
+case "$1" in
+  start)
+  do_start $2
+  ;;
+  stop)
+  do_stop $2
+  ;;
+  *)
+  echo "Usage: $0 {start|stop} [shard number]" >&2
+  exit 3
+  ;;
+esac
+
+:

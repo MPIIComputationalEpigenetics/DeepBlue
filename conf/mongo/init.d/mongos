@@ -1,0 +1,70 @@
+#! /bin/sh
+### BEGIN INIT INFO
+# Provides:          mongos
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Mongos
+# Description:       Starts the MongoDB sharding deamon which interfaces to
+#                    a set of shards.
+### END INIT INFO
+
+# Author: Fabian Reinartz <fab.reinartz@gmail.com>
+
+PATH=/bin:/usr/bin
+DESC="mongodb sharding deamon"
+NAME=mongos
+BIN=/opt/mongodb/mongodb/bin/$NAME
+CONF=/opt/mongodb/epidb/src/epidb/mongo/etc/mongos.conf
+
+# Exit if the binary is not installed
+[ -x "$BIN" ] || { echo "$BIN not found"; exit 0; }
+
+# Read configuration variable file if it is present, exit otherwise
+[ -r $CONF ] && . $CONF || { echo "$CONF not found"; exit 0; }
+
+do_start()
+{
+  if [ -r $PIDFILEPATH ]; then
+    PID=$(cat $PIDFILEPATH)
+  fi
+  if [ -n "$PID" ] && ps -p $PID > /dev/null; then
+    echo "mongos already running"
+    exit 0
+  else
+    echo "starting mongos on port $PORT"
+    echo "cmd: $BIN -fork -port $PORT -configdb $CONFIGDB --nssize 2047 -logpath $LOGPATH -pidfilepath $PIDFILEPATH"
+    $BIN -fork -port $PORT -configdb $CONFIGDB --nssize 2047 -logpath $LOGPATH -pidfilepath $PIDFILEPATH
+  fi
+}
+
+do_stop()
+{
+  echo "checking if mongos is running"
+  if [ -r $PIDFILEPATH ]; then
+    PID=$(cat $PIDFILEPATH)
+  fi
+  if [ -z "$PID" ]; then
+    echo "mongos not running"; exit 0
+  fi
+  echo "stopping mongos"
+  kill -2 $PID
+  rm -f $PIDFILEPATH
+}
+
+
+case "$1" in
+  start)
+  do_start
+  ;;
+  stop)
+  do_stop
+  ;;
+  *)
+  echo "Usage: $0 {start|stop}" >&2
+  exit 3
+  ;;
+esac
+
+:

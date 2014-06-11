@@ -1,0 +1,956 @@
+//
+//  insert.cpp
+//  epidb
+//
+//  Created by Felipe Albrecht on 30.04.14.
+//  Copyright (c) 2014 Max Planck Institute for Computer Science. All rights reserved.
+//
+
+#include <map>
+#include <string>
+#include <sstream>
+#include <vector>
+
+#include <time.h>
+#include <math.h>
+
+#include <boost/foreach.hpp>
+#include <boost/lexical_cast.hpp>
+
+#include <mongo/bson/bson.h>
+#include <mongo/client/dbclient.h>
+
+#include "../extras/utils.hpp"
+#include "../parser/field_type.hpp"
+#include "../parser/genome_data.hpp"
+#include "../parser/parser_factory.hpp"
+#include "../parser/wig_parser.hpp"
+
+#include "dba.hpp"
+#include "collections.hpp"
+#include "config.hpp"
+#include "controlled_vocabulary.hpp"
+#include "full_text.hpp"
+#include "genomes.hpp"
+#include "info.hpp"
+#include "helpers.hpp"
+#include "key_mapper.hpp"
+
+#include "../regions.hpp"
+#include "../log.hpp"
+
+
+namespace epidb {
+  namespace dba {
+
+    const size_t BULK_SIZE = 20000;
+
+
+    static const bool fill_region_builder(mongo::BSONObjBuilder &builder, const parser::Tokens &tokens, const parser::FileFormat &file_format,
+                                          std::string &chromosome, size_t &start, size_t &end, std::string &msg)
+    {
+      if (tokens.size() != file_format.size()) {
+        msg = "size of tokens doesn't match size of file format.";
+        return false;
+      }
+
+      size_t i(0);
+      bool chr_found = false;
+      bool start_found = false;
+      bool end_found = false;
+
+      BOOST_FOREACH(dba::columns::ColumnTypePtr column_type, file_format) {
+        std::string field_name = column_type->name();
+        std::string name;
+        if (!KeyMapper::to_short(field_name, name, msg)) {
+          return false;
+        }
+        parser::Token token = tokens[i++];
+
+        if (!chr_found && field_name == "CHROMOSOME") {
+          chr_found = true;
+          chromosome = token;
+          continue;
+        }
+
+        if (column_type->ignore(token)) {
+          continue;
+        }
+
+        if (!column_type->check(token)) {
+          msg = "Invalid value '" + token + "' for column " + field_name;
+          return false;
+        }
+
+        if (column_type->type() == dba::columns::COLUMN_STRING) {
+          builder.append(name, token);
+        } else if (column_type->type() == dba::columns::COLUMN_INTEGER) {
+          size_t l;
+          if (!utils::string_to_long(token, l)) {
+            msg = "The field '" + field_name + "' is an integer, but the value '" + token + "' is not a valid integer.";
+            return false;
+          }
+          builder.append(name, (int) l);
+        } else if (column_type->type() == dba::columns::COLUMN_DOUBLE) {
+          double d;
+          if (!utils::string_to_double(token, d)) {
+            msg = "The field '" + field_name + "' is a double, but the value '" + token + "' is not a valid double.";
+            return false;
+          }
+          builder.append(name, d);
+        }
+
+        if (!start_found && field_name == "START") {
+          start_found = true;
+          size_t l;
+          if (!utils::string_to_long(token, l)) {
+            msg = "The field START should be an integer, but the value '" + token + "' is not a valid integer.";
+            return false;
+          }
+          start = l;
+        }
+
+        if (!end_found && field_name == "END") {
+          end_found = true;
+          size_t l;
+          if (!utils::string_to_long(token, l)) {
+            msg = "The field END should be an integer, but the value '" + token + "' is not a valid integer.";
+            return false;
+          }
+          end = l;
+        }
+      }
+
+      if (!start_found) {
+        msg = "Start position was not informed or was ignored. Line content: ";
+        BOOST_FOREACH(std::string s, tokens) {
+          msg += s;
+          msg += "\t";
+        }
+        return false;
+      }
+
+      if (!end_found) {
+        msg = "End position was not informed or was ignored. Line content: ";
+        BOOST_FOREACH(std::string s, tokens) {
+          msg += s;
+          msg += "\t";
+        }
+        return false;
+      }
+
+      return true;
+    }
+
+    bool set_index_shard(std::map<std::string, bool> &processed, const std::string &collection, const size_t chromosome_size,
+                         std::string &msg)
+    {
+      if (processed.find(collection) != processed.end()) {
+        return true;
+      }
+
+      EPIDB_LOG_DBG("Starting Indexing and Sharding for " << collection);
+
+      mongo::ScopedDbConnection c(config::get_mongodb_server());
+      mongo::BSONObj info;
+
+
+      std::string collection_name = collection.substr(dba::DATABASE_NAME.length() + 1);
+
+      EPIDB_LOG("Creating collection: " << collection_name);
+
+      if (!c->createCollection(collection, 0, false, 0, &info)) {
+        EPIDB_LOG_ERR("Problem creating collection '" << collection_name << "' error: " << info.toString());
+        msg = "Error while creating data collection";
+        c.done();
+        return false;
+      }
+
+      // Unset powerOf2
+      mongo::BSONObjBuilder unsetPowerOf2SizesBuilder;
+      unsetPowerOf2SizesBuilder.append("collMod", collection_name);
+      unsetPowerOf2SizesBuilder.append("usePowerOf2Sizes", false);
+      mongo::BSONObj unsetPowerOf2Sizes = unsetPowerOf2SizesBuilder.obj();
+      EPIDB_LOG_DBG("Unseting PowerOf2Sizes: " << unsetPowerOf2Sizes.toString());
+      if (!c->runCommand(dba::DATABASE_NAME, unsetPowerOf2Sizes, info)) {
+        EPIDB_LOG_ERR("Unseting PowerOf2Sizes '" << collection_name << "' error: " << info.toString());
+        msg = "Error while setting data collection";
+        c.done();
+        return false;
+      }
+
+      // Set indexes
+      mongo::BSONObjBuilder index_rs;
+      index_rs.append(KeyMapper::START(), 1);
+      index_rs.append(KeyMapper::END(), 1);
+      c->ensureIndex(collection, index_rs.obj());
+      if (!c->getLastError().empty()) {
+        msg = c->getLastError();
+        EPIDB_LOG_ERR("Indexing on '" << collection << "' error: " << msg);
+        c.done();
+        return false;
+      }
+
+      if (config::sharding()) {
+
+        // TODO: check if (number_of_shards == 0)
+        size_t number_of_shards = config::shards.size();
+        size_t size_by_shard = (chromosome_size + number_of_shards - 1) / number_of_shards;
+
+        for (size_t i = 0; i < number_of_shards; i++) {
+          size_t min = i * size_by_shard;
+          size_t max = (i * size_by_shard) + size_by_shard - 1;
+
+          mongo::BSONObjBuilder _id_builder;
+          _id_builder.append("ns", collection);
+          _id_builder.append("min", BSON(KeyMapper::START() << (unsigned) (i * size_by_shard)));
+
+          mongo::BSONObj _id = _id_builder.obj();
+
+          mongo::BSONObjBuilder update_builder;
+          update_builder.append("_id", _id);
+          update_builder.append("ns",  collection);
+          update_builder.append("min", BSON(KeyMapper::START() << (unsigned) min));
+          update_builder.append("max", BSON(KeyMapper::START() << (unsigned) max));
+          update_builder.append("tag", config::shards[i]);
+
+          mongo::BSONObj update = update_builder.obj();
+
+          c->update("config.tags", _id, update, true);
+
+          if (!c->getLastError().empty()) {
+            msg = c->getLastError();
+            c.done();
+            return false;
+          }
+        }
+
+        mongo::BSONObjBuilder builder;
+        builder.append("shardCollection", collection);
+        builder.append("key", BSON(KeyMapper::START() << 1));
+        mongo::BSONObj objShard = builder.obj();
+        mongo::BSONObj info;
+        EPIDB_LOG_DBG("Sharding: " << objShard.toString());
+
+        if (!c->runCommand("admin", objShard, info)) {
+          EPIDB_LOG_ERR("Sharding on '" << collection << "' error: " << info.toString());
+          msg = "Error while sharding data. Check if you are connected to a MongoDB cluster with sharding enabled for the database '" + dba::DATABASE_NAME + "' or disable sharding: --nosharding";
+          c.done();
+          return false;
+        }
+
+        EPIDB_LOG_DBG("Index and Sharding for " << collection << " done");
+      }
+      c.done();
+      processed[collection] = true;
+
+      return true;
+    }
+
+    std::string out_of_range_message(size_t start, size_t end, std::string &chrom )
+    {
+      std::stringstream ss;
+      ss << "Invalid region: ";
+      ss << start;
+      ss << " - ";
+      ss << end;
+      ss << ". It is beyond the length of the chromosome ";
+      ss << chrom;
+      ss << " .";
+      return ss.str();
+    }
+
+    bool insert_experiment(const std::string &name, const std::string &norm_name,
+                           const std::string &genome, const std::string &norm_genome,
+                           const std::string &epigenetic_mark, const std::string &norm_epigenetic_mark,
+                           const std::string &sample_id, const std::string &technique, const std::string &norm_technique,
+                           const std::string &project, const std::string &norm_project,
+                           const std::string &description, const std::string &norm_description, const Metadata &extra_metadata,
+                           const std::string &user_key, const std::string &ip, const std::vector<parser::Feature> &features,
+                           std::string &experiment_id, std::string &msg)
+    {
+      {
+        int e_id;
+        if (!helpers::get_counter("experiments", e_id, msg))  {
+          return false;
+        }
+        experiment_id = "e" + boost::lexical_cast<std::string>(e_id);
+      }
+
+      mongo::BSONObjBuilder experiment_data_builder;
+      experiment_data_builder.append("_id", experiment_id);
+      experiment_data_builder.append("name", name);
+      experiment_data_builder.append("norm_name", norm_name);
+      experiment_data_builder.append("genome", genome);
+      experiment_data_builder.append("norm_genome", norm_genome);
+      experiment_data_builder.append("epigenetic_mark", epigenetic_mark);
+      experiment_data_builder.append("norm_epigenetic_mark", norm_epigenetic_mark);
+      experiment_data_builder.append("sample_id", sample_id);
+      experiment_data_builder.append("technique", technique);
+      experiment_data_builder.append("norm_technique", norm_technique);
+      experiment_data_builder.append("project", project);
+      experiment_data_builder.append("norm_project", norm_project);
+      experiment_data_builder.append("description", description);
+      experiment_data_builder.append("norm_description", norm_description);
+      experiment_data_builder.append("content_format", "wig");
+
+
+      mongo::BSONObjBuilder metadata_builder;
+      Metadata::const_iterator cit;
+      for (cit = extra_metadata.begin(); cit != extra_metadata.end(); ++cit) {
+        metadata_builder.append(cit->first, cit->second);
+      }
+      experiment_data_builder.append("extra_metadata", metadata_builder.obj());
+
+
+      std::map<std::string, std::string> sample_data;
+      if (!info::get_sample_by_id(sample_id, sample_data, msg, true)) {
+        return false;
+      }
+      std::map<std::string, std::string>::iterator it;
+      for (it = sample_data.begin(); it != sample_data.end(); ++it) {
+        if ((it->first != "_id") && (it->first != "user")) {
+          experiment_data_builder.append(it->first, it->second);
+        }
+      }
+
+      mongo::BSONObj experiment_data = experiment_data_builder.obj();
+      mongo::BSONObjBuilder experiment_builder;
+      experiment_builder.appendElements(experiment_data);
+
+      std::string user_name;
+      if (!get_user_name(user_key, user_name, msg)) {
+        return false;
+      }
+      experiment_builder.append("user", user_name);
+      experiment_builder.append("done", false);
+      experiment_builder.append("client_address", ip);
+      time_t time_;
+      time(&time_);
+      experiment_builder.appendTimeT("upload_start", time_);
+
+      mongo::BSONObj e = experiment_builder.obj();
+
+      mongo::ScopedDbConnection c(config::get_mongodb_server());
+      c->insert(helpers::collection_name(Collections::EXPERIMENTS()), e);
+      if (!c->getLastError().empty()) {
+        msg = c->getLastError();
+        c.done();
+        return false;
+      }
+
+      if (!insert_full_text(Collections::EXPERIMENTS(), experiment_id, experiment_data, msg)) {
+        c.done();
+        return false;
+      }
+
+      genomes::GenomeInfoPtr genome_info;
+      if (!genomes::get_genome_info(genome, genome_info, msg)) {
+        c.done();
+        return false;
+      }
+
+      size_t count = 0;
+      std::vector<mongo::BSONObj> bulk;
+      std::string prev_collection;
+      size_t prev_size;
+      std::map<std::string, bool> processed;
+      BOOST_FOREACH( parser::Feature feature, features) {
+        mongo::BSONObjBuilder region_builder;
+        region_builder.append("_id", (int) count++);
+        region_builder.append(KeyMapper::START(), (int) feature._start);
+        region_builder.append(KeyMapper::END(), (int) feature._end);
+        region_builder.append(KeyMapper::VALUE(), feature._value);
+
+        std::string internal_chromosome;
+        if (!genome_info->internal_chromosome(feature._chrom, internal_chromosome, msg)) {
+          // TODO: delete data already included.
+          c.done();
+          return false;
+        }
+        size_t size;
+        if (!genome_info->chromosome_size(internal_chromosome, size, msg)) {
+          // TODO: delete data already included.
+          c.done();
+          return false;
+        }
+
+        if (feature._start > size || feature._end > size) {
+          msg = out_of_range_message(feature._start, feature._end, feature._chrom);
+          c.done();
+          return false;
+        }
+
+        mongo::BSONObj r = region_builder.obj();
+        std::string collection = helpers::region_collection_name(genome, experiment_id, internal_chromosome);
+
+        if (prev_collection != collection) {
+          if (!prev_collection.empty() && bulk.size() > 0) {
+            if (!set_index_shard(processed, collection, size, msg)) {
+              c.done();
+              return false;
+            }
+            c->insert(prev_collection, bulk);
+            if (!c->getLastError().empty()) {
+              msg = c->getLastError();
+              c.done();
+              return false;
+            }
+            bulk.clear();
+          }
+          prev_collection = collection;
+          prev_size = size;
+        }
+
+        bulk.push_back(r);
+
+        if (bulk.size() % BULK_SIZE == 0) {
+          if (!set_index_shard(processed, collection, size, msg)) {
+            c.done();
+            return false;
+          }
+          c->insert(collection, bulk);
+          if (!c->getLastError().empty()) {
+            msg = c->getLastError();
+            c.done();
+            return false;
+          }
+          bulk.clear();
+        }
+      }
+
+      if (bulk.size() > 0) {
+        if (!set_index_shard(processed, prev_collection, prev_size, msg)) {
+          c.done();
+          return false;
+        }
+        c->insert(prev_collection, bulk);
+        if (!c->getLastError().empty()) {
+          msg = c->getLastError();
+          c.done();
+          return false;
+        }
+        bulk.clear();
+      }
+
+      c->update(helpers::collection_name(Collections::EXPERIMENTS()), QUERY("_id" << experiment_id),
+                BSON("$set" << BSON("done" << true << "upload_end" << mongo::DATENOW)), false, true);
+
+      if (!c->getLastError().empty()) {
+        msg = c->getLastError();
+        c.done();
+        return false;
+      }
+
+      c.done();
+      return true;
+    }
+
+    bool insert_experiment(const std::string &name, const std::string &norm_name,
+                           const std::string &genome, const std::string &norm_genome,
+                           const std::string &epigenetic_mark, const std::string &norm_epigenetic_mark,
+                           const std::string &sample_id, const std::string &technique, const std::string &norm_technique,
+                           const std::string &project, const std::string &norm_project,
+                           const std::string &description, const std::string &norm_description, const Metadata &extra_metadata,
+                           const std::string &user_key, const std::string &ip,
+                           const std::vector<parser::Tokens> &bed_file_tokenized,
+                           const parser::FileFormat &format,
+                           std::string &experiment_id, std::string &msg)
+    {
+      {
+        int e_id;
+        if (!helpers::get_counter("experiments", e_id, msg))  {
+          return false;
+        }
+        experiment_id = "e" + boost::lexical_cast<std::string>(e_id);
+      }
+
+      mongo::BSONObjBuilder experiment_data_builder;
+      experiment_data_builder.append("_id", experiment_id);
+      experiment_data_builder.append("name", name);
+      experiment_data_builder.append("norm_name", norm_name);
+      experiment_data_builder.append("genome", genome);
+      experiment_data_builder.append("norm_genome", genome);
+      experiment_data_builder.append("epigenetic_mark", epigenetic_mark);
+      experiment_data_builder.append("norm_epigenetic_mark", norm_epigenetic_mark);
+      experiment_data_builder.append("sample_id", sample_id);
+      experiment_data_builder.append("technique", technique);
+      experiment_data_builder.append("norm_technique", norm_technique);
+      experiment_data_builder.append("project", project);
+      experiment_data_builder.append("norm_project", norm_project);
+      experiment_data_builder.append("description", description);
+      experiment_data_builder.append("norm_description", norm_description);
+      experiment_data_builder.append("format", format.format());
+      experiment_data_builder.append("content_format", "bed");
+
+      mongo::BSONObjBuilder metadata_builder;
+      Metadata::const_iterator cit;
+      for (cit = extra_metadata.begin(); cit != extra_metadata.end(); ++cit) {
+        metadata_builder.append(cit->first, cit->second);
+      }
+      experiment_data_builder.append("extra_metadata", metadata_builder.obj());
+
+      std::map<std::string, std::string> sample_data;
+      if (!info::get_sample_by_id(sample_id, sample_data, msg, true)) {
+        return false;
+      }
+      std::map<std::string, std::string>::iterator it;
+      for (it = sample_data.begin(); it != sample_data.end(); ++it) {
+        if ((it->first != "_id") && (it->first != "user")) {
+          experiment_data_builder.append(it->first, it->second);
+        }
+      }
+
+      mongo::BSONObjBuilder experiment_builder;
+      mongo::BSONObj experiment_data = experiment_data_builder.obj();
+      experiment_builder.appendElements(experiment_data);
+
+      std::string user_name;
+      if (!get_user_name(user_key, user_name, msg)) {
+        return false;
+      }
+      experiment_builder.append("user", user_name);
+      experiment_builder.append("done", false);
+      experiment_builder.append("client_address", ip);
+      time_t time_;
+      time(&time_);
+      experiment_builder.appendTimeT("upload_start", time_);
+      mongo::BSONObj e = experiment_builder.obj();
+
+      mongo::ScopedDbConnection c(config::get_mongodb_server());
+      c->insert(helpers::collection_name(Collections::EXPERIMENTS()), e);
+      if (!c->getLastError().empty()) {
+        msg = c->getLastError();
+        c.done();
+        return false;
+      }
+
+      if (!insert_full_text(Collections::EXPERIMENTS(), experiment_id, experiment_data, msg)) {
+        c.done();
+        return false;
+      }
+
+      genomes::GenomeInfoPtr genome_info;
+      if (!genomes::get_genome_info(genome, genome_info, msg)) {
+        c.done();
+        return false;
+      }
+
+      size_t count = 0;
+      std::vector<mongo::BSONObj> bulk;
+      std::string prev_collection;
+      size_t prev_size;
+      std::map<std::string, bool> processed;
+      BOOST_FOREACH( parser::Tokens tokens, bed_file_tokenized) {
+        mongo::BSONObjBuilder region_builder;
+        region_builder.append("_id", (int) count++);
+        std::string chromosome;
+        size_t start;
+        size_t end;
+        if (!fill_region_builder(region_builder, tokens, format, chromosome, start, end, msg)) {
+          c.done();
+          return false;
+        }
+        std::string internal_chromosome;
+        if (!genome_info->internal_chromosome(chromosome, internal_chromosome, msg)) {
+          // TODO: delete data already included.
+          c.done();
+          return false;
+        }
+        size_t size;
+        if (!genome_info->chromosome_size(internal_chromosome, size, msg)) {
+          // TODO: delete data already included.
+          c.done();
+          return false;
+        }
+
+        if (start > size || end > size) {
+          msg = out_of_range_message(start, end, chromosome);
+          c.done();
+          return false;
+        }
+
+        mongo::BSONObj r = region_builder.obj();
+        std::string collection = helpers::region_collection_name(genome, experiment_id, internal_chromosome);
+
+        if (prev_collection != collection) {
+          if (!prev_collection.empty() && bulk.size() > 0) {
+            if (!set_index_shard(processed, collection, size, msg)) {
+              c.done();
+              return false;
+            }
+            c->insert(prev_collection, bulk);
+            if (!c->getLastError().empty()) {
+              msg = c->getLastError();
+              c.done();
+              return false;
+            }
+            bulk.clear();
+          }
+          prev_collection = collection;
+          prev_size = size;
+        }
+
+        bulk.push_back(r);
+
+        if (bulk.size() % BULK_SIZE == 0) {
+          if (!set_index_shard(processed, collection, size, msg)) {
+            c.done();
+            return false;
+          }
+          c->insert(collection, bulk);
+          if (!c->getLastError().empty()) {
+            msg = c->getLastError();
+            c.done();
+            return false;
+          }
+          bulk.clear();
+        }
+      }
+
+      if (bulk.size() > 0) {
+        if (!set_index_shard(processed, prev_collection, prev_size, msg)) {
+          c.done();
+          return false;
+        }
+        c->insert(prev_collection, bulk);
+        if (!c->getLastError().empty()) {
+          msg = c->getLastError();
+          c.done();
+          return false;
+        }
+        bulk.clear();
+      }
+
+      c->update(helpers::collection_name(Collections::EXPERIMENTS()), QUERY("_id" << experiment_id),
+                BSON("$set" << BSON("done" << true << "upload_end" << mongo::DATENOW)), false, true);
+
+      if (!c->getLastError().empty()) {
+        msg = c->getLastError();
+        c.done();
+        return false;
+      }
+
+      c.done();
+      return true;
+    }
+
+    bool insert_annotation(const std::string &name, const std::string &norm_name,
+                           const std::string &genome, const std::string &norm_genome,
+                           const std::string &description, const std::string &norm_description, const Metadata &extra_metadata,
+                           const std::string &user_key, const std::string &ip,
+                           const std::vector<parser::Tokens> &bed_file_tokenized,
+                           const parser::FileFormat &format,
+                           std::string &annotation_id, std::string &msg)
+    {
+      {
+        int a_id;
+        if (!helpers::get_counter("annotations", a_id, msg))  {
+          return false;
+        }
+        annotation_id = "a" + boost::lexical_cast<std::string>(a_id);
+      }
+
+      mongo::ScopedDbConnection c(config::get_mongodb_server());
+      mongo::BSONObjBuilder annotation_data_builder;
+      annotation_data_builder.append("_id", annotation_id);
+      annotation_data_builder.append("name", name);
+      annotation_data_builder.append("norm_name", norm_name);
+      annotation_data_builder.append("genome", genome);
+      annotation_data_builder.append("norm_genome", norm_genome);
+      annotation_data_builder.append("description", description);
+      annotation_data_builder.append("norm_description", norm_description);
+      annotation_data_builder.append("format", format.format());
+
+      mongo::BSONObjBuilder metadata_builder;
+      Metadata::const_iterator cit;
+      for (cit = extra_metadata.begin(); cit != extra_metadata.end(); ++cit) {
+        metadata_builder.append(cit->first, cit->second);
+      }
+      annotation_data_builder.append("extra_metadata", metadata_builder.obj());
+
+      // TODO: extra metadata
+      mongo::BSONObj search_data = annotation_data_builder.obj();
+      mongo::BSONObjBuilder annotation_builder;
+      annotation_builder.appendElements(search_data);
+
+      std::string user_name;
+      if (!get_user_name(user_key, user_name, msg)) {
+        c.done();
+        return false;
+      }
+      annotation_builder.append("user", user_name);
+      annotation_builder.append("done", false);
+      annotation_builder.append("client_address", ip);
+      time_t time_;
+      time(&time_);
+      annotation_builder.appendTimeT("upload_start", time_);
+      // TODO: internal metadata:
+      // - extra_columns
+      mongo::BSONObj a = annotation_builder.obj();
+      c->insert(helpers::collection_name(Collections::ANNOTATIONS()), a);
+      if (!c->getLastError().empty()) {
+        msg = c->getLastError();
+        c.done();
+        return false;
+      }
+
+      if (!insert_full_text(Collections::ANNOTATIONS(), annotation_id, search_data, msg)) {
+        c.done();
+        return false;
+      }
+
+      genomes::GenomeInfoPtr genome_info;
+      if (!genomes::get_genome_info(genome, genome_info, msg)) {
+        c.done();
+        return false;
+      }
+
+      size_t count = 0;
+      std::vector<mongo::BSONObj> bulk;
+      std::string prev_collection;
+      size_t prev_size;
+      std::map<std::string, bool> processed;
+      BOOST_FOREACH( parser::Tokens tokens, bed_file_tokenized) {
+        mongo::BSONObjBuilder region_builder;
+        region_builder.append("_id", (int) count++);
+        std::string chromosome;
+        size_t start;
+        size_t end;
+
+        if (!fill_region_builder(region_builder, tokens, format, chromosome, start, end, msg)) {
+          c.done();
+          return false;
+        }
+        std::string internal_chromosome;
+        if (!genome_info->internal_chromosome(chromosome, internal_chromosome, msg)) {
+          // TODO: delete data already included.
+          c.done();
+          return false;
+        }
+        size_t size;
+        if (!genome_info->chromosome_size(internal_chromosome, size, msg)) {
+          // TODO: delete data already included.
+          c.done();
+          return false;
+        }
+
+        if (start > size || end > size) {
+          msg = out_of_range_message(start, end, chromosome);
+          c.done();
+          return false;
+        }
+        mongo::BSONObj r = region_builder.obj();
+        std::string collection = helpers::region_collection_name(genome, annotation_id, internal_chromosome);
+        if (prev_collection != collection) {
+          if (!prev_collection.empty() && bulk.size() > 0) {
+            if (!set_index_shard(processed, collection, size, msg)) {
+              c.done();
+              return false;
+            }
+            c->insert(prev_collection, bulk);
+            if (!c->getLastError().empty()) {
+              msg = c->getLastError();
+              c.done();
+              return false;
+            }
+            bulk.clear();
+          }
+          prev_collection = collection;
+          prev_size = size;
+        }
+
+        bulk.push_back(r);
+
+        if (bulk.size() % BULK_SIZE == 0) {
+          if (!set_index_shard(processed, collection, size, msg)) {
+            c.done();
+            return false;
+          }
+          c->insert(collection, bulk);
+          if (!c->getLastError().empty()) {
+            msg = c->getLastError();
+            c.done();
+            return false;
+          }
+          bulk.clear();
+        }
+      }
+
+      if (bulk.size() > 0) {
+        if (!set_index_shard(processed, prev_collection, prev_size, msg)) {
+          c.done();
+          return false;
+        }
+        c->insert(prev_collection, bulk);
+        if (!c->getLastError().empty()) {
+          msg = c->getLastError();
+          c.done();
+          return false;
+        }
+        bulk.clear();
+      }
+
+      c->update(helpers::collection_name(Collections::ANNOTATIONS()), QUERY("_id" << annotation_id),
+                BSON("$set" << BSON("done" << true << "upload_end" << mongo::DATENOW)), false, true);
+
+      if (!c->getLastError().empty()) {
+        msg = c->getLastError();
+        c.done();
+        return false;
+      }
+
+      c.done();
+      return true;
+    }
+
+    bool insert_annotation(const std::string &name, const std::string &norm_name,
+                           const std::string &genome, const std::string &norm_genome,
+                           const std::string &description, const std::string &norm_description, const Metadata &extra_metadata,
+                           const std::string &user_key, const std::string &ip,
+                           const ChromosomeRegionsList &regions,
+                           const parser::FileFormat &format,
+                           std::string &annotation_id, std::string &msg)
+    {
+      {
+        int a_id;
+        if (!helpers::get_counter("annotations", a_id, msg))  {
+          return false;
+        }
+        annotation_id = "a" + boost::lexical_cast<std::string>(a_id);
+      }
+
+      mongo::ScopedDbConnection c(config::get_mongodb_server());
+      mongo::BSONObjBuilder annotation_data_builder;
+      annotation_data_builder.append("_id", annotation_id);
+      annotation_data_builder.append("name", name);
+      annotation_data_builder.append("norm_name", norm_name);
+      annotation_data_builder.append("genome", genome);
+      annotation_data_builder.append("norm_genome", norm_genome);
+      annotation_data_builder.append("description", description);
+      annotation_data_builder.append("norm_description", norm_description);
+      annotation_data_builder.append("format", format.format());
+
+      mongo::BSONObjBuilder metadata_builder;
+      Metadata::const_iterator cit;
+      for (cit = extra_metadata.begin(); cit != extra_metadata.end(); ++cit) {
+        metadata_builder.append(cit->first, cit->second);
+      }
+      annotation_data_builder.append("extra_metadata", metadata_builder.obj());
+
+      // TODO: extra metadata
+      mongo::BSONObj search_data = annotation_data_builder.obj();
+      mongo::BSONObjBuilder annotation_builder;
+      annotation_builder.appendElements(search_data);
+
+      std::string user_name;
+      if (!get_user_name(user_key, user_name, msg)) {
+        c.done();
+        return false;
+      }
+      annotation_builder.append("user", user_name);
+      annotation_builder.append("done", false);
+      annotation_builder.append("client_address", ip);
+      time_t time_;
+      time(&time_);
+      annotation_builder.appendTimeT("upload_start", time_);
+      // TODO: internal metadata:
+      // - extra_columns
+      mongo::BSONObj a = annotation_builder.obj();
+      c->insert(helpers::collection_name(Collections::ANNOTATIONS()), a);
+      if (!c->getLastError().empty()) {
+        msg = c->getLastError();
+        c.done();
+        return false;
+      }
+
+      if (!insert_full_text(Collections::ANNOTATIONS(), annotation_id, search_data, msg)) {
+        c.done();
+        return false;
+      }
+
+      genomes::GenomeInfoPtr genome_info;
+      if (!genomes::get_genome_info(genome, genome_info, msg)) {
+        c.done();
+        return false;
+      }
+
+      size_t count = 0;
+      std::map<std::string, bool> processed;
+      BOOST_FOREACH(ChromosomeRegions chromosome_regions, regions) {
+        std::string chromosome = chromosome_regions.first;
+        std::string internal_chromosome;
+        size_t chromosome_size;
+
+        if (!genome_info->internal_chromosome(chromosome, internal_chromosome, msg)) {
+          // TODO: delete data already included.
+          c.done();
+          return false;
+        }
+
+        if (!genome_info->chromosome_size(internal_chromosome, chromosome_size, msg)) {
+          // TODO: delete data already included.
+          c.done();
+          return false;
+        }
+
+        std::string collection = helpers::region_collection_name(genome, annotation_id, internal_chromosome);
+        std::vector<mongo::BSONObj> bulk;
+
+        if (!set_index_shard(processed, collection, chromosome_size, msg)) {
+          c.done();
+          return false;
+        }
+
+        for (RegionsIterator it = chromosome_regions.second->begin(); it != chromosome_regions.second->end(); it++) {
+          Region region = *it;
+          mongo::BSONObjBuilder region_builder;
+          region_builder.append("_id", (int) count++);
+
+          if (region.start > chromosome_size || region.end > chromosome_size) {
+            msg = out_of_range_message(region.start, region.end, chromosome);
+            c.done();
+            return false;
+          }
+
+          region_builder.append(KeyMapper::START(), (int) region.start);
+          region_builder.append(KeyMapper::END(), (int) region.end);
+
+          mongo::BSONObj r = region_builder.obj();
+          bulk.push_back(r);
+
+          if (bulk.size() % BULK_SIZE == 0) {
+            c->insert(collection, bulk);
+            if (!c->getLastError().empty()) {
+              msg = c->getLastError();
+              c.done();
+              return false;
+            }
+            bulk.clear();
+          }
+        }
+        if (bulk.size() > 0) {
+          c->insert(collection, bulk);
+          if (!c->getLastError().empty()) {
+            msg = c->getLastError();
+            c.done();
+            return false;
+          }
+          bulk.clear();
+        }
+      }
+
+      c->update(helpers::collection_name(Collections::ANNOTATIONS()), QUERY("_id" << annotation_id),
+                BSON("$set" << BSON("done" << true << "upload_end" << mongo::DATENOW)), false, true);
+
+      if (!c->getLastError().empty()) {
+        msg = c->getLastError();
+        c.done();
+        return false;
+      }
+
+      c.done();
+      return true;
+    }
+  }
+}

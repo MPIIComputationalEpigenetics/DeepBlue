@@ -1,0 +1,32 @@
+//
+//  config.hpp
+//  epidb
+//
+//  Created by Felipe Albrecht on 09.07.13.
+//  Copyright (c) 2013,2014 Max Planck Institute for Computer Science. All rights reserved.
+//
+
+#ifndef EPIDB_DBA_CONFIG_HPP
+#define EPIDB_DBA_CONFIG_HPP
+
+#include <string>
+
+namespace epidb {
+  namespace dba {
+
+    namespace config {
+      bool set_shards_tags();
+      extern std::vector<std::string> shards;
+      void set_mongodb_server(const std::string &server);
+      const std::string get_mongodb_server();
+      bool sharding();
+      void set_sharding(bool sharding);
+      size_t chunk_size();
+      void set_chunk_size(size_t);
+    }
+
+    static const std::string DATABASE_NAME("epidb");
+  }
+}
+
+#endif /* defined(EPIDB_DBA_CONFIG_HPP) */
