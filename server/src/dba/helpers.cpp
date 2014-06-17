@@ -32,13 +32,22 @@ namespace epidb {
         return DATABASE_NAME + "." + name;
       }
 
-      const std::string region_collection_name(const std::string &genome, const std::string& collection_id, const std::string &chromosome)
+      const std::string region_collection_name(const std::string &genome, const std::string &collection_id, const std::string &chromosome)
       {
         std::stringstream ss;
         ss << collection_name(Collections::REGIONS()) << "." << utils::normalize_name(genome) << "." << collection_id << "." << chromosome;
         return ss.str();
       }
 
+      // ---
+
+      bool get_bio_source_id(const std::string &norm_name, std::string &id, std::string &msg)
+      {
+        return get_id(Collections::BIO_SOURCES(), norm_name, id, msg);
+      }
+
+
+      // --- 
       bool get(const std::string &where,
                std::vector<std::string> &result, std::string &msg)
       {
@@ -171,6 +180,31 @@ namespace epidb {
 
         id_name = utils::IdName(_id, name);
 
+        return true;
+      }
+
+      bool get_id(const std::string &where, const std::string norm_name,
+                  std::string &id, std::string &msg)
+      {
+        std::string field;
+        std::vector<mongo::BSONObj> results;
+
+        if (where.compare("users") == 0) {
+          field = "key";
+        } else {
+          field = "norm_name";
+        }
+        if (!get(where, field, norm_name, results, msg)) {
+          return false;
+        }
+
+        if (results.size() == 0) {
+          msg = "Unable to retrieve the id of the '" + norm_name + "''.";
+          return false;
+        }
+
+        id = results[0]["_id"].str();
+        
         return true;
       }
 

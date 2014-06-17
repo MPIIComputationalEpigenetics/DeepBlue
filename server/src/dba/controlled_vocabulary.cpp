@@ -17,6 +17,7 @@
 #include "config.hpp"
 #include "collections.hpp"
 #include "helpers.hpp"
+#include "full_text.hpp"
 
 namespace epidb {
   namespace dba {
@@ -133,6 +134,20 @@ namespace epidb {
         }
 
         c.done();
+
+        std::string bio_source_id;
+        if (!helpers::get_bio_source_id(norm_bio_source_name, bio_source_id, msg)) {
+          return false;
+        }
+
+        if (!search::insert_related_term(bio_source_id, synonym, msg)) {
+          return false;
+        }
+
+        if (!search::insert_related_term(bio_source_id, norm_synonym, msg)) {
+          return false;
+        }
+
         return true;
       }
 

@@ -277,7 +277,7 @@ namespace epidb {
       }
       c.done();
 
-      if (!insert_full_text(Collections::GENOMES(), genome_id, search_data, msg)) {
+      if (!search::insert_full_text(Collections::GENOMES(), genome_id, search_data, msg)) {
         return false;
       }
 
@@ -348,7 +348,7 @@ namespace epidb {
       }
       c.done();
 
-      if (!insert_full_text(Collections::EPIGENETIC_MARKS(), epigenetic_mark_id, search_data, msg)) {
+      if (!search::insert_full_text(Collections::EPIGENETIC_MARKS(), epigenetic_mark_id, search_data, msg)) {
         return false;
       }
 
@@ -412,7 +412,7 @@ namespace epidb {
         return false;
       }
 
-      if (!insert_full_text(Collections::BIO_SOURCES(), bio_source_id, search_data, msg)) {
+      if (!search::insert_full_text(Collections::BIO_SOURCES(), bio_source_id, search_data, msg)) {
         c.done();
         return false;
       }
@@ -478,7 +478,7 @@ namespace epidb {
         return false;
       }
 
-      if (!insert_full_text(Collections::TECHNIQUES(), technique_id, search_data, msg)) {
+      if (!search::insert_full_text(Collections::TECHNIQUES(), technique_id, search_data, msg)) {
         c.done();
         return false;
       }
@@ -569,7 +569,7 @@ namespace epidb {
       }
       c.done();
 
-      if (!insert_full_text(Collections::SAMPLES(), sample_id, search_data, msg)) {
+      if (!search::insert_full_text(Collections::SAMPLES(), sample_id, search_data, msg)) {
         return false;
       }
 
@@ -656,7 +656,7 @@ namespace epidb {
         return false;
       }
 
-      if (!insert_full_text(Collections::PROJECTS(), project_id, search_data, msg)) {
+      if (!search::insert_full_text(Collections::PROJECTS(), project_id, search_data, msg)) {
         c.done();
         return false;
       }

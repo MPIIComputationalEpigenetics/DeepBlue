@@ -27,6 +27,12 @@ namespace epidb {
 
       const std::string region_collection_name(const std::string &genome, const std::string& regions_set, const std::string &chromosome);
 
+      // ----
+
+      bool get_bio_source_id(const std::string &norm_name, std::string &id, std::string &msg);
+      
+      // ----
+
       // Get **all** content from **entire** colection
       bool get(const std::string &where,
                std::vector<std::string> &result, std::string &msg);
@@ -60,6 +66,9 @@ namespace epidb {
 
       bool get_name(const std::string &where, const std::string norm_name,
                     utils::IdName &id_name, std::string &msg);
+
+      bool get_id(const std::string &where, const std::string norm_name,
+                  std::string &id, std::string &msg);
 
       bool check_exist(const std::string &where, const std::string &field, const std::string &content,
                        bool &r, std::string &msg);

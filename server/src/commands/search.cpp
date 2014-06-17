@@ -86,14 +86,14 @@ namespace epidb {
           return false;
         }
 
-        std::vector<dba::TextSearchResult> search_res;
-        if (!dba::search_full_text(keyword, types_s, search_res, msg)) {
+        std::vector<dba::search::TextSearchResult> search_res;
+        if (!dba::search::search_full_text(keyword, types_s, search_res, msg)) {
           result.add_error(msg);
           return false;
         }
 
         result.set_as_array(true);
-        std::vector<dba::TextSearchResult>::iterator it;
+        std::vector<dba::search::TextSearchResult>::iterator it;
         for (it = search_res.begin(); it != search_res.end(); ++it) {
           std::vector<serialize::ParameterPtr> list;
           list.push_back(serialize::ParameterPtr(new serialize::SimpleParameter(serialize::STRING, it->id)));

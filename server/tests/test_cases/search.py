@@ -238,3 +238,18 @@ class TestSearch(helpers.TestCase):
     s, e = epidb.search("hg19", "genome", self.admin_key)
     self.assertEqual("genome is not a valid type. The valid types are: 'annotations,bio_sources,epigenetic_marks,experiments,genomes,projects,samples,samples.fields,techniques,tilings'", e)
   
+  def test_search_synonyms(self):
+    epidb = EpidbClient()
+    self.init(epidb)
+
+    res, bsid1 = epidb.add_bio_source("Bio Source A", "bio source A", {}, self.admin_key)
+    self.assertSuccess(res, bsid1)
+    
+    res = epidb.set_bio_source_synonym("bio source a", "synonym name for bio source a", self.admin_key)
+    self.assertSuccess(res)
+
+    res = epidb.set_bio_source_synonym("synonym name for bio source a", "another synonym", self.admin_key)
+    self.assertSuccess(res)
+
+    (res, found) = epidb.search("another synonym", None, self.admin_key)
+    self.assertEquals(found, [['bs1', 'Bio Source A', 'bio_sources']])

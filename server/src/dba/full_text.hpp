@@ -26,22 +26,26 @@
 
 namespace epidb {
   namespace dba {
+    namespace search {
 
-    struct TextSearchResult {
-      std::string id;
-      std::string name;
-      std::string type;
+      struct TextSearchResult {
+        std::string id;
+        std::string name;
+        std::string type;
 
-      double score;
-    };
+        double score;
+      };
 
-    bool insert_full_text(const std::string &type, const std::string &id,
-                          const mongo::BSONObj &extra_data, std::string &msg);
+      bool insert_full_text(const std::string &type, const std::string &id,
+                            const mongo::BSONObj &extra_data, std::string &msg);
 
-    bool search_full_text(const std::string &text, std::vector<TextSearchResult> &, std::string &msg);
+      bool search_full_text(const std::string &text, std::vector<TextSearchResult> &, std::string &msg);
 
-    bool search_full_text(const std::string &text, const std::vector<std::string> &types,
-                          std::vector<TextSearchResult> &, std::string &msg);
+      bool insert_related_term(const std::string &id, const std::string &name, std::string &msg);
+
+      bool search_full_text(const std::string &text, const std::vector<std::string> &types,
+                            std::vector<TextSearchResult> &, std::string &msg);
+    }
   }
 }
 
