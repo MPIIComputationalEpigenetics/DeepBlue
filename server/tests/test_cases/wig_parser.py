@@ -40,7 +40,6 @@ class TestWigFiles(helpers.TestCase):
                                  "ENCODE", "desc1", wig_data, "wig", None, self.admin_key)
       self.assertSuccess(res)
 
-
   def test_wig_files_fail(self):
     epidb = EpidbClient()
     self.init_base(epidb)
@@ -52,6 +51,7 @@ class TestWigFiles(helpers.TestCase):
                   "null_step", "var_null_replace", "var_overwrite", "bad_fields",
                   "empty", "fix_overwrite", "missing_fields", "mix_overwrite",
                   "null_span", "rubbish", "var_overshoot", "multitrack", "ucsc_definition"]
+
 
     for filename in fail_files:
       wig_data = helpers.load_wig("should_fail/%s" % filename)

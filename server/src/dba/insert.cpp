@@ -339,7 +339,7 @@ namespace epidb {
         return false;
       }
 
-      if (!insert_full_text(Collections::EXPERIMENTS(), experiment_id, experiment_data, msg)) {
+      if (!search::insert_full_text(Collections::EXPERIMENTS(), experiment_id, experiment_data, msg)) {
         c.done();
         return false;
       }
@@ -355,6 +355,7 @@ namespace epidb {
       std::string prev_collection;
       size_t prev_size;
       std::map<std::string, bool> processed;
+
       BOOST_FOREACH( parser::Feature feature, features) {
         mongo::BSONObjBuilder region_builder;
         region_builder.append("_id", (int) count++);
@@ -386,7 +387,7 @@ namespace epidb {
 
         if (prev_collection != collection) {
           if (!prev_collection.empty() && bulk.size() > 0) {
-            if (!set_index_shard(processed, collection, size, msg)) {
+            if (!set_index_shard(processed, prev_collection, prev_size, msg)) {
               c.done();
               return false;
             }
@@ -525,7 +526,7 @@ namespace epidb {
         return false;
       }
 
-      if (!insert_full_text(Collections::EXPERIMENTS(), experiment_id, experiment_data, msg)) {
+      if (!search::insert_full_text(Collections::EXPERIMENTS(), experiment_id, experiment_data, msg)) {
         c.done();
         return false;
       }
@@ -575,7 +576,7 @@ namespace epidb {
 
         if (prev_collection != collection) {
           if (!prev_collection.empty() && bulk.size() > 0) {
-            if (!set_index_shard(processed, collection, size, msg)) {
+            if (!set_index_shard(processed, prev_collection, prev_size, msg)) {
               c.done();
               return false;
             }
@@ -695,7 +696,7 @@ namespace epidb {
         return false;
       }
 
-      if (!insert_full_text(Collections::ANNOTATIONS(), annotation_id, search_data, msg)) {
+      if (!search::insert_full_text(Collections::ANNOTATIONS(), annotation_id, search_data, msg)) {
         c.done();
         return false;
       }
@@ -744,7 +745,7 @@ namespace epidb {
         std::string collection = helpers::region_collection_name(genome, annotation_id, internal_chromosome);
         if (prev_collection != collection) {
           if (!prev_collection.empty() && bulk.size() > 0) {
-            if (!set_index_shard(processed, collection, size, msg)) {
+            if (!set_index_shard(processed, prev_collection, prev_size, msg)) {
               c.done();
               return false;
             }
@@ -864,7 +865,7 @@ namespace epidb {
         return false;
       }
 
-      if (!insert_full_text(Collections::ANNOTATIONS(), annotation_id, search_data, msg)) {
+      if (!search::insert_full_text(Collections::ANNOTATIONS(), annotation_id, search_data, msg)) {
         c.done();
         return false;
       }
