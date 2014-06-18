@@ -20,7 +20,7 @@ namespace epidb {
 
       private:
         static CommandDescription desc_() {
-          return CommandDescription(categories::OPERATIONS, "Calculates the intersection of the given queries.");
+          return CommandDescription(categories::OPERATIONS, "Select regions from the first query that does intersect with at least one second query region.");
         }
 
         static Parameters parameters_() {
