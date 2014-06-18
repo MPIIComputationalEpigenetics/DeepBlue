@@ -78,7 +78,7 @@ namespace epidb {
             std::stringstream ss;
             ss << "Invalid bio_source name: ";
             ss << bio_source_name ;
-            ss << ". No bio_source or synonymous was defined with this name.";
+            ss << ". No Bio Source or synonymous was defined with this name.";
             result.add_error(ss.str());
             return false;
           }

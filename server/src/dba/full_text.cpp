@@ -49,6 +49,14 @@ namespace epidb {
         }
 
         c->ensureIndex(helpers::collection_name(Collections::TEXT_SEARCH()),
+                       mongo::fromjson("{\"epidb_id\": 1}"));
+        if (!c->getLastError().empty()) {
+          msg = c->getLastError();
+          c.done();
+          return false;
+        }
+
+        c->ensureIndex(helpers::collection_name(Collections::TEXT_SEARCH()),
                        mongo::fromjson("{\"$**\": \"text\", \"name\":\"text\", \"description\":\"text\"}"));
 
         if (!c->getLastError().empty()) {
@@ -79,9 +87,26 @@ namespace epidb {
           }
         }
 
+        if (type == "experiments" || type == "samples") {
+          std::string bio_source_name = data["bio_source_name"].str();
+          std::auto_ptr<mongo::DBClientCursor> cursor = c->query(helpers::collection_name(Collections::TEXT_SEARCH()),
+              mongo::fromjson("{\"name\": \"" + bio_source_name + "\", \"type\": \"bio_sources\"}"));
+
+          if (!cursor->more()) {
+            msg = "Unable to find bio source " + bio_source_name;
+          }
+
+          mongo::BSONObj bio_source = cursor->next().getOwned();
+          if (bio_source.hasField("related_terms")) {
+            create_text_search_builder.append(bio_source["related_terms"]);
+          }
+        }
+
         create_text_search_builder.append("epidb_id", id);
         create_text_search_builder.append("type", type);
         mongo::BSONObj q = create_text_search_builder.obj();
+
+        std::cerr << "q: " << q.toString() << std::endl;
 
         c->insert(helpers::collection_name(Collections::TEXT_SEARCH()), q);
 
@@ -90,6 +115,7 @@ namespace epidb {
           c.done();
           return false;
         }
+
         c.done();
         return true;
       }
@@ -105,7 +131,38 @@ namespace epidb {
         mongo::BSONObj value = BSON("related_terms" << name);
         mongo::BSONObj append_value = BSON("$addToSet" << value);
 
+        // Update the bio_source term
         c->update(helpers::collection_name(Collections::TEXT_SEARCH()), query, append_value, true, false);
+        if (!c->getLastError().empty()) {
+          msg = c->getLastError();
+          c.done();
+          return false;
+        }
+
+        // Find the bio source to update the experiments and samples that use it
+        std::auto_ptr<mongo::DBClientCursor> cursor =
+          c->query(helpers::collection_name(Collections::TEXT_SEARCH()), query);
+
+        if (!cursor->more()) {
+          msg = "Unable to find bio source " + id;
+          c.done();
+          return false;
+        }
+
+        mongo::BSONObj o = cursor->next();
+        if (o["type"].str() != "bio_sources") {
+          msg = "Data id " + id + " is not a bio source";
+          c.done();
+          return false;
+        }
+
+        std::string norm_bio_source_name = o["norm_name"].str();
+
+        mongo::BSONObjBuilder update_related_query_builder;
+        update_related_query_builder.append("norm_bio_source_name", norm_bio_source_name);
+        mongo::BSONObj update_related_query = update_related_query_builder.obj();
+
+        c->update(helpers::collection_name(Collections::TEXT_SEARCH()), update_related_query, append_value, false, true);
         if (!c->getLastError().empty()) {
           msg = c->getLastError();
           c.done();

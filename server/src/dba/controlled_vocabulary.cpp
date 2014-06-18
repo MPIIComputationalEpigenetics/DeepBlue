@@ -22,6 +22,128 @@
 namespace epidb {
   namespace dba {
     namespace cv {
+
+      bool __get_synonyms_from_bio_source(const std::string &bio_source_name, const std::string &norm_bio_source_name,
+                                          const std::string &user_key,
+                                          std::vector<utils::IdName> &syns, std::string &msg)
+      {
+        utils::IdName id_name_bio_source;
+        if (!helpers::get_name(Collections::BIO_SOURCES(), norm_bio_source_name, id_name_bio_source, msg)) {
+          return false;
+        }
+
+        syns.push_back(id_name_bio_source);
+
+        mongo::ScopedDbConnection c(config::get_mongodb_server());
+
+        mongo::BSONObjBuilder syn_query_builder;
+        syn_query_builder.append("norm_name", norm_bio_source_name);
+        mongo::BSONObj query_obj = syn_query_builder.obj();
+        mongo::Query query = mongo::Query(query_obj);
+        std::auto_ptr<mongo::DBClientCursor> syns_cursor = c->query(helpers::collection_name(Collections::BIO_SOURCE_SYNONYMS()), query);
+
+        if (!syns_cursor->more()) {
+          c.done();
+          return true;
+        }
+
+        mongo::BSONObj syn_bson = syns_cursor->next();
+        std::vector<mongo::BSONElement> e = syn_bson["synonyms"].Array();
+
+        BOOST_FOREACH(mongo::BSONElement be, e) {
+          std::string norm_synonym = be.str();
+          mongo::BSONObjBuilder syn_query;
+          syn_query.append("norm_synonym", norm_synonym);
+          mongo::Query query = mongo::Query(syn_query.obj());
+
+          std::auto_ptr<mongo::DBClientCursor> syns_names_cursor = c->query(helpers::collection_name(Collections::BIO_SOURCE_SYNONYM_NAMES()), query);
+
+          if (!syns_names_cursor->more()) {
+            msg = "It was not possible to find the name of " + norm_synonym + " .";
+            c.done();
+            return false;
+          }
+          mongo::BSONObj e_syn = syns_names_cursor->next();
+          mongo::BSONElement syn = e_syn["synonym"];
+          std::string syn_name = syn.str();
+          utils::IdName id_syn_name(id_name_bio_source.id , syn_name);
+          syns.push_back(id_syn_name);
+        }
+
+        c.done();
+        return true;
+      }
+
+      bool __get_synonyms_from_synonym(const std::string &synonym, const std::string &norm_synonym,
+                                       const std::string &user_key,
+                                       std::vector<utils::IdName> &syns, std::string &msg)
+      {
+        mongo::ScopedDbConnection c(config::get_mongodb_server());
+
+        mongo::BSONObjBuilder syn_query_builder;
+        syn_query_builder.append("norm_synonym", norm_synonym);
+
+        mongo::BSONObj query_obj = syn_query_builder.obj();
+        mongo::Query query = mongo::Query(query_obj).sort("synonym");
+        std::auto_ptr<mongo::DBClientCursor> syns_cursor = c->query(helpers::collection_name(Collections::BIO_SOURCE_SYNONYM_NAMES()), query);
+
+        if (!syns_cursor->more()) {
+          msg = "It was not possible to find the bio_sources synonyms for " + synonym + " .";
+          c.done();
+          return false;
+        }
+
+        mongo::BSONObj syn_bson = syns_cursor->next();
+        std::string bio_source_name = syn_bson["bio_source_name"].str();
+        std::string norm_bio_source_name = syn_bson["norm_bio_source_name"].str();
+
+        c.done();
+
+        if (!__get_synonyms_from_bio_source(bio_source_name, norm_bio_source_name, user_key, syns, msg)) {
+          return false;
+        }
+
+        return true;
+      }
+
+      bool __full_text_relation(const std::string &term, const std::string &norm_term,
+                                const std::string &bio_source, const std::string &norm_bio_source,
+                                std::string &msg)
+      {
+        std::vector<utils::IdName> syns;
+        if (!__get_synonyms_from_bio_source(term, norm_term, "", syns, msg)) {
+          return false;
+        }
+
+        std::vector<std::string> terms;
+        BOOST_FOREACH(utils::IdName syn, syns) {
+          terms.push_back(syn.name);
+          terms.push_back(utils::normalize_name(syn.name));
+        }
+
+        std::vector<std::string> norm_subs;
+        if (!get_bio_source_embracing(bio_source, norm_bio_source,
+                                      true, "", norm_subs, msg)) {
+          return false;
+        }
+
+        BOOST_FOREACH(std::string norm_sub, norm_subs) {
+          std::string bio_source_id;
+          if (!helpers::get_bio_source_id(norm_sub, bio_source_id, msg)) {
+            return false;
+          }
+
+          BOOST_FOREACH(std::string term, terms) {
+            if (norm_sub != utils::normalize_name(term)) {
+              if (!search::insert_related_term(bio_source_id, term, msg)) {
+                return false;
+              }
+            }
+          }
+        }
+        return true;
+      }
+
       bool set_bio_source_synonym(const std::string &input_bio_source_name, const std::string &synonym,
                                   bool is_bio_source, const bool is_syn, const std::string &user_key,
                                   std::string &msg)
@@ -135,100 +257,9 @@ namespace epidb {
 
         c.done();
 
-        std::string bio_source_id;
-        if (!helpers::get_bio_source_id(norm_bio_source_name, bio_source_id, msg)) {
-          return false;
-        }
-
-        if (!search::insert_related_term(bio_source_id, synonym, msg)) {
-          return false;
-        }
-
-        if (!search::insert_related_term(bio_source_id, norm_synonym, msg)) {
-          return false;
-        }
-
-        return true;
-      }
-
-
-      bool __get_synonyms_from_bio_source(const std::string &bio_source_name, const std::string &norm_bio_source_name,
-                                          const std::string &user_key,
-                                          std::vector<utils::IdName> &syns, std::string &msg)
-      {
-        utils::IdName id_name_bio_source;
-        if (!helpers::get_name(Collections::BIO_SOURCES(), norm_bio_source_name, id_name_bio_source, msg)) {
-          return false;
-        }
-
-        syns.push_back(id_name_bio_source);
-
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
-
-        mongo::BSONObjBuilder syn_query_builder;
-        syn_query_builder.append("norm_name", norm_bio_source_name);
-        mongo::BSONObj query_obj = syn_query_builder.obj();
-        mongo::Query query = mongo::Query(query_obj);
-        std::auto_ptr<mongo::DBClientCursor> syns_cursor = c->query(helpers::collection_name(Collections::BIO_SOURCE_SYNONYMS()), query);
-
-        if (!syns_cursor->more()) {
-          c.done();
-          return true;
-        }
-
-        mongo::BSONObj syn_bson = syns_cursor->next();
-        std::vector<mongo::BSONElement> e = syn_bson["synonyms"].Array();
-
-        BOOST_FOREACH(mongo::BSONElement be, e) {
-          std::string norm_synonym = be.str();
-          mongo::BSONObjBuilder syn_query;
-          syn_query.append("norm_synonym", norm_synonym);
-          mongo::Query query = mongo::Query(syn_query.obj());
-
-          std::auto_ptr<mongo::DBClientCursor> syns_names_cursor = c->query(helpers::collection_name(Collections::BIO_SOURCE_SYNONYM_NAMES()), query);
-
-          if (!syns_names_cursor->more()) {
-            msg = "It was not possible to find the name of " + norm_synonym + " .";
-            c.done();
-            return false;
-          }
-          mongo::BSONObj e_syn = syns_names_cursor->next();
-          mongo::BSONElement syn = e_syn["synonym"];
-          std::string syn_name = syn.str();
-          utils::IdName id_syn_name(id_name_bio_source.id , syn_name);
-          syns.push_back(id_syn_name);
-        }
-
-        c.done();
-        return true;
-      }
-
-      bool __get_synonyms_from_synonym(const std::string &synonym, const std::string &norm_synonym,
-                                       const std::string &user_key,
-                                       std::vector<utils::IdName> &syns, std::string &msg)
-      {
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
-
-        mongo::BSONObjBuilder syn_query_builder;
-        syn_query_builder.append("norm_synonym", norm_synonym);
-
-        mongo::BSONObj query_obj = syn_query_builder.obj();
-        mongo::Query query = mongo::Query(query_obj).sort("synonym");
-        std::auto_ptr<mongo::DBClientCursor> syns_cursor = c->query(helpers::collection_name(Collections::BIO_SOURCE_SYNONYM_NAMES()), query);
-
-        if (!syns_cursor->more()) {
-          msg = "It was not possible to find the bio_sources synonyms for " + synonym + " .";
-          c.done();
-          return false;
-        }
-
-        mongo::BSONObj syn_bson = syns_cursor->next();
-        std::string bio_source_name = syn_bson["bio_source_name"].str();
-        std::string norm_bio_source_name = syn_bson["norm_bio_source_name"].str();
-
-        c.done();
-
-        if (!__get_synonyms_from_bio_source(bio_source_name, norm_bio_source_name, user_key, syns, msg)) {
+        if (!__full_text_relation(bio_source_name, norm_bio_source_name,
+                                  bio_source_name, norm_bio_source_name,
+                                  msg)) {
           return false;
         }
 
@@ -364,7 +395,7 @@ namespace epidb {
         }
 
         if (is_connected) {
-          msg = bio_source_more_embracing + " is already more embraing than " + bio_source_less_embracing + ".";
+          msg = bio_source_more_embracing + " is already more embracing than " + bio_source_less_embracing + ".";
           return false;
         }
 
@@ -373,7 +404,7 @@ namespace epidb {
         }
 
         if (is_connected) {
-          msg = bio_source_less_embracing + " is already more embraing than " + bio_source_more_embracing + ".";
+          msg = bio_source_less_embracing + " is already more embracing than " + bio_source_more_embracing + ".";
           return false;
         }
 
@@ -403,6 +434,12 @@ namespace epidb {
         }
 
         c.done();
+
+        if (!__full_text_relation(more_embracing_root, norm_more_embracing_root,
+                                  less_embracing_root, norm_less_embracing_root, msg)) {
+          return false;
+        }
+
         return true;
       }
 
@@ -474,9 +511,8 @@ namespace epidb {
       }
 
       bool get_bio_source_embracing(const std::string &bio_source_name, const std::string &norm_bio_source_name,
-                                    bool is_bio_source,
-                                    std::vector<std::string> &norm_subs,
-                                    const std::string &user_key, std::string &msg)
+                                    bool is_bio_source, const std::string &user_key,
+                                    std::vector<std::string> &norm_subs, std::string &msg)
       {
         std::string more_embracing_root;
         std::string norm_more_embracing_root;
@@ -492,30 +528,6 @@ namespace epidb {
         }
 
         if (!__get_down_connected(norm_more_embracing_root, norm_subs, msg)) {
-          return false;
-        }
-        return true;
-      }
-
-      bool get_upper_term(const std::string &bio_source_name, const std::string &norm_bio_source_name,
-                          bool is_bio_source,
-                          std::vector<std::string> &norm_uppers,
-                          const std::string &user_key, std::string &msg)
-      {
-        std::string less_embracing_root;
-        std::string norm_less_embracing_root;
-
-        if (!is_bio_source) {
-          if (!__get_synonym_root(bio_source_name, norm_bio_source_name,
-                                  less_embracing_root, norm_less_embracing_root, msg)) {
-            return false;
-          }
-        } else {
-          less_embracing_root = bio_source_name;
-          norm_less_embracing_root = norm_bio_source_name;
-        }
-
-        if (!__get_upper_connected(norm_less_embracing_root, norm_uppers, msg)) {
           return false;
         }
         return true;

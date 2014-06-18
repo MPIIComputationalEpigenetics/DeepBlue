@@ -4,7 +4,6 @@ from client import EpidbClient
 import data_info
 
 class TestSearch(helpers.TestCase):
-
   def test_type_restricted(self):
     epidb = EpidbClient()
     self.init(epidb)
@@ -240,7 +239,7 @@ class TestSearch(helpers.TestCase):
   
   def test_search_synonyms(self):
     epidb = EpidbClient()
-    self.init(epidb)
+    self.init_base(epidb)
 
     res, bsid1 = epidb.add_bio_source("Bio Source A", "bio source A", {}, self.admin_key)
     self.assertSuccess(res, bsid1)
@@ -248,8 +247,141 @@ class TestSearch(helpers.TestCase):
     res = epidb.set_bio_source_synonym("bio source a", "synonym name for bio source a", self.admin_key)
     self.assertSuccess(res)
 
+    res = epidb.set_bio_source_synonym("bio source a", "bla bla blu blu", self.admin_key)
+    self.assertSuccess(res)
+
     res = epidb.set_bio_source_synonym("synonym name for bio source a", "another synonym", self.admin_key)
     self.assertSuccess(res)
 
     (res, found) = epidb.search("another synonym", None, self.admin_key)
-    self.assertEquals(found, [['bs1', 'Bio Source A', 'bio_sources']])
+    self.assertEquals(found, [['bs2', 'Bio Source A', 'bio_sources'], ['t2', 'tech2', 'techniques']])
+
+    (res, found) = epidb.search("bla bla blu blu", None, self.admin_key)
+    self.assertEquals(found, [['bs2', 'Bio Source A', 'bio_sources']])
+
+  def test_search_embracing(self):
+    epidb = EpidbClient()
+    self.init(epidb)
+
+    s = epidb.add_bio_source("Ana", "Ana", {}, self.admin_key)
+    self.assertSuccess(s)
+
+    s = epidb.add_bio_source("Beatriz", "Beatriz", {}, self.admin_key)
+    self.assertSuccess(s)
+
+    s = epidb.add_bio_source("Carolina", "Carolina", {}, self.admin_key)
+    self.assertSuccess(s)
+
+    s = epidb.add_bio_source("Bianca Ana", "Bianca Ana", {}, self.admin_key)
+    self.assertSuccess(s)
+
+    s = epidb.add_bio_source("Bruna Branca", "Bruna Branca", {}, self.admin_key)
+    self.assertSuccess(s)
+
+    s = epidb.add_bio_source("Bianca Carolina", "Bianca Carolina", {}, self.admin_key)
+    self.assertSuccess(s)
+
+    s = epidb.add_bio_source("Brunete Cinza Cerva", "Brunete Cinza Cerva", {}, self.admin_key)
+    self.assertSuccess(s)
+
+    s = epidb.set_bio_source_scope("Ana", "Carolina", self.admin_key)
+    self.assertSuccess(s)
+
+    s = epidb.set_bio_source_scope("Bianca Carolina", "Brunete Cinza Cerva", self.admin_key)
+    self.assertSuccess(s)
+
+    s = epidb.set_bio_source_scope("Beatriz", "Bianca Carolina", self.admin_key)
+    self.assertSuccess(s)
+
+    s = epidb.set_bio_source_scope("Beatriz", "Bruna branca", self.admin_key)
+    self.assertSuccess(s)
+
+    s = epidb.set_bio_source_synonym("Ana", "Zebra", self.admin_key)
+    self.assertSuccess(s)
+
+    s = epidb.set_bio_source_scope("Beatriz", "Bianca Ana", self.admin_key)
+    self.assertSuccess(s)
+
+    s = epidb.set_bio_source_scope("Ana", "Beatriz", self.admin_key)
+    self.assertSuccess(s)
+
+    (s, r1) = epidb.search("Ana Zebra Beatriz", None, self.admin_key)
+    self.assertEquals([['bs2', 'Beatriz', 'bio_sources'], ['bs4', 'Bianca Ana', 'bio_sources'], ['bs1', 'Ana', 'bio_sources'], ['bs7', 'Brunete Cinza Cerva', 'bio_sources'], ['bs6', 'Bianca Carolina', 'bio_sources'], ['bs5', 'Bruna Branca', 'bio_sources'], ['bs3', 'Carolina', 'bio_sources']], r1)
+
+    (s, r2) = epidb.search("Ana", None, self.admin_key)
+    self.assertEquals([['bs1', 'Ana', 'bio_sources'], ['bs4', 'Bianca Ana', 'bio_sources'], ['bs2', 'Beatriz', 'bio_sources'], ['bs3', 'Carolina', 'bio_sources'], ['bs7', 'Brunete Cinza Cerva', 'bio_sources'], ['bs6', 'Bianca Carolina', 'bio_sources'], ['bs5', 'Bruna Branca', 'bio_sources']], r2)
+
+    (s, r3) = epidb.search("Zebra", None, self.admin_key)
+    self.assertEquals([['bs1', 'Ana', 'bio_sources'], ['bs2', 'Beatriz', 'bio_sources'], ['bs3', 'Carolina', 'bio_sources'], ['bs7', 'Brunete Cinza Cerva', 'bio_sources'], ['bs6', 'Bianca Carolina', 'bio_sources'], ['bs5', 'Bruna Branca', 'bio_sources'], ['bs4', 'Bianca Ana', 'bio_sources']], r3)
+
+
+  def test_search_sample_related(self):
+    epidb = EpidbClient()
+    self.init(epidb)
+
+    s = epidb.add_bio_source("Ana", "Ana", {}, self.admin_key)
+    self.assertSuccess(s)
+
+    s = epidb.add_bio_source("Beatriz", "Beatriz", {}, self.admin_key)
+    self.assertSuccess(s)    
+
+    s = epidb.add_bio_source("Carolina", "Carolina", {}, self.admin_key)
+    self.assertSuccess(s)
+
+    s = epidb.set_bio_source_scope("Beatriz", "Carolina", self.admin_key)
+    self.assertSuccess(s)
+
+    s = epidb.add_sample("Carolina", {}, self.admin_key)
+    self.assertSuccess(s)
+
+    s = epidb.set_bio_source_scope("Ana", "Beatriz", self.admin_key)
+    self.assertSuccess(s)
+
+    s = epidb.set_bio_source_synonym("Ana", "Zebra", self.admin_key)
+    self.assertSuccess(s)
+
+    (s, r1) = epidb.search("Zebra", "samples", self.admin_key)
+    self.assertEquals([['s1', '', 'samples']], r1)
+
+    (s, r2) = epidb.search("Beatriz", "", self.admin_key)
+    self.assertEqual([['bs2', 'Beatriz', 'bio_sources'], ['s1', '', 'samples'], ['bs3', 'Carolina', 'bio_sources']], r2)
+
+    (s, r3) = epidb.search("Zebra", [], self.admin_key)
+    self.assertEqual([['bs1', 'Ana', 'bio_sources'], ['bs2', 'Beatriz', 'bio_sources'], ['s1', '', 'samples'], ['bs3', 'Carolina', 'bio_sources']], r3)
+
+
+  def test_search_experiment_related(self):
+    epidb = EpidbClient()
+    self.init_base(epidb)
+
+    s = epidb.add_bio_source("Ana", "Ana", {}, self.admin_key)
+    self.assertSuccess(s)
+
+    s = epidb.add_bio_source("Beatriz", "Beatriz", {}, self.admin_key)
+    self.assertSuccess(s)    
+
+    s = epidb.add_bio_source("Carolina", "Carolina", {}, self.admin_key)
+    self.assertSuccess(s)
+
+    s = epidb.set_bio_source_scope("Beatriz", "Carolina", self.admin_key)
+    self.assertSuccess(s)
+
+    (s, sid) = epidb.add_sample("Carolina", {}, self.admin_key)
+    self.assertSuccess(s, sid)
+
+    data = "chr1\t1\t100"
+    (s, e) = epidb.add_experiment("las chicas", "hg19", "Methylation", sid, "tech1", "ENCODE", "interesting experiment", data, "CHROMOSOME,START,END", {}, self.admin_key)
+    self.assertSuccess(s, e)
+
+    s = epidb.set_bio_source_scope("Ana", "Beatriz", self.admin_key)
+    self.assertSuccess(s)
+
+    s = epidb.set_bio_source_synonym("Ana", "Zebra", self.admin_key)
+    self.assertSuccess(s)
+
+    (s, r1) = epidb.search("Zebra", "experiments", self.admin_key)
+    self.assertEqual([['e1', 'las chicas', 'experiments']], r1)
+
+    (s, r2) = epidb.search("Carolina", [], self.admin_key)
+    self.assertEqual([['bs4', 'Carolina', 'bio_sources'], ['s2', '', 'samples'], ['e1', 'las chicas', 'experiments']], r2)
+

@@ -95,7 +95,7 @@ namespace epidb {
             std::stringstream ss;
             ss << "Invalid bio_source name: ";
             ss << bigger_scope ;
-            ss << ". No bio_source or synonymous was defined with this name.";
+            ss << ". No Bio Source or synonymous was defined with this name.";
             result.add_error(ss.str());
             return false;
           }
@@ -116,7 +116,7 @@ namespace epidb {
             std::stringstream ss;
             ss << "Invalid bio_source name: ";
             ss << smaller_scope ;
-            ss << ". No bio_source or synonymous was defined with this name.";
+            ss << ". No Bio Source or synonymous was defined with this name.";
             result.add_error(ss.str());
             return false;
           }
