@@ -162,5 +162,12 @@ namespace epidb {
       static std::string settings("settings");
       return settings;
     }
+
+    const std::string &Collections::COUNTERS()
+    {
+      static std::string settings("counters");
+      return settings;
+    }
+
   }
 }

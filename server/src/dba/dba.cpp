@@ -48,7 +48,7 @@ namespace epidb {
 
     bool is_initialized(bool &ret, std::string &msg)
     {
-      return helpers::check_exist("settings", "initialized", true, ret, msg);
+      return helpers::check_exist(Collections::SETTINGS(), "initialized", true, ret, msg);
     }
 
     bool init_system(const std::string &name, const std::string &email, const std::string &institution,
@@ -720,7 +720,7 @@ namespace epidb {
     bool is_valid_bio_source_name(const std::string &name, const std::string &norm_name, std::string &msg)
     {
       bool exists;
-      if (!helpers::check_exist("bio_sources", "norm_name", norm_name, exists, msg)) {
+      if (!helpers::check_exist(Collections::BIO_SOURCES(), "norm_name", norm_name, exists, msg)) {
         return false;
       }
       if (exists) {
@@ -736,7 +736,7 @@ namespace epidb {
     bool is_valid_sample_name(const std::string &name, const std::string &norm_name, std::string &msg)
     {
       bool exists;
-      if (!helpers::check_exist("samples", "norm_name", norm_name, exists, msg)) {
+      if (!helpers::check_exist(Collections::SAMPLES(), "norm_name", norm_name, exists, msg)) {
         return false;
       }
       if (exists) {
@@ -751,7 +751,7 @@ namespace epidb {
     bool is_valid_sample_field_name(const std::string &name, const std::string &norm_name, std::string &msg)
     {
       bool exists;
-      if (!helpers::check_exist("samples.fields", "norm_name", norm_name, exists, msg)) {
+      if (!helpers::check_exist(Collections::SAMPLE_FIELDS(), "norm_name", norm_name, exists, msg)) {
         return false;
       }
       if (exists) {
@@ -766,7 +766,7 @@ namespace epidb {
     bool is_valid_epigenetic_mark(const std::string &name, const std::string &norm_name, std::string &msg)
     {
       bool exists;
-      if (!helpers::check_exist("epigenetic_marks", "norm_name", norm_name, exists, msg)) {
+      if (!helpers::check_exist(Collections::EPIGENETIC_MARKS(), "norm_name", norm_name, exists, msg)) {
         return false;
       }
       if (exists) {
@@ -781,7 +781,7 @@ namespace epidb {
     bool is_project_valid(const std::string &name, const std::string &norm_name, std::string &msg)
     {
       bool exists;
-      if (!helpers::check_exist("projects", "norm_name", norm_name, exists, msg)) {
+      if (!helpers::check_exist(Collections::PROJECTS(), "norm_name", norm_name, exists, msg)) {
         return false;
       }
       if (exists) {
@@ -796,7 +796,7 @@ namespace epidb {
     bool is_valid_genome(const std::string &genome, const std::string &norm_genome, std::string &msg)
     {
       bool exists;
-      if (!helpers::check_exist("genomes", "norm_name", norm_genome, exists, msg)) {
+      if (!helpers::check_exist(Collections::GENOMES(), "norm_name", norm_genome, exists, msg)) {
         return false;
       }
       if (exists) {
@@ -811,7 +811,7 @@ namespace epidb {
     bool is_valid_email(const std::string &email, std::string &msg)
     {
       bool exists;
-      if (!helpers::check_exist("users", "email", email, exists, msg)) {
+      if (!helpers::check_exist(Collections::USERS(), "email", email, exists, msg)) {
         return false;
       }
       if (exists) {
@@ -825,55 +825,55 @@ namespace epidb {
 
     bool check_user(const std::string &user_key, bool &r, std::string &msg)
     {
-      return helpers::check_exist("users", "key", user_key, r, msg);
+      return helpers::check_exist(Collections::USERS(), "key", user_key, r, msg);
     }
 
     bool check_genome(const std::string &genome, bool &r, std::string &msg)
     {
       std::string norm_genome = utils::normalize_name(genome);
-      return helpers::check_exist("genomes", "norm_name", norm_genome, r, msg);
+      return helpers::check_exist(Collections::GENOMES(), "norm_name", norm_genome, r, msg);
     }
 
     bool check_epigenetic_mark(const std::string &epigenetic_mark, bool &r, std::string &msg)
     {
       std::string norm_epigenetic_mark = utils::normalize_name(epigenetic_mark);
-      return helpers::check_exist("epigenetic_marks", "norm_name", norm_epigenetic_mark, r, msg);
+      return helpers::check_exist(Collections::EPIGENETIC_MARKS(), "norm_name", norm_epigenetic_mark, r, msg);
     }
 
     bool sample(const std::string &bio_source_name, bool &r, std::string &msg)
     {
       std::string norm_bio_source_name = utils::normalize_name(bio_source_name);
-      return helpers::check_exist("samples", "norm_name", norm_bio_source_name, r, msg);
+      return helpers::check_exist(Collections::SAMPLES(), "norm_name", norm_bio_source_name, r, msg);
     }
 
     bool check_bio_source(const std::string &bio_source_name, bool &r, std::string &msg)
     {
       std::string norm_bio_source_name = utils::normalize_name(bio_source_name);
-      return helpers::check_exist("bio_sources", "norm_name", norm_bio_source_name, r, msg);
+      return helpers::check_exist(Collections::BIO_SOURCES(), "norm_name", norm_bio_source_name, r, msg);
     }
 
     bool check_sample_field(const std::string &bio_source_name, bool &r, std::string &msg)
     {
       std::string norm_bio_source_name = utils::normalize_name(bio_source_name);
-      return helpers::check_exist("samples.fields", "norm_name", norm_bio_source_name, r, msg);
+      return helpers::check_exist(Collections::SAMPLE_FIELDS(), "norm_name", norm_bio_source_name, r, msg);
     }
 
     bool check_technique(const std::string &technique_name, bool &r, std::string &msg)
     {
       std::string norm_technique_name = utils::normalize_name(technique_name);
-      return helpers::check_exist("techniques", "norm_name", norm_technique_name, r, msg);
+      return helpers::check_exist(Collections::TECHNIQUES(), "norm_name", norm_technique_name, r, msg);
     }
 
     bool check_bio_source_synonym(const std::string &bio_source_synonym, bool &r, std::string &msg)
     {
       std::string norm_bio_source_synonym = utils::normalize_name(bio_source_synonym);
-      return helpers::check_exist("bio_source_synonyms.names", "norm_synonym", norm_bio_source_synonym, r, msg);
+      return helpers::check_exist(Collections::BIO_SOURCE_SYNONYM_NAMES(), "norm_synonym", norm_bio_source_synonym, r, msg);
     }
 
     bool check_project(const std::string &project, bool &r, std::string &msg)
     {
       std::string norm_project = utils::normalize_name(project);
-      return helpers::check_exist("projects", "norm_name", norm_project, r, msg);
+      return helpers::check_exist(Collections::PROJECTS(), "norm_name", norm_project, r, msg);
     }
 
     bool check_annotation(const std::string &annotation, const std::string &genome, bool &ok, std::string &msg)

@@ -278,7 +278,7 @@ namespace epidb {
         mongo::ScopedDbConnection c(config::get_mongodb_server());
 
         bool exist;
-        if (!check_exist("counters", "_id", name, exist, msg)) {
+        if (!check_exist(Collections::COUNTERS(), "_id", name, exist, msg)) {
           c.done();
           return false;
         }
