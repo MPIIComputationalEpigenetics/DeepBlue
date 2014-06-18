@@ -1,0 +1,2981 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>DeepBlue API Documentation &mdash; DeepBlue</title>
+<meta name="application-name" content="DeepBlue Epigenomic Data Server"/>
+<meta name="author" content="Felipe Albrecht"/>
+<meta name="description" content="DeepBlue is a Data Server for Epigenomic and genetic data"/>
+<meta name="keywords" content="bioinformatics, computational epigenetic, epigenetic, data, server, api, DeepBlue"/>
+<!-- An HTML5 shim, for IE6-8 support of HTML elements -->
+<!--[if lt IE 9]>
+<script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+
+<link rel="stylesheet" media="all" href="style.css">
+
+<link rel="icon" href="imgs/ico_16.ico" type="image/x-icon">
+<link rel="shortcut icon" href="imgs/ico_16.ico"  type="image/x-icon">
+
+</head>
+<!-- Colors:
+Deep: #3F4A9F
+Blue: 005DAC
+Epigenetic Database: 59616C
+-->
+
+<body class="public-page developer-page">
+<!--[if lt IE 9]>
+<div class="msie">
+<![endif]-->
+
+<header id="main-header">
+<span class="content-container">
+ <a href="/">
+  <img id="main-logo" src="imgs/deepblue_alt.png" alt="DeepBlue"/>
+</a>
+<a class="main-header-link" href="api.html">API</a>
+<a class="main-header-link" href="data.html">Data</a>
+<a class="main-header-link" href="status.html">Server Status</a>
+</span>
+</header>
+
+<div id="main-header-shadow" class="drop-shadow-hack"></div>
+
+<div id="api-documentation" class="content-container under-main-header">
+
+<section class="panel">
+<header class="top-header">
+<h1>DeepBlue API</h1>
+<p class="deepblue_subheader">DeepBlue Epigenomic Data Server user interface</p>
+<img class="icon" src="imgs/cromossomo.png" alt="DeepBlue cromosome"/>
+</header>
+
+<div class="panel-body">
+<h2>Getting started</h2>
+<p>
+Please read our <a href="terms.html">terms and conditions</a> of use carefully before using DeepBlue Epigenomic Data Server.
+</p>
+<p>
+In order to gain access to the DeepBlue API, you will first need
+to email us at <a href="mailto:deepblue@mpi-inf.mpg.de">deepblue@mpi-inf.mpg.de</a> to obtain an user key. (<a href="#api-signing">Read more</a>)
+</p>
+<p>
+Once we issue you an user key, you will do all the following operations in your favorite language using XML-RPC. (<a href="#xmlrpc">Read more</a>)
+</p>
+
+<!--
+<h2>Who is using DeepBlue?</h2>
+<p>
+We are in developing phase, so we do not have (yet) any user. But the following we will list the softwares that we want to connect to DeepBlue.
+</p>
+<ul id="api-clients">
+<li>
+<a href="http://epiexplorer.mpi-inf.mpg.de/"><img src="http://epiexplorer.mpi-inf.mpg.de/extras/new_logo.png" class="logo" alt="epiexplorer logo"/></a>
+<a href="http://epiexplorer.mpi-inf.mpg.de/" class="client-name">EpiExplorer</a> EpiExplorer is a web tool that allows you to use large reference epigenome datasets for your own analysis without complex scripting or laborous preprocessing. EpiExplorer uses DeepBlue to get the datasets to be processed and available for the users.
+</li>
+</ul>
+-->
+
+<h2>Table of contents</h2>
+<ol id="api-documentation-contents">
+<li>
+<a href="#api-throttle-limits">Throttle Limits</a>
+&mdash; The limits on API calls per user per day.
+</li>
+
+<li>
+<a href="#api-register">Registering</a>
+&mdash; How to register to use DeepBlue.
+</li>
+
+<li>
+<a href="#api-access">Accessing DeepBlue</a>
+&mdash; How to access DeepBlue Epigenomic Data Server.
+</li>
+
+
+<li>
+  <a href="#api-administration">Administration</a>
+  &mdash; Administration commands
+  <ol>
+
+    <li><a href="#api-add_user">add_user</a> &mdash; Inserts a new user with the given parameters</li>
+
+
+
+    <li><a href="#api-init_system">init_system</a> &mdash; Initializes the system with the given user as administrator</li>
+
+
+
+    <li><a href="#api-list_users">list_users</a> &mdash; Lists all existing users</li>
+
+  </ol>
+</li>
+
+<li>
+  <a href="#api-annotations">Annotations</a>
+  &mdash; Inserting and listing annotations
+  <ol>
+
+    <li><a href="#api-add_annotation">add_annotation</a> &mdash; Inserts a new annotation with the given parameters</li>
+
+
+
+    <li><a href="#api-list_annotations">list_annotations</a> &mdash; Lists all existing annotations</li>
+
+  </ol>
+</li>
+
+<li>
+  <a href="#api-bio-source-names">Bio source names</a>
+  &mdash; Inserting and listing of bio source scopes and synonyms
+  <ol>
+
+    <li><a href="#api-get_bio_source_related">get_bio_source_related</a> &mdash; Gets bio sources related to the given one</li>
+
+
+
+    <li><a href="#api-get_bio_source_scope">get_bio_source_scope</a> &mdash; Gets the scope for the bio source</li>
+
+
+
+    <li><a href="#api-get_bio_source_synonyms">get_bio_source_synonyms</a> &mdash; Gets the synonyms for the bio source</li>
+
+
+
+    <li><a href="#api-set_bio_source_scope">set_bio_source_scope</a> &mdash; Sets a bio source scope</li>
+
+
+
+    <li><a href="#api-set_bio_source_synonym">set_bio_source_synonym</a> &mdash; Sets a bio source synonym</li>
+
+  </ol>
+</li>
+
+<li>
+  <a href="#api-bio-sources">Bio sources</a>
+  &mdash; Inserting and listing bio sources
+  <ol>
+
+    <li><a href="#api-add_bio_source">add_bio_source</a> &mdash; Inserts a new bio source with the given parameters</li>
+
+
+
+    <li><a href="#api-list_bio_sources">list_bio_sources</a> &mdash; Lists all existing bio sources</li>
+
+
+
+    <li><a href="#api-list_similar_bio_sources">list_similar_bio_sources</a> &mdash; Lists all bio sources similar to the one provided</li>
+
+  </ol>
+</li>
+
+<li>
+  <a href="#api-column-types">Column Types</a>
+  &mdash; Inserting and listing different column types
+  <ol>
+
+    <li><a href="#api-create_column_type_category">create_column_type_category</a> &mdash; Create a column type from a category set</li>
+
+
+
+    <li><a href="#api-create_column_type_range">create_column_type_range</a> &mdash; Create a column type from a category set</li>
+
+
+
+    <li><a href="#api-create_column_type_simple">create_column_type_simple</a> &mdash; Create a column type from a category set</li>
+
+
+
+    <li><a href="#api-list_column_types">list_column_types</a> &mdash; Lists all available column types</li>
+
+  </ol>
+</li>
+
+<li>
+  <a href="#api-epigenetic-marks">Epigenetic marks</a>
+  &mdash; Inserting and listing epigenetic marks
+  <ol>
+
+    <li><a href="#api-add_epigenetic_mark">add_epigenetic_mark</a> &mdash; Inserts a new epigenetic mark with the given parameters</li>
+
+
+
+    <li><a href="#api-list_epigenetic_marks">list_epigenetic_marks</a> &mdash; Lists all existing epigenetic marks</li>
+
+
+
+    <li><a href="#api-list_similar_epigenetic_marks">list_similar_epigenetic_marks</a> &mdash; Lists all epigenetic marks similar to the one provided</li>
+
+  </ol>
+</li>
+
+<li>
+  <a href="#api-experiments">Experiments</a>
+  &mdash; Inserting and listing experiments
+  <ol>
+
+    <li><a href="#api-add_experiment">add_experiment</a> &mdash; Inserts a new experiment with the given parameters</li>
+
+
+
+    <li><a href="#api-get_experiments_by_query">get_experiments_by_query</a> &mdash; Gets the regions for the given query in the requested BED format</li>
+
+
+
+    <li><a href="#api-list_experiments">list_experiments</a> &mdash; Lists all existing experiments</li>
+
+
+
+    <li><a href="#api-list_recent_experiments">list_recent_experiments</a> &mdash; Lists all recent experiments</li>
+
+
+
+    <li><a href="#api-list_similar_experiments">list_similar_experiments</a> &mdash; Lists all experiments similar to the one provided</li>
+
+  </ol>
+</li>
+
+<li>
+  <a href="#api-general-information">General Information</a>
+  &mdash; Commands for all types of data
+  <ol>
+
+    <li><a href="#api-get_info">get_info</a> &mdash; Gets the information for the given id which includes all its public attributes</li>
+
+
+
+    <li><a href="#api-search">search</a> &mdash; Search all data of all types for the given keyword</li>
+
+  </ol>
+</li>
+
+<li>
+  <a href="#api-genomes">Genomes</a>
+  &mdash; Inserting and listing genomes
+  <ol>
+
+    <li><a href="#api-add_genome">add_genome</a> &mdash; Inserts a new genome with the given parameters</li>
+
+
+
+    <li><a href="#api-list_genomes">list_genomes</a> &mdash; Lists all existing genomes</li>
+
+
+
+    <li><a href="#api-list_similar_genomes">list_similar_genomes</a> &mdash; Lists all genomes similar to the one provided</li>
+
+  </ol>
+</li>
+
+<li>
+  <a href="#api-operations">Operations</a>
+  &mdash; Different querying operations
+  <ol>
+
+    <li><a href="#api-count_regions">count_regions</a> &mdash; Counts the number of regions in the result of the given query</li>
+
+
+
+    <li><a href="#api-filter_regions">filter_regions</a> &mdash; Filters the result of the given query by the given restrictions</li>
+
+
+
+    <li><a href="#api-get_regions">get_regions</a> &mdash; Gets the regions for the given query in the requested BED format</li>
+
+
+
+    <li><a href="#api-intersection">intersection</a> &mdash; Calculates the intersection of the given queries</li>
+
+
+
+    <li><a href="#api-merge_queries">merge_queries</a> &mdash; Merges the regions of the given queries</li>
+
+
+
+    <li><a href="#api-select_annotations">select_annotations</a> &mdash; Selects annotation regions matching the given parameters</li>
+
+
+
+    <li><a href="#api-select_regions">select_regions</a> &mdash; Selects experiment regions matching the given parameters</li>
+
+
+
+    <li><a href="#api-tiling_regions">tiling_regions</a> &mdash; Creates regions with the tiling size over the chromosomes</li>
+
+  </ol>
+</li>
+
+<li>
+  <a href="#api-projects">Projects</a>
+  &mdash; Inserting and listing projects
+  <ol>
+
+    <li><a href="#api-add_project">add_project</a> &mdash; Inserts a new project with the given parameters</li>
+
+
+
+    <li><a href="#api-list_projects">list_projects</a> &mdash; Lists all existing projects</li>
+
+
+
+    <li><a href="#api-list_similar_projects">list_similar_projects</a> &mdash; Lists all projects similar to the one provided</li>
+
+  </ol>
+</li>
+
+<li>
+  <a href="#api-samples">Samples</a>
+  &mdash; Inserting and listing samples
+  <ol>
+
+    <li><a href="#api-add_sample">add_sample</a> &mdash; Inserts a new sample with the given parameters</li>
+
+
+
+    <li><a href="#api-add_sample_field">add_sample_field</a> &mdash; Inserts a new sample field with the given parameters</li>
+
+
+
+    <li><a href="#api-get_samples">get_samples</a> &mdash; Gets the samples matching the bio source and optional meta data</li>
+
+
+
+    <li><a href="#api-list_samples">list_samples</a> &mdash; Lists all existing samples</li>
+
+
+
+    <li><a href="#api-list_similar_samples">list_similar_samples</a> &mdash; Lists all samples similar to the one provided</li>
+
+  </ol>
+</li>
+
+<li>
+  <a href="#api-status">Status</a>
+  &mdash; Checking Deep Blue status
+  <ol>
+
+    <li><a href="#api-dummy">dummy</a> &mdash; some descriptio</li>
+
+
+
+    <li><a href="#api-echo">echo</a> &mdash; Echos the server's version</li>
+
+
+
+    <li><a href="#api-list_commands">list_commands</a> &mdash; Lists all existing commands</li>
+
+
+
+    <li><a href="#api-test_types">test_types</a> &mdash; Debugging command to test type serialization</li>
+
+  </ol>
+</li>
+
+<li>
+  <a href="#api-techniques">Techniques</a>
+  &mdash; Inserting and listing techniques
+  <ol>
+
+    <li><a href="#api-add_technique">add_technique</a> &mdash; Inserts a technique with the given parameters</li>
+
+
+
+    <li><a href="#api-list_similar_techniques">list_similar_techniques</a> &mdash; Lists all techniques similar to the one provided</li>
+
+
+
+    <li><a href="#api-list_techniques">list_techniques</a> &mdash; Lists all existing techniques</li>
+
+  </ol>
+</li>
+
+
+</ol>
+</div>
+
+</section>
+
+<section id="api-throttle-limits" class="panel">
+  <header>
+    <h2>Throttle Limits</h2>
+  </header>
+  <div class="panel-body">
+    <p>
+      DeepBlue API user keys are free to do how many requests with per day.
+    </p>
+    <p>
+      The public users keys will be throttled as soon the server begins to receive many requests.
+    </p>
+    <p>
+      If you need more API calls per day, feel free to reach out to us at <a href="mailto:deepblue@mpi-inf.mpg.de">deepblue@mpi-inf.mpg.de</a>.
+    </p>
+  </div>
+</section>
+
+<section id="api-register" class="panel">
+  <header>
+    <h2>Registering</h2>
+  </header>
+  <div class="panel-body">
+    <p>
+      Requests to the DeepBlue API <strong>must</strong> include the researcher name, researcher email, and the reseacher institution.
+    </p>
+
+    <p>
+      In order to obtain the users key, please email <a href="mailto:deepblue@mpi-inf.mpg.de?subject=Deep%20Blue%20API%20key">deepblue@mpi-inf.mpg.de</a> with the required information. Remember that creating an user key is a manual process, so, it could take some days (specially on weekends and holidays).
+    </p>
+
+    <p>
+      We will anser you with a key. This key is <strong>your</strong> key to access all DeepBlue services.
+      As a personal key, do not share it. Contact us as soon as possible if you lost or another person got access to this key.
+    </p>
+
+    <p>
+      After the registration, you can use DeepBlue Epigenomic Data Server.
+    </p>
+  </div>
+</section>
+
+<section id="api-access" class="panel">
+  <header>
+    <h2>Accessing DeepBlue</h2>
+  </header>
+  <div class="panel-body">
+    <p>
+      DeepBlue uses XML-RPC protocol for communication between user and the server. XML-RPC does not depend on the programming language. You can use your favorite programming language to use DeepBlue.
+    </p>
+
+    <p>
+      Accessing DeepBlue through:
+    </p>
+    <ul>
+      <li> Java &mdash; <a href="http://ws.apache.org/xmlrpc/">Apache XML</a> </li>
+      <li> Python &mdash; <a href="http://docs.python.org/2/library/xmlrpclib.html">xmlrpclib</a> </li>
+      <li> R (bioconductor) &mdash; <a href="http://bioconductor.org/packages/devel/extra/html/XMLRPC.html">XMLRPC</a> </li>
+      <li> PHP &mdash; <a href="http://php.net/manual/en/book.xmlrpc.php">XML-RPC</a></li>
+      <li> Others programming languages &mdash; <a href="https://www.google.com/search?q=xml+rpc+%3Cyour%20language%3E">google it</a></li>
+    </ul>
+
+    <p>
+      You can use the operation <a href="#api-echo">echo</a> to test your key. Here is an exemple of accessing DeepBlue using python language:
+    </p>
+    <pre class="api-json">>>> import xmlrpclib
+>>> address = "deepblue.mpi-inf.mpg.de/xmlrpc"
+>>> port = 31415
+>>> server = xmlrpclib.Server("http://"+address+":"+str(port), allow_none=True)
+>>> server.echo("testuserkey123")
+['okay', 'DeepBlue (0.3.0) says hi to Felipe Albrecht']</pre>
+
+    <p>
+      If your key is invalid, you will receive the following result:
+    </p>
+    <pre class="api-json">['error', 'Invalid user key.']</pre>
+  </div>
+</section>
+
+
+<section id="api-administration" class="panel">
+  <header>
+    <h2>Administration commands</h2>
+  </header>
+  <div class="panel-body">
+
+  
+    <div class="api-endpoint">
+      <h3 id="api-add_user">add_user</h3>
+
+      <div class="api-description">Inserts a new user with the given parameters.</div>
+
+      <div class="api-header">
+        <code class="operation-name">add_user</code><code class="operation-parameter">(name, email, institution, user key)</code>
+      </div>
+
+      <h4>Parameters:</h4>
+      <ul class="api-parameters">
+        
+        <li><code class="operation-parameter">name</code> (<code class="operation-type">string</code>) &mdash; name for the new user</li>
+
+
+        <li><code class="operation-parameter">email</code> (<code class="operation-type">string</code>) &mdash; email address of the new user</li>
+
+
+        <li><code class="operation-parameter">institution</code> (<code class="operation-type">string</code>) &mdash; institution of the new user</li>
+
+
+        <li><code class="operation-parameter">user key</code> (<code class="operation-type">string</code>) &mdash; users token key</li>
+
+
+      </ul>
+
+      <h4>Responses:</h4>
+      <ul class="api-responses">
+        <li>
+          <code class="python-code">['okay', result]</code>
+          &mdash; result consists of
+          <ul class="api-parameters">
+            
+        <li><code class="operation-parameter">id</code> (<code class="operation-type">string</code>) &mdash; id of the newly inserted user</li>
+
+
+          </ul>
+        </li>
+        <li>
+          <code class="python-code">['error', error_message]</code>
+          &mdash; Error. Verify the error message.
+        </li>
+      </ul>
+    </div>
+
+
+
+    <div class="api-endpoint">
+      <h3 id="api-init_system">init_system</h3>
+
+      <div class="api-description">Initializes the system with the given user as administrator.</div>
+
+      <div class="api-header">
+        <code class="operation-name">init_system</code><code class="operation-parameter">(name, email, institution)</code>
+      </div>
+
+      <h4>Parameters:</h4>
+      <ul class="api-parameters">
+        
+        <li><code class="operation-parameter">name</code> (<code class="operation-type">string</code>) &mdash; name for the initial user</li>
+
+
+        <li><code class="operation-parameter">email</code> (<code class="operation-type">string</code>) &mdash; email address of the initial user</li>
+
+
+        <li><code class="operation-parameter">institution</code> (<code class="operation-type">string</code>) &mdash; institution of the initial user</li>
+
+
+      </ul>
+
+      <h4>Responses:</h4>
+      <ul class="api-responses">
+        <li>
+          <code class="python-code">['okay', result]</code>
+          &mdash; result consists of
+          <ul class="api-parameters">
+            
+        <li><code class="operation-parameter">admin_key</code> (<code class="operation-type">string</code>) &mdash; administrator's authentication key</li>
+
+
+          </ul>
+        </li>
+        <li>
+          <code class="python-code">['error', error_message]</code>
+          &mdash; Error. Verify the error message.
+        </li>
+      </ul>
+    </div>
+
+
+
+    <div class="api-endpoint">
+      <h3 id="api-list_users">list_users</h3>
+
+      <div class="api-description">Lists all existing users.</div>
+
+      <div class="api-header">
+        <code class="operation-name">list_users</code><code class="operation-parameter">(user key)</code>
+      </div>
+
+      <h4>Parameters:</h4>
+      <ul class="api-parameters">
+        
+        <li><code class="operation-parameter">user key</code> (<code class="operation-type">string</code>) &mdash; users token key</li>
+
+
+      </ul>
+
+      <h4>Responses:</h4>
+      <ul class="api-responses">
+        <li>
+          <code class="python-code">['okay', result]</code>
+          &mdash; result consists of
+          <ul class="api-parameters">
+            
+        <li><code class="operation-parameter">users</code> (<code class="operation-type">array</code>) &mdash; user names</li>
+
+
+          </ul>
+        </li>
+        <li>
+          <code class="python-code">['error', error_message]</code>
+          &mdash; Error. Verify the error message.
+        </li>
+      </ul>
+    </div>
+
+
+  </div>
+</section>
+
+<section id="api-annotations" class="panel">
+  <header>
+    <h2>Inserting and listing annotations</h2>
+  </header>
+  <div class="panel-body">
+
+  
+    <div class="api-endpoint">
+      <h3 id="api-add_annotation">add_annotation</h3>
+
+      <div class="api-description">Inserts a new annotation with the given parameters.</div>
+
+      <div class="api-header">
+        <code class="operation-name">add_annotation</code><code class="operation-parameter">(name, genome, description, data, format, extra_metadata, user key)</code>
+      </div>
+
+      <h4>Parameters:</h4>
+      <ul class="api-parameters">
+        
+        <li><code class="operation-parameter">name</code> (<code class="operation-type">string</code>) &mdash; annotation name</li>
+
+
+        <li><code class="operation-parameter">genome</code> (<code class="operation-type">string</code>) &mdash; the target genome</li>
+
+
+        <li><code class="operation-parameter">description</code> (<code class="operation-type">string</code>) &mdash; description of the annotation</li>
+
+
+        <li><code class="operation-parameter">data</code> (<code class="operation-type">string</code>) &mdash; the BED formatted data</li>
+
+
+        <li><code class="operation-parameter">format</code> (<code class="operation-type">string</code>) &mdash; format of the provided data</li>
+
+
+        <li><code class="operation-parameter">extra_metadata</code> (<code class="operation-type">struct</code>) &mdash; additional metadata</li>
+
+
+        <li><code class="operation-parameter">user key</code> (<code class="operation-type">string</code>) &mdash; users token key</li>
+
+
+      </ul>
+
+      <h4>Responses:</h4>
+      <ul class="api-responses">
+        <li>
+          <code class="python-code">['okay', result]</code>
+          &mdash; result consists of
+          <ul class="api-parameters">
+            
+        <li><code class="operation-parameter">id</code> (<code class="operation-type">string</code>) &mdash; id of the newly inserted annotation</li>
+
+
+          </ul>
+        </li>
+        <li>
+          <code class="python-code">['error', error_message]</code>
+          &mdash; Error. Verify the error message.
+        </li>
+      </ul>
+    </div>
+
+
+
+    <div class="api-endpoint">
+      <h3 id="api-list_annotations">list_annotations</h3>
+
+      <div class="api-description">Lists all existing annotations.</div>
+
+      <div class="api-header">
+        <code class="operation-name">list_annotations</code><code class="operation-parameter">(genome, user key)</code>
+      </div>
+
+      <h4>Parameters:</h4>
+      <ul class="api-parameters">
+        
+        <li><code class="operation-parameter">genome</code> (<code class="operation-type">string</code>) &mdash; the target genome</li>
+
+
+        <li><code class="operation-parameter">user key</code> (<code class="operation-type">string</code>) &mdash; users token key</li>
+
+
+      </ul>
+
+      <h4>Responses:</h4>
+      <ul class="api-responses">
+        <li>
+          <code class="python-code">['okay', result]</code>
+          &mdash; result consists of
+          <ul class="api-parameters">
+            
+        <li><code class="operation-parameter">annotations</code> (<code class="operation-type">array</code>) &mdash; annotation ids</li>
+
+
+          </ul>
+        </li>
+        <li>
+          <code class="python-code">['error', error_message]</code>
+          &mdash; Error. Verify the error message.
+        </li>
+      </ul>
+    </div>
+
+
+  </div>
+</section>
+
+<section id="api-bio-source-names" class="panel">
+  <header>
+    <h2>Inserting and listing of bio source scopes and synonyms</h2>
+  </header>
+  <div class="panel-body">
+
+  
+    <div class="api-endpoint">
+      <h3 id="api-get_bio_source_related">get_bio_source_related</h3>
+
+      <div class="api-description">Gets bio sources related to the given one.</div>
+
+      <div class="api-header">
+        <code class="operation-name">get_bio_source_related</code><code class="operation-parameter">(bio_source, user key)</code>
+      </div>
+
+      <h4>Parameters:</h4>
+      <ul class="api-parameters">
+        
+        <li><code class="operation-parameter">bio_source</code> (<code class="operation-type">string</code>) &mdash; name of the bio source</li>
+
+
+        <li><code class="operation-parameter">user key</code> (<code class="operation-type">string</code>) &mdash; users token key</li>
+
+
+      </ul>
+
+      <h4>Responses:</h4>
+      <ul class="api-responses">
+        <li>
+          <code class="python-code">['okay', result]</code>
+          &mdash; result consists of
+          <ul class="api-parameters">
+            
+        <li><code class="operation-parameter">bio_sources</code> (<code class="operation-type">array</code>) &mdash; related bio sources</li>
+
+
+          </ul>
+        </li>
+        <li>
+          <code class="python-code">['error', error_message]</code>
+          &mdash; Error. Verify the error message.
+        </li>
+      </ul>
+    </div>
+
+
+
+    <div class="api-endpoint">
+      <h3 id="api-get_bio_source_scope">get_bio_source_scope</h3>
+
+      <div class="api-description">Gets the scope for the bio source.</div>
+
+      <div class="api-header">
+        <code class="operation-name">get_bio_source_scope</code><code class="operation-parameter">(bio_source, user key)</code>
+      </div>
+
+      <h4>Parameters:</h4>
+      <ul class="api-parameters">
+        
+        <li><code class="operation-parameter">bio_source</code> (<code class="operation-type">string</code>) &mdash; name of the bio source</li>
+
+
+        <li><code class="operation-parameter">user key</code> (<code class="operation-type">string</code>) &mdash; users token key</li>
+
+
+      </ul>
+
+      <h4>Responses:</h4>
+      <ul class="api-responses">
+        <li>
+          <code class="python-code">['okay', result]</code>
+          &mdash; result consists of
+          <ul class="api-parameters">
+            
+        <li><code class="operation-parameter">bio_sources</code> (<code class="operation-type">array</code>) &mdash; related bio sources</li>
+
+
+          </ul>
+        </li>
+        <li>
+          <code class="python-code">['error', error_message]</code>
+          &mdash; Error. Verify the error message.
+        </li>
+      </ul>
+    </div>
+
+
+
+    <div class="api-endpoint">
+      <h3 id="api-get_bio_source_synonyms">get_bio_source_synonyms</h3>
+
+      <div class="api-description">Gets the synonyms for the bio source.</div>
+
+      <div class="api-header">
+        <code class="operation-name">get_bio_source_synonyms</code><code class="operation-parameter">(bio_source, user key)</code>
+      </div>
+
+      <h4>Parameters:</h4>
+      <ul class="api-parameters">
+        
+        <li><code class="operation-parameter">bio_source</code> (<code class="operation-type">string</code>) &mdash; name of the bio source</li>
+
+
+        <li><code class="operation-parameter">user key</code> (<code class="operation-type">string</code>) &mdash; users token key</li>
+
+
+      </ul>
+
+      <h4>Responses:</h4>
+      <ul class="api-responses">
+        <li>
+          <code class="python-code">['okay', result]</code>
+          &mdash; result consists of
+          <ul class="api-parameters">
+            
+        <li><code class="operation-parameter">synonyms</code> (<code class="operation-type">array</code>) &mdash; synonyms of the bio source</li>
+
+
+          </ul>
+        </li>
+        <li>
+          <code class="python-code">['error', error_message]</code>
+          &mdash; Error. Verify the error message.
+        </li>
+      </ul>
+    </div>
+
+
+
+    <div class="api-endpoint">
+      <h3 id="api-set_bio_source_scope">set_bio_source_scope</h3>
+
+      <div class="api-description">Sets a bio source scope.</div>
+
+      <div class="api-header">
+        <code class="operation-name">set_bio_source_scope</code><code class="operation-parameter">(smaller_scope, bigger_scope, user key)</code>
+      </div>
+
+      <h4>Parameters:</h4>
+      <ul class="api-parameters">
+        
+        <li><code class="operation-parameter">smaller_scope</code> (<code class="operation-type">string</code>) &mdash; bigger scope</li>
+
+
+        <li><code class="operation-parameter">bigger_scope</code> (<code class="operation-type">string</code>) &mdash; smaller scope</li>
+
+
+        <li><code class="operation-parameter">user key</code> (<code class="operation-type">string</code>) &mdash; users token key</li>
+
+
+      </ul>
+
+      <h4>Responses:</h4>
+      <ul class="api-responses">
+        <li>
+          <code class="python-code">['okay', result]</code>
+          &mdash; result consists of
+          <ul class="api-parameters">
+            
+          </ul>
+        </li>
+        <li>
+          <code class="python-code">['error', error_message]</code>
+          &mdash; Error. Verify the error message.
+        </li>
+      </ul>
+    </div>
+
+
+
+    <div class="api-endpoint">
+      <h3 id="api-set_bio_source_synonym">set_bio_source_synonym</h3>
+
+      <div class="api-description">Sets a bio source synonym.</div>
+
+      <div class="api-header">
+        <code class="operation-name">set_bio_source_synonym</code><code class="operation-parameter">(bio_source, synonym_name, user key)</code>
+      </div>
+
+      <h4>Parameters:</h4>
+      <ul class="api-parameters">
+        
+        <li><code class="operation-parameter">bio_source</code> (<code class="operation-type">string</code>) &mdash; name of the bio source</li>
+
+
+        <li><code class="operation-parameter">synonym_name</code> (<code class="operation-type">string</code>) &mdash; name of the synonym</li>
+
+
+        <li><code class="operation-parameter">user key</code> (<code class="operation-type">string</code>) &mdash; users token key</li>
+
+
+      </ul>
+
+      <h4>Responses:</h4>
+      <ul class="api-responses">
+        <li>
+          <code class="python-code">['okay', result]</code>
+          &mdash; result consists of
+          <ul class="api-parameters">
+            
+          </ul>
+        </li>
+        <li>
+          <code class="python-code">['error', error_message]</code>
+          &mdash; Error. Verify the error message.
+        </li>
+      </ul>
+    </div>
+
+
+  </div>
+</section>
+
+<section id="api-bio-sources" class="panel">
+  <header>
+    <h2>Inserting and listing bio sources</h2>
+  </header>
+  <div class="panel-body">
+
+  
+    <div class="api-endpoint">
+      <h3 id="api-add_bio_source">add_bio_source</h3>
+
+      <div class="api-description">Inserts a new bio source with the given parameters.</div>
+
+      <div class="api-header">
+        <code class="operation-name">add_bio_source</code><code class="operation-parameter">(name, description, extra_metadata, user key)</code>
+      </div>
+
+      <h4>Parameters:</h4>
+      <ul class="api-parameters">
+        
+        <li><code class="operation-parameter">name</code> (<code class="operation-type">string</code>) &mdash; bio source name</li>
+
+
+        <li><code class="operation-parameter">description</code> (<code class="operation-type">string</code>) &mdash; description of the bio source</li>
+
+
+        <li><code class="operation-parameter">extra_metadata</code> (<code class="operation-type">struct</code>) &mdash; additional metadata</li>
+
+
+        <li><code class="operation-parameter">user key</code> (<code class="operation-type">string</code>) &mdash; users token key</li>
+
+
+      </ul>
+
+      <h4>Responses:</h4>
+      <ul class="api-responses">
+        <li>
+          <code class="python-code">['okay', result]</code>
+          &mdash; result consists of
+          <ul class="api-parameters">
+            
+        <li><code class="operation-parameter">id</code> (<code class="operation-type">string</code>) &mdash; id of the newly inserted bio source</li>
+
+
+          </ul>
+        </li>
+        <li>
+          <code class="python-code">['error', error_message]</code>
+          &mdash; Error. Verify the error message.
+        </li>
+      </ul>
+    </div>
+
+
+
+    <div class="api-endpoint">
+      <h3 id="api-list_bio_sources">list_bio_sources</h3>
+
+      <div class="api-description">Lists all existing bio sources.</div>
+
+      <div class="api-header">
+        <code class="operation-name">list_bio_sources</code><code class="operation-parameter">(user key)</code>
+      </div>
+
+      <h4>Parameters:</h4>
+      <ul class="api-parameters">
+        
+        <li><code class="operation-parameter">user key</code> (<code class="operation-type">string</code>) &mdash; users token key</li>
+
+
+      </ul>
+
+      <h4>Responses:</h4>
+      <ul class="api-responses">
+        <li>
+          <code class="python-code">['okay', result]</code>
+          &mdash; result consists of
+          <ul class="api-parameters">
+            
+        <li><code class="operation-parameter">bio_sources</code> (<code class="operation-type">array</code>) &mdash; bio sources</li>
+
+
+          </ul>
+        </li>
+        <li>
+          <code class="python-code">['error', error_message]</code>
+          &mdash; Error. Verify the error message.
+        </li>
+      </ul>
+    </div>
+
+
+
+    <div class="api-endpoint">
+      <h3 id="api-list_similar_bio_sources">list_similar_bio_sources</h3>
+
+      <div class="api-description">Lists all bio sources similar to the one provided.</div>
+
+      <div class="api-header">
+        <code class="operation-name">list_similar_bio_sources</code><code class="operation-parameter">(name, user key)</code>
+      </div>
+
+      <h4>Parameters:</h4>
+      <ul class="api-parameters">
+        
+        <li><code class="operation-parameter">name</code> (<code class="operation-type">string</code>) &mdash; bio source name</li>
+
+
+        <li><code class="operation-parameter">user key</code> (<code class="operation-type">string</code>) &mdash; users token key</li>
+
+
+      </ul>
+
+      <h4>Responses:</h4>
+      <ul class="api-responses">
+        <li>
+          <code class="python-code">['okay', result]</code>
+          &mdash; result consists of
+          <ul class="api-parameters">
+            
+        <li><code class="operation-parameter">bio_sources</code> (<code class="operation-type">array</code>) &mdash; similar bio sources</li>
+
+
+          </ul>
+        </li>
+        <li>
+          <code class="python-code">['error', error_message]</code>
+          &mdash; Error. Verify the error message.
+        </li>
+      </ul>
+    </div>
+
+
+  </div>
+</section>
+
+<section id="api-column-types" class="panel">
+  <header>
+    <h2>Inserting and listing different column types</h2>
+  </header>
+  <div class="panel-body">
+
+  
+    <div class="api-endpoint">
+      <h3 id="api-create_column_type_category">create_column_type_category</h3>
+
+      <div class="api-description">Create a column type from a category set.</div>
+
+      <div class="api-header">
+        <code class="operation-name">create_column_type_category</code><code class="operation-parameter">(name, description, ignore_if, items, user key)</code>
+      </div>
+
+      <h4>Parameters:</h4>
+      <ul class="api-parameters">
+        
+        <li><code class="operation-parameter">name</code> (<code class="operation-type">string</code>) &mdash; column type name</li>
+
+
+        <li><code class="operation-parameter">description</code> (<code class="operation-type">string</code>) &mdash; description of the column type</li>
+
+
+        <li><code class="operation-parameter">ignore_if</code> (<code class="operation-type">string</code>) &mdash; value to use for ignoring this column</li>
+
+
+        <li><code class="operation-parameter">items</code> (<code class="operation-type">string</code>) &mdash; items that are accepted for this category set</li>
+
+
+        <li><code class="operation-parameter">user key</code> (<code class="operation-type">string</code>) &mdash; users token key</li>
+
+
+      </ul>
+
+      <h4>Responses:</h4>
+      <ul class="api-responses">
+        <li>
+          <code class="python-code">['okay', result]</code>
+          &mdash; result consists of
+          <ul class="api-parameters">
+            
+        <li><code class="operation-parameter">id</code> (<code class="operation-type">string</code>) &mdash; id of the newly created column type</li>
+
+
+          </ul>
+        </li>
+        <li>
+          <code class="python-code">['error', error_message]</code>
+          &mdash; Error. Verify the error message.
+        </li>
+      </ul>
+    </div>
+
+
+
+    <div class="api-endpoint">
+      <h3 id="api-create_column_type_range">create_column_type_range</h3>
+
+      <div class="api-description">Create a column type from a category set.</div>
+
+      <div class="api-header">
+        <code class="operation-name">create_column_type_range</code><code class="operation-parameter">(name, description, ignore_if, minimum, maximum, user key)</code>
+      </div>
+
+      <h4>Parameters:</h4>
+      <ul class="api-parameters">
+        
+        <li><code class="operation-parameter">name</code> (<code class="operation-type">string</code>) &mdash; column type name</li>
+
+
+        <li><code class="operation-parameter">description</code> (<code class="operation-type">string</code>) &mdash; description of the column type</li>
+
+
+        <li><code class="operation-parameter">ignore_if</code> (<code class="operation-type">string</code>) &mdash; value to use for ignoring this column</li>
+
+
+        <li><code class="operation-parameter">minimum</code> (<code class="operation-type">double</code>) &mdash; minimum value for this range (inclusive)</li>
+
+
+        <li><code class="operation-parameter">maximum</code> (<code class="operation-type">double</code>) &mdash; maximum value for this range (inclusive)</li>
+
+
+        <li><code class="operation-parameter">user key</code> (<code class="operation-type">string</code>) &mdash; users token key</li>
+
+
+      </ul>
+
+      <h4>Responses:</h4>
+      <ul class="api-responses">
+        <li>
+          <code class="python-code">['okay', result]</code>
+          &mdash; result consists of
+          <ul class="api-parameters">
+            
+        <li><code class="operation-parameter">id</code> (<code class="operation-type">string</code>) &mdash; id of the newly created column type</li>
+
+
+          </ul>
+        </li>
+        <li>
+          <code class="python-code">['error', error_message]</code>
+          &mdash; Error. Verify the error message.
+        </li>
+      </ul>
+    </div>
+
+
+
+    <div class="api-endpoint">
+      <h3 id="api-create_column_type_simple">create_column_type_simple</h3>
+
+      <div class="api-description">Create a column type from a category set.</div>
+
+      <div class="api-header">
+        <code class="operation-name">create_column_type_simple</code><code class="operation-parameter">(name, description, ignore_if, type, user key)</code>
+      </div>
+
+      <h4>Parameters:</h4>
+      <ul class="api-parameters">
+        
+        <li><code class="operation-parameter">name</code> (<code class="operation-type">string</code>) &mdash; column type name</li>
+
+
+        <li><code class="operation-parameter">description</code> (<code class="operation-type">string</code>) &mdash; description of the column type</li>
+
+
+        <li><code class="operation-parameter">ignore_if</code> (<code class="operation-type">string</code>) &mdash; value to use for ignoring this column</li>
+
+
+        <li><code class="operation-parameter">type</code> (<code class="operation-type">string</code>) &mdash; type of the column type</li>
+
+
+        <li><code class="operation-parameter">user key</code> (<code class="operation-type">string</code>) &mdash; users token key</li>
+
+
+      </ul>
+
+      <h4>Responses:</h4>
+      <ul class="api-responses">
+        <li>
+          <code class="python-code">['okay', result]</code>
+          &mdash; result consists of
+          <ul class="api-parameters">
+            
+        <li><code class="operation-parameter">id</code> (<code class="operation-type">string</code>) &mdash; id of the newly created column type</li>
+
+
+          </ul>
+        </li>
+        <li>
+          <code class="python-code">['error', error_message]</code>
+          &mdash; Error. Verify the error message.
+        </li>
+      </ul>
+    </div>
+
+
+
+    <div class="api-endpoint">
+      <h3 id="api-list_column_types">list_column_types</h3>
+
+      <div class="api-description">Lists all available column types.</div>
+
+      <div class="api-header">
+        <code class="operation-name">list_column_types</code><code class="operation-parameter">(user key)</code>
+      </div>
+
+      <h4>Parameters:</h4>
+      <ul class="api-parameters">
+        
+        <li><code class="operation-parameter">user key</code> (<code class="operation-type">string</code>) &mdash; users token key</li>
+
+
+      </ul>
+
+      <h4>Responses:</h4>
+      <ul class="api-responses">
+        <li>
+          <code class="python-code">['okay', result]</code>
+          &mdash; result consists of
+          <ul class="api-parameters">
+            
+        <li><code class="operation-parameter">column_types</code> (<code class="operation-type">array</code>) &mdash; column types</li>
+
+
+          </ul>
+        </li>
+        <li>
+          <code class="python-code">['error', error_message]</code>
+          &mdash; Error. Verify the error message.
+        </li>
+      </ul>
+    </div>
+
+
+  </div>
+</section>
+
+<section id="api-epigenetic-marks" class="panel">
+  <header>
+    <h2>Inserting and listing epigenetic marks</h2>
+  </header>
+  <div class="panel-body">
+
+  
+    <div class="api-endpoint">
+      <h3 id="api-add_epigenetic_mark">add_epigenetic_mark</h3>
+
+      <div class="api-description">Inserts a new epigenetic mark with the given parameters.</div>
+
+      <div class="api-header">
+        <code class="operation-name">add_epigenetic_mark</code><code class="operation-parameter">(name, description, user key)</code>
+      </div>
+
+      <h4>Parameters:</h4>
+      <ul class="api-parameters">
+        
+        <li><code class="operation-parameter">name</code> (<code class="operation-type">string</code>) &mdash; name of the epigenetic mark</li>
+
+
+        <li><code class="operation-parameter">description</code> (<code class="operation-type">string</code>) &mdash; description of the epigenetic mark</li>
+
+
+        <li><code class="operation-parameter">user key</code> (<code class="operation-type">string</code>) &mdash; users token key</li>
+
+
+      </ul>
+
+      <h4>Responses:</h4>
+      <ul class="api-responses">
+        <li>
+          <code class="python-code">['okay', result]</code>
+          &mdash; result consists of
+          <ul class="api-parameters">
+            
+        <li><code class="operation-parameter">id</code> (<code class="operation-type">string</code>) &mdash; id of the newly inserted epigenetic mark</li>
+
+
+          </ul>
+        </li>
+        <li>
+          <code class="python-code">['error', error_message]</code>
+          &mdash; Error. Verify the error message.
+        </li>
+      </ul>
+    </div>
+
+
+
+    <div class="api-endpoint">
+      <h3 id="api-list_epigenetic_marks">list_epigenetic_marks</h3>
+
+      <div class="api-description">Lists all existing epigenetic marks.</div>
+
+      <div class="api-header">
+        <code class="operation-name">list_epigenetic_marks</code><code class="operation-parameter">(user key)</code>
+      </div>
+
+      <h4>Parameters:</h4>
+      <ul class="api-parameters">
+        
+        <li><code class="operation-parameter">user key</code> (<code class="operation-type">string</code>) &mdash; users token key</li>
+
+
+      </ul>
+
+      <h4>Responses:</h4>
+      <ul class="api-responses">
+        <li>
+          <code class="python-code">['okay', result]</code>
+          &mdash; result consists of
+          <ul class="api-parameters">
+            
+        <li><code class="operation-parameter">epigenetic_marks</code> (<code class="operation-type">array</code>) &mdash; epigenetic mark names</li>
+
+
+          </ul>
+        </li>
+        <li>
+          <code class="python-code">['error', error_message]</code>
+          &mdash; Error. Verify the error message.
+        </li>
+      </ul>
+    </div>
+
+
+
+    <div class="api-endpoint">
+      <h3 id="api-list_similar_epigenetic_marks">list_similar_epigenetic_marks</h3>
+
+      <div class="api-description">Lists all epigenetic marks similar to the one provided.</div>
+
+      <div class="api-header">
+        <code class="operation-name">list_similar_epigenetic_marks</code><code class="operation-parameter">(name, user key)</code>
+      </div>
+
+      <h4>Parameters:</h4>
+      <ul class="api-parameters">
+        
+        <li><code class="operation-parameter">name</code> (<code class="operation-type">string</code>) &mdash; epigenetic mark name</li>
+
+
+        <li><code class="operation-parameter">user key</code> (<code class="operation-type">string</code>) &mdash; users token key</li>
+
+
+      </ul>
+
+      <h4>Responses:</h4>
+      <ul class="api-responses">
+        <li>
+          <code class="python-code">['okay', result]</code>
+          &mdash; result consists of
+          <ul class="api-parameters">
+            
+        <li><code class="operation-parameter">epigenetic_marks</code> (<code class="operation-type">array</code>) &mdash; similar epigenetic mark names</li>
+
+
+          </ul>
+        </li>
+        <li>
+          <code class="python-code">['error', error_message]</code>
+          &mdash; Error. Verify the error message.
+        </li>
+      </ul>
+    </div>
+
+
+  </div>
+</section>
+
+<section id="api-experiments" class="panel">
+  <header>
+    <h2>Inserting and listing experiments</h2>
+  </header>
+  <div class="panel-body">
+
+  
+    <div class="api-endpoint">
+      <h3 id="api-add_experiment">add_experiment</h3>
+
+      <div class="api-description">Inserts a new experiment with the given parameters.</div>
+
+      <div class="api-header">
+        <code class="operation-name">add_experiment</code><code class="operation-parameter">(name, genome, epigenetic_mark, sample, technique, project, description, data, format, extra_metadata, user key)</code>
+      </div>
+
+      <h4>Parameters:</h4>
+      <ul class="api-parameters">
+        
+        <li><code class="operation-parameter">name</code> (<code class="operation-type">string</code>) &mdash; experiment name</li>
+
+
+        <li><code class="operation-parameter">genome</code> (<code class="operation-type">string</code>) &mdash; the target genome</li>
+
+
+        <li><code class="operation-parameter">epigenetic_mark</code> (<code class="operation-type">string</code>) &mdash; epigenetic mark of the experiment</li>
+
+
+        <li><code class="operation-parameter">sample</code> (<code class="operation-type">string</code>) &mdash; id of the used sample</li>
+
+
+        <li><code class="operation-parameter">technique</code> (<code class="operation-type">string</code>) &mdash; technique used by this experiment</li>
+
+
+        <li><code class="operation-parameter">project</code> (<code class="operation-type">string</code>) &mdash; the project name</li>
+
+
+        <li><code class="operation-parameter">description</code> (<code class="operation-type">string</code>) &mdash; description of the experiment</li>
+
+
+        <li><code class="operation-parameter">data</code> (<code class="operation-type">string</code>) &mdash; the BED formated data</li>
+
+
+        <li><code class="operation-parameter">format</code> (<code class="operation-type">string</code>) &mdash; format of the provided data</li>
+
+
+        <li><code class="operation-parameter">extra_metadata</code> (<code class="operation-type">struct</code>) &mdash; additional metadata</li>
+
+
+        <li><code class="operation-parameter">user key</code> (<code class="operation-type">string</code>) &mdash; users token key</li>
+
+
+      </ul>
+
+      <h4>Responses:</h4>
+      <ul class="api-responses">
+        <li>
+          <code class="python-code">['okay', result]</code>
+          &mdash; result consists of
+          <ul class="api-parameters">
+            
+        <li><code class="operation-parameter">id</code> (<code class="operation-type">string</code>) &mdash; id of the newly inserted experiment</li>
+
+
+          </ul>
+        </li>
+        <li>
+          <code class="python-code">['error', error_message]</code>
+          &mdash; Error. Verify the error message.
+        </li>
+      </ul>
+    </div>
+
+
+
+    <div class="api-endpoint">
+      <h3 id="api-get_experiments_by_query">get_experiments_by_query</h3>
+
+      <div class="api-description">Gets the regions for the given query in the requested BED format.</div>
+
+      <div class="api-header">
+        <code class="operation-name">get_experiments_by_query</code><code class="operation-parameter">(query_id, user key)</code>
+      </div>
+
+      <h4>Parameters:</h4>
+      <ul class="api-parameters">
+        
+        <li><code class="operation-parameter">query_id</code> (<code class="operation-type">string</code>) &mdash; id of the query</li>
+
+
+        <li><code class="operation-parameter">user key</code> (<code class="operation-type">string</code>) &mdash; users token key</li>
+
+
+      </ul>
+
+      <h4>Responses:</h4>
+      <ul class="api-responses">
+        <li>
+          <code class="python-code">['okay', result]</code>
+          &mdash; result consists of
+          <ul class="api-parameters">
+            
+        <li><code class="operation-parameter">regions</code> (<code class="operation-type">string</code>) &mdash; BED formated regions</li>
+
+
+          </ul>
+        </li>
+        <li>
+          <code class="python-code">['error', error_message]</code>
+          &mdash; Error. Verify the error message.
+        </li>
+      </ul>
+    </div>
+
+
+
+    <div class="api-endpoint">
+      <h3 id="api-list_experiments">list_experiments</h3>
+
+      <div class="api-description">Lists all existing experiments.</div>
+
+      <div class="api-header">
+        <code class="operation-name">list_experiments</code><code class="operation-parameter">(genome, user key)</code>
+      </div>
+
+      <h4>Parameters:</h4>
+      <ul class="api-parameters">
+        
+        <li><code class="operation-parameter">genome</code> (<code class="operation-type">string</code>) &mdash; the target genome</li>
+
+
+        <li><code class="operation-parameter">user key</code> (<code class="operation-type">string</code>) &mdash; users token key</li>
+
+
+      </ul>
+
+      <h4>Responses:</h4>
+      <ul class="api-responses">
+        <li>
+          <code class="python-code">['okay', result]</code>
+          &mdash; result consists of
+          <ul class="api-parameters">
+            
+        <li><code class="operation-parameter">experiments</code> (<code class="operation-type">array</code>) &mdash; experiment names</li>
+
+
+          </ul>
+        </li>
+        <li>
+          <code class="python-code">['error', error_message]</code>
+          &mdash; Error. Verify the error message.
+        </li>
+      </ul>
+    </div>
+
+
+
+    <div class="api-endpoint">
+      <h3 id="api-list_recent_experiments">list_recent_experiments</h3>
+
+      <div class="api-description">Lists all recent experiments.</div>
+
+      <div class="api-header">
+        <code class="operation-name">list_recent_experiments</code><code class="operation-parameter">(genome, days, user key)</code>
+      </div>
+
+      <h4>Parameters:</h4>
+      <ul class="api-parameters">
+        
+        <li><code class="operation-parameter">genome</code> (<code class="operation-type">string</code>) &mdash; the target genome</li>
+
+
+        <li><code class="operation-parameter">days</code> (<code class="operation-type">double</code>) &mdash; maximum days ago the experiments were added</li>
+
+
+        <li><code class="operation-parameter">user key</code> (<code class="operation-type">string</code>) &mdash; users token key</li>
+
+
+      </ul>
+
+      <h4>Responses:</h4>
+      <ul class="api-responses">
+        <li>
+          <code class="python-code">['okay', result]</code>
+          &mdash; result consists of
+          <ul class="api-parameters">
+            
+        <li><code class="operation-parameter">experiments</code> (<code class="operation-type">array</code>) &mdash; names of recent experiments</li>
+
+
+          </ul>
+        </li>
+        <li>
+          <code class="python-code">['error', error_message]</code>
+          &mdash; Error. Verify the error message.
+        </li>
+      </ul>
+    </div>
+
+
+
+    <div class="api-endpoint">
+      <h3 id="api-list_similar_experiments">list_similar_experiments</h3>
+
+      <div class="api-description">Lists all experiments similar to the one provided.</div>
+
+      <div class="api-header">
+        <code class="operation-name">list_similar_experiments</code><code class="operation-parameter">(name, genome, user key)</code>
+      </div>
+
+      <h4>Parameters:</h4>
+      <ul class="api-parameters">
+        
+        <li><code class="operation-parameter">name</code> (<code class="operation-type">string</code>) &mdash; experiment name</li>
+
+
+        <li><code class="operation-parameter">genome</code> (<code class="operation-type">string</code>) &mdash; the target genome</li>
+
+
+        <li><code class="operation-parameter">user key</code> (<code class="operation-type">string</code>) &mdash; users token key</li>
+
+
+      </ul>
+
+      <h4>Responses:</h4>
+      <ul class="api-responses">
+        <li>
+          <code class="python-code">['okay', result]</code>
+          &mdash; result consists of
+          <ul class="api-parameters">
+            
+        <li><code class="operation-parameter">experiments</code> (<code class="operation-type">array</code>) &mdash; similar experiment names</li>
+
+
+          </ul>
+        </li>
+        <li>
+          <code class="python-code">['error', error_message]</code>
+          &mdash; Error. Verify the error message.
+        </li>
+      </ul>
+    </div>
+
+
+  </div>
+</section>
+
+<section id="api-general-information" class="panel">
+  <header>
+    <h2>Commands for all types of data</h2>
+  </header>
+  <div class="panel-body">
+
+  
+    <div class="api-endpoint">
+      <h3 id="api-get_info">get_info</h3>
+
+      <div class="api-description">Gets the information for the given id which includes all its public attributes.</div>
+
+      <div class="api-header">
+        <code class="operation-name">get_info</code><code class="operation-parameter">(id, user key)</code>
+      </div>
+
+      <h4>Parameters:</h4>
+      <ul class="api-parameters">
+        
+        <li><code class="operation-parameter">id</code> (<code class="operation-type">string</code>) &mdash; id of the data</li>
+
+
+        <li><code class="operation-parameter">user key</code> (<code class="operation-type">string</code>) &mdash; users token key</li>
+
+
+      </ul>
+
+      <h4>Responses:</h4>
+      <ul class="api-responses">
+        <li>
+          <code class="python-code">['okay', result]</code>
+          &mdash; result consists of
+          <ul class="api-parameters">
+            
+        <li><code class="operation-parameter">information</code> (<code class="operation-type">struct</code>) &mdash; information about the object</li>
+
+
+          </ul>
+        </li>
+        <li>
+          <code class="python-code">['error', error_message]</code>
+          &mdash; Error. Verify the error message.
+        </li>
+      </ul>
+    </div>
+
+
+
+    <div class="api-endpoint">
+      <h3 id="api-search">search</h3>
+
+      <div class="api-description">Search all data of all types for the given keyword. A minus (-) character in front of a keyword searches for data without the given keyword.
+
+The search can be restricted to the following data types are:
+
+	genomes
+	epigenetic_marks
+	projects
+	bio_sources
+	samples
+	experiments
+	annotations</div>
+
+      <div class="api-header">
+        <code class="operation-name">search</code><code class="operation-parameter">(keyword, type, user key)</code>
+      </div>
+
+      <h4>Parameters:</h4>
+      <ul class="api-parameters">
+        
+        <li><code class="operation-parameter">keyword</code> (<code class="operation-type">string</code>) &mdash; keyword to search by</li>
+
+
+        <li><code class="operation-parameter">type</code> (<code class="operation-type">string</code>) &mdash; type of data to search for</li>
+
+
+        <li><code class="operation-parameter">user key</code> (<code class="operation-type">string</code>) &mdash; users token key</li>
+
+
+      </ul>
+
+      <h4>Responses:</h4>
+      <ul class="api-responses">
+        <li>
+          <code class="python-code">['okay', result]</code>
+          &mdash; result consists of
+          <ul class="api-parameters">
+            
+        <li><code class="operation-parameter">results</code> (<code class="operation-type">array</code>) &mdash; search results as [id, name, type]</li>
+
+
+          </ul>
+        </li>
+        <li>
+          <code class="python-code">['error', error_message]</code>
+          &mdash; Error. Verify the error message.
+        </li>
+      </ul>
+    </div>
+
+
+  </div>
+</section>
+
+<section id="api-genomes" class="panel">
+  <header>
+    <h2>Inserting and listing genomes</h2>
+  </header>
+  <div class="panel-body">
+
+  
+    <div class="api-endpoint">
+      <h3 id="api-add_genome">add_genome</h3>
+
+      <div class="api-description">Inserts a new genome with the given parameters.</div>
+
+      <div class="api-header">
+        <code class="operation-name">add_genome</code><code class="operation-parameter">(name, description, data, user key)</code>
+      </div>
+
+      <h4>Parameters:</h4>
+      <ul class="api-parameters">
+        
+        <li><code class="operation-parameter">name</code> (<code class="operation-type">string</code>) &mdash; genome name</li>
+
+
+        <li><code class="operation-parameter">description</code> (<code class="operation-type">string</code>) &mdash; description of the genome</li>
+
+
+        <li><code class="operation-parameter">data</code> (<code class="operation-type">string</code>) &mdash; genome data</li>
+
+
+        <li><code class="operation-parameter">user key</code> (<code class="operation-type">string</code>) &mdash; users token key</li>
+
+
+      </ul>
+
+      <h4>Responses:</h4>
+      <ul class="api-responses">
+        <li>
+          <code class="python-code">['okay', result]</code>
+          &mdash; result consists of
+          <ul class="api-parameters">
+            
+        <li><code class="operation-parameter">id</code> (<code class="operation-type">string</code>) &mdash; id of the newly inserted genome</li>
+
+
+          </ul>
+        </li>
+        <li>
+          <code class="python-code">['error', error_message]</code>
+          &mdash; Error. Verify the error message.
+        </li>
+      </ul>
+    </div>
+
+
+
+    <div class="api-endpoint">
+      <h3 id="api-list_genomes">list_genomes</h3>
+
+      <div class="api-description">Lists all existing genomes.</div>
+
+      <div class="api-header">
+        <code class="operation-name">list_genomes</code><code class="operation-parameter">(user key)</code>
+      </div>
+
+      <h4>Parameters:</h4>
+      <ul class="api-parameters">
+        
+        <li><code class="operation-parameter">user key</code> (<code class="operation-type">string</code>) &mdash; users token key</li>
+
+
+      </ul>
+
+      <h4>Responses:</h4>
+      <ul class="api-responses">
+        <li>
+          <code class="python-code">['okay', result]</code>
+          &mdash; result consists of
+          <ul class="api-parameters">
+            
+        <li><code class="operation-parameter">genomes</code> (<code class="operation-type">array</code>) &mdash; genome names</li>
+
+
+          </ul>
+        </li>
+        <li>
+          <code class="python-code">['error', error_message]</code>
+          &mdash; Error. Verify the error message.
+        </li>
+      </ul>
+    </div>
+
+
+
+    <div class="api-endpoint">
+      <h3 id="api-list_similar_genomes">list_similar_genomes</h3>
+
+      <div class="api-description">Lists all genomes similar to the one provided.</div>
+
+      <div class="api-header">
+        <code class="operation-name">list_similar_genomes</code><code class="operation-parameter">(name, user key)</code>
+      </div>
+
+      <h4>Parameters:</h4>
+      <ul class="api-parameters">
+        
+        <li><code class="operation-parameter">name</code> (<code class="operation-type">string</code>) &mdash; genome name</li>
+
+
+        <li><code class="operation-parameter">user key</code> (<code class="operation-type">string</code>) &mdash; users token key</li>
+
+
+      </ul>
+
+      <h4>Responses:</h4>
+      <ul class="api-responses">
+        <li>
+          <code class="python-code">['okay', result]</code>
+          &mdash; result consists of
+          <ul class="api-parameters">
+            
+        <li><code class="operation-parameter">genomes</code> (<code class="operation-type">array</code>) &mdash; similar genome names</li>
+
+
+          </ul>
+        </li>
+        <li>
+          <code class="python-code">['error', error_message]</code>
+          &mdash; Error. Verify the error message.
+        </li>
+      </ul>
+    </div>
+
+
+  </div>
+</section>
+
+<section id="api-operations" class="panel">
+  <header>
+    <h2>Different querying operations</h2>
+  </header>
+  <div class="panel-body">
+
+  
+    <div class="api-endpoint">
+      <h3 id="api-count_regions">count_regions</h3>
+
+      <div class="api-description">Counts the number of regions in the result of the given query.</div>
+
+      <div class="api-header">
+        <code class="operation-name">count_regions</code><code class="operation-parameter">(query_id, user key)</code>
+      </div>
+
+      <h4>Parameters:</h4>
+      <ul class="api-parameters">
+        
+        <li><code class="operation-parameter">query_id</code> (<code class="operation-type">string</code>) &mdash; id of the counted query</li>
+
+
+        <li><code class="operation-parameter">user key</code> (<code class="operation-type">string</code>) &mdash; users token key</li>
+
+
+      </ul>
+
+      <h4>Responses:</h4>
+      <ul class="api-responses">
+        <li>
+          <code class="python-code">['okay', result]</code>
+          &mdash; result consists of
+          <ul class="api-parameters">
+            
+        <li><code class="operation-parameter">size</code> (<code class="operation-type">int</code>) &mdash; number of regions</li>
+
+
+          </ul>
+        </li>
+        <li>
+          <code class="python-code">['error', error_message]</code>
+          &mdash; Error. Verify the error message.
+        </li>
+      </ul>
+    </div>
+
+
+
+    <div class="api-endpoint">
+      <h3 id="api-filter_regions">filter_regions</h3>
+
+      <div class="api-description">Filters the result of the given query by the given restrictions.</div>
+
+      <div class="api-header">
+        <code class="operation-name">filter_regions</code><code class="operation-parameter">(query_id, field, operation, value, type, user key)</code>
+      </div>
+
+      <h4>Parameters:</h4>
+      <ul class="api-parameters">
+        
+        <li><code class="operation-parameter">query_id</code> (<code class="operation-type">string</code>) &mdash; id of the query to be filtered</li>
+
+
+        <li><code class="operation-parameter">field</code> (<code class="operation-type">string</code>) &mdash; field that is filtered by</li>
+
+
+        <li><code class="operation-parameter">operation</code> (<code class="operation-type">string</code>) &mdash; operation used for filtering</li>
+
+
+        <li><code class="operation-parameter">value</code> (<code class="operation-type">string</code>) &mdash; value the operator is applied to</li>
+
+
+        <li><code class="operation-parameter">type</code> (<code class="operation-type">string</code>) &mdash; type of the value</li>
+
+
+        <li><code class="operation-parameter">user key</code> (<code class="operation-type">string</code>) &mdash; users token key</li>
+
+
+      </ul>
+
+      <h4>Responses:</h4>
+      <ul class="api-responses">
+        <li>
+          <code class="python-code">['okay', result]</code>
+          &mdash; result consists of
+          <ul class="api-parameters">
+            
+        <li><code class="operation-parameter">id</code> (<code class="operation-type">string</code>) &mdash; id of filtered query</li>
+
+
+          </ul>
+        </li>
+        <li>
+          <code class="python-code">['error', error_message]</code>
+          &mdash; Error. Verify the error message.
+        </li>
+      </ul>
+    </div>
+
+
+
+    <div class="api-endpoint">
+      <h3 id="api-get_regions">get_regions</h3>
+
+      <div class="api-description">Gets the regions for the given query in the requested BED format.</div>
+
+      <div class="api-header">
+        <code class="operation-name">get_regions</code><code class="operation-parameter">(query_id, user_format, user key)</code>
+      </div>
+
+      <h4>Parameters:</h4>
+      <ul class="api-parameters">
+        
+        <li><code class="operation-parameter">query_id</code> (<code class="operation-type">string</code>) &mdash; id of the query</li>
+
+
+        <li><code class="operation-parameter">user_format</code> (<code class="operation-type">string</code>) &mdash; format of the returned regions</li>
+
+
+        <li><code class="operation-parameter">user key</code> (<code class="operation-type">string</code>) &mdash; users token key</li>
+
+
+      </ul>
+
+      <h4>Responses:</h4>
+      <ul class="api-responses">
+        <li>
+          <code class="python-code">['okay', result]</code>
+          &mdash; result consists of
+          <ul class="api-parameters">
+            
+        <li><code class="operation-parameter">regions</code> (<code class="operation-type">string</code>) &mdash; BED formated regions</li>
+
+
+          </ul>
+        </li>
+        <li>
+          <code class="python-code">['error', error_message]</code>
+          &mdash; Error. Verify the error message.
+        </li>
+      </ul>
+    </div>
+
+
+
+    <div class="api-endpoint">
+      <h3 id="api-intersection">intersection</h3>
+
+      <div class="api-description">Calculates the intersection of the given queries.</div>
+
+      <div class="api-header">
+        <code class="operation-name">intersection</code><code class="operation-parameter">(query_a_id, query_b_id, user key)</code>
+      </div>
+
+      <h4>Parameters:</h4>
+      <ul class="api-parameters">
+        
+        <li><code class="operation-parameter">query_a_id</code> (<code class="operation-type">string</code>) &mdash; id of the first query</li>
+
+
+        <li><code class="operation-parameter">query_b_id</code> (<code class="operation-type">string</code>) &mdash; id of the second query</li>
+
+
+        <li><code class="operation-parameter">user key</code> (<code class="operation-type">string</code>) &mdash; users token key</li>
+
+
+      </ul>
+
+      <h4>Responses:</h4>
+      <ul class="api-responses">
+        <li>
+          <code class="python-code">['okay', result]</code>
+          &mdash; result consists of
+          <ul class="api-parameters">
+            
+        <li><code class="operation-parameter">id</code> (<code class="operation-type">string</code>) &mdash; id of the new query</li>
+
+
+          </ul>
+        </li>
+        <li>
+          <code class="python-code">['error', error_message]</code>
+          &mdash; Error. Verify the error message.
+        </li>
+      </ul>
+    </div>
+
+
+
+    <div class="api-endpoint">
+      <h3 id="api-merge_queries">merge_queries</h3>
+
+      <div class="api-description">Merges the regions of the given queries.</div>
+
+      <div class="api-header">
+        <code class="operation-name">merge_queries</code><code class="operation-parameter">(query_a_id, query_b_id, user key)</code>
+      </div>
+
+      <h4>Parameters:</h4>
+      <ul class="api-parameters">
+        
+        <li><code class="operation-parameter">query_a_id</code> (<code class="operation-type">string</code>) &mdash; id of the first query</li>
+
+
+        <li><code class="operation-parameter">query_b_id</code> (<code class="operation-type">string</code>) &mdash; id of the second query</li>
+
+
+        <li><code class="operation-parameter">user key</code> (<code class="operation-type">string</code>) &mdash; users token key</li>
+
+
+      </ul>
+
+      <h4>Responses:</h4>
+      <ul class="api-responses">
+        <li>
+          <code class="python-code">['okay', result]</code>
+          &mdash; result consists of
+          <ul class="api-parameters">
+            
+        <li><code class="operation-parameter">id</code> (<code class="operation-type">string</code>) &mdash; new query id</li>
+
+
+          </ul>
+        </li>
+        <li>
+          <code class="python-code">['error', error_message]</code>
+          &mdash; Error. Verify the error message.
+        </li>
+      </ul>
+    </div>
+
+
+
+    <div class="api-endpoint">
+      <h3 id="api-select_annotations">select_annotations</h3>
+
+      <div class="api-description">Selects annotation regions matching the given parameters.</div>
+
+      <div class="api-header">
+        <code class="operation-name">select_annotations</code><code class="operation-parameter">(annotation_name, genome, chromosome, start, end, user key)</code>
+      </div>
+
+      <h4>Parameters:</h4>
+      <ul class="api-parameters">
+        
+        <li><code class="operation-parameter">annotation_name</code> (<code class="operation-type">string</code>) &mdash; name(s) of selected annotation(s)</li>
+
+
+        <li><code class="operation-parameter">genome</code> (<code class="operation-type">string</code>) &mdash; the target genome</li>
+
+
+        <li><code class="operation-parameter">chromosome</code> (<code class="operation-type">string</code>) &mdash; chromosome name(s)</li>
+
+
+        <li><code class="operation-parameter">start</code> (<code class="operation-type">int</code>) &mdash; minimum start region</li>
+
+
+        <li><code class="operation-parameter">end</code> (<code class="operation-type">int</code>) &mdash; maximum end region</li>
+
+
+        <li><code class="operation-parameter">user key</code> (<code class="operation-type">string</code>) &mdash; users token key</li>
+
+
+      </ul>
+
+      <h4>Responses:</h4>
+      <ul class="api-responses">
+        <li>
+          <code class="python-code">['okay', result]</code>
+          &mdash; result consists of
+          <ul class="api-parameters">
+            
+        <li><code class="operation-parameter">id</code> (<code class="operation-type">string</code>) &mdash; query id</li>
+
+
+          </ul>
+        </li>
+        <li>
+          <code class="python-code">['error', error_message]</code>
+          &mdash; Error. Verify the error message.
+        </li>
+      </ul>
+    </div>
+
+
+
+    <div class="api-endpoint">
+      <h3 id="api-select_regions">select_regions</h3>
+
+      <div class="api-description">Selects experiment regions matching the given parameters.</div>
+
+      <div class="api-header">
+        <code class="operation-name">select_regions</code><code class="operation-parameter">(experiment_name, genome, epigenetic_mark, sample, technique, project, chromosome, start, end, user key)</code>
+      </div>
+
+      <h4>Parameters:</h4>
+      <ul class="api-parameters">
+        
+        <li><code class="operation-parameter">experiment_name</code> (<code class="operation-type">string</code>) &mdash; name(s) of selected experiment(s)</li>
+
+
+        <li><code class="operation-parameter">genome</code> (<code class="operation-type">string</code>) &mdash; the target genome</li>
+
+
+        <li><code class="operation-parameter">epigenetic_mark</code> (<code class="operation-type">string</code>) &mdash; name(s) of selected epigenetic mark(s)</li>
+
+
+        <li><code class="operation-parameter">sample</code> (<code class="operation-type">string</code>) &mdash; id(s) of selected sample(s)</li>
+
+
+        <li><code class="operation-parameter">technique</code> (<code class="operation-type">string</code>) &mdash; name(s) of selected technique(es)</li>
+
+
+        <li><code class="operation-parameter">project</code> (<code class="operation-type">string</code>) &mdash; name(s) of selected projects</li>
+
+
+        <li><code class="operation-parameter">chromosome</code> (<code class="operation-type">string</code>) &mdash; chromosome name(s)</li>
+
+
+        <li><code class="operation-parameter">start</code> (<code class="operation-type">int</code>) &mdash; minimum start region</li>
+
+
+        <li><code class="operation-parameter">end</code> (<code class="operation-type">int</code>) &mdash; maximum end region</li>
+
+
+        <li><code class="operation-parameter">user key</code> (<code class="operation-type">string</code>) &mdash; users token key</li>
+
+
+      </ul>
+
+      <h4>Responses:</h4>
+      <ul class="api-responses">
+        <li>
+          <code class="python-code">['okay', result]</code>
+          &mdash; result consists of
+          <ul class="api-parameters">
+            
+        <li><code class="operation-parameter">id</code> (<code class="operation-type">string</code>) &mdash; query id</li>
+
+
+          </ul>
+        </li>
+        <li>
+          <code class="python-code">['error', error_message]</code>
+          &mdash; Error. Verify the error message.
+        </li>
+      </ul>
+    </div>
+
+
+
+    <div class="api-endpoint">
+      <h3 id="api-tiling_regions">tiling_regions</h3>
+
+      <div class="api-description">Creates regions with the tiling size over the chromosomes.</div>
+
+      <div class="api-header">
+        <code class="operation-name">tiling_regions</code><code class="operation-parameter">(size, genome, chromosome, user key)</code>
+      </div>
+
+      <h4>Parameters:</h4>
+      <ul class="api-parameters">
+        
+        <li><code class="operation-parameter">size</code> (<code class="operation-type">int</code>) &mdash; tiling size</li>
+
+
+        <li><code class="operation-parameter">genome</code> (<code class="operation-type">string</code>) &mdash; the target genome</li>
+
+
+        <li><code class="operation-parameter">chromosome</code> (<code class="operation-type">string</code>) &mdash; chromosome name(s)</li>
+
+
+        <li><code class="operation-parameter">user key</code> (<code class="operation-type">string</code>) &mdash; users token key</li>
+
+
+      </ul>
+
+      <h4>Responses:</h4>
+      <ul class="api-responses">
+        <li>
+          <code class="python-code">['okay', result]</code>
+          &mdash; result consists of
+          <ul class="api-parameters">
+            
+        <li><code class="operation-parameter">id</code> (<code class="operation-type">string</code>) &mdash; query id</li>
+
+
+          </ul>
+        </li>
+        <li>
+          <code class="python-code">['error', error_message]</code>
+          &mdash; Error. Verify the error message.
+        </li>
+      </ul>
+    </div>
+
+
+  </div>
+</section>
+
+<section id="api-projects" class="panel">
+  <header>
+    <h2>Inserting and listing projects</h2>
+  </header>
+  <div class="panel-body">
+
+  
+    <div class="api-endpoint">
+      <h3 id="api-add_project">add_project</h3>
+
+      <div class="api-description">Inserts a new project with the given parameters.</div>
+
+      <div class="api-header">
+        <code class="operation-name">add_project</code><code class="operation-parameter">(name, description, user key)</code>
+      </div>
+
+      <h4>Parameters:</h4>
+      <ul class="api-parameters">
+        
+        <li><code class="operation-parameter">name</code> (<code class="operation-type">string</code>) &mdash; projectname</li>
+
+
+        <li><code class="operation-parameter">description</code> (<code class="operation-type">string</code>) &mdash; description of the project</li>
+
+
+        <li><code class="operation-parameter">user key</code> (<code class="operation-type">string</code>) &mdash; users token key</li>
+
+
+      </ul>
+
+      <h4>Responses:</h4>
+      <ul class="api-responses">
+        <li>
+          <code class="python-code">['okay', result]</code>
+          &mdash; result consists of
+          <ul class="api-parameters">
+            
+        <li><code class="operation-parameter">id</code> (<code class="operation-type">string</code>) &mdash; id of the newly inserted project</li>
+
+
+          </ul>
+        </li>
+        <li>
+          <code class="python-code">['error', error_message]</code>
+          &mdash; Error. Verify the error message.
+        </li>
+      </ul>
+    </div>
+
+
+
+    <div class="api-endpoint">
+      <h3 id="api-list_projects">list_projects</h3>
+
+      <div class="api-description">Lists all existing projects.</div>
+
+      <div class="api-header">
+        <code class="operation-name">list_projects</code><code class="operation-parameter">(user key)</code>
+      </div>
+
+      <h4>Parameters:</h4>
+      <ul class="api-parameters">
+        
+        <li><code class="operation-parameter">user key</code> (<code class="operation-type">string</code>) &mdash; users token key</li>
+
+
+      </ul>
+
+      <h4>Responses:</h4>
+      <ul class="api-responses">
+        <li>
+          <code class="python-code">['okay', result]</code>
+          &mdash; result consists of
+          <ul class="api-parameters">
+            
+        <li><code class="operation-parameter">projects</code> (<code class="operation-type">array</code>) &mdash; project names</li>
+
+
+          </ul>
+        </li>
+        <li>
+          <code class="python-code">['error', error_message]</code>
+          &mdash; Error. Verify the error message.
+        </li>
+      </ul>
+    </div>
+
+
+
+    <div class="api-endpoint">
+      <h3 id="api-list_similar_projects">list_similar_projects</h3>
+
+      <div class="api-description">Lists all projects similar to the one provided.</div>
+
+      <div class="api-header">
+        <code class="operation-name">list_similar_projects</code><code class="operation-parameter">(name, user key)</code>
+      </div>
+
+      <h4>Parameters:</h4>
+      <ul class="api-parameters">
+        
+        <li><code class="operation-parameter">name</code> (<code class="operation-type">string</code>) &mdash; project name</li>
+
+
+        <li><code class="operation-parameter">user key</code> (<code class="operation-type">string</code>) &mdash; users token key</li>
+
+
+      </ul>
+
+      <h4>Responses:</h4>
+      <ul class="api-responses">
+        <li>
+          <code class="python-code">['okay', result]</code>
+          &mdash; result consists of
+          <ul class="api-parameters">
+            
+        <li><code class="operation-parameter">projects</code> (<code class="operation-type">array</code>) &mdash; similar project names</li>
+
+
+          </ul>
+        </li>
+        <li>
+          <code class="python-code">['error', error_message]</code>
+          &mdash; Error. Verify the error message.
+        </li>
+      </ul>
+    </div>
+
+
+  </div>
+</section>
+
+<section id="api-samples" class="panel">
+  <header>
+    <h2>Inserting and listing samples</h2>
+  </header>
+  <div class="panel-body">
+
+  
+    <div class="api-endpoint">
+      <h3 id="api-add_sample">add_sample</h3>
+
+      <div class="api-description">Inserts a new sample with the given parameters.</div>
+
+      <div class="api-header">
+        <code class="operation-name">add_sample</code><code class="operation-parameter">(name, metadata, user key)</code>
+      </div>
+
+      <h4>Parameters:</h4>
+      <ul class="api-parameters">
+        
+        <li><code class="operation-parameter">name</code> (<code class="operation-type">string</code>) &mdash; sample name</li>
+
+
+        <li><code class="operation-parameter">metadata</code> (<code class="operation-type">struct</code>) &mdash; sample metadata</li>
+
+
+        <li><code class="operation-parameter">user key</code> (<code class="operation-type">string</code>) &mdash; users token key</li>
+
+
+      </ul>
+
+      <h4>Responses:</h4>
+      <ul class="api-responses">
+        <li>
+          <code class="python-code">['okay', result]</code>
+          &mdash; result consists of
+          <ul class="api-parameters">
+            
+        <li><code class="operation-parameter">id</code> (<code class="operation-type">string</code>) &mdash; id of the newly inserted sample</li>
+
+
+          </ul>
+        </li>
+        <li>
+          <code class="python-code">['error', error_message]</code>
+          &mdash; Error. Verify the error message.
+        </li>
+      </ul>
+    </div>
+
+
+
+    <div class="api-endpoint">
+      <h3 id="api-add_sample_field">add_sample_field</h3>
+
+      <div class="api-description">Inserts a new sample field with the given parameters.</div>
+
+      <div class="api-header">
+        <code class="operation-name">add_sample_field</code><code class="operation-parameter">(name, type, description, user key)</code>
+      </div>
+
+      <h4>Parameters:</h4>
+      <ul class="api-parameters">
+        
+        <li><code class="operation-parameter">name</code> (<code class="operation-type">string</code>) &mdash; sample field name</li>
+
+
+        <li><code class="operation-parameter">type</code> (<code class="operation-type">string</code>) &mdash; type of the sample field</li>
+
+
+        <li><code class="operation-parameter">description</code> (<code class="operation-type">string</code>) &mdash; description of the sample field</li>
+
+
+        <li><code class="operation-parameter">user key</code> (<code class="operation-type">string</code>) &mdash; users token key</li>
+
+
+      </ul>
+
+      <h4>Responses:</h4>
+      <ul class="api-responses">
+        <li>
+          <code class="python-code">['okay', result]</code>
+          &mdash; result consists of
+          <ul class="api-parameters">
+            
+        <li><code class="operation-parameter">id</code> (<code class="operation-type">string</code>) &mdash; id of the newly inserted sample field</li>
+
+
+          </ul>
+        </li>
+        <li>
+          <code class="python-code">['error', error_message]</code>
+          &mdash; Error. Verify the error message.
+        </li>
+      </ul>
+    </div>
+
+
+
+    <div class="api-endpoint">
+      <h3 id="api-get_samples">get_samples</h3>
+
+      <div class="api-description">Gets the samples matching the bio source and optional meta data.</div>
+
+      <div class="api-header">
+        <code class="operation-name">get_samples</code><code class="operation-parameter">(bio_source, metadata, user key)</code>
+      </div>
+
+      <h4>Parameters:</h4>
+      <ul class="api-parameters">
+        
+        <li><code class="operation-parameter">bio_source</code> (<code class="operation-type">string</code>) &mdash; the bio source name</li>
+
+
+        <li><code class="operation-parameter">metadata</code> (<code class="operation-type">struct</code>) &mdash; data the searched sample matches</li>
+
+
+        <li><code class="operation-parameter">user key</code> (<code class="operation-type">string</code>) &mdash; users token key</li>
+
+
+      </ul>
+
+      <h4>Responses:</h4>
+      <ul class="api-responses">
+        <li>
+          <code class="python-code">['okay', result]</code>
+          &mdash; result consists of
+          <ul class="api-parameters">
+            
+        <li><code class="operation-parameter">samples</code> (<code class="operation-type">array</code>) &mdash; matching samples</li>
+
+
+          </ul>
+        </li>
+        <li>
+          <code class="python-code">['error', error_message]</code>
+          &mdash; Error. Verify the error message.
+        </li>
+      </ul>
+    </div>
+
+
+
+    <div class="api-endpoint">
+      <h3 id="api-list_samples">list_samples</h3>
+
+      <div class="api-description">Lists all existing samples.</div>
+
+      <div class="api-header">
+        <code class="operation-name">list_samples</code><code class="operation-parameter">(user key)</code>
+      </div>
+
+      <h4>Parameters:</h4>
+      <ul class="api-parameters">
+        
+        <li><code class="operation-parameter">user key</code> (<code class="operation-type">string</code>) &mdash; users token key</li>
+
+
+      </ul>
+
+      <h4>Responses:</h4>
+      <ul class="api-responses">
+        <li>
+          <code class="python-code">['okay', result]</code>
+          &mdash; result consists of
+          <ul class="api-parameters">
+            
+        <li><code class="operation-parameter">samples</code> (<code class="operation-type">array</code>) &mdash; sample names</li>
+
+
+          </ul>
+        </li>
+        <li>
+          <code class="python-code">['error', error_message]</code>
+          &mdash; Error. Verify the error message.
+        </li>
+      </ul>
+    </div>
+
+
+
+    <div class="api-endpoint">
+      <h3 id="api-list_similar_samples">list_similar_samples</h3>
+
+      <div class="api-description">Lists all samples similar to the one provided.</div>
+
+      <div class="api-header">
+        <code class="operation-name">list_similar_samples</code><code class="operation-parameter">(name, user key)</code>
+      </div>
+
+      <h4>Parameters:</h4>
+      <ul class="api-parameters">
+        
+        <li><code class="operation-parameter">name</code> (<code class="operation-type">string</code>) &mdash; sample name</li>
+
+
+        <li><code class="operation-parameter">user key</code> (<code class="operation-type">string</code>) &mdash; users token key</li>
+
+
+      </ul>
+
+      <h4>Responses:</h4>
+      <ul class="api-responses">
+        <li>
+          <code class="python-code">['okay', result]</code>
+          &mdash; result consists of
+          <ul class="api-parameters">
+            
+        <li><code class="operation-parameter">samples</code> (<code class="operation-type">array</code>) &mdash; similiar sample names</li>
+
+
+          </ul>
+        </li>
+        <li>
+          <code class="python-code">['error', error_message]</code>
+          &mdash; Error. Verify the error message.
+        </li>
+      </ul>
+    </div>
+
+
+  </div>
+</section>
+
+<section id="api-status" class="panel">
+  <header>
+    <h2>Checking Deep Blue status</h2>
+  </header>
+  <div class="panel-body">
+
+  
+    <div class="api-endpoint">
+      <h3 id="api-dummy">dummy</h3>
+
+      <div class="api-description">some description</div>
+
+      <div class="api-header">
+        <code class="operation-name">dummy</code><code class="operation-parameter">(parameter name)</code>
+      </div>
+
+      <h4>Parameters:</h4>
+      <ul class="api-parameters">
+        
+        <li><code class="operation-parameter">parameter name</code> (<code class="operation-type">string</code>) &mdash; some parameter description</li>
+
+
+      </ul>
+
+      <h4>Responses:</h4>
+      <ul class="api-responses">
+        <li>
+          <code class="python-code">['okay', result]</code>
+          &mdash; result consists of
+          <ul class="api-parameters">
+            
+        <li><code class="operation-parameter">result</code> (<code class="operation-type">string</code>) &mdash; some result description</li>
+
+
+          </ul>
+        </li>
+        <li>
+          <code class="python-code">['error', error_message]</code>
+          &mdash; Error. Verify the error message.
+        </li>
+      </ul>
+    </div>
+
+
+
+    <div class="api-endpoint">
+      <h3 id="api-echo">echo</h3>
+
+      <div class="api-description">Echos the server's version.</div>
+
+      <div class="api-header">
+        <code class="operation-name">echo</code><code class="operation-parameter">(user key)</code>
+      </div>
+
+      <h4>Parameters:</h4>
+      <ul class="api-parameters">
+        
+        <li><code class="operation-parameter">user key</code> (<code class="operation-type">string</code>) &mdash; users token key</li>
+
+
+      </ul>
+
+      <h4>Responses:</h4>
+      <ul class="api-responses">
+        <li>
+          <code class="python-code">['okay', result]</code>
+          &mdash; result consists of
+          <ul class="api-parameters">
+            
+        <li><code class="operation-parameter">message</code> (<code class="operation-type">string</code>) &mdash; echo message including version</li>
+
+
+          </ul>
+        </li>
+        <li>
+          <code class="python-code">['error', error_message]</code>
+          &mdash; Error. Verify the error message.
+        </li>
+      </ul>
+    </div>
+
+
+
+    <div class="api-endpoint">
+      <h3 id="api-list_commands">list_commands</h3>
+
+      <div class="api-description">Lists all existing commands.</div>
+
+      <div class="api-header">
+        <code class="operation-name">list_commands</code><code class="operation-parameter">()</code>
+      </div>
+
+      <h4>Parameters:</h4>
+      <ul class="api-parameters">
+        
+      </ul>
+
+      <h4>Responses:</h4>
+      <ul class="api-responses">
+        <li>
+          <code class="python-code">['okay', result]</code>
+          &mdash; result consists of
+          <ul class="api-parameters">
+            
+        <li><code class="operation-parameter">commands</code> (<code class="operation-type">struct</code>) &mdash; command descriptions</li>
+
+
+          </ul>
+        </li>
+        <li>
+          <code class="python-code">['error', error_message]</code>
+          &mdash; Error. Verify the error message.
+        </li>
+      </ul>
+    </div>
+
+
+
+    <div class="api-endpoint">
+      <h3 id="api-test_types">test_types</h3>
+
+      <div class="api-description">Debugging command to test type serialization.</div>
+
+      <div class="api-header">
+        <code class="operation-name">test_types</code><code class="operation-parameter">(string, int, double, bool, list, map)</code>
+      </div>
+
+      <h4>Parameters:</h4>
+      <ul class="api-parameters">
+        
+        <li><code class="operation-parameter">string</code> (<code class="operation-type">string</code>) &mdash; </li>
+
+
+        <li><code class="operation-parameter">int</code> (<code class="operation-type">int</code>) &mdash; </li>
+
+
+        <li><code class="operation-parameter">double</code> (<code class="operation-type">double</code>) &mdash; </li>
+
+
+        <li><code class="operation-parameter">bool</code> (<code class="operation-type">boolean</code>) &mdash; </li>
+
+
+        <li><code class="operation-parameter">list</code> (<code class="operation-type">array</code>) &mdash; </li>
+
+
+        <li><code class="operation-parameter">map</code> (<code class="operation-type">struct</code>) &mdash; </li>
+
+
+      </ul>
+
+      <h4>Responses:</h4>
+      <ul class="api-responses">
+        <li>
+          <code class="python-code">['okay', result]</code>
+          &mdash; result consists of
+          <ul class="api-parameters">
+            
+        <li><code class="operation-parameter">string</code> (<code class="operation-type">string</code>) &mdash; </li>
+
+
+        <li><code class="operation-parameter">int</code> (<code class="operation-type">int</code>) &mdash; </li>
+
+
+        <li><code class="operation-parameter">double</code> (<code class="operation-type">double</code>) &mdash; </li>
+
+
+        <li><code class="operation-parameter">bool</code> (<code class="operation-type">boolean</code>) &mdash; </li>
+
+
+        <li><code class="operation-parameter">list</code> (<code class="operation-type">array</code>) &mdash; </li>
+
+
+        <li><code class="operation-parameter">map</code> (<code class="operation-type">struct</code>) &mdash; </li>
+
+
+          </ul>
+        </li>
+        <li>
+          <code class="python-code">['error', error_message]</code>
+          &mdash; Error. Verify the error message.
+        </li>
+      </ul>
+    </div>
+
+
+  </div>
+</section>
+
+<section id="api-techniques" class="panel">
+  <header>
+    <h2>Inserting and listing techniques</h2>
+  </header>
+  <div class="panel-body">
+
+  
+    <div class="api-endpoint">
+      <h3 id="api-add_technique">add_technique</h3>
+
+      <div class="api-description">Inserts a technique with the given parameters.</div>
+
+      <div class="api-header">
+        <code class="operation-name">add_technique</code><code class="operation-parameter">(name, description, extra_metadata, user key)</code>
+      </div>
+
+      <h4>Parameters:</h4>
+      <ul class="api-parameters">
+        
+        <li><code class="operation-parameter">name</code> (<code class="operation-type">string</code>) &mdash; technique name</li>
+
+
+        <li><code class="operation-parameter">description</code> (<code class="operation-type">string</code>) &mdash; description of technique</li>
+
+
+        <li><code class="operation-parameter">extra_metadata</code> (<code class="operation-type">struct</code>) &mdash; additional metadata</li>
+
+
+        <li><code class="operation-parameter">user key</code> (<code class="operation-type">string</code>) &mdash; users token key</li>
+
+
+      </ul>
+
+      <h4>Responses:</h4>
+      <ul class="api-responses">
+        <li>
+          <code class="python-code">['okay', result]</code>
+          &mdash; result consists of
+          <ul class="api-parameters">
+            
+        <li><code class="operation-parameter">id</code> (<code class="operation-type">string</code>) &mdash; id of the newly inserted technique</li>
+
+
+          </ul>
+        </li>
+        <li>
+          <code class="python-code">['error', error_message]</code>
+          &mdash; Error. Verify the error message.
+        </li>
+      </ul>
+    </div>
+
+
+
+    <div class="api-endpoint">
+      <h3 id="api-list_similar_techniques">list_similar_techniques</h3>
+
+      <div class="api-description">Lists all techniques similar to the one provided.</div>
+
+      <div class="api-header">
+        <code class="operation-name">list_similar_techniques</code><code class="operation-parameter">(name, user key)</code>
+      </div>
+
+      <h4>Parameters:</h4>
+      <ul class="api-parameters">
+        
+        <li><code class="operation-parameter">name</code> (<code class="operation-type">string</code>) &mdash; technique name</li>
+
+
+        <li><code class="operation-parameter">user key</code> (<code class="operation-type">string</code>) &mdash; users token key</li>
+
+
+      </ul>
+
+      <h4>Responses:</h4>
+      <ul class="api-responses">
+        <li>
+          <code class="python-code">['okay', result]</code>
+          &mdash; result consists of
+          <ul class="api-parameters">
+            
+        <li><code class="operation-parameter">techniques</code> (<code class="operation-type">array</code>) &mdash; similar techniques</li>
+
+
+          </ul>
+        </li>
+        <li>
+          <code class="python-code">['error', error_message]</code>
+          &mdash; Error. Verify the error message.
+        </li>
+      </ul>
+    </div>
+
+
+
+    <div class="api-endpoint">
+      <h3 id="api-list_techniques">list_techniques</h3>
+
+      <div class="api-description">Lists all existing techniques.</div>
+
+      <div class="api-header">
+        <code class="operation-name">list_techniques</code><code class="operation-parameter">(user key)</code>
+      </div>
+
+      <h4>Parameters:</h4>
+      <ul class="api-parameters">
+        
+        <li><code class="operation-parameter">user key</code> (<code class="operation-type">string</code>) &mdash; users token key</li>
+
+
+      </ul>
+
+      <h4>Responses:</h4>
+      <ul class="api-responses">
+        <li>
+          <code class="python-code">['okay', result]</code>
+          &mdash; result consists of
+          <ul class="api-parameters">
+            
+        <li><code class="operation-parameter">techniques</code> (<code class="operation-type">array</code>) &mdash; techniques</li>
+
+
+          </ul>
+        </li>
+        <li>
+          <code class="python-code">['error', error_message]</code>
+          &mdash; Error. Verify the error message.
+        </li>
+      </ul>
+    </div>
+
+
+  </div>
+</section>
+
+
+</div>
+
+<footer id="main-footer" class="content-container">
+<span>&copy; 2014 Max-Planck-Institut Informatik</span>
+<a href="about.html">About</a>
+</footer>
+
+<!--[if lt IE 9]>
+</div>
+<![endif]-->
+</body>
+</html>
