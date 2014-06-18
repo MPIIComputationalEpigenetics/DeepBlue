@@ -98,6 +98,20 @@ namespace epidb {
             return false;
           }
           builder.append(name, d);
+        } else if (column_type->type() == dba::columns::COLUMN_CATEGORY) {
+          builder.append(name, token);
+        } else if (column_type->type() == dba::columns::COLUMN_RANGE) {
+          double d;
+          if (!utils::string_to_double(token, d)) {
+            msg = "The field '" + field_name + "' is a double, but the value '" + token + "' is not a valid integer.";
+            return false;
+          }
+          builder.append(name, d);
+        } else {
+          std::string err = "Invalid column type: " + column_type->str();
+          EPIDB_LOG_ERR(err);
+          msg = err;
+          return false;
         }
 
         if (!start_found && field_name == "START") {
