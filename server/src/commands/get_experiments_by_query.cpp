@@ -24,7 +24,7 @@ namespace epidb {
 
       private:
         static CommandDescription desc_() {
-          return CommandDescription(categories::OPERATIONS, "Gets the regions for the given query in the requested BED format.");
+          return CommandDescription(categories::OPERATIONS, "Return a list of experiments and annotations that have at least one region in the data set represented by the query.");
         }
 
         static Parameters parameters_() {
