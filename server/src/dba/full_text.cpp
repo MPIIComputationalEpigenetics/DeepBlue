@@ -25,6 +25,9 @@
 #include "helpers.hpp"
 #include "full_text.hpp"
 
+#include "../errors.hpp"
+#include "../log.hpp"
+
 namespace epidb {
   namespace dba {
     namespace search {
@@ -88,12 +91,15 @@ namespace epidb {
         }
 
         if (type == "experiments" || type == "samples") {
-          std::string bio_source_name = data["bio_source_name"].str();
+          std::string norm_bio_source_name = data["norm_bio_source_name"].str();
           std::auto_ptr<mongo::DBClientCursor> cursor = c->query(helpers::collection_name(Collections::TEXT_SEARCH()),
-              mongo::fromjson("{\"name\": \"" + bio_source_name + "\", \"type\": \"bio_sources\"}"));
+              mongo::fromjson("{\"norm_name\": \"" + norm_bio_source_name + "\", \"type\": \"bio_sources\"}"));
 
           if (!cursor->more()) {
-            msg = "Unable to find bio source " + bio_source_name;
+            std::string s = Error::m(ERR_DATABASE_INVALID_BIO_SOURCE, norm_bio_source_name.c_str());
+            EPIDB_LOG_TRACE(s);
+            msg = s;
+            return false;
           }
 
           mongo::BSONObj bio_source = cursor->next().getOwned();
@@ -106,10 +112,7 @@ namespace epidb {
         create_text_search_builder.append("type", type);
         mongo::BSONObj q = create_text_search_builder.obj();
 
-        std::cerr << "q: " << q.toString() << std::endl;
-
         c->insert(helpers::collection_name(Collections::TEXT_SEARCH()), q);
-
         if (!c->getLastError().empty()) {
           msg = c->getLastError();
           c.done();
