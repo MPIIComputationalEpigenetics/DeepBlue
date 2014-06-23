@@ -19,6 +19,9 @@
 #include "helpers.hpp"
 #include "full_text.hpp"
 
+#include "../errors.hpp"
+#include "../log.hpp"
+
 namespace epidb {
   namespace dba {
     namespace cv {
@@ -395,7 +398,10 @@ namespace epidb {
         }
 
         if (is_connected) {
-          msg = bio_source_more_embracing + " is already more embracing than " + bio_source_less_embracing + ".";
+          std::string e = Error::m(ERR_MORE_EMBRACING_BIO_SOURCE_NAME,
+                                   bio_source_more_embracing.c_str(), bio_source_less_embracing.c_str());
+          EPIDB_LOG_TRACE(e);
+          msg = e;
           return false;
         }
 
@@ -404,7 +410,10 @@ namespace epidb {
         }
 
         if (is_connected) {
-          msg = bio_source_less_embracing + " is already more embracing than " + bio_source_more_embracing + ".";
+          std::string e = Error::m(ERR_MORE_EMBRACING_BIO_SOURCE_NAME,
+                                   bio_source_less_embracing.c_str(), bio_source_more_embracing.c_str());
+          EPIDB_LOG_TRACE(e);
+          msg = e;
           return false;
         }
 

@@ -40,6 +40,7 @@
 #include "retrieve.hpp"
 #include "info.hpp"
 
+#include "../errors.hpp"
 #include "../regions.hpp"
 #include "../log.hpp"
 
@@ -724,9 +725,9 @@ namespace epidb {
         return false;
       }
       if (exists) {
-        std::stringstream ss;
-        ss << "bio_source name '" << name << "' already exists.";
-        msg = ss.str();
+        std::string e = Error::m(ERR_DUPLICATED_BIO_SOURCE_NAME, name.c_str());
+        EPIDB_LOG_TRACE(e);
+        msg = e;
         return false;
       }
       return true;

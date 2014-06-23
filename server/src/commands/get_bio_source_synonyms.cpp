@@ -14,6 +14,9 @@
 
 #include "../engine/commands.hpp"
 
+#include "../log.hpp"
+#include "../errors.hpp"
+
 namespace epidb {
   namespace command {
 
@@ -85,11 +88,9 @@ namespace epidb {
         }
 
         if (!(is_bio_source || !is_syn)) {
-          std::stringstream ss;
-          ss << "Invalid bio_source name: ";
-          ss << bio_source_name ;
-          ss << ". The given bio_source name was not registred.";
-          result.add_error(ss.str());
+          std::string s = Error::m(ERR_INVALID_BIO_SOURCE_NAME, bio_source_name.c_str());
+          EPIDB_LOG_TRACE(s);
+          result.add_error(s);
           return false;
         }
 

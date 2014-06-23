@@ -7,7 +7,7 @@ EXE	= server
 COMMANDS = $(wildcard commands/*.cpp)
 COMMANDS_OBJS = $(COMMANDS:.cpp=.o)
 
-OBJS	= main.o version.o regions.o
+OBJS	= main.o version.o regions.o errors.o
 OBJLIBS	= $(COMMANDS_OBJS) libhttpd.a libdba.a libparser.a libengine.a libextras.a libalgorithms.a
 
 CXXFLAGS	= $(DEFCXXFLAGS)
