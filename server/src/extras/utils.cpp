@@ -144,7 +144,7 @@ namespace epidb {
         char c = *it;
         if (isalnum(c)) {
           out += tolower(c);
-        } if (c == '+' || c == '-') {
+        } if (c == '+') {
           out += c;
         }
       }
