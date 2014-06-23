@@ -15,6 +15,7 @@
 #include "xmlrpc_request.hpp"
 
 #include "../engine/engine.hpp"
+#include "../errors.hpp"
 #include "../log.hpp"
 
 namespace epidb {
@@ -32,11 +33,12 @@ namespace epidb {
 
       catch (const mongo::UserException& e) {
         std::string s(e.what());
-        EPIDB_LOG_ERR("Database exception on command " << request.method_name() << ": " << s);
+        std::string err = Error::m(ERR_DATABASE_EXCEPTION, request.method_name().c_str(), e.what());
+        EPIDB_LOG_ERR(err);
         okay = false;
         // overwrite with clear result
         result = serialize::Parameters();
-        result.add_string("database server error" + s);
+        result.add_string(err);
       }
       catch (const std::exception& e) {
         std::string s(e.what());
