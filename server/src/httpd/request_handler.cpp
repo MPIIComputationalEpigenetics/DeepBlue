@@ -77,20 +77,26 @@ namespace epidb {
         if (len == 8192 || done) {
           if (!parser.parse(buf, len)) {
             error = true;
-            EPIDB_LOG("request from " << request.ip << ": parsing error.");
-            return XmlrpcResponse::error_response("parsing error");
+            EPIDB_LOG("[1] request from " << request.ip << ": parsing error.");
+            return XmlrpcResponse::error_response("[1] parsing error");
           }
           if (done) {
             if(!parser.done(xmlrpc_request)) {
               error = true;
-              EPIDB_LOG("request from " << request.ip << ": parsing error.");
-              return XmlrpcResponse::error_response("parsing error on done");
+              EPIDB_LOG("[2] request from " << request.ip << ": parsing error.");
+              return XmlrpcResponse::error_response("[2] parsing error on done");
             }
             break;
           }
           len = 0;
         }
       }
+
+      if (!xmlrpc_request) {
+        EPIDB_LOG("[3] request from " << request.ip << ": parsing error.");
+        return XmlrpcResponse::error_response("[3] Error rarsing the request data.");
+      }
+
       xmlrpc_request->set_ip(request.ip);
       xmlrpc_request->set_id(request.id_);
 

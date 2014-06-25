@@ -242,6 +242,10 @@ namespace epidb {
         }
         // otherwise hand the top level param to the request
         else {
+          if (!self->request_) {
+            self->error_ = true;
+            return;
+          }
           self->request_->params().add_param(last_param);
         }
 
