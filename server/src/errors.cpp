@@ -6,6 +6,7 @@
 //  Copyright (c) 2013,2014 Max Planck Institute for Computer Science. All rights reserved.
 //
 
+#include <cstdarg>
 #include <cstdio>
 #include <sstream>
 #include <string>

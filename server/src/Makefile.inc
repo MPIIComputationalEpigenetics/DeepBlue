@@ -25,6 +25,7 @@ ifeq ($(host),production)
  BOOST_DIR = /opt/mongodb/boost/lib
  DEFCXXFLAGS = -Wall -O3 -Ofast -I/opt/mongodb/boost/include/ -I/opt/mongodb/driver/include/
  BOOSTLIBS = $(BOOST_DIR)/libboost_filesystem.a $(BOOST_DIR)/libboost_thread.a $(BOOST_DIR)/libboost_system.a $(BOOST_DIR)/libboost_regex.a $(BOOST_DIR)/libboost_log.a  $(BOOST_DIR)/libboost_timer.a  $(BOOST_DIR)/libboost_chrono.a -lrt
+ THIRDLIBS = ../third_party/libexpat_linux.a
 endif
 
 # Felipe Albrecht's mac
@@ -36,10 +37,10 @@ ifeq ($(host),macosx)
  LDFLAGS = -g
  MONGOLIBS =  -L/Users/albrecht/mpi/epidb/epidb/mongo/driver/macosx/lib -lmongoclient
  BOOSTLIBS = $(BOOST_DIR)/libboost_filesystem.a $(BOOST_DIR)/libboost_thread.a $(BOOST_DIR)/libboost_system.a $(BOOST_DIR)/libboost_regex.a $(BOOST_DIR)/libboost_log.a  $(BOOST_DIR)/libboost_timer.a  $(BOOST_DIR)/libboost_chrono.a
+ THIRDLIBS = ../third_party/libexpat_macosx.a
 endif
 
 DEFLIBS = $(MONGOLIBS) $(BOOSTLIBS)
-THIRDLIBS = ../third_party/libexpat_macosx.a
 
 AR	= ar
 ARFLAGS	=
