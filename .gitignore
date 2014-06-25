@@ -32,5 +32,5 @@
 
 
 # DeepBlue binary
-server
+server/src/server
 api_auto.html
