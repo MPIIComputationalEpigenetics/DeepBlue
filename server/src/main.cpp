@@ -40,6 +40,7 @@ int main(int argc, char *argv[])
   std::string port;
   size_t threads;
   std::string mongodb_server;
+  std::string database_name;
 
   // Declare the supported options.
   po::options_description desc("DeepBlue Command Line Parameters");
@@ -48,7 +49,8 @@ int main(int argc, char *argv[])
   ("address,A", po::value<std::string>(&address)->default_value("localhost"), "local address")
   ("port,P", po::value<std::string>(&port)->default_value("31415"), "local port")
   ("threads,T", po::value<size_t>(&threads)->default_value(10), "number of concurrent requests")
-  ("mongodb,M", po::value<std::string>(&mongodb_server)->default_value("127.0.0.1:27017"), "local port")
+  ("mongodb,M", po::value<std::string>(&mongodb_server)->default_value("127.0.0.1:27017"), "MongoDB address and port")
+  ("database_name,D", po::value<std::string>(&database_name)->default_value("epidb"), "Database Name")
   ("nosharding", "do not use sharding in the mongodb")
   ;
 

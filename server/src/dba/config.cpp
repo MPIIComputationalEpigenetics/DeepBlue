@@ -79,6 +79,8 @@ namespace epidb {
       {
         mongo::ScopedDbConnection c(config::get_mongodb_server());
 
+        bool b(false);
+
         mongo::Query q = mongo::Query().sort("_id");
         std::auto_ptr<mongo::DBClientCursor> cursor  = c->query("config.shards", q);
         while  (cursor->more()) {
@@ -99,6 +101,11 @@ namespace epidb {
           }
 
           EPIDB_LOG_DBG("Shard tag: " << shard << " set" );
+          b = true;
+        }
+
+        if (!b) {
+          EPIDB_LOG_WARN("No shards were found in the MongoDB instance [" << config::get_mongodb_server() << "]");
         }
 
         c.done();
