@@ -30,8 +30,6 @@ namespace epidb {
 
   void Command::init()
   {
-    EPIDB_LOG_DBG("Loading command " << name_);
-
     if ( commands_ == 0 ) {
       commands_ = new std::map<std::string, Command *>;
     }
