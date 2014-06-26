@@ -148,7 +148,7 @@ namespace epidb {
 
     bool set_user_admin(const std::string &user_id, const bool value, std::string &msg)
     {
-      mongo::BSONObj o = BSON("findandmodify" << "users" <<
+      mongo::BSONObj o = BSON("findandmodify" << Collections::USERS() <<
                               "query" << BSON("_id" << user_id) <<
                               "update" << BSON("$set" << BSON("admin" << value)));
 
