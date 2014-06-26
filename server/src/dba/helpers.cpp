@@ -287,7 +287,7 @@ namespace epidb {
           mongo::BSONObjBuilder b;
           b.append("_id", name);
           b.append("seq", 0);
-          c->insert("epidb.counters", b.obj());
+          c->insert(helpers::collection_name(Collections::COUNTERS()), b.obj());
           if (!c->getLastError().empty()) {
             msg = c->getLastError();
             c.done();
@@ -296,7 +296,7 @@ namespace epidb {
         }
 
         mongo::BSONObj fnm_obj =
-          BSON("findandmodify" << "counters" <<
+          BSON("findandmodify" << Collections::COUNTERS() <<
                "query" << BSON("_id" << name) <<
                "update" << BSON("$inc" << BSON("seq" << 1)) <<
                "new" << true);
