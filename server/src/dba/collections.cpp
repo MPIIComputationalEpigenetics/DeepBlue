@@ -169,5 +169,12 @@ namespace epidb {
       return settings;
     }
 
+    const std::string &Collections::KEY_MAPPER()
+    {
+      static std::string settings("key_mapper");
+      return settings;
+    }
+
+
   }
 }

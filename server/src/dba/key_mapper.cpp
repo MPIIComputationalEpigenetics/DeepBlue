@@ -16,6 +16,8 @@
 
 #include "key_mapper.hpp"
 #include "config.hpp"
+#include "helpers.hpp"
+#include "collections.hpp"
 #include "../log.hpp"
 
 
@@ -80,7 +82,7 @@ namespace epidb {
       mongo::BSONObjBuilder b;
       b.append("s", s);
       b.append("l", l);
-      c->insert("epidb.key_mapper", b.obj());
+      c->insert(helpers::collection_name(Collections::KEY_MAPPER()), b.obj());
       // TODO: handle error
       mongo::BSONObj err = c->getLastErrorDetailed();
       c.done();

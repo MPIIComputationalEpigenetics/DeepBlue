@@ -45,6 +45,7 @@ namespace epidb {
       static const std::string &TEXT_SEARCH();
       static const std::string &SETTINGS();
       static const std::string &COUNTERS();
+      static const std::string &KEY_MAPPER();
     };
   }
 }
