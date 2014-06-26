@@ -24,7 +24,8 @@ namespace epidb {
       size_t chunk_size();
       void set_chunk_size(size_t);
       bool check_mongodb(std::string &msg);
-      std::string DATABASE_NAME();
+      void set_database_name(const std::string &name);
+      const std::string DATABASE_NAME();
     }
   }
 }

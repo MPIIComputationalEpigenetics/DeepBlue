@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
   ("threads,T", po::value<size_t>(&threads)->default_value(10), "Number of concurrent requests")
   ("mongodb,M", po::value<std::string>(&mongodb_server)->default_value("127.0.0.1:27017"), "MongoDB address and port")
   ("database_name,D", po::value<std::string>(&database_name)->default_value("epidb"), "Database Name")
-  ("nosharding", "do not use sharding in the mongodb")
+  ("nosharding,X", "do not use sharding in the mongodb")
   ;
 
   po::variables_map vm;
@@ -73,6 +73,7 @@ int main(int argc, char *argv[])
 
   epidb::dba::config::set_sharding(!vm.count("nosharding"));
   epidb::dba::config::set_mongodb_server(mongodb_server);
+  epidb::dba::config::set_database_name(database_name);
 
   std::string msg;
   if (!epidb::dba::config::check_mongodb(msg)) {

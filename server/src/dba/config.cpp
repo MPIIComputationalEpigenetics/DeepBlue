@@ -40,7 +40,7 @@ namespace epidb {
         return mongodb_server;
       }
 
-      void set_database(const std::string &name)
+      void set_database_name(const std::string &name)
       {
         database_name = name;
       }
