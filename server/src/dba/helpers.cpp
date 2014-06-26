@@ -47,7 +47,7 @@ namespace epidb {
       }
 
 
-      // --- 
+      // ---
       bool get(const std::string &where,
                std::vector<std::string> &result, std::string &msg)
       {
@@ -204,7 +204,7 @@ namespace epidb {
         }
 
         id = results[0]["_id"].str();
-        
+
         return true;
       }
 
@@ -302,7 +302,7 @@ namespace epidb {
                "new" << true);
 
         mongo::BSONObj info;
-        bool result = c->runCommand("epidb", fnm_obj, info);
+        bool result = c->runCommand(dba::DATABASE_NAME, fnm_obj, info);
         if (!result) {
           // TODO: get info error
           msg = "error in generate the counter '" + name + "'.";

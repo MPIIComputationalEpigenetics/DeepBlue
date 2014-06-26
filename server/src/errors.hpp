@@ -29,6 +29,7 @@ namespace epidb {
 
 	extern Error ERR_DUPLICATED_EPIGENETIC_MARK_NAME;
 
+	extern Error ERR_DATABASE_CONNECTION;
 	extern Error ERR_DATABASE_EXCEPTION;
 	extern Error ERR_DATABASE_INVALID_BIO_SOURCE;
 }

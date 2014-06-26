@@ -15,6 +15,9 @@
 
 #include "config.hpp"
 
+#include "dba.hpp"
+
+#include "../errors.hpp"
 #include "../log.hpp"
 
 namespace epidb {
@@ -58,10 +61,23 @@ namespace epidb {
         chunk_size_value = size;
       }
 
+      bool check_mongodb(std::string &msg)
+      {
+        try {
+          bool ret;
+          if (!is_initialized(ret, msg)) {
+            return false;
+          }
+          return !ret;
+        } catch (const std::exception &e) {
+          msg = Error::m(ERR_DATABASE_CONNECTION, e.what());
+          return false;
+        }
+      }
+
       bool set_shards_tags()
       {
         mongo::ScopedDbConnection c(config::get_mongodb_server());
-
 
         mongo::Query q = mongo::Query().sort("_id");
         std::auto_ptr<mongo::DBClientCursor> cursor  = c->query("config.shards", q);
@@ -74,8 +90,8 @@ namespace epidb {
 
           mongo::BSONObj info;
           mongo::BSONObj findandmodify = BSON("findandmodify" << "shards" <<
-                                  "query" << BSON("_id" << shard) <<
-                                  "update" << BSON("$addToSet" << BSON("tags" << shard)));
+                                              "query" << BSON("_id" << shard) <<
+                                              "update" << BSON("$addToSet" << BSON("tags" << shard)));
 
           if (!c->runCommand("config", findandmodify, info)) {
             EPIDB_LOG_ERR("Problem while setting shard tag ' << " << shard << " for shard " << shard << ":" << info.toString());

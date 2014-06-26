@@ -40,6 +40,7 @@
   * 000 - Invalid/Non-Existent
   * 001 - Duplicated
   *
+  * 555 - Connection Error
   * 666 - Internal Error
   *
   * // Controlled vocabulary errors
@@ -69,6 +70,7 @@ namespace epidb {
 
   Error ERR_DUPLICATED_EPIGENETIC_MARK_NAME("105001", "Duplicated Epigenetic Mark Name '%s'." );
 
+  Error ERR_DATABASE_CONNECTION("466555", "Database connection error: '%s'.");
   Error ERR_DATABASE_EXCEPTION("466666", "Database exception at operation '%s': '%s'.");
   Error ERR_DATABASE_INVALID_BIO_SOURCE("404666", "Bio Source '%s' not found.");
 };

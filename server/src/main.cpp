@@ -62,10 +62,13 @@ int main(int argc, char *argv[])
   }
 
   epidb::dba::config::set_sharding(!vm.count("nosharding"));
-
-  epidb::httpd::server s(address, port, threads);
-
   epidb::dba::config::set_mongodb_server(mongodb_server);
+
+  std::string msg;
+  if (!epidb::dba::config::check_mongodb(msg)) {
+    EPIDB_LOG_ERR(msg);
+    return 1;
+  }
 
   if (epidb::dba::config::sharding()) {
     EPIDB_LOG("Configuring MongoDB Sharding [" << std::string(mongodb_server) << "]");
@@ -73,6 +76,7 @@ int main(int argc, char *argv[])
   }
 
   EPIDB_LOG("Starting DeepBlue Epigenomics Data Server ");
+  epidb::httpd::server s(address, port, threads);
   s.run();
 
   return 0;
