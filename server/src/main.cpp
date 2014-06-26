@@ -46,22 +46,30 @@ int main(int argc, char *argv[])
   po::options_description desc("DeepBlue Command Line Parameters");
   desc.add_options()
   ("help,H", "produce help message")
-  ("address,A", po::value<std::string>(&address)->default_value("localhost"), "local address")
-  ("port,P", po::value<std::string>(&port)->default_value("31415"), "local port")
-  ("threads,T", po::value<size_t>(&threads)->default_value(10), "number of concurrent requests")
+  ("address,A", po::value<std::string>(&address)->default_value("localhost"), "Local address")
+  ("port,P", po::value<std::string>(&port)->default_value("31415"), "Local port")
+  ("threads,T", po::value<size_t>(&threads)->default_value(10), "Number of concurrent requests")
   ("mongodb,M", po::value<std::string>(&mongodb_server)->default_value("127.0.0.1:27017"), "MongoDB address and port")
   ("database_name,D", po::value<std::string>(&database_name)->default_value("epidb"), "Database Name")
   ("nosharding", "do not use sharding in the mongodb")
   ;
 
   po::variables_map vm;
-  po::store(po::parse_command_line(argc, argv, desc), vm);
-  po::notify(vm);
+  try {
+    po::store(po::parse_command_line(argc, argv, desc), vm);
+    po::notify(vm);
+  } catch (const boost::program_options::error &e) {
+    EPIDB_LOG_ERR(e.what());
+    return 1;
+  }
 
   if (vm.count("help")) {
     std::cout << desc << "\n";
     return 1;
   }
+
+  EPIDB_LOG("Executing DeepBlue at " << address << ":" << port << " with " << threads << " threads.");
+  EPIDB_LOG("Connecting to MongoDB server " << mongodb_server << " and using database " << database_name << ".")
 
   epidb::dba::config::set_sharding(!vm.count("nosharding"));
   epidb::dba::config::set_mongodb_server(mongodb_server);

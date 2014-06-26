@@ -32,8 +32,6 @@ namespace epidb {
 
     const std::map<const std::string, Metafield::Function> Metafield::createFunctionsMap()
     {
-      EPIDB_LOG("Building Metafield functions-table.");
-
       std::map<const std::string, Metafield::Function> m;
       m["@LENGTH"] = &Metafield::length;
       m["@NAME"] = &Metafield::name;

@@ -203,7 +203,7 @@ namespace epidb {
 
         mongo::BSONObj result;
         mongo::BSONObj o = cmd_builder.obj();
-        c->runCommand(dba::DATABASE_NAME, o, result);
+        c->runCommand(config::DATABASE_NAME(), o, result);
 
         if (!c->getLastError().empty()) {
           msg = c->getLastError();

@@ -168,8 +168,7 @@ namespace epidb {
       mongo::ScopedDbConnection c(config::get_mongodb_server());
       mongo::BSONObj info;
 
-
-      std::string collection_name = collection.substr(dba::DATABASE_NAME.length() + 1);
+      std::string collection_name = collection.substr(config::DATABASE_NAME().length() + 1);
 
       EPIDB_LOG("Creating collection: " << collection_name);
 
@@ -186,7 +185,7 @@ namespace epidb {
       unsetPowerOf2SizesBuilder.append("usePowerOf2Sizes", false);
       mongo::BSONObj unsetPowerOf2Sizes = unsetPowerOf2SizesBuilder.obj();
       EPIDB_LOG_DBG("Unseting PowerOf2Sizes: " << unsetPowerOf2Sizes.toString());
-      if (!c->runCommand(dba::DATABASE_NAME, unsetPowerOf2Sizes, info)) {
+      if (!c->runCommand(config::DATABASE_NAME(), unsetPowerOf2Sizes, info)) {
         EPIDB_LOG_ERR("Unseting PowerOf2Sizes '" << collection_name << "' error: " << info.toString());
         msg = "Error while setting data collection";
         c.done();
@@ -248,7 +247,7 @@ namespace epidb {
 
         if (!c->runCommand("admin", objShard, info)) {
           EPIDB_LOG_ERR("Sharding on '" << collection << "' error: " << info.toString());
-          msg = "Error while sharding data. Check if you are connected to a MongoDB cluster with sharding enabled for the database '" + dba::DATABASE_NAME + "' or disable sharding: --nosharding";
+          msg = "Error while sharding data. Check if you are connected to a MongoDB cluster with sharding enabled for the database '" + config::DATABASE_NAME() + "' or disable sharding: --nosharding";
           c.done();
           return false;
         }

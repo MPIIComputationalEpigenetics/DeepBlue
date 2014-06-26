@@ -27,16 +27,27 @@ namespace epidb {
 
       std::vector<std::string> shards;
 
-      std::string MONGODB_SERVER("localhost:27017");
+      static std::string mongodb_server("localhost:27017");
+      static std::string database_name("epidb");
 
       void set_mongodb_server(const std::string &server)
       {
-        MONGODB_SERVER = server;
+        mongodb_server = server;
       }
 
       const std::string get_mongodb_server()
       {
-        return MONGODB_SERVER;
+        return mongodb_server;
+      }
+
+      void set_database(const std::string &name)
+      {
+        database_name = name;
+      }
+
+      const std::string DATABASE_NAME()
+      {
+        return database_name;
       }
 
       bool use_sharding = true;

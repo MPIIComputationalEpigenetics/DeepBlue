@@ -29,7 +29,7 @@ namespace epidb {
 
       const std::string collection_name(const std::string &name)
       {
-        return DATABASE_NAME + "." + name;
+        return config::DATABASE_NAME() + "." + name;
       }
 
       const std::string region_collection_name(const std::string &genome, const std::string &collection_id, const std::string &chromosome)
@@ -302,7 +302,7 @@ namespace epidb {
                "new" << true);
 
         mongo::BSONObj info;
-        bool result = c->runCommand(dba::DATABASE_NAME, fnm_obj, info);
+        bool result = c->runCommand(config::DATABASE_NAME(), fnm_obj, info);
         if (!result) {
           // TODO: get info error
           msg = "error in generate the counter '" + name + "'.";

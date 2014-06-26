@@ -59,7 +59,7 @@ namespace epidb {
 
       if (config::sharding()) {
         mongo::BSONObjBuilder builder;
-        builder.append("enableSharding", dba::DATABASE_NAME);
+        builder.append("enableSharding", config::DATABASE_NAME());
         mongo::BSONObj info;
         if (!c->runCommand("admin", builder.obj(), info)) {
           if (info["errmsg"].str() == "already enabled") {
@@ -70,11 +70,11 @@ namespace epidb {
             return false;
           }
         } else {
-          EPIDB_LOG("Shard enabled for: " << dba::DATABASE_NAME << " info: " << info.toString());
+          EPIDB_LOG("Shard enabled for: " << config::DATABASE_NAME() << " info: " << info.toString());
         }
 
         mongo::BSONObjBuilder movePrimaryBuilder;
-        movePrimaryBuilder.append("movePrimary", dba::DATABASE_NAME);
+        movePrimaryBuilder.append("movePrimary", config::DATABASE_NAME());
         movePrimaryBuilder.append("to", "shard0000");
         if (!c->runCommand("admin", movePrimaryBuilder.obj(), info)) {
           EPIDB_LOG_WARN("Error movePrimary: " << info.toString());
@@ -154,7 +154,7 @@ namespace epidb {
 
       mongo::ScopedDbConnection c(config::get_mongodb_server());
       mongo::BSONObj info;
-      bool result = c->runCommand(dba::DATABASE_NAME, o, info);
+      bool result = c->runCommand(config::DATABASE_NAME(), o, info);
       if (!result) {
         // TODO: get info error
         msg = "error setting admin in user '" + user_id + "'.";
@@ -687,7 +687,7 @@ namespace epidb {
       }
 
       // insert sequence
-      mongo::GridFS gfs(c.conn(), DATABASE_NAME, Collections::SEQUENCES());
+      mongo::GridFS gfs(c.conn(), config::DATABASE_NAME(), Collections::SEQUENCES());
 
       gfs.setChunkSize(2 << 12); // 8KB
 
