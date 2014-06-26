@@ -23,7 +23,7 @@
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/asio.hpp>
+#include <boost/program_options.hpp>
 
 #include "httpd/server.hpp"
 #include "dba/config.hpp"
@@ -34,28 +34,40 @@ int main(int argc, char *argv[])
 {
   EPIDB_LOG(epidb::Version::info());
 
-  if (argc < 5) {
-    EPIDB_LOG_ERR("Usage: epidb <address> <port> <threads> <mongodb_server> [--nosharding]\n  For IPv4, try:\n  server 0.0.0.0 31415 1 127.0.0.1:27017\n  For IPv6, try:\n  server 0::0 31415 1 127.0.0.1:27017");
+  namespace po = boost::program_options;
+
+  std::string address;
+  std::string port;
+  size_t threads;
+  std::string mongodb_server;
+
+  // Declare the supported options.
+  po::options_description desc("DeepBlue Command Line Parameters");
+  desc.add_options()
+  ("help,H", "produce help message")
+  ("address,A", po::value<std::string>(&address)->default_value("localhost"), "local address")
+  ("port,P", po::value<std::string>(&port)->default_value("31415"), "local port")
+  ("threads,T", po::value<size_t>(&threads)->default_value(10), "number of concurrent requests")
+  ("mongodb,M", po::value<std::string>(&mongodb_server)->default_value("127.0.0.1:27017"), "local port")
+  ("nosharding", "do not use sharding in the mongodb")
+  ;
+
+  po::variables_map vm;
+  po::store(po::parse_command_line(argc, argv, desc), vm);
+  po::notify(vm);
+
+  if (vm.count("help")) {
+    std::cout << desc << "\n";
     return 1;
   }
 
-  std::size_t num_threads = boost::lexical_cast<std::size_t>(argv[3]);
-  epidb::httpd::server s(argv[1], argv[2], num_threads);
+  epidb::dba::config::set_sharding(!vm.count("nosharding"));
 
-  std::string mongodb_server = argv[4];
+  epidb::httpd::server s(address, port, threads);
 
   epidb::dba::config::set_mongodb_server(mongodb_server);
 
-  if (argc == 6) {
-    if (std::string(argv[5]) == "--nosharding") {
-
-      EPIDB_LOG("No sharding");
-      epidb::dba::config::set_sharding(false);
-    } else {
-      EPIDB_LOG_ERR("Unkown option " << argv[5]);
-      return 1;
-    }
-  }
+  epidb::dba::config::check_mongodb()
 
   if (epidb::dba::config::sharding()) {
     EPIDB_LOG("Configuring MongoDB Sharding [" << std::string(mongodb_server) << "]");
