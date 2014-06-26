@@ -67,8 +67,6 @@ int main(int argc, char *argv[])
 
   epidb::dba::config::set_mongodb_server(mongodb_server);
 
-  epidb::dba::config::check_mongodb()
-
   if (epidb::dba::config::sharding()) {
     EPIDB_LOG("Configuring MongoDB Sharding [" << std::string(mongodb_server) << "]");
     epidb::dba::config::set_shards_tags();
