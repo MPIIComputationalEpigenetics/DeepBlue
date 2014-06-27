@@ -79,7 +79,7 @@ namespace epidb {
           if (!is_initialized(ret, msg)) {
             return false;
           }
-          return !ret;
+          return true;
         } catch (const std::exception &e) {
           msg = Error::m(ERR_DATABASE_CONNECTION, e.what());
           return false;
