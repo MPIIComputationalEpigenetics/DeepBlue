@@ -43,7 +43,7 @@ namespace epidb {
 
   class Region {
   private:
-    CollectionId _collection_id; // Reference
+    CollectionId _collection_id;
     size_t _start;
     size_t _end;
     boost::shared_ptr<StatsValue> _stats_value;
@@ -111,6 +111,7 @@ namespace epidb {
   typedef std::vector<Region>::const_iterator RegionsConstIterator;
 
   Regions build_regions();
+  Regions build_regions(size_t s);
 
   typedef std::pair<std::string, Regions> ChromosomeRegions;
   typedef std::vector<ChromosomeRegions> ChromosomeRegionsList;

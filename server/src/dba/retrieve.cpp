@@ -40,12 +40,13 @@ namespace epidb {
       const size_t BULK_SIZE = 20000;
 
       struct RegionProcess {
-        Regions regions;
+        size_t _count;
+        Regions &_regions;
 
-        RegionProcess()
-        {
-          regions = build_regions();
-        }
+        RegionProcess(Regions &regions) :
+          _count(0),
+          _regions(regions)
+        { }
 
         void read_region(const mongo::BSONObj &region_bson, const CollectionId &collection_id)
         {
@@ -53,8 +54,6 @@ namespace epidb {
 
           for ( mongo::BSONObj::iterator i = region_bson.begin(); i.more(); ) {
             mongo::BSONElement e = i.next();
-
-            // get fixed keyes
             if (e.fieldName() == KeyMapper::START()) {
               region.set_start(e.numberInt());
             } else if (e.fieldName() == KeyMapper::END()) {
@@ -71,7 +70,8 @@ namespace epidb {
             }
           }
           // region._data.shrink_to_fit();
-          regions->push_back(region);
+          _regions->push_back(region);
+          _count++;
         }
       };
 
@@ -82,10 +82,9 @@ namespace epidb {
       {
         mongo::ScopedDbConnection c(config::get_mongodb_server());
 
-        RegionProcess rp;
+        RegionProcess rp(regions);
 
         mongo::Query query = mongo::Query(regions_query).sort(KeyMapper::START());
-        //mongo::Query query = mongo::Query(regions_query);
         int queryOptions = (int)( mongo::QueryOption_NoCursorTimeout | mongo::QueryOption_SlaveOk );
 
         std::auto_ptr<mongo::DBClientCursor> cursor( c->query(collection, query, 0, 0, NULL, queryOptions) );
@@ -100,8 +99,7 @@ namespace epidb {
 
         c.done();
 
-        if (!rp.regions->empty()) {
-          regions->insert(regions->end(), rp.regions->begin(), rp.regions->end());
+        if (rp._count > 0) {
           offsets.push_back(regions->size());
         }
         return true;
@@ -114,7 +112,6 @@ namespace epidb {
                            boost::shared_ptr<ChromosomeRegionsList> &result)
       {
         for (std::vector<std::string>::const_iterator chrom_it = chromosomes->begin(); chrom_it != chromosomes->end(); chrom_it++) {
-          /*
           size_t total_count(0);
           for (std::vector<std::string>::const_iterator id_it = collections_id.begin(); id_it != collections_id.end(); id_it++) {
             std::string collection = helpers::region_collection_name(genome, *id_it, *chrom_it);
@@ -122,13 +119,9 @@ namespace epidb {
             size_t count(0);
             count_regions(genome, *collection_id, *chrom_it, regions_query, count);
             total_count += count;
-            std::cerr << "parial: " << count << " total: " << total_count << std::endl;
           }
-          std::cerr << "total: " << total_count;
-          */
 
-
-          Regions regions = build_regions(); // <<<<
+          Regions regions = build_regions(total_count);
           std::vector<size_t> offsets;
           offsets.push_back(0);
 
@@ -142,7 +135,6 @@ namespace epidb {
             }
           }
 
-          // ----
           while (offsets.size() > 2) {
             assert(offsets.back() == regions->size());
             assert(offsets.front() == 0);
@@ -230,7 +222,6 @@ namespace epidb {
       {
         mongo::ScopedDbConnection c(config::get_mongodb_server());
         std::string collection_name = helpers::region_collection_name(genome, collection_id, chromosome);
-        std::cerr << collection_name << std::endl;
         count = c->count(collection_name, regions_query);
         c.done();
         return true;

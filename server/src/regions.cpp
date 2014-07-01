@@ -26,6 +26,13 @@ namespace epidb {
 
   CollectionId EMPTY_COLLECTION_ID = build_collection_id("");
 
+  Regions build_regions(size_t s)
+  {
+    boost::shared_ptr<std::vector<Region> > v =  boost::shared_ptr<std::vector<Region> >( new std::vector<Region>() );
+    v->reserve(s);
+    return v;
+  }
+
   Regions build_regions()
   {
     return boost::shared_ptr<std::vector<Region> >( new std::vector<Region>() );

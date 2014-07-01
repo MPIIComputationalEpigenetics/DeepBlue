@@ -31,7 +31,7 @@ endif
 # Felipe Albrecht's mac
 ifeq ($(host),macosx)
  CXX = clang++
- DEFCXXFLAGS = -Werror -Wall -Wextra -Weffc++ -Wno-unused-parameter -Wno-ignored-qualifiers -DPROFINY_CALL_GRAPH_PROFILER -g -I/opt/boost/include/ -I/Users/albrecht/mpi/epidb/epidb/mongo/driver/macosx/include
+ DEFCXXFLAGS = -O3 -Ofast -Werror -Wall -Wextra  -Weffc++ -Wno-unused-parameter -Wno-ignored-qualifiers -DPROFINY_CALL_GRAPH_PROFILER -I/opt/boost/include/ -I/Users/albrecht/mpi/epidb/epidb/mongo/driver/macosx/include
  BOOST_DIR = /opt/boost/lib
  LD	= clang++
  LDFLAGS = -g
