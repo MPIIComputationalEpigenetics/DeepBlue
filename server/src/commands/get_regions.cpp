@@ -134,7 +134,7 @@ namespace epidb {
 
         dba::Metafield metafield;
         std::stringstream ss;
-        for (ChromosomeRegionsList::const_iterator it = chromosomeRegionsList.begin(); 
+        for (ChromosomeRegionsList::const_iterator it = chromosomeRegionsList.begin();
           it != chromosomeRegionsList.end(); it++) {
           std::string chromosome = it->first;
 
@@ -177,9 +177,9 @@ namespace epidb {
           if (it->first == "CHROMOSOME") {
             ss << chromosome;
           } else if (it->first == "START") {
-            ss << region.start;
+            ss << region.start();
           } else if (it->first == "END") {
-            ss << region.end;
+            ss << region.end();
           } else if (dba::Metafield::is_meta(it->first)) {
             std::string result;
             if (!metafield.process(it->first, chromosome, region, result, msg)) {

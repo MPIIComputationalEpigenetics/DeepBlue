@@ -28,98 +28,126 @@ namespace epidb {
 
   Regions build_regions()
   {
-    return boost::shared_ptr<std::vector<Region> >( new std::vector<Region> );
+    return boost::shared_ptr<std::vector<Region> >( new std::vector<Region>() );
   }
 
   static const std::string empty_string = "";
 
-  size_t Region::length()
+  size_t Region::length() const
   {
-    return end - start;
+    return _end - _start;
+  }
+
+  CollectionId Region::collection_id() const
+  {
+    return _collection_id;
+  }
+
+  size_t Region::start() const
+  {
+    return _start;
+  }
+
+  size_t Region::end() const
+  {
+    return _end;
+  }
+
+  void Region::set_start(size_t s)
+  {
+    _start = s;
+  }
+
+  void Region::set_end(size_t e)
+  {
+    _end = e;
   }
 
   void Region::set(const std::string &key, const std::string &value)
   {
-    data[key] = value;
+    std::pair<std::string, std::string> p(key, value);
+    _data.push_back(p);
   }
 
   const std::string &Region::get(const std::string &key) const
   {
-    std::map<std::string, std::string>::const_iterator it = data.find(key);
-    if (it == data.end()) {
-      return empty_string;
+    for (std::vector<std::pair<std::string, std::string> >::const_iterator it = _data.begin(); it != _data.end(); it++) {
+      if (it->first == key) {
+        return it->second;
+      }
     }
-    return it->second;
+    return empty_string;
   }
 
   double Region::value(const std::string &key) const
   {
-    std::map<std::string, std::string>::const_iterator it = data.find(key);
-    if (it == data.end()) {
-      return 0.0;
+    for (std::vector<std::pair<std::string, std::string> >::const_iterator it = _data.begin(); it != _data.end(); it++) {
+      if (it->first == key) {
+        double v;
+        utils::string_to_double(it->second, v);
+        return v;
+      }
     }
-    double v;
-    utils::string_to_double(it->second, v);
-    return v;
+    return 0.0;
   }
 
   bool Region::has_stats() const
   {
-    return stats_value;
+    return _stats_value;
   }
 
   double Region::min() const
   {
-    if (stats_value) {
-      return stats_value->_min;
+    if (_stats_value) {
+      return _stats_value->_min;
     }
     return std::numeric_limits<double>::min();
   }
 
   double Region::max() const
   {
-    if (stats_value) {
-      return stats_value->_max;
+    if (_stats_value) {
+      return _stats_value->_max;
     }
     return std::numeric_limits<double>::min();
   }
 
   double Region::median() const
   {
-    if (stats_value) {
-      return stats_value->_median;
+    if (_stats_value) {
+      return _stats_value->_median;
     }
     return std::numeric_limits<double>::min();
   }
 
   double Region::mean() const
   {
-    if (stats_value) {
-      return stats_value->_mean;
+    if (_stats_value) {
+      return _stats_value->_mean;
     }
     return std::numeric_limits<double>::min();
   }
 
   double Region::var() const
   {
-    if (stats_value) {
-      return stats_value->_var;
+    if (_stats_value) {
+      return _stats_value->_var;
     }
     return std::numeric_limits<double>::min();
   }
 
   double Region::sd() const
   {
-    if (stats_value) {
-      return stats_value->_sd;
+    if (_stats_value) {
+      return _stats_value->_sd;
     }
     return std::numeric_limits<double>::min();
   }
 
   double Region::count() const
   {
-    if (stats_value) {
-      return stats_value->_count;
+    if (_stats_value) {
+      return _stats_value->_count;
     }
     return std::numeric_limits<double>::min();
   }

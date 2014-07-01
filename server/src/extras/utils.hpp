@@ -54,6 +54,8 @@ namespace epidb {
 
     const std::string double_to_string(const double d);
 
+    const std::string integer_to_string(const int d);
+
     bool is_number(const std::string &s);
 
     bool valid_input_string(const std::string &in);

@@ -27,7 +27,7 @@ def setUp():
   # clear database
   print "----- clearing database -----"
   mongo = MongoClient("localhost", 27017)
-  mongo.drop_database("epidb_test")
+  mongo.drop_database("tests_suite")
   print "\n"
 
   # start epidb
@@ -125,7 +125,7 @@ class TestCase(unittest.TestCase):
 
   def setUp(self):
     mongo = MongoClient("localhost", 27017)
-    mongo.drop_database("epidb_test")
+    mongo.drop_database("tests_suite")
 
   def tearDown(self):
     pass

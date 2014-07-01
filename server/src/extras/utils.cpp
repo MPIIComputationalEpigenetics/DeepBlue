@@ -92,6 +92,13 @@ namespace epidb {
       return sstream.str();
     }
 
+    const std::string integer_to_string(const int t)
+    {
+      std::ostringstream sstream;
+      sstream << t;
+      return sstream.str();
+    }
+
     bool is_number(const std::string &s_)
     {
       std::string ss(s_);

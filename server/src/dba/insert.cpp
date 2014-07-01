@@ -921,14 +921,14 @@ namespace epidb {
           mongo::BSONObjBuilder region_builder;
           region_builder.append("_id", (int) count++);
 
-          if (region.start > chromosome_size || region.end > chromosome_size) {
-            msg = out_of_range_message(region.start, region.end, chromosome);
+          if (region.start() > chromosome_size || region.end() > chromosome_size) {
+            msg = out_of_range_message(region.start(), region.end(), chromosome);
             c.done();
             return false;
           }
 
-          region_builder.append(KeyMapper::START(), (int) region.start);
-          region_builder.append(KeyMapper::END(), (int) region.end);
+          region_builder.append(KeyMapper::START(), (int) region.start());
+          region_builder.append(KeyMapper::END(), (int) region.end());
 
           mongo::BSONObj r = region_builder.obj();
           bulk.push_back(r);

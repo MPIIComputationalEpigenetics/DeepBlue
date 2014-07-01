@@ -67,7 +67,7 @@ namespace epidb {
         // build an interval tree of region set B
         std::vector<Interval<Region> > intervals;
         for (RegionsConstIterator rcit = chr_regions_b->begin(); rcit != chr_regions_b->end(); ++rcit) {
-          intervals.push_back(Interval<Region>(rcit->start, rcit->end, *rcit)); // XXX: mem?
+          intervals.push_back(Interval<Region>(rcit->start(), rcit->end(), *rcit)); // XXX: mem?
         }
         IntervalTree<Region> tree(intervals);
 
@@ -75,7 +75,7 @@ namespace epidb {
         // find all overlaps of regions from set A in the tree
         for (RegionsConstIterator rcit = chr_regions_a->begin(); rcit != chr_regions_a->end(); ++rcit) {
           std::vector<Interval<Region> > overlaps;
-          tree.findOverlapping(rcit->start, rcit->end, overlaps);
+          tree.findOverlapping(rcit->start(), rcit->end(), overlaps);
 
           // add overlaps to the total of intersections
           chr_intersections->reserve(intersections.size() + overlaps.size());
@@ -84,8 +84,8 @@ namespace epidb {
           for (ocit = overlaps.begin(); ocit != overlaps.end(); ++ocit) {
             Region region = ocit->value;
             // change the region to only the actually intersecting part
-            region.start = rcit->start > region.start ? rcit->start : region.start;
-            region.end = rcit->end > region.end ? region.end : rcit->end;
+            region.set_start(rcit->start() > region.start() ? rcit->start() : region.start());
+            region.set_end(rcit->end() > region.end() ? region.end() : rcit->end());
 
             chr_intersections->push_back(region);
           }

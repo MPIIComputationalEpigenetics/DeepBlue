@@ -11,6 +11,7 @@
 
 #include <limits>
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -23,7 +24,7 @@ namespace epidb {
 
   typedef boost::shared_ptr<std::string> CollectionId;
 
-  CollectionId build_collection_id(const std::string& name);
+  CollectionId build_collection_id(const std::string &name);
 
   extern CollectionId EMPTY_COLLECTION_ID;
 
@@ -42,33 +43,54 @@ namespace epidb {
 
   class Region {
   private:
-    static const std::string name;
-
-    boost::shared_ptr<StatsValue> stats_value;
-    std::map<std::string, std::string> data;
+    CollectionId _collection_id; // Reference
+    size_t _start;
+    size_t _end;
+    boost::shared_ptr<StatsValue> _stats_value;
+    std::vector<std::pair<std::string, std::string> > _data;
 
   public:
-    Region() : start(-1), end(-1) {}
+    Region() :
+      _collection_id(),
+      _start(-1),
+      _end(-1),
+      _stats_value(),
+      _data() {}
 
-    Region(long long s, long long e, CollectionId _id)
-      : start(s), end(e), collection_id(_id) {}
+
+    Region(CollectionId _id) :
+      _collection_id(_id),
+      _start(-1),
+      _end(-1),
+      _stats_value(),
+      _data() {}
+
+    Region(long long s, long long e, CollectionId _id):
+      _collection_id(_id),
+      _start(s),
+      _end(e),
+      _stats_value(),
+      _data() {}
 
     Region(long long s, long long e, CollectionId _id,
            double min, double max, double median, double mean, double var, double sd, double count) :
-      stats_value(new StatsValue(min, max, median, mean, var, sd, count)),
-      start(s), end(e), collection_id(_id)
-    { }
-
-    size_t start;
-    size_t end;
-    CollectionId collection_id;
+      _collection_id(_id),
+      _start(s),
+      _end(e),
+      _stats_value(new StatsValue(min, max, median, mean, var, sd, count)),
+      _data() {}
 
     bool operator<(const Region &other) const
     {
-      return start < other.start;
+      return _start < other._start;
     }
 
-    size_t length();
+    CollectionId collection_id() const;
+    size_t length() const;
+    size_t start() const;
+    size_t end() const;
+    void set_start(size_t s);
+    void set_end(size_t e);
     void set(const std::string &key, const std::string &value);
     const std::string  &get(const std::string &key) const;
     double value(const std::string &key) const;
@@ -91,9 +113,6 @@ namespace epidb {
   Regions build_regions();
 
   typedef std::pair<std::string, Regions> ChromosomeRegions;
-  // TODO: to class/struct.
-  // TOOD: ::insert(chr, data)
-  // TOOD: ::get(chr)
   typedef std::vector<ChromosomeRegions> ChromosomeRegionsList;
 
 } // namespace epidb

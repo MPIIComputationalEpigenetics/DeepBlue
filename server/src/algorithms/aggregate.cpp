@@ -132,9 +132,9 @@ namespace epidb {
       while (it_ranges != ranges->end()) {
         Accumulator acc;
         while (it_data != data->end() &&
-               it_data->start >= it_ranges->start && it_data->start <= it_ranges->end) {
+               it_data->start() >= it_ranges->start() && it_data->start() <= it_ranges->end()) {
 
-          if (it_data->start >= it_ranges->start && it_data->end <= it_ranges->end) {
+          if (it_data->start() >= it_ranges->start() && it_data->end() <= it_ranges->end()) {
 
             if (field[0] == '@') {
               std::string value;
@@ -154,7 +154,7 @@ namespace epidb {
           it_data++;
 
         }
-        Region region(it_ranges->start, it_ranges->end, EMPTY_COLLECTION_ID,
+        Region region(it_ranges->start(), it_ranges->end(), EMPTY_COLLECTION_ID,
                       acc.min(), acc.max(), acc.median(), acc.mean(), acc.var(), acc.sd(), acc.count());
 
         chr_regions->push_back(region);

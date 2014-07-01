@@ -136,7 +136,7 @@ namespace epidb {
         for (ChromosomeRegionsList::const_iterator it = chromossome_regions.begin(); it != chromossome_regions.end(); it++) {
           Regions regions = it->second;
           for (RegionsIterator it = regions->begin(); it != regions->end(); it++) {
-            experiments_id_set.insert(*(it->collection_id));
+            experiments_id_set.insert(*(it->collection_id()));
           }
         }
 
@@ -555,10 +555,10 @@ namespace epidb {
                          Metafield &metafield, const std::string &chrom, FilterBuilder::FilterPtr filter)
       {
         if (field.compare("START") == 0) {
-          return filter->is(region.start);
+          return filter->is(region.start());
         }
         if (field.compare("END") == 0) {
-          return filter->is(region.end);
+          return filter->is(region.end());
         }
 
         // TODO: optimize for "@AGG." values

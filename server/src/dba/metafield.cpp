@@ -104,8 +104,8 @@ namespace epidb {
       mongo::BSONObj obj;
 
       // TODO: Workaround - because aggregates does not have a region_set_id
-      if (region.collection_id != EMPTY_COLLECTION_ID) {
-        if (!get_bson_by_collection_id(region.collection_id, obj, msg)) {
+      if (region.collection_id() != EMPTY_COLLECTION_ID) {
+        if (!get_bson_by_collection_id(region.collection_id(), obj, msg)) {
           return false;
         }
       }
@@ -133,7 +133,7 @@ namespace epidb {
                            std::string &result, std::string &msg)
     {
 
-      result = boost::lexical_cast<std::string>(region.end - region.start);
+      result = boost::lexical_cast<std::string>(region.end() - region.start());
       return true;
     }
 
@@ -180,7 +180,7 @@ namespace epidb {
 
       std::string sequence;
       if (seq_retr.exists(genome, chrom)) {
-        if (!seq_retr.retrieve(genome, chrom, region.start, region.end, sequence, msg)) {
+        if (!seq_retr.retrieve(genome, chrom, region.start(), region.end(), sequence, msg)) {
           return false;
         }
         result = sequence;
@@ -202,8 +202,8 @@ namespace epidb {
 
       mongo::BSONObjBuilder region_query_builder;
 
-      region_query_builder.append(KeyMapper::START(), BSON("$gte" << (int) region.start << "$lte" << (int) region.end));
-      region_query_builder.append(KeyMapper::END(), BSON("$gte" << (int) region.start << "$lte" << (int) region.end));
+      region_query_builder.append(KeyMapper::START(), BSON("$gte" << (int) region.start() << "$lte" << (int) region.end()));
+      region_query_builder.append(KeyMapper::END(), BSON("$gte" << (int) region.start() << "$lte" << (int) region.end()));
 
       mongo::BSONObj region_query = region_query_builder.obj();
 
