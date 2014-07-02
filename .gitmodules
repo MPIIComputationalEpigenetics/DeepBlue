@@ -1,3 +1,0 @@
-[submodule "server/third_party/cppformat"]
-	path = server/third_party/cppformat
-	url = https://github.com/cppformat/cppformat.git
