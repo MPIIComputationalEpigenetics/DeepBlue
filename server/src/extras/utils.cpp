@@ -18,6 +18,8 @@
 #include <string>
 #include <vector>
 
+#include <format.h>
+
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/regex.hpp>
@@ -86,17 +88,14 @@ namespace epidb {
 
     const std::string double_to_string(const double d)
     {
-      std::ostringstream sstream;
-      sstream << std::fixed;
-      sstream << std::setprecision(4) << d;
-      return sstream.str();
+      fmt::Writer w;
+      w << d;
+      return w.str();
     }
 
     const std::string integer_to_string(const int t)
     {
-      std::ostringstream sstream;
-      sstream << t;
-      return sstream.str();
+      return fmt::FormatInt(t).str();
     }
 
     bool is_number(const std::string &s_)
