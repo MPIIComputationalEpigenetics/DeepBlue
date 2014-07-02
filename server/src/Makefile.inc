@@ -24,14 +24,15 @@ ifeq ($(host),production)
  MONGOLIBS = -L/opt/mongodb/driver/lib -lmongoclient
  BOOST_DIR = /opt/mongodb/boost/lib
  DEFCXXFLAGS = -Wall -O3 -Ofast -I/opt/mongodb/boost/include/ -I/opt/mongodb/driver/include/
- BOOSTLIBS = $(BOOST_DIR)/libboost_filesystem.a $(BOOST_DIR)/libboost_thread.a $(BOOST_DIR)/libboost_system.a $(BOOST_DIR)/libboost_regex.a $(BOOST_DIR)/libboost_log.a  $(BOOST_DIR)/libboost_timer.a  $(BOOST_DIR)/libboost_chrono.a $(BOOST_DIR)/libboost_program_options.a -lrt
+ BOOSTLIBS = $(BOOST_DIR)/libboost_filesystem.a $(BOOST_DIR)/libboost_thread.a $(BOOST_DIR)/libboost_system.a $(BOOST_DIR)/libboost_regex.a $(BOOST_DIR)/libboost_log.a  $(BOOST_DIR)/libboost_timer.a  $(BOOST_DIR)/libboost_chrono.a $(BOOST_DIR)/libboost_program_options.a -I/opt/mongodb/DeepBlue/server/third_party/cppformat/ -lrt
  THIRDLIBS = ../third_party/libexpat_linux.a
+
 endif
 
 # Felipe Albrecht's mac
 ifeq ($(host),macosx)
  CXX = clang++
- DEFCXXFLAGS = -O3 -Ofast -Werror -Wall -Wextra  -Weffc++ -Wno-unused-parameter -Wno-ignored-qualifiers -DPROFINY_CALL_GRAPH_PROFILER -I/opt/boost/include/ -I/Users/albrecht/mpi/epidb/epidb/mongo/driver/macosx/include
+ DEFCXXFLAGS = -O3 -Ofast  -Werror -Wall -Wextra  -Weffc++ -Wno-unused-parameter -Wno-ignored-qualifiers -DPROFINY_CALL_GRAPH_PROFILER -I/opt/boost/include/ -I/Users/albrecht/mpi/epidb/epidb/mongo/driver/macosx/include -I/Users/albrecht/mpi/DeepBlue/server/third_party/cppformat/
  BOOST_DIR = /opt/boost/lib
  LD	= clang++
  LDFLAGS = -g
@@ -40,7 +41,8 @@ ifeq ($(host),macosx)
  THIRDLIBS = ../third_party/libexpat_macosx.a
 endif
 
-DEFLIBS = $(MONGOLIBS) $(BOOSTLIBS)
+CPPFORMAT = ../third_party/cppformat/format.cc
+DEFLIBS = $(MONGOLIBS) $(BOOSTLIBS) $(CPPFORMAT)
 
 AR	= ar
 ARFLAGS	=
