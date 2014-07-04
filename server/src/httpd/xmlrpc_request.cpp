@@ -73,12 +73,11 @@ namespace epidb {
     }
 
 
-    std::string XmlrpcResponse::message_header(const std::string& method_name) {
+    std::string XmlrpcResponse::message_header() {
       std::stringstream m;
 
       m << "<?xml version=\"1.0\"?>" << "\r\n";
       m << "<methodResponse>" << "\r\n";
-      m << "<methodName> " << method_name << "</methodName>" << "\r\n";
       m << "<params>" << "\r\n";
 
       return m.str();
@@ -95,7 +94,7 @@ namespace epidb {
 
     const std::string XmlrpcResponse::error_response(const std::string& error) {
       std::stringstream m;
-      m << message_header("ErrorResponse");
+      m << message_header();
       m << serialize::SimpleParameter(serialize::ERROR, error).get_xml();
       m << message_tail();
       return m.str();
@@ -104,7 +103,7 @@ namespace epidb {
     const std::string XmlrpcResponse::buffer() const {
       std::stringstream m;
 
-      m << message_header(method_name_);
+      m << message_header();
       m << "<param>" << std::endl;
       m << "<value>" << std::endl;
       m << "<array>" << std::endl;

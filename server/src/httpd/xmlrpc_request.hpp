@@ -71,7 +71,7 @@ namespace epidb {
       std::string method_name_;
       serialize::Parameters parameters_;
 
-      static std::string message_header(const std::string& method_name);
+      static std::string message_header();
       static std::string message_tail();
 
      public:
