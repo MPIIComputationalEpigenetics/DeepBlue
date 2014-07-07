@@ -44,10 +44,10 @@ namespace epidb {
       mongo::BSONObjBuilder index;
       index.append("s", 1);
       index.append("l", 1);
-      c->ensureIndex("epidb.key_mapper", index.obj(), true);
+      c->ensureIndex(helpers::collection_name(Collections::KEY_MAPPER()), index.obj(), true);
 
       std::auto_ptr<mongo::DBClientCursor> cursor =
-        c->query("epidb.key_mapper", mongo::BSONObj());
+        c->query(helpers::collection_name(Collections::KEY_MAPPER()), mongo::BSONObj());
 
       if (!(c->getLastErrorDetailed().getField("err").isNull())) {
         c.done();
