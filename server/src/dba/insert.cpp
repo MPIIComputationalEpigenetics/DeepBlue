@@ -205,38 +205,7 @@ namespace epidb {
       }
 
       if (config::sharding()) {
-
-        // TODO: check if (number_of_shards == 0)
-        size_t number_of_shards = config::shards.size();
-        size_t size_by_shard = (chromosome_size + number_of_shards - 1) / number_of_shards;
-
-        for (size_t i = 0; i < number_of_shards; i++) {
-          size_t min = i * size_by_shard;
-          size_t max = (i * size_by_shard) + size_by_shard - 1;
-
-          mongo::BSONObjBuilder _id_builder;
-          _id_builder.append("ns", collection);
-          _id_builder.append("min", BSON(KeyMapper::START() << (unsigned) (i * size_by_shard)));
-
-          mongo::BSONObj _id = _id_builder.obj();
-
-          mongo::BSONObjBuilder update_builder;
-          update_builder.append("_id", _id);
-          update_builder.append("ns",  collection);
-          update_builder.append("min", BSON(KeyMapper::START() << (unsigned) min));
-          update_builder.append("max", BSON(KeyMapper::START() << (unsigned) max));
-          update_builder.append("tag", config::shards[i]);
-
-          mongo::BSONObj update = update_builder.obj();
-
-          c->update("config.tags", _id, update, true);
-
-          if (!c->getLastError().empty()) {
-            msg = c->getLastError();
-            c.done();
-            return false;
-          }
-        }
+        EPIDB_LOG_DBG("Setting sharding for collection " << collection);
 
         mongo::BSONObjBuilder builder;
         builder.append("shardCollection", collection);
@@ -250,6 +219,87 @@ namespace epidb {
           msg = "Error while sharding data. Check if you are connected to a MongoDB cluster with sharding enabled for the database '" + config::DATABASE_NAME() + "' or disable sharding: --nosharding";
           c.done();
           return false;
+        }
+
+        // TODO: check if (number_of_shards == 0)
+        size_t number_of_shards = config::shards.size();
+        size_t size_by_shard = (chromosome_size + number_of_shards - 1) / number_of_shards;
+        std::vector<std::string> shards_names = config::get_shards_names();
+
+
+        for (size_t i = 0; i < number_of_shards; i++) {
+          size_t min = i * size_by_shard;
+          size_t max = (i * size_by_shard) + size_by_shard - 1;
+
+          EPIDB_LOG_DBG("Setting Chunks for " << collection << " done");
+
+          mongo::BSONObjBuilder _id_builder;
+          _id_builder.append("ns", collection);
+          _id_builder.append("min", BSON(KeyMapper::START() << (unsigned) (i * size_by_shard)));
+
+          mongo::BSONObj _id = _id_builder.obj();
+
+          mongo::BSONObjBuilder update_builder;
+          update_builder.append("_id", _id);
+          update_builder.append("ns",  collection);
+
+          if (min == 0) {
+            update_builder.append("min", BSON( KeyMapper::START() << mongo::MINKEY));
+          } else {
+            update_builder.append("min", BSON(KeyMapper::START() << (unsigned) min));
+          }
+
+          if (i == number_of_shards - 1) {
+            update_builder.append("max", BSON( KeyMapper::START() << mongo::MAXKEY));
+          } else {
+            update_builder.append("max", BSON(KeyMapper::START() << (unsigned) max));
+          }
+
+          update_builder.append("tag", config::shards[i]);
+
+          mongo::BSONObj update = update_builder.obj();
+
+          c->update("config.tags", _id, update, true);
+
+          if (!c->getLastError().empty()) {
+            msg = c->getLastError();
+            c.done();
+            return false;
+          }
+
+
+          EPIDB_LOG_DBG("Creating Chunks for " << collection);
+
+          if (i != 0) { // if is not already the primary
+            mongo::BSONObjBuilder split_builder;
+            split_builder.append("split", collection);
+            split_builder.append("middle", BSON(KeyMapper::START() << (unsigned) min));
+            mongo::BSONObj split = split_builder.obj();
+
+            std::cerr << split.toString() << std::endl;
+
+            if (!c->runCommand("admin", split, info)) {
+              EPIDB_LOG("Error while splitting the collection " << collection << " :" << info.toString());
+              msg = "(Internal Error) Error while splitting the data.";
+              c.done();
+              return false;
+            }
+
+            mongo::BSONObjBuilder move_builder;
+            move_builder.append("moveChunk", collection);
+            move_builder.append("find", BSON(KeyMapper::START() << (unsigned) min )) ;
+            move_builder.append("to", shards_names[i]);
+
+            mongo::BSONObj move = move_builder.obj();
+            std::cerr << move.toString() << std::endl;
+            if (!c->runCommand("admin", move, info)) {
+              EPIDB_LOG_WARN("Error while distributing the collection " << collection << " :" << info.toString());
+              //msg = "(Internal Error) Error while distributing the data.";
+              //c.done();
+              //return false;
+            }
+          }
+
         }
 
         EPIDB_LOG_DBG("Index and Sharding for " << collection << " done");

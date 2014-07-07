@@ -10,6 +10,7 @@
 #define EPIDB_DBA_CONFIG_HPP
 
 #include <string>
+#include <vector>
 
 namespace epidb {
   namespace dba {
@@ -21,6 +22,7 @@ namespace epidb {
       const std::string get_mongodb_server();
       bool sharding();
       void set_sharding(bool sharding);
+      std::vector<std::string> get_shards_names();
       size_t chunk_size();
       void set_chunk_size(size_t);
       bool check_mongodb(std::string &msg);

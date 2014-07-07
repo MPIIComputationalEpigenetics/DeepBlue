@@ -61,7 +61,7 @@ namespace epidb {
         use_sharding = value;
       }
 
-      size_t chunk_size_value = 4;
+      size_t chunk_size_value = 1024;
       size_t chunk_size()
       {
         return chunk_size_value;
@@ -121,7 +121,11 @@ namespace epidb {
 
         c.done();
         return true;
+      }
 
+      std::vector<std::string> get_shards_names()
+      {
+        return shards;
       }
 
     }
