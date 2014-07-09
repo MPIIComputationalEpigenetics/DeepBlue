@@ -16,6 +16,7 @@
 
 #include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/thread/mutex.hpp>
 
 #include <mongo/bson/bson.h>
 #include <mongo/client/dbclient.h>
@@ -156,6 +157,7 @@ namespace epidb {
       return true;
     }
 
+    boost::mutex move_chunk_lock;
     bool set_index_shard(std::map<std::string, bool> &processed, const std::string &collection, const size_t chromosome_size,
                          std::string &msg)
     {
@@ -271,6 +273,7 @@ namespace epidb {
           EPIDB_LOG_DBG("Creating Chunks for " << collection);
 
           if (i != 0) { // if is not already the primary
+            boost::mutex::scoped_lock lock(move_chunk_lock);
             mongo::BSONObjBuilder split_builder;
             split_builder.append("split", collection);
             split_builder.append("middle", BSON(KeyMapper::START() << (unsigned) min));
@@ -279,21 +282,22 @@ namespace epidb {
             std::cerr << split.toString() << std::endl;
 
             if (!c->runCommand("admin", split, info)) {
-              EPIDB_LOG("Error while splitting the collection " << collection << " :" << info.toString());
-              msg = "(Internal Error) Error while splitting the data.";
+              EPIDB_LOG("Error while splitting (" << split.toString() << ") the collection " << collection << " :" << info.toString());
+              msg = "Error while splitting (" +  split.toString() + ") the collection "+  collection + " :" + info.toString();
               c.done();
               return false;
             }
 
             mongo::BSONObjBuilder move_builder;
             move_builder.append("moveChunk", collection);
-            move_builder.append("find", BSON(KeyMapper::START() << (unsigned) min )) ;
+            move_builder.append("find", BSON(KeyMapper::START() << (unsigned) min)) ;
             move_builder.append("to", shards_names[i]);
 
             mongo::BSONObj move = move_builder.obj();
             std::cerr << move.toString() << std::endl;
+
             if (!c->runCommand("admin", move, info)) {
-              EPIDB_LOG_WARN("Error while distributing the collection " << collection << " :" << info.toString());
+              EPIDB_LOG_WARN("Error while distributing the collection ("  << move.toString() << ") " <<  collection << " :" << info.toString());
               //msg = "(Internal Error) Error while distributing the data.";
               //c.done();
               //return false;
