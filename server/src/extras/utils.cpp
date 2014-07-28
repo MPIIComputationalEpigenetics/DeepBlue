@@ -88,9 +88,7 @@ namespace epidb {
 
     const std::string double_to_string(const double d)
     {
-      fmt::Writer w;
-      w << d;
-      return w.str();
+      return fmt::format("{:-.4f}", d);
     }
 
     const std::string integer_to_string(const int t)
