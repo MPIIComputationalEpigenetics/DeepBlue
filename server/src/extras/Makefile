@@ -3,7 +3,7 @@ include ../Makefile.inc
 CXXFLAGS	= $(DEFCXXFLAGS) -I..
 
 OBJLIBS	= ../libextras.a
-OBJS		= utils.o xmlrpc.o serialize.o
+OBJS		= utils.o xmlrpc.o serialize.o compress.o
 
 all : $(OBJLIBS)
 

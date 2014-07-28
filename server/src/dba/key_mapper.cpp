@@ -43,7 +43,6 @@ namespace epidb {
 
       mongo::BSONObjBuilder index;
       index.append("s", 1);
-      index.append("l", 1);
       c->ensureIndex(helpers::collection_name(Collections::KEY_MAPPER()), index.obj(), true);
 
       std::auto_ptr<mongo::DBClientCursor> cursor =
@@ -57,8 +56,8 @@ namespace epidb {
 
       while (cursor->more()) {
         mongo::BSONObj e = cursor->next();
+        const std::string l = e.getStringField("_id");
         const std::string s = e.getStringField("s");
-        const std::string l = e.getStringField("l");
         stol_[s] = l;
         ltos_[l] = s;
       }
@@ -80,8 +79,8 @@ namespace epidb {
       mongo::ScopedDbConnection c(config::get_mongodb_server());
 
       mongo::BSONObjBuilder b;
+      b.append("_id", l);
       b.append("s", s);
-      b.append("l", l);
       c->insert(helpers::collection_name(Collections::KEY_MAPPER()), b.obj());
       // TODO: handle error
       mongo::BSONObj err = c->getLastErrorDetailed();
@@ -96,27 +95,70 @@ namespace epidb {
       return true;
     }
 
-    const std::string& KeyMapper::CHROMOSOME()
+    const std::string &KeyMapper::CHROMOSOME()
     {
       static std::string CHROMOSOME = epidb::dba::KeyMapper::build_default("CHROMOSOME");
       return CHROMOSOME;
     }
 
-    const std::string& KeyMapper::START()
+    const std::string &KeyMapper::START()
     {
       static std::string START = epidb::dba::KeyMapper::build_default("START");
       return START;
     }
 
-    const std::string& KeyMapper::END()
+    const std::string &KeyMapper::END()
     {
       static std::string END = epidb::dba::KeyMapper::build_default("END");
       return END;
     }
 
-    const std::string& KeyMapper::VALUE()
+    const std::string &KeyMapper::VALUE()
     {
       static std::string VALUE = epidb::dba::KeyMapper::build_default("VALUE");
+      return VALUE;
+    }
+
+
+    const std::string &KeyMapper::WIG_TYPE()
+    {
+      static std::string VALUE = epidb::dba::KeyMapper::build_default("TYPE_WIG");
+      return VALUE;
+    }
+
+    const std::string &KeyMapper::WIG_STEP()
+    {
+      static std::string VALUE = epidb::dba::KeyMapper::build_default("STEP_WIG");
+      return VALUE;
+    }
+
+    const std::string &KeyMapper::WIG_SPAN()
+    {
+      static std::string VALUE = epidb::dba::KeyMapper::build_default("SPAN_WIG");
+      return VALUE;
+    }
+
+    const std::string &KeyMapper::WIG_SIZE()
+    {
+      static std::string VALUE = epidb::dba::KeyMapper::build_default("SIZE_WIG");
+      return VALUE;
+    }
+
+    const std::string &KeyMapper::WIG_DATA_SIZE()
+    {
+      static std::string VALUE = epidb::dba::KeyMapper::build_default("DATA_SIZE_WIG");
+      return VALUE;
+    }
+
+    const std::string &KeyMapper::WIG_TRACK_TYPE()
+    {
+      static std::string VALUE = epidb::dba::KeyMapper::build_default("TRACK_TYPE_WIG");
+      return VALUE;
+    }
+
+    const std::string &KeyMapper::WIG_DATA()
+    {
+      static std::string VALUE = epidb::dba::KeyMapper::build_default("DATA_WIG");
       return VALUE;
     }
 
@@ -153,9 +195,20 @@ namespace epidb {
       std::string sk;
       sk = l[0];
       int i = 0;
-      while (!(stol_.find(sk) == stol_.end())) {
-        sk = l[0] + boost::lexical_cast<std::string>(i++);
+
+      // Try to use some letter from the name
+      size_t pos(0);
+      while (!(stol_.find(sk) == stol_.end()) && (pos < l.size() - 1)) {
+        sk = l[pos++];
       }
+
+      // If not found useful letter, insert number
+      if (stol_.find(sk) != stol_.end()) {
+        while (!(stol_.find(sk) == stol_.end())) {
+          sk = l[0] + boost::lexical_cast<std::string>(i++);
+        }
+      }
+
       if (set_shortcut(sk, l, err)) {
         res = sk;
         return true;

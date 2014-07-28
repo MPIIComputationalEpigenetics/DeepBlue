@@ -25,10 +25,14 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/program_options.hpp>
 
-#include "httpd/server.hpp"
-#include "dba/config.hpp"
 #include "log.hpp"
 #include "version.hpp"
+#include "dba/config.hpp"
+#include "extras/compress.hpp"
+#include "httpd/server.hpp"
+
+
+#include "parser/wig.hpp"
 
 int main(int argc, char *argv[])
 {
@@ -87,6 +91,10 @@ int main(int argc, char *argv[])
   }
 
   EPIDB_LOG("Starting DeepBlue Epigenomics Data Server ");
+  if (!epidb::compress::init()) {
+    EPIDB_LOG_ERR("Problem initializing LZO compression algorithm.");
+    return 1;
+  }
   epidb::httpd::server s(address, port, threads);
   s.run();
 

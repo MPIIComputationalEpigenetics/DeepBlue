@@ -25,7 +25,7 @@
 #include "../parser/field_type.hpp"
 #include "../parser/genome_data.hpp"
 #include "../parser/parser_factory.hpp"
-#include "../parser/wig_parser.hpp"
+#include "../parser/wig.hpp"
 
 #include "dba.hpp"
 #include "collections.hpp"
@@ -226,11 +226,12 @@ namespace epidb {
         std::vector<std::string> shards_names = config::get_shards_names();
 
         static size_t i = 0;
-        size_t actual_pos = i%shards_names.size();
+        size_t actual_pos = i % shards_names.size();
         std::string shard = shards_names[actual_pos];
         i++;
 
         if (actual_pos != 0) { // if is not already the primary
+          boost::mutex::scoped_lock lock(move_chunk_lock);
           EPIDB_LOG_DBG("Moving " << collection << " to " << shard);
           mongo::BSONObjBuilder move_builder;
           move_builder.append("moveChunk", collection);
@@ -270,13 +271,15 @@ namespace epidb {
       return ss.str();
     }
 
+
+
     bool insert_experiment(const std::string &name, const std::string &norm_name,
                            const std::string &genome, const std::string &norm_genome,
                            const std::string &epigenetic_mark, const std::string &norm_epigenetic_mark,
                            const std::string &sample_id, const std::string &technique, const std::string &norm_technique,
                            const std::string &project, const std::string &norm_project,
                            const std::string &description, const std::string &norm_description, const Metadata &extra_metadata,
-                           const std::string &user_key, const std::string &ip, const std::vector<parser::Feature> &features,
+                           const std::string &user_key, const std::string &ip, const parser::WigPtr &wig,
                            std::string &experiment_id, std::string &msg)
     {
       {
@@ -366,19 +369,40 @@ namespace epidb {
       size_t prev_size;
       std::map<std::string, bool> processed;
 
-      BOOST_FOREACH( parser::Feature feature, features) {
+      parser::WigContent::const_iterator end = wig->tracks_iterator_end();
+      for (parser::WigContent::const_iterator it = wig->tracks_iterator(); it != end; it++) {
+        parser::TrackPtr track = *it;
         mongo::BSONObjBuilder region_builder;
         region_builder.append("_id", (int) count++);
-        region_builder.append(KeyMapper::START(), (int) feature._start);
-        region_builder.append(KeyMapper::END(), (int) feature._end);
-        region_builder.append(KeyMapper::VALUE(), feature._value);
+
+        if (track->type() == parser::FIXED_STEP) {
+          region_builder.append(KeyMapper::WIG_TRACK_TYPE(), "F");
+        } else {
+          region_builder.append(KeyMapper::WIG_TRACK_TYPE(), "V");
+        }
+
+        region_builder.append(KeyMapper::START(), (int) track->start());
+        region_builder.append(KeyMapper::WIG_STEP(), (int) (int) track->step());
+        region_builder.append(KeyMapper::START(), (int) track->start());
+        region_builder.append(KeyMapper::END(), (int) track->end());
+        region_builder.append(KeyMapper::WIG_SPAN(), (int) track->span());
+        region_builder.append(KeyMapper::WIG_SIZE(), (int) track->size());
+        region_builder.append(KeyMapper::WIG_DATA_SIZE(), (int) track->data_size());
+
+        void *data = track->data();
+        size_t data_size = track->data_size();
+
+        std::cerr << "data_size: " << data_size << std::endl;
+
+        region_builder.appendBinData(KeyMapper::WIG_DATA(), data_size, mongo::BinDataGeneral, data);
 
         std::string internal_chromosome;
-        if (!genome_info->internal_chromosome(feature._chrom, internal_chromosome, msg)) {
+        if (!genome_info->internal_chromosome(track->chromosome(), internal_chromosome, msg)) {
           // TODO: delete data already included.
           c.done();
           return false;
         }
+
         size_t size;
         if (!genome_info->chromosome_size(internal_chromosome, size, msg)) {
           // TODO: delete data already included.
@@ -386,11 +410,13 @@ namespace epidb {
           return false;
         }
 
+        /*
         if (feature._start > size || feature._end > size) {
           msg = out_of_range_message(feature._start, feature._end, feature._chrom);
           c.done();
           return false;
         }
+        */
 
         mongo::BSONObj r = region_builder.obj();
         std::string collection = helpers::region_collection_name(genome, experiment_id, internal_chromosome);
@@ -413,6 +439,7 @@ namespace epidb {
           prev_size = size;
         }
 
+        std::cerr << r.toString() << std::endl;
         bulk.push_back(r);
 
         if (bulk.size() % BULK_SIZE == 0) {

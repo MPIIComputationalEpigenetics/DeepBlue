@@ -1,16 +1,8 @@
 //
-//  create_user.cpp
+//  add_user.cpp
 //  epidb
 //
 //  Created by Felipe Albrecht on 16.06.13.
-//  Copyright (c) 2013,2014 Max Planck Institute for Computer Science. All rights reserved.
-//
-
-//
-//  find.cpp
-//  epidb
-//
-//  Created by Felipe Albrecht on 12.06.13.
 //  Copyright (c) 2013,2014 Max Planck Institute for Computer Science. All rights reserved.
 //
 

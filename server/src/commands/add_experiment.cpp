@@ -23,11 +23,12 @@
 #include "../parser/field_type.hpp"
 #include "../parser/parser_factory.hpp"
 #include "../parser/wig_parser.hpp"
+#include "../parser/wig.hpp"
 
 namespace epidb {
   namespace command {
 
-    class InsertCommand: public Command {
+    class AddExperimentCommand: public Command {
 
     private:
       static CommandDescription desc_()
@@ -64,7 +65,7 @@ namespace epidb {
       }
 
     public:
-      InsertCommand() : Command("add_experiment", parameters_(), results_(), desc_()) {}
+      AddExperimentCommand() : Command("add_experiment", parameters_(), results_(), desc_()) {}
 
       // TODO: Check user
       virtual bool run(const std::string &ip,
@@ -194,9 +195,9 @@ namespace epidb {
         }
 
         if (format.compare("wig") == 0) {
+          parser::WigPtr wig;
           parser::WIGParser wig_parser(data);
-          std::vector<parser::Feature> features;
-          if (!wig_parser.get_features(features, msg)) {
+          if (!wig_parser.get(wig, msg)) {
             result.add_error(msg);
             return false;
           }
@@ -204,13 +205,15 @@ namespace epidb {
           std::string id;
           bool ret = dba::insert_experiment(name, norm_name, genome, norm_genome, epigenetic_mark, norm_epigenetic_mark, sample,
                                             technique, norm_technique, project, norm_project, description, norm_description,
-                                            extra_metadata, user_key, ip, features, id, msg);
+                                            extra_metadata, user_key, ip, wig, id, msg);
           if (ret) {
+            std::cerr << id << std::endl;
             result.add_string(id);
+            return true;
           } else {
             result.add_error(msg);
+            return false;
           }
-          return ret;
 
         } else {
           parser::FileFormat fileFormat;

@@ -29,19 +29,20 @@ ifeq ($(host),production)
 
 endif
 
+# -O3 -Ofast
 # Felipe Albrecht's mac
 ifeq ($(host),macosx)
  CXX = clang++
- DEFCXXFLAGS = -O3 -Ofast  -Werror -Wall -Wextra  -Weffc++ -Wno-unused-parameter -Wno-ignored-qualifiers -DPROFINY_CALL_GRAPH_PROFILER -I/opt/boost/include/ -I/Users/albrecht/mpi/epidb/epidb/mongo/driver/macosx/include -I/Users/albrecht/mpi/DeepBlue/server/third_party/cppformat/
+ DEFCXXFLAGS = -g   -Werror -Wall -Wextra  -Weffc++ -Wno-unused-parameter -Wno-ignored-qualifiers -DPROFINY_CALL_GRAPH_PROFILER -I/opt/boost/include/ -I/Users/albrecht/mpi/DeepBlue/server/third_party/drivers/macosx/include -I/Users/albrecht/mpi/DeepBlue/server/third_party/cppformat/ -I/Users/albrecht/mpi/DeepBlue/server/third_party/minilzo/
  BOOST_DIR = /opt/boost/lib
  LD	= clang++
  LDFLAGS = -g
- MONGOLIBS =  -L/Users/albrecht/mpi/epidb/epidb/mongo/driver/macosx/lib -lmongoclient
+ MONGOLIBS =  -L/Users/albrecht/mpi/DeepBlue/server/third_party/drivers/macosx/lib -lmongoclient
  BOOSTLIBS = $(BOOST_DIR)/libboost_filesystem.a $(BOOST_DIR)/libboost_thread.a $(BOOST_DIR)/libboost_system.a $(BOOST_DIR)/libboost_regex.a $(BOOST_DIR)/libboost_log.a  $(BOOST_DIR)/libboost_timer.a  $(BOOST_DIR)/libboost_chrono.a $(BOOST_DIR)/libboost_program_options.a
  THIRDLIBS = ../third_party/libexpat_macosx.a
 endif
 
-CPPFORMAT = ../third_party/cppformat/format.cc
+CPPFORMAT = ../third_party/cppformat/format.cc ../third_party/minilzo/minilzo.c
 DEFLIBS = $(MONGOLIBS) $(BOOSTLIBS) $(CPPFORMAT)
 
 AR	= ar

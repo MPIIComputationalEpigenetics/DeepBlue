@@ -27,6 +27,13 @@ namespace epidb {
       static const std::string& START();
       static const std::string& END();
       static const std::string& VALUE();
+      static const std::string& WIG_TYPE();
+      static const std::string& WIG_STEP();
+      static const std::string& WIG_SPAN();
+      static const std::string& WIG_SIZE();
+      static const std::string& WIG_DATA_SIZE();
+      static const std::string& WIG_TRACK_TYPE();
+      static const std::string& WIG_DATA();
 
     private:
       static bool set_shortcut(const std::string &s, const std::string &l, std::string &err);

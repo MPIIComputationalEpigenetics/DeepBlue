@@ -18,37 +18,151 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/tokenizer.hpp>
+#include <boost/shared_ptr.hpp>
 
 #include "wig_parser.hpp"
 
 #include "../extras/utils.hpp"
+#include "wig.hpp"
 
 namespace epidb {
   namespace parser {
 
-    WIGParser::WIGParser(const std::string& content) :
+    WIGParser::WIGParser(const std::string &content) :
       actual_line_(0),
       input_(content),
-      declare_track_(false),
-      start(0),
-      step(0),
-      span(0)
+      declare_track_(false)
     {}
 
-    bool WIGParser::get_features(std::vector<Feature>& features, std::string& msg)
+    bool WIGParser::read_track(const std::string &line, std::map<std::string, std::string> &info, std::string &msg)
     {
+      std::string s = line.substr(6); // remove "track "
+      std::string separator1("");//dont let quoted arguments escape themselves
+      std::string separator2(" \t");//split on spaces
+      std::string separator3("\"\'");//let it have quoted arguments
+
+      boost::escaped_list_separator<char> els(separator1, separator2, separator3);
+      boost::tokenizer<boost::escaped_list_separator<char> > tok(s, els);
+
+      for (boost::tokenizer<boost::escaped_list_separator<char> >::iterator beg = tok.begin(); beg != tok.end(); ++beg) {
+        std::vector<std::string> kv;
+        size_t pos = beg->find_first_of("=");
+        if (pos == std::string::npos) {
+          msg = "The track seems to have an invalid <track> header line: " + *beg;
+          return false;
+        }
+        std::string key = beg->substr(0, pos);
+        std::string value = beg->substr(pos + 1);
+        info[key] = value;
+      }
+      return true;
+    }
+
+    bool WIGParser::read_parameters(const std::vector<std::string> &strs, std::map<std::string, std::string> &params,
+                                    std::string &msg)
+    {
+      params.clear();
+      //params["mode"] = strs[0];
+      for (size_t i = 1; i < strs.size(); i++ ) {
+        std::vector<std::string> kv;
+        size_t pos = strs[i].find_first_of("=");
+        if (pos == std::string::npos) {
+          msg = "The track seems to have an invalid parameters: " + strs[i] + " . Line: " + line_str();
+          return false;
+        }
+
+        std::string key = strs[i].substr(0, pos);
+        std::string value = strs[i].substr(pos + 1);
+        boost::trim(value);
+
+        if (value.size() == 0) {
+          msg = "Value for the key " + key + " was not informed. Line: " + line_str();
+          return false;
+        }
+        params[key] = value;
+      }
+      return true;
+    }
+
+
+    bool WIGParser::read_format(const std::vector<std::string> &strs, TrackPtr &track, std::string &msg)
+    {
+      std::map<std::string, std::string> params;
+      if (!read_parameters(strs, params, msg)) {
+        return false;
+      }
+
+      std::string mode(strs[0]);
+      size_t start;
+      size_t step;
+      size_t span;
+
+      if (params.find("chrom") == params.end()) {
+        msg = "The track doesn't specify a chromosome. Line: " + line_str();
+        return false;
+      }
+      std::string chrom = params["chrom"];
+
+      if (params.find("span") == params.end()) {
+        span = 1;
+      } else if (utils::string_to_long(params["span"], span)) {
+        if (span == 0) {
+          msg = "The span value should be bigger than 0. Line: " + line_str();
+          return false;
+        }
+      } else {
+        msg = "The track has a non integer or negative or null span value. Line: " + line_str();
+        return false;
+      }
+
+      if (mode == "fixedStep") {
+        if (params.find("start") == params.end() || !utils::is_number(params["start"])) {
+          msg = "The track has a non integer or smaller than 1 as start value. Line: " + line_str();
+          return false;
+        }
+        if (params.find("step") == params.end()) {
+          msg = "The fixedStep tracks should define a positive step value. Line: " + line_str();
+          return false;
+        } else if (!utils::is_number(params["step"])) {
+          msg = "The track has a negative or null step value. Line: " + line_str();
+          return false;
+        }
+        start = atoi(params["start"].c_str());
+        step = atoi(params["step"].c_str());
+
+        if (span > step) {
+          msg = "The span value (" + utils::integer_to_string(span) + ") is bigger than the step value (" +
+                utils::integer_to_string(step) + "). Line: " + line_str();
+          return false;
+        }
+        track = build_fixed_track(chrom, start, step, span);
+        return true;
+
+      } else if (mode == "variableStep") {
+        track = build_variable_track(chrom, span);
+        return true;
+
+      } else {
+        msg = "Invalid track mode " + mode + ". Line: " + line_str();
+        return false;
+      }
+    }
+
+    bool WIGParser::get(WigPtr &wig, std::string &msg)
+    {
+      wig = boost::shared_ptr<WigFile>(new WigFile());
       std::string line;
 
       while (!input_.eof()) {
         std::getline(input_, line);
         boost::trim(line);
         actual_line_++;
-        if (!line.size()) {
+        if (line.empty()) {
           continue;
         }
 
         while (*line.rbegin() == '\\') {
-          line = line.substr(0, line.size()-1);
+          line = line.substr(0, line.size() - 1);
           std::string new_line;
           std::getline(input_, new_line);
           boost::trim(new_line);
@@ -63,136 +177,53 @@ namespace epidb {
         std::vector<std::string> strs;
         boost::split(strs, line, boost::is_any_of("\t "));
 
-        if (strs[0].compare("browser") == 0) {
+        if (strs[0] == "browser") {
           continue;
         }
 
-        std::map<std::string, std::string> info;
-        if (strs[0].compare("track") == 0) {
-
+        if (strs[0] == "track") {
           if (declare_track_)  {
             msg = "It is allowed only one track by file. Line: " + line_str();
             return false;
           }
 
-          std::string s = line.substr(6); // remove "track "
-          std::string separator1("");//dont let quoted arguments escape themselves
-          std::string separator2(" \t");//split on spaces
-          std::string separator3("\"\'");//let it have quoted arguments
-
-          boost::escaped_list_separator<char> els(separator1,separator2,separator3);
-          boost::tokenizer<boost::escaped_list_separator<char> > tok(s, els);
-
-          for(boost::tokenizer<boost::escaped_list_separator<char> >::iterator beg=tok.begin(); beg!=tok.end();++beg) {
-            std::vector<std::string> kv;
-            size_t pos = beg->find_first_of("=");
-            if (pos == std::string::npos) {
-              msg = "The track seems to have an invalid <track> header line: " + *beg;
-              return false;
-            }
-            std::string key = beg->substr(0,pos);
-            std::string value = beg->substr(pos+1);
-            info[key] = value;
+          std::map<std::string, std::string> info;
+          if (!read_track(line, info, msg)) {
+            return false;
           }
 
           declare_track_ = true;
+          continue;
+        }
 
-          if (!last_feature_.empty()) {
-            if (!check_feature(last_feature_, msg)) {
-              return false;
-            }
-            features.push_back(last_feature_);
-            last_feature_.clear();
+        if (strs[0] == "variableStep" ||
+            strs[0] == "fixedStep") {
+
+          if (actual_track) {
+            wig->add_track(actual_track);
+          }
+
+          if (!read_format(strs, actual_track, msg)) {
+            return false;
           }
 
           continue;
         }
 
-        if (strs[0].compare("variableStep") == 0 ||
-          strs[0].compare("fixedStep") == 0) {
-
-          params.clear();
-          params["mode"] = strs[0];
-
-          for (size_t i = 1; i < strs.size(); i++ ) {
-            std::vector<std::string> kv;
-            size_t pos = strs[i].find_first_of("=");
-            if (pos == std::string::npos) {
-              msg = "The track seems to have an invalid parameters: " + strs[i] + " . Line: " + line_str();
-              return false;
-            }
-
-            std::string key = strs[i].substr(0,pos);
-            std::string value = strs[i].substr(pos+1);
-            boost::trim(value);
-
-            if (value.size() == 0) {
-              msg = "Value for the key " + key + " was not informed. Line: " + line_str();
-              return false;
-            }
-            params[key] = value;
-          }
-
-          if (params.find("chrom") == params.end()) {
-            msg = "The track doesn't specify a chromosome. Line: " + line_str();
-            return false;
-          }
-
-          if (params.find("span") == params.end()) {
-            span = 1;
-          } else if (utils::string_to_long(params["span"], span)) {
-            if (span == 0) {
-              msg = "The span value should be bigger than 0. Line: " + line_str();
-              return false;
-            }
-          } else {
-            msg = "The track has a non integer or negative or null span value. Line: " + line_str();
-            return false;
-          }
-
-          if (strs[0].compare("fixedStep") == 0) {
-            if (params.find("start") == params.end() || !utils::is_number(params["start"])) {
-              msg = "The track has a non integer or smaller than 1 as start value. Line: " + line_str();
-              return false;
-            }
-            if (params.find("step") == params.end()) {
-              msg = "The fixedStep tracks should define a positive step value. Line: " + line_str();
-              return false;
-            } else if (!utils::is_number(params["step"])) {
-              msg = "The track has a negative or null step value. Line: " + line_str();
-              return false;
-            }
-            start = atoi(params["start"].c_str());
-            step = atoi(params["step"].c_str());
-          }
-
-          continue;
-        }
-
-        if (params.size() == 0) {
+        if (!actual_track) {
           msg = "The track is missing a fixedStep or variableStep directive. Line: "  + line_str();
         }
 
-        Feature new_feature;
-
-        if (params["mode"].compare("fixedStep") == 0) {
-
-          if (span > step) {
-            msg = "The span value (" + boost::lexical_cast<std::string>(span) + ") is bigger than the step value (" +
-            boost::lexical_cast<std::string>(step) + "). Line: " + line_str();
-            return false;
-          }
+        if (actual_track->type() == FIXED_STEP) {
 
           double value;
           if (!utils::string_to_double(line, value)) {
-            msg = "The feature value " + line + " at the line " + line_str();
+            msg = "The feature value " + line + " at the line " + line_str() + " is not a valid number";
             return false;
           }
-          new_feature.set(params["chrom"], start, start + span, value);
-          start += step;
+          actual_track->add_feature(value);
 
-        } else if (params["mode"].compare("variableStep") == 0) {
-
+        } else if (actual_track->type() == VARIABLE_STEP) {
           if (strs.size() != 2) {
             msg = "The track has invalid or missing values. Line: " + line_str();
             return false;
@@ -208,35 +239,18 @@ namespace epidb {
             return false;
           }
 
-          new_feature.set(params["chrom"], position, position+span, value);
+          actual_track->add_feature(position, value);
         } else {
           msg = "The track is missing a fixedStep or variableStep directive at the line " + line_str();
           return false;
         }
-
-        if (new_feature._value == 0.0) {
-          continue;
-        }
-
-        if (!last_feature_.empty()) {
-          if (!check_feature(last_feature_, msg)) {
-            return false;
-          }
-          features.push_back(last_feature_);
-          last_feature_.clear();
-        }
-        last_feature_ = new_feature;
       }
 
-      if (!last_feature_.empty()) {
-        if (!check_feature(last_feature_, msg)) {
-          return false;
-        }
-        features.push_back(last_feature_);
-        last_feature_.clear();
+      if (actual_track) {
+        wig->add_track(actual_track);
       }
 
-      if (features.size() == 0) {
+      if (wig->size() == 0) {
         msg = "The file does not inform any region or is empty.";
         return false;
       }

@@ -52,6 +52,20 @@ namespace epidb {
         {
           Region region(collection_id);
 
+          if (region_bson.hasField(KeyMapper::WIG_TRACK_TYPE())) {
+            std::string track_type = region_bson[KeyMapper::WIG_TRACK_TYPE()].str();
+
+            std::cerr << "got: " << region_bson.toString() << std::endl;
+            if (track_type  == "F") {
+              std::cerr << "FIXED" << std::endl;
+
+            } else if (track_type  == "V") {
+              std::cerr << "VARIABLE_STEP" << std::endl;
+            } else {
+              std::cerr << "Invalid Wig track type : " + track_type << std::endl;
+            }
+          }
+
           for ( mongo::BSONObj::iterator i = region_bson.begin(); i.more(); ) {
             mongo::BSONElement e = i.next();
             if (e.fieldName() == KeyMapper::START()) {
