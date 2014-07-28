@@ -6,3 +6,7 @@ fixedStep chrom=chr1 start=68 step=2 span=2
 100.001
 fixedStep chrom=chr1 start=120 step=10 span=10
 10.0
+fixedStep chrom=chr1 start=150 step=10 span=10
+10.0
+20.0
+30.0
