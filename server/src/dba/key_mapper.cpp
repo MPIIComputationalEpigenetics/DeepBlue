@@ -138,7 +138,7 @@ namespace epidb {
       return VALUE;
     }
 
-    const std::string &KeyMapper::WIG_SIZE()
+    const std::string &KeyMapper::WIG_FEATURES()
     {
       static std::string VALUE = epidb::dba::KeyMapper::build_default("SIZE_WIG");
       return VALUE;

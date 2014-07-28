@@ -9,7 +9,7 @@
 
 #include <algorithm>
 #include <climits>
-#include <ctype.h>
+#include <cctype>
 #include <cmath>
 #include <iomanip>
 #include <iostream>
@@ -59,38 +59,164 @@ namespace epidb {
       return std::pair<std::string, std::string>(s.substr(0, found), s.substr(found + 1));
     }
 
-    // XXX: Template for string_to_long and string_to_double
-    bool string_to_long(const std::string &s_, size_t &i)
+    static uint64_t decdigits[100] = {
+      0ll, 0ll, 0ll, 0ll, 0ll, 0ll, 0ll, 0ll, 0ll, 0,
+      1ll, 10ll, 100ll, 1000ll, 10000ll, 100000ll, 1000000ll, 10000000ll, 100000000ll, 1000000000ll,
+      2ll, 20ll, 200ll, 2000ll, 20000ll, 200000ll, 2000000ll, 20000000ll, 200000000ll, 2000000000ll,
+      3ll, 30ll, 300ll, 3000ll, 30000ll, 300000ll, 3000000ll, 30000000ll, 300000000ll, 3000000000ll,
+      4ll, 40ll, 400ll, 4000ll, 40000ll, 400000ll, 4000000ll, 40000000ll, 400000000ll, 400000000ll,
+      5ll, 50ll, 500ll, 5000ll, 50000ll, 500000ll, 5000000ll, 50000000ll, 500000000ll, 5000000000ll,
+      6ll, 60ll, 600ll, 6000ll, 60000ll, 600000ll, 6000000ll, 60000000ll, 600000000ll, 6000000000ll,
+      7ll, 70ll, 700ll, 7000ll, 70000ll, 700000ll, 7000000ll, 70000000ll, 700000000ll, 7000000000ll,
+      8ll, 80ll, 800ll, 8000ll, 80000ll, 800000ll, 8000000ll, 80000000ll, 800000000ll, 8000000000ll,
+      9ll, 90ll, 900ll, 9000ll, 90000ll, 900000ll, 9000000ll, 90000000ll, 900000000ll, 9000000000ll
+    };
+
+    bool string_to_long(const std::string &s, size_t &i)
     {
-      std::string ss(s_);
-      boost::trim(ss);
-      try {
-        i = boost::lexical_cast<size_t>(ss);
-        return true;
-      } catch (boost::bad_lexical_cast const &) {
-        i = LONG_MIN;
-        return false;
+      const char *p = s.c_str();
+      bool neg((*p == '-') ? 1 : 0);
+      register size_t num(0);
+      register size_t pos(strlen(p + neg) - 1);
+      if (neg)  {
+        ++p;
       }
+      while (*p) {
+        if (!std::isdigit(*p)) {
+          return false;
+        }
+        num += decdigits[(*p++ - '0') * 10 + pos--];
+      }
+      i = (neg ? -num : num);
+      return true;
+    }
+
+    template<typename T>
+    bool s_to_T(T &r, const char *p)
+    {
+      // Skip leading white space, if any.
+      while (std::isspace(*p) ) {
+        p += 1;
+      }
+
+      r = 0.0;
+      int c = 0; // counter to check how many numbers we got!
+
+      // Get the sign!
+      bool neg = false;
+      if (*p == '-') {
+        neg = true;
+        ++p;
+      } else if (*p == '+') {
+        neg = false;
+        ++p;
+      }
+
+      // Get the digits before decimal point
+      while (std::isdigit(*p)) {
+        r = (r * 10.0) + (*p - '0');
+        ++p; ++c;
+      }
+
+      // Get the digits after decimal point
+      if (*p == '.') {
+        T f = 0.0;
+        T scale = 1.0;
+        ++p;
+        while (*p >= '0' && *p <= '9') {
+          f = (f * 10.0) + (*p - '0');
+          ++p;
+          scale *= 10.0;
+          ++c;
+        }
+        r += f / scale;
+      }
+
+      // FIRST CHECK:
+      if (c == 0) {
+        return false; // we got no dezimal places! this cannot be any number!
+      }
+
+
+      // Get the digits after the "e"/"E" (exponenet)
+      if (*p == 'e' || *p == 'E') {
+        int e = 0;
+
+        bool negE = false;
+        ++p;
+        if (*p == '-') {
+          negE = true;
+          ++p;
+        } else if (*p == '+') {
+          negE = false;
+          ++p;
+        }
+        // Get exponent
+        c = 0;
+        while (std::isdigit(*p)) {
+          e = (e * 10) + (*p - '0');
+          ++p; ++c;
+        }
+        if ( !neg && e > std::numeric_limits<T>::max_exponent10 ) {
+          e = std::numeric_limits<T>::max_exponent10;
+        } else if (neg && e > std::numeric_limits<T>::min_exponent10 ) {
+          e = std::numeric_limits<T>::max_exponent10;
+        }
+        // SECOND CHECK:
+        if (c == 0) {
+          return false; // we got no  exponent! this was not intended!!
+        }
+
+        T scaleE = 1.0;
+        // Calculate scaling factor.
+
+        while (e >= 50) {
+          scaleE *= 1E50;
+          e -= 50;
+        }
+        //while (e >=  8) { scaleE *= 1E8;  e -=  8; }
+        while (e >   0) {
+          scaleE *= 10.0;
+          e -=  1;
+        }
+
+        if (negE) {
+          r /= scaleE;
+        } else {
+          r *= scaleE;
+        }
+      }
+
+      // POST CHECK:
+      // skip post whitespaces
+      while ( std::isspace(*p) ) {
+        ++p;
+      }
+      if (*p != '\0') {
+        return false; // if next character is not the terminating character
+      }
+
+      // Apply sign to number
+      if (neg) {
+        r = -r;
+      }
+
+      return true;
     }
 
     bool string_to_double(const std::string &s_, double &d)
     {
-      std::string ss(s_);
-      boost::trim(ss);
-      try {
-        d = boost::lexical_cast<double>(ss);
-        return true;
-      } catch (boost::bad_lexical_cast const &m) {
-        d = NAN;
-        return false;
-      }
+      return s_to_T<double>(d, s_.c_str());
+    }
+
+    bool string_to_float(const std::string &s_, float &d)
+    {
+      return s_to_T<float>(d, s_.c_str());
     }
 
     const std::string double_to_string(const double d)
     {
-      fmt::Writer w;
-      w << d;
-      return w.str();
+      return fmt::format("{:-.4f}", d);
     }
 
     const std::string integer_to_string(const int t)

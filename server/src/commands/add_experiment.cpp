@@ -22,6 +22,7 @@
 
 #include "../parser/field_type.hpp"
 #include "../parser/parser_factory.hpp"
+#include "../parser/bedgraph_parser.hpp"
 #include "../parser/wig_parser.hpp"
 #include "../parser/wig.hpp"
 
@@ -194,12 +195,20 @@ namespace epidb {
           return false;
         }
 
-        if (format.compare("wig") == 0) {
+        if (format == "wig" || format == "bedgraph") {
           parser::WigPtr wig;
-          parser::WIGParser wig_parser(data);
-          if (!wig_parser.get(wig, msg)) {
-            result.add_error(msg);
-            return false;
+          if (format == "wig") {
+            parser::WIGParser wig_parser(data);
+            if (!wig_parser.get(wig, msg)) {
+              result.add_error(msg);
+              return false;
+            }
+          } else {
+            parser::BedGraphParser bedgraph_parser(data);
+            if (!bedgraph_parser.get(wig, msg)) {
+              result.add_error(msg);
+              return false;
+            }
           }
 
           std::string id;
@@ -207,7 +216,6 @@ namespace epidb {
                                             technique, norm_technique, project, norm_project, description, norm_description,
                                             extra_metadata, user_key, ip, wig, id, msg);
           if (ret) {
-            std::cerr << id << std::endl;
             result.add_string(id);
             return true;
           } else {

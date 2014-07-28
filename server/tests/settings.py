@@ -5,5 +5,6 @@ MONGODB_SCRIPTS = {
 }
 
 EPIDB_BIN = "../server/server"
+DATABASE_NAME = "tests_suite"
 
 EPIDB_TEST_ADMIN = ("test_admin", "deepblue@mpi-inf.mpg.de", "MPI-Inf")

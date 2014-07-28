@@ -232,7 +232,6 @@ class TestSelectRegions(helpers.TestCase):
   #     res, msg = epidb.select_regions(*args)
   #     self.assertFailure(res, msg)
 
-
   def test_argument_normalization(self):
     epidb = EpidbClient()
     self.init_base()
@@ -244,7 +243,7 @@ class TestSelectRegions(helpers.TestCase):
 
     format = "CHROMOSOME,START,END,name,score,strand,signalValue,pValue,qValue,peak"
 
-    res, qid = epidb.select_regions("  HG19_CHR1_1", "hg19", "methylatioN", sample_id, " Tech1",
+    res, qid = epidb.select_regions("HG19_CHR1_1", "hg19", "methylation", sample_id, " Tech1",
                                     "ENCode ", "chr1", 713240, 876330, self.admin_key)
     self.assertSuccess(res, qid)
 
@@ -333,7 +332,7 @@ class TestSelectRegions(helpers.TestCase):
     self.insert_experiment(epidb, "hg19_chr1_1", sample_id)
     self.insert_experiment(epidb, "hg19_chr1_2", sample_id)
 
-    # retrieve every paired combination 
+    # retrieve every paired combination
     combinations = [
       (["hg18_chr1_1", "hg19_chr1_2"], "multiple_genomes"),
       (["hg18_chr1_1", "hg19_chr1_1"], "multiple_genomes_2"),

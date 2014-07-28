@@ -31,7 +31,9 @@ namespace epidb {
     WIGParser::WIGParser(const std::string &content) :
       actual_line_(0),
       input_(content),
-      declare_track_(false)
+      declare_track_(false),
+      actual_track(),
+      map_overlap_counter()
     {}
 
     bool WIGParser::read_track(const std::string &line, std::map<std::string, std::string> &info, std::string &msg)
@@ -83,7 +85,6 @@ namespace epidb {
       }
       return true;
     }
-
 
     bool WIGParser::read_format(const std::vector<std::string> &strs, TrackPtr &track, std::string &msg)
     {
@@ -148,6 +149,29 @@ namespace epidb {
       }
     }
 
+    bool WIGParser::check_feature(const std::string &chromosome, const size_t start, const size_t span, const size_t &line, std::string &msg)
+    {
+      boost::shared_ptr<boost::icl::interval_set<int> > overlap_counter;
+
+      if (map_overlap_counter.find(chromosome) == map_overlap_counter.end()) {
+        overlap_counter = boost::shared_ptr<boost::icl::interval_set<int> >( new boost::icl::interval_set<int>());
+        map_overlap_counter[chromosome] = overlap_counter;
+      } else {
+        overlap_counter = map_overlap_counter[chromosome];
+      }
+
+      boost::icl::discrete_interval<int> inter_val =  boost::icl::discrete_interval<int>::right_open(start, start + span);
+
+      if (boost::icl::intersects(*overlap_counter, inter_val)) {
+        msg = "The region " + chromosome + " " + utils::integer_to_string(start) + " " +
+              utils::integer_to_string(start + span) + " is overlaping with some other region. Line: " +
+              utils::integer_to_string(line);
+        return false;
+      }
+      (*overlap_counter) += inter_val;
+      return true;
+    }
+
     bool WIGParser::get(WigPtr &wig, std::string &msg)
     {
       wig = boost::shared_ptr<WigFile>(new WigFile());
@@ -206,19 +230,24 @@ namespace epidb {
           if (!read_format(strs, actual_track, msg)) {
             return false;
           }
-
           continue;
         }
 
         if (!actual_track) {
           msg = "The track is missing a fixedStep or variableStep directive. Line: "  + line_str();
+          return false;
         }
 
         if (actual_track->type() == FIXED_STEP) {
-
           double value;
           if (!utils::string_to_double(line, value)) {
             msg = "The feature value " + line + " at the line " + line_str() + " is not a valid number";
+            return false;
+          }
+
+          if (!check_feature(actual_track->chromosome(),
+                             actual_track->start() + ( actual_track->features() * actual_track->span()),
+                             actual_track->span(), actual_line_, msg)) {
             return false;
           }
           actual_track->add_feature(value);
@@ -236,6 +265,10 @@ namespace epidb {
           }
           if (!utils::string_to_double(strs[1], value)) {
             msg = "The feature value " + strs[0] + " at the line " + line_str();
+            return false;
+          }
+
+          if (!check_feature(actual_track->chromosome(), position, actual_track->span(), actual_line_, msg)) {
             return false;
           }
 

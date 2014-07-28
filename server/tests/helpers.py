@@ -1,8 +1,9 @@
-import subprocess
-import unittest
+import gzip
 import inspect
+import subprocess
 import os.path
 import time
+import unittest
 
 from pymongo import MongoClient
 from client import EpidbClient
@@ -27,7 +28,7 @@ def setUp():
   # clear database
   print "----- clearing database -----"
   mongo = MongoClient("localhost", 27017)
-  mongo.drop_database("tests_suite")
+  mongo.drop_database(settings.DATABASE_NAME)
   print "\n"
 
   # start epidb
@@ -103,7 +104,10 @@ def load_wig(name):
     return f.read()
 
 
-
+def load_bedgraph(name):
+  filename = "data/bedgraph/%s.bg.gz" % name
+  with gzip.open(filename, 'r') as f:
+    return f.read()
 
 class TestCase(unittest.TestCase):
 

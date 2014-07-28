@@ -24,6 +24,18 @@ namespace epidb {
       return boost::shared_ptr<Track>(new Track(chr, span));
     }
 
+    TrackPtr build_bedgraph_track(std::string &chr, size_t start, size_t end)
+    {
+      return boost::shared_ptr<Track>(new Track(chr, start, end));
+    }
+
+    TrackPtr build_bedgraph_track(std::string &chr)
+    {
+      return boost::shared_ptr<Track>(new Track(chr));
+    }
+
+
+
     Track::Track(std::string &chr, size_t start, size_t step, size_t span) :
       _type(FIXED_STEP),
       _chromosome(chr),
@@ -38,8 +50,26 @@ namespace epidb {
       _chromosome(chr),
       _start(std::numeric_limits<size_t>::max()),
       _end(0),
-      _step(-1),
+      _step(0),
       _span(span)
+    { }
+
+    Track::Track(std::string &chr, size_t start, size_t end) :
+      _type(ENCODE_BEDGRAPH),
+      _chromosome(chr),
+      _start(start),
+      _end(end),
+      _step(0),
+      _span(0)
+    { }
+
+    Track::Track(std::string &chr) :
+      _type(MISC_BEDGRAPH),
+      _chromosome(chr),
+      _start(0),
+      _end(0),
+      _step(0),
+      _span(0)
     { }
 
     WigTrackType Track::type()
@@ -47,50 +77,60 @@ namespace epidb {
       return _type;
     }
 
-    size_t Track::size()
+    size_t Track::features()
     {
       if (_type == FIXED_STEP) {
-        std::cerr << "FIXED_STEP size : " << _data_fixed.size() << std::endl;
         return _data_fixed.size();
       } else {
         return _data_variable.size();
-        std::cerr << "VARIABLE_STEP size : " << _data_variable.size() << std::endl;
       }
       return _type;
     }
 
     void Track::add_feature(float score)
     {
-      if (_type == FIXED_STEP) {
-        _data_fixed.push_back(score);
-        _end = _start + (_data_fixed.size() * _span);
-      } else {
-        std::cerr << "ERROR WITH ADD FEATURE 1" << std::endl;
-      }
+      _end = _start + (_data_fixed.size() * _span);
+
+      _data_fixed.push_back(score);
     }
 
     void Track::add_feature(size_t position, float score)
     {
-      if (_type == VARIABLE_STEP) {
-        std::pair<size_t, float> p(position, score);
-        _data_variable.push_back(p);
-        if (position + _span > _end) {
-          _end = position + _span;
-        }
-        if (position < _start) {
-          _start = position;
-        }
-      } else {
-        std::cerr << "ERROR WITH ADD FEATURE 1" << std::endl;
+
+      if (position + _span > _end) {
+        _end = position + _span;
       }
+      if (position < _start) {
+        _start = position;
+      }
+
+      std::pair<size_t, float> p(position, score);
+      _data_variable.push_back(p);
+    }
+
+    void Track::add_feature(size_t start, size_t end, float score)
+    {
+      BedGraphRegion region;
+      region.start = start;
+      region.end = end;
+      region.score = score;
+
+      if (_data_bedgraph.empty() && _start == 0) {
+        _start = start;
+      }
+
+      if (_type == MISC_BEDGRAPH && _end < end) {
+        _end = end;
+      }
+
+      _data_bedgraph.push_back(region);
     }
 
     void *Track::data()
     {
       if (_type == VARIABLE_STEP) {
         return (void *) _data_variable.data();
-      }
-      else  {
+      } else  {
         return (void *) _data_fixed.data();
       }
     }
@@ -106,7 +146,6 @@ namespace epidb {
       }
     }
 
-
     void WigFile::add_track(boost::shared_ptr<Track> track)
     {
       content.push_back(track);
@@ -119,6 +158,9 @@ namespace epidb {
 
     WigContent::const_iterator WigFile::tracks_iterator_end()
     {
+      std::cerr << "iteratorrr" << std::endl;
+      std::cerr << content.size() << std::endl;
+      std::cerr << content[0]->features() << std::endl;
       return content.end();
     }
 
@@ -126,7 +168,7 @@ namespace epidb {
     {
       size_t size(0);
       for (WigContent::iterator it = content.begin(); it != content.end(); it++) {
-        size += (*it)->size();
+        size += (*it)->features();
       }
       return size;
     }

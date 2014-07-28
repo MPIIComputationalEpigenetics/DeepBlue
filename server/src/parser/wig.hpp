@@ -25,56 +25,59 @@ namespace epidb {
 
     typedef enum {
       FIXED_STEP,
-      VARIABLE_STEP
+      VARIABLE_STEP,
+      ENCODE_BEDGRAPH,
+      MISC_BEDGRAPH
     } WigTrackType;
+
+    typedef struct {
+      size_t start;
+      size_t end;
+      float score;
+    } BedGraphRegion;
+
+    typedef std::vector<float>  DataFixed;
+    typedef std::vector<std::pair<size_t, float> > DataVariable;
+    typedef std::vector<BedGraphRegion> DataBedgraph;
 
     class Track {
     private:
       WigTrackType _type;
       std::string _chromosome;
-      boost::icl::interval_set<int> overlap_counter;
       size_t _start;
       size_t _end;
       size_t _step;
       size_t _span;
-
-      std::vector<float>  _data_fixed;
-      std::vector<std::pair<size_t, float> > _data_variable;
-
-      bool check_feature(const size_t start, const size_t &line, std::string &msg)
-      {
-        boost::icl::discrete_interval<int> inter_val =  boost::icl::discrete_interval<int>::right_open(start, start + _span);
-
-        if (boost::icl::intersects(overlap_counter, inter_val)) {
-          msg = "The region " + _chromosome + " " + utils::integer_to_string(start) + " " +
-                utils::integer_to_string(start + _span) + " is overlaping with some other region. Line: " +
-                utils::integer_to_string(line);
-          return false;
-        }
-        overlap_counter += inter_val;
-        return true;
-      }
+      DataFixed  _data_fixed;
+      DataVariable _data_variable;
+      DataBedgraph _data_bedgraph;
 
     public:
-      Track(std::string &chr, size_t start, size_t step, size_t span = 1); // FixedStep
-      Track(std::string &chr, size_t span = 1); // VariableStep
+      Track(std::string &chr, size_t start, size_t step, size_t span); // FixedStep
+      Track(std::string &chr, size_t span); // VariableStep
+      Track(std::string &chr, size_t start, size_t end); // EncodeBedgraph
+      Track(std::string &chr); // MiscBedgraph
+
       WigTrackType type();
       std::string chromosome() { return _chromosome; }
       size_t start() { return _start; }
       size_t end() { return _end; }
       size_t step() { return _step; }
       size_t span() { return _span; }
-      size_t size();
+      size_t features();
       void* data();
       size_t data_size();
       void add_feature(float _score);
       void add_feature(size_t position, float _score);
+      void add_feature(size_t start, size_t end, float _score);
     };
 
     typedef boost::shared_ptr<Track> TrackPtr;
 
     TrackPtr build_fixed_track(std::string &chr, size_t start, size_t step, size_t span);
     TrackPtr build_variable_track(std::string &chr, size_t span);
+    TrackPtr build_bedgraph_track(std::string &chr);
+    TrackPtr build_bedgraph_track(std::string &chr, size_t start, size_t end);
 
     typedef std::vector<TrackPtr> WigContent;
     class WigFile : boost::noncopyable {
@@ -82,16 +85,14 @@ namespace epidb {
       WigContent content;
 
     public:
+      bool check_feature(const std::string& chrm, const size_t start, const size_t &line, std::string &msg);
       WigContent::const_iterator tracks_iterator();
       WigContent::const_iterator tracks_iterator_end();
       size_t size();
       void add_track(TrackPtr track);
     };
 
-
-
     typedef boost::shared_ptr<WigFile> WigPtr;
-
   }
 }
 

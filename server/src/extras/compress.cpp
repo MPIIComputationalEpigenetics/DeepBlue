@@ -16,8 +16,8 @@ namespace epidb {
     bool init()
     {
       if (lzo_init() != LZO_E_OK) {
-        std::cerr << "internal error - lzo_init() failed !!!" << std::endl;
-        std::cerr << "(this usually indicates a compiler bug - try recompiling\nwithout optimizations, and enable '-DLZO_DEBUG' for diagnostics)\n" << std::endl;
+        EPIDB_LOG_ERR("internal error - lzo_init() failed !!!");
+        EPIDB_LOG_ERR("(this usually indicates a compiler bug - try recompiling\nwithout optimizations, and enable '-DLZO_DEBUG' for diagnostics)")
         return false;
       }
 
@@ -34,12 +34,11 @@ namespace epidb {
       free(wrkmem);
 
       if (r == LZO_E_OK) {
-        printf("compressed %lu bytes into %lu bytes\n",
-               (unsigned long) in_size, (unsigned long) out_size);
+        EPIDB_LOG_TRACE("compressed " << in_size << "  bytes into " << out_size  << " bytes");
       }
 
       if (out_size >= in_size) {
-        std::cout << "This block contains incompressible data." << std::endl;
+        EPIDB_LOG_TRACE("This block contains incompressible data.");
       }
       return true;
     }
@@ -49,12 +48,8 @@ namespace epidb {
     {
       bool r = lzo1x_decompress(data, lzo_size, in, &new_len, NULL);
       if (r == LZO_E_OK  && new_len == orig_size) {
-        std::cerr << "r == LZO_E_OK" << std::endl;
       }
-      std::cerr << new_len << std::endl;
-      std::cerr << lzo_size << std::endl;
-      printf("decompressed %lu bytes back into %lu bytes\n",
-             (unsigned long) lzo_size, (unsigned long) new_len);
+      EPIDB_LOG_TRACE("decompressed " << lzo_size << " bytes back into " << new_len << " bytes");
       return 1;
     }
   }

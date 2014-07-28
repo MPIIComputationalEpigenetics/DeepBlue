@@ -1,6 +1,7 @@
 import admin
 import aggregate
 import annotations
+import bedgraph_parser
 import bio_sources
 import bugs
 import column_types
