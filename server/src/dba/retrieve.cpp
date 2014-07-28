@@ -50,42 +50,61 @@ namespace epidb {
 
         void read_region(const mongo::BSONObj &region_bson, const CollectionId &collection_id)
         {
-          Region region(collection_id);
-
           if (region_bson.hasField(KeyMapper::WIG_TRACK_TYPE())) {
             std::string track_type = region_bson[KeyMapper::WIG_TRACK_TYPE()].str();
 
-            std::cerr << "got: " << region_bson.toString() << std::endl;
+            int start = region_bson[KeyMapper::START()].numberInt();
+            int step = region_bson[KeyMapper::WIG_STEP()].numberInt();
+            int span = region_bson[KeyMapper::WIG_SPAN()].numberInt();
+            int size = region_bson[KeyMapper::WIG_FEATURES()].numberInt();
+
             if (track_type  == "F") {
-              std::cerr << "FIXED" << std::endl;
+
+              int i_size;
+              const float *data_fixed = reinterpret_cast<const float *>(region_bson[KeyMapper::WIG_DATA()].binData(i_size));
+              for (int i = 0; i < size; i++) {
+                EPIDB_LOG_DBG("OUT: " << data_fixed[i]);
+                Region region(start + (i * step), start + (i * step) + span, collection_id);
+                region.set(KeyMapper::VALUE(), utils::double_to_string(data_fixed[i]));
+                _regions->push_back(region);
+                _count++;
+              }
 
             } else if (track_type  == "V") {
-              std::cerr << "VARIABLE_STEP" << std::endl;
-            } else {
-              std::cerr << "Invalid Wig track type : " + track_type << std::endl;
+              int i_size;
+              const std::pair<size_t, float> *data_fixed = reinterpret_cast<const std::pair<size_t, float>*>(region_bson[KeyMapper::WIG_DATA()].binData(i_size));
+              for (int i = 0; i < size; i++)  {
+                EPIDB_LOG_DBG("OUT: " << data_fixed[i].first << " " << data_fixed[i].second);
+                Region region(data_fixed[i].first, data_fixed[i].first + span, collection_id);
+                region.set(KeyMapper::VALUE(), utils::double_to_string(data_fixed[i].second));
+                _regions->push_back(region);
+                _count++;
+              }
             }
           }
 
-          for ( mongo::BSONObj::iterator i = region_bson.begin(); i.more(); ) {
-            mongo::BSONElement e = i.next();
-            if (e.fieldName() == KeyMapper::START()) {
-              region.set_start(e.numberInt());
-            } else if (e.fieldName() == KeyMapper::END()) {
-              region.set_end(e.numberInt());
-            } // get free data
-            else if (e.type() == mongo::String) {
-              region.set(e.fieldName(), e.str());
-            } else if (e.type() == mongo::NumberDouble) {
-              region.set(e.fieldName(), utils::double_to_string(e.numberDouble()));
-            } else if (e.type() == mongo::NumberInt) {
-              region.set(e.fieldName(), utils::integer_to_string(e.numberInt()));
-            } else {
-              region.set(e.fieldName(), e.toString(false));
+          else {
+            Region region(collection_id);
+            for ( mongo::BSONObj::iterator i = region_bson.begin(); i.more(); ) {
+              mongo::BSONElement e = i.next();
+              if (e.fieldName() == KeyMapper::START()) {
+                region.set_start(e.numberInt());
+              } else if (e.fieldName() == KeyMapper::END()) {
+                region.set_end(e.numberInt());
+              } // get free data
+              else if (e.type() == mongo::String) {
+                region.set(e.fieldName(), e.str());
+              } else if (e.type() == mongo::NumberDouble) {
+                region.set(e.fieldName(), utils::double_to_string(e.numberDouble()));
+              } else if (e.type() == mongo::NumberInt) {
+                region.set(e.fieldName(), utils::integer_to_string(e.numberInt()));
+              } else {
+                region.set(e.fieldName(), e.toString(false));
+              }
             }
+            _regions->push_back(region);
+            _count++;
           }
-          // region._data.shrink_to_fit();
-          _regions->push_back(region);
-          _count++;
         }
       };
 

@@ -239,7 +239,6 @@ namespace epidb {
           move_builder.append("to", shard);
 
           mongo::BSONObj move = move_builder.obj();
-          std::cerr << move.toString() << std::endl;
 
           if (!c->runCommand("admin", move, info)) {
             EPIDB_LOG_WARN("Error while distributing the collection ("  << move.toString() << ") " <<  collection << " :" << info.toString());
@@ -386,15 +385,9 @@ namespace epidb {
         region_builder.append(KeyMapper::START(), (int) track->start());
         region_builder.append(KeyMapper::END(), (int) track->end());
         region_builder.append(KeyMapper::WIG_SPAN(), (int) track->span());
-        region_builder.append(KeyMapper::WIG_SIZE(), (int) track->size());
+        region_builder.append(KeyMapper::WIG_FEATURES(), (int) track->features());
         region_builder.append(KeyMapper::WIG_DATA_SIZE(), (int) track->data_size());
-
-        void *data = track->data();
-        size_t data_size = track->data_size();
-
-        std::cerr << "data_size: " << data_size << std::endl;
-
-        region_builder.appendBinData(KeyMapper::WIG_DATA(), data_size, mongo::BinDataGeneral, data);
+        region_builder.appendBinData(KeyMapper::WIG_DATA(), track->data_size(), mongo::BinDataGeneral, track->data());
 
         std::string internal_chromosome;
         if (!genome_info->internal_chromosome(track->chromosome(), internal_chromosome, msg)) {
@@ -439,7 +432,6 @@ namespace epidb {
           prev_size = size;
         }
 
-        std::cerr << r.toString() << std::endl;
         bulk.push_back(r);
 
         if (bulk.size() % BULK_SIZE == 0) {

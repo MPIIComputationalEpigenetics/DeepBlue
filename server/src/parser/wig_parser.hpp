@@ -12,49 +12,12 @@
 #include <sstream>
 #include <list>
 
+#include <boost/shared_ptr.hpp>
+
 #include "wig.hpp"
 
 namespace epidb {
   namespace parser {
-
-    /*
-        class Feature {
-        public:
-          std::string _chrom;
-          size_t _start;
-          size_t _end;
-          double _value;
-          Feature() :
-            _chrom(),
-            _start(-1),
-            _end(-1),
-            _value(0.0) {}
-
-          void set(const std::string chrom,
-                  const size_t start, const size_t end, const double value) {
-            _chrom = chrom;
-            _start = start;
-            _end = end;
-            _value = value;
-          }
-
-          bool empty() {
-            return _start == (size_t) -1 && _end == (size_t) -1 && _value == 0.0;
-          }
-
-          void clear()  {
-            _chrom = "";
-            _start = -1;
-            _end = -1;
-            _value = 0.0;
-          }
-
-          friend std::ostream& operator<< (std::ostream& stream, const Feature& feature) {
-            stream << feature._chrom << "\t" << feature._start << "\t" << feature._end << "\t" << feature._value;
-            return stream;
-          }
-        };
-        */
 
     class WIGParser {
     private:
@@ -63,9 +26,11 @@ namespace epidb {
       std::map<std::string, std::string> info_;
       bool declare_track_;
       TrackPtr actual_track;
+      std::map<std::string, boost::shared_ptr<boost::icl::interval_set<int> > > map_overlap_counter;
       bool read_track(const std::string &line, std::map<std::string, std::string> &info, std::string &msg);
       bool read_parameters(const std::vector<std::string> &strs, std::map<std::string, std::string> &params, std::string &msg);
-      bool read_format(const std::vector<std::string> &strs, TrackPtr& track, std::string &msg);
+      bool read_format(const std::vector<std::string> &strs, TrackPtr &track, std::string &msg);
+      bool check_feature(const std::string &chromosome, const size_t start, const size_t span, const size_t &line, std::string &msg);
       bool get_line(std::string line, std::string &msg);
 
       const std::string line_str()

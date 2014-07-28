@@ -47,41 +47,31 @@ namespace epidb {
       return _type;
     }
 
-    size_t Track::size()
+    size_t Track::features()
     {
       if (_type == FIXED_STEP) {
-        std::cerr << "FIXED_STEP size : " << _data_fixed.size() << std::endl;
         return _data_fixed.size();
       } else {
         return _data_variable.size();
-        std::cerr << "VARIABLE_STEP size : " << _data_variable.size() << std::endl;
       }
       return _type;
     }
 
     void Track::add_feature(float score)
     {
-      if (_type == FIXED_STEP) {
-        _data_fixed.push_back(score);
-        _end = _start + (_data_fixed.size() * _span);
-      } else {
-        std::cerr << "ERROR WITH ADD FEATURE 1" << std::endl;
-      }
+      _data_fixed.push_back(score);
+      _end = _start + (_data_fixed.size() * _span);
     }
 
     void Track::add_feature(size_t position, float score)
     {
-      if (_type == VARIABLE_STEP) {
-        std::pair<size_t, float> p(position, score);
-        _data_variable.push_back(p);
-        if (position + _span > _end) {
-          _end = position + _span;
-        }
-        if (position < _start) {
-          _start = position;
-        }
-      } else {
-        std::cerr << "ERROR WITH ADD FEATURE 1" << std::endl;
+      std::pair<size_t, float> p(position, score);
+      _data_variable.push_back(p);
+      if (position + _span > _end) {
+        _end = position + _span;
+      }
+      if (position < _start) {
+        _start = position;
       }
     }
 
@@ -89,8 +79,7 @@ namespace epidb {
     {
       if (_type == VARIABLE_STEP) {
         return (void *) _data_variable.data();
-      }
-      else  {
+      } else  {
         return (void *) _data_fixed.data();
       }
     }
@@ -105,7 +94,6 @@ namespace epidb {
         return _data_fixed.size() * sizeof(float);
       }
     }
-
 
     void WigFile::add_track(boost::shared_ptr<Track> track)
     {
@@ -126,7 +114,7 @@ namespace epidb {
     {
       size_t size(0);
       for (WigContent::iterator it = content.begin(); it != content.end(); it++) {
-        size += (*it)->size();
+        size += (*it)->features();
       }
       return size;
     }

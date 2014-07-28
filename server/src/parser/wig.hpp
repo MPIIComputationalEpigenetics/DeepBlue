@@ -23,6 +23,9 @@
 namespace epidb {
   namespace parser {
 
+    typedef std::vector<float>  DataFixed;
+    typedef std::vector<std::pair<size_t, float> > DataVariable;
+
     typedef enum {
       FIXED_STEP,
       VARIABLE_STEP
@@ -32,28 +35,12 @@ namespace epidb {
     private:
       WigTrackType _type;
       std::string _chromosome;
-      boost::icl::interval_set<int> overlap_counter;
       size_t _start;
       size_t _end;
       size_t _step;
       size_t _span;
-
-      std::vector<float>  _data_fixed;
-      std::vector<std::pair<size_t, float> > _data_variable;
-
-      bool check_feature(const size_t start, const size_t &line, std::string &msg)
-      {
-        boost::icl::discrete_interval<int> inter_val =  boost::icl::discrete_interval<int>::right_open(start, start + _span);
-
-        if (boost::icl::intersects(overlap_counter, inter_val)) {
-          msg = "The region " + _chromosome + " " + utils::integer_to_string(start) + " " +
-                utils::integer_to_string(start + _span) + " is overlaping with some other region. Line: " +
-                utils::integer_to_string(line);
-          return false;
-        }
-        overlap_counter += inter_val;
-        return true;
-      }
+      DataFixed  _data_fixed;
+      DataVariable _data_variable;
 
     public:
       Track(std::string &chr, size_t start, size_t step, size_t span = 1); // FixedStep
@@ -64,7 +51,7 @@ namespace epidb {
       size_t end() { return _end; }
       size_t step() { return _step; }
       size_t span() { return _span; }
-      size_t size();
+      size_t features();
       void* data();
       size_t data_size();
       void add_feature(float _score);
@@ -82,16 +69,14 @@ namespace epidb {
       WigContent content;
 
     public:
+      bool check_feature(const std::string& chrm, const size_t start, const size_t &line, std::string &msg);
       WigContent::const_iterator tracks_iterator();
       WigContent::const_iterator tracks_iterator_end();
       size_t size();
       void add_track(TrackPtr track);
     };
 
-
-
     typedef boost::shared_ptr<WigFile> WigPtr;
-
   }
 }
 

@@ -207,7 +207,6 @@ namespace epidb {
                                             technique, norm_technique, project, norm_project, description, norm_description,
                                             extra_metadata, user_key, ip, wig, id, msg);
           if (ret) {
-            std::cerr << id << std::endl;
             result.add_string(id);
             return true;
           } else {
