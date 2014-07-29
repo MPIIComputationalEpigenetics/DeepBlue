@@ -86,6 +86,19 @@ namespace epidb {
       }
     }
 
+    bool string_to_float(const std::string &s_, float &d)
+    {
+      std::string ss(s_);
+      boost::trim(ss);
+      try {
+        d = boost::lexical_cast<float>(ss);
+        return true;
+      } catch (boost::bad_lexical_cast const &m) {
+        d = NAN;
+        return false;
+      }
+    }
+
     const std::string double_to_string(const double d)
     {
       return fmt::format("{:-.4f}", d);

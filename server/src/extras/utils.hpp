@@ -52,6 +52,8 @@ namespace epidb {
 
     bool string_to_double(const std::string &s, double &d);
 
+    bool string_to_float(const std::string &s, float &d);
+
     const std::string double_to_string(const double d);
 
     const std::string integer_to_string(const int d);
