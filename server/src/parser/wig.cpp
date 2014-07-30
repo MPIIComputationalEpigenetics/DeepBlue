@@ -90,13 +90,11 @@ namespace epidb {
     void Track::add_feature(float score)
     {
       _end = _start + (_data_fixed.size() * _span);
-
       _data_fixed.push_back(score);
     }
 
     void Track::add_feature(size_t position, float score)
     {
-
       if (position + _span > _end) {
         _end = position + _span;
       }

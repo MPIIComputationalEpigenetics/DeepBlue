@@ -23,6 +23,9 @@
 namespace epidb {
   namespace parser {
 
+    typedef std::vector<float>  DataFixed;
+    typedef std::vector<std::pair<size_t, float> > DataVariable;
+
     typedef enum {
       FIXED_STEP,
       VARIABLE_STEP,
