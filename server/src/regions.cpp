@@ -40,7 +40,7 @@ namespace epidb {
 
   static const std::string empty_string = "";
 
-  size_t Region::length() const
+  Length Region::length() const
   {
     return _end - _start;
   }
@@ -50,22 +50,22 @@ namespace epidb {
     return _collection_id;
   }
 
-  size_t Region::start() const
+  Position Region::start() const
   {
     return _start;
   }
 
-  size_t Region::end() const
+  Position Region::end() const
   {
     return _end;
   }
 
-  void Region::set_start(size_t s)
+  void Region::set_start(Position s)
   {
     _start = s;
   }
 
-  void Region::set_end(size_t e)
+  void Region::set_end(Position e)
   {
     _end = e;
   }
@@ -86,12 +86,12 @@ namespace epidb {
     return empty_string;
   }
 
-  double Region::value(const std::string &key) const
+  Score Region::value(const std::string &key) const
   {
     for (std::vector<std::pair<std::string, std::string> >::const_iterator it = _data.begin(); it != _data.end(); it++) {
       if (it->first == key) {
-        double v;
-        utils::string_to_double(it->second, v);
+        Score v;
+        utils::string_to_score(it->second, v);
         return v;
       }
     }
@@ -103,59 +103,59 @@ namespace epidb {
     return _stats_value;
   }
 
-  double Region::min() const
+  Score Region::min() const
   {
     if (_stats_value) {
       return _stats_value->_min;
     }
-    return std::numeric_limits<double>::min();
+    return std::numeric_limits<Score>::min();
   }
 
-  double Region::max() const
+  Score Region::max() const
   {
     if (_stats_value) {
       return _stats_value->_max;
     }
-    return std::numeric_limits<double>::min();
+    return std::numeric_limits<Score>::min();
   }
 
-  double Region::median() const
+  Score Region::median() const
   {
     if (_stats_value) {
       return _stats_value->_median;
     }
-    return std::numeric_limits<double>::min();
+    return std::numeric_limits<Score>::min();
   }
 
-  double Region::mean() const
+  Score Region::mean() const
   {
     if (_stats_value) {
       return _stats_value->_mean;
     }
-    return std::numeric_limits<double>::min();
+    return std::numeric_limits<Score>::min();
   }
 
-  double Region::var() const
+  Score Region::var() const
   {
     if (_stats_value) {
       return _stats_value->_var;
     }
-    return std::numeric_limits<double>::min();
+    return std::numeric_limits<Score>::min();
   }
 
-  double Region::sd() const
+  Score Region::sd() const
   {
     if (_stats_value) {
       return _stats_value->_sd;
     }
-    return std::numeric_limits<double>::min();
+    return std::numeric_limits<Score>::min();
   }
 
-  double Region::count() const
+  Score Region::count() const
   {
     if (_stats_value) {
       return _stats_value->_count;
     }
-    return std::numeric_limits<double>::min();
+    return std::numeric_limits<Score>::min();
   }
 } // namespace epidb

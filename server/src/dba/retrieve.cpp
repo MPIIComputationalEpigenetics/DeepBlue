@@ -51,18 +51,17 @@ namespace epidb {
         void read_region(const mongo::BSONObj &region_bson, const CollectionId &collection_id)
         {
           if (region_bson.hasField(KeyMapper::WIG_TRACK_TYPE())) {
-            std::string track_type = region_bson[KeyMapper::WIG_TRACK_TYPE()].str();
+            int track_type = region_bson[KeyMapper::WIG_TRACK_TYPE()].numberInt();
+            Position start = region_bson[KeyMapper::START()].numberInt();
+            Length step = region_bson[KeyMapper::WIG_STEP()].numberInt();
+            Length span = region_bson[KeyMapper::WIG_SPAN()].numberInt();
+            Length size = region_bson[KeyMapper::WIG_FEATURES()].numberInt();
 
-            int start = region_bson[KeyMapper::START()].numberInt();
-            int step = region_bson[KeyMapper::WIG_STEP()].numberInt();
-            int span = region_bson[KeyMapper::WIG_SPAN()].numberInt();
-            int size = region_bson[KeyMapper::WIG_FEATURES()].numberInt();
-
-            if (track_type  == "F") {
+            if (track_type  == parser::FIXED_STEP) {
 
               int i_size;
               const float *data_fixed = reinterpret_cast<const float *>(region_bson[KeyMapper::WIG_DATA()].binData(i_size));
-              for (int i = 0; i < size; i++) {
+              for (Length i = 0; i < size; i++) {
                 EPIDB_LOG_DBG("OUT: " << data_fixed[i]);
                 Region region(start + (i * step), start + (i * step) + span, collection_id);
                 region.set(KeyMapper::VALUE(), utils::double_to_string(data_fixed[i]));
@@ -70,13 +69,23 @@ namespace epidb {
                 _count++;
               }
 
-            } else if (track_type  == "V") {
+            } else if (track_type == parser::VARIABLE_STEP) {
               int i_size;
-              const std::pair<size_t, float> *data_fixed = reinterpret_cast<const std::pair<size_t, float>*>(region_bson[KeyMapper::WIG_DATA()].binData(i_size));
-              for (int i = 0; i < size; i++)  {
+              const parser::PositionScorePair *data_fixed = reinterpret_cast<const parser::PositionScorePair *>(region_bson[KeyMapper::WIG_DATA()].binData(i_size));
+              for (Length i = 0; i < size; i++)  {
                 EPIDB_LOG_DBG("OUT: " << data_fixed[i].first << " " << data_fixed[i].second);
                 Region region(data_fixed[i].first, data_fixed[i].first + span, collection_id);
                 region.set(KeyMapper::VALUE(), utils::double_to_string(data_fixed[i].second));
+                _regions->push_back(region);
+                _count++;
+              }
+
+            } else if ((track_type == parser::ENCODE_BEDGRAPH) || (track_type == parser::MISC_BEDGRAPH)) {
+              int i_size;
+              const parser::BedGraphRegion *data_fixed = reinterpret_cast<const parser::BedGraphRegion*>(region_bson[KeyMapper::WIG_DATA()].binData(i_size));
+              for (Length i = 0; i < size; i++)  {
+                Region region(data_fixed[i].start, data_fixed[i].end, collection_id);
+                region.set(KeyMapper::VALUE(), utils::double_to_string(data_fixed[i].score));
                 _regions->push_back(region);
                 _count++;
               }

@@ -20,6 +20,8 @@
 
 #include "extras/utils.hpp"
 
+#include "types.hpp"
+
 namespace epidb {
 
   typedef boost::shared_ptr<std::string> CollectionId;
@@ -29,23 +31,23 @@ namespace epidb {
   extern CollectionId EMPTY_COLLECTION_ID;
 
   struct StatsValue {
-    StatsValue(double min, double max, double median, double mean, double var, double sd, double count) :
+    StatsValue(Score min, Score max, Score median, Score mean, Score var, Score sd, Score count) :
       _min(min), _max(max), _median(median), _mean(mean), _var(var), _sd(sd), _count(count) {}
 
-    double _min;
-    double _max;
-    double _median;
-    double _mean;
-    double _var;
-    double _sd;
-    double _count;
+    Score _min;
+    Score _max;
+    Score _median;
+    Score _mean;
+    Score _var;
+    Score _sd;
+    Score _count;
   };
 
   class Region {
   private:
     CollectionId _collection_id;
-    size_t _start;
-    size_t _end;
+    Position _start;
+    Position _end;
     boost::shared_ptr<StatsValue> _stats_value;
     std::vector<std::pair<std::string, std::string> > _data;
 
@@ -65,15 +67,15 @@ namespace epidb {
       _stats_value(),
       _data() {}
 
-    Region(long long s, long long e, CollectionId _id):
+    Region(Position s, Position e, CollectionId _id):
       _collection_id(_id),
       _start(s),
       _end(e),
       _stats_value(),
       _data() {}
 
-    Region(long long s, long long e, CollectionId _id,
-           double min, double max, double median, double mean, double var, double sd, double count) :
+    Region(Position s, Position e, CollectionId _id,
+           Score min, Score max, Score median, Score mean, Score var, Score sd, Score count) :
       _collection_id(_id),
       _start(s),
       _end(e),
@@ -86,23 +88,23 @@ namespace epidb {
     }
 
     CollectionId collection_id() const;
-    size_t length() const;
-    size_t start() const;
-    size_t end() const;
-    void set_start(size_t s);
-    void set_end(size_t e);
+    Length length() const;
+    Position start() const;
+    Position end() const;
+    void set_start(Position s);
+    void set_end(Position e);
     void set(const std::string &key, const std::string &value);
     const std::string  &get(const std::string &key) const;
-    double value(const std::string &key) const;
+    Score value(const std::string &key) const;
 
     bool has_stats() const;
-    double min() const;
-    double max() const;
-    double median() const;
-    double mean() const;
-    double var() const;
-    double sd() const;
-    double count() const;
+    Score min() const;
+    Score max() const;
+    Score median() const;
+    Score mean() const;
+    Score var() const;
+    Score sd() const;
+    Score count() const;
 
   };
 
