@@ -19,12 +19,10 @@
 #include <boost/icl/split_interval_map.hpp>
 
 #include "../extras/utils.hpp"
+#include "../types.hpp"
 
 namespace epidb {
   namespace parser {
-
-    typedef std::vector<float>  DataFixed;
-    typedef std::vector<std::pair<size_t, float> > DataVariable;
 
     typedef enum {
       FIXED_STEP,
@@ -34,53 +32,71 @@ namespace epidb {
     } WigTrackType;
 
     typedef struct {
-      size_t start;
-      size_t end;
-      float score;
+      Position start;
+      Position end;
+      Score score;
     } BedGraphRegion;
 
-    typedef std::vector<float>  DataFixed;
-    typedef std::vector<std::pair<size_t, float> > DataVariable;
+    typedef std::pair<Position, Score> PositionScorePair;
+    typedef std::vector<Score>  DataFixed;
+    typedef std::vector<PositionScorePair> DataVariable;
     typedef std::vector<BedGraphRegion> DataBedgraph;
+
+    class Track;
+    typedef boost::shared_ptr<Track> TrackPtr;
 
     class Track {
     private:
       WigTrackType _type;
       std::string _chromosome;
-      size_t _start;
-      size_t _end;
-      size_t _step;
-      size_t _span;
+      Position _start;
+      Position _end;
+      Length _step;
+      Length _span;
       DataFixed  _data_fixed;
       DataVariable _data_variable;
       DataBedgraph _data_bedgraph;
 
     public:
-      Track(std::string &chr, size_t start, size_t step, size_t span); // FixedStep
-      Track(std::string &chr, size_t span); // VariableStep
-      Track(std::string &chr, size_t start, size_t end); // EncodeBedgraph
+      Track(std::string &chr, Position start, Length step, Length span); // FixedStep
+      Track(std::string &chr, Position span); // VariableStep
+      Track(std::string &chr, Position start, Position end); // EncodeBedgraph
       Track(std::string &chr); // MiscBedgraph
 
       WigTrackType type();
-      std::string chromosome() { return _chromosome; }
-      size_t start() { return _start; }
-      size_t end() { return _end; }
-      size_t step() { return _step; }
-      size_t span() { return _span; }
+      std::string chromosome()
+      {
+        return _chromosome;
+      }
+      Position start()
+      {
+        return _start;
+      }
+      Position end()
+      {
+        return _end;
+      }
+      Length step()
+      {
+        return _step;
+      }
+      Length span()
+      {
+        return _span;
+      }
       size_t features();
-      void* data();
+      void *data();
       size_t data_size();
-      void add_feature(float _score);
-      void add_feature(size_t position, float _score);
-      void add_feature(size_t start, size_t end, float _score);
+      TrackPtr split();
+      void add_feature(Score _score);
+      void add_feature(Position position, Score _score);
+      void add_feature(Position start, Position end, Score _score);
     };
 
-    typedef boost::shared_ptr<Track> TrackPtr;
-
-    TrackPtr build_fixed_track(std::string &chr, size_t start, size_t step, size_t span);
-    TrackPtr build_variable_track(std::string &chr, size_t span);
+    TrackPtr build_fixed_track(std::string &chr, Position start, Length step, Length span);
+    TrackPtr build_variable_track(std::string &chr, Length span);
     TrackPtr build_bedgraph_track(std::string &chr);
-    TrackPtr build_bedgraph_track(std::string &chr, size_t start, size_t end);
+    TrackPtr build_bedgraph_track(std::string &chr, Position start, Position end);
 
     typedef std::vector<TrackPtr> WigContent;
     class WigFile : boost::noncopyable {
@@ -88,7 +104,7 @@ namespace epidb {
       WigContent content;
 
     public:
-      bool check_feature(const std::string& chrm, const size_t start, const size_t &line, std::string &msg);
+      bool check_feature(const std::string &chrm, const Position start, const size_t &line, std::string &msg);
       WigContent::const_iterator tracks_iterator();
       WigContent::const_iterator tracks_iterator_end();
       size_t size();

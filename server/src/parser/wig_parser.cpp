@@ -172,6 +172,14 @@ namespace epidb {
       return true;
     }
 
+    void WIGParser::check_block_size(WigPtr &wig)
+    {
+      if (actual_track->features() >= BLOCK_SIZE) {
+        wig->add_track(actual_track);
+        actual_track = actual_track->split();
+      }
+    }
+
     bool WIGParser::get(WigPtr &wig, std::string &msg)
     {
       wig = boost::shared_ptr<WigFile>(new WigFile());
@@ -250,6 +258,9 @@ namespace epidb {
                              actual_track->span(), actual_line_, msg)) {
             return false;
           }
+
+          check_block_size(wig);
+
           actual_track->add_feature(value);
 
         } else if (actual_track->type() == VARIABLE_STEP) {

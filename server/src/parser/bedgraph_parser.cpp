@@ -16,6 +16,8 @@
 #include "bedgraph_parser.hpp"
 #include "wig.hpp"
 
+#include "../types.hpp"
+
 namespace epidb {
   namespace parser {
 
@@ -28,9 +30,6 @@ namespace epidb {
       wig = boost::shared_ptr<WigFile>(new WigFile());
       std::string line;
       std::string current_chr;
-
-      size_t prev_start;
-      size_t prev_end;
 
       clock_t dsysTime = clock();
 
@@ -73,14 +72,14 @@ namespace epidb {
             std::vector<std::string> start_end;
             boost::split(start_end, location[1], boost::is_any_of("-"));
             if (start_end.size() == 2) {
-              size_t start;
-              size_t end;
-              if (!utils::string_to_long(start_end[0], start)) {
+              Position start;
+              Position end;
+              if (!utils::string_to_position(start_end[0], start)) {
                 msg = "The start position " + line + " is not valid. (Line: " + line_str() + ")";
                 return false;
               }
 
-              if (!utils::string_to_long(start_end[1], end)) {
+              if (!utils::string_to_position(start_end[1], end)) {
                 msg = "The end position " + line + " is not valid. (Line: " + line_str() + ")";
                 return false;
               }
@@ -114,35 +113,32 @@ namespace epidb {
           }
         }
 
-        size_t start;
-        size_t end;
-        float score;
+        Position start;
+        Position end;
+        Score score;
 
-        if (!utils::string_to_long(strs[1], start)) {
+        if (!utils::string_to_position(strs[1], start)) {
           msg = "The start position '" + line + "' is not valid. (Line: " + line_str() + ")";
           return false;
         }
 
-        if (!utils::string_to_long(strs[2], end)) {
+        if (!utils::string_to_position(strs[2], end)) {
           msg = "The end position '" + line + "'' is not valid. (Line: " + line_str() + ")";
           return false;
         }
 
-        if (!utils::string_to_float(strs[3], score)) {
+        if (!utils::string_to_score(strs[3], score)) {
           msg = "The score '" + line + "' is not valid. (Line: " + line_str() + ")";
           return false;
         }
 
-
-        if (actual_line_ % 300000 == 0){
+        if (actual_line_ % 600000 == 0){
           std::cerr << (( ((float)  clock()) - dsysTime)/CLOCKS_PER_SEC) << std::endl;
           dsysTime = clock();
         }
 
+        check_block_size(wig);
         actual_track->add_feature(start, end, score);
-
-        prev_start = start;
-        prev_end = end;
       }
       if (actual_track) {
         wig->add_track(actual_track);

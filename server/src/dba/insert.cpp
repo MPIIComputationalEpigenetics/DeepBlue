@@ -45,7 +45,7 @@ namespace epidb {
   namespace dba {
 
     const size_t BULK_SIZE = 20000;
-
+    const size_t MAXIMUM_SIZE = 40000000; // from mongodb maximum message size: 48000000
 
     static const bool fill_region_builder(mongo::BSONObjBuilder &builder, const parser::Tokens &tokens, const parser::FileFormat &file_format,
                                           std::string &chromosome, size_t &start, size_t &end, std::string &msg)
@@ -367,6 +367,7 @@ namespace epidb {
       std::string prev_collection;
       size_t prev_size;
       std::map<std::string, bool> processed;
+      size_t actual_size = 0;
 
       parser::WigContent::const_iterator end = wig->tracks_iterator_end();
       for (parser::WigContent::const_iterator it = wig->tracks_iterator(); it != end; it++) {
@@ -374,19 +375,19 @@ namespace epidb {
         mongo::BSONObjBuilder region_builder;
         region_builder.append("_id", (int) count++);
 
-        if (track->type() == parser::FIXED_STEP) {
-          region_builder.append(KeyMapper::WIG_TRACK_TYPE(), "F");
-        } else {
-          region_builder.append(KeyMapper::WIG_TRACK_TYPE(), "V");
-        }
-
-        region_builder.append(KeyMapper::START(), (int) track->start());
-        region_builder.append(KeyMapper::WIG_STEP(), (int) (int) track->step());
+        region_builder.append(KeyMapper::WIG_TRACK_TYPE(), track->type());
         region_builder.append(KeyMapper::START(), (int) track->start());
         region_builder.append(KeyMapper::END(), (int) track->end());
-        region_builder.append(KeyMapper::WIG_SPAN(), (int) track->span());
+        if (track->step()) {
+          region_builder.append(KeyMapper::WIG_STEP(), (int) track->step());
+        }
+        if (track->span()) {
+          region_builder.append(KeyMapper::WIG_SPAN(), (int) track->span());
+        }
         region_builder.append(KeyMapper::WIG_FEATURES(), (int) track->features());
         region_builder.append(KeyMapper::WIG_DATA_SIZE(), (int) track->data_size());
+
+        actual_size += track->data_size();
         region_builder.appendBinData(KeyMapper::WIG_DATA(), track->data_size(), mongo::BinDataGeneral, track->data());
 
         std::string internal_chromosome;
@@ -402,14 +403,6 @@ namespace epidb {
           c.done();
           return false;
         }
-
-        /*
-        if (feature._start > size || feature._end > size) {
-          msg = out_of_range_message(feature._start, feature._end, feature._chrom);
-          c.done();
-          return false;
-        }
-        */
 
         mongo::BSONObj r = region_builder.obj();
         std::string collection = helpers::region_collection_name(genome, experiment_id, internal_chromosome);
@@ -430,11 +423,12 @@ namespace epidb {
           }
           prev_collection = collection;
           prev_size = size;
+          actual_size = 0;
         }
 
         bulk.push_back(r);
 
-        if (bulk.size() % BULK_SIZE == 0) {
+        if (bulk.size() % BULK_SIZE == 0 || actual_size > MAXIMUM_SIZE) {
           if (!set_index_shard(processed, collection, size, msg)) {
             c.done();
             return false;
@@ -446,6 +440,7 @@ namespace epidb {
             return false;
           }
           bulk.clear();
+          actual_size = 0;
         }
       }
 

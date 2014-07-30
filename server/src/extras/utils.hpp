@@ -18,6 +18,8 @@
 
 #include "serialize.hpp"
 
+#include "../types.hpp"
+
 namespace epidb {
   namespace utils {
 
@@ -53,6 +55,12 @@ namespace epidb {
     bool string_to_double(const std::string &s, double &d);
 
     bool string_to_float(const std::string &s, float &d);
+
+    bool string_to_position(const std::string &s, Position &p);
+
+    bool string_to_length(const std::string &s, Length p);
+
+    bool string_to_score(const std::string &s, Score &c);
 
     const std::string double_to_string(const double d);
 

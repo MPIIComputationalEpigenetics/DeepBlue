@@ -22,7 +22,6 @@ class TestWigFiles(helpers.TestCase):
                                  "ENCODE", "desc1", wig_data, "wig", None, self.admin_key)
       self.assertSuccess(res)
 
-
   def test_wig_files_pass(self):
     epidb = EpidbClient()
     self.init_base(epidb)
@@ -43,7 +42,7 @@ class TestWigFiles(helpers.TestCase):
   def test_wig_files_fail(self):
     epidb = EpidbClient()
     self.init_base(epidb)
-    
+
     sample_id = self.sample_ids[0]
 
     fail_files = ["overlap", "absent_chr", "bad_value", "fix_overshoot",

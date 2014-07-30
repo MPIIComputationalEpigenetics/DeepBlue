@@ -9,22 +9,23 @@
 #include <limits>
 
 #include "wig.hpp"
+#include "../types.hpp"
 
 namespace epidb {
   namespace parser {
 
 
-    TrackPtr build_fixed_track(std::string &chr, size_t start, size_t step, size_t span)
+    TrackPtr build_fixed_track(std::string &chr, Position start, Length step, Length span)
     {
       return boost::shared_ptr<Track>(new Track(chr, start, step, span));
     }
 
-    TrackPtr build_variable_track(std::string &chr, size_t span)
+    TrackPtr build_variable_track(std::string &chr, Length span)
     {
       return boost::shared_ptr<Track>(new Track(chr, span));
     }
 
-    TrackPtr build_bedgraph_track(std::string &chr, size_t start, size_t end)
+    TrackPtr build_bedgraph_track(std::string &chr, Length start, Length end)
     {
       return boost::shared_ptr<Track>(new Track(chr, start, end));
     }
@@ -35,8 +36,7 @@ namespace epidb {
     }
 
 
-
-    Track::Track(std::string &chr, size_t start, size_t step, size_t span) :
+    Track::Track(std::string &chr, Position start, Length step, Length span) :
       _type(FIXED_STEP),
       _chromosome(chr),
       _start(start),
@@ -45,7 +45,7 @@ namespace epidb {
       _span(span)
     { }
 
-    Track::Track(std::string &chr, size_t span) :
+    Track::Track(std::string &chr, Length span) :
       _type(VARIABLE_STEP),
       _chromosome(chr),
       _start(std::numeric_limits<size_t>::max()),
@@ -54,7 +54,7 @@ namespace epidb {
       _span(span)
     { }
 
-    Track::Track(std::string &chr, size_t start, size_t end) :
+    Track::Track(std::string &chr, Position start, Position end) :
       _type(ENCODE_BEDGRAPH),
       _chromosome(chr),
       _start(start),
@@ -81,19 +81,21 @@ namespace epidb {
     {
       if (_type == FIXED_STEP) {
         return _data_fixed.size();
-      } else {
+      } else if (_type == VARIABLE_STEP) {
         return _data_variable.size();
+      } else {
+        return _data_bedgraph.size();
       }
       return _type;
     }
 
     void Track::add_feature(float score)
     {
-      _end = _start + (_data_fixed.size() * _span);
       _data_fixed.push_back(score);
+      _end = _start + (_data_fixed.size() * _span);
     }
 
-    void Track::add_feature(size_t position, float score)
+    void Track::add_feature(Position position, Score score)
     {
       if (position + _span > _end) {
         _end = position + _span;
@@ -106,7 +108,7 @@ namespace epidb {
       _data_variable.push_back(p);
     }
 
-    void Track::add_feature(size_t start, size_t end, float score)
+    void Track::add_feature(Position start, Position end, Score score)
     {
       BedGraphRegion region;
       region.start = start;
@@ -128,19 +130,47 @@ namespace epidb {
     {
       if (_type == VARIABLE_STEP) {
         return (void *) _data_variable.data();
-      } else  {
+      } else if (_type == FIXED_STEP) {
         return (void *) _data_fixed.data();
+      } else { /* ENCODE_BEDGRAPH or MISC_BEDGRAPH */
+        return (void *) _data_bedgraph.data();
       }
     }
 
     size_t Track::data_size()
     {
       if (_type == VARIABLE_STEP) {
-        return _data_variable.size() * sizeof(std::pair<size_t, float>);
+        return _data_variable.size() * sizeof(PositionScorePair);
       }
 
-      else  {
-        return _data_fixed.size() * sizeof(float);
+      else if (_type == FIXED_STEP) {
+        return _data_fixed.size() * sizeof(Score);
+      }
+
+      else { /* ENCODE_BEDGRAPH or MISC_BEDGRAPH */
+        return _data_bedgraph.size() * (sizeof(BedGraphRegion));
+      }
+    }
+
+    TrackPtr Track::split()
+    {
+      if (_type == VARIABLE_STEP) {
+        return build_variable_track(_chromosome, _span);
+      }
+
+      else if (_type == FIXED_STEP) {
+        return build_fixed_track(_chromosome, _end, _step, _span);
+      }
+
+      else if (_type == ENCODE_BEDGRAPH) {
+        size_t _last_position = _data_bedgraph.rbegin()->end;
+        TrackPtr track = build_bedgraph_track(_chromosome, _last_position, _end);
+        _end = _last_position;
+        return track;
+      }
+
+      else { /* (type == MISC_BEDGRAPH) */
+        return build_bedgraph_track(_chromosome);
       }
     }
 
@@ -156,9 +186,6 @@ namespace epidb {
 
     WigContent::const_iterator WigFile::tracks_iterator_end()
     {
-      std::cerr << "iteratorrr" << std::endl;
-      std::cerr << content.size() << std::endl;
-      std::cerr << content[0]->features() << std::endl;
       return content.end();
     }
 

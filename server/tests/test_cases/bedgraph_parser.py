@@ -18,6 +18,5 @@ class TestBedgraphFiles(helpers.TestCase):
       wig_data = helpers.load_bedgraph(filename)
       res = epidb.add_experiment(filename, "hg19", "Methylation", sample_id, "tech1",
                                  "ENCODE", "desc1", wig_data, "bedgraph", None, self.admin_key)
-      print res
       self.assertSuccess(res)
 

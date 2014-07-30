@@ -19,6 +19,8 @@
 namespace epidb {
   namespace parser {
 
+    static const size_t BLOCK_SIZE = 40;
+
     class WIGParser {
     protected:
       size_t actual_line_;
@@ -31,6 +33,7 @@ namespace epidb {
       bool read_parameters(const std::vector<std::string> &strs, std::map<std::string, std::string> &params, std::string &msg);
       bool read_format(const std::vector<std::string> &strs, TrackPtr &track, std::string &msg);
       bool check_feature(const std::string &chromosome, const size_t start, const size_t span, const size_t &line, std::string &msg);
+      void check_block_size(WigPtr &wig);
       bool get_line(std::string line, std::string &msg);
 
       const std::string line_str()

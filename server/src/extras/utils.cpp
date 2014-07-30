@@ -25,6 +25,7 @@
 #include <boost/regex.hpp>
 
 #include "../log.hpp"
+#include "../types.hpp"
 
 namespace epidb {
   namespace utils {
@@ -72,11 +73,12 @@ namespace epidb {
       9ll, 90ll, 900ll, 9000ll, 90000ll, 900000ll, 9000000ll, 90000000ll, 900000000ll, 9000000000ll
     };
 
-    bool string_to_long(const std::string &s, size_t &i)
+    template<typename T>
+    bool string_to_fixed_point(const std::string &s, T &i)
     {
       const char *p = s.c_str();
       bool neg((*p == '-') ? 1 : 0);
-      register size_t num(0);
+      register T num(0);
       register size_t pos(strlen(p + neg) - 1);
       if (neg)  {
         ++p;
@@ -91,8 +93,23 @@ namespace epidb {
       return true;
     }
 
+    bool string_to_long(const std::string &s, size_t &i)
+    {
+      return string_to_fixed_point<size_t>(s, i);
+    }
+
+    bool string_to_position(const std::string &s, Position &p)
+    {
+      return string_to_fixed_point<Position>(s, p);
+    }
+
+    bool string_to_length(const std::string &s, Length &l)
+    {
+      return string_to_fixed_point<Length>(s, l);
+    }
+
     template<typename T>
-    bool s_to_T(T &r, const char *p)
+    bool string_to_floating_point(T &r, const char *p)
     {
       // Skip leading white space, if any.
       while (std::isspace(*p) ) {
@@ -206,12 +223,17 @@ namespace epidb {
 
     bool string_to_double(const std::string &s_, double &d)
     {
-      return s_to_T<double>(d, s_.c_str());
+      return string_to_floating_point<double>(d, s_.c_str());
     }
 
     bool string_to_float(const std::string &s_, float &d)
     {
-      return s_to_T<float>(d, s_.c_str());
+      return string_to_floating_point<float>(d, s_.c_str());
+    }
+
+    bool string_to_score(const std::string &s_, Score &c)
+    {
+      return string_to_floating_point<Score>(c, s_.c_str());
     }
 
     const std::string double_to_string(const double d)
