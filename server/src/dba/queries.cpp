@@ -196,78 +196,20 @@ namespace epidb {
         mongo::BSONObj args = query["args"].Obj();
 
         count = 0;
-
-        // DB Queries
-        /*
-        if (type == "experiment_select") {
-          std::vector<std::string> experiments_id;
-          mongo::BSONObj mongo_query;
-          if (!build_experiment_query(user_key, query, mongo_query, experiments_id, msg)) {
-            return false;
-          }
-          std::vector<std::string> chromosomes;
-          std::vector<mongo::BSONElement> chr_arr = args["chromosomes"].Array();
-          std::vector<mongo::BSONElement>::iterator it;
-          for (it = chr_arr.begin(); it != chr_arr.end(); ++it) {
-            chromosomes.push_back(it->str());
-          }
-
-          // get region data for all genomes
-          std::vector<mongo::BSONElement> genome_arr = args["genomes"].Array();
-          std::vector<mongo::BSONElement>::iterator git;
-          for (git = genome_arr.begin(); git != genome_arr.end(); ++git) {
-            size_t size = 0;
-            std::string norm_genome = utils::normalize_name(git->str());
-            if (!retrieve::count_regions(norm_genome, experiments_id, chromosomes, mongo_query, size, msg)) {
-              return false;
-            }
-            count += size;
-          }
-          return true;
-
-        } else if (type == "annotation_select") {
-          mongo::BSONObj mongo_query;
-          std::vector<std::string> annotations_id;
-          if (!build_annotation_query(user_key, query, mongo_query, annotations_id, msg)) {
-            return false;
-          }
-          std::vector<std::string> chromosomes;
-          std::vector<mongo::BSONElement> chr_arr = args["chromosomes"].Array();
-          std::vector<mongo::BSONElement>::iterator it;
-          for (it = chr_arr.begin(); it != chr_arr.end(); ++it) {
-            chromosomes.push_back(it->str());
-          }
-
-          // get region data for all genomes
-          std::vector<mongo::BSONElement> genome_arr = args["genomes"].Array();
-          std::vector<mongo::BSONElement>::iterator git;
-          for (git = genome_arr.begin(); git != genome_arr.end(); ++git) {
-            std::string norm_genome = utils::normalize_name(git->str());
-            size_t size = 0;
-            if (!retrieve::count_regions(norm_genome, annotations_id, chromosomes, mongo_query, size, msg)) {
-              return false;
-            }
-            count += size;
-          }
-          return true;
-
-        } else {*/
-          ChromosomeRegionsList regions;
-          if (!retrieve_query(user_key, query_id,  regions, msg)) {
-            return false;
-          }
-
-          count = 0;
-          for (ChromosomeRegionsList::const_iterator it = regions.begin(); it != regions.end(); it++) {
-            std::string chromosome = it->first;
-            Regions regions = it->second;
-            count += regions->size();
-          }
-
-          return true;
+        ChromosomeRegionsList regions;
+        if (!retrieve_query(user_key, query_id,  regions, msg)) {
+          return false;
         }
-       /* return false;
-      }*/
+
+        count = 0;
+        for (ChromosomeRegionsList::const_iterator it = regions.begin(); it != regions.end(); it++) {
+          std::string chromosome = it->first;
+          Regions regions = it->second;
+          count += regions->size();
+        }
+
+        return true;
+      }
 
       const mongo::BSONObj build_query(const mongo::BSONObj &args)
       {
