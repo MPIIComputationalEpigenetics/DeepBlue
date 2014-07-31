@@ -4,7 +4,6 @@ from client import EpidbClient
 
 class TestPattern(helpers.TestCase):
 
-  """
   def test_pattern_chromosome(self):
     epidb = EpidbClient()
     self.init_base(epidb)
@@ -81,8 +80,7 @@ class TestPattern(helpers.TestCase):
     status, c = epidb.count_regions(_id, self.admin_key)
     self.assertSuccess(status, c)
     self.assertEquals(c, 638969)
-  """  
-  
+
   def test_upload_sequence(self):
     epidb = EpidbClient()
     self.init_base(epidb)
@@ -107,6 +105,6 @@ class TestPattern(helpers.TestCase):
     fmt = "CHROMOSOME,START,END,@NAME:none,@LENGTH,@COUNT.NON-OVERLAP(TATA),@COUNT.NON-OVERLAP(GAGA),@COUNT.NON-OVERLAP((TATA|GAGA))"
     res, regions = epidb.get_regions(qid, fmt, self.admin_key)
     self.assertSuccess(res, regions)
-    
+
     expected = "chr19\t0\t59128983\thg19_only_chr19\t59128983\t159464\t336889\t496353"
     self.assertEquals(expected, regions)
