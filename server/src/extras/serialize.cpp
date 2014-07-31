@@ -479,7 +479,16 @@ namespace epidb {
             params_ss << s;
           }
         } else {
-          params_ss << (**it).as_string();
+          if (truncate_strings) {
+            std::string tmp_string((**it).as_string());
+            size_t l = tmp_string.length();
+            if (l > 1024) {
+              params_ss << tmp_string.substr(0, 1024);
+              params_ss << " ... [" << l - 1024 << " more characters]";
+            }
+          } else {
+            params_ss << (**it).as_string();
+          }
         }
       }
       return params_ss.str();

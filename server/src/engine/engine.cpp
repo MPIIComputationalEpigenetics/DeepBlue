@@ -31,12 +31,12 @@ namespace epidb {
     std::string msg;
     if (!command->check_parameters(parameters, msg)) {
       EPIDB_LOG("Request (" << id << ") from " << ip << ": " << name << " with bad typed parameters (" <<
-                parameters.string() << "). " << msg);
+                parameters.string(true) << "). " << msg);
       result.add_error(msg);
       return false;
     }
 
-    EPIDB_LOG("Request (" << id << ") from " << ip << ": " << name << " with (" <<  parameters.string() << ").");
+    EPIDB_LOG("Request (" << id << ") from " << ip << ": " << name << " with (" <<  parameters.string(true) << ").");
     return command->run(ip, parameters, result);
   }
 }
