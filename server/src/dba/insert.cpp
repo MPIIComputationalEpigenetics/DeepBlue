@@ -375,7 +375,7 @@ namespace epidb {
         mongo::BSONObjBuilder region_builder;
         region_builder.append("_id", (int) count++);
 
-        region_builder.append(KeyMapper::WIG_TRACK_TYPE(), track->type());
+        region_builder.append(KeyMapper::WIG_TRACK_TYPE(), (int) track->type());
         region_builder.append(KeyMapper::START(), (int) track->start());
         region_builder.append(KeyMapper::END(), (int) track->end());
         if (track->step()) {

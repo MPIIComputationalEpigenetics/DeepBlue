@@ -82,7 +82,7 @@ namespace epidb {
 
             } else if ((track_type == parser::ENCODE_BEDGRAPH) || (track_type == parser::MISC_BEDGRAPH)) {
               int i_size;
-              const parser::BedGraphRegion *data_fixed = reinterpret_cast<const parser::BedGraphRegion*>(region_bson[KeyMapper::WIG_DATA()].binData(i_size));
+              const parser::BedGraphRegion *data_fixed = reinterpret_cast<const parser::BedGraphRegion *>(region_bson[KeyMapper::WIG_DATA()].binData(i_size));
               for (Length i = 0; i < size; i++)  {
                 Region region(data_fixed[i].start, data_fixed[i].end, collection_id);
                 region.set(KeyMapper::VALUE(), utils::double_to_string(data_fixed[i].score));

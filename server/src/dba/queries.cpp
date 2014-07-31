@@ -198,6 +198,7 @@ namespace epidb {
         count = 0;
 
         // DB Queries
+        /*
         if (type == "experiment_select") {
           std::vector<std::string> experiments_id;
           mongo::BSONObj mongo_query;
@@ -250,7 +251,7 @@ namespace epidb {
           }
           return true;
 
-        } else {
+        } else {*/
           ChromosomeRegionsList regions;
           if (!retrieve_query(user_key, query_id,  regions, msg)) {
             return false;
@@ -265,8 +266,8 @@ namespace epidb {
 
           return true;
         }
-        return false;
-      }
+       /* return false;
+      }*/
 
       const mongo::BSONObj build_query(const mongo::BSONObj &args)
       {
@@ -384,12 +385,12 @@ namespace epidb {
 
         mongo::BSONObjBuilder regions_query_builder;
         if (args.hasField("start") && args.hasField("end")) {
-          regions_query_builder.append(KeyMapper::START(), BSON("$gte" << args["start"].Long() << "$lte" << args["end"].Long()));
-          regions_query_builder.append(KeyMapper::END(), BSON("$gte" << args["start"].Long() << "$lte" << args["end"].Long()));
+          regions_query_builder.append(KeyMapper::START(), BSON("$lte" << args["end"].Long()));
+          regions_query_builder.append(KeyMapper::END(), BSON("$gte" << args["start"].Long()));
         } else if (args.hasField("start")) {
-          regions_query_builder.append(KeyMapper::START(), BSON("$gte" << args["start"].Long()));
+          regions_query_builder.append(KeyMapper::END(), BSON("$gte" << args["start"].Long()));
         } else if (args.hasField("end")) {
-          regions_query_builder.append(KeyMapper::END(), BSON("$lte" << args["end"].Long()));
+          regions_query_builder.append(KeyMapper::START(), BSON("$lte" << args["end"].Long()));
         }
 
         regions_query = regions_query_builder.obj();
