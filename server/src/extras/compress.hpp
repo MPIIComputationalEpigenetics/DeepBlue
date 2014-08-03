@@ -11,8 +11,8 @@
 namespace epidb {
   namespace compress {
     bool init();
-    bool compress(const lzo_bytep in, const lzo_uint in_size, lzo_bytep out, lzo_uint &out_size);
-    bool decompress(const lzo_bytep data, const lzo_uint lzo_size, const lzo_uint orig_size,
-                    lzo_bytep &in, lzo_uint &new_len);
+    // TODO : Return smart pointer
+    boost::shared_ptr<char> compress(const char *in, const size_t in_size, size_t &out_size, bool& compress);
+    lzo_bytep decompress(const lzo_bytep data, const lzo_uint compressed_size, const size_t uncompressed_size, size_t &out_size);
   }
 }

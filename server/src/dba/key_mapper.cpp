@@ -150,6 +150,12 @@ namespace epidb {
       return VALUE;
     }
 
+    const std::string &KeyMapper::WIG_COMPRESSED()
+    {
+      static std::string VALUE = epidb::dba::KeyMapper::build_default("COMPRESSED_DATA");
+      return VALUE;
+    }
+
     const std::string &KeyMapper::WIG_TRACK_TYPE()
     {
       static std::string VALUE = epidb::dba::KeyMapper::build_default("TRACK_TYPE_WIG");

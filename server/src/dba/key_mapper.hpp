@@ -32,6 +32,7 @@ namespace epidb {
       static const std::string& WIG_SPAN();
       static const std::string& WIG_FEATURES();
       static const std::string& WIG_DATA_SIZE();
+      static const std::string& WIG_COMPRESSED();
       static const std::string& WIG_TRACK_TYPE();
       static const std::string& WIG_DATA();
 

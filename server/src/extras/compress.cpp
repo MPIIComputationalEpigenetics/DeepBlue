@@ -6,13 +6,18 @@
 //  Copyright (c) 2013,2014 Max Planck Institute for Computer Science. All rights reserved.
 //
 
+#include <new>
+
 #include <iostream>
 #include <minilzo.h>
+
+#include <boost/shared_ptr.hpp>
 
 #include "log.hpp"
 
 namespace epidb {
   namespace compress {
+
     bool init()
     {
       if (lzo_init() != LZO_E_OK) {
@@ -27,30 +32,45 @@ namespace epidb {
     }
 
 
-    bool compress(const lzo_bytep in, const lzo_uint in_size, lzo_bytep out, lzo_uint &out_size)
+    bool __compress(const lzo_bytep in, const lzo_uint in_size, lzo_bytep out, lzo_uint &out_size)
     {
       lzo_voidp wrkmem = (lzo_voidp) malloc(LZO1X_1_MEM_COMPRESS);
       int r = lzo1x_1_compress(in, in_size, out, &out_size, wrkmem);
       free(wrkmem);
 
-      if (r == LZO_E_OK) {
-        EPIDB_LOG_TRACE("compressed " << in_size << "  bytes into " << out_size  << " bytes");
-      }
-
-      if (out_size >= in_size) {
-        EPIDB_LOG_TRACE("This block contains incompressible data.");
+      if (r == LZO_E_OK && out_size >= in_size + 32) { // 32 for the overhead in the bson object
+        return false;
       }
       return true;
     }
 
-    bool decompress(const lzo_bytep data, const lzo_uint lzo_size, const lzo_uint orig_size,
-                    lzo_bytep &in, lzo_uint &new_len)
+    // TODO : Return smart pointer
+    boost::shared_ptr<char> compress(const char *in, const size_t in_size, size_t &out_size, bool &compress)
     {
-      bool r = lzo1x_decompress(data, lzo_size, in, &new_len, NULL);
-      if (r == LZO_E_OK  && new_len == orig_size) {
+      char *ptr = const_cast<char *>(in);
+      lzo_bytep lzo_ptr = reinterpret_cast<lzo_bytep &>(ptr);
+
+      lzo_bytep lzo_out = (lzo_bytep) malloc((in_size + in_size / 16 + 64 + 3));
+      bool r = __compress(lzo_ptr, in_size, lzo_out, out_size);
+      if (!r) {
+        free(lzo_out);
+        compress = false;
+        return boost::shared_ptr<char>();
       }
-      EPIDB_LOG_TRACE("decompressed " << lzo_size << " bytes back into " << new_len << " bytes");
-      return 1;
+      compress = true;
+      return boost::shared_ptr<char>( (char *) lzo_out);
     }
+
+    lzo_bytep decompress(const lzo_bytep data, const lzo_uint compressed_size, const size_t uncompressed_size, size_t &out_size)
+    {
+      lzo_bytep lzo_out = (lzo_bytep) malloc(sizeof(lzo_byte) * uncompressed_size);
+      bool r = lzo1x_decompress(data, compressed_size, lzo_out, &out_size, NULL);
+      if (r != LZO_E_OK ) {
+        free(lzo_out);
+        return NULL;
+      }
+      return lzo_out;
+    }
+
   }
 }

@@ -64,6 +64,7 @@ namespace epidb {
         }
 
         // Code for ENCODE bigbed files
+        /*
         if ((strs[0] == "#bedGraph") && (strs[1] == "section") && strs.size() == 3) {
           std::vector<std::string> location;
           boost::split(location, strs[2], boost::is_any_of(":"));
@@ -92,6 +93,7 @@ namespace epidb {
           }
           continue;
         }
+        */
 
         if (line[0] == '#') {
           continue;

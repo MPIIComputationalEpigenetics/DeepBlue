@@ -21,10 +21,11 @@
 #include <mongo/bson/bson.h>
 #include <mongo/client/dbclient.h>
 
-#include "../extras/utils.hpp"
+#include "../extras/compress.hpp"
 #include "../parser/field_type.hpp"
 #include "../parser/genome_data.hpp"
 #include "../parser/parser_factory.hpp"
+#include "../extras/utils.hpp"
 #include "../parser/wig.hpp"
 
 #include "dba.hpp"
@@ -45,7 +46,7 @@ namespace epidb {
   namespace dba {
 
     const size_t BULK_SIZE = 20000;
-    const size_t MAXIMUM_SIZE = 40000000; // from mongodb maximum message size: 48000000
+    const size_t MAXIMUM_SIZE = 46000000; // from mongodb maximum message size: 48000000
 
     static const bool fill_region_builder(mongo::BSONObjBuilder &builder, const parser::Tokens &tokens, const parser::FileFormat &file_format,
                                           std::string &chromosome, size_t &start, size_t &end, std::string &msg)
@@ -368,6 +369,7 @@ namespace epidb {
       size_t prev_size;
       std::map<std::string, bool> processed;
       size_t actual_size = 0;
+      size_t total_size = 0;
 
       parser::WigContent::const_iterator end = wig->tracks_iterator_end();
       for (parser::WigContent::const_iterator it = wig->tracks_iterator(); it != end; it++) {
@@ -387,8 +389,22 @@ namespace epidb {
         region_builder.append(KeyMapper::WIG_FEATURES(), (int) track->features());
         region_builder.append(KeyMapper::WIG_DATA_SIZE(), (int) track->data_size());
 
-        actual_size += track->data_size();
-        region_builder.appendBinData(KeyMapper::WIG_DATA(), track->data_size(), mongo::BinDataGeneral, track->data());
+        boost::shared_ptr<char> data = track->data();
+        size_t data_size = track->data_size();
+
+        boost::shared_ptr<char> compressed_data;
+        size_t compressed_size = 0;
+        bool compressed = false;
+        compressed_data = epidb::compress::compress(data.get(), data_size, compressed_size, compressed);
+
+        if (compressed) {
+          region_builder.append(KeyMapper::WIG_COMPRESSED(), true);
+          region_builder.appendBinData(KeyMapper::WIG_DATA(), compressed_size, mongo::BinDataGeneral, (void *) compressed_data.get());
+          actual_size += compressed_size;
+        } else {
+          region_builder.appendBinData(KeyMapper::WIG_DATA(), compressed_size, mongo::BinDataGeneral, data.get());
+          actual_size += data_size;
+        }
 
         std::string internal_chromosome;
         if (!genome_info->internal_chromosome(track->chromosome(), internal_chromosome, msg)) {
@@ -426,6 +442,7 @@ namespace epidb {
           actual_size = 0;
         }
 
+        total_size += r.objsize();
         bulk.push_back(r);
 
         if (bulk.size() % BULK_SIZE == 0 || actual_size > MAXIMUM_SIZE) {
@@ -459,7 +476,7 @@ namespace epidb {
       }
 
       c->update(helpers::collection_name(Collections::EXPERIMENTS()), QUERY("_id" << experiment_id),
-                BSON("$set" << BSON("done" << true << "upload_end" << mongo::DATENOW)), false, true);
+                BSON("$set" << BSON("total_size" << (unsigned int) total_size << "done" << true << "upload_end" << mongo::DATENOW)), false, true);
 
       if (!c->getLastError().empty()) {
         msg = c->getLastError();
@@ -566,7 +583,11 @@ namespace epidb {
       std::string prev_collection;
       size_t prev_size;
       std::map<std::string, bool> processed;
-      BOOST_FOREACH( parser::Tokens tokens, bed_file_tokenized) {
+      size_t total_size = 0;
+      for (std::vector<parser::Tokens>::const_iterator it = bed_file_tokenized.begin();
+           it != bed_file_tokenized.end();
+           it++) {
+        const parser::Tokens &tokens = *it;
         mongo::BSONObjBuilder region_builder;
         region_builder.append("_id", (int) count++);
         std::string chromosome;
@@ -617,6 +638,7 @@ namespace epidb {
         }
 
         bulk.push_back(r);
+        total_size += r.objsize();
 
         if (bulk.size() % BULK_SIZE == 0) {
           if (!set_index_shard(processed, collection, size, msg)) {
@@ -648,7 +670,7 @@ namespace epidb {
       }
 
       c->update(helpers::collection_name(Collections::EXPERIMENTS()), QUERY("_id" << experiment_id),
-                BSON("$set" << BSON("done" << true << "upload_end" << mongo::DATENOW)), false, true);
+                BSON("$set" << BSON("total_size" << (unsigned int) total_size << "done" << true << "upload_end" << mongo::DATENOW)), false, true);
 
       if (!c->getLastError().empty()) {
         msg = c->getLastError();

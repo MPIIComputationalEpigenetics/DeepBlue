@@ -79,20 +79,13 @@ namespace epidb {
 
     size_t Track::features()
     {
-      if (_type == FIXED_STEP) {
-        return _data_fixed.size();
-      } else if (_type == VARIABLE_STEP) {
-        return _data_variable.size();
-      } else {
-        return _data_bedgraph.size();
-      }
-      return _type;
+      return _scores.size();
     }
 
     void Track::add_feature(float score)
     {
-      _data_fixed.push_back(score);
-      _end = _start + (_data_fixed.size() * _span);
+      _scores.push_back(score);
+      _end = _start + (_scores.size() * _span);
     }
 
     void Track::add_feature(Position position, Score score)
@@ -104,18 +97,13 @@ namespace epidb {
         _start = position;
       }
 
-      std::pair<size_t, float> p(position, score);
-      _data_variable.push_back(p);
+      _starts.push_back(position);
+      _scores.push_back(score);
     }
 
     void Track::add_feature(Position start, Position end, Score score)
     {
-      BedGraphRegion region;
-      region.start = start;
-      region.end = end;
-      region.score = score;
-
-      if (_data_bedgraph.empty() && _start == 0) {
+      if (_scores.empty() && _start == 0) {
         _start = start;
       }
 
@@ -123,32 +111,54 @@ namespace epidb {
         _end = end;
       }
 
-      _data_bedgraph.push_back(region);
+      _starts.push_back(start);
+      _ends.push_back(end);
+      _scores.push_back(score);
     }
 
-    void *Track::data()
+    boost::shared_ptr<char> Track::data()
     {
-      if (_type == VARIABLE_STEP) {
-        return (void *) _data_variable.data();
-      } else if (_type == FIXED_STEP) {
-        return (void *) _data_fixed.data();
+      size_t _starts_size = _starts.size() * sizeof(Position);
+      size_t _ends_size = _ends.size() * sizeof(Position);
+      size_t _scores_size = _scores.size() * sizeof(Score);
+
+      if (_type == FIXED_STEP) {
+        char *data = (char *) malloc(_scores_size);
+        memcpy(data, _scores.data(), _scores_size);
+        return boost::shared_ptr<char>(data);
+
+      } else if (_type == VARIABLE_STEP) {
+        char *data = (char *) malloc(_starts_size + _scores_size);
+        memcpy(data, _starts.data(), _starts_size);
+        memcpy(data + _starts_size, _scores.data(), _scores_size);
+        return boost::shared_ptr<char>(data);
+
+
       } else { /* ENCODE_BEDGRAPH or MISC_BEDGRAPH */
-        return (void *) _data_bedgraph.data();
+        char *data = (char *) malloc(_starts_size + _ends_size + _scores_size);
+        memcpy(data, _starts.data(), _starts_size);
+        memcpy(data + _starts_size, _ends.data(), _ends_size);
+        memcpy(data + _starts_size + _ends_size, _scores.data(), _scores_size);
+        return boost::shared_ptr<char>(data);
       }
     }
 
     size_t Track::data_size()
     {
-      if (_type == VARIABLE_STEP) {
-        return _data_variable.size() * sizeof(PositionScorePair);
+      size_t _starts_size = _starts.size() * sizeof(Position);
+      size_t _ends_size = _ends.size() * sizeof(Position);
+      size_t _scores_size = _scores.size() * sizeof(Score);
+
+      if (_type == FIXED_STEP) {
+        return _scores_size;
       }
 
-      else if (_type == FIXED_STEP) {
-        return _data_fixed.size() * sizeof(Score);
+      else if (_type == VARIABLE_STEP) {
+        return _starts_size + _scores_size;
       }
 
       else { /* ENCODE_BEDGRAPH or MISC_BEDGRAPH */
-        return _data_bedgraph.size() * (sizeof(BedGraphRegion));
+        return _starts_size + _ends_size + _scores_size;
       }
     }
 
@@ -163,7 +173,7 @@ namespace epidb {
       }
 
       else if (_type == ENCODE_BEDGRAPH) {
-        size_t _last_position = _data_bedgraph.rbegin()->end;
+        size_t _last_position = *_ends.rbegin();
         TrackPtr track = build_bedgraph_track(_chromosome, _last_position, _end);
         _end = _last_position;
         return track;

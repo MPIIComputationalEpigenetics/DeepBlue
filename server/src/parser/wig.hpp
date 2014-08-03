@@ -31,16 +31,9 @@ namespace epidb {
       MISC_BEDGRAPH
     } WigTrackType;
 
-    typedef struct {
-      Position start;
-      Position end;
-      Score score;
-    } BedGraphRegion;
-
-    typedef std::pair<Position, Score> PositionScorePair;
+    typedef std::vector<Position> PositionStart;
+    typedef std::vector<Position> PositionEnd;
     typedef std::vector<Score>  DataFixed;
-    typedef std::vector<PositionScorePair> DataVariable;
-    typedef std::vector<BedGraphRegion> DataBedgraph;
 
     class Track;
     typedef boost::shared_ptr<Track> TrackPtr;
@@ -53,9 +46,10 @@ namespace epidb {
       Position _end;
       Length _step;
       Length _span;
-      DataFixed  _data_fixed;
-      DataVariable _data_variable;
-      DataBedgraph _data_bedgraph;
+
+      PositionStart _starts;
+      PositionEnd _ends;
+      DataFixed  _scores;
 
     public:
       Track(std::string &chr, Position start, Length step, Length span); // FixedStep
@@ -85,7 +79,7 @@ namespace epidb {
         return _span;
       }
       size_t features();
-      void *data();
+      boost::shared_ptr<char> data();
       size_t data_size();
       TrackPtr split();
       void add_feature(Score _score);
