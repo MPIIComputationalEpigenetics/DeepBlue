@@ -19,7 +19,7 @@
 namespace epidb {
   namespace parser {
 
-    static const size_t BLOCK_SIZE = 4000;
+    static const size_t BLOCK_SIZE = 8000;
 
     class WIGParser {
     protected:

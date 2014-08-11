@@ -7,10 +7,12 @@
 //
 
 #include <algorithm>
+#include <cstdlib>
 #include <limits>
 #include <numeric>
 #include <string>
 #include <vector>
+#include <new>
 
 #include <boost/ref.hpp>
 #include <boost/thread.hpp>
@@ -27,6 +29,7 @@
 #include "key_mapper.hpp"
 #include "queries.hpp"
 
+#include "../extras/compress.hpp"
 #include "../extras/utils.hpp"
 
 #include "../regions.hpp"
@@ -57,38 +60,72 @@ namespace epidb {
             Length span = region_bson[KeyMapper::WIG_SPAN()].numberInt();
             Length size = region_bson[KeyMapper::WIG_FEATURES()].numberInt();
 
-            if (track_type  == parser::FIXED_STEP) {
+            int db_data_size;
+            const char *data;
+            lzo_bytep decompressed_data;
+            bool compressed = false;
+            if (region_bson.hasField(KeyMapper::WIG_COMPRESSED())) {
+              compressed = true;
+              const lzo_bytep compressed_data = (lzo_bytep) region_bson[KeyMapper::WIG_DATA()].binData(db_data_size);
+              size_t real_size = region_bson[KeyMapper::WIG_DATA_SIZE()].numberInt();
 
-              int i_size;
-              const float *data_fixed = reinterpret_cast<const float *>(region_bson[KeyMapper::WIG_DATA()].binData(i_size));
+              size_t uncompressed_size;
+              decompressed_data = epidb::compress::decompress(compressed_data, db_data_size, real_size, uncompressed_size);
+            } else {
+              data = region_bson[KeyMapper::WIG_DATA()].binData(db_data_size);
+            }
+
+            const Position *starts;
+            const Position *ends;
+            const Score *scores;
+            if (track_type  == parser::FIXED_STEP) {
+              if (compressed) {
+                starts = reinterpret_cast<const Position *>(decompressed_data);
+              } else {
+                starts = reinterpret_cast<const Position *>(data);
+              }
               for (Length i = 0; i < size; i++) {
-                EPIDB_LOG_DBG("OUT: " << data_fixed[i]);
                 Region region(start + (i * step), start + (i * step) + span, collection_id);
-                region.set(KeyMapper::VALUE(), utils::double_to_string(data_fixed[i]));
+                region.set(KeyMapper::VALUE(), utils::double_to_string(starts[i]));
                 _regions->push_back(region);
                 _count++;
               }
 
             } else if (track_type == parser::VARIABLE_STEP) {
-              int i_size;
-              const parser::PositionScorePair *data_fixed = reinterpret_cast<const parser::PositionScorePair *>(region_bson[KeyMapper::WIG_DATA()].binData(i_size));
+              if (compressed) {
+                starts = reinterpret_cast<const Position *>(decompressed_data);
+                scores = reinterpret_cast<const Score *>(decompressed_data + (size * sizeof(Position)));
+              } else {
+                starts = reinterpret_cast<const Position *>(data);
+                scores = reinterpret_cast<const Score *>(data + (size * sizeof(Position)));
+              }
               for (Length i = 0; i < size; i++)  {
-                EPIDB_LOG_DBG("OUT: " << data_fixed[i].first << " " << data_fixed[i].second);
-                Region region(data_fixed[i].first, data_fixed[i].first + span, collection_id);
-                region.set(KeyMapper::VALUE(), utils::double_to_string(data_fixed[i].second));
+                Region region(starts[i], starts[i] + span, collection_id);
+                region.set(KeyMapper::VALUE(), utils::double_to_string(scores[i]));
                 _regions->push_back(region);
                 _count++;
               }
 
             } else if ((track_type == parser::ENCODE_BEDGRAPH) || (track_type == parser::MISC_BEDGRAPH)) {
-              int i_size;
-              const parser::BedGraphRegion *data_fixed = reinterpret_cast<const parser::BedGraphRegion *>(region_bson[KeyMapper::WIG_DATA()].binData(i_size));
+              if (compressed) {
+                starts = reinterpret_cast<const Position *>(decompressed_data);
+                ends = reinterpret_cast<const Position *>(decompressed_data + (size * sizeof(Position)));
+                scores = reinterpret_cast<const Score *>(decompressed_data + (size * sizeof(Position) + (size * sizeof(Position))));
+              } else {
+                starts = reinterpret_cast<const Position *>(decompressed_data);
+                ends = reinterpret_cast<const Position *>(decompressed_data + (size * sizeof(Position)));
+                scores = reinterpret_cast<const Score *>(decompressed_data + (size * sizeof(Position) + (size * sizeof(Position))));
+              }
               for (Length i = 0; i < size; i++)  {
-                Region region(data_fixed[i].start, data_fixed[i].end, collection_id);
-                region.set(KeyMapper::VALUE(), utils::double_to_string(data_fixed[i].score));
+                Region region(starts[i], ends[i], collection_id);
+                region.set(KeyMapper::VALUE(), utils::double_to_string(scores[i]));
                 _regions->push_back(region);
                 _count++;
               }
+            }
+
+            if (compressed) {
+              free(decompressed_data);
             }
           }
 
@@ -216,7 +253,7 @@ namespace epidb {
                        std::vector<std::string> &chromosomes, const mongo::BSONObj &regions_query,
                        ChromosomeRegionsList &results, std::string &msg)
       {
-        const size_t max_threads = 10;
+        const size_t max_threads = 1;
         std::vector<boost::thread *> threads;
         std::vector<boost::shared_ptr<ChromosomeRegionsList> > result_parts;
 
