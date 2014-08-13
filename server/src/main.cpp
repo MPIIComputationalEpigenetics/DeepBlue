@@ -47,9 +47,9 @@ int main(int argc, char *argv[])
   std::string database_name;
 
   // Declare the supported options.
-  po::options_description desc("DeepBlue Command Line Parameters");
+  po::options_description desc("DeepBlue Parameters");
   desc.add_options()
-  ("help,H", "produce help message")
+  ("help,H", "help message")
   ("address,A", po::value<std::string>(&address)->default_value("localhost"), "Local address")
   ("port,P", po::value<std::string>(&port)->default_value("31415"), "Local port")
   ("threads,T", po::value<size_t>(&threads)->default_value(10), "Number of concurrent requests")

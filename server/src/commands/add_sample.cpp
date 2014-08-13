@@ -8,6 +8,7 @@
 
 #include "../engine/commands.hpp"
 
+#include "../dba/controlled_vocabulary.hpp"
 #include "../dba/dba.hpp"
 #include "../dba/list.hpp"
 
@@ -77,16 +78,30 @@ namespace epidb {
           return false;
         }
 
-        if (!(is_bio_source || is_syn)) {
-          std::vector<utils::IdName> names;
-          if (!dba::list::similar_bio_sources(bio_source_name, user_key, names, msg)) {
+        if (!is_bio_source) {
+          if (!dba::check_bio_source_synonym(norm_bio_source_name, is_syn, msg)) {
             result.add_error(msg);
             return false;
           }
+        }
+
+        if (!(is_bio_source || is_syn)) {
           std::string s = Error::m(ERR_INVALID_BIO_SOURCE_NAME, bio_source_name.c_str());
           EPIDB_LOG_TRACE(s);
           result.add_error(s);
           return false;
+        }
+
+        std::string sample_bio_source_name;
+        std::string norm_sample_bio_source_name;
+        if (is_syn) {
+          if (!dba::cv::get_synonym_root(bio_source_name, norm_bio_source_name,
+                                         sample_bio_source_name, norm_sample_bio_source_name, msg)) {
+            return false;
+          }
+        } else {
+          sample_bio_source_name = bio_source_name;
+          norm_sample_bio_source_name = norm_bio_source_name;
         }
 
         Metadata metadata;
@@ -96,7 +111,7 @@ namespace epidb {
         }
 
         std::string s_id;
-        if (!dba::add_sample(bio_source_name, norm_bio_source_name, metadata, user_key, s_id, msg)) {
+        if (!dba::add_sample(sample_bio_source_name, norm_sample_bio_source_name, metadata, user_key, s_id, msg)) {
           result.add_error(msg);
           return false;
         }

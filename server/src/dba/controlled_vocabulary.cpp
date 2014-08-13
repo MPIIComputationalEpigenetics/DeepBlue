@@ -147,7 +147,7 @@ namespace epidb {
         return true;
       }
 
-      bool __get_synonym_root(const std::string &synonym, const std::string &norm_synonym,
+      bool get_synonym_root(const std::string &synonym, const std::string &norm_synonym,
                               std::string &bio_source_name, std::string &norm_bio_source_name, std::string &msg)
       {
         mongo::ScopedDbConnection c(config::get_mongodb_server());
@@ -183,7 +183,7 @@ namespace epidb {
 
         if (is_syn) {
           std::string norm_input_bio_source_name = utils::normalize_name(input_bio_source_name);
-          if (!__get_synonym_root(input_bio_source_name, norm_input_bio_source_name,
+          if (!get_synonym_root(input_bio_source_name, norm_input_bio_source_name,
                                   bio_source_name, norm_bio_source_name, msg)) {
             return false;
           }
@@ -352,7 +352,7 @@ namespace epidb {
         std::string norm_less_embracing_root;
 
         if (more_embracing_is_syn) {
-          if (!__get_synonym_root(bio_source_more_embracing, norm_bio_source_more_embracing,
+          if (!get_synonym_root(bio_source_more_embracing, norm_bio_source_more_embracing,
                                   more_embracing_root, norm_more_embracing_root, msg)) {
             return false;
           }
@@ -362,7 +362,7 @@ namespace epidb {
         }
 
         if (less_embracing_is_syn) {
-          if (!__get_synonym_root(bio_source_less_embracing, norm_bio_source_less_embracing,
+          if (!get_synonym_root(bio_source_less_embracing, norm_bio_source_less_embracing,
                                   less_embracing_root, norm_less_embracing_root, msg)) {
             return false;
           }
@@ -511,7 +511,7 @@ namespace epidb {
         std::string norm_more_embracing_root;
 
         if (!is_bio_source) {
-          if (!__get_synonym_root(bio_source_name, norm_bio_source_name,
+          if (!get_synonym_root(bio_source_name, norm_bio_source_name,
                                   more_embracing_root, norm_more_embracing_root, msg)) {
             return false;
           }

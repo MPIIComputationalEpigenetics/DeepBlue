@@ -42,6 +42,8 @@ namespace epidb {
                                     bool is_bio_source, const std::string &user_key,
                                     std::vector<std::string> &norm_subs, std::string &msg);
 
+      bool get_synonym_root(const std::string &synonym, const std::string &norm_synonym,
+                            std::string &bio_source_name, std::string &norm_bio_source_name, std::string &msg);
     }
   }
 }

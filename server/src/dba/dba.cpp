@@ -493,17 +493,9 @@ namespace epidb {
                     const std::string &user_key,
                     std::string &sample_id, std::string &msg)
     {
-      {
-        int id;
-        if (!helpers::get_counter("samples", id, msg))  {
-          return false;
-        }
-        sample_id = "s" + boost::lexical_cast<std::string>(id);
-      }
-      mongo::BSONObjBuilder search_data_builder;
-      search_data_builder.append("_id", sample_id);
-      search_data_builder.append("bio_source_name", bio_source_name);
-      search_data_builder.append("norm_bio_source_name", norm_bio_source_name);
+      mongo::BSONObjBuilder data_builder;
+      data_builder.append("bio_source_name", bio_source_name);
+      data_builder.append("norm_bio_source_name", norm_bio_source_name);
 
       std::map<std::string, std::string> names_values;
       std::map<std::string, std::string>::iterator it;
@@ -526,7 +518,7 @@ namespace epidb {
           return false;
         } else if (!r) {
           // TODO: return the similar sample_field names
-          msg = "Field " + kv.first + " is not registered. Please use add_sample_field command or check the field name.";
+          msg = "Field '" + kv.first + "' is not registered. Please use add_sample_field command or check the field name.";
           if (err_msg.empty()) {
             err_msg = msg;
           } else {
@@ -546,13 +538,37 @@ namespace epidb {
       for (it = names_values.begin(); it != names_values.end(); it++) {
         std::string norm_title = "norm_" + it->first;
         std::string norm_value = utils::normalize_name(it->second);
-        search_data_builder.append(it->first, it->second);
-        search_data_builder.append(norm_title, norm_value);
+        data_builder.append(it->first, it->second);
+        data_builder.append(norm_title, norm_value);
       }
 
-      mongo::BSONObj search_data = search_data_builder.obj();
+      mongo::BSONObj data = data_builder.obj();
+
+      mongo::ScopedDbConnection c(config::get_mongodb_server());
+
+      // If we already have a sample with exactly the same information
+      std::auto_ptr<mongo::DBClientCursor> cursor  = c->query(helpers::collection_name(Collections::SAMPLES()), data);
+      std::cerr << data.toString() << std::endl;
+      if (cursor->more()) {
+        std::cerr << "ACHOUUU " << std::endl;
+        mongo::BSONObj o = cursor->next();
+        std::cerr << o.toString() << std::endl;
+        sample_id = o["_id"].str();
+        std::cerr << sample_id << std::endl;
+        return true;
+      } else {
+        std::cerr << "VAI INCLUIRRR" << std::endl;
+      }
+
+      int id;
+      if (!helpers::get_counter("samples", id, msg))  {
+        return false;
+      }
+      sample_id = "s" + boost::lexical_cast<std::string>(id);
+
       mongo::BSONObjBuilder create_sample_builder;
-      create_sample_builder.appendElements(search_data);
+      create_sample_builder.append("_id", sample_id);
+      create_sample_builder.appendElements(data);
 
       utils::IdName id_user_name;
       if (!get_user_name(user_key, id_user_name, msg)) {
@@ -561,7 +577,6 @@ namespace epidb {
       create_sample_builder.append("user", id_user_name.name);
       mongo::BSONObj cem = create_sample_builder.obj();
 
-      mongo::ScopedDbConnection c(config::get_mongodb_server());
       c->insert(helpers::collection_name(Collections::SAMPLES()), cem);
       if (!c->getLastError().empty()) {
         msg = c->getLastError();
@@ -570,7 +585,7 @@ namespace epidb {
       }
       c.done();
 
-      if (!search::insert_full_text(Collections::SAMPLES(), sample_id, search_data, msg)) {
+      if (!search::insert_full_text(Collections::SAMPLES(), sample_id, data, msg)) {
         return false;
       }
 
