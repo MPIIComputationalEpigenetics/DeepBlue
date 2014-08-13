@@ -110,7 +110,7 @@ namespace epidb {
         if (exists) {
           std::stringstream ss;
           ss << "Invalid synonymous name: ";
-          ss << bio_source_name ;
+          ss << synonym_name ;
           ss << ". A bio_source synonym with this name already exists.";
           result.add_error(ss.str());
           return false;

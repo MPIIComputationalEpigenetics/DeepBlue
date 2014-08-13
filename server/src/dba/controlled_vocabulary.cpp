@@ -147,6 +147,33 @@ namespace epidb {
         return true;
       }
 
+      bool __get_synonym_root(const std::string &synonym, const std::string &norm_synonym,
+                              std::string &bio_source_name, std::string &norm_bio_source_name, std::string &msg)
+      {
+        mongo::ScopedDbConnection c(config::get_mongodb_server());
+
+        mongo::BSONObjBuilder syn_query_builder;
+        syn_query_builder.append("norm_synonym", norm_synonym);
+
+        mongo::BSONObj query_obj = syn_query_builder.obj();
+        mongo::Query query = mongo::Query(query_obj).sort("synonym");
+        std::auto_ptr<mongo::DBClientCursor> syns_cursor = c->query(helpers::collection_name(Collections::BIO_SOURCE_SYNONYM_NAMES()), query);
+
+        if (!syns_cursor->more()) {
+          msg = "It was not possible to find the bio_source root for " + synonym + " .";
+          c.done();
+          return false;
+        }
+
+        mongo::BSONObj syn_bson = syns_cursor->next();
+        bio_source_name = syn_bson["bio_source_name"].str();
+        norm_bio_source_name = syn_bson["norm_bio_source_name"].str();
+
+        c.done();
+
+        return true;
+      }
+
       bool set_bio_source_synonym(const std::string &input_bio_source_name, const std::string &synonym,
                                   bool is_bio_source, const bool is_syn, const std::string &user_key,
                                   std::string &msg)
@@ -155,33 +182,17 @@ namespace epidb {
         std::string norm_bio_source_name;
 
         if (is_syn) {
-          // TODO: put in a separated function
-          mongo::ScopedDbConnection c(config::get_mongodb_server());
           std::string norm_input_bio_source_name = utils::normalize_name(input_bio_source_name);
-
-          mongo::BSONObjBuilder syn_builder;
-          syn_builder.append("norm_synonym", norm_input_bio_source_name);
-
-          mongo::BSONObj q = syn_builder.obj();
-          std::auto_ptr<mongo::DBClientCursor> cursor = c->query(helpers::collection_name(Collections::BIO_SOURCE_SYNONYM_NAMES()), q);
-
-          if (!cursor->more()) {
-            msg = "It was not possible to find " + input_bio_source_name + " synonyms for .";
-            c.done();
+          if (!__get_synonym_root(input_bio_source_name, norm_input_bio_source_name,
+                                  bio_source_name, norm_bio_source_name, msg)) {
             return false;
           }
-
-          mongo::BSONObj syn_bson = cursor->next();
-          bio_source_name = syn_bson["bio_source_name"].str();
-          norm_bio_source_name = syn_bson["norm_bio_source_name"].str();
-          c.done();
         } else {
           bio_source_name = input_bio_source_name;
           norm_bio_source_name = utils::normalize_name(input_bio_source_name);
         }
 
         std::string norm_synonym = utils::normalize_name(synonym);
-
         mongo::ScopedDbConnection c(config::get_mongodb_server());
 
         mongo::BSONObjBuilder index_name;
@@ -279,33 +290,6 @@ namespace epidb {
         } else {
           return __get_synonyms_from_synonym(bio_source_name, norm_bio_source_name, user_key, syns, msg);
         }
-      }
-
-      bool __get_synonym_root(const std::string &synonym, const std::string &norm_synonym,
-                              std::string &bio_source_name, std::string &norm_bio_source_name, std::string &msg)
-      {
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
-
-        mongo::BSONObjBuilder syn_query_builder;
-        syn_query_builder.append("norm_synonym", norm_synonym);
-
-        mongo::BSONObj query_obj = syn_query_builder.obj();
-        mongo::Query query = mongo::Query(query_obj).sort("synonym");
-        std::auto_ptr<mongo::DBClientCursor> syns_cursor = c->query(helpers::collection_name(Collections::BIO_SOURCE_SYNONYM_NAMES()), query);
-
-        if (!syns_cursor->more()) {
-          msg = "It was not possible to find the bio_source root for " + synonym + " .";
-          c.done();
-          return false;
-        }
-
-        mongo::BSONObj syn_bson = syns_cursor->next();
-        bio_source_name = syn_bson["bio_source_name"].str();
-        norm_bio_source_name = syn_bson["norm_bio_source_name"].str();
-
-        c.done();
-
-        return true;
       }
 
       bool __is_connected(const std::string &norm_s1, const std::string &norm_s2,
