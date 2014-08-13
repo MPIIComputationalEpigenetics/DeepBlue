@@ -84,6 +84,7 @@ namespace epidb {
           std::string s = Error::m(ERR_INVALID_BIO_SOURCE_NAME, bio_source_name.c_str());
           EPIDB_LOG_TRACE(s);
           result.add_error(s);
+          return false;
         }
 
         std::string norm_synoynm_name = utils::normalize_name(synonym_name);
