@@ -550,14 +550,10 @@ namespace epidb {
       std::auto_ptr<mongo::DBClientCursor> cursor  = c->query(helpers::collection_name(Collections::SAMPLES()), data);
       std::cerr << data.toString() << std::endl;
       if (cursor->more()) {
-        std::cerr << "ACHOUUU " << std::endl;
         mongo::BSONObj o = cursor->next();
-        std::cerr << o.toString() << std::endl;
         sample_id = o["_id"].str();
-        std::cerr << sample_id << std::endl;
+        c.done();
         return true;
-      } else {
-        std::cerr << "VAI INCLUIRRR" << std::endl;
       }
 
       int id;

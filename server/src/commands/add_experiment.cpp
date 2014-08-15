@@ -138,7 +138,7 @@ namespace epidb {
             return false;
           }
           std::stringstream ss;
-          ss << "Invalid epigenetic mark name: ";
+          ss << "Invalid epigenetic mark: ";
           ss << epigenetic_mark;
           ss << ".";
           if (names.size() > 0) {
