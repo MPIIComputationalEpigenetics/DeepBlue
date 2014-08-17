@@ -83,7 +83,18 @@ namespace epidb {
         const std::string format = parameters[8]->as_string();
         const std::string user_key = parameters[10]->as_string();
 
+        bool ok = false;
         std::string msg;
+
+        if (!dba::check_user(user_key, ok, msg)) {
+          result.add_error(msg);
+          return false;
+        }
+        if (!ok) {
+          result.add_error("Invalid user key.");
+          return false;
+        }
+
         Metadata extra_metadata;
         if (!read_metadata(parameters[9], extra_metadata, msg)) {
           result.add_error(msg);
@@ -97,14 +108,8 @@ namespace epidb {
         std::string norm_project = utils::normalize_name(project);
         std::string norm_technique = utils::normalize_name(technique);
 
-        bool ok = false;
-
-        if (!dba::check_user(user_key, ok, msg)) {
-          result.add_error(msg);
-          return false;
-        }
-        if (!ok) {
-          result.add_error("Invalid user key.");
+        if (description.size() > 10000) {
+          result.add_error("Description is too long.");
           return false;
         }
 

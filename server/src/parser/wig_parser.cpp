@@ -231,13 +231,21 @@ namespace epidb {
         if (strs[0] == "variableStep" ||
             strs[0] == "fixedStep") {
 
-          if (actual_track) {
-            wig->add_track(actual_track);
-          }
-
-          if (!read_format(strs, actual_track, msg)) {
+          TrackPtr new_track;
+          if (!read_format(strs, new_track, msg)) {
             return false;
           }
+
+          if (!actual_track) {
+            actual_track = new_track;
+          } else if ((actual_track->chromosome() != new_track->chromosome())  ||
+                     (actual_track->end() != new_track->start())) {
+            if (actual_track) {
+              wig->add_track(actual_track);
+            }
+            actual_track = new_track;
+          }
+
           continue;
         }
 
