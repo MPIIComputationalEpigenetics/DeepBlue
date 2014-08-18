@@ -726,7 +726,7 @@ namespace epidb {
 
     bool count_experiments(unsigned long long &size, const std::string &user_key, std::string &msg)
     {
-      return helpers::collection_size("experiments", size, msg);
+      return helpers::collection_size(Collections::EXPERIMENTS(), size, msg);
     }
 
     bool is_valid_bio_source_name(const std::string &name, const std::string &norm_name, std::string &msg)
@@ -744,22 +744,6 @@ namespace epidb {
       return true;
     }
 
-
-    bool is_valid_sample_name(const std::string &name, const std::string &norm_name, std::string &msg)
-    {
-      bool exists;
-      if (!helpers::check_exist(Collections::SAMPLES(), "norm_name", norm_name, exists, msg)) {
-        return false;
-      }
-      if (exists) {
-        std::stringstream ss;
-        ss << "Sample name '" << name << "' already exists.";
-        msg = ss.str();
-        return false;
-      }
-      return true;
-    }
-
     bool is_valid_sample_field_name(const std::string &name, const std::string &norm_name, std::string &msg)
     {
       bool exists;
@@ -767,7 +751,7 @@ namespace epidb {
         return false;
       }
       if (exists) {
-        std::string s = Error::m(ERR_DUPLICATED_SAMPLE_FIELD_NAME, name.c_str());
+        std::string s = Error::m(ERR_DUPLICATE_SAMPLE_FIELD_NAME, name.c_str());
         EPIDB_LOG_TRACE(s);
         msg = s;
         return false;
@@ -797,9 +781,9 @@ namespace epidb {
         return false;
       }
       if (exists) {
-        std::stringstream ss;
-        ss << "Project '" << name << "' already exists.";
-        msg = ss.str();
+        std::string s = Error::m(ERR_DUPLICATE_PROJECT_NAME, name.c_str());
+        EPIDB_LOG_TRACE(s);
+        msg = s;
         return false;
       }
       return true;
@@ -812,9 +796,9 @@ namespace epidb {
         return false;
       }
       if (exists) {
-        std::stringstream ss;
-        ss << "Genome '" << genome << "' already exists.";
-        msg = ss.str();
+        std::string s = Error::m(ERR_DUPLICATE_GENOME_NAME, genome.c_str());
+        EPIDB_LOG_TRACE(s);
+        msg = s;
         return false;
       }
       return true;

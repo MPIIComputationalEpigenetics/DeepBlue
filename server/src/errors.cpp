@@ -33,7 +33,8 @@
  * 08 - Data
  * 09 - Format
  * 10 - Sample Field
- * 11 -
+ * 11 - Genome
+ * 12 - ..
  * 66 - Internal
  */
 
@@ -76,7 +77,11 @@ namespace epidb {
 
   Error ERR_DUPLICATED_EPIGENETIC_MARK_NAME("105001", "Duplicated Epigenetic Mark Name '%s'." );
 
-  Error ERR_DUPLICATED_SAMPLE_FIELD_NAME("111001", "Duplicated Sample Field Name '%s'.");
+  Error ERR_DUPLICATE_PROJECT_NAME("107001", "Duplicated Project Name '%s'.");
+
+  Error ERR_DUPLICATE_SAMPLE_FIELD_NAME("111001", "Duplicated Sample Field Name '%s'.");
+
+  Error ERR_DUPLICATE_GENOME_NAME("111101", "Duplicated Genome Name '%s'.");
 
   Error ERR_DATABASE_CONNECTION("466555", "MongoDB connection error: '%s'.");
   Error ERR_DATABASE_EXCEPTION("466666", "MongoDB exception at operation '%s': '%s'.");

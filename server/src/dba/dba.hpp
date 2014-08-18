@@ -102,8 +102,6 @@ namespace epidb {
 
     bool is_valid_bio_source_name(const std::string &name, const std::string &norm_name, std::string &msg);
 
-    bool is_valid_sample_name(const std::string &name, const std::string &norm_name, std::string &msg);
-
     bool is_valid_sample_field_name(const std::string &name, const std::string &norm_name, std::string &msg);
 
     bool is_valid_epigenetic_mark(const std::string &name, const std::string &norm_name, std::string &msg);
