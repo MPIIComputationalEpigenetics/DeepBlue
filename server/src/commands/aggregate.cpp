@@ -23,6 +23,7 @@
 
 #include "../log.hpp"
 #include "../regions.hpp"
+#include "../errors.hpp"
 
 namespace epidb {
   namespace command {
@@ -34,7 +35,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::OPERATIONS, "Summarize the data regions content in range regions. Use the fields @AGG.MIN, @AGG.MAX, @AGG.MEDIAN, @AGG.MEAN, @AGG.VAR, @AGG.SD, @AGG.COUNT in the get_regions command format parameter for retrieving the computed values."); 
+        return CommandDescription(categories::OPERATIONS, "Summarize the data regions content in range regions. Use the fields @AGG.MIN, @AGG.MAX, @AGG.MEDIAN, @AGG.MEAN, @AGG.VAR, @AGG.SD, @AGG.COUNT in the get_regions command format parameter for retrieving the computed values.");
       }
 
       static Parameters parameters_()
@@ -76,7 +77,8 @@ namespace epidb {
           return false;
         }
         if (!ok) {
-          result.add_error("Invalid user key.");
+          std::string s = Error::m(ERR_INVALID_USER_KEY);
+          result.add_error(s);
           return false;
         }
 

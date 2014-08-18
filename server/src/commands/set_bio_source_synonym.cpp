@@ -61,7 +61,8 @@ namespace epidb {
           return false;
         }
         if (!ok) {
-          result.add_error("Invalid user key.");
+          std::string s = Error::m(ERR_INVALID_USER_KEY);
+          result.add_error(s);
           return false;
         }
 
@@ -95,11 +96,9 @@ namespace epidb {
           return false;
         }
         if (exists) {
-          std::stringstream ss;
-          ss << "Invalid synonymous name: ";
-          ss << bio_source_name ;
-          ss << ". A synonymous with this name already exists.";
-          result.add_error(ss.str());
+          std::string s = Error::m(ERR_INVALID_BIO_SOURCE_SYNONYM, synonym_name.c_str());
+          EPIDB_LOG_TRACE(s);
+          result.add_error(s);
           return false;
         }
 
@@ -108,11 +107,9 @@ namespace epidb {
           return false;
         }
         if (exists) {
-          std::stringstream ss;
-          ss << "Invalid synonymous name: ";
-          ss << synonym_name ;
-          ss << ". A bio_source synonym with this name already exists.";
-          result.add_error(ss.str());
+          std::string s = Error::m(ERR_INVALID_BIO_SOURCE_SYNONYM, synonym_name.c_str());
+          EPIDB_LOG_TRACE(s);
+          result.add_error(s);
           return false;
         }
 

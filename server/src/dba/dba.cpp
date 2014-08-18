@@ -767,9 +767,9 @@ namespace epidb {
         return false;
       }
       if (exists) {
-        std::stringstream ss;
-        ss << "Sample field name '" << name << "' already exists.";
-        msg = ss.str();
+        std::string s = Error::m(ERR_DUPLICATED_SAMPLE_FIELD_NAME, name.c_str());
+        EPIDB_LOG_TRACE(s);
+        msg = s;
         return false;
       }
       return true;

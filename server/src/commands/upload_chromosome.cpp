@@ -17,6 +17,8 @@
 #include "../parser/fasta_parser.hpp"
 #include "../parser/genome_data.hpp"
 
+#include "../errors.hpp"
+
 namespace epidb {
     namespace command {
 
@@ -62,8 +64,9 @@ namespace epidb {
             return false;
           }
           if (!ok) {
-            result.add_error("Invalid user key.");
-            return false;
+          std::string s = Error::m(ERR_INVALID_USER_KEY);
+          result.add_error(s);
+          return false;
           }
 
           std::string norm_genome = utils::normalize_name(genome);

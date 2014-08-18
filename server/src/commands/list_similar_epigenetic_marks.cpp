@@ -16,6 +16,8 @@
 #include "../extras/utils.hpp"
 #include "../extras/serialize.hpp"
 
+#include "../errors.hpp"
+
 namespace epidb {
   namespace command {
 
@@ -62,7 +64,8 @@ namespace epidb {
           return false;
         }
         if (!ok) {
-          result.add_error("Invalid user key.");
+          std::string s = Error::m(ERR_INVALID_USER_KEY);
+          result.add_error(s);
           return false;
         }
 

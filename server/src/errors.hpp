@@ -23,11 +23,16 @@ namespace epidb {
 		static std::string m(const Error e, ...);
 	};
 
+	extern Error ERR_INVALID_USER_KEY;
+
 	extern Error ERR_INVALID_BIO_SOURCE_NAME;
 	extern Error ERR_DUPLICATED_BIO_SOURCE_NAME;
 	extern Error ERR_MORE_EMBRACING_BIO_SOURCE_NAME;
+	extern Error ERR_INVALID_BIO_SOURCE_SYNONYM;
 
 	extern Error ERR_DUPLICATED_EPIGENETIC_MARK_NAME;
+
+	extern Error ERR_DUPLICATED_SAMPLE_FIELD_NAME;
 
 	extern Error ERR_DATABASE_CONNECTION;
 	extern Error ERR_DATABASE_EXCEPTION;
