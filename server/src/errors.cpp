@@ -70,7 +70,11 @@ namespace epidb {
       else
         break;
     }
-    return std::string(formatted.get());
+    std::stringstream ss;
+    ss << e.code_value;
+    ss << ":";
+    ss << formatted.get();
+    return ss.str();
   }
 
 
