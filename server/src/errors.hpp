@@ -11,34 +11,34 @@
 
 namespace epidb {
 
-	class Error {
-	private:
-		std::string code_value;
-		std::string err_fmt;
-	public:
-		Error(const std::string& c, const std::string& f) :
-			code_value(c),
-			err_fmt(f) {}
+  class Error {
+  private:
+    std::string code_value;
+    std::string err_fmt;
+  public:
+    Error(const std::string &c, const std::string &f) :
+      code_value(c),
+      err_fmt(f) {}
 
-		static std::string m(const Error e, ...);
-	};
+    static std::string m(const Error e, ...);
+  };
 
-	extern Error ERR_INVALID_USER_KEY;
+  extern Error ERR_INVALID_USER_KEY;
 
-	extern Error ERR_INVALID_BIO_SOURCE_NAME;
-	extern Error ERR_DUPLICATED_BIO_SOURCE_NAME;
-	extern Error ERR_MORE_EMBRACING_BIO_SOURCE_NAME;
-	extern Error ERR_INVALID_BIO_SOURCE_SYNONYM;
+  extern Error ERR_INVALID_BIO_SOURCE_NAME;
+  extern Error ERR_DUPLICATED_BIO_SOURCE_NAME;
+  extern Error ERR_MORE_EMBRACING_BIO_SOURCE_NAME;
+  extern Error ERR_INVALID_BIO_SOURCE_SYNONYM;
 
-	extern Error ERR_DUPLICATED_EPIGENETIC_MARK_NAME;
+  extern Error ERR_DUPLICATED_EPIGENETIC_MARK_NAME;
 
-	extern Error ERR_DUPLICATE_PROJECT_NAME;
+  extern Error ERR_DUPLICATE_PROJECT_NAME;
 
-	extern Error ERR_DUPLICATE_SAMPLE_FIELD_NAME;
+  extern Error ERR_DUPLICATE_SAMPLE_FIELD_NAME;
 
-	extern Error ERR_DUPLICATE_GENOME_NAME;
+  extern Error ERR_DUPLICATE_GENOME_NAME;
 
-	extern Error ERR_DATABASE_CONNECTION;
-	extern Error ERR_DATABASE_EXCEPTION;
-	extern Error ERR_DATABASE_INVALID_BIO_SOURCE;
+  extern Error ERR_DATABASE_CONNECTION;
+  extern Error ERR_DATABASE_EXCEPTION;
+  extern Error ERR_DATABASE_INVALID_BIO_SOURCE;
 }

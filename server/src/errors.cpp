@@ -38,35 +38,41 @@
  * 66 - Internal
  */
 
- /** Error :
-  * 000 - Invalid/Non-Existent
-  * 001 - Duplicated
-  *
-  * 400 - Synonym already exists
-  *
-  * 555 - Connection Error
-  * 666 - Internal Error
-  *
-  * // Controlled vocabulary errors
-  * 901 - More Embracing
-  */
+/** Error :
+ * 000 - Invalid/Non-Existent
+ * 001 - Duplicated
+ *
+ * 400 - Synonym already exists
+ *
+ * 555 - Connection Error
+ * 666 - Internal Error
+ *
+ * // Controlled vocabulary errors
+ * 901 - More Embracing
+ */
 
 namespace epidb {
 
   std::string Error::m(const Error e, ...)
   {
-  	char buffer[256];
- 	va_list args;
-    va_start(args, e);
-    vsprintf(buffer, e.err_fmt.c_str(), args);
-    va_end(args);
-
-    std::stringstream ss;
-    ss << e.code_value;
-	ss << ":";
-	ss << buffer;
-	return ss.str();
+    int final_n, n = ((int)e.err_fmt.size()) * 2; /* reserve 2 times as much as the length of the fmt_str */
+    std::string str;
+    std::unique_ptr<char[]> formatted;
+    va_list ap;
+    while (1) {
+      formatted.reset(new char[n]); /* wrap the plain char array into the unique_ptr */
+      strcpy(&formatted[0], e.err_fmt.c_str());
+      va_start(ap, e);
+      final_n = vsnprintf(&formatted[0], n, e.err_fmt.c_str(), ap);
+      va_end(ap);
+      if (final_n < 0 || final_n >= n)
+        n += abs(final_n - n + 1);
+      else
+        break;
+    }
+    return std::string(formatted.get());
   }
+
 
   Error ERR_INVALID_USER_KEY("100000", "Invalid User Key.");
 
