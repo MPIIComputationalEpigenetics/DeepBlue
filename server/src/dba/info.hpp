@@ -38,6 +38,8 @@ namespace epidb {
                           std::map<std::string, std::string> &metadata, std::string &msg, bool full = false);
 
       bool get_query(const std::string &id, std::map<std::string, std::string> &, std::string &msg);
+
+      bool get_sample_field(const std::string &id, std::map<std::string, std::string> &res, std::string &msg, bool full = false);
     }
   }
 }

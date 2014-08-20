@@ -55,6 +55,7 @@ namespace epidb {
 
       bool get_genome(const std::string &id, std::map<std::string, std::string> &res, std::string &msg, bool full = false)
       {
+        //  TODO: move to a generic function
         mongo::ScopedDbConnection c(config::get_mongodb_server());
 
         mongo::BSONObj query = BSON("_id" << id);
@@ -80,6 +81,7 @@ namespace epidb {
 
       bool get_project(const std::string &id, std::map<std::string, std::string> &res, std::string &msg, bool full = false)
       {
+        //  TODO: move to a generic function
         mongo::ScopedDbConnection c(config::get_mongodb_server());
 
         mongo::BSONObj query = BSON("_id" << id);
@@ -167,6 +169,7 @@ namespace epidb {
 
       bool get_epigenetic_mark(const std::string &id, std::map<std::string, std::string> &res, std::string &msg, bool full = false)
       {
+        //  TODO: move to a generic function
         mongo::ScopedDbConnection c(config::get_mongodb_server());
 
         mongo::BSONObj query = BSON("_id" << id);
@@ -295,6 +298,34 @@ namespace epidb {
         res["args"] = arg_builder.obj().jsonString(mongo::Strict, false);
         return true;
       }
+
+
+      bool get_sample_field(const std::string &id, std::map<std::string, std::string> &res, std::string &msg, bool full = false)
+      {
+        //  TODO: move to a generic function
+        mongo::ScopedDbConnection c(config::get_mongodb_server());
+
+        mongo::BSONObj query = BSON("_id" << id);
+        std::auto_ptr<mongo::DBClientCursor> data_cursor = c->query(helpers::collection_name(Collections::SAMPLE_FIELDS()), query, 1);
+        mongo::BSONObj result;
+        if (data_cursor->more()) {
+          result = data_cursor->next().getOwned();
+        } else {
+          msg = "project with id " + id + " not found.";
+          c.done();
+          return false;
+        }
+        c.done();
+
+        for (mongo::BSONObj::iterator it = result.begin(); it.more(); ) {
+          mongo::BSONElement e = it.next();
+          if (full || (strncmp("norm_", e.fieldName(), 5) != 0)) {
+            res[e.fieldName()] = e.str();
+          }
+        }
+        return true;
+      }
+
     }
   }
 }
