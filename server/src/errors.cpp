@@ -8,8 +8,11 @@
 
 #include <cstdarg>
 #include <cstdio>
+#include <cstring>
 #include <sstream>
 #include <string>
+
+#include <boost/shared_ptr.hpp>
 
 #include "errors.hpp"
 
@@ -57,7 +60,7 @@ namespace epidb {
   {
     int final_n, n = ((int)e.err_fmt.size()) * 2; /* reserve 2 times as much as the length of the fmt_str */
     std::string str;
-    std::unique_ptr<char[]> formatted;
+    boost::shared_ptr<char[]> formatted;
     va_list ap;
     while (1) {
       formatted.reset(new char[n]); /* wrap the plain char array into the unique_ptr */
