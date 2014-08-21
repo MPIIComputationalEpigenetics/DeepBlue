@@ -31,22 +31,22 @@ namespace epidb {
 
       bool users(const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg)
       {
-        return helpers::get("users", result, msg);
+        return helpers::get(Collections::USERS(), result, msg);
       }
 
       bool genomes(const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg)
       {
-        return helpers::get("genomes", result, msg);
+        return helpers::get(Collections::GENOMES(), result, msg);
       }
 
       bool bio_sources(const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg)
       {
-        return helpers::get("bio_sources", result, msg);
+        return helpers::get(Collections::BIO_SOURCES(), result, msg);
       }
 
       bool techniques(const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg)
       {
-        return helpers::get("techniques", result, msg);
+        return helpers::get(Collections::TECHNIQUES(), result, msg);
       }
 
       bool samples(const std::string &user_key, const mongo::BSONArray &bio_sources, const Metadata &metadata,
@@ -77,6 +77,11 @@ namespace epidb {
         return true;
       }
 
+      bool sample_fields(const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg)
+      {
+        return helpers::get(Collections::SAMPLE_FIELDS(), result, msg);
+      }
+
       bool projects(const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg)
       {
         return helpers::get(Collections::PROJECTS(), result, msg);
@@ -89,12 +94,22 @@ namespace epidb {
 
       bool experiments(const mongo::Query query, std::vector<utils::IdName> &result, std::string &msg)
       {
+
+        /*
+                fields.push_back("_id");
+        fields.push_back("name");
+        fields.push_back("genome");
+        fields.push_back("epigenetic_mark");
+        fields.push_back("sample_id");
+        fields.push_back("technique");
+        fields.push_back("description");
+        */
         std::vector<std::string> fields;
         fields.push_back("_id");
         fields.push_back("name");
 
         std::vector<mongo::BSONObj> objects;
-        if (!helpers::get("experiments", query, fields, objects, msg)) {
+        if (!helpers::get(Collections::EXPERIMENTS(), query, fields, objects, msg)) {
           return false;
         }
 
@@ -109,7 +124,7 @@ namespace epidb {
       bool annotations(const std::string &genome, const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg)
       {
         std::vector<mongo::BSONObj> objects;
-        if (!helpers::get("annotations", "genome", genome, objects, msg)) {
+        if (!helpers::get(Collections::ANNOTATIONS(), "genome", genome, objects, msg)) {
           return false;
         }
 
@@ -149,37 +164,43 @@ namespace epidb {
       bool similar_bio_sources(const std::string name, const std::string &user_key,
                                std::vector<utils::IdName> &result, std::string &msg)
       {
-        return similar("bio_sources", name, user_key, result, msg);
+        return similar(Collections::BIO_SOURCES(), name, user_key, result, msg);
+      }
+
+      bool similar_sample_fields(const std::string name, const std::string &user_key,
+                                 std::vector<utils::IdName> &result, std::string &msg)
+      {
+        return similar(Collections::SAMPLE_FIELDS(), name, user_key, result, msg);
       }
 
       bool similar_techniques(const std::string name, const std::string &user_key,
                               std::vector<utils::IdName> &result, std::string &msg)
       {
-        return similar("techniques", name, user_key, result, msg);
+        return similar(Collections::TECHNIQUES(), name, user_key, result, msg);
       }
 
       bool similar_projects(const std::string name, const std::string &user_key,
                             std::vector<utils::IdName> &result, std::string &msg)
       {
-        return similar("projects", name, user_key, result, msg);
+        return similar(Collections::PROJECTS(), name, user_key, result, msg);
       }
 
       bool similar_epigenetic_marks(const std::string name, const std::string &user_key,
                                     std::vector<utils::IdName> &result, std::string &msg)
       {
-        return similar("epigenetic_marks", name, user_key, result, msg);
+        return similar(Collections::EPIGENETIC_MARKS(), name, user_key, result, msg);
       }
 
       bool similar_genomes(const std::string name, const std::string &user_key,
                            std::vector<utils::IdName> &result, std::string &msg)
       {
-        return similar("genomes", name, user_key, result, msg);
+        return similar(Collections::GENOMES(), name, user_key, result, msg);
       }
 
       bool similar_experiments(const std::string name, const std::string &genome, const std::string &user_key,
                                std::vector<utils::IdName> &result, std::string &msg)
       {
-        return similar("experiments", "name", name, "genome", genome, user_key, result, msg);
+        return similar(Collections::EXPERIMENTS(), "name", name, "genome", genome, user_key, result, msg);
       }
 
       bool similar(const std::string &where, const std::string &what,

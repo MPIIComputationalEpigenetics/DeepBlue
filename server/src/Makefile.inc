@@ -33,7 +33,8 @@ endif
 # Felipe Albrecht's mac
 ifeq ($(host),macosx)
  CXX = clang++
- DEFCXXFLAGS = -O3 -Ofast -Werror -Wall -Wextra  -Weffc++ -Wno-unused-parameter -Wno-ignored-qualifiers -DPROFINY_CALL_GRAPH_PROFILER -I/opt/boost/include/ -I/Users/albrecht/mpi/DeepBlue/server/third_party/drivers/macosx/include -I/Users/albrecht/mpi/DeepBlue/server/third_party/cppformat/ -I/Users/albrecht/mpi/DeepBlue/server/third_party/minilzo/
+ #
+ DEFCXXFLAGS = -O3 -Ofast -ffast-math -march=native -Werror -Wall -Wextra  -Weffc++ -Wno-unused-parameter -Wno-ignored-qualifiers -DPROFINY_CALL_GRAPH_PROFILER -I/opt/boost/include/ -I/Users/albrecht/mpi/DeepBlue/server/third_party/drivers/macosx/include -I/Users/albrecht/mpi/DeepBlue/server/third_party/cppformat/ -I/Users/albrecht/mpi/DeepBlue/server/third_party/minilzo/
  BOOST_DIR = /opt/boost/lib
  LD	= clang++
  LDFLAGS = -g

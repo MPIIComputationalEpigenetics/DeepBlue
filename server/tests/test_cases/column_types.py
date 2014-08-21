@@ -92,7 +92,7 @@ class TestColumnTypes(helpers.TestCase):
   def test_insert_experiment(self):
     epidb = EpidbClient()
     self.init_base(epidb)
-    
+
     sample_id = self.sample_ids[0]
 
     format = ",".join([
@@ -128,13 +128,13 @@ class TestColumnTypes(helpers.TestCase):
   def test_range_fail(self):
     epidb = EpidbClient()
     self.init_base(epidb)
-    
+
     sample_id = self.sample_ids[0]
 
     format = ",".join([
       "CHROMOSOME",
       "START",
-      "END",  
+      "END",
       "NAME",
       "SCORE",
       "STRAND",
@@ -160,7 +160,7 @@ class TestColumnTypes(helpers.TestCase):
     self.assertSuccess(res)
 
     regions_data = helpers.load_bed("hg19_chr1_1")
-    res, msg = epidb.add_experiment("test_exp_fail", "hg19", "Methylation", sample_id, "tech1", "ENCODE", "desc1", 
+    res, msg = epidb.add_experiment("test_exp_fail", "hg19", "Methylation", sample_id, "tech1", "ENCODE", "desc1",
                                     regions_data, format, None, self.admin_key)
     self.assertFailure(res, msg)
     self.assertTrue("p_value" in msg.lower())
@@ -170,7 +170,7 @@ class TestColumnTypes(helpers.TestCase):
   def test_category_fail(self):
     epidb = EpidbClient()
     self.init_base(epidb)
-    
+
     sample_id = self.sample_ids[0]
 
     format = ",".join([
@@ -202,9 +202,8 @@ class TestColumnTypes(helpers.TestCase):
     self.assertSuccess(res)
 
     regions_data = helpers.load_bed("hg19_chr1_1")
-    res, msg = epidb.add_experiment("test_exp_fail2", "hg19", "Methylation", sample_id, "tech1", "ENCODE", 
+    res, msg = epidb.add_experiment("test_exp_fail2", "hg19", "Methylation", sample_id, "tech1", "ENCODE",
                                     "desc1", regions_data, format, None, self.admin_key)
     self.assertFailure(res, msg)
     self.assertTrue("strand" in msg.lower())
     # self.assertEqual(res[1], "Invalid value '+' for column STRAND")
-  

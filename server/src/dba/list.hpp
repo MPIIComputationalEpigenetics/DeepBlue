@@ -38,6 +38,8 @@ namespace epidb {
       bool samples(const std::string &user_key, const mongo::BSONArray &bio_sources, const Metadata &metadata,
                    std::vector<std::string> &result, std::string &msg);
 
+      bool sample_fields(const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg);
+
       bool projects(const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg);
 
       bool epigenetic_marks(const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg);
@@ -59,6 +61,9 @@ namespace epidb {
 
       bool similar_bio_sources(const std::string name, const std::string &user_key,
                                std::vector<utils::IdName> &result, std::string &msg);
+
+      bool similar_sample_fields(const std::string name, const std::string &user_key,
+                                 std::vector<utils::IdName> &result, std::string &msg);
 
       bool similar_techniques(const std::string name, const std::string &user_key,
                               std::vector<utils::IdName> &result, std::string &msg);

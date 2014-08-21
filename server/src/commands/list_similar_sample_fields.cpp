@@ -1,9 +1,9 @@
 //
-//  list_similar_bio_sources.cpp
+//  list_similar_sample_fields.cpp
 //  epidb
 //
-//  Created by Felipe Albrecht on 26.06.13.
-//  Copyright (c) 2013,2014 Max Planck Institute for Computer Science. All rights reserved.
+//  Created by Felipe Albrecht on 22.08.14.
+//  Copyright (c) 2014 Max Planck Institute for Computer Science. All rights reserved.
 //
 
 #include <boost/foreach.hpp>
@@ -21,18 +21,18 @@
 namespace epidb {
   namespace command {
 
-    class ListSimilarBioSourcesCommand: public Command {
+    class ListSimilarSampleFieldsCommand: public Command {
 
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::BIO_SOURCES, "Lists all bio sources similar to the one provided.");
+        return CommandDescription(categories::SAMPLES, "Lists all sample fields similar to the one provided.");
       }
 
       static Parameters parameters_()
       {
         Parameter p[] = {
-          Parameter("name", serialize::STRING, "bio source name"),
+          Parameter("name", serialize::STRING, "sample field name"),
           parameters::UserKey
         };
         Parameters params(&p[0], &p[0] + 2);
@@ -42,14 +42,14 @@ namespace epidb {
       static Parameters results_()
       {
         Parameter p[] = {
-          Parameter("bio_sources", serialize::LIST, "similar bio sources")
+          Parameter("sample fields", serialize::LIST, "similar sample field")
         };
         Parameters results(&p[0], &p[0] + 1);
         return results;
       }
 
     public:
-      ListSimilarBioSourcesCommand() : Command("list_similar_bio_sources", parameters_(), results_(), desc_()) {}
+      ListSimilarSampleFieldsCommand() : Command("list_similar_sample_fields", parameters_(), results_(), desc_()) {}
 
       virtual bool run(const std::string &ip,
                        const serialize::Parameters &parameters, serialize::Parameters &result) const
@@ -70,7 +70,7 @@ namespace epidb {
         }
 
         std::vector<utils::IdName> names;
-        if (!dba::list::similar_bio_sources(name, user_key, names, msg)) {
+        if (!dba::list::similar_sample_fields(name, user_key, names, msg)) {
           result.add_error(msg);
           return false;
         }
@@ -79,6 +79,6 @@ namespace epidb {
 
         return true;
       }
-    } listSimilarBioSourcesCommand;
+    } listSimilarSampleFieldsCommand;
   }
 }

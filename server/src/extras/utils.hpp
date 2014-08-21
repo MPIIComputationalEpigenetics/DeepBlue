@@ -46,6 +46,28 @@ namespace epidb {
       return oss.str();
     }
 
+    class ExperimentInfo {
+    public:
+      ExperimentInfo(std::string &i, std::string& n, std::string &em, std::string s, std::string& t,
+      std::string& p, std::string& d):
+        id(i),
+        name(n),
+        epigenetic_mark(em),
+        sample_id(s),
+        technique(t),
+        project(p),
+        description(d) {}
+
+      std::string id;
+      std::string name;
+      std::string epigenetic_mark;
+      std::string sample_id;
+      std::string technique;
+      std::string project;
+      std::string description;
+    };
+
+
     std::vector<std::string> string_to_vector(const std::string &s, const char sep = ',');
 
     std::pair<std::string, std::string> string_to_pair(const std::string &s, const char sep = ',');
