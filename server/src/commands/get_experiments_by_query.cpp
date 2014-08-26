@@ -38,7 +38,7 @@ namespace epidb {
 
         static Parameters results_() {
           Parameter p[] = {
-            Parameter("regions", serialize::STRING, "BED formated regions")
+            Parameter("experiments", serialize::LIST, "List containing experiments names and ids")
           };
           Parameters results(&p[0], &p[0]+1);
           return results;
