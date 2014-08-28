@@ -731,7 +731,7 @@ namespace epidb {
 
     bool is_valid_bio_source_name(const std::string &name, const std::string &norm_name, std::string &msg)
     {
-      bool exists;
+      bool exists = true;
       if (!helpers::check_exist(Collections::BIO_SOURCES(), "norm_name", norm_name, exists, msg)) {
         return false;
       }
@@ -741,12 +741,24 @@ namespace epidb {
         msg = e;
         return false;
       }
+
+      exists = true;
+      if (!helpers::check_exist(Collections::BIO_SOURCE_SYNONYM_NAMES(), "norm_synonym", norm_name, exists, msg)) {
+        return false;
+      }
+      if (exists) {
+        std::string e = Error::m(ERR_DUPLICATED_BIO_SOURCE_NAME, name.c_str());
+        EPIDB_LOG_TRACE(e);
+        msg = e;
+        return false;
+      }
+
       return true;
     }
 
     bool is_valid_sample_field_name(const std::string &name, const std::string &norm_name, std::string &msg)
     {
-      bool exists;
+      bool exists = true;
       if (!helpers::check_exist(Collections::SAMPLE_FIELDS(), "norm_name", norm_name, exists, msg)) {
         return false;
       }
@@ -761,7 +773,7 @@ namespace epidb {
 
     bool is_valid_epigenetic_mark(const std::string &name, const std::string &norm_name, std::string &msg)
     {
-      bool exists;
+      bool exists = true;
       if (!helpers::check_exist(Collections::EPIGENETIC_MARKS(), "norm_name", norm_name, exists, msg)) {
         return false;
       }
@@ -776,7 +788,7 @@ namespace epidb {
 
     bool is_project_valid(const std::string &name, const std::string &norm_name, std::string &msg)
     {
-      bool exists;
+      bool exists = true;
       if (!helpers::check_exist(Collections::PROJECTS(), "norm_name", norm_name, exists, msg)) {
         return false;
       }
@@ -791,7 +803,7 @@ namespace epidb {
 
     bool is_valid_genome(const std::string &genome, const std::string &norm_genome, std::string &msg)
     {
-      bool exists;
+      bool exists = true;
       if (!helpers::check_exist(Collections::GENOMES(), "norm_name", norm_genome, exists, msg)) {
         return false;
       }
@@ -806,7 +818,7 @@ namespace epidb {
 
     bool is_valid_email(const std::string &email, std::string &msg)
     {
-      bool exists;
+      bool exists = true;
       if (!helpers::check_exist(Collections::USERS(), "email", email, exists, msg)) {
         return false;
       }

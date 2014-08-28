@@ -22,3 +22,17 @@ class TestBioSourceCommands(helpers.TestCase):
     self.assertTrue("K562" in bio_sources_names)
     self.assertTrue("K562b" in bio_sources_names)
     self.assertTrue("HepG2" in bio_sources_names)
+
+
+  def test_duplicated_bio_source_with_synonym(self):
+    epidb = EpidbClient()
+    self.init(epidb)
+
+    s = epidb.add_bio_source("Ana", "Ana", {}, self.admin_key)
+    self.assertSuccess(s)
+
+    s = epidb.set_bio_source_synonym("Ana", "Zebra", self.admin_key)
+    self.assertSuccess(s)
+
+    s = epidb.add_bio_source("Zebra", "Zebra", {}, self.admin_key)
+    self.assertFailure(s)
