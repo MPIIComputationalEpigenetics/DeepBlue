@@ -24,7 +24,7 @@ namespace epidb {
   namespace algorithms {
     void PatternFinder::non_overlap_regex_callback(const boost::match_results<std::string::const_iterator> &what)
     {
-      Region region(what.position(), what.position() + what.str().size(), EMPTY_COLLECTION_ID);
+      Region region(what.position(), what.position() + what.str().size(), DATASET_EMPTY_ID);
       non_overlap_localizations->push_back(region);
     }
 
@@ -61,7 +61,7 @@ namespace epidb {
       boost::match_results<std::string::const_iterator> what;
       boost::match_flag_type flags = boost::match_default;
       while (boost::regex_search(start, end, what, expression, flags)) {
-        Region region(what.position(), what.position() + what.str().size(), EMPTY_COLLECTION_ID);
+        Region region(what.position(), what.position() + what.str().size(), DATASET_EMPTY_ID);
         overlap_localizations->push_back(region);
         start = what[0].first + 1;
         flags |= boost::match_prev_avail;

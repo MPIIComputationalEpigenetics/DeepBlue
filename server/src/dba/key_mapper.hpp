@@ -23,6 +23,7 @@ namespace epidb {
       static bool to_long(const std::string &s, std::string &res, std::string &err);
       static std::string build_default(const std::string &s);
 
+      static const std::string& DATASET();
       static const std::string& CHROMOSOME();
       static const std::string& START();
       static const std::string& END();

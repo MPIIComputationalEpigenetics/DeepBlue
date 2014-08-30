@@ -38,6 +38,7 @@
  * 10 - Sample Field
  * 11 - Genome
  * 12 - ..
+ * 50 - Dataset
  * 66 - Internal
  */
 
@@ -95,6 +96,8 @@ namespace epidb {
   Error ERR_DUPLICATE_SAMPLE_FIELD_NAME("111001", "Duplicated Sample Field Name '%s'.");
 
   Error ERR_DUPLICATE_GENOME_NAME("111101", "Duplicated Genome Name '%s'.");
+
+  Error ERR_DATASET_NOT_FOUND("350000", "Dataset '%ld' not found.");
 
   Error ERR_DATABASE_CONNECTION("466555", "MongoDB connection error: '%s'.");
   Error ERR_DATABASE_EXCEPTION("466666", "MongoDB exception at operation '%s': '%s'.");

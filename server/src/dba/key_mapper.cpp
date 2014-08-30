@@ -95,6 +95,12 @@ namespace epidb {
       return true;
     }
 
+    const std::string &KeyMapper::DATASET()
+    {
+      static std::string DATASET = epidb::dba::KeyMapper::build_default("DATASET");
+      return DATASET;
+    }
+
     const std::string &KeyMapper::CHROMOSOME()
     {
       static std::string CHROMOSOME = epidb::dba::KeyMapper::build_default("CHROMOSOME");

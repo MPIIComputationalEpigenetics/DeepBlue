@@ -122,7 +122,7 @@ namespace epidb {
     };
 
     bool aggregate_regions(const std::string chrom, Regions &data, Regions &ranges, const std::string &field,
-                                 dba::Metafield metafield, Regions &chr_regions)
+                                 dba::Metafield metafield, Regions &chr_regions, std::string& msg)
     {
       chr_regions = build_regions();
       RegionsConstIterator it_data = data->begin();
@@ -138,9 +138,8 @@ namespace epidb {
 
             if (field[0] == '@') {
               std::string value;
-              std::string msg;
               if (!metafield.process(field, chrom, *it_data, value, msg)) {
-                EPIDB_LOG_ERR(msg);
+                std::cerr << msg << std::endl;
                 return false;
               }
               double v;
@@ -154,7 +153,7 @@ namespace epidb {
           it_data++;
 
         }
-        Region region(it_ranges->start(), it_ranges->end(), EMPTY_COLLECTION_ID,
+        Region region(it_ranges->start(), it_ranges->end(), DATASET_EMPTY_ID,
                       acc.min(), acc.max(), acc.median(), acc.mean(), acc.var(), acc.sd(), acc.count());
 
         chr_regions->push_back(region);
@@ -165,7 +164,7 @@ namespace epidb {
     }
 
     bool aggregate(const ChromosomeRegionsList &data, const ChromosomeRegionsList &ranges, const std::string &field,
-                         ChromosomeRegionsList &regions)
+                         ChromosomeRegionsList &regions, std::string& msg)
     {
       //-- move to queries.cpp --//
       std::string field_value;
@@ -190,7 +189,9 @@ namespace epidb {
         BOOST_FOREACH(ChromosomeRegions datum, data) {
           Regions chr_regions;
           if (range.first == datum.first) {
-            aggregate_regions(range.first, datum.second, range.second, field_value, metafield, chr_regions);
+            if (!aggregate_regions(range.first, datum.second, range.second, field_value, metafield, chr_regions, msg)) {
+              return false;
+            }
             std::pair<std::string, Regions> r(range.first, chr_regions);
             regions.push_back(r);
           }

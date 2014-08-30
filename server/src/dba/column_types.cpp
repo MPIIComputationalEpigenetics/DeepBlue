@@ -396,8 +396,8 @@ namespace epidb {
           }
           column_type = boost::shared_ptr<ColumnType<Category > >(new ColumnType<Category>(name, category, ignore_if));
         } else if (type == "range") {
-          long long minimum = obj["minimum"].numberInt();
-          long long maximum = obj["maximum"].numberInt();
+          double minimum = obj["minimum"].Double();
+          double maximum = obj["maximum"].Double();
           Range range(minimum, maximum);
           column_type = boost::shared_ptr<ColumnType<Range > >(new ColumnType<Range>(name, range, ignore_if));
         } else {

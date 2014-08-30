@@ -9,7 +9,7 @@ import data_info
 
 
 class TestExperiments(helpers.TestCase):
-  
+
   def test_experiments_pass(self):
     epidb = EpidbClient()
     self.init_base(epidb)

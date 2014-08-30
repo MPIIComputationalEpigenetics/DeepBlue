@@ -102,6 +102,9 @@ namespace epidb {
           } else if (id.compare(0, 1, "q") == 0) {
             ok = dba::info::get_query(id, res, msg);
             type = "query";
+          } else if (id.compare(0, 2, "tr") == 0) {
+            ok = dba::info::get_tiling_region(id, res, msg);
+            type = "tiling_region";
           } else if (id.compare(0, 1, "t") == 0) {
             ok = dba::info::get_technique(id, res, metadata, msg);
             type = "technique";

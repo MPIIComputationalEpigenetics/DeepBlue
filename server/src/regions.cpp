@@ -19,12 +19,7 @@
 
 namespace epidb {
 
-  CollectionId build_collection_id(const std::string &name)
-  {
-    return boost::shared_ptr<std::string>(new std::string(name));
-  }
-
-  CollectionId EMPTY_COLLECTION_ID = build_collection_id("");
+  DatasetId DATASET_EMPTY_ID = std::numeric_limits<long long>::min();
 
   Regions build_regions(size_t s)
   {
@@ -45,9 +40,9 @@ namespace epidb {
     return _end - _start;
   }
 
-  CollectionId Region::collection_id() const
+  DatasetId Region::dataset_id() const
   {
-    return _collection_id;
+    return _dataset_id;
   }
 
   Position Region::start() const

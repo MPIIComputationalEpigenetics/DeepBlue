@@ -21,10 +21,7 @@ namespace epidb {
   namespace dba {
     namespace retrieve {
 
-      bool get_regions_from_collection(const std::string &collection, const CollectionId id, const std::string &chromosome,
-                                       const mongo::BSONObj &regions_query, ChromosomeRegionsList &results, std::string &msg);
-
-      bool get_regions(const std::string &genome, std::vector<std::string> &ids, std::vector<std::string> &chromosomes,
+      bool get_regions(const std::string &genome, std::vector<std::string> &chromosomes,
                        const mongo::BSONObj &regions_query,
                        ChromosomeRegionsList &results, std::string &msg);
 
@@ -32,12 +29,11 @@ namespace epidb {
                           const std::vector<std::string> &ids,
                           ChromosomeRegionsList &regions, std::string &msg);
 
-      bool count_regions(const std::string &genome, const std::string &collection_id, const std::string &chromosome,
+      bool count_regions(const std::string &genome, const std::string &chromosome,
                          const mongo::BSONObj &regions_query,
                          size_t &count);
 
       bool count_regions(const std::string &genome,
-                         std::vector<std::string> &collections_id,
                          std::vector<std::string> &chromosomes, const mongo::BSONObj &regions_query,
                          size_t &size, std::string &msg);
 

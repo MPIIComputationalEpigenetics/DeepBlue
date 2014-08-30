@@ -282,7 +282,7 @@ namespace epidb {
         return false;
       }
 
-      CollectionId id = build_collection_id("Add Genome Regions");
+      DatasetId id = DATASET_EMPTY_ID;
 
       ChromosomeRegionsList chromosome_regions_list;
       for (parser::ChromosomesInfo::const_iterator it = genome_info.begin(); it != genome_info.end(); it++) {
@@ -1088,7 +1088,7 @@ namespace epidb {
     }
 
     bool find_annotation_pattern(const std::string &genome, const std::string &pattern, const bool overlap,
-                                 std::string &annotation_id, std::string &msg)
+                                 DatasetId &dataset_id, std::string &msg)
     {
 
       mongo::BSONObjBuilder annotations_query_builder;
@@ -1117,7 +1117,7 @@ namespace epidb {
 
       if (cursor->more()) {
         mongo::BSONObj p = cursor->next();
-        annotation_id = p.getField("_id").str();
+        dataset_id = p.getField(KeyMapper::DATASET()).Int();
         c.done();
         return true;
       } else {

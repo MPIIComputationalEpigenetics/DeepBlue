@@ -51,10 +51,14 @@ namespace epidb {
           _regions(regions)
         { }
 
-        void read_region(const mongo::BSONObj &region_bson, const CollectionId &collection_id)
+        void read_region(const mongo::BSONObj &region_bson)
         {
           if (region_bson.hasField(KeyMapper::WIG_TRACK_TYPE())) {
-            int track_type = region_bson[KeyMapper::WIG_TRACK_TYPE()].numberInt();
+            DatasetId dataset_id = region_bson[KeyMapper::DATASET()].Int();
+
+            int track_type = region_bson[KeyMapper::WIG_TRACK_TYPE()].Int();
+
+            // The following 4 BsonElements are optional, because it I use "numberInt()" rather Int()
             Position start = region_bson[KeyMapper::START()].numberInt();
             Length step = region_bson[KeyMapper::WIG_STEP()].numberInt();
             Length span = region_bson[KeyMapper::WIG_SPAN()].numberInt();
@@ -67,7 +71,7 @@ namespace epidb {
             if (region_bson.hasField(KeyMapper::WIG_COMPRESSED())) {
               compressed = true;
               const lzo_bytep compressed_data = (lzo_bytep) region_bson[KeyMapper::WIG_DATA()].binData(db_data_size);
-              size_t real_size = region_bson[KeyMapper::WIG_DATA_SIZE()].numberInt();
+              size_t real_size = region_bson[KeyMapper::WIG_DATA_SIZE()].Int();
 
               size_t uncompressed_size;
               decompressed_data = epidb::compress::decompress(compressed_data, db_data_size, real_size, uncompressed_size);
@@ -85,7 +89,7 @@ namespace epidb {
                 starts = reinterpret_cast<const Position *>(data);
               }
               for (Length i = 0; i < size; i++) {
-                Region region(start + (i * step), start + (i * step) + span, collection_id);
+                Region region(start + (i * step), start + (i * step) + span, dataset_id);
                 region.set(KeyMapper::VALUE(), utils::double_to_string(starts[i]));
                 _regions->push_back(region);
                 _count++;
@@ -100,7 +104,7 @@ namespace epidb {
                 scores = reinterpret_cast<const Score *>(data + (size * sizeof(Position)));
               }
               for (Length i = 0; i < size; i++)  {
-                Region region(starts[i], starts[i] + span, collection_id);
+                Region region(starts[i], starts[i] + span, dataset_id);
                 region.set(KeyMapper::VALUE(), utils::double_to_string(scores[i]));
                 _regions->push_back(region);
                 _count++;
@@ -112,12 +116,12 @@ namespace epidb {
                 ends = reinterpret_cast<const Position *>(decompressed_data + (size * sizeof(Position)));
                 scores = reinterpret_cast<const Score *>(decompressed_data + (size * sizeof(Position) + (size * sizeof(Position))));
               } else {
-                starts = reinterpret_cast<const Position *>(decompressed_data);
-                ends = reinterpret_cast<const Position *>(decompressed_data + (size * sizeof(Position)));
-                scores = reinterpret_cast<const Score *>(decompressed_data + (size * sizeof(Position) + (size * sizeof(Position))));
+                starts = reinterpret_cast<const Position *>(data);
+                ends = reinterpret_cast<const Position *>(data + (size * sizeof(Position)));
+                scores = reinterpret_cast<const Score *>(data + (size * sizeof(Position) + (size * sizeof(Position))));
               }
               for (Length i = 0; i < size; i++)  {
-                Region region(starts[i], ends[i], collection_id);
+                Region region(starts[i], ends[i], dataset_id);
                 region.set(KeyMapper::VALUE(), utils::double_to_string(scores[i]));
                 _regions->push_back(region);
                 _count++;
@@ -130,20 +134,28 @@ namespace epidb {
           }
 
           else {
-            Region region(collection_id);
-            for ( mongo::BSONObj::iterator i = region_bson.begin(); i.more(); ) {
+            mongo::BSONObj::iterator i = region_bson.begin();
+
+            long _id = i.next().Long();
+            DatasetId dataset_id = i.next().Int();
+            if (_id >> 32 != dataset_id) {
+              EPIDB_LOG_ERR("Invalid dataset_id: " << _id << " expected: " << (_id >> 32) << "Region: " << _id << "Query: " << region_bson.toString());
+              return;
+
+            }
+            Position start = i.next().Int();
+            Position end = i.next().Int();
+
+            Region region(start, end, dataset_id);
+
+            while (  i.more() ) {
               mongo::BSONElement e = i.next();
-              if (e.fieldName() == KeyMapper::START()) {
-                region.set_start(e.numberInt());
-              } else if (e.fieldName() == KeyMapper::END()) {
-                region.set_end(e.numberInt());
-              } // get free data
-              else if (e.type() == mongo::String) {
+              if (e.type() == mongo::String) {
                 region.set(e.fieldName(), e.str());
               } else if (e.type() == mongo::NumberDouble) {
-                region.set(e.fieldName(), utils::double_to_string(e.numberDouble()));
+                region.set(e.fieldName(), utils::double_to_string(e.Number()));
               } else if (e.type() == mongo::NumberInt) {
-                region.set(e.fieldName(), utils::integer_to_string(e.numberInt()));
+                region.set(e.fieldName(), utils::integer_to_string(e.Int()));
               } else {
                 region.set(e.fieldName(), e.toString(false));
               }
@@ -155,9 +167,9 @@ namespace epidb {
       };
 
       bool get_regions_from_collection(const std::string &collection,
-                                       const CollectionId collection_id, const std::string &chromosome,
+                                       const std::string &chromosome,
                                        const mongo::BSONObj &regions_query,
-                                       Regions &regions, std::vector<size_t> &offsets, std::string &msg)
+                                       Regions &regions, std::string &msg)
       {
         mongo::ScopedDbConnection c(config::get_mongodb_server());
 
@@ -172,75 +184,32 @@ namespace epidb {
         while ( cursor->more() ) {
           while (cursor->moreInCurrentBatch()) {
             mongo::BSONObj o = cursor->nextSafe();
-            rp.read_region(o, collection_id);
+            rp.read_region(o);
           }
         }
 
         c.done();
-
-        if (rp._count > 0) {
-          offsets.push_back(regions->size());
-        }
         return true;
       }
 
       void get_regions_job(const std::string &genome,
-                           const std::vector<std::string> &collections_id,
                            const boost::shared_ptr<std::vector<std::string> > chromosomes,
                            const mongo::BSONObj &regions_query,
                            boost::shared_ptr<ChromosomeRegionsList> &result)
       {
+
         for (std::vector<std::string>::const_iterator chrom_it = chromosomes->begin(); chrom_it != chromosomes->end(); chrom_it++) {
-          size_t total_count(0);
-          for (std::vector<std::string>::const_iterator id_it = collections_id.begin(); id_it != collections_id.end(); id_it++) {
-            std::string collection = helpers::region_collection_name(genome, *id_it, *chrom_it);
-            CollectionId collection_id = build_collection_id(*id_it);
-            size_t count(0);
-            count_regions(genome, *collection_id, *chrom_it, regions_query, count);
-            total_count += count;
+          std::string collection = helpers::region_collection_name(genome, *chrom_it);
+
+          size_t count(0);
+          count_regions(genome, *chrom_it, regions_query, count);
+          Regions regions = build_regions(count);
+
+          std::string msg;
+          if (!get_regions_from_collection(collection, *chrom_it, regions_query, regions, msg)) {
+            EPIDB_LOG_ERR(msg);
+            return;
           }
-
-          Regions regions = build_regions(total_count);
-          std::vector<size_t> offsets;
-          offsets.push_back(0);
-
-          for (std::vector<std::string>::const_iterator id_it = collections_id.begin(); id_it != collections_id.end(); id_it++) {
-            CollectionId collection_id = build_collection_id(*id_it);
-            std::string collection = helpers::region_collection_name(genome, *id_it, *chrom_it);
-            std::string msg;
-            if (!get_regions_from_collection(collection, collection_id, *chrom_it, regions_query, regions, offsets, msg)) {
-              EPIDB_LOG_ERR(msg);
-              return;
-            }
-          }
-
-          while (offsets.size() > 2) {
-            assert(offsets.back() == regions->size());
-            assert(offsets.front() == 0);
-            std::vector<size_t> new_offsets;
-            size_t x = 0;
-            while (x + 2 < offsets.size()) {
-              std::inplace_merge(&regions->at(offsets.at(x))
-                                 , &regions->at(offsets.at(x + 1))
-                                 , &((*regions)[offsets.at(x + 2)]) // this *might* be at the end
-                                );
-              // now they are sorted, we just put offsets[x] and offsets[x+2] into the new offsets.
-              // offsets[x+1] is not relevant any more
-              new_offsets.push_back(offsets.at(x));
-              new_offsets.push_back(offsets.at(x + 2));
-              x += 2;
-            }
-            // if the number of offsets was odd, there might be a dangling offset
-            // which we must remember to include in the new_offsets
-            if (x + 2 == offsets.size()) {
-              new_offsets.push_back(offsets.at(x + 1));
-            }
-            // assert(new_offsets.front() == 0);
-            assert(new_offsets.back() == regions->size());
-            offsets.swap(new_offsets);
-          }
-
-          // -----
 
           if (regions->size() > 0) {
             ChromosomeRegions chromossomeRegions(*chrom_it, regions);
@@ -249,8 +218,8 @@ namespace epidb {
         }
       }
 
-      bool get_regions(const std::string &genome, std::vector<std::string> &collections_id,
-                       std::vector<std::string> &chromosomes, const mongo::BSONObj &regions_query,
+      bool get_regions(const std::string &genome, std::vector<std::string> &chromosomes,
+                       const mongo::BSONObj &regions_query,
                        ChromosomeRegionsList &results, std::string &msg)
       {
         const size_t max_threads = 1;
@@ -271,8 +240,7 @@ namespace epidb {
 
           boost::shared_ptr<std::vector<std::string> > chrs(new std::vector<std::string>(start, end));
           boost::shared_ptr<ChromosomeRegionsList> result_part(new ChromosomeRegionsList);
-          boost::thread *t = new boost::thread(&get_regions_job,
-                                               boost::cref(genome), boost::cref(collections_id), chrs,
+          boost::thread *t = new boost::thread(&get_regions_job, boost::cref(genome), chrs,
                                                boost::cref(regions_query), result_part);
           threads.push_back(t);
           result_parts.push_back(result_part);
@@ -296,36 +264,33 @@ namespace epidb {
         return true;
       }
 
-      bool count_regions(const std::string &genome, const std::string &collection_id, const std::string &chromosome, const mongo::BSONObj &regions_query,
+      // TODO: Fix for counting the *real* number
+      bool count_regions(const std::string &genome, const std::string &chromosome, const mongo::BSONObj &regions_query,
                          size_t &count)
       {
         mongo::ScopedDbConnection c(config::get_mongodb_server());
-        std::string collection_name = helpers::region_collection_name(genome, collection_id, chromosome);
+        std::string collection_name = helpers::region_collection_name(genome, chromosome);
         count = c->count(collection_name, regions_query);
         c.done();
         return true;
       }
 
       void count_regions_job(const std::string &genome,
-                             const std::vector<std::string> &collections_id,
                              const boost::shared_ptr<std::vector<std::string> > chromosomes,
                              const mongo::BSONObj &regions_query, boost::shared_ptr<std::vector<size_t> > results)
       {
         mongo::ScopedDbConnection c(config::get_mongodb_server());
-        for (std::vector<std::string>::const_iterator c_it = collections_id.begin(); c_it != collections_id.end(); ++c_it) {
-          size_t size = 0;
-          for (std::vector<std::string>::const_iterator it = chromosomes->begin(); it != chromosomes->end(); ++it) {
-            std::string collection_name = helpers::region_collection_name(genome, *c_it, *it);
-            size_t partial_size = c->count(collection_name, regions_query);
-            size += partial_size;
-          }
-          results->push_back(size);
+        size_t size = 0;
+        for (std::vector<std::string>::const_iterator it = chromosomes->begin(); it != chromosomes->end(); ++it) {
+          std::string collection_name = helpers::region_collection_name(genome, *it);
+          size_t partial_size = c->count(collection_name, regions_query);
+          size += partial_size;
         }
+        results->push_back(size);
         c.done();
       }
 
       bool count_regions(const std::string &genome,
-                         std::vector<std::string> &collections_id,
                          std::vector<std::string> &chromosomes, const mongo::BSONObj &regions_query,
                          size_t &size, std::string &msg)
       {
@@ -346,8 +311,7 @@ namespace epidb {
           }
           boost::shared_ptr<std::vector<std::string> > chrs(new std::vector<std::string>(start, end));
           boost::shared_ptr<std::vector<size_t> > result_part(new std::vector<size_t>);
-          boost::thread *t = new boost::thread(&count_regions_job,
-                                               boost::cref(genome), boost::cref(collections_id), chrs,
+          boost::thread *t = new boost::thread(&count_regions_job, boost::cref(genome), chrs,
                                                boost::cref(regions_query), result_part);
           threads.push_back(t);
           result_parts.push_back(result_part);

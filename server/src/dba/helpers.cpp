@@ -32,10 +32,10 @@ namespace epidb {
         return config::DATABASE_NAME() + "." + name;
       }
 
-      const std::string region_collection_name(const std::string &genome, const std::string &collection_id, const std::string &chromosome)
+      const std::string region_collection_name(const std::string &genome, const std::string &chromosome)
       {
         std::stringstream ss;
-        ss << collection_name(Collections::REGIONS()) << "." << utils::normalize_name(genome) << "." << collection_id << "." << chromosome;
+        ss << collection_name(Collections::REGIONS()) << "." << utils::normalize_name(genome) << "." << chromosome;
         return ss.str();
       }
 
@@ -258,17 +258,6 @@ namespace epidb {
 
         c.done();
         return count;
-      }
-
-      mongo::BSONObj build_condition_array(const std::vector<std::string> &params, const std::string &condition)
-      {
-        mongo::BSONArrayBuilder ab;
-        for (std::vector<std::string>::const_iterator it = params.begin(); it != params.end(); it++) {
-          ab.append(*it);
-        }
-        mongo::BSONObjBuilder in_condition;
-        in_condition.append (condition, ab.arr());
-        return in_condition.obj();
       }
 
       boost::mutex counter_mutex;

@@ -132,19 +132,19 @@ namespace epidb {
           return false;
         }
 
-        std::set<std::string> experiments_id_set;
+        std::set<DatasetId> datasets_it_set;
         for (ChromosomeRegionsList::const_iterator it = chromossome_regions.begin(); it != chromossome_regions.end(); it++) {
           Regions regions = it->second;
           for (RegionsIterator it = regions->begin(); it != regions->end(); it++) {
-            experiments_id_set.insert(*(it->collection_id()));
+            datasets_it_set.insert(it->dataset_id());
           }
         }
 
-        std::vector<std::string> experiments_id(experiments_id_set.size());
-        std::copy(experiments_id_set.begin(), experiments_id_set.end(), experiments_id.begin());
+        std::vector<DatasetId> datasets_it(datasets_it_set.size());
+        std::copy(datasets_it_set.begin(), datasets_it_set.end(), datasets_it.begin());
 
         mongo::BSONObjBuilder experiments_query_builder;
-        experiments_query_builder << "_id" << helpers::build_condition_array(experiments_id, "$in");
+        experiments_query_builder << KeyMapper::DATASET() << helpers::build_condition_array<DatasetId>(datasets_it, "$in");
 
         mongo::BSONObj o = experiments_query_builder.obj();
         std::auto_ptr<mongo::DBClientCursor> cursor;
@@ -268,10 +268,11 @@ namespace epidb {
       }
 
       bool build_experiment_query(const std::string &user_key, const mongo::BSONObj &query,
-                                  mongo::BSONObj &regions_query, std::vector<std::string> &experiments_id,
-                                  std::string &msg)
+                                  mongo::BSONObj &regions_query, std::string &msg)
       {
         mongo::BSONObj args = query["args"].Obj();
+
+        mongo::BSONArrayBuilder datasets_array_builder;
 
         if (args["has_filter"].Bool()) {
           const mongo::BSONObj query = build_query(args);
@@ -279,13 +280,19 @@ namespace epidb {
           std::auto_ptr<mongo::DBClientCursor> cursor = c->query(helpers::collection_name(Collections::EXPERIMENTS()), query);
           while (cursor->more()) {
             mongo::BSONObj p = cursor->next();
-            mongo::BSONElement experiment_id = p.getField("_id");
-            experiments_id.push_back(experiment_id.str());
+            mongo::BSONElement dataset_id = p.getField(KeyMapper::DATASET());
+            datasets_array_builder.append(dataset_id.Int());
           }
           c.done();
         }
 
+        mongo::BSONArray datasets_array = datasets_array_builder.arr();
+
         mongo::BSONObjBuilder regions_query_builder;
+        if (args["has_filter"].Bool()) {
+            regions_query_builder.append(KeyMapper::DATASET(), BSON("$in" << datasets_array));
+        }
+
         if (args.hasField("start") && args.hasField("end")) {
           regions_query_builder.append(KeyMapper::START(), BSON("$gte" << args["start"].Long() << "$lte" << args["end"].Long()));
           regions_query_builder.append(KeyMapper::END(), BSON("$gte" << args["start"].Long() << "$lte" << args["end"].Long()));
@@ -301,11 +308,12 @@ namespace epidb {
       }
 
       bool build_annotation_query(const std::string &user_key, const mongo::BSONObj &query,
-                                  mongo::BSONObj &regions_query, std::vector<std::string> &annotations_id,
-                                  std::string &msg)
+                                  mongo::BSONObj &regions_query,  std::string &msg)
       {
-        mongo::BSONObjBuilder annotations_query_builder;
         mongo::BSONObj args = query["args"].Obj();
+
+        mongo::BSONObjBuilder annotations_query_builder;
+        mongo::BSONArrayBuilder datasets_array_builder;
 
         // TODO: do the same as build_experiment_query, not verifying the type()
         if (args["norm_annotation"].type() == mongo::Array) {
@@ -320,12 +328,16 @@ namespace epidb {
         std::auto_ptr<mongo::DBClientCursor> cursor = c->query(helpers::collection_name(Collections::ANNOTATIONS()), annotation_query);
         while (cursor->more()) {
           mongo::BSONObj p = cursor->next();
-          mongo::BSONElement annotation_id = p.getField("_id");
-          annotations_id.push_back(annotation_id.str());
+          mongo::BSONElement dataset_id = p.getField(KeyMapper::DATASET());
+          datasets_array_builder.append(dataset_id.Int());
         }
         c.done();
 
+        mongo::BSONArray datasets_array = datasets_array_builder.arr();
         mongo::BSONObjBuilder regions_query_builder;
+
+        regions_query_builder.append(KeyMapper::DATASET(), BSON("$in" << datasets_array));
+
         if (args.hasField("start") && args.hasField("end")) {
           regions_query_builder.append(KeyMapper::START(), BSON("$lte" << args["end"].Long()));
           regions_query_builder.append(KeyMapper::END(), BSON("$gte" << args["start"].Long()));
@@ -345,8 +357,7 @@ namespace epidb {
       {
 
         mongo::BSONObj regions_query;
-        std::vector<std::string> experiments_id;
-        if (!build_experiment_query(user_key, query, regions_query, experiments_id, msg)) {
+        if (!build_experiment_query(user_key, query, regions_query, msg)) {
           return false;
         }
 
@@ -366,8 +377,7 @@ namespace epidb {
         std::vector<mongo::BSONElement>::iterator git;
         for (git = genome_arr.begin(); git != genome_arr.end(); ++git) {
           ChromosomeRegionsList reg;
-          if (!retrieve::get_regions(git->str(), experiments_id, chromosomes,
-                                     regions_query, reg, msg)) {
+          if (!retrieve::get_regions(git->str(), chromosomes, regions_query, reg, msg)) {
             return false;
           }
           genome_regions.push_back(reg);
@@ -394,8 +404,7 @@ namespace epidb {
                                             ChromosomeRegionsList &regions, std::string &msg)
       {
         mongo::BSONObj regions_query;
-        std::vector<std::string> annotations_id;
-        if (!build_annotation_query(user_key, query, regions_query, annotations_id, msg)) {
+        if (!build_annotation_query(user_key, query, regions_query, msg)) {
           return false;
         }
 
@@ -414,8 +423,7 @@ namespace epidb {
         std::vector<mongo::BSONElement>::iterator git;
         for (git = genome_arr.begin(); git != genome_arr.end(); ++git) {
           ChromosomeRegionsList reg;
-          if (!retrieve::get_regions(git->str(), annotations_id, chromosomes,
-                                     regions_query, reg, msg)) {
+          if (!retrieve::get_regions(git->str(), chromosomes, regions_query, reg, msg)) {
             return false;
           }
           genome_regions.push_back(reg);
@@ -587,7 +595,7 @@ namespace epidb {
       }
 
       bool add_tiling(const std::string &genome, const size_t &tiling_size,
-                      std::string &tiling_id, std::string &msg)
+                      DatasetId &dataset_id, std::string &msg)
       {
 
         mongo::ScopedDbConnection c(config::get_mongodb_server());
@@ -605,18 +613,20 @@ namespace epidb {
         }
         if (data_cursor->more()) {
           mongo::BSONObj result = data_cursor->next().getOwned();
-          tiling_id = result.getField("_id").str();
+          dataset_id = result.getField(KeyMapper::DATASET()).Int();
           c.done();
           return true;
         }
 
-        {
-          int t_id;
-          if (!helpers::get_counter("tiling", t_id, msg))  {
-            c.done();
-            return false;
-          }
-          tiling_id = "t" + boost::lexical_cast<std::string>(t_id);
+        int t_id;
+        if (!helpers::get_counter("tiling", t_id, msg))  {
+          c.done();
+          return false;
+        }
+        std::string tiling_id = "tr" + boost::lexical_cast<std::string>(t_id);
+
+        if (!helpers::get_counter("dataset", dataset_id, msg))  {
+          return false;
         }
 
         mongo::BSONObjBuilder tiling_data_builder;
@@ -624,6 +634,7 @@ namespace epidb {
         std::stringstream name;
         name << "Tiling regions of " << tiling_size << " (Genome " << genome << ")";
         tiling_data_builder.append("_id", tiling_id);
+        tiling_data_builder.append(KeyMapper::DATASET(), dataset_id);
         tiling_data_builder.append("name", name.str());
         tiling_data_builder.append("genome", genome);
         tiling_data_builder.append("norm_genome", norm_genome);
@@ -667,12 +678,10 @@ namespace epidb {
         std::vector<std::string>::iterator cit;
         dba::genomes::ChromosomeInfo chromosome_info;
 
-        std::string tiling_id;
+        DatasetId tiling_id;
         if (!add_tiling(genome, tiling_size, tiling_id, msg)) {
           return false;
         }
-
-        CollectionId id = build_collection_id(tiling_id);
 
         for (cit = chromosomes.begin(); cit != chromosomes.end(); ++cit) {
           if (!genome_info->get_chromosome(*cit, chromosome_info, msg)) {
@@ -681,7 +690,7 @@ namespace epidb {
           }
           Regions regs = build_regions();
           for (size_t i = 0; i + tiling_size < chromosome_info.size; i += tiling_size) {
-            regs->push_back(Region(i, i + tiling_size, id));
+            regs->push_back(Region(i, i + tiling_size, tiling_id));
           }
           regions.push_back(ChromosomeRegions(*cit, regs));
         }
@@ -711,7 +720,7 @@ namespace epidb {
           return false;
         }
 
-        return algorithms::aggregate(data, ranges, field, regions);
+        return algorithms::aggregate(data, ranges, field, regions, msg);
       }
     }
   }

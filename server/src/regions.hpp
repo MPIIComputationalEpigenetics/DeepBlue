@@ -24,11 +24,9 @@
 
 namespace epidb {
 
-  typedef boost::shared_ptr<std::string> CollectionId;
+  typedef int DatasetId;
 
-  CollectionId build_collection_id(const std::string &name);
-
-  extern CollectionId EMPTY_COLLECTION_ID;
+  extern DatasetId DATASET_EMPTY_ID;
 
   struct StatsValue {
     StatsValue(Score min, Score max, Score median, Score mean, Score var, Score sd, Score count) :
@@ -45,7 +43,7 @@ namespace epidb {
 
   class Region {
   private:
-    CollectionId _collection_id;
+    DatasetId _dataset_id;
     Position _start;
     Position _end;
     boost::shared_ptr<StatsValue> _stats_value;
@@ -53,30 +51,22 @@ namespace epidb {
 
   public:
     Region() :
-      _collection_id(),
+      _dataset_id(),
       _start(-1),
       _end(-1),
       _stats_value(),
       _data() {}
 
-
-    Region(CollectionId _id) :
-      _collection_id(_id),
-      _start(-1),
-      _end(-1),
-      _stats_value(),
-      _data() {}
-
-    Region(Position s, Position e, CollectionId _id):
-      _collection_id(_id),
+    Region(Position s, Position e, DatasetId _id):
+      _dataset_id(_id),
       _start(s),
       _end(e),
       _stats_value(),
       _data() {}
 
-    Region(Position s, Position e, CollectionId _id,
+    Region(Position s, Position e, DatasetId _id,
            Score min, Score max, Score median, Score mean, Score var, Score sd, Score count) :
-      _collection_id(_id),
+      _dataset_id(_id),
       _start(s),
       _end(e),
       _stats_value(new StatsValue(min, max, median, mean, var, sd, count)),
@@ -87,7 +77,7 @@ namespace epidb {
       return _start < other._start;
     }
 
-    CollectionId collection_id() const;
+    DatasetId dataset_id() const;
     Length length() const;
     Position start() const;
     Position end() const;

@@ -24,6 +24,7 @@
 #include "queries.hpp"
 #include "retrieve.hpp"
 
+#include "../errors.hpp"
 #include "../log.hpp"
 #include "../extras/utils.hpp"
 
@@ -58,42 +59,47 @@ namespace epidb {
       return (s[0] == '@' || s[0] == '$');
     }
 
-    bool Metafield::get_bson_by_collection_id(CollectionId collection_id, mongo::BSONObj &obj, std::string &msg)
+    bool Metafield::get_bson_by_dataset_id(DatasetId dataset_id, mongo::BSONObj &obj, std::string &msg)
     {
 
-      if (obj_by_collection_id.find(collection_id) != obj_by_collection_id.end()) {
-        obj = obj_by_collection_id.find(collection_id)->second;
+      if (obj_by_dataset_id.find(dataset_id) != obj_by_dataset_id.end()) {
+        obj = obj_by_dataset_id.find(dataset_id)->second;
         return true;
       }
 
       mongo::ScopedDbConnection c(config::get_mongodb_server());
 
-      std::string id = *collection_id;
-
       std::auto_ptr<mongo::DBClientCursor> data_cursor;
-      if (id[0] == 'e') {
-        data_cursor = c->query(helpers::collection_name(Collections::EXPERIMENTS()),
-                               mongo::Query(BSON("_id" << id)));
-      }
-
-      else if (id[0] == 'a') {
-        data_cursor = c->query(helpers::collection_name(Collections::ANNOTATIONS()),
-                               mongo::Query(BSON("_id" << id)));
-
-      } if (id[0] == 't') {
-        data_cursor = c->query(helpers::collection_name(Collections::TILINGS()),
-                               mongo::Query(BSON("_id" << id)));
-      }
-
+      data_cursor = c->query(helpers::collection_name(Collections::EXPERIMENTS()),
+                             mongo::Query(BSON(KeyMapper::DATASET() << dataset_id)));
       if (data_cursor->more()) {
         obj = data_cursor->next().getOwned();
-        obj_by_collection_id[collection_id] = obj;
+        obj_by_dataset_id[dataset_id] = obj;
+        c.done();
+        return true;
+      }
+
+      data_cursor = c->query(helpers::collection_name(Collections::ANNOTATIONS()),
+                             mongo::Query(BSON(KeyMapper::DATASET() << dataset_id)));
+      if (data_cursor->more()) {
+        obj = data_cursor->next().getOwned();
+        obj_by_dataset_id[dataset_id] = obj;
+        c.done();
+        return true;
+      }
+
+
+      data_cursor = c->query(helpers::collection_name(Collections::TILINGS()),
+                             mongo::Query(BSON(KeyMapper::DATASET() << dataset_id)));
+      if (data_cursor->more()) {
+        obj = data_cursor->next().getOwned();
+        obj_by_dataset_id[dataset_id] = obj;
         c.done();
         return true;
       }
 
       c.done();
-      msg = "source with id " + id + " not found.";
+      msg = Error::m(ERR_DATASET_NOT_FOUND, dataset_id);
       return false;
     }
 
@@ -104,8 +110,8 @@ namespace epidb {
       mongo::BSONObj obj;
 
       // TODO: Workaround - because aggregates does not have a region_set_id
-      if (region.collection_id() != EMPTY_COLLECTION_ID) {
-        if (!get_bson_by_collection_id(region.collection_id(), obj, msg)) {
+      if (region.dataset_id() != DATASET_EMPTY_ID) {
+        if (!get_bson_by_dataset_id(region.dataset_id(), obj, msg)) {
           return false;
         }
       }
@@ -194,20 +200,21 @@ namespace epidb {
                                   const Region &region, const bool overlap,
                                   size_t &count, std::string &msg)
     {
-      std::string annotation_id;
-      if (!dba::find_annotation_pattern(genome, pattern, overlap, annotation_id, msg)) {
+      DatasetId dataset_id;
+      if (!dba::find_annotation_pattern(genome, pattern, overlap, dataset_id, msg)) {
         count = 0;
         return false;
       }
 
       mongo::BSONObjBuilder region_query_builder;
 
+      region_query_builder.append(KeyMapper::DATASET(), dataset_id);
       region_query_builder.append(KeyMapper::START(), BSON("$gte" << (int) region.start() << "$lte" << (int) region.end()));
       region_query_builder.append(KeyMapper::END(), BSON("$gte" << (int) region.start() << "$lte" << (int) region.end()));
 
       mongo::BSONObj region_query = region_query_builder.obj();
 
-      if (!retrieve::count_regions(genome, annotation_id, chrom, region_query, count)) {
+      if (!retrieve::count_regions(genome, chrom, region_query, count)) {
         msg = "Error while counting regions for " + genome + " " + chrom + " " + region_query.toString();
         count = 0;
         return false;

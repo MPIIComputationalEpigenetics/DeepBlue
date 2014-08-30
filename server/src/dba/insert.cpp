@@ -48,7 +48,8 @@ namespace epidb {
     const size_t BULK_SIZE = 20000;
     const size_t MAXIMUM_SIZE = 46000000; // from mongodb maximum message size: 48000000
 
-    static const bool fill_region_builder(mongo::BSONObjBuilder &builder, const parser::Tokens &tokens, const parser::FileFormat &file_format,
+    static const bool fill_region_builder(mongo::BSONObjBuilder &builder,
+                                          const parser::Tokens &tokens, const parser::FileFormat &file_format,
                                           std::string &chromosome, size_t &start, size_t &end, std::string &msg)
     {
       if (tokens.size() != file_format.size()) {
@@ -158,9 +159,10 @@ namespace epidb {
       return true;
     }
 
+    /* deprecated */
     boost::mutex move_chunk_lock;
-    bool set_index_shard(std::map<std::string, bool> &processed, const std::string &collection, const size_t chromosome_size,
-                         std::string &msg)
+    bool __set_index_shard(std::map<std::string, bool> &processed, const std::string &collection, const size_t chromosome_size,
+                           std::string &msg)
     {
       if (processed.find(collection) != processed.end()) {
         return true;
@@ -282,16 +284,20 @@ namespace epidb {
                            const std::string &user_key, const std::string &ip, const parser::WigPtr &wig,
                            std::string &experiment_id, std::string &msg)
     {
-      {
-        int e_id;
-        if (!helpers::get_counter("experiments", e_id, msg))  {
-          return false;
-        }
-        experiment_id = "e" + boost::lexical_cast<std::string>(e_id);
+      int e_id;
+      if (!helpers::get_counter("experiments", e_id, msg))  {
+        return false;
+      }
+      experiment_id = "e" + boost::lexical_cast<std::string>(e_id);
+
+      int dataset_id;
+      if (!helpers::get_counter("dataset", dataset_id, msg))  {
+        return false;
       }
 
       mongo::BSONObjBuilder experiment_data_builder;
       experiment_data_builder.append("_id", experiment_id);
+      experiment_data_builder.append(KeyMapper::DATASET(), dataset_id);
       experiment_data_builder.append("name", name);
       experiment_data_builder.append("norm_name", norm_name);
       experiment_data_builder.append("genome", genome);
@@ -375,7 +381,8 @@ namespace epidb {
       for (parser::WigContent::const_iterator it = wig->tracks_iterator(); it != end; it++) {
         parser::TrackPtr track = *it;
         mongo::BSONObjBuilder region_builder;
-        region_builder.append("_id", (int) count++);
+        region_builder.append("_id", (long long) dataset_id << 32 | (long long) count++);
+        region_builder.append(KeyMapper::DATASET(), (int) dataset_id);
 
         region_builder.append(KeyMapper::WIG_TRACK_TYPE(), (int) track->type());
         region_builder.append(KeyMapper::START(), (int) track->start());
@@ -421,14 +428,10 @@ namespace epidb {
         }
 
         mongo::BSONObj r = region_builder.obj();
-        std::string collection = helpers::region_collection_name(genome, experiment_id, internal_chromosome);
+        std::string collection = helpers::region_collection_name(genome, internal_chromosome);
 
         if (prev_collection != collection) {
           if (!prev_collection.empty() && bulk.size() > 0) {
-            if (!set_index_shard(processed, prev_collection, prev_size, msg)) {
-              c.done();
-              return false;
-            }
             c->insert(prev_collection, bulk);
             if (!c->getLastError().empty()) {
               msg = c->getLastError();
@@ -446,10 +449,6 @@ namespace epidb {
         bulk.push_back(r);
 
         if (bulk.size() % BULK_SIZE == 0 || actual_size > MAXIMUM_SIZE) {
-          if (!set_index_shard(processed, collection, size, msg)) {
-            c.done();
-            return false;
-          }
           c->insert(collection, bulk);
           if (!c->getLastError().empty()) {
             msg = c->getLastError();
@@ -462,10 +461,6 @@ namespace epidb {
       }
 
       if (bulk.size() > 0) {
-        if (!set_index_shard(processed, prev_collection, prev_size, msg)) {
-          c.done();
-          return false;
-        }
         c->insert(prev_collection, bulk);
         if (!c->getLastError().empty()) {
           msg = c->getLastError();
@@ -499,16 +494,20 @@ namespace epidb {
                            const parser::FileFormat &format,
                            std::string &experiment_id, std::string &msg)
     {
-      {
-        int e_id;
-        if (!helpers::get_counter("experiments", e_id, msg))  {
-          return false;
-        }
-        experiment_id = "e" + boost::lexical_cast<std::string>(e_id);
+      int e_id;
+      if (!helpers::get_counter("experiments", e_id, msg))  {
+        return false;
+      }
+      experiment_id = "e" + boost::lexical_cast<std::string>(e_id);
+
+      int dataset_id;
+      if (!helpers::get_counter("dataset", dataset_id, msg))  {
+        return false;
       }
 
       mongo::BSONObjBuilder experiment_data_builder;
       experiment_data_builder.append("_id", experiment_id);
+      experiment_data_builder.append(KeyMapper::DATASET(), dataset_id);
       experiment_data_builder.append("name", name);
       experiment_data_builder.append("norm_name", norm_name);
       experiment_data_builder.append("genome", genome);
@@ -589,7 +588,8 @@ namespace epidb {
            it++) {
         const parser::Tokens &tokens = *it;
         mongo::BSONObjBuilder region_builder;
-        region_builder.append("_id", (int) count++);
+        region_builder.append("_id", (long long) dataset_id << 32 | (long long) count++);
+        region_builder.append(KeyMapper::DATASET(), (int) dataset_id);
         std::string chromosome;
         size_t start;
         size_t end;
@@ -617,14 +617,10 @@ namespace epidb {
         }
 
         mongo::BSONObj r = region_builder.obj();
-        std::string collection = helpers::region_collection_name(genome, experiment_id, internal_chromosome);
+        std::string collection = helpers::region_collection_name(genome, internal_chromosome);
 
         if (prev_collection != collection) {
           if (!prev_collection.empty() && bulk.size() > 0) {
-            if (!set_index_shard(processed, prev_collection, prev_size, msg)) {
-              c.done();
-              return false;
-            }
             c->insert(prev_collection, bulk);
             if (!c->getLastError().empty()) {
               msg = c->getLastError();
@@ -637,14 +633,10 @@ namespace epidb {
           prev_size = size;
         }
 
-        bulk.push_back(r);
         total_size += r.objsize();
+        bulk.push_back(r);
 
         if (bulk.size() % BULK_SIZE == 0) {
-          if (!set_index_shard(processed, collection, size, msg)) {
-            c.done();
-            return false;
-          }
           c->insert(collection, bulk);
           if (!c->getLastError().empty()) {
             msg = c->getLastError();
@@ -656,10 +648,6 @@ namespace epidb {
       }
 
       if (bulk.size() > 0) {
-        if (!set_index_shard(processed, prev_collection, prev_size, msg)) {
-          c.done();
-          return false;
-        }
         c->insert(prev_collection, bulk);
         if (!c->getLastError().empty()) {
           msg = c->getLastError();
@@ -690,17 +678,21 @@ namespace epidb {
                            const parser::FileFormat &format,
                            std::string &annotation_id, std::string &msg)
     {
-      {
-        int a_id;
-        if (!helpers::get_counter("annotations", a_id, msg))  {
-          return false;
-        }
-        annotation_id = "a" + boost::lexical_cast<std::string>(a_id);
+      int a_id;
+      if (!helpers::get_counter("annotations", a_id, msg))  {
+        return false;
+      }
+      annotation_id = "a" + boost::lexical_cast<std::string>(a_id);
+
+      int dataset_id;
+      if (!helpers::get_counter("dataset", dataset_id, msg))  {
+        return false;
       }
 
       mongo::ScopedDbConnection c(config::get_mongodb_server());
       mongo::BSONObjBuilder annotation_data_builder;
       annotation_data_builder.append("_id", annotation_id);
+      annotation_data_builder.append(KeyMapper::DATASET(), dataset_id);
       annotation_data_builder.append("name", name);
       annotation_data_builder.append("norm_name", norm_name);
       annotation_data_builder.append("genome", genome);
@@ -760,7 +752,8 @@ namespace epidb {
       std::map<std::string, bool> processed;
       BOOST_FOREACH( parser::Tokens tokens, bed_file_tokenized) {
         mongo::BSONObjBuilder region_builder;
-        region_builder.append("_id", (int) count++);
+        region_builder.append("_id", (long long) dataset_id << 32 | (long long) count++ );
+        region_builder.append(KeyMapper::DATASET(), (int) dataset_id);
         std::string chromosome;
         size_t start;
         size_t end;
@@ -788,13 +781,9 @@ namespace epidb {
           return false;
         }
         mongo::BSONObj r = region_builder.obj();
-        std::string collection = helpers::region_collection_name(genome, annotation_id, internal_chromosome);
+        std::string collection = helpers::region_collection_name(genome, internal_chromosome);
         if (prev_collection != collection) {
           if (!prev_collection.empty() && bulk.size() > 0) {
-            if (!set_index_shard(processed, prev_collection, prev_size, msg)) {
-              c.done();
-              return false;
-            }
             c->insert(prev_collection, bulk);
             if (!c->getLastError().empty()) {
               msg = c->getLastError();
@@ -810,10 +799,6 @@ namespace epidb {
         bulk.push_back(r);
 
         if (bulk.size() % BULK_SIZE == 0) {
-          if (!set_index_shard(processed, collection, size, msg)) {
-            c.done();
-            return false;
-          }
           c->insert(collection, bulk);
           if (!c->getLastError().empty()) {
             msg = c->getLastError();
@@ -825,10 +810,6 @@ namespace epidb {
       }
 
       if (bulk.size() > 0) {
-        if (!set_index_shard(processed, prev_collection, prev_size, msg)) {
-          c.done();
-          return false;
-        }
         c->insert(prev_collection, bulk);
         if (!c->getLastError().empty()) {
           msg = c->getLastError();
@@ -859,17 +840,21 @@ namespace epidb {
                            const parser::FileFormat &format,
                            std::string &annotation_id, std::string &msg)
     {
-      {
-        int a_id;
-        if (!helpers::get_counter("annotations", a_id, msg))  {
-          return false;
-        }
-        annotation_id = "a" + boost::lexical_cast<std::string>(a_id);
+      int a_id;
+      if (!helpers::get_counter("annotations", a_id, msg))  {
+        return false;
+      }
+      annotation_id = "a" + boost::lexical_cast<std::string>(a_id);
+
+      int dataset_id;
+      if (!helpers::get_counter("dataset", dataset_id, msg))  {
+        return false;
       }
 
       mongo::ScopedDbConnection c(config::get_mongodb_server());
       mongo::BSONObjBuilder annotation_data_builder;
       annotation_data_builder.append("_id", annotation_id);
+      annotation_data_builder.append(KeyMapper::DATASET(), dataset_id);
       annotation_data_builder.append("name", name);
       annotation_data_builder.append("norm_name", norm_name);
       annotation_data_builder.append("genome", genome);
@@ -941,18 +926,14 @@ namespace epidb {
           return false;
         }
 
-        std::string collection = helpers::region_collection_name(genome, annotation_id, internal_chromosome);
+        std::string collection = helpers::region_collection_name(genome, internal_chromosome);
         std::vector<mongo::BSONObj> bulk;
-
-        if (!set_index_shard(processed, collection, chromosome_size, msg)) {
-          c.done();
-          return false;
-        }
 
         for (RegionsIterator it = chromosome_regions.second->begin(); it != chromosome_regions.second->end(); it++) {
           Region region = *it;
           mongo::BSONObjBuilder region_builder;
-          region_builder.append("_id", (int) count++);
+          region_builder.append("_id", (long long) dataset_id << 32 | (long long) count++);
+          region_builder.append(KeyMapper::DATASET(), (int) dataset_id);
 
           if (region.start() > chromosome_size || region.end() > chromosome_size) {
             msg = out_of_range_message(region.start(), region.end(), chromosome);
