@@ -222,9 +222,9 @@ namespace epidb {
       }
 
       block.clear();
-      mongo::BSONObj o = block_builder.obj();
-      blocks_bulk.push_back(o);
-      size += o.objsize();
+      mongo::BSONObj block_obj = block_builder.obj();
+      blocks_bulk.push_back(block_obj);
+      size += block_obj.objsize();
 
       return true;
     }
@@ -243,7 +243,7 @@ namespace epidb {
         compress_block(dataset_id, collection, count, block, blocks_bulk, total_size);
       }
 
-      if (blocks_bulk.size() > bulk_size || size > MAXIMUM_SIZE) {
+      if (blocks_bulk.size() > bulk_size || total_size > MAXIMUM_SIZE) {
         mongo::ScopedDbConnection c(config::get_mongodb_server());
         c->insert(collection, blocks_bulk);
         if (!c->getLastError().empty()) {
