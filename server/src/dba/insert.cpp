@@ -159,107 +159,6 @@ namespace epidb {
       return true;
     }
 
-    /* deprecated */
-    boost::mutex move_chunk_lock;
-    bool __set_index_shard(std::map<std::string, bool> &processed, const std::string &collection, const size_t chromosome_size,
-                           std::string &msg)
-    {
-      if (processed.find(collection) != processed.end()) {
-        return true;
-      }
-
-      EPIDB_LOG_DBG("Starting Indexing and Sharding for " << collection);
-
-      mongo::ScopedDbConnection c(config::get_mongodb_server());
-      mongo::BSONObj info;
-
-      std::string collection_name = collection.substr(config::DATABASE_NAME().length() + 1);
-
-      EPIDB_LOG("Creating collection: " << collection_name);
-
-      if (!c->createCollection(collection, 0, false, 0, &info)) {
-        EPIDB_LOG_ERR("Problem creating collection '" << collection_name << "' error: " << info.toString());
-        msg = "Error while creating data collection";
-        c.done();
-        return false;
-      }
-
-      // Unset powerOf2
-      mongo::BSONObjBuilder unsetPowerOf2SizesBuilder;
-      unsetPowerOf2SizesBuilder.append("collMod", collection_name);
-      unsetPowerOf2SizesBuilder.append("usePowerOf2Sizes", false);
-      mongo::BSONObj unsetPowerOf2Sizes = unsetPowerOf2SizesBuilder.obj();
-      EPIDB_LOG_DBG("Unseting PowerOf2Sizes: " << unsetPowerOf2Sizes.toString());
-      if (!c->runCommand(config::DATABASE_NAME(), unsetPowerOf2Sizes, info)) {
-        EPIDB_LOG_ERR("Unseting PowerOf2Sizes '" << collection_name << "' error: " << info.toString());
-        msg = "Error while setting data collection";
-        c.done();
-        return false;
-      }
-
-      // Set indexes
-      mongo::BSONObjBuilder index_rs;
-      index_rs.append(KeyMapper::START(), 1);
-      index_rs.append(KeyMapper::END(), 1);
-      c->ensureIndex(collection, index_rs.obj());
-      if (!c->getLastError().empty()) {
-        msg = c->getLastError();
-        EPIDB_LOG_ERR("Indexing on '" << collection << "' error: " << msg);
-        c.done();
-        return false;
-      }
-
-      if (config::sharding()) {
-        EPIDB_LOG_DBG("Setting sharding for collection " << collection);
-
-        mongo::BSONObjBuilder builder;
-        builder.append("shardCollection", collection);
-        builder.append("key", BSON(KeyMapper::START() << 1));
-        mongo::BSONObj objShard = builder.obj();
-        mongo::BSONObj info;
-        EPIDB_LOG_DBG("Sharding: " << objShard.toString());
-
-        if (!c->runCommand("admin", objShard, info)) {
-          EPIDB_LOG_ERR("Sharding on '" << collection << "' error: " << info.toString());
-          msg = "Error while sharding data. Check if you are connected to a MongoDB cluster with sharding enabled for the database '" + config::DATABASE_NAME() + "' or disable sharding: --nosharding";
-          c.done();
-          return false;
-        }
-
-        std::vector<std::string> shards_names = config::get_shards_names();
-
-        static size_t i = 0;
-        size_t actual_pos = i % shards_names.size();
-        std::string shard = shards_names[actual_pos];
-        i++;
-
-        if (actual_pos != 0) { // if is not already the primary
-          boost::mutex::scoped_lock lock(move_chunk_lock);
-          EPIDB_LOG_DBG("Moving " << collection << " to " << shard);
-          mongo::BSONObjBuilder move_builder;
-          move_builder.append("moveChunk", collection);
-          move_builder.append("find", BSON(KeyMapper::START() << 0)) ;
-          move_builder.append("to", shard);
-
-          mongo::BSONObj move = move_builder.obj();
-
-          if (!c->runCommand("admin", move, info)) {
-            EPIDB_LOG_WARN("Error while distributing the collection ("  << move.toString() << ") " <<  collection << " :" << info.toString());
-            //msg = "(Internal Error) Error while distributing the data.";
-            //c.done();
-            //return false;
-          }
-
-        }
-
-        EPIDB_LOG_DBG("Index and Sharding for " << collection << " done");
-      }
-      c.done();
-      processed[collection] = true;
-
-      return true;
-    }
-
     std::string out_of_range_message(size_t start, size_t end, std::string &chrom )
     {
       std::stringstream ss;
@@ -373,7 +272,6 @@ namespace epidb {
       std::vector<mongo::BSONObj> bulk;
       std::string prev_collection;
       size_t prev_size;
-      std::map<std::string, bool> processed;
       size_t actual_size = 0;
       size_t total_size = 0;
 
@@ -581,7 +479,6 @@ namespace epidb {
       std::vector<mongo::BSONObj> bulk;
       std::string prev_collection;
       size_t prev_size;
-      std::map<std::string, bool> processed;
       size_t total_size = 0;
       for (std::vector<parser::Tokens>::const_iterator it = bed_file_tokenized.begin();
            it != bed_file_tokenized.end();
@@ -749,7 +646,6 @@ namespace epidb {
       std::vector<mongo::BSONObj> bulk;
       std::string prev_collection;
       size_t prev_size;
-      std::map<std::string, bool> processed;
       BOOST_FOREACH( parser::Tokens tokens, bed_file_tokenized) {
         mongo::BSONObjBuilder region_builder;
         region_builder.append("_id", (long long) dataset_id << 32 | (long long) count++ );
@@ -908,7 +804,6 @@ namespace epidb {
       }
 
       size_t count = 0;
-      std::map<std::string, bool> processed;
       BOOST_FOREACH(ChromosomeRegions chromosome_regions, regions) {
         std::string chromosome = chromosome_regions.first;
         std::string internal_chromosome;
