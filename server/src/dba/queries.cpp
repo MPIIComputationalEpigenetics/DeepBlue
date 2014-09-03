@@ -625,7 +625,7 @@ namespace epidb {
         }
         std::string tiling_id = "tr" + boost::lexical_cast<std::string>(t_id);
 
-        if (!helpers::get_counter("dataset", dataset_id, msg))  {
+        if (!helpers::get_counter("datasets", dataset_id, msg))  {
           return false;
         }
 

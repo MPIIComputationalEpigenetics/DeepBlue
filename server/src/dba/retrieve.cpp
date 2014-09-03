@@ -133,6 +133,77 @@ namespace epidb {
             }
           }
 
+          else if (region_bson.hasField(KeyMapper::BED_COMPRESSED())) {
+            bool compressed = region_bson[KeyMapper::BED_COMPRESSED()].Bool();
+            DatasetId dataset_id = region_bson[KeyMapper::DATASET()].Int();
+            int db_data_size;
+
+            if (compressed) {
+              const lzo_bytep compressed_data = (lzo_bytep) region_bson[KeyMapper::BED_DATA()].binData(db_data_size);
+              size_t real_size = region_bson[KeyMapper::BED_DATASIZE()].Int();
+
+              size_t uncompressed_size;
+              unsigned char *data = epidb::compress::decompress(compressed_data, db_data_size, real_size, uncompressed_size);
+              mongo::BSONObj arrobj((char *) data);
+
+              mongo::BSONObj::iterator regions_it = arrobj.begin();
+              while (regions_it.more()) {
+                const mongo::BSONObj &region_bson = regions_it.next().Obj();
+
+                mongo::BSONObj::iterator i = region_bson.begin();
+                Position start = i.next().Int();
+                Position end = i.next().Int();
+
+                Region region(start, end, dataset_id);
+
+                while ( i.more() ) {
+                  mongo::BSONElement e = i.next();
+                  if (e.type() == mongo::String) {
+                    region.set(e.fieldName(), e.str());
+                  } else if (e.type() == mongo::NumberDouble) {
+                    region.set(e.fieldName(), utils::double_to_string(e.Number()));
+                  } else if (e.type() == mongo::NumberInt) {
+                    region.set(e.fieldName(), utils::integer_to_string(e.Int()));
+                  } else {
+                    region.set(e.fieldName(), e.toString(false));
+                  }
+                }
+                _regions->push_back(region);
+                _count++;
+              }
+            } else {
+              const char* data = region_bson[KeyMapper::BED_DATA()].binData(db_data_size);
+
+              mongo::BSONObj arrobj((char *) data);
+
+              mongo::BSONObj::iterator regions_it = arrobj.begin();
+              while (regions_it.more()) {
+                const mongo::BSONObj &region_bson = regions_it.next().Obj();
+
+                mongo::BSONObj::iterator i = region_bson.begin();
+                Position start = i.next().Int();
+                Position end = i.next().Int();
+
+                Region region(start, end, dataset_id);
+
+                while ( i.more() ) {
+                  mongo::BSONElement e = i.next();
+                  if (e.type() == mongo::String) {
+                    region.set(e.fieldName(), e.str());
+                  } else if (e.type() == mongo::NumberDouble) {
+                    region.set(e.fieldName(), utils::double_to_string(e.Number()));
+                  } else if (e.type() == mongo::NumberInt) {
+                    region.set(e.fieldName(), utils::integer_to_string(e.Int()));
+                  } else {
+                    region.set(e.fieldName(), e.toString(false));
+                  }
+                }
+                _regions->push_back(region);
+                _count++;
+              }
+            }
+          }
+
           else {
             mongo::BSONObj::iterator i = region_bson.begin();
 

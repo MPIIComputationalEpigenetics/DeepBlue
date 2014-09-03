@@ -107,6 +107,12 @@ namespace epidb {
       return BED_DATA;
     }
 
+    const std::string &KeyMapper::BED_DATASIZE()
+    {
+      static std::string BED_DATA = epidb::dba::KeyMapper::build_default("BED_DATASIZE");
+      return BED_DATA;
+    }
+
     const std::string &KeyMapper::DATASET()
     {
       static std::string DATASET = epidb::dba::KeyMapper::build_default("DATASET");

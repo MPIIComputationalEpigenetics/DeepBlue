@@ -182,7 +182,7 @@ namespace epidb {
       //--- move to queries.cpp --//
 
 
-      // TODO :optimize it for finding the ChromosomeRegionsList data in not O(N) time
+      // TODO :optimize it for finding the ChromosomeRegionsList data not in O(N) time
 
       dba::Metafield metafield;
       BOOST_FOREACH(ChromosomeRegions range, ranges) {
