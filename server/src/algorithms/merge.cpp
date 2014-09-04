@@ -34,7 +34,7 @@ namespace epidb {
       results->push_back(last);
 
       for (RegionsIterator it = sorted->begin()+1; it != sorted->end(); ++it) {
-        if (it->start() != last.start() || it->end() != last.end() || it->collection_id() != last.collection_id()) {
+        if (it->start() != last.start() || it->end() != last.end() || it->dataset_id() != last.dataset_id()) {
           results->push_back(*it);
         }
         last = *it;

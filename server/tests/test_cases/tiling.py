@@ -29,7 +29,7 @@ class TestTilingRegions(helpers.TestCase):
     chr3_tiles = 198022430 / 1000000
     chr15_tiles = 102531392 / 1000000
     chrX_tiles = 155270560 / 1000000
-    
+
     self.assertEqual(len(regions.strip().split('\n')), chr3_tiles + chr15_tiles + chrX_tiles)
 
 

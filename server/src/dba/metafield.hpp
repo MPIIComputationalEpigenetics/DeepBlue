@@ -28,13 +28,13 @@ namespace epidb {
 
       static std::map<const std::string, Function> functions;
 
-      std::map<CollectionId, mongo::BSONObj> obj_by_collection_id;
+      std::unordered_map<DatasetId, mongo::BSONObj> obj_by_dataset_id;
 
       dba::retrieve::SequenceRetriever seq_retr;
 
       static const std::map<const std::string, Function> createFunctionsMap();
 
-      bool get_bson_by_collection_id(CollectionId collection_id, mongo::BSONObj &obj, std::string &msg);
+      bool get_bson_by_dataset_id(DatasetId dataset_id, mongo::BSONObj &obj, std::string &msg);
 
       bool count_pattern(const std::string& pattern, const std::string& genome, const std::string &chrom,
                                        const Region &region, const bool overlap,

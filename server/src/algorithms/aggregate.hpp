@@ -25,7 +25,7 @@
 namespace epidb {
   namespace algorithms {
     bool aggregate(const ChromosomeRegionsList &data, const  ChromosomeRegionsList &ranges, const std::string &field,
-                         ChromosomeRegionsList &regions);
+                         ChromosomeRegionsList &regions, std::string& msg);
   } // namespace algorithms
 } // namespace epidb
 

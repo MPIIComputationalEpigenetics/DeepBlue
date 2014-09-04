@@ -311,7 +311,33 @@ namespace epidb {
         if (data_cursor->more()) {
           result = data_cursor->next().getOwned();
         } else {
-          msg = "project with id " + id + " not found.";
+          msg = "Sample Field with id " + id + " not found.";
+          c.done();
+          return false;
+        }
+        c.done();
+
+        for (mongo::BSONObj::iterator it = result.begin(); it.more(); ) {
+          mongo::BSONElement e = it.next();
+          if (full || (strncmp("norm_", e.fieldName(), 5) != 0)) {
+            res[e.fieldName()] = e.str();
+          }
+        }
+        return true;
+      }
+
+      bool get_tiling_region(const std::string &id, std::map<std::string, std::string> &res, std::string &msg, bool full = false)
+      {
+        //  TODO: move to a generic function
+        mongo::ScopedDbConnection c(config::get_mongodb_server());
+
+        mongo::BSONObj query = BSON("_id" << id);
+        std::auto_ptr<mongo::DBClientCursor> data_cursor = c->query(helpers::collection_name(Collections::TILINGS()), query, 1);
+        mongo::BSONObj result;
+        if (data_cursor->more()) {
+          result = data_cursor->next().getOwned();
+        } else {
+          msg = "Tiling Regions id " + id + " not found.";
           c.done();
           return false;
         }

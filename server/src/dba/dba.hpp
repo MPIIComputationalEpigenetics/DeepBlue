@@ -178,7 +178,7 @@ namespace epidb {
                          std::string &annotation_id, std::string &msg);
 
     bool find_annotation_pattern(const std::string &genome, const std::string &pattern, const bool overlap,
-                                 std::string &annotation_id, std::string &msg);
+                                 DatasetId &dataset_id, std::string &msg);
   }
 }
 

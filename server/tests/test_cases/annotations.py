@@ -39,3 +39,32 @@ class TestAnnotationCommands(helpers.TestCase):
     res, regions = epidb.get_regions(qid, "CHROMOSOME,START,END", self.admin_key)
     self.assertSuccess(res, regions)
     self.assertEqual(regions, file_data)
+
+  def test_annotation_full_cpg_islands(self):
+    epidb = EpidbClient()
+    self.init_base(epidb)
+
+    cpg_island =  ",".join([
+      "CHROMOSOME",
+      "START",
+      "END",
+      "name:String",
+      "length:Integer:0",
+      "cpgNum:Integer:0",
+      "gcNum:Integer:0",
+      "perCpg:Double",
+      "perGc:Double",
+      "obsExp:Double"
+      ])
+
+    with open("data/cpgIslandExtFull.txt", 'r') as f:
+      file_data = f.read()
+      regions_count = len(file_data.split("\n")) -1
+      (res, a_1) = epidb.add_annotation("Cpg Islands", "hg19", "Complete CpG islands", file_data, cpg_island, None, self.admin_key)
+      self.assertSuccess(res, a_1)
+      res, qid_1 = epidb.select_annotations("Cpg Islands", "hg19", None, None, None, self.admin_key)
+      self.assertSuccess(res, qid_1)
+
+      (s, c) = epidb.count_regions(qid_1, self.admin_key)
+
+      self.assertEqual(regions_count, c)

@@ -47,15 +47,15 @@ int main(int argc, char *argv[])
   std::string database_name;
 
   // Declare the supported options.
-  po::options_description desc("DeepBlue Parameters");
+  po::options_description desc("DeepBlue parameters");
   desc.add_options()
-  ("help,H", "help message")
+  ("help,H", "Help message")
   ("address,A", po::value<std::string>(&address)->default_value("localhost"), "Local address")
   ("port,P", po::value<std::string>(&port)->default_value("31415"), "Local port")
   ("threads,T", po::value<size_t>(&threads)->default_value(10), "Number of concurrent requests")
   ("mongodb,M", po::value<std::string>(&mongodb_server)->default_value("127.0.0.1:27017"), "MongoDB address and port")
-  ("database_name,D", po::value<std::string>(&database_name)->default_value("epidb"), "Database Name")
-  ("nosharding,X", "do not use sharding in the mongodb")
+  ("database_name,D", po::value<std::string>(&database_name)->default_value("epidb"), "Database name")
+  ("nosharding,X", "Do not use sharding in the MongoDB")
   ;
 
   po::variables_map vm;

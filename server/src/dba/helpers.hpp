@@ -25,12 +25,12 @@ namespace epidb {
 
       const std::string collection_name(const std::string &name);
 
-      const std::string region_collection_name(const std::string &genome, const std::string& regions_set, const std::string &chromosome);
+      const std::string region_collection_name(const std::string &genome, const std::string &chromosome);
 
       // ----
 
       bool get_bio_source_id(const std::string &norm_name, std::string &id, std::string &msg);
-      
+
       // ----
 
       // Get **all** content from **entire** colection
@@ -79,7 +79,18 @@ namespace epidb {
       bool collection_size(const std::string &where, unsigned long long &size, std::string &msg);
 
 
-      mongo::BSONObj build_condition_array(const std::vector<std::string> &params, const std::string &condition = "$in");
+      template<typename T>
+      mongo::BSONObj build_condition_array(const std::vector<T> &params, const std::string &condition)
+      {
+        mongo::BSONArrayBuilder ab;
+        for (typename std::vector<T>::const_iterator it = params.begin(); it != params.end(); it++) {
+          ab.append(*it);
+        }
+        mongo::BSONObjBuilder in_condition;
+        in_condition.append (condition, ab.arr());
+        return in_condition.obj();
+      }
+
 
       bool get_counter(const std::string &name, int &id, std::string &msg);
 

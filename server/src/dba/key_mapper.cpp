@@ -95,6 +95,30 @@ namespace epidb {
       return true;
     }
 
+    const std::string &KeyMapper::BED_COMPRESSED()
+    {
+      static std::string BED_COMPRESSED = epidb::dba::KeyMapper::build_default("BED_COMPRESSED");
+      return BED_COMPRESSED;
+    }
+
+    const std::string &KeyMapper::BED_DATA()
+    {
+      static std::string BED_DATA = epidb::dba::KeyMapper::build_default("BED_DATA");
+      return BED_DATA;
+    }
+
+    const std::string &KeyMapper::BED_DATASIZE()
+    {
+      static std::string BED_DATA = epidb::dba::KeyMapper::build_default("BED_DATASIZE");
+      return BED_DATA;
+    }
+
+    const std::string &KeyMapper::DATASET()
+    {
+      static std::string DATASET = epidb::dba::KeyMapper::build_default("DATASET");
+      return DATASET;
+    }
+
     const std::string &KeyMapper::CHROMOSOME()
     {
       static std::string CHROMOSOME = epidb::dba::KeyMapper::build_default("CHROMOSOME");

@@ -198,7 +198,7 @@ namespace epidb {
         cmd_builder.append("text", Collections::TEXT_SEARCH());
         cmd_builder.append("search", text);
         if (types.size() > 0) {
-          cmd_builder.append("filter", BSON("type" << helpers::build_condition_array(types, "$in")));
+          cmd_builder.append("filter", BSON("type" << helpers::build_condition_array<std::string>(types, "$in")));
         }
 
         mongo::BSONObj result;

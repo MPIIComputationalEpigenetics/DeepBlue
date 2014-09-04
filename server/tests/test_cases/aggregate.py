@@ -51,8 +51,3 @@ class TestAggregateCommand(helpers.TestCase):
     c = epidb.count_regions(qid_4, self.admin_key)
     self.assertSuccess(c)
     self.assertEquals(c[1], 12)
-
-
-
-
-

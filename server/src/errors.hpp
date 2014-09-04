@@ -7,7 +7,6 @@
 //
 
 #include <string>
-#include <map>
 
 namespace epidb {
 
@@ -37,6 +36,8 @@ namespace epidb {
   extern Error ERR_DUPLICATE_SAMPLE_FIELD_NAME;
 
   extern Error ERR_DUPLICATE_GENOME_NAME;
+
+  extern Error ERR_DATASET_NOT_FOUND;
 
   extern Error ERR_DATABASE_CONNECTION;
   extern Error ERR_DATABASE_EXCEPTION;

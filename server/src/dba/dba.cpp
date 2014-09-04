@@ -227,6 +227,83 @@ namespace epidb {
       return true;
     }
 
+    bool create_chromosome_collection(const std::string &genome_norm_name, const std::string &chromosome,
+                                      std::string &msg)
+    {
+      mongo::ScopedDbConnection c(config::get_mongodb_server());
+      mongo::BSONObj info;
+
+      std::string collection = helpers::region_collection_name(genome_norm_name, chromosome);
+      std::string collection_name = collection.substr(config::DATABASE_NAME().length() + 1);
+      EPIDB_LOG("Creating collection: " << collection_name);
+
+      if (!c->createCollection(collection, 0, false, 0, &info)) {
+        EPIDB_LOG_ERR("Problem creating collection '" << collection_name << "' error: " << info.toString());
+        msg = "Error while creating data collection";
+        c.done();
+        return false;
+      }
+
+      // Unset powerOf2
+      mongo::BSONObjBuilder unsetPowerOf2SizesBuilder;
+      unsetPowerOf2SizesBuilder.append("collMod", collection_name);
+      unsetPowerOf2SizesBuilder.append("usePowerOf2Sizes", false);
+      mongo::BSONObj unsetPowerOf2Sizes = unsetPowerOf2SizesBuilder.obj();
+      EPIDB_LOG_DBG("Unseting PowerOf2Sizes: " << unsetPowerOf2Sizes.toString());
+      if (!c->runCommand(config::DATABASE_NAME(), unsetPowerOf2Sizes, info)) {
+        EPIDB_LOG_ERR("Unseting PowerOf2Sizes '" << collection_name << "' error: " << info.toString());
+        msg = "Error while setting data collection";
+        c.done();
+        return false;
+      }
+
+      // Set indexes
+      EPIDB_LOG_DBG("Creating index for " << collection);
+      mongo::BSONObjBuilder start_end_index;
+      start_end_index.append(KeyMapper::START(), 1);
+      start_end_index.append(KeyMapper::END(), 1);
+      c->ensureIndex(collection, start_end_index.obj());
+      if (!c->getLastError().empty()) {
+        msg = c->getLastError();
+        EPIDB_LOG_ERR("Indexing on START and END at '" << collection << "' error: " << msg);
+        c.done();
+        return false;
+      }
+
+      mongo::BSONObjBuilder dataset_id_index;
+      dataset_id_index.append(KeyMapper::DATASET(), "hashed");
+      c->ensureIndex(collection, dataset_id_index.obj());
+      if (!c->getLastError().empty()) {
+        msg = c->getLastError();
+        EPIDB_LOG_ERR("Indexing on DATASET '" << collection << "' error: " << msg);
+        c.done();
+        return false;
+      }
+
+      if (config::sharding()) {
+        EPIDB_LOG_DBG("Setting sharding for collection " << collection);
+
+        mongo::BSONObjBuilder builder;
+        builder.append("shardCollection", collection);
+        builder.append("key", BSON(KeyMapper::DATASET() << "hash"));
+        mongo::BSONObj objShard = builder.obj();
+        mongo::BSONObj info;
+        EPIDB_LOG_DBG("Sharding: " << objShard.toString());
+
+        if (!c->runCommand("admin", objShard, info)) {
+          EPIDB_LOG_ERR("Sharding on '" << collection << "' error: " << info.toString());
+          msg = "Error while sharding data. Check if you are connected to a MongoDB cluster with sharding enabled for the database '" + config::DATABASE_NAME() + "' or disable sharding: --nosharding";
+          c.done();
+          return false;
+        }
+
+        EPIDB_LOG_DBG("Index and Sharding for " << collection << " done");
+      }
+      c.done();
+      return true;
+    }
+
+
     bool add_genome(const std::string &name, const std::string &norm_name,
                     const std::string &description, const std::string &norm_description,
                     const parser::ChromosomesInfo &genome_info,
@@ -258,6 +335,10 @@ namespace epidb {
         chromosome_builder.append("name", it->first);
         chromosome_builder.append("size", it->second);
         ab.append(chromosome_builder.obj());
+
+        if (!create_chromosome_collection(name, it->first, msg)) {
+          return false;
+        }
       }
 
       create_genome_builder.append("chromosomes", ab.arr());
@@ -282,7 +363,7 @@ namespace epidb {
         return false;
       }
 
-      CollectionId id = build_collection_id("Add Genome Regions");
+      DatasetId id = DATASET_EMPTY_ID;
 
       ChromosomeRegionsList chromosome_regions_list;
       for (parser::ChromosomesInfo::const_iterator it = genome_info.begin(); it != genome_info.end(); it++) {
@@ -1088,7 +1169,7 @@ namespace epidb {
     }
 
     bool find_annotation_pattern(const std::string &genome, const std::string &pattern, const bool overlap,
-                                 std::string &annotation_id, std::string &msg)
+                                 DatasetId &dataset_id, std::string &msg)
     {
 
       mongo::BSONObjBuilder annotations_query_builder;
@@ -1117,7 +1198,7 @@ namespace epidb {
 
       if (cursor->more()) {
         mongo::BSONObj p = cursor->next();
-        annotation_id = p.getField("_id").str();
+        dataset_id = p.getField(KeyMapper::DATASET()).Int();
         c.done();
         return true;
       } else {
