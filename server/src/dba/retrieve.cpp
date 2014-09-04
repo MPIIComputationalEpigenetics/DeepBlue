@@ -45,10 +45,14 @@ namespace epidb {
       struct RegionProcess {
         size_t _count;
         Regions &_regions;
+        Position _query_start;
+        Position _query_end;
 
-        RegionProcess(Regions &regions) :
+        RegionProcess(Regions &regions, Position query_start, Position query_end) :
           _count(0),
-          _regions(regions)
+          _regions(regions),
+          _query_start(query_start),
+          _query_end(query_end)
         { }
 
         void read_region(const mongo::BSONObj &region_bson)
@@ -89,6 +93,9 @@ namespace epidb {
                 starts = reinterpret_cast<const Position *>(data);
               }
               for (Length i = 0; i < size; i++) {
+                if ((starts[i] < _query_start) ||  start + (i * step) + span > _query_end) {
+                  continue;
+                }
                 Region region(start + (i * step), start + (i * step) + span, dataset_id);
                 region.set(KeyMapper::VALUE(), utils::double_to_string(starts[i]));
                 _regions->push_back(region);
@@ -104,6 +111,9 @@ namespace epidb {
                 scores = reinterpret_cast<const Score *>(data + (size * sizeof(Position)));
               }
               for (Length i = 0; i < size; i++)  {
+                if ((starts[i] < _query_start) || (starts[i] + span > _query_end)) {
+                  continue;
+                }
                 Region region(starts[i], starts[i] + span, dataset_id);
                 region.set(KeyMapper::VALUE(), utils::double_to_string(scores[i]));
                 _regions->push_back(region);
@@ -121,6 +131,9 @@ namespace epidb {
                 scores = reinterpret_cast<const Score *>(data + (size * sizeof(Position) + (size * sizeof(Position))));
               }
               for (Length i = 0; i < size; i++)  {
+                if ((starts[i] < _query_start) || (ends[i] > _query_end)) {
+                  continue;
+                }
                 Region region(starts[i], ends[i], dataset_id);
                 region.set(KeyMapper::VALUE(), utils::double_to_string(scores[i]));
                 _regions->push_back(region);
@@ -154,6 +167,10 @@ namespace epidb {
                 Position start = i.next().Int();
                 Position end = i.next().Int();
 
+                if ((start < _query_start) || (end > _query_end)) {
+                  continue;
+                }
+
                 Region region(start, end, dataset_id);
 
                 while ( i.more() ) {
@@ -171,8 +188,9 @@ namespace epidb {
                 _regions->push_back(region);
                 _count++;
               }
+              // Grouped in blocks but not compressed
             } else {
-              const char* data = region_bson[KeyMapper::BED_DATA()].binData(db_data_size);
+              const char *data = region_bson[KeyMapper::BED_DATA()].binData(db_data_size);
 
               mongo::BSONObj arrobj((char *) data);
 
@@ -183,6 +201,10 @@ namespace epidb {
                 mongo::BSONObj::iterator i = region_bson.begin();
                 Position start = i.next().Int();
                 Position end = i.next().Int();
+
+                if ((start < _query_start) || (end > _query_end)) {
+                  continue;
+                }
 
                 Region region(start, end, dataset_id);
 
@@ -204,6 +226,7 @@ namespace epidb {
             }
           }
 
+          //
           else {
             mongo::BSONObj::iterator i = region_bson.begin();
 
@@ -216,6 +239,10 @@ namespace epidb {
             }
             Position start = i.next().Int();
             Position end = i.next().Int();
+
+            if ((start < _query_start) || (end > _query_end)) {
+              return;
+            }
 
             Region region(start, end, dataset_id);
 
@@ -244,7 +271,24 @@ namespace epidb {
       {
         mongo::ScopedDbConnection c(config::get_mongodb_server());
 
-        RegionProcess rp(regions);
+        Position start;
+        Position end;
+
+        if (regions_query.hasField(KeyMapper::START())) {
+          mongo::BSONObj o = regions_query[KeyMapper::START()].Obj();
+          end = o["$lte"].Int();
+        } else {
+          end = std::numeric_limits<Position>::max();
+        }
+
+        if (regions_query.hasField(KeyMapper::END())) {
+          mongo::BSONObj o = regions_query[KeyMapper::END()].Obj();
+          start = o["$gte"].Int();
+        } else {
+          start = std::numeric_limits<Position>::min();
+        }
+
+        RegionProcess rp(regions, start, end);
 
         mongo::Query query = mongo::Query(regions_query).sort(KeyMapper::START());
         int queryOptions = (int)( mongo::QueryOption_NoCursorTimeout | mongo::QueryOption_SlaveOk );
