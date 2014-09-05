@@ -21,6 +21,7 @@
 #include "collections.hpp"
 #include "config.hpp"
 #include "dba.hpp"
+#include "full_text.hpp"
 #include "helpers.hpp"
 
 #include "column_types.hpp"
@@ -245,7 +246,7 @@ namespace epidb {
         }
         create_column_type_builder.append("description", description);
         create_column_type_builder.append("norm_description", norm_description);
-        create_column_type_builder.append("type", type);
+        create_column_type_builder.append("column_type", type);
 
         std::string user_name;
         if (!get_user_name(user_key, user_name, msg)) {
@@ -285,6 +286,12 @@ namespace epidb {
           c.done();
           return false;
         }
+
+        if (!search::insert_full_text(Collections::COLUMN_TYPES(), column_type_id, obj, msg)) {
+          c.done();
+          return false;
+        }
+
         c.done();
 
         return true;
@@ -315,6 +322,12 @@ namespace epidb {
           c.done();
           return false;
         }
+
+        if (!search::insert_full_text(Collections::COLUMN_TYPES(), column_type_id, obj, msg)) {
+          c.done();
+          return false;
+        }
+
         c.done();
 
         return true;
@@ -348,6 +361,11 @@ namespace epidb {
         }
         c.done();
 
+        if (!search::insert_full_text(Collections::COLUMN_TYPES(), column_type_id, obj, msg)) {
+          c.done();
+          return false;
+        }
+
         return true;
       }
 
@@ -372,8 +390,8 @@ namespace epidb {
 
       bool column_type_bsonobj_to_class(const mongo::BSONObj &obj, ColumnTypePtr &column_type, std::string &msg)
       {
-        const std::string &name = obj["name"].String();
-        const std::string type = obj["type"].String();
+        const std::string name = obj["name"].String();
+        const std::string type = obj["column_type"].String();
         std::string ignore_if;
         if (obj.hasField("ignore_if")) {
           ignore_if = obj["ignore_if"].String();
@@ -425,6 +443,69 @@ namespace epidb {
 
         return r;
       }
+
+      bool get_column_type(const std::string &id, std::map<std::string, std::string> &res, std::string &msg, bool full)
+      {
+        mongo::ScopedDbConnection c(config::get_mongodb_server());
+        mongo::BSONObj query = BSON("_id" << id);
+        std::auto_ptr<mongo::DBClientCursor> data_cursor = c->query(helpers::collection_name(Collections::COLUMN_TYPES()), query, 1);
+        if (!data_cursor->more()) {
+          msg = "Column type id " + id + " not found";
+          c.done();
+          return false;
+        }
+
+        ColumnTypePtr column_type;
+        mongo::BSONObj o = data_cursor->next().getOwned();
+        if (!column_type_bsonobj_to_class(o, column_type, msg)) {
+          return false;
+        }
+        c.done();
+
+        res["name"] = column_type->name();
+        res["ignore_if"] = column_type->ignore_if();
+        switch (column_type->type()) {
+        case COLUMN_STRING: {
+          res["type"] = "string";
+          break;
+        }
+
+        case COLUMN_INTEGER: {
+          res["type"] = "integer";
+          break;
+        }
+
+        case COLUMN_DOUBLE: {
+          res["type"] = "double";
+          break;
+        }
+
+        case COLUMN_RANGE: {
+          res["type"] = "range";
+          ColumnType<Range> *column = static_cast<ColumnType<Range> *>(column_type.get());
+          res["min"] = utils::integer_to_string(column->content().first);
+          res["max"] = utils::integer_to_string(column->content().second);
+          break;
+        }
+
+        case COLUMN_CATEGORY: {
+          res["type"] = "category";
+          ColumnType<Category> *column = static_cast<ColumnType<Category> *>(column_type.get());
+          res["values"] = utils::vector_to_string(column->content());
+          break;
+        }
+
+        case COLUMN_ERR: {
+          msg = "Invalid column id: " + id;
+          return false;
+        }
+        }
+
+        return true;
+      }
     }
+
+
+
   }
 }

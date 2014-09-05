@@ -294,12 +294,12 @@ namespace epidb {
         }
 
         if (args.hasField("start") && args.hasField("end")) {
-          regions_query_builder.append(KeyMapper::START(), BSON("$gte" << args["start"].Long() << "$lte" << args["end"].Long()));
-          regions_query_builder.append(KeyMapper::END(), BSON("$gte" << args["start"].Long() << "$lte" << args["end"].Long()));
+          regions_query_builder.append(KeyMapper::START(), BSON("$lte" << args["end"].Int()));
+          regions_query_builder.append(KeyMapper::END(), BSON("$gte" << args["start"].Int()));
         } else if (args.hasField("start")) {
-          regions_query_builder.append(KeyMapper::START(), BSON("$gte" << args["start"].Long()));
+          regions_query_builder.append(KeyMapper::END(), BSON("$gte" << args["start"].Int()));
         } else if (args.hasField("end")) {
-          regions_query_builder.append(KeyMapper::END(), BSON("$lte" << args["end"].Long()));
+          regions_query_builder.append(KeyMapper::START(), BSON("$lte" << args["end"].Int()));
         }
 
         regions_query = regions_query_builder.obj();
@@ -339,12 +339,12 @@ namespace epidb {
         regions_query_builder.append(KeyMapper::DATASET(), BSON("$in" << datasets_array));
 
         if (args.hasField("start") && args.hasField("end")) {
-          regions_query_builder.append(KeyMapper::START(), BSON("$lte" << args["end"].Long()));
-          regions_query_builder.append(KeyMapper::END(), BSON("$gte" << args["start"].Long()));
+          regions_query_builder.append(KeyMapper::START(), BSON("$lte" << args["end"].Int()));
+          regions_query_builder.append(KeyMapper::END(), BSON("$gte" << args["start"].Int()));
         } else if (args.hasField("start")) {
-          regions_query_builder.append(KeyMapper::END(), BSON("$gte" << args["start"].Long()));
+          regions_query_builder.append(KeyMapper::END(), BSON("$gte" << args["start"].Int()));
         } else if (args.hasField("end")) {
-          regions_query_builder.append(KeyMapper::START(), BSON("$lte" << args["end"].Long()));
+          regions_query_builder.append(KeyMapper::START(), BSON("$lte" << args["end"].Int()));
         }
 
         regions_query = regions_query_builder.obj();

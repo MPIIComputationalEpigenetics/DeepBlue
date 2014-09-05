@@ -21,6 +21,7 @@
 
 #include "config.hpp"
 #include "collections.hpp"
+#include "column_types.hpp"
 #include "helpers.hpp"
 
 #include "../regions.hpp"
@@ -287,9 +288,9 @@ namespace epidb {
           mongo::BSONElement e = it.next();
           std::string fieldName = std::string(e.fieldName());
           if (fieldName.find("start") == 0) {
-            arg_builder.appendNumber("start", e.Long());
+            arg_builder.appendNumber("start", e.Int());
           } else if (fieldName.find("end") == 0) {
-            arg_builder.appendNumber("end", e.Long());
+            arg_builder.appendNumber("end", e.Int());
           } else if (fieldName.find("norm_") != 0) {
             arg_builder.append(e);
           }
@@ -350,6 +351,11 @@ namespace epidb {
           }
         }
         return true;
+      }
+
+      bool get_column_type(const std::string &id, std::map<std::string, std::string> &res, std::string &msg, bool full = false)
+      {
+        return columns::get_column_type(id, res, msg, full);
       }
 
     }

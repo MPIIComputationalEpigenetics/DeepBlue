@@ -77,8 +77,8 @@ namespace epidb {
 
           const std::string user_key = parameters[9]->as_string();
 
-          const long long start = parameters[7]->isNull() ? -1 : parameters[7]->as_long();
-          const long long end = parameters[8]->isNull() ? -1 : parameters[8]->as_long();
+          const int start = parameters[7]->isNull() ? -1 : parameters[7]->as_long();
+          const int end = parameters[8]->isNull() ? -1 : parameters[8]->as_long();
 
           std::string msg;
           bool ok;
@@ -136,10 +136,10 @@ namespace epidb {
           args_builder.append("has_filter", has_filter);
 
           if (start >= 0) {
-            args_builder.append("start", start);
+            args_builder.append("start", (int) start);
           }
           if (end >= 0) {
-            args_builder.append("end", end);
+            args_builder.append("end", (int) end);
           }
 
 

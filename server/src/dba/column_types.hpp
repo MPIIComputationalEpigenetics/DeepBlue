@@ -59,6 +59,10 @@ namespace epidb {
           return _name;
         }
 
+        const std::string ignore_if() {
+          return _ignore_if;
+        }
+
         virtual bool check(const Value &verify) const
         {
           return false;
@@ -106,6 +110,10 @@ namespace epidb {
         const std::string str() const
         {
           return AbstractColumnType::str();
+        }
+
+        const Type content() {
+          return _content;
         }
 
         std::ostream &operator<<(std::ostream &str)
@@ -184,6 +192,8 @@ namespace epidb {
                                     std::string &id, std::string &msg);
 
       bool column_type_bsonobj_to_class(const mongo::BSONObj &obj, ColumnTypePtr &column_type, std::string &msg);
+
+      bool get_column_type(const std::string &id, std::map<std::string, std::string> &res, std::string &msg, bool full = false);
     }
   }
 }

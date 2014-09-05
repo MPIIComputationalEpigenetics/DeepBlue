@@ -21,6 +21,7 @@ namespace epidb {
       std::vector<std::string> v;
       v.push_back(ANNOTATIONS());
       v.push_back(BIO_SOURCES());
+      v.push_back(COLUMN_TYPES());
       v.push_back(EPIGENETIC_MARKS());
       v.push_back(EXPERIMENTS());
       v.push_back(GENOMES());
