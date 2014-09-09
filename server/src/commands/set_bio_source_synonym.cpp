@@ -39,8 +39,10 @@ namespace epidb {
 
       static Parameters results_()
       {
-        Parameter p[] = {};
-        Parameters results(&p[0], &p[0] + 0);
+        Parameter p[] = {
+          Parameter("synonym_name", serialize::STRING, "inserted synonym_name")
+        };
+        Parameters results(&p[0], &p[0] + 1);
         return results;
       }
 
@@ -117,6 +119,8 @@ namespace epidb {
           result.add_error(msg);
           return false;
         }
+
+        result.add_string(synonym_name);
 
         return true;
       }
