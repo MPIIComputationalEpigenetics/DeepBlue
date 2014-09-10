@@ -6,8 +6,6 @@
 //  Copyright (c) 2013,2014 Max Planck Institute for Computer Science. All rights reserved.
 //
 
-#include <sstream>
-
 #include "../dba/dba.hpp"
 #include "../dba/queries.hpp"
 
