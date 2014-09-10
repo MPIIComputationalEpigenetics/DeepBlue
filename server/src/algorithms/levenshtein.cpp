@@ -146,7 +146,7 @@ namespace epidb {
       float threshould(0.60);
       std::vector<std::pair<std::string, float> > ps;
 
-      BOOST_FOREACH(std::string tm, tms) {
+      BOOST_FOREACH(const std::string & tm, tms) {
         float value = calculate_score(term, tm);
         std::pair<std::string, float> score_pair(tm, value);
         ps.push_back(score_pair);
