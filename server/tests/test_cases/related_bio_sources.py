@@ -62,5 +62,6 @@ class TestBioSourceRelated(helpers.TestCase):
     res = epidb.set_bio_source_scope("A", "C D", self.admin_key)
     self.assertSuccess(res)
     res = epidb.set_bio_source_scope("A", "C D", self.admin_key)
-    self.assertSuccess(res)
+    self.assertFailure(res)
+    self.assertEqual(res[1], "104901:'A' is already more embracing than 'C D'.")
 
