@@ -5,7 +5,6 @@ import data_info
 
 class TestSearch(helpers.TestCase):
 
-  """
   def test_type_restricted(self):
     epidb = EpidbClient()
     self.init(epidb)
@@ -387,7 +386,6 @@ class TestSearch(helpers.TestCase):
     (s, r2) = epidb.search("Carolina", [], self.admin_key)
     self.assertEqual([['bs4', 'Carolina', 'bio_sources'], ['s2', '', 'samples'], ['e1', 'las chicas', 'experiments']], r2)
 
-  """
   def test_column_types_search(self):
     epidb = EpidbClient()
     self.init(epidb)
