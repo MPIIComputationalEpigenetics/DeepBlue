@@ -7,7 +7,6 @@
 //
 
 #include <sstream>
-#include <map>
 
 #include "../dba/dba.hpp"
 #include "../dba/queries.hpp"
