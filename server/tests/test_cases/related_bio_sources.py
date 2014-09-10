@@ -42,3 +42,25 @@ class TestBioSourceRelated(helpers.TestCase):
     self.assertSuccess(res, scope)
     scope_names = [x[1] for x in scope]
     self.assertEquals(scope_names, ['mesoderm', 'blood', 'GM12878', 'K562', 'Adult_CD4_naive'])
+
+  def test_bio_source_related(self):
+    epidb = EpidbClient()
+    self.init(epidb)
+
+    self.assertSuccess(epidb.add_bio_source("A", None, {}, self.admin_key))
+    self.assertSuccess(epidb.add_bio_source("A C", None, {}, self.admin_key))
+    self.assertSuccess(epidb.add_bio_source("A D", None, {}, self.admin_key))
+    self.assertSuccess(epidb.add_bio_source("A E", None, {}, self.admin_key))
+    self.assertSuccess(epidb.add_bio_source("C D", None, {}, self.admin_key))
+
+    res = epidb.set_bio_source_scope("A", "A C", self.admin_key)
+    self.assertSuccess(res)
+    res = epidb.set_bio_source_scope("A", "A D", self.admin_key)
+    self.assertSuccess(res)
+    res = epidb.set_bio_source_scope("A", "A E", self.admin_key)
+    self.assertSuccess(res)
+    res = epidb.set_bio_source_scope("A", "C D", self.admin_key)
+    self.assertSuccess(res)
+    res = epidb.set_bio_source_scope("A", "C D", self.admin_key)
+    self.assertSuccess(res)
+
