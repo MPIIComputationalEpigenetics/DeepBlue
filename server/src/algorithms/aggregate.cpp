@@ -121,8 +121,8 @@ namespace epidb {
       }
     };
 
-    bool aggregate_regions(const std::string chrom, Regions &data, Regions &ranges, const std::string &field,
-                                 dba::Metafield metafield, Regions &chr_regions, std::string& msg)
+    bool aggregate_regions(const std::string& chrom, const Regions &data, const Regions &ranges, const std::string &field,
+                           dba::Metafield& metafield, Regions &chr_regions, std::string &msg)
     {
       chr_regions = build_regions();
       RegionsConstIterator it_data = data->begin();
@@ -164,7 +164,7 @@ namespace epidb {
     }
 
     bool aggregate(const ChromosomeRegionsList &data, const ChromosomeRegionsList &ranges, const std::string &field,
-                         ChromosomeRegionsList &regions, std::string& msg)
+                   ChromosomeRegionsList &regions, std::string &msg)
     {
       //-- move to queries.cpp --//
       std::string field_value;
@@ -185,8 +185,8 @@ namespace epidb {
       // TODO :optimize it for finding the ChromosomeRegionsList data not in O(N) time
 
       dba::Metafield metafield;
-      BOOST_FOREACH(ChromosomeRegions range, ranges) {
-        BOOST_FOREACH(ChromosomeRegions datum, data) {
+      BOOST_FOREACH(const ChromosomeRegions & range, ranges) {
+        BOOST_FOREACH(const ChromosomeRegions & datum, data) {
           Regions chr_regions;
           if (range.first == datum.first) {
             if (!aggregate_regions(range.first, datum.second, range.second, field_value, metafield, chr_regions, msg)) {
