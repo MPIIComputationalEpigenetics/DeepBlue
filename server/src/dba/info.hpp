@@ -22,7 +22,10 @@ namespace epidb {
       bool get_project(const std::string &id, std::map<std::string, std::string> &res, std::string &msg, bool full = false);
 
       bool get_bio_source(const std::string &id, std::map<std::string, std::string> &res,
-                          std::map<std::string, std::string> &metadata, std::string &msg, bool full = false);
+                          std::map<std::string, std::string> &metadata,
+                          std::vector<std::string> &synonyms,
+                          std::string &msg,
+                          bool full = false);
 
       bool get_technique(const std::string &id, std::map<std::string, std::string> &res,
                          std::map<std::string, std::string> &metadata, std::string &msg, bool full = false);

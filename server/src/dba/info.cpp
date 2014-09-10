@@ -22,6 +22,7 @@
 #include "config.hpp"
 #include "collections.hpp"
 #include "column_types.hpp"
+#include "dba.hpp"
 #include "helpers.hpp"
 
 #include "../regions.hpp"
@@ -138,7 +139,10 @@ namespace epidb {
       }
 
       bool get_bio_source(const std::string &id, std::map<std::string, std::string> &res,
-                          std::map<std::string, std::string> &metadata, std::string &msg, bool full = false)
+                          std::map<std::string, std::string> &metadata,
+                          std::vector<std::string> &synonyms,
+                          std::string &msg,
+                          bool full = false)
       {
         mongo::ScopedDbConnection c(config::get_mongodb_server());
 
@@ -154,6 +158,9 @@ namespace epidb {
         }
         c.done();
 
+        std::string bio_source_name = result["name"].String();
+        std::string norm_bio_source_name = result["norm_name"].String();
+
         for (mongo::BSONObj::iterator it = result.begin(); it.more(); ) {
           mongo::BSONElement e = it.next();
           if (std::string(e.fieldName()) == "extra_metadata") {
@@ -165,6 +172,16 @@ namespace epidb {
             res[e.fieldName()] = e.str();
           }
         }
+
+        std::vector<utils::IdName> syns;
+        if (!get_bio_source_synonyms(bio_source_name, norm_bio_source_name, true, "", syns, msg)) {
+          return false;
+        }
+        std::cerr << syns.size() << std::endl;
+        BOOST_FOREACH(const utils::IdName &id_name, syns) {
+          synonyms.push_back(id_name.name);
+        }
+
         return true;
       }
 

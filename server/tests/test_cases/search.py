@@ -260,6 +260,10 @@ class TestSearch(helpers.TestCase):
     (res, found) = epidb.search("bla bla blu blu", None, self.admin_key)
     self.assertEquals(found, [['bs2', 'Bio Source A', 'bio_sources']])
 
+    (res, info) = epidb.info(bsid1, self.admin_key)
+    self.assertSuccess(res, info)
+    self.assertEquals(info, {'description': 'bio source A', 'synonyms': ['Bio Source A', 'synonym name for bio source a', 'bla bla blu blu', 'another synonym'], 'user': 'test_admin', '_id': 'bs2', 'type': 'bio_source', 'name': 'Bio Source A'})
+
   def test_search_embracing(self):
     epidb = EpidbClient()
     self.init(epidb)

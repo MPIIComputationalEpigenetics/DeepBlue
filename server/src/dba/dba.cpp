@@ -1058,7 +1058,7 @@ namespace epidb {
         return false;
       }
 
-      BOOST_FOREACH(std::string norm_sub, norm_subs) {
+      BOOST_FOREACH(const std::string & norm_sub, norm_subs) {
         utils::IdName sub_bio_source_name;
         if (!helpers::get_name(Collections::BIO_SOURCES(), norm_sub, sub_bio_source_name, msg)) {
           return false;
@@ -1124,7 +1124,7 @@ namespace epidb {
 
       retrieve::SequenceRetriever retriever;
       std::vector<std::string> missing;
-      BOOST_FOREACH(genomes::ChromosomeInfo chromosome_info, chromosomes) {
+      BOOST_FOREACH(const genomes::ChromosomeInfo & chromosome_info, chromosomes) {
         if (!retriever.exists(genome, chromosome_info.name)) {
           missing.push_back(chromosome_info.name);
         }
@@ -1134,7 +1134,7 @@ namespace epidb {
       }
 
       ChromosomeRegionsList pattern_regions;
-      BOOST_FOREACH(genomes::ChromosomeInfo chromosome_info, chromosomes) {
+      BOOST_FOREACH(const genomes::ChromosomeInfo & chromosome_info, chromosomes) {
         std::string sequence;
         if (!retriever.retrieve(norm_genome, chromosome_info.name, 0, chromosome_info.size, sequence, msg)) {
           return false;

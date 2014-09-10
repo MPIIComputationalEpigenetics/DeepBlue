@@ -73,7 +73,8 @@ namespace epidb {
           result.set_as_array(true);
         }
 
-        BOOST_FOREACH(serialize::ParameterPtr id_param, ids_param) {
+        std::vector<std::string> synonyms;
+        BOOST_FOREACH(const serialize::ParameterPtr &id_param, ids_param) {
           std::string id = id_param->as_string();
           std::string type;
           std::map<std::string, std::string> res;
@@ -88,7 +89,7 @@ namespace epidb {
             ok = dba::info::get_project(id, res, msg);
             type = "project";
           } else if (id.compare(0, 2, "bs") == 0) {
-            ok = dba::info::get_bio_source(id, res, metadata, msg);
+            ok = dba::info::get_bio_source(id, res, metadata, synonyms, msg);
             type = "bio_source";
           } else if (id.compare(0, 1, "s") == 0) {
             ok = dba::info::get_sample_by_id(id, res, msg);
@@ -132,6 +133,18 @@ namespace epidb {
           for (it = res.begin(); it != res.end(); ++it) {
             serialize::ParameterPtr p(new serialize::SimpleParameter(serialize::STRING, it->second));
             info->add_child(it->first, p);
+          }
+
+          if (synonyms.size() > 0) {
+              serialize::ParameterPtr serialize_synonyms(new serialize::ListParameter());
+              std::vector<std::string>::iterator it_syns = synonyms.begin();
+
+              for ( ; it_syns != synonyms.end(); it_syns++) {
+                serialize::ParameterPtr p(new serialize::SimpleParameter(serialize::STRING, *it_syns));
+                serialize_synonyms->add_child(p);
+              }
+
+              info->add_child("synonyms", serialize_synonyms);
           }
 
           if (metadata.size() > 0) {
