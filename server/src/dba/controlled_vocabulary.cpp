@@ -6,6 +6,8 @@
 //  Copyright (c) 2013,2014 Max Planck Institute for Computer Science. All rights reserved.
 //
 
+#include <map>
+
 #include <boost/foreach.hpp>
 
 #include <mongo/bson/bson.h>
@@ -25,6 +27,8 @@
 namespace epidb {
   namespace dba {
     namespace cv {
+
+      std::map<std::string, std::string> cache_is_connected;
 
       bool __get_synonyms_from_bio_source(const std::string &bio_source_name, const std::string &norm_bio_source_name,
                                           const std::string &user_key,
@@ -53,7 +57,7 @@ namespace epidb {
         mongo::BSONObj syn_bson = syns_cursor->next();
         std::vector<mongo::BSONElement> e = syn_bson["synonyms"].Array();
 
-        BOOST_FOREACH(mongo::BSONElement be, e) {
+        BOOST_FOREACH(const mongo::BSONElement & be, e) {
           std::string norm_synonym = be.str();
           mongo::BSONObjBuilder syn_query;
           syn_query.append("norm_synonym", norm_synonym);
@@ -119,7 +123,7 @@ namespace epidb {
         }
 
         std::vector<std::string> terms;
-        BOOST_FOREACH(utils::IdName syn, syns) {
+        BOOST_FOREACH(const utils::IdName& syn, syns) {
           terms.push_back(syn.name);
           terms.push_back(utils::normalize_name(syn.name));
         }
@@ -130,13 +134,13 @@ namespace epidb {
           return false;
         }
 
-        BOOST_FOREACH(std::string norm_sub, norm_subs) {
+        BOOST_FOREACH(const std::string& norm_sub, norm_subs) {
           std::string bio_source_id;
           if (!helpers::get_bio_source_id(norm_sub, bio_source_id, msg)) {
             return false;
           }
 
-          BOOST_FOREACH(std::string term, terms) {
+          BOOST_FOREACH(const std::string& term, terms) {
             if (norm_sub != utils::normalize_name(term)) {
               if (!search::insert_related_term(bio_source_id, term, msg)) {
                 return false;
@@ -148,7 +152,7 @@ namespace epidb {
       }
 
       bool get_synonym_root(const std::string &synonym, const std::string &norm_synonym,
-                              std::string &bio_source_name, std::string &norm_bio_source_name, std::string &msg)
+                            std::string &bio_source_name, std::string &norm_bio_source_name, std::string &msg)
       {
         mongo::ScopedDbConnection c(config::get_mongodb_server());
 
@@ -184,7 +188,7 @@ namespace epidb {
         if (is_syn) {
           std::string norm_input_bio_source_name = utils::normalize_name(input_bio_source_name);
           if (!get_synonym_root(input_bio_source_name, norm_input_bio_source_name,
-                                  bio_source_name, norm_bio_source_name, msg)) {
+                                bio_source_name, norm_bio_source_name, msg)) {
             return false;
           }
         } else {
@@ -295,6 +299,14 @@ namespace epidb {
       bool __is_connected(const std::string &norm_s1, const std::string &norm_s2,
                           bool &r, std::string &msg)
       {
+        std::map<std::string, std::string>::iterator it = cache_is_connected.find(norm_s1);
+        for ( ; it != cache_is_connected.end(); it++) {
+          if (it->second == norm_s2) {
+            r = true;
+            return true;
+          }
+        }
+
         mongo::ScopedDbConnection c(config::get_mongodb_server());
 
         mongo::BSONObjBuilder syn_query_builder;
@@ -317,22 +329,26 @@ namespace epidb {
 
         std::list<std::string> subs;
 
-        BOOST_FOREACH(mongo::BSONElement be, e) {
+        BOOST_FOREACH(const mongo::BSONElement & be, e) {
           std::string sub = be.str();
-          if (sub.compare(norm_s2) == 0) {
+          if (sub == norm_s2) {
             r = true;
+            cache_is_connected[norm_s1] = norm_s2;
+            cache_is_connected[sub] = norm_s2;
             return true;
           }
           subs.push_back(sub);
         }
 
-        BOOST_FOREACH(std::string norm_sub, subs) {
+        BOOST_FOREACH(const std::string & norm_sub, subs) {
           bool rr;
           if (!__is_connected(norm_sub, norm_s2, rr, msg)) {
             return false;
           }
           if (rr) {
             r = true;
+            cache_is_connected[norm_s1] = norm_s2;
+            cache_is_connected[norm_sub] = norm_s2;
             return true;
           }
         }
@@ -353,7 +369,7 @@ namespace epidb {
 
         if (more_embracing_is_syn) {
           if (!get_synonym_root(bio_source_more_embracing, norm_bio_source_more_embracing,
-                                  more_embracing_root, norm_more_embracing_root, msg)) {
+                                more_embracing_root, norm_more_embracing_root, msg)) {
             return false;
           }
         } else {
@@ -363,7 +379,7 @@ namespace epidb {
 
         if (less_embracing_is_syn) {
           if (!get_synonym_root(bio_source_less_embracing, norm_bio_source_less_embracing,
-                                  less_embracing_root, norm_less_embracing_root, msg)) {
+                                less_embracing_root, norm_less_embracing_root, msg)) {
             return false;
           }
         } else {
@@ -371,7 +387,7 @@ namespace epidb {
           norm_less_embracing_root = norm_bio_source_less_embracing;
         }
 
-        if (norm_more_embracing_root.compare(norm_less_embracing_root) == 0) {
+        if (norm_more_embracing_root == norm_less_embracing_root) {
           msg = bio_source_more_embracing + " and " + bio_source_less_embracing + " are synonyms.";
           return false;
         }
@@ -417,6 +433,8 @@ namespace epidb {
           return false;
         }
 
+        cache_is_connected[norm_bio_source_more_embracing] = norm_bio_source_less_embracing;
+
         mongo::BSONObjBuilder index_name;
         index_name.append("norm_bio_source_name", 1);
         c->ensureIndex(helpers::collection_name(Collections::BIO_SOURCE_EMBRACING()), index_name.obj());
@@ -461,7 +479,7 @@ namespace epidb {
         c.done();
 
         std::list<std::string> subs;
-        BOOST_FOREACH(mongo::BSONElement be, e) {
+        BOOST_FOREACH(const mongo::BSONElement & be, e) {
           std::string sub = be.str();
           if (!__get_down_connected(sub, norm_names, msg)) {
             return false;
@@ -493,7 +511,7 @@ namespace epidb {
         c.done();
 
         std::list<std::string> subs;
-        BOOST_FOREACH(mongo::BSONElement be, e) {
+        BOOST_FOREACH(const mongo::BSONElement & be, e) {
           std::string sub = be.str();
           if (!__get_upper_connected(sub, norm_uppers, msg)) {
             return false;
@@ -512,7 +530,7 @@ namespace epidb {
 
         if (!is_bio_source) {
           if (!get_synonym_root(bio_source_name, norm_bio_source_name,
-                                  more_embracing_root, norm_more_embracing_root, msg)) {
+                                more_embracing_root, norm_more_embracing_root, msg)) {
             return false;
           }
         } else {

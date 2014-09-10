@@ -142,6 +142,9 @@ namespace epidb {
         return false;
       }
 
+      // Clear caches
+      cv::cache_is_connected.clear();
+
       c.done();
       return true;
     }

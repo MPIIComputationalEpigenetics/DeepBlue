@@ -15,6 +15,9 @@
 namespace epidb {
   namespace dba {
     namespace cv {
+
+      extern std::map<std::string, std::string> cache_is_connected;
+
       bool set_bio_source_synonym(const std::string &actual_existing_bio_source_name, const std::string &new_bio_source_name,
                                   bool is_bio_source, const bool is_syn,
                                   const std::string &user_key, std::string &msg);
