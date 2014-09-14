@@ -177,7 +177,6 @@ namespace epidb {
         if (!get_bio_source_synonyms(bio_source_name, norm_bio_source_name, true, "", syns, msg)) {
           return false;
         }
-        std::cerr << syns.size() << std::endl;
         BOOST_FOREACH(const utils::IdName &id_name, syns) {
           synonyms.push_back(id_name.name);
         }

@@ -17,6 +17,7 @@ namespace epidb {
   namespace dba {
     namespace genomes {
 
+      typedef std::pair<std::string, size_t> ChromosomeData;
       typedef std::map<std::string, size_t> GenomeData;
 
       struct ChromosomeInfo {

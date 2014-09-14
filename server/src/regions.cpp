@@ -68,29 +68,42 @@ namespace epidb {
   void Region::set(const std::string &key, const std::string &value)
   {
     std::pair<std::string, std::string> p(key, value);
-    _data.push_back(p);
+    _string_data.push_back(p);
+  }
+
+  void Region::set(const std::string &key, const Score value)
+  {
+    std::pair<std::string, Score> p(key, value);
+    _numeric_data.push_back(p);
+  }
+
+  void Region::set(const std::string &key, const int value)
+  {
+    std::pair<std::string, Score> p(key, value);
+    _numeric_data.push_back(p);
   }
 
   const std::string &Region::get(const std::string &key) const
   {
-    for (std::vector<std::pair<std::string, std::string> >::const_iterator it = _data.begin(); it != _data.end(); it++) {
+    for (std::vector<std::pair<std::string, std::string> >::const_iterator it = _string_data.begin();
+         it != _string_data.end(); it++) {
       if (it->first == key) {
         return it->second;
       }
     }
+
     return empty_string;
   }
 
   Score Region::value(const std::string &key) const
   {
-    for (std::vector<std::pair<std::string, std::string> >::const_iterator it = _data.begin(); it != _data.end(); it++) {
+    for (std::vector<std::pair<std::string, Score> >::const_iterator it = _numeric_data.begin();
+         it != _numeric_data.end(); it++) {
       if (it->first == key) {
-        Score v;
-        utils::string_to_score(it->second, v);
-        return v;
+        return it->second;
       }
     }
-    return 0.0;
+    return std::numeric_limits<Score>::min();
   }
 
   bool Region::has_stats() const

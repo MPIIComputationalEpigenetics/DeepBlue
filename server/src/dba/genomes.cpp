@@ -63,8 +63,7 @@ namespace epidb {
       {
         std::vector<std::string> r;
 
-        std::pair<std::string, long long> c;
-        BOOST_FOREACH(c, data_) {
+        BOOST_FOREACH(const ChromosomeData &c, data_) {
           r.push_back(c.first);
         }
         return r;
@@ -90,8 +89,7 @@ namespace epidb {
           return false;
         }
         std::vector<std::string> chroms = genome_info->chromosomes();
-        std::string chrom;
-        BOOST_FOREACH(chrom, chroms) {
+        BOOST_FOREACH(const std::string &chrom, chroms) {
           chromosomes.insert(chrom);
         }
         return true;
@@ -105,7 +103,7 @@ namespace epidb {
           return false;
         }
         std::vector<std::string> chroms = genome_info->chromosomes();
-        BOOST_FOREACH(std::string chrom, chroms) {
+        BOOST_FOREACH(const std::string & chrom, chroms) {
           ChromosomeInfo chromosome_info;
           if (!genome_info->get_chromosome(chrom, chromosome_info, msg)) {
             return false;

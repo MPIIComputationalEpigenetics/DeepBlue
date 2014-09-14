@@ -44,6 +44,18 @@ namespace epidb {
       }
 
       template<>
+      const mongo::BSONObj ColumnType<long long>::BSONObj() const
+      {
+        mongo::BSONObj super = AbstractColumnType::BSONObj();
+
+        mongo::BSONObjBuilder builder;
+        builder.appendElements(super);
+        builder.append("column_type", "integer");
+
+        return builder.obj();
+      }
+
+      template<>
       COLUMN_TYPES ColumnType<long long>::type() const
       {
         return COLUMN_INTEGER;
@@ -69,6 +81,18 @@ namespace epidb {
       }
 
       template<>
+      const mongo::BSONObj ColumnType<double>::BSONObj() const
+      {
+        mongo::BSONObj super = AbstractColumnType::BSONObj();
+
+        mongo::BSONObjBuilder builder;
+        builder.appendElements(super);
+        builder.append("column_type", "double");
+
+        return builder.obj();
+      }
+
+      template<>
       bool ColumnType<std::string>::check(const std::string &verify) const
       {
         return true;
@@ -84,6 +108,18 @@ namespace epidb {
       COLUMN_TYPES ColumnType<std::string>::type() const
       {
         return COLUMN_STRING;
+      }
+
+      template<>
+      const mongo::BSONObj ColumnType<std::string>::BSONObj() const
+      {
+        mongo::BSONObj super = AbstractColumnType::BSONObj();
+
+        mongo::BSONObjBuilder builder;
+        builder.appendElements(super);
+        builder.append("column_type", "string");
+
+        return builder.obj();
       }
 
       template<>
@@ -111,6 +147,20 @@ namespace epidb {
       }
 
       template<>
+      const mongo::BSONObj ColumnType<Range>::BSONObj() const
+      {
+        mongo::BSONObj super = AbstractColumnType::BSONObj();
+
+        mongo::BSONObjBuilder builder;
+        builder.appendElements(super);
+        builder.append("column_type", "range");
+        builder.append("minimum", _content.first);
+        builder.append("maximum", _content.second);
+
+        return builder.obj();
+      }
+
+      template<>
       bool ColumnType<Category>::check(const std::string &verify) const
       {
         return find(_content.begin(), _content.end(), verify) != _content.end();
@@ -126,6 +176,20 @@ namespace epidb {
       COLUMN_TYPES ColumnType<Category>::type() const
       {
         return COLUMN_CATEGORY;
+      }
+
+      template<>
+      const mongo::BSONObj ColumnType<Category>::BSONObj() const
+      {
+        mongo::BSONObj super = AbstractColumnType::BSONObj();
+
+        mongo::BSONObjBuilder builder;
+        builder.appendElements(super);
+        builder.append("column_type", "range");
+        mongo::BSONArray arr = helpers::build_array(_content);
+        builder.append("values", arr);
+
+        return builder.obj();
       }
 
       bool get_column_type(const std::string &type_name, COLUMN_TYPES type, std::string &msg)
@@ -145,25 +209,27 @@ namespace epidb {
         }
       }
 
-      bool column_type_simple(const std::string &name, COLUMN_TYPES type, const std::string &ignore_if,
+      bool column_type_simple(const std::string &name, COLUMN_TYPES type, const std::string &default_value,
                               ColumnTypePtr &column_type, std::string &msg)
       {
         switch (type) {
         case COLUMN_STRING:
-          column_type = boost::shared_ptr<ColumnType<std::string > >(new ColumnType<std::string>(name, "", ignore_if));
+          column_type = boost::shared_ptr<ColumnType<std::string > >(new ColumnType<std::string>(name, "", default_value));
           return true;
 
         case COLUMN_INTEGER:
-          column_type = boost::shared_ptr<ColumnType<size_t> >(new ColumnType<size_t>(name, 0, ignore_if));
+          column_type = boost::shared_ptr<ColumnType<size_t> >(new ColumnType<size_t>(name, 0, default_value));
           return true;
 
         case COLUMN_DOUBLE:
-          column_type = boost::shared_ptr<ColumnType<double> >(new ColumnType<double>(name, 0.0, ignore_if));
+          column_type = boost::shared_ptr<ColumnType<double> >(new ColumnType<double>(name, 0.0, default_value));
           return true;
 
         case COLUMN_RANGE:
+          msg = "Range Columns should be created first and them loaded.";
+          return false;
         case COLUMN_CATEGORY:
-          msg = "Range and Category Columns should be created and after loaded.";
+          msg = "Category Columns should be created first and them loaded.";
           return false;
 
         default:
@@ -172,35 +238,23 @@ namespace epidb {
         }
       }
 
-      bool column_type_simple(const std::string &name, COLUMN_TYPES type,
-                              ColumnTypePtr &column_type, std::string &msg)
-      {
-        return column_type_simple(name, type, std::string(""), column_type, msg);
-      }
-
-      bool column_type_simple(const std::string &name, const std::string &type, const std::string &ignore_if,
+      bool column_type_simple(const std::string &name, const std::string &type, const std::string &default_value,
                               ColumnTypePtr &column_type, std::string &msg)
       {
         std::string type_l(utils::lower(type));
         if (type_l == "string") {
-          column_type = boost::shared_ptr<ColumnType<std::string > >(new ColumnType<std::string>(name, "", ignore_if));
+          column_type = boost::shared_ptr<ColumnType<std::string > >(new ColumnType<std::string>(name, "", default_value));
           return true;
         } else if (type_l == "integer") {
-          column_type = boost::shared_ptr<ColumnType<long long> >(new ColumnType<long long>(name, 0, ignore_if));
+          column_type = boost::shared_ptr<ColumnType<long long> >(new ColumnType<long long>(name, 0, default_value));
           return true;
         } else if (type_l == "double") {
-          column_type = boost::shared_ptr<ColumnType<double> >(new ColumnType<double>(name, 0.0, ignore_if));
+          column_type = boost::shared_ptr<ColumnType<double> >(new ColumnType<double>(name, 0.0, default_value));
           return true;
         } else {
           msg = "Invalid column type '" + type_l + "'";
           return false;
         }
-      }
-
-      bool column_type_simple(const std::string &name, const std::string &type,
-                              ColumnTypePtr &column_type, std::string &msg)
-      {
-        return column_type_simple(name, type, std::string(""), column_type, msg);
       }
 
       bool is_column_type_name_valid(const std::string &name, const std::string &norm_name,
@@ -227,7 +281,7 @@ namespace epidb {
 
       bool __create_column_base(const std::string &name, const std::string &norm_name,
                                 const std::string &description, const std::string &norm_description,
-                                const std::string &ignore_if, const std::string &type,
+                                const std::string &default_value, const std::string &type,
                                 const std::string &user_key,
                                 std::string &column_type_id, mongo::BSONObj &obj, std::string &msg)
       {
@@ -241,9 +295,7 @@ namespace epidb {
         create_column_type_builder.append("_id", column_type_id);
         create_column_type_builder.append("name", name);
         create_column_type_builder.append("norm_name", norm_name);
-        if (ignore_if != "") {
-          create_column_type_builder.append("ignore_if", ignore_if);
-        }
+        create_column_type_builder.append("default_value", default_value);
         create_column_type_builder.append("description", description);
         create_column_type_builder.append("norm_description", norm_description);
         create_column_type_builder.append("column_type", type);
@@ -261,7 +313,7 @@ namespace epidb {
 
       bool create_column_type_simple(const std::string &name, const std::string &norm_name,
                                      const std::string &description, const std::string &norm_description,
-                                     const std::string &ignore_if, const std::string &type,
+                                     const std::string &default_value, const std::string &type,
                                      const std::string &user_key,
                                      std::string &column_type_id, std::string &msg)
       {
@@ -275,7 +327,7 @@ namespace epidb {
 
         mongo::BSONObj obj;
         if (!__create_column_base(name, norm_name, description, norm_description,
-                                  ignore_if, type, user_key, column_type_id, obj, msg)) {
+                                  default_value, type, user_key, column_type_id, obj, msg)) {
           return false;
         }
 
@@ -299,13 +351,13 @@ namespace epidb {
 
       bool create_column_type_category(const std::string &name, const std::string &norm_name,
                                        const std::string &description, const std::string &norm_description,
-                                       const std::string &ignore_if, const std::vector<std::string> &items,
+                                       const std::string &default_value, const std::vector<std::string> &items,
                                        const std::string &user_key,
                                        std::string &column_type_id, std::string &msg)
       {
         mongo::BSONObj obj;
         if (!__create_column_base(name, norm_name, description, norm_description,
-                                  ignore_if, "category", user_key, column_type_id, obj, msg)) {
+                                  default_value, "category", user_key, column_type_id, obj, msg)) {
           return false;
         }
 
@@ -335,14 +387,14 @@ namespace epidb {
 
       bool create_column_type_range(const std::string &name, const std::string &norm_name,
                                     const std::string &description, const std::string &norm_description,
-                                    const std::string &ignore_if,
+                                    const std::string &default_value,
                                     const double minimum, const double maximum,
                                     const std::string &user_key,
                                     std::string &column_type_id, std::string &msg)
       {
         mongo::BSONObj obj;
         if (!__create_column_base(name, norm_name, description, norm_description,
-                                  ignore_if, "range", user_key, column_type_id, obj, msg)) {
+                                  default_value, "range", user_key, column_type_id, obj, msg)) {
           return false;
         }
 
@@ -392,40 +444,42 @@ namespace epidb {
       {
         const std::string name = obj["name"].String();
         const std::string type = obj["column_type"].String();
-        std::string ignore_if;
-        if (obj.hasField("ignore_if")) {
-          ignore_if = obj["ignore_if"].String();
+        std::string default_value;
+        if (obj.hasField("default_value")) {
+          default_value = obj["default_value"].String();
         } else {
-          ignore_if = "";
+          default_value = "";
         }
 
         if (type == "string") {
-          column_type = boost::shared_ptr<ColumnType<std::string > >(new ColumnType<std::string>(name, "", ignore_if));
+          column_type = boost::shared_ptr<ColumnType<std::string > >(new ColumnType<std::string>(name, "", default_value));
           return true;
         } else if (type == "integer") {
-          column_type = boost::shared_ptr<ColumnType<long long > >(new ColumnType<long long>(name, 0, ignore_if));
+          column_type = boost::shared_ptr<ColumnType<long long > >(new ColumnType<long long>(name, 0, default_value));
         } else if (type == "double") {
-          column_type = boost::shared_ptr<ColumnType<double > >(new ColumnType<double>(name, 0.0, ignore_if));
+          column_type = boost::shared_ptr<ColumnType<double > >(new ColumnType<double>(name, 0.0, default_value));
         } else if (type == "category") {
           Category category;
           std::vector<mongo::BSONElement> e = obj["items"].Array();
-          BOOST_FOREACH(mongo::BSONElement be, e) {
+          BOOST_FOREACH(const mongo::BSONElement & be, e) {
             category.push_back(be.str());
           }
-          column_type = boost::shared_ptr<ColumnType<Category > >(new ColumnType<Category>(name, category, ignore_if));
+          column_type = boost::shared_ptr<ColumnType<Category > >(new ColumnType<Category>(name, category, default_value));
         } else if (type == "range") {
           double minimum = obj["minimum"].Double();
           double maximum = obj["maximum"].Double();
           Range range(minimum, maximum);
-          column_type = boost::shared_ptr<ColumnType<Range > >(new ColumnType<Range>(name, range, ignore_if));
+          column_type = boost::shared_ptr<ColumnType<Range > >(new ColumnType<Range>(name, range, default_value));
         } else {
           msg = "Column type '" + type + "' is invalid";
           return false;
         }
+
         return true;
       }
 
-      bool load_column_type(const std::string &name, ColumnTypePtr &column_type, std::string &msg)
+
+      bool load_column_type(const std::string &name, mongo::BSONObj &obj_column_type, std::string &msg)
       {
         mongo::ScopedDbConnection c(config::get_mongodb_server());
         const std::string norm_name = utils::normalize_name(name);
@@ -436,12 +490,22 @@ namespace epidb {
           c.done();
           return false;
         }
-
-        mongo::BSONObj o = data_cursor->next().getOwned();
-        bool r = column_type_bsonobj_to_class(o, column_type, msg);
         c.done();
 
-        return r;
+        obj_column_type = data_cursor->next().getOwned();
+
+        return true;
+      }
+
+
+      bool load_column_type(const std::string &name, ColumnTypePtr &column_type, std::string &msg)
+      {
+        mongo::BSONObj obj_column_type;
+        if (!load_column_type(name, obj_column_type, msg)) {
+          return false;
+        }
+
+        return column_type_bsonobj_to_class(obj_column_type, column_type, msg);
       }
 
       bool get_column_type(const std::string &id, std::map<std::string, std::string> &res, std::string &msg, bool full)
@@ -463,33 +527,33 @@ namespace epidb {
         c.done();
 
         res["name"] = column_type->name();
-        res["ignore_if"] = column_type->ignore_if();
+        res["default_value"] = column_type->default_value();
         switch (column_type->type()) {
         case COLUMN_STRING: {
-          res["type"] = "string";
+          res["column_type"] = "string";
           break;
         }
 
         case COLUMN_INTEGER: {
-          res["type"] = "integer";
+          res["column_type"] = "integer";
           break;
         }
 
         case COLUMN_DOUBLE: {
-          res["type"] = "double";
+          res["column_type"] = "double";
           break;
         }
 
         case COLUMN_RANGE: {
-          res["type"] = "range";
+          res["column_type"] = "range";
           ColumnType<Range> *column = static_cast<ColumnType<Range> *>(column_type.get());
-          res["min"] = utils::integer_to_string(column->content().first);
-          res["max"] = utils::integer_to_string(column->content().second);
+          res["minimum"] = utils::integer_to_string(column->content().first);
+          res["maximum"] = utils::integer_to_string(column->content().second);
           break;
         }
 
         case COLUMN_CATEGORY: {
-          res["type"] = "category";
+          res["column_type"] = "category";
           ColumnType<Category> *column = static_cast<ColumnType<Category> *>(column_type.get());
           res["values"] = utils::vector_to_string(column->content());
           break;
@@ -504,8 +568,5 @@ namespace epidb {
         return true;
       }
     }
-
-
-
   }
 }

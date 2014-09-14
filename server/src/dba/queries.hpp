@@ -73,6 +73,8 @@ namespace epidb {
 
       bool process_aggregate(const std::string &user_key, const mongo::BSONObj &query,
                              ChromosomeRegionsList &regions, std::string &msg);
+
+      bool get_columns_from_dataset(DatasetId &dataset_id, std::vector<mongo::BSONElement> &columns, std::string &msg);
     }
   }
 }

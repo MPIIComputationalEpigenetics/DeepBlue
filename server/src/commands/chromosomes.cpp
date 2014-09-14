@@ -75,7 +75,7 @@ namespace epidb {
         }
 
         result.set_as_array(true);
-        BOOST_FOREACH(dba::genomes::ChromosomeInfo info, chromosomes) {
+        BOOST_FOREACH(const dba::genomes::ChromosomeInfo &info, chromosomes) {
           std::vector<serialize::ParameterPtr> list;
           list.push_back(serialize::ParameterPtr(new serialize::SimpleParameter(info.name)));
           list.push_back(serialize::ParameterPtr(new serialize::SimpleParameter((long long) info.size)));

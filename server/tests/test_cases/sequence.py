@@ -3,7 +3,7 @@ import helpers
 from client import EpidbClient
 
 class TestSequence(helpers.TestCase):
-  
+
   def test_upload_sequence(self):
     epidb = EpidbClient()
     self.init_base(epidb)
@@ -33,7 +33,7 @@ class TestSequence(helpers.TestCase):
     self.assertSuccess(res)
 
     self.insert_experiment(epidb, "hg19_big_1")
-    
+
     res, qid = epidb.tiling_regions(10000, "hg19", "chr19", self.admin_key)
     self.assertSuccess(res, qid)
 
@@ -93,7 +93,7 @@ class TestSequence(helpers.TestCase):
     res = epidb.upload_chromosome("hg19", "chrInvalid", sequence, self.admin_key)
     self.assertFailure(res)
     self.assertEquals(res[1], 'Chromosome chrInvalid not found.')
-  
+
   def test_result(self):
     epidb = EpidbClient()
     self.init_base(epidb)
@@ -124,7 +124,7 @@ chrM\t2\t4\thg19_small\tTC\t2\tH3K4me3\tENCODE\tK562\ts1
 chrM\t4\t8\thg19_small\tACAG\t4\tH3K4me3\tENCODE\tK562\ts1
 chrM\t8\t16\thg19_small\tGTCTATCA\t8\tH3K4me3\tENCODE\tK562\ts1
 chrM\t16\t32\thg19_small\tCCCTATTAACCACTCA\t16\tH3K4me3\tENCODE\tK562\ts1"""
-    
+
     self.assertEquals(regions, expected)
 
   def test_get_sequences(self):
@@ -160,7 +160,7 @@ chrM\t2340\t2377\tInteresting Regions at chrM\tGCCTGCGTCAGATCAAAACACTGAACTGACAAT
     self.assertSuccess(res)
 
     join_seq = "".join(sequence.split("\n"))
-    
+
     data = "chr19\t0\t59128983"
     ann_name = "Full chr19"
     (s, aid) = epidb.add_annotation(ann_name, "hg19", None, data, None, None, self.admin_key)

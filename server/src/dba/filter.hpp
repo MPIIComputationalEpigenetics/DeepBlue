@@ -67,7 +67,7 @@ namespace epidb {
 
       bool is(const std::string &value)
       {
-        if (check(STRING) && value.compare(s_value) == 0) {
+        if (check(STRING) && value == s_value) {
           return true;
         } else if (check(NUMBER)) {
           double d;
@@ -95,7 +95,7 @@ namespace epidb {
 
       bool is(const std::string &value)
       {
-        if (check(STRING) && value.compare(s_value) == 0) {
+        if (check(STRING) && value == s_value) {
           return true;
         } else if (check(NUMBER)) {
           double d;
@@ -289,16 +289,16 @@ namespace epidb {
 
       bool check_operation(const std::string &operation, const std::string &type, std::string &msg)
       {
-        if (type.compare("string") == 0) {
-          if ((operation.compare("==") == 0) || (operation.compare("!=") == 0)) {
+        if (type == "string") {
+          if ((operation == "==") || (operation == "!=")) {
             return true;
           } else {
             msg = "Only equals (==) or not equals (!=) are available for strings";
             return false;
           }
-        } else if (type.compare("number") == 0) {
-          BOOST_FOREACH(std::string op, operations) {
-            if (operation.compare(op) == 0) {
+        } else if (type == "number") {
+          BOOST_FOREACH(const std::string &op, operations) {
+            if (operation == op) {
               return true;
             }
           }
@@ -326,12 +326,12 @@ namespace epidb {
           return nullPtr;
         }
 
-        if (op.compare("==") == 0) {
+        if (op == "==") {
           error = false;
           return boost::shared_ptr<Filter>(new EqualsFilter(value));
         }
 
-        if (op.compare("!=") == 0) {
+        if (op == "!=") {
           error = false;
           return boost::shared_ptr<Filter>(new NotEqualsFilter(value));
         }
@@ -349,32 +349,32 @@ namespace epidb {
           return nullPtr;
         }
 
-        if (op.compare("==") == 0) {
+        if (op == "==") {
           error = false;
           return boost::shared_ptr<Filter>(new  EqualsFilter(value));
         }
 
-        if (op.compare("!=") == 0) {
+        if (op == "!=") {
           error = false;
           return boost::shared_ptr<Filter>(new  NotEqualsFilter(value));
         }
 
-        if (op.compare(">") == 0) {
+        if (op == ">") {
           error = false;
           return boost::shared_ptr<Filter>(new  GreaterFilter(value));
         }
 
-        if (op.compare(">=") == 0) {
+        if (op == ">=") {
           error = false;
           return boost::shared_ptr<Filter>(new  GreaterEqualsFilter(value));
         }
 
-        if (op.compare("<") == 0) {
+        if (op == "<") {
           error = false;
           return boost::shared_ptr<Filter>(new  LessFilter(value));
         }
 
-        if (op.compare("<=") == 0) {
+        if (op == "<=") {
           error = false;
           return boost::shared_ptr<Filter>(new  LessEqualsFilter(value));
         }

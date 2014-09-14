@@ -27,7 +27,7 @@ namespace epidb {
           Parameter p[] = {
             Parameter("name", serialize::STRING, "column type name"),
             Parameter("description", serialize::STRING, "description of the column type"),
-            Parameter("ignore_if", serialize::STRING, "value to use for ignoring this column"),
+            Parameter("default_value", serialize::STRING, "value used when the column value is missing"),
             Parameter("minimum", serialize::DOUBLE, "minimum value for this range (inclusive)"),
             Parameter("maximum", serialize::DOUBLE, "maximum value for this range (inclusive)"),
             parameters::UserKey
@@ -52,7 +52,7 @@ namespace epidb {
         {
           const std::string name = parameters[0]->as_string();
           const std::string description = parameters[1]->as_string();
-          const std::string ignore_if = parameters[2]->as_string();
+          const std::string default_value = parameters[2]->as_string();
           const double minimum = parameters[3]->as_double();
           const double maximum = parameters[4]->as_double();
           const std::string user_key = parameters[5]->as_string();
@@ -82,7 +82,7 @@ namespace epidb {
           std::string norm_description = utils::normalize_name(description);
 
           std::string id;
-          bool ret = dba::columns::create_column_type_range(name, norm_name, description, norm_description, ignore_if, minimum, maximum, user_key, id, msg);
+          bool ret = dba::columns::create_column_type_range(name, norm_name, description, norm_description, default_value, minimum, maximum, user_key, id, msg);
 
           if (!ret) {
             result.add_error(msg);

@@ -70,7 +70,7 @@ namespace epidb {
           return false;
         }
 
-        BOOST_FOREACH(mongo::BSONObj o, samples) {
+        BOOST_FOREACH(const mongo::BSONObj &o, samples) {
           result.push_back(o["_id"].String());
         }
 
@@ -113,7 +113,7 @@ namespace epidb {
           return false;
         }
 
-        BOOST_FOREACH(mongo::BSONObj o, objects) {
+        BOOST_FOREACH(const mongo::BSONObj &o, objects) {
           utils::IdName id_name(o["_id"].String(), o["name"].String());
           result.push_back(id_name);
         }
@@ -128,7 +128,7 @@ namespace epidb {
           return false;
         }
 
-        BOOST_FOREACH(mongo::BSONObj o, objects) {
+        BOOST_FOREACH(const mongo::BSONObj &o, objects) {
           utils::IdName names(o["_id"].String(), o["name"].String());
           result.push_back(names);
         }
@@ -213,13 +213,13 @@ namespace epidb {
 
         std::vector<std::string> names;
         std::map<std::string, std::string> id_name_map;
-        BOOST_FOREACH(utils::IdName id_name, id_names) {
+        BOOST_FOREACH(const utils::IdName &id_name, id_names) {
           id_name_map[id_name.name] = id_name.id;
           names.push_back(id_name.name);
         }
         std::vector<std::string> ordered = epidb::algorithms::Levenshtein::order_by_score(what, names);
 
-        BOOST_FOREACH(std::string name, ordered) {
+        BOOST_FOREACH(const std::string& name, ordered) {
           utils::IdName id_name(id_name_map[name], name);
           result.push_back(id_name);
         }
@@ -247,7 +247,7 @@ namespace epidb {
 
         std::vector<std::string> ordered = epidb::algorithms::Levenshtein::order_by_score(what, names);
 
-        BOOST_FOREACH(std::string name, ordered) {
+        BOOST_FOREACH(const std::string& name, ordered) {
           utils::IdName id_name(id_name_map[name], name);
           result.push_back(id_name);
         }

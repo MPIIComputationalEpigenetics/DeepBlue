@@ -111,7 +111,7 @@ namespace epidb {
 
 
         std::vector<utils::IdName> final_result;
-        BOOST_FOREACH(utils::IdName related_bio_source, related_bio_sources) {
+        BOOST_FOREACH(const utils::IdName& related_bio_source, related_bio_sources) {
           std::vector<utils::IdName> related_syns;
           std::string norm_related_bio_source = utils::normalize_name(related_bio_source.name);
 
@@ -125,7 +125,7 @@ namespace epidb {
             return false;
           }
 
-          BOOST_FOREACH(utils::IdName related_syn, related_syns) {
+          BOOST_FOREACH(const utils::IdName& related_syn, related_syns) {
             final_result.push_back(related_syn);
           }
         }

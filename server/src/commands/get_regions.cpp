@@ -6,6 +6,7 @@
 //  Copyright (c) 2013,2014 Max Planck Institute for Computer Science. All rights reserved.
 //
 
+#include <limits>
 #include <sstream>
 #include <vector>
 #include <map>
@@ -31,8 +32,6 @@ namespace epidb {
 
     class GetRegionsCommand: public Command {
 
-      typedef std::vector<std::pair<std::string, std::string> > Format;
-
     private:
       static CommandDescription desc_()
       {
@@ -43,7 +42,7 @@ namespace epidb {
       {
         Parameter p[] = {
           Parameter("query_id", serialize::STRING, "id of the query"),
-          Parameter("user_format", serialize::STRING, "format of the returned regions"),
+          Parameter("output_format", serialize::STRING, "The columns that will be returned and theirs default value if necessary."),
           parameters::UserKey
         };
         Parameters params(&p[0], &p[0] + 3);
@@ -66,7 +65,7 @@ namespace epidb {
                        const serialize::Parameters &parameters, serialize::Parameters &result) const
       {
         const std::string query_id = parameters[0]->as_string();
-        const std::string user_format = parameters[1]->as_string();
+        const std::string output_format = parameters[1]->as_string();
         const std::string user_key = parameters[2]->as_string();
 
         std::string msg;
@@ -96,48 +95,11 @@ namespace epidb {
           return false;
         }
 
-        std::vector<std::string> format_names = utils::string_to_vector(user_format, ',');
-        if (format_names.size() == 0) {
-          result.add_error("Format must not be empty.");
-          return false;
-        }
-
-        Format format;
-        // load format columns and their defaults
-        for (std::vector<std::string>::iterator it = format_names.begin(); it != format_names.end(); ++it) {
-          std::vector<std::string> parts;
-          boost::split(parts, *it, boost::is_any_of(":"));
-
-          int size = parts.size();
-          if (size == 0) {
-            result.add_error("Format column must not be empty.");
-            return false;
-          } else if (size == 1) {
-            boost::trim(parts[0]);
-            if (parts[0] == "") {
-              result.add_error("Format column must not be empty.");
-              return false;
-            }
-            std::pair<std::string, std::string> column(parts[0], " ");
-            format.push_back(column);
-          } else if (size == 2) {
-            boost::trim(parts[0]);
-            if (parts[0] == "") {
-              result.add_error("Format column must not be empty.");
-              return false;
-            }
-            std::pair<std::string, std::string> column(parts[0], parts[1]);
-            format.push_back(column);
-          } else {
-            result.add_error("Wrong output format: '" + *it + "'. The format is \"<field:default_value>,<field:default_value>,..\"");
-            return false;
-          }
-        }
-
+        std::map<int, parser::FileFormat> datasets_format;
         dba::Metafield metafield;
         std::stringstream ss;
         for (ChromosomeRegionsList::const_iterator it = chromosomeRegionsList.begin();
-          it != chromosomeRegionsList.end(); it++) {
+             it != chromosomeRegionsList.end(); it++) {
           std::string chromosome = it->first;
 
           Regions regions = it->second;
@@ -154,7 +116,22 @@ namespace epidb {
             if (cit != regions->begin()) {
               ss << std::endl;
             }
-            if (!format_region(ss, chromosome, *cit, format, metafield, msg)) {
+
+            const Region &region = *cit;
+
+            DatasetId id = region.dataset_id();
+
+            std::vector<mongo::BSONElement> columns;
+            if (!dba::query::get_columns_from_dataset(id, columns, msg)) {
+              return false;
+            }
+
+            parser::FileFormat format;
+            if (!parser::FileFormatBuilder::build_for_outout(output_format, format, columns, msg)) {
+              result.add_error(msg);
+              return false;
+            }
+            if (!format_region(ss, chromosome, region, format, metafield, msg)) {
               result.add_error(msg);
               return false;
             }
@@ -166,43 +143,55 @@ namespace epidb {
         return true;
       }
 
-      bool format_region(std::stringstream &ss, const std::string &chromosome, const Region &region,
-                         const Format &format, dba::Metafield &metafield, std::string &msg) const
+      inline bool format_region(std::stringstream &ss, const std::string &chromosome, const Region &region,
+                                const parser::FileFormat &format, dba::Metafield &metafield, std::string &msg) const
       {
-        std::string s;
         std::string err;
-        for (Format::const_iterator it = format.begin(); it != format.end(); it++) {
+        for (parser::FileFormat::const_iterator it =  format.begin(); it != format.end(); it++) {
           if (it != format.begin()) {
             ss << "\t";
           }
-
-          if (it->first == "CHROMOSOME") {
+          if ( (*it)->name() == "CHROMOSOME") {
             ss << chromosome;
-          } else if (it->first == "START") {
+          } else if ((*it)->name() == "START") {
             ss << region.start();
-          } else if (it->first == "END") {
+          } else if ((*it)->name() == "END") {
             ss << region.end();
-          } else if (dba::Metafield::is_meta(it->first)) {
+          } else if (dba::Metafield::is_meta((*it)->name())) {
             std::string result;
-            if (!metafield.process(it->first, chromosome, region, result, msg)) {
+            if (!metafield.process((*it)->name(), chromosome, region, result, msg)) {
               return false;
             }
+            std::cerr << (*it)->name() << " " << result << std::endl;
             if (result.empty()) {
-              ss << it->second;
+              ss << (*it)->default_value();
             } else {
               ss << result;
             }
           } else {
-            if (!dba::KeyMapper::to_short(it->first, s, err)) {
-              EPIDB_LOG_ERR(err);
-              msg = err;
-              return false;
-            }
-            std::string o = region.get(s);
-            if (o.empty()) {
-              ss << it->second;
+            if ((*it)->type() == dba::columns::COLUMN_INTEGER) {
+              Score v = region.value((*it)->internal_name());
+              if (v == std::numeric_limits<Score>::min()) {
+                std::cerr << " 1 default" << std::endl;
+                ss << (*it)->default_value();
+              } else {
+                ss << utils::integer_to_string((int)v);
+              }
+            } else if ( ( (*it)->type() == dba::columns::COLUMN_DOUBLE) ||  ((*it)->type() == dba::columns::COLUMN_RANGE)) {
+              Score v = region.value((*it)->internal_name());
+              if (v == std::numeric_limits<Score>::min()) {
+                std::cerr << " 2 default" << std::endl;
+                ss << (*it)->default_value();
+              } else {
+                ss << utils::double_to_string(v);
+              }
             } else {
-              ss << o;
+              std::string o = region.get((*it)->internal_name());
+              if (o.empty()) {
+                ss << (*it)->default_value();
+              } else {
+                ss << o;
+              }
             }
           }
         }

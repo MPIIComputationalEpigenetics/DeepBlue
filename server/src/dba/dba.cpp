@@ -127,18 +127,31 @@ namespace epidb {
       std::string column_id;
 
       if (!dba::columns::create_column_type_simple("CHROMOSOME", utils::normalize_name("CHROMOSOME"),
-          /* description */ "" , /* norm_description */ "", /* ignore_if */ "",
+          "Chromosome name column" ,
+          "This column should be used to store the Chromosome value in all experiments and annotations",
+          "",
           "string",  key, column_id, msg)) {
         return false;
       }
       if (!dba::columns::create_column_type_simple("START", utils::normalize_name("START"),
-          /* description */ "" , /* norm_description */ "", /* ignore_if */ "",
+          "Region Start column" ,
+          "This column should be used to store the Region Start position all experiments and annotations",
+          "",
           "integer",  key, column_id, msg)) {
         return false;
       }
       if (!dba::columns::create_column_type_simple("END", utils::normalize_name("END"),
-          /* description */ "" , /* norm_description */ "", /* ignore_if */ "",
+          "Region End column" ,
+          "This column should be used to store the Region End position all experiments and annotations",
+          "",
           "integer",  key, column_id, msg)) {
+        return false;
+      }
+      if (!dba::columns::create_column_type_simple("VALUE", utils::normalize_name("VALUE"),
+          "Region Value" ,
+          "This column should be used to store the Wig Files Region Values",
+          "",
+          "double",  key, column_id, msg)) {
         return false;
       }
 
@@ -632,7 +645,6 @@ namespace epidb {
 
       // If we already have a sample with exactly the same information
       std::auto_ptr<mongo::DBClientCursor> cursor  = c->query(helpers::collection_name(Collections::SAMPLES()), data);
-      std::cerr << data.toString() << std::endl;
       if (cursor->more()) {
         mongo::BSONObj o = cursor->next();
         sample_id = o["_id"].str();

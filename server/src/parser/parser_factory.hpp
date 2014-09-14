@@ -30,6 +30,7 @@ namespace epidb {
     typedef std::map<std::string, std::string> ParsedLine;
     typedef std::vector<Token> Tokens;
 
+    // TODO: move to bed_format.hpp
     class FileFormat {
     private:
       std::string format_;
@@ -58,22 +59,22 @@ namespace epidb {
         return fields_.size();
       }
 
-      std::vector<dba::columns::ColumnTypePtr>::iterator begin()
+      iterator begin()
       {
         return fields_.begin();
       }
 
-      std::vector<dba::columns::ColumnTypePtr>::const_iterator begin() const
+      const_iterator begin() const
       {
         return fields_.begin();
       }
 
-      std::vector<dba::columns::ColumnTypePtr>::iterator end()
+      iterator end()
       {
         return fields_.end();
       }
 
-      std::vector<dba::columns::ColumnTypePtr>::const_iterator end() const
+      const_iterator end() const
       {
         return fields_.end();
       }
@@ -87,6 +88,8 @@ namespace epidb {
     class FileFormatBuilder {
     public:
       static bool build(const std::string &format, FileFormat &file_format, std::string &msg);
+      static bool build_for_outout(const std::string &format, FileFormat &file_format,
+                                   std::vector<mongo::BSONElement> experiment_columns, std::string &msg );
     };
 
     class Parser {

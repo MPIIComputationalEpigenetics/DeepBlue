@@ -109,7 +109,7 @@ namespace epidb {
       m << "<array>" << std::endl;
       m << "<data>" << std::endl;
 
-      BOOST_FOREACH(serialize::ParameterPtr p,  parameters_)
+      BOOST_FOREACH(const serialize::ParameterPtr& p,  parameters_)
       {
         m << p->get_xml() << std::endl;
       }

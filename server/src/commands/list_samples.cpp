@@ -94,7 +94,7 @@ namespace epidb {
 
         result.set_as_array(true);
 
-        BOOST_FOREACH(std::string sample_id, ids) {
+        BOOST_FOREACH(const std::string & sample_id, ids) {
           std::map<std::string, std::string> sample_data;
           if (!dba::info::get_sample_by_id(sample_id, sample_data, msg)) {
             return false;

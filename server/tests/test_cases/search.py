@@ -411,20 +411,20 @@ class TestSearch(helpers.TestCase):
 
     (s, ss) = epidb.search("string_column", "column_types", self.admin_key)
     (s, info) = epidb.info(ss[0][0], self.admin_key)
-    self.assertEqual(info, {'type': 'string', 'ignore_if': '.', 'name': 'string_column'})
+    self.assertEqual(info, {'default_value': '.', 'type': 'column_type', 'name': 'string_column', 'column_type': 'string'})
 
     (s, ss) = epidb.search("integer_column", "column_types", self.admin_key)
     (s, info) = epidb.info(ss[0][0], self.admin_key)
-    self.assertEqual(info, {'type': 'integer', 'ignore_if': '0', 'name': 'integer_column'})
+    self.assertEqual(info, {'column_type': 'integer', 'type': 'column_type', 'default_value': '0', 'name': 'integer_column'})
 
     (s, ss) = epidb.search("double_column", "column_types", self.admin_key)
     (s, info) = epidb.info(ss[0][0], self.admin_key)
-    self.assertEqual(info, {'type': 'double', 'ignore_if': '0.0', 'name': 'double_column'})
+    self.assertEqual(info, {'column_type': 'double', 'type': 'column_type', 'default_value': '0.0', 'name': 'double_column'})
 
     (s, ss) = epidb.search("score", "column_types", self.admin_key)
     (s, info) = epidb.info(ss[0][0], self.admin_key)
-    self.assertEqual(info, {'ignore_if': 'X', 'max': '1', 'min': '0', 'name': 'score', 'type': 'range'})
+    self.assertEqual(info, {'type': 'column_type', 'default_value': 'X', 'maximum': '1', 'minimum': '0', 'name': 'score', 'column_type': 'range'})
 
     (s, ss) = epidb.search("STRAND", "column_types", self.admin_key)
     (s, info) = epidb.info(ss[0][0], self.admin_key)
-    self.assertEqual(info, {'ignore_if': '.', 'name': 'STRAND', 'type': 'category', 'values': '+,-'})
+    self.assertEqual(info, {'type': 'column_type', 'default_value': '.', 'name': 'STRAND', 'column_type': 'category', 'values': '+,-'})

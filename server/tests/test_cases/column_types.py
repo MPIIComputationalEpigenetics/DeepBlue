@@ -59,15 +59,16 @@ class TestColumnTypes(helpers.TestCase):
     res, column_types = epidb.list_column_types(self.admin_key)
     self.assertSuccess(res, column_types)
 
-    self.assertEqual(column_types[0][1], "column type name: 'CHROMOSOME' ignore if: '' type: 'string'")
-    self.assertEqual(column_types[1][1], "column type name: 'START' ignore if: '' type: 'integer'")
-    self.assertEqual(column_types[2][1], "column type name: 'END' ignore if: '' type: 'integer'")
-    self.assertEqual(column_types[3][1], "column type name: 'name' ignore if: '.' type: 'string'")
-    self.assertEqual(column_types[4][1], "column type name: 'string_column' ignore if: '.' type: 'string'")
-    self.assertEqual(column_types[5][1], "column type name: 'integer_column' ignore if: '.' type: 'integer'")
-    self.assertEqual(column_types[6][1], "column type name: 'double_column' ignore if: '.' type: 'double'")
-    self.assertEqual(column_types[7][1], "column type name: 'score' ignore if: '.' type: 'range' : 0,1")
-    self.assertEqual(column_types[8][1], "column type name: 'STRAND' ignore if: '.' type: 'category' values: +,-")
+    self.assertEqual(column_types[0][1], "column type name: 'CHROMOSOME' default: '' type: 'string'")
+    self.assertEqual(column_types[1][1], "column type name: 'START' default: '' type: 'integer'")
+    self.assertEqual(column_types[2][1], "column type name: 'END' default: '' type: 'integer'")
+    self.assertEqual(column_types[3][1], "column type name: 'VALUE' default: '' type: 'double'")
+    self.assertEqual(column_types[4][1], "column type name: 'name' default: '.' type: 'string'")
+    self.assertEqual(column_types[5][1], "column type name: 'string_column' default: '.' type: 'string'")
+    self.assertEqual(column_types[6][1], "column type name: 'integer_column' default: '.' type: 'integer'")
+    self.assertEqual(column_types[7][1], "column type name: 'double_column' default: '.' type: 'double'")
+    self.assertEqual(column_types[8][1], "column type name: 'score' default: '.' type: 'range' : 0,1")
+    self.assertEqual(column_types[9][1], "column type name: 'STRAND' default: '.' type: 'category' values: +,-")
 
 
   def test_no_ignore_if(self):
@@ -82,11 +83,12 @@ class TestColumnTypes(helpers.TestCase):
     res, column_types = epidb.list_column_types(self.admin_key)
     self.assertSuccess(res, column_types)
 
-    self.assertEqual(column_types[0][1], "column type name: 'CHROMOSOME' ignore if: '' type: 'string'")
-    self.assertEqual(column_types[1][1], "column type name: 'START' ignore if: '' type: 'integer'")
-    self.assertEqual(column_types[2][1], "column type name: 'END' ignore if: '' type: 'integer'")
-    self.assertEqual(column_types[3][1], "column type name: 'name' ignore if: '' type: 'string'")
-    self.assertEqual(column_types[4][1], "column type name: 'string_column' ignore if: '' type: 'string'")
+    self.assertEqual(column_types[0][1], "column type name: 'CHROMOSOME' default: '' type: 'string'")
+    self.assertEqual(column_types[1][1], "column type name: 'START' default: '' type: 'integer'")
+    self.assertEqual(column_types[2][1], "column type name: 'END' default: '' type: 'integer'")
+    self.assertEqual(column_types[3][1], "column type name: 'VALUE' default: '' type: 'double'")
+    self.assertEqual(column_types[4][1], "column type name: 'name' default: '' type: 'string'")
+    self.assertEqual(column_types[5][1], "column type name: 'string_column' default: '' type: 'string'")
 
 
   def test_insert_experiment(self):

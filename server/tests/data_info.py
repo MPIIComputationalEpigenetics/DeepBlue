@@ -88,13 +88,13 @@ EXPERIMENTS = {
       "CHROMOSOME",
       "START",
       "END",
-      "name:String:.",
-      "score:Integer:0",
-      "strand:String:.",
-      "signalValue:Double:-1",
-      "pValue:Double:-1",
-      "qValue:Double:-1",
-      "peak:Integer:-1"
+      "name:String",
+      "score:Integer",
+      "strand:String",
+      "signalValue:Integer",
+      "pValue:Double",
+      "qValue:Integer",
+      "peak:Integer"
     ])
   },
 
@@ -229,5 +229,5 @@ EXPERIMENTS = {
     "project": "ENCODE",
     "description": "desc",
     "format": ""
-  }  
+  }
 }

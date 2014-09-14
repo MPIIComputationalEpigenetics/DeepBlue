@@ -12,7 +12,7 @@ class TestSelectRegions(helpers.TestCase):
     sample_id = self.sample_ids[0]
 
     self.insert_experiment(epidb, "hg19_chr1_1", sample_id)
-    full_experiment_regions = helpers.get_result("full_experiment_regions")
+    full_experiment_regions = helpers.get_result("hg19_chr1_1_output")
     region_count = len(full_experiment_regions.split("\n"))
 
     format = "CHROMOSOME,START,END,name,score,strand,signalValue,pValue,qValue,peak"
@@ -59,7 +59,7 @@ class TestSelectRegions(helpers.TestCase):
     self.assertFailure(res)
 
     # at least one: should pass
-    expected_regions = helpers.get_result("full_experiment_regions")
+    expected_regions = helpers.get_result("hg19_chr1_1_output")
     format = "CHROMOSOME,START,END,name,score,strand,signalValue,pValue,qValue,peak"
 
     argument_combinations = [
@@ -80,15 +80,15 @@ class TestSelectRegions(helpers.TestCase):
       self.assertSuccess(res, regions)
       self.assertEqual(regions, expected_regions)
 
-
   def test_retrieve_with_defaults(self):
     epidb = EpidbClient()
     self.init_base()
 
     self.insert_experiment(epidb, "hg19_chr1_1")
-    expected_regions = helpers.get_result("full_experiment_regions_with_defaults")
+    expected_regions = helpers.get_result("hg19_chr1_1_output")
 
-    format = "CHROMOSOME,START,END,name:.,score:0,strand:.,signalValue:0.0,pValue:-1,qValue:-1,peak:-1"
+    #format = "CHROMOSOME,START,END,name:.,score:0,strand:.,signalValue:0.0,pValue:-1,qValue:-1,peak:-1"
+    format = "CHROMOSOME,START,END,name,score,strand,signalValue,pValue,qValue,peak"
 
     res, qid = epidb.select_regions("hg19_chr1_1", "hg19", None, None, None, None, None, None, None, self.admin_key)
     self.assertSuccess(res, qid)
@@ -96,7 +96,6 @@ class TestSelectRegions(helpers.TestCase):
     res, regions = epidb.get_regions(qid, format, self.admin_key)
     self.assertSuccess(res, regions)
     self.assertEqual(regions, expected_regions)
-
 
   def test_experiment_name_metacolumn(self):
     epidb = EpidbClient()
@@ -114,7 +113,6 @@ class TestSelectRegions(helpers.TestCase):
     res, regions = epidb.get_regions(qid, format, self.admin_key)
     self.assertSuccess(res, regions)
     self.assertEqual(regions, expected_regions)
-
 
   def test_experiment_name_metacolumn2(self):
     epidb = EpidbClient()
@@ -171,7 +169,6 @@ class TestSelectRegions(helpers.TestCase):
     self.assertSuccess(res, regions)
     self.assertEqual(regions, regions_wo_chr)
 
-
   def test_malformed_format(self):
     epidb = EpidbClient()
     self.init_base()
@@ -180,7 +177,6 @@ class TestSelectRegions(helpers.TestCase):
 
     # test various bad format strings that should fail
     bad_formats = [
-      "",
       ",",
       "chr,start,,",
       "chr,start:0:,end",
@@ -198,7 +194,6 @@ class TestSelectRegions(helpers.TestCase):
       res = epidb.get_regions(qid, fmt, self.admin_key)
       self.assertFailure(res)
 
-
   def test_genome_required(self):
     epidb = EpidbClient()
     self.init(epidb)
@@ -210,27 +205,27 @@ class TestSelectRegions(helpers.TestCase):
     # "genome" should be mentioned in the error message
     self.assertTrue("genome" in msg.lower())
 
+  def test_unknown_parameters(self):
+    epidb = EpidbClient()
+    self.init_base()
 
-  # def test_unknown_parameters(self):
-  #   epidb = EpidbClient()
-  #   self.init_base()
+    sample_id = self.sample_ids[0]
 
-  #   sample_id = self.sample_ids[0]
+    self.insert_experiment(epidb, "hg19_chr1_1", sample_id)
 
-  #   self.insert_experiment(epidb, "hg19_chr1_1", sample_id)
+    argument_combinations = [
+      (None, "hg19", "_invalid_mark", sample_id, "tech1", "ENCODE", None, None, None),
+      (None, "hg19", "Methylation", "_invalid_sid", "tech1", "ENCODE", None, None, None),
+      (None, "hg19", "Methylation", sample_id, "_invalid_tech", "ENCODE", None, None, None),
+      (None, "hg19", "Methylation", sample_id, "tech1", "_invalid_project", None, None, None)
+    ]
 
-  #   argument_combinations = [
-  #     (None, "hg19", "_invalid_mark", sample_id, "tech1", "ENCODE", None, None, None),
-  #     # (None, "hg19", "Methylation", "_invalid_sid", "tech1", "ENCODE", None, None, None),
-  #     # (None, "hg19", "Methylation", sample_id, "_invalid_tech", "ENCODE", None, None, None),
-  #     # (None, "hg19", "Methylation", sample_id, "tech1", "_invalid_project", None, None, None)
-  #   ]
+    for args in argument_combinations:
+      args = args + (self.admin_key,)
 
-  #   for args in argument_combinations:
-  #     args = args + (self.admin_key,)
-
-  #     res, msg = epidb.select_regions(*args)
-  #     self.assertFailure(res, msg)
+      res, msg = epidb.select_regions(*args)
+      (res, regions) = epidb.get_regions(msg, "", self.admin_key)
+      self.assertEqual(0, len(regions))
 
   def test_argument_normalization(self):
     epidb = EpidbClient()
@@ -251,7 +246,6 @@ class TestSelectRegions(helpers.TestCase):
     self.assertSuccess(res, regions)
     self.assertEqual(regions, full_experiment_regions)
 
-
   def test_select_range(self):
     epidb = EpidbClient()
     self.init_base()
@@ -270,7 +264,6 @@ class TestSelectRegions(helpers.TestCase):
     res, regions = epidb.get_regions(qid, format, self.admin_key)
     self.assertSuccess(res, regions)
     self.assertEqual(regions, range_regions)
-
 
   def test_multiple_experiments(self):
     epidb = EpidbClient()
@@ -292,7 +285,6 @@ class TestSelectRegions(helpers.TestCase):
     self.assertSuccess(res, regions)
 
     self.assertEqual(regions, multiple_experiments_regions)
-
 
   def test_multiple_genomes(self):
     epidb = EpidbClient()
@@ -318,7 +310,6 @@ class TestSelectRegions(helpers.TestCase):
       self.assertSuccess(res, regions)
 
       self.assertEqual(regions, multiple_genomes_regions)
-
 
   def test_multiple_genomes_2(self):
     epidb = EpidbClient()

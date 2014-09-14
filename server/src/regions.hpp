@@ -47,7 +47,8 @@ namespace epidb {
     Position _start;
     Position _end;
     boost::shared_ptr<StatsValue> _stats_value;
-    std::vector<std::pair<std::string, std::string> > _data;
+    std::vector<std::pair<std::string, std::string> > _string_data;
+    std::vector<std::pair<std::string, float> > _numeric_data;
 
   public:
     Region() :
@@ -55,14 +56,16 @@ namespace epidb {
       _start(-1),
       _end(-1),
       _stats_value(),
-      _data() {}
+      _string_data(),
+      _numeric_data() {}
 
     Region(Position s, Position e, DatasetId _id):
       _dataset_id(_id),
       _start(s),
       _end(e),
       _stats_value(),
-      _data() {}
+      _string_data(),
+      _numeric_data() {}
 
     Region(Position s, Position e, DatasetId _id,
            Score min, Score max, Score median, Score mean, Score var, Score sd, Score count) :
@@ -70,7 +73,8 @@ namespace epidb {
       _start(s),
       _end(e),
       _stats_value(new StatsValue(min, max, median, mean, var, sd, count)),
-      _data() {}
+      _string_data(),
+      _numeric_data() {}
 
     bool operator<(const Region &other) const
     {
@@ -84,6 +88,8 @@ namespace epidb {
     void set_start(Position s);
     void set_end(Position e);
     void set(const std::string &key, const std::string &value);
+    void set(const std::string &key, const float value);
+    void set(const std::string &key, const int value);
     const std::string  &get(const std::string &key) const;
     Score value(const std::string &key) const;
 

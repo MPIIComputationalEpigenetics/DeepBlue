@@ -12,7 +12,6 @@
 #include <numeric>
 #include <string>
 #include <vector>
-#include <new>
 
 #include <boost/ref.hpp>
 #include <boost/thread.hpp>
@@ -88,16 +87,16 @@ namespace epidb {
             const Score *scores;
             if (track_type  == parser::FIXED_STEP) {
               if (compressed) {
-                starts = reinterpret_cast<const Position *>(decompressed_data);
+                scores = reinterpret_cast<const Score *>(decompressed_data);
               } else {
-                starts = reinterpret_cast<const Position *>(data);
+                scores = reinterpret_cast<const Score *>(data);
               }
               for (Length i = 0; i < size; i++) {
-                if ((starts[i] < _query_start) ||  start + (i * step) + span > _query_end) {
+                if ((start + (i * step) < _query_start) ||  start + (i * step) + span > _query_end) {
                   continue;
                 }
                 Region region(start + (i * step), start + (i * step) + span, dataset_id);
-                region.set(KeyMapper::VALUE(), utils::double_to_string(starts[i]));
+                region.set(KeyMapper::VALUE(), scores[i]);
                 _regions->push_back(region);
                 _count++;
               }
@@ -115,7 +114,7 @@ namespace epidb {
                   continue;
                 }
                 Region region(starts[i], starts[i] + span, dataset_id);
-                region.set(KeyMapper::VALUE(), utils::double_to_string(scores[i]));
+                region.set(KeyMapper::VALUE(), scores[i]);
                 _regions->push_back(region);
                 _count++;
               }
@@ -135,7 +134,7 @@ namespace epidb {
                   continue;
                 }
                 Region region(starts[i], ends[i], dataset_id);
-                region.set(KeyMapper::VALUE(), utils::double_to_string(scores[i]));
+                region.set(KeyMapper::VALUE(), scores[i]);
                 _regions->push_back(region);
                 _count++;
               }
@@ -178,9 +177,9 @@ namespace epidb {
                   if (e.type() == mongo::String) {
                     region.set(e.fieldName(), e.str());
                   } else if (e.type() == mongo::NumberDouble) {
-                    region.set(e.fieldName(), utils::double_to_string(e.Number()));
+                    region.set(e.fieldName(), (float) e.Double());
                   } else if (e.type() == mongo::NumberInt) {
-                    region.set(e.fieldName(), utils::integer_to_string(e.Int()));
+                    region.set(e.fieldName(), (int) e.Int());
                   } else {
                     region.set(e.fieldName(), e.toString(false));
                   }
@@ -213,9 +212,9 @@ namespace epidb {
                   if (e.type() == mongo::String) {
                     region.set(e.fieldName(), e.str());
                   } else if (e.type() == mongo::NumberDouble) {
-                    region.set(e.fieldName(), utils::double_to_string(e.Number()));
+                    region.set(e.fieldName(), (float) e.Double());
                   } else if (e.type() == mongo::NumberInt) {
-                    region.set(e.fieldName(), utils::integer_to_string(e.Int()));
+                    region.set(e.fieldName(), (int) e.Int());
                   } else {
                     region.set(e.fieldName(), e.toString(false));
                   }
@@ -251,9 +250,9 @@ namespace epidb {
               if (e.type() == mongo::String) {
                 region.set(e.fieldName(), e.str());
               } else if (e.type() == mongo::NumberDouble) {
-                region.set(e.fieldName(), utils::double_to_string(e.Number()));
+                region.set(e.fieldName(), (float) e.Double());
               } else if (e.type() == mongo::NumberInt) {
-                region.set(e.fieldName(), utils::integer_to_string(e.Int()));
+                region.set(e.fieldName(), (int) e.Int());
               } else {
                 region.set(e.fieldName(), e.toString(false));
               }

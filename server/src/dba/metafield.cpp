@@ -18,6 +18,7 @@
 
 #include "config.hpp"
 #include "collections.hpp"
+#include "column_types.hpp"
 #include "helpers.hpp"
 #include "key_mapper.hpp"
 #include "metafield.hpp"
@@ -31,9 +32,9 @@
 namespace epidb {
   namespace dba {
 
-    const std::map<const std::string, Metafield::Function> Metafield::createFunctionsMap()
+    const std::map<std::string, Metafield::Function> Metafield::createFunctionsMap()
     {
-      std::map<const std::string, Metafield::Function> m;
+      std::map<std::string, Metafield::Function> m;
       m["@LENGTH"] = &Metafield::length;
       m["@NAME"] = &Metafield::name;
       m["@SEQUENCE"] = &Metafield::sequence;
@@ -52,6 +53,48 @@ namespace epidb {
       m["@COUNT.NON-OVERLAP"] = &Metafield::count_non_overlap;
 
       return m;
+    }
+
+    const std::map<std::string, std::string> Metafield::createFunctionsReturnsMap()
+    {
+      std::map<std::string, std::string> m;
+      m["@LENGTH"] = "integer";
+      m["@NAME"] = "string";
+      m["@SEQUENCE"] = "string";
+      m["@EPIGENETIC_MARK"] = "string";
+      m["@PROJECT"] = "string";
+      m["@BIO_SOURCE"] = "string";
+      m["@SAMPLE_ID"] = "string";
+      m["@AGG.MIN"] = "double";
+      m["@AGG.MAX"] = "double";
+      m["@AGG.MEDIAN"] = "double";
+      m["@AGG.MEAN"] = "double";
+      m["@AGG.VAR"] = "double";
+      m["@AGG.SD"] = "double";
+      m["@AGG.COUNT"] = "integer";
+      m["@COUNT.OVERLAP"] = "integer";
+      m["@COUNT.NON-OVERLAP"] = "integer";
+
+      return m;
+    }
+
+    bool Metafield::build_column(const std::string &name, columns::ColumnTypePtr &column_type, std::string &msg)
+    {
+      return build_column(name, "", column_type, msg);
+    }
+
+    bool Metafield::build_column(const std::string &op, const std::string &default_value,
+                                 columns::ColumnTypePtr &column_type, std::string &msg)
+    {
+      std::string command = op.substr(0, op.find('('));
+      std::map<std::string, std::string>::iterator it = functionsReturns.find(command);
+      if (it == functionsReturns.end()) {
+        msg = "Metafield " + command + " does not exist.";
+        return false;
+      }
+      const std::string &type = it->second;
+
+      return columns::column_type_simple(op, type, default_value, column_type, msg);
     }
 
     bool Metafield::is_meta(const std::string &s)
@@ -117,7 +160,7 @@ namespace epidb {
       }
 
       std::string command = op.substr(0, op.find('('));
-      std::map<const std::string, Function>::iterator it;
+      std::map<std::string, Function>::iterator it;
       it = functions.find(command);
       if (it != functions.end()) {
         Function f = it->second;
@@ -342,4 +385,6 @@ namespace epidb {
   }
 }
 
-std::map<const std::string, epidb::dba::Metafield::Function> epidb::dba::Metafield::functions =  epidb::dba::Metafield::createFunctionsMap();
+std::map<std::string, epidb::dba::Metafield::Function> epidb::dba::Metafield::functions =  epidb::dba::Metafield::createFunctionsMap();
+
+std::map<std::string, std::string> epidb::dba::Metafield::functionsReturns =  epidb::dba::Metafield::createFunctionsReturnsMap();

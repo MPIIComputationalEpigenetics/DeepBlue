@@ -106,12 +106,17 @@ class TestTilingRegions(helpers.TestCase):
     self.assertSuccess(res, regions)
 
     expected = helpers.get_result("experiment_name_default")
-    res, regions = epidb.get_regions(qid, "CHROMOSOME,START,END,experiment_name", self.admin_key)
+    res, regions = epidb.get_regions(qid, "CHROMOSOME,START,END,experiment_name:string: ", self.admin_key)
     self.assertSuccess(res, regions)
     self.assertEqual(regions, expected)
 
     expected = helpers.get_result("experiment_name_custom")
     res, regions = epidb.get_regions(qid, "CHROMOSOME,START,END,experiment_name:no_name", self.admin_key)
+    self.assertFailure(res, regions)
+    self.assertEqual(regions, "Invalid column experiment_name. Please inform the column type inside the column definition: 'experiment_name:(integer|double|string):no_name'")
+
+    expected = helpers.get_result("experiment_name_custom")
+    res, regions = epidb.get_regions(qid, "CHROMOSOME,START,END,experiment_name:string:no_name", self.admin_key)
     self.assertSuccess(res, regions)
     self.assertEqual(regions, expected)
 

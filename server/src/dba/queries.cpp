@@ -290,7 +290,7 @@ namespace epidb {
 
         mongo::BSONObjBuilder regions_query_builder;
         if (args["has_filter"].Bool()) {
-            regions_query_builder.append(KeyMapper::DATASET(), BSON("$in" << datasets_array));
+          regions_query_builder.append(KeyMapper::DATASET(), BSON("$in" << datasets_array));
         }
 
         if (args.hasField("start") && args.hasField("end")) {
@@ -639,6 +639,8 @@ namespace epidb {
         tiling_data_builder.append("genome", genome);
         tiling_data_builder.append("norm_genome", norm_genome);
         tiling_data_builder.append("tiling_size", (int) tiling_size);
+        mongo::BSONArrayBuilder ab;
+        tiling_data_builder.append("columns", ab.arr());
 
         c->insert(helpers::collection_name(Collections::TILINGS()), tiling_data_builder.obj());
         if (!c->getLastError().empty()) {
@@ -721,6 +723,71 @@ namespace epidb {
         }
 
         return algorithms::aggregate(data, ranges, field, regions, msg);
+      }
+
+      bool get_columns_from_dataset(DatasetId &dataset_id, std::vector<mongo::BSONElement> &columns, std::string &msg)
+      {
+        if (dataset_id == 0) {
+          return true;
+        }
+
+        mongo::BSONObjBuilder experiments_query_builder;
+        experiments_query_builder << KeyMapper::DATASET() << dataset_id;
+
+        mongo::BSONObj o = experiments_query_builder.obj();
+        std::auto_ptr<mongo::DBClientCursor> cursor;
+
+        mongo::ScopedDbConnection c(config::get_mongodb_server());
+        cursor = c->query(helpers::collection_name(Collections::EXPERIMENTS()), o);
+
+        while (cursor->more()) {
+          mongo::BSONObj experiment = cursor->next();
+          if (experiment.hasField("columns")) {
+            columns = experiment["columns"].Array();
+            c.done();
+            return true;
+          } else {
+            std::cerr <<  "Experiment dataset" << dataset_id << " does not have columns!!" << std::endl;
+            msg = "blah 1";
+            c.done();
+            return false;
+          }
+        }
+
+        cursor = c->query(helpers::collection_name(Collections::ANNOTATIONS()), o);
+        while (cursor->more()) {
+          mongo::BSONObj annotation = cursor->next();
+          if (annotation.hasField("columns")) {
+            columns = annotation["columns"].Array();
+            c.done();
+            return true;
+          } else {
+            std::cerr <<  "Annotation dataset" << dataset_id << " does not have columns!!" << std::endl;
+            msg = "blah 2";
+            c.done();
+            return false;
+          }
+        }
+
+        cursor = c->query(helpers::collection_name(Collections::TILINGS()), o);
+        while (cursor->more()) {
+          mongo::BSONObj tiling = cursor->next();
+          if (tiling.hasField("columns")) {
+            columns = tiling["columns"].Array();
+            c.done();
+            return true;
+          } else {
+            std::cerr << "Tiling dataset" << dataset_id << " does not have columns!!" << std::endl;
+            msg = "blah ";
+            c.done();
+            return false;
+          }
+        }
+        c.done();
+        std::cerr << dataset_id << std::endl;
+        std::cerr << "nao foi encontrando coisa com o id tal" << std::endl;
+        msg = "nao foi encontrando coisa com o id tal";
+        return false;
       }
     }
   }

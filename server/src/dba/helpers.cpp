@@ -77,7 +77,7 @@ namespace epidb {
           return false;
         }
 
-        BOOST_FOREACH(mongo::BSONObj o, objs) {
+        BOOST_FOREACH(const mongo::BSONObj &o, objs) {
           result.push_back(o[returned_field].String());
         }
 
@@ -89,7 +89,7 @@ namespace epidb {
                std::vector<mongo::BSONObj> &results, std::string &msg)
       {
         mongo::BSONObjBuilder query_builder;
-        BOOST_FOREACH(QueryPair p, conditions) {
+        BOOST_FOREACH(const QueryPair &p, conditions) {
           query_builder.append(p.first, p.second);
         }
         mongo::BSONObj query = query_builder.obj();
@@ -124,7 +124,7 @@ namespace epidb {
           return false;
         }
 
-        BOOST_FOREACH(mongo::BSONObj o, r) {
+        BOOST_FOREACH(const mongo::BSONObj &o, r) {
           utils::IdName utils(o["_id"].str(), o["name"].str());
           results.push_back(utils);
         }
@@ -140,7 +140,7 @@ namespace epidb {
         mongo::ScopedDbConnection c(config::get_mongodb_server());
 
         mongo::BSONObjBuilder b;
-        BOOST_FOREACH(std::string f, fields) {
+        BOOST_FOREACH(const std::string &f, fields) {
           b.append(f, 1);
         }
         mongo::BSONObj projection = b.obj();

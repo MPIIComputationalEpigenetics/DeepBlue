@@ -64,7 +64,7 @@ namespace epidb {
       bool start_found = false;
       bool end_found = false;
 
-      BOOST_FOREACH(dba::columns::ColumnTypePtr column_type, file_format) {
+      BOOST_FOREACH(const dba::columns::ColumnTypePtr & column_type, file_format) {
         std::string field_name = column_type->name();
         std::string name;
         if (!KeyMapper::to_short(field_name, name, msg)) {
@@ -142,7 +142,7 @@ namespace epidb {
 
       if (!start_found) {
         msg = "Start position was not informed or was ignored. Line content: ";
-        BOOST_FOREACH(std::string s, tokens) {
+        BOOST_FOREACH(const std::string & s, tokens) {
           msg += s;
           msg += "\t";
         }
@@ -151,7 +151,7 @@ namespace epidb {
 
       if (!end_found) {
         msg = "End position was not informed or was ignored. Line content: ";
-        BOOST_FOREACH(std::string s, tokens) {
+        BOOST_FOREACH(const std::string & s, tokens) {
           msg += s;
           msg += "\t";
         }
@@ -298,13 +298,55 @@ namespace epidb {
 
     inline bool check_remainings(const int dataset_id, const std::string &collection, size_t &count,
                                  std::vector<mongo::BSONObj> &block, std::vector<mongo::BSONObj> &blocks_bulk,
-                                 size_t& bulk_size, size_t &total_size,
+                                 size_t &bulk_size, size_t &total_size,
                                  std::string &msg)
     {
       if (!compress_and_insert_region_block(dataset_id, collection, count, block, blocks_bulk, bulk_size, total_size, msg)) {
         return false;
       }
 
+      return true;
+    }
+
+    bool wig_file_format(mongo::BSONArray &array, std::string &msg)
+    {
+      mongo::BSONArrayBuilder ab;
+      columns::ColumnTypePtr column_type;
+      if (!columns::load_column_type("CHROMOSOME", column_type, msg)) {
+        return false;
+      }
+      ab.append(column_type->BSONObj());
+
+      if (!columns::load_column_type("START", column_type, msg)) {
+        return false;
+      }
+      ab.append(column_type->BSONObj());
+
+      if (!columns::load_column_type("END", column_type, msg)) {
+        return false;
+      }
+      ab.append(column_type->BSONObj());
+
+      if (!columns::load_column_type("VALUE", column_type, msg)) {
+        return false;
+      }
+      ab.append(column_type->BSONObj());
+      array = ab.arr();
+
+      std::cerr << array.toString() << std::endl;
+      return true;
+    }
+
+    bool bed_file_format(const parser::FileFormat &format, mongo::BSONArray &array, std::string &msg)
+    {
+      mongo::BSONArrayBuilder ab;
+
+      for (parser::FileFormat::const_iterator it =  format.begin(); it != format.end(); it++) {
+        mongo::BSONObj o = (*it)->BSONObj();
+        ab.append(o);
+      }
+
+      array = ab.arr();
       return true;
     }
 
@@ -346,6 +388,11 @@ namespace epidb {
       experiment_data_builder.append("norm_description", norm_description);
       experiment_data_builder.append("content_format", "wig");
 
+      mongo::BSONArray format_array;
+      if (!wig_file_format(format_array, msg)) {
+        return false;
+      }
+      experiment_data_builder.append("columns", format_array);
 
       mongo::BSONObjBuilder metadata_builder;
       Metadata::const_iterator cit;
@@ -503,8 +550,6 @@ namespace epidb {
         bulk.clear();
       }
 
-      std::cerr << "total_regions : " << total_regions << std::endl;
-
       c->update(helpers::collection_name(Collections::EXPERIMENTS()), QUERY("_id" << experiment_id),
                 BSON("$set" << BSON("total_size" << (unsigned int) total_size << "done" << true << "upload_end" << mongo::DATENOW)), false, true);
 
@@ -558,6 +603,12 @@ namespace epidb {
       experiment_data_builder.append("norm_description", norm_description);
       experiment_data_builder.append("format", format.format());
       experiment_data_builder.append("content_format", "bed");
+
+      mongo::BSONArray format_array;
+      if (!bed_file_format(format, format_array, msg)) {
+        return false;
+      }
+      experiment_data_builder.append("columns", format_array);
 
       mongo::BSONObjBuilder metadata_builder;
       Metadata::const_iterator cit;
@@ -733,6 +784,12 @@ namespace epidb {
       annotation_data_builder.append("norm_description", norm_description);
       annotation_data_builder.append("format", format.format());
 
+      mongo::BSONArray format_array;
+      if (!bed_file_format(format, format_array, msg)) {
+        return false;
+      }
+      annotation_data_builder.append("columns", format_array);
+
       mongo::BSONObjBuilder metadata_builder;
       Metadata::const_iterator cit;
       for (cit = extra_metadata.begin(); cit != extra_metadata.end(); ++cit) {
@@ -784,7 +841,7 @@ namespace epidb {
       std::vector<mongo::BSONObj> blocks_bulk;
       std::string prev_collection;
 
-      BOOST_FOREACH( parser::Tokens tokens, bed_file_tokenized) {
+      BOOST_FOREACH(const parser::Tokens & tokens, bed_file_tokenized) {
         mongo::BSONObjBuilder region_builder;
         std::string chromosome;
         size_t start;
@@ -877,6 +934,12 @@ namespace epidb {
       annotation_data_builder.append("norm_description", norm_description);
       annotation_data_builder.append("format", format.format());
 
+      mongo::BSONArray format_array;
+      if (!bed_file_format(format, format_array, msg)) {
+        return false;
+      }
+      annotation_data_builder.append("columns", format_array);
+
       mongo::BSONObjBuilder metadata_builder;
       Metadata::const_iterator cit;
       for (cit = extra_metadata.begin(); cit != extra_metadata.end(); ++cit) {
@@ -922,7 +985,7 @@ namespace epidb {
       }
 
       size_t count = 0;
-      BOOST_FOREACH(ChromosomeRegions chromosome_regions, regions) {
+      BOOST_FOREACH(const ChromosomeRegions & chromosome_regions, regions) {
         std::string chromosome = chromosome_regions.first;
         std::string internal_chromosome;
         size_t chromosome_size;

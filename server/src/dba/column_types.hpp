@@ -18,7 +18,10 @@
 
 #include <mongo/bson/bson.h>
 
+#include "key_mapper.hpp"
+
 #include "../extras/utils.hpp"
+#include "../log.hpp"
 
 namespace epidb {
   namespace dba {
@@ -33,7 +36,7 @@ namespace epidb {
         COLUMN_ERR,
       };
 
-      typedef std::string Value;
+      typedef std::string Token;
       typedef std::pair<double, double> Range;
       typedef std::vector<std::string> Category;
 
@@ -41,15 +44,16 @@ namespace epidb {
 
       protected:
         std::string _name;
-        std::string _ignore_if;
-        bool no_ignore_if;
+        std::string _default_value;
+        bool _has_internal_name;
+        std::string _internal_name;
 
         AbstractColumnType(const std::string n, const std::string i) :
           _name(n),
-          _ignore_if(i)
-        {
-          no_ignore_if = i.empty();
-        }
+          _default_value(i),
+          _has_internal_name(false),
+          _internal_name()
+        {}
 
       public:
         virtual COLUMN_TYPES type() const = 0;
@@ -59,26 +63,45 @@ namespace epidb {
           return _name;
         }
 
-        const std::string ignore_if() {
-          return _ignore_if;
+        const std::string internal_name() {
+          if (!_has_internal_name) {
+            std::string msg;
+            if (!dba::KeyMapper::to_short(_name, _internal_name, msg)) {
+              EPIDB_LOG_ERR(msg);
+              _internal_name = "There was not possible to load " + _name;
+            }
+            _has_internal_name = true;
+          }
+
+          return _internal_name;
         }
 
-        virtual bool check(const Value &verify) const
+        const std::string default_value() {
+          return _default_value;
+        }
+
+        virtual bool check(const Token &verify) const
         {
           return false;
         }
 
-        bool ignore(const Value &verify) const
+        bool ignore(const Token &verify) const
         {
-          if (no_ignore_if) {
-            return false;
-          }
-          return (_ignore_if == "*") || (verify == _ignore_if);
+          return _default_value == verify;
         }
 
         virtual const std::string str() const
         {
-          return "column type name: '" + _name + "' ignore if: '" + _ignore_if + "'";
+          return "column type name: '" + _name + "' default: '" + _default_value + "'";
+        }
+
+        virtual const mongo::BSONObj BSONObj() const
+        {
+          mongo::BSONObjBuilder builder;
+          builder.append("name", _name);
+          builder.append("default_value", _default_value);
+
+          return builder.obj();
         }
 
         virtual ~AbstractColumnType() {}
@@ -112,6 +135,11 @@ namespace epidb {
           return AbstractColumnType::str();
         }
 
+        virtual const mongo::BSONObj BSONObj() const
+        {
+          return AbstractColumnType::BSONObj();
+        }
+
         const Type content() {
           return _content;
         }
@@ -130,10 +158,16 @@ namespace epidb {
       const std::string ColumnType<long long>::str() const;
 
       template<>
+      const mongo::BSONObj ColumnType<long long>::BSONObj() const;
+
+      template<>
       bool ColumnType<double>::check(const std::string &verify) const;
 
       template<>
       const std::string ColumnType<double>::str() const;
+
+      template<>
+      const mongo::BSONObj ColumnType<double>::BSONObj() const;
 
       template<>
       bool ColumnType<std::string>::check(const std::string &verify) const;
@@ -142,10 +176,16 @@ namespace epidb {
       const std::string ColumnType<std::string>::str() const;
 
       template<>
+      const mongo::BSONObj ColumnType<std::string>::BSONObj() const;
+
+      template<>
       bool ColumnType<Range>::check(const std::string &verify) const;
 
       template<>
       const std::string ColumnType<Range>::str() const;
+
+      template<>
+      const mongo::BSONObj ColumnType<Range>::BSONObj() const;
 
       template<>
       bool ColumnType<Category>::check(const std::string &verify) const;
@@ -153,19 +193,18 @@ namespace epidb {
       template<>
       const std::string ColumnType<Category>::str() const;
 
+      template<>
+      const mongo::BSONObj ColumnType<Category>::BSONObj() const;
+
       bool list_column_types(const std::string &user_key, std::vector<utils::IdName> &content, std::string  &msg);
 
-      bool column_type_simple(const std::string &name, COLUMN_TYPES type, const std::string &ignore_if,
+      bool column_type_simple(const std::string &name, COLUMN_TYPES type, const std::string &default_value,
                               ColumnTypePtr &column_type, std::string &msg);
 
-      bool column_type_simple(const std::string &name, COLUMN_TYPES type,
+      bool column_type_simple(const std::string &name, const std::string &type, const std::string &default_value,
                               ColumnTypePtr &column_type, std::string &msg);
 
-      bool column_type_simple(const std::string &name, const std::string &type, const std::string &ignore_if,
-                              ColumnTypePtr &column_type, std::string &msg);
-
-      bool column_type_simple(const std::string &name, const std::string &type,
-                              ColumnTypePtr &column_type, std::string &msg);
+      bool load_column_type(const std::string &name, mongo::BSONObj &obj_column_type, std::string &msg);
 
       bool load_column_type(const std::string &name, ColumnTypePtr &column_type, std::string &msg);
 
@@ -174,19 +213,19 @@ namespace epidb {
 
       bool create_column_type_simple(const std::string &name, const std::string &norm_name,
                                      const std::string &description, const std::string &norm_description,
-                                     const std::string &ignore_if, const std::string &type,
+                                     const std::string &default_value, const std::string &type,
                                      const std::string &user_key,
                                      std::string &id, std::string &msg);
 
       bool create_column_type_category(const std::string &name, const std::string &norm_name,
                                        const std::string &description, const std::string &norm_description,
-                                       const std::string &ignore_if, const std::vector<std::string> &items,
+                                       const std::string &default_value, const std::vector<std::string> &items,
                                        const std::string &user_key,
                                        std::string &id, std::string &msg);
 
       bool create_column_type_range(const std::string &name, const std::string &norm_name,
                                     const std::string &description, const std::string &norm_description,
-                                    const std::string &ignore_if,
+                                    const std::string &default_value,
                                     const double minimum, const double maximum,
                                     const std::string &user_key,
                                     std::string &id, std::string &msg);

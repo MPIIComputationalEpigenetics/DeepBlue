@@ -114,7 +114,7 @@ namespace epidb {
             type = "sample_field";
           } else if (id.compare(0, 2, "ct") == 0) {
             ok = dba::info::get_column_type(id, res, msg);
-            type = "sample_field";
+            type = "column_type";
           } else {
             result.add_error("Invalid identifier: " + id);
             return false;

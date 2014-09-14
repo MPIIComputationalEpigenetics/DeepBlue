@@ -36,7 +36,7 @@ class TestOutput(helpers.TestCase):
     self.assertEqual(10, count)
 
     res, regions = epidb.get_regions(qid_1, "chr:start:end:name:length:cpgNum:gcNum:perCpg:perGc:obsExp", self.admin_key)
-    self.assertEquals("Wrong output format: 'chr:start:end:name:length:cpgNum:gcNum:perCpg:perGc:obsExp'. The format is \"<field:default_value>,<field:default_value>,..\"", regions)
+    self.assertEquals("Invalid column type 'start'", regions)
 
     res, regions = epidb.get_regions(qid_1, "CHROMOSOME,START,END,name,length,cpgNum,gcNum,perCpg,perGc,obsExp", self.admin_key)
 
