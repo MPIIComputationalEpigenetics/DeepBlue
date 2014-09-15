@@ -664,19 +664,18 @@ namespace epidb {
       }
 
       size_t count = 0;
-      std::vector<mongo::BSONObj> bulk;
-      std::string prev_collection;
       size_t total_size = 0;
-      for (std::vector<parser::Tokens>::const_iterator it = bed_file_tokenized.begin();
-           it != bed_file_tokenized.end();
-           it++) {
-        const parser::Tokens &tokens = *it;
+      size_t bulk_size = 0;
+      std::vector<mongo::BSONObj> block;
+      std::vector<mongo::BSONObj> blocks_bulk;
+      std::string prev_collection;
+
+      BOOST_FOREACH(const parser::Tokens & tokens, bed_file_tokenized) {
         mongo::BSONObjBuilder region_builder;
-        region_builder.append("_id", (long long) dataset_id << 32 | (long long) count++);
-        region_builder.append(KeyMapper::DATASET(), (int) dataset_id);
         std::string chromosome;
         size_t start;
         size_t end;
+
         if (!fill_region_builder(region_builder, tokens, format, chromosome, start, end, msg)) {
           c.done();
           return false;
@@ -699,45 +698,25 @@ namespace epidb {
           c.done();
           return false;
         }
-
         mongo::BSONObj r = region_builder.obj();
         std::string collection = helpers::region_collection_name(genome, internal_chromosome);
 
-        if (prev_collection != collection) {
-          if (!prev_collection.empty() && bulk.size() > 0) {
-            c->insert(prev_collection, bulk);
-            if (!c->getLastError().empty()) {
-              msg = c->getLastError();
-              c.done();
-              return false;
-            }
-            bulk.clear();
-          }
-          prev_collection = collection;
-        }
-
-        total_size += r.objsize();
-        bulk.push_back(r);
-
-        if (bulk.size() % BULK_SIZE == 0) {
-          c->insert(collection, bulk);
-          if (!c->getLastError().empty()) {
-            msg = c->getLastError();
-            c.done();
-            return false;
-          }
-          bulk.clear();
-        }
-      }
-
-      if (bulk.size() > 0) {
-        c->insert(prev_collection, bulk);
-        if (!c->getLastError().empty()) {
-          msg = c->getLastError();
+        if (!check_collection(dataset_id, collection, prev_collection, count, block, blocks_bulk, bulk_size, total_size, msg)) {
           c.done();
           return false;
         }
-        bulk.clear();
+
+        block.push_back(r);
+
+        if (!check_bulk_size(dataset_id, collection, count, block, blocks_bulk, bulk_size, total_size, msg)) {
+          c.done();
+          return false;
+        }
+      }
+
+      if (!check_remainings(dataset_id, prev_collection, count, block, blocks_bulk, bulk_size, total_size, msg)) {
+        c.done();
+        return false;
       }
 
       c->update(helpers::collection_name(Collections::EXPERIMENTS()), QUERY("_id" << experiment_id),

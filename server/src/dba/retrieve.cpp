@@ -224,42 +224,6 @@ namespace epidb {
               }
             }
           }
-
-          //
-          else {
-            mongo::BSONObj::iterator i = region_bson.begin();
-
-            long _id = i.next().Long();
-            DatasetId dataset_id = i.next().Int();
-            if (_id >> 32 != dataset_id) {
-              EPIDB_LOG_ERR("Invalid dataset_id: " << _id << " expected: " << (_id >> 32) << "Region: " << _id << "Query: " << region_bson.toString());
-              return;
-
-            }
-            Position start = i.next().Int();
-            Position end = i.next().Int();
-
-            if ((start < _query_start) || (end > _query_end)) {
-              return;
-            }
-
-            Region region(start, end, dataset_id);
-
-            while (  i.more() ) {
-              mongo::BSONElement e = i.next();
-              if (e.type() == mongo::String) {
-                region.set(e.fieldName(), e.str());
-              } else if (e.type() == mongo::NumberDouble) {
-                region.set(e.fieldName(), (float) e.Double());
-              } else if (e.type() == mongo::NumberInt) {
-                region.set(e.fieldName(), (int) e.Int());
-              } else {
-                region.set(e.fieldName(), e.toString(false));
-              }
-            }
-            _regions->push_back(region);
-            _count++;
-          }
         }
       };
 
@@ -301,6 +265,8 @@ namespace epidb {
             rp.read_region(o);
           }
         }
+
+        std::sort(regions->begin(), regions->end());
 
         c.done();
         return true;
