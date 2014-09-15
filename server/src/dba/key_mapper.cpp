@@ -137,6 +137,12 @@ namespace epidb {
       return END;
     }
 
+    const std::string &KeyMapper::FEATURES()
+    {
+      static std::string VALUE = epidb::dba::KeyMapper::build_default("FEATURES");
+      return VALUE;
+    }
+
     const std::string &KeyMapper::VALUE()
     {
       static std::string VALUE = epidb::dba::KeyMapper::build_default("VALUE");
@@ -159,12 +165,6 @@ namespace epidb {
     const std::string &KeyMapper::WIG_SPAN()
     {
       static std::string VALUE = epidb::dba::KeyMapper::build_default("SPAN_WIG");
-      return VALUE;
-    }
-
-    const std::string &KeyMapper::WIG_FEATURES()
-    {
-      static std::string VALUE = epidb::dba::KeyMapper::build_default("SIZE_WIG");
       return VALUE;
     }
 

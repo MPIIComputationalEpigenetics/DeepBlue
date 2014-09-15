@@ -784,8 +784,6 @@ namespace epidb {
           }
         }
         c.done();
-        std::cerr << dataset_id << std::endl;
-        std::cerr << "nao foi encontrando coisa com o id tal" << std::endl;
         msg = "nao foi encontrando coisa com o id tal";
         return false;
       }

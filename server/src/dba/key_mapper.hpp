@@ -26,15 +26,15 @@ namespace epidb {
       static const std::string& BED_COMPRESSED();
       static const std::string& BED_DATA();
       static const std::string& BED_DATASIZE();
-      static const std::string& DATASET();
       static const std::string& CHROMOSOME();
-      static const std::string& START();
+      static const std::string& DATASET();
       static const std::string& END();
+      static const std::string& FEATURES();
+      static const std::string& START();
       static const std::string& VALUE();
       static const std::string& WIG_TYPE();
       static const std::string& WIG_STEP();
       static const std::string& WIG_SPAN();
-      static const std::string& WIG_FEATURES();
       static const std::string& WIG_DATA_SIZE();
       static const std::string& WIG_COMPRESSED();
       static const std::string& WIG_TRACK_TYPE();

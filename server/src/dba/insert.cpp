@@ -183,9 +183,10 @@ namespace epidb {
     {
       mongo::BSONArrayBuilder ab;
 
+      size_t features = 0;
       size_t uncompress_size = 0;
-      int min = std::numeric_limits<int>::max();;
-      int max = std::numeric_limits<int>::min();;
+      int min = std::numeric_limits<int>::max();
+      int max = std::numeric_limits<int>::min();
       for (std::vector<mongo::BSONObj>::const_iterator it = block.begin(); it != block.end(); it++) {
         uncompress_size += (*it).objsize();
         int start = (*it)[KeyMapper::START()].Int();
@@ -197,6 +198,7 @@ namespace epidb {
         if (end > max) {
           max = end;
         }
+        features++;
         ab.append(*it);
       }
 
@@ -216,10 +218,12 @@ namespace epidb {
       block_builder.append(KeyMapper::END(), max);
 
       if (compressed) {
+        block_builder.append(KeyMapper::FEATURES(), (int) features);
         block_builder.append(KeyMapper::BED_COMPRESSED(), true);
         block_builder.append(KeyMapper::BED_DATASIZE(), o.objsize());
         block_builder.appendBinData(KeyMapper::BED_DATA(), compressed_size, mongo::BinDataGeneral, (void *) compressed_data.get());
       } else {
+        block_builder.append(KeyMapper::FEATURES(), (int) features);
         block_builder.append(KeyMapper::BED_COMPRESSED(), false);
         block_builder.appendBinData(KeyMapper::BED_DATA(), o.objsize(), mongo::BinDataGeneral, o.objdata());
       }
@@ -333,7 +337,6 @@ namespace epidb {
       ab.append(column_type->BSONObj());
       array = ab.arr();
 
-      std::cerr << array.toString() << std::endl;
       return true;
     }
 
@@ -472,7 +475,7 @@ namespace epidb {
         if (track->span()) {
           region_builder.append(KeyMapper::WIG_SPAN(), (int) track->span());
         }
-        region_builder.append(KeyMapper::WIG_FEATURES(), (int) track->features());
+        region_builder.append(KeyMapper::FEATURES(), (int) track->features());
         region_builder.append(KeyMapper::WIG_DATA_SIZE(), (int) track->data_size());
 
         boost::shared_ptr<char> data = track->data();
@@ -964,6 +967,11 @@ namespace epidb {
       }
 
       size_t count = 0;
+      size_t total_size = 0;
+      size_t bulk_size = 0;
+      std::vector<mongo::BSONObj> block;
+      std::vector<mongo::BSONObj> blocks_bulk;
+
       BOOST_FOREACH(const ChromosomeRegions & chromosome_regions, regions) {
         std::string chromosome = chromosome_regions.first;
         std::string internal_chromosome;
@@ -985,10 +993,8 @@ namespace epidb {
         std::vector<mongo::BSONObj> bulk;
 
         for (RegionsIterator it = chromosome_regions.second->begin(); it != chromosome_regions.second->end(); it++) {
-          Region region = *it;
+          const Region &region = *it;
           mongo::BSONObjBuilder region_builder;
-          region_builder.append("_id", (long long) dataset_id << 32 | (long long) count++);
-          region_builder.append(KeyMapper::DATASET(), (int) dataset_id);
 
           if (region.start() > chromosome_size || region.end() > chromosome_size) {
             msg = out_of_range_message(region.start(), region.end(), chromosome);
@@ -1000,31 +1006,21 @@ namespace epidb {
           region_builder.append(KeyMapper::END(), (int) region.end());
 
           mongo::BSONObj r = region_builder.obj();
-          bulk.push_back(r);
+          block.push_back(r);
 
-          if (bulk.size() % BULK_SIZE == 0) {
-            c->insert(collection, bulk);
-            if (!c->getLastError().empty()) {
-              msg = c->getLastError();
-              c.done();
-              return false;
-            }
-            bulk.clear();
-          }
-        }
-        if (bulk.size() > 0) {
-          c->insert(collection, bulk);
-          if (!c->getLastError().empty()) {
-            msg = c->getLastError();
+          if (!check_bulk_size(dataset_id, collection, count, block, blocks_bulk, bulk_size, total_size, msg)) {
             c.done();
             return false;
           }
-          bulk.clear();
+        }
+        if (!check_remainings(dataset_id, collection, count, block, blocks_bulk, bulk_size, total_size, msg)) {
+          c.done();
+          return false;
         }
       }
 
       c->update(helpers::collection_name(Collections::ANNOTATIONS()), QUERY("_id" << annotation_id),
-                BSON("$set" << BSON("done" << true << "upload_end" << mongo::DATENOW)), false, true);
+                BSON("$set" << BSON("total_size" << (unsigned int) total_size << "done" << true << "upload_end" << mongo::DATENOW)), false, true);
 
       if (!c->getLastError().empty()) {
         msg = c->getLastError();

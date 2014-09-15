@@ -162,7 +162,6 @@ namespace epidb {
             if (!metafield.process((*it)->name(), chromosome, region, result, msg)) {
               return false;
             }
-            std::cerr << (*it)->name() << " " << result << std::endl;
             if (result.empty()) {
               ss << (*it)->default_value();
             } else {
@@ -172,7 +171,6 @@ namespace epidb {
             if ((*it)->type() == dba::columns::COLUMN_INTEGER) {
               Score v = region.value((*it)->internal_name());
               if (v == std::numeric_limits<Score>::min()) {
-                std::cerr << " 1 default" << std::endl;
                 ss << (*it)->default_value();
               } else {
                 ss << utils::integer_to_string((int)v);
@@ -180,7 +178,6 @@ namespace epidb {
             } else if ( ( (*it)->type() == dba::columns::COLUMN_DOUBLE) ||  ((*it)->type() == dba::columns::COLUMN_RANGE)) {
               Score v = region.value((*it)->internal_name());
               if (v == std::numeric_limits<Score>::min()) {
-                std::cerr << " 2 default" << std::endl;
                 ss << (*it)->default_value();
               } else {
                 ss << utils::double_to_string(v);

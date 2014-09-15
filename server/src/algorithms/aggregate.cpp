@@ -139,7 +139,6 @@ namespace epidb {
             if (field[0] == '@') {
               std::string value;
               if (!metafield.process(field, chrom, *it_data, value, msg)) {
-                std::cerr << msg << std::endl;
                 return false;
               }
               double v;

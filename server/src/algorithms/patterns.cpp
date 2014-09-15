@@ -60,14 +60,15 @@ namespace epidb {
       boost::regex expression(pattern);
       boost::match_results<std::string::const_iterator> what;
       boost::match_flag_type flags = boost::match_default;
+      int pos = 0;
       while (boost::regex_search(start, end, what, expression, flags)) {
-        Region region(what.position(), what.position() + what.str().size(), DATASET_EMPTY_ID);
+        Region region(pos, pos + what.str().size(), DATASET_EMPTY_ID);
         overlap_localizations->push_back(region);
         start = what[0].first + 1;
+        pos += (what.position() + 1);
         flags |= boost::match_prev_avail;
         flags |= boost::match_not_bob;
       }
-
 
       return true;
     }

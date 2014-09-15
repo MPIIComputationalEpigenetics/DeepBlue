@@ -65,7 +65,7 @@ namespace epidb {
             Position start = region_bson[KeyMapper::START()].numberInt();
             Length step = region_bson[KeyMapper::WIG_STEP()].numberInt();
             Length span = region_bson[KeyMapper::WIG_SPAN()].numberInt();
-            Length size = region_bson[KeyMapper::WIG_FEATURES()].numberInt();
+            Length size = region_bson[KeyMapper::FEATURES()].numberInt();
 
             int db_data_size;
             const char *data;
@@ -228,7 +228,6 @@ namespace epidb {
       };
 
       bool get_regions_from_collection(const std::string &collection,
-                                       const std::string &chromosome,
                                        const mongo::BSONObj &regions_query,
                                        Regions &regions, std::string &msg)
       {
@@ -280,13 +279,9 @@ namespace epidb {
 
         for (std::vector<std::string>::const_iterator chrom_it = chromosomes->begin(); chrom_it != chromosomes->end(); chrom_it++) {
           std::string collection = helpers::region_collection_name(genome, *chrom_it);
-
-          size_t count(0);
-          count_regions(genome, *chrom_it, regions_query, count);
-          Regions regions = build_regions(count);
-
+          Regions regions = build_regions();
           std::string msg;
-          if (!get_regions_from_collection(collection, *chrom_it, regions_query, regions, msg)) {
+          if (!get_regions_from_collection(collection, regions_query, regions, msg)) {
             EPIDB_LOG_ERR(msg);
             return;
           }
@@ -348,10 +343,15 @@ namespace epidb {
       bool count_regions(const std::string &genome, const std::string &chromosome, const mongo::BSONObj &regions_query,
                          size_t &count)
       {
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
         std::string collection_name = helpers::region_collection_name(genome, chromosome);
-        count = c->count(collection_name, regions_query);
-        c.done();
+        std::string msg;
+        Regions regions = build_regions();
+        if (!get_regions_from_collection(collection_name, regions_query, regions, msg)) {
+          EPIDB_LOG_ERR(msg);
+          count = 0;
+          return false;
+        }
+        count = regions->size();
         return true;
       }
 
@@ -359,15 +359,19 @@ namespace epidb {
                              const boost::shared_ptr<std::vector<std::string> > chromosomes,
                              const mongo::BSONObj &regions_query, boost::shared_ptr<std::vector<size_t> > results)
       {
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
         size_t size = 0;
         for (std::vector<std::string>::const_iterator it = chromosomes->begin(); it != chromosomes->end(); ++it) {
           std::string collection_name = helpers::region_collection_name(genome, *it);
-          size_t partial_size = c->count(collection_name, regions_query);
-          size += partial_size;
+          Regions regions = build_regions();
+          std::string msg;
+          if (!get_regions_from_collection(collection_name, regions_query, regions, msg)) {
+            EPIDB_LOG_ERR(msg);
+            size = 0;
+            return;
+          }
+          size += regions->size();;
         }
         results->push_back(size);
-        c.done();
       }
 
       bool count_regions(const std::string &genome,
