@@ -108,7 +108,7 @@ namespace epidb {
 
   bool Region::has_stats() const
   {
-    return _stats_value;
+    return _stats_value.get();
   }
 
   Score Region::min() const

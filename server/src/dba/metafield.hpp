@@ -30,7 +30,7 @@ namespace epidb {
       static std::map<std::string, Function> functions;
       static std::map<std::string, std::string> functionsReturns;
 
-      std::unordered_map<DatasetId, mongo::BSONObj> obj_by_dataset_id;
+      std::map<DatasetId, mongo::BSONObj> obj_by_dataset_id;
 
       dba::retrieve::SequenceRetriever seq_retr;
 

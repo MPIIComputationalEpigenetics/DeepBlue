@@ -11,6 +11,9 @@ ifeq ($(UNAME_S),Linux)
 	ifeq ($(UNAME_N),infao6940)
 		host = production
 	endif
+	ifeq ($(UNAME_N),infao3901)
+		host = production
+	endif
 endif
 ifeq ($(UNAME_S),Darwin)
 	host = macosx
@@ -20,10 +23,10 @@ endif
 ifeq ($(host),production)
  CXX = g++
  LD  = g++
- LDFLAGS     = -static -pthread
- MONGOLIBS = -L/opt/mongodb/driver/lib -lmongoclient
+ LDFLAGS   = -pthread
+ MONGOLIBS = -L/local/data/DeepBlue/server/third_party/drivers/linux/lib -lmongoclient
  BOOST_DIR = /opt/mongodb/boost/lib
- DEFCXXFLAGS = -Wall -O3 -Ofast -I/opt/mongodb/boost/include/ -I/opt/mongodb/driver/include/ -I/opt/mongodb/DeepBlue/server/third_party/cppformat/ -I/opt/mongodb/DeepBlue/server//third_party/minilzo/
+ DEFCXXFLAGS = -Wall -O3 -Ofast -I/opt/mongodb/boost/include/ -I/local/data/DeepBlue/server/third_party/drivers/linux/include/ -I/local/data/DeepBlue/server/third_party/minilzo/ -I/local/data/DeepBlue/server/third_party/cppformat/
  BOOSTLIBS = $(BOOST_DIR)/libboost_filesystem.a $(BOOST_DIR)/libboost_thread.a $(BOOST_DIR)/libboost_system.a $(BOOST_DIR)/libboost_regex.a $(BOOST_DIR)/libboost_log.a  $(BOOST_DIR)/libboost_timer.a  $(BOOST_DIR)/libboost_chrono.a $(BOOST_DIR)/libboost_program_options.a -lrt
  THIRDLIBS = ../third_party/libexpat_linux.a
 
