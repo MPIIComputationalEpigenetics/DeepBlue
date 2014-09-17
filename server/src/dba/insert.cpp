@@ -491,7 +491,7 @@ namespace epidb {
           region_builder.appendBinData(KeyMapper::WIG_DATA(), compressed_size, mongo::BinDataGeneral, (void *) compressed_data.get());
           actual_size += compressed_size;
         } else {
-          region_builder.appendBinData(KeyMapper::WIG_DATA(), compressed_size, mongo::BinDataGeneral, data.get());
+          region_builder.appendBinData(KeyMapper::WIG_DATA(), data_size, mongo::BinDataGeneral, data.get());
           actual_size += data_size;
         }
 
