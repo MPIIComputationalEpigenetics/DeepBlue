@@ -70,7 +70,7 @@ namespace epidb {
 
     const std::string &Collections::BIO_SOURCE_SYNONYM_NAMES()
     {
-      static std::string bio_source_synonyms_names("bio_source_synonyms.names");
+      static std::string bio_source_synonyms_names("bio_source_synonyms_names");
       return bio_source_synonyms_names;
     }
 
