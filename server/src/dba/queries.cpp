@@ -725,7 +725,7 @@ namespace epidb {
         return algorithms::aggregate(data, ranges, field, regions, msg);
       }
 
-      bool get_columns_from_dataset(DatasetId &dataset_id, std::vector<mongo::BSONElement> &columns, std::string &msg)
+      bool get_columns_from_dataset(DatasetId &dataset_id, std::vector<mongo::BSONObj> &columns, std::string &msg)
       {
         if (dataset_id == 0) {
           return true;
@@ -743,12 +743,14 @@ namespace epidb {
         while (cursor->more()) {
           mongo::BSONObj experiment = cursor->next();
           if (experiment.hasField("columns")) {
-            columns = experiment["columns"].Array();
+            std::vector<mongo::BSONElement> tmp_columns = experiment["columns"].Array();
+            BOOST_FOREACH(const mongo::BSONElement & e, tmp_columns) {
+              columns.push_back(e.Obj().getOwned());
+            }
             c.done();
             return true;
           } else {
             std::cerr <<  "Experiment dataset" << dataset_id << " does not have columns!!" << std::endl;
-            msg = "blah 1";
             c.done();
             return false;
           }
@@ -756,9 +758,12 @@ namespace epidb {
 
         cursor = c->query(helpers::collection_name(Collections::ANNOTATIONS()), o);
         while (cursor->more()) {
-          mongo::BSONObj annotation = cursor->next();
+          mongo::BSONObj annotation = cursor->next().getOwned();
           if (annotation.hasField("columns")) {
-            columns = annotation["columns"].Array();
+            std::vector<mongo::BSONElement> tmp_columns = annotation["columns"].Array();
+            BOOST_FOREACH(const mongo::BSONElement & e, tmp_columns) {
+              columns.push_back(e.Obj().getOwned());
+            }
             c.done();
             return true;
           } else {
@@ -771,9 +776,12 @@ namespace epidb {
 
         cursor = c->query(helpers::collection_name(Collections::TILINGS()), o);
         while (cursor->more()) {
-          mongo::BSONObj tiling = cursor->next();
+          mongo::BSONObj tiling = cursor->next().getOwned();
           if (tiling.hasField("columns")) {
-            columns = tiling["columns"].Array();
+            std::vector<mongo::BSONElement> tmp_columns = tiling["columns"].Array();
+            BOOST_FOREACH(const mongo::BSONElement & e, tmp_columns) {
+              columns.push_back(e.Obj().getOwned());
+            }
             c.done();
             return true;
           } else {
@@ -784,7 +792,7 @@ namespace epidb {
           }
         }
         c.done();
-        msg = "nao foi encontrando coisa com o id tal";
+        msg = "Dataset " + utils::integer_to_string(dataset_id) + " not found";
         return false;
       }
     }

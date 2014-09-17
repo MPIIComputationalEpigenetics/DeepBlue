@@ -121,7 +121,7 @@ namespace epidb {
 
             DatasetId id = region.dataset_id();
 
-            std::vector<mongo::BSONElement> columns;
+            std::vector<mongo::BSONObj> columns;
             if (!dba::query::get_columns_from_dataset(id, columns, msg)) {
               return false;
             }

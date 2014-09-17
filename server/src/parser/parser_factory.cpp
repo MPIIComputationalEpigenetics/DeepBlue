@@ -143,7 +143,7 @@ namespace epidb {
     }
 
     bool FileFormatBuilder::build_for_outout(const std::string &format, FileFormat &file_format,
-        std::vector<mongo::BSONElement> experiment_columns, std::string &msg )
+        std::vector<mongo::BSONObj> experiment_columns, std::string &msg )
 
     {
       if (format.empty()) {
@@ -170,12 +170,12 @@ namespace epidb {
           bool found = false;
 
           // Look into experiment columns
-          BOOST_FOREACH(const mongo::BSONElement & column, experiment_columns) {
+          BOOST_FOREACH(const mongo::BSONObj& column, experiment_columns) {
             if (found) {
               break;
             }
             if (column["name"].str() == field_info[0]) {
-              if (!dba::columns::column_type_bsonobj_to_class(column.Obj(), column_type, msg)) {
+              if (!dba::columns::column_type_bsonobj_to_class(column, column_type, msg)) {
                 return false;
               } else {
                 found = true;

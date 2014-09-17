@@ -89,7 +89,7 @@ namespace epidb {
     public:
       static bool build(const std::string &format, FileFormat &file_format, std::string &msg);
       static bool build_for_outout(const std::string &format, FileFormat &file_format,
-                                   std::vector<mongo::BSONElement> experiment_columns, std::string &msg );
+                                   std::vector<mongo::BSONObj> experiment_columns, std::string &msg );
     };
 
     class Parser {
