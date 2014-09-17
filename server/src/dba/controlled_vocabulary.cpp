@@ -423,7 +423,7 @@ namespace epidb {
         query_builder.append("norm_bio_source_name", norm_bio_source_more_embracing);
         mongo::BSONObj query = query_builder.obj();
 
-        mongo::BSONObj value = BSON("subs" << norm_bio_source_less_embracing);
+        mongo::BSONObj value = BSON("subs" << norm_less_embracing_root);
         mongo::BSONObj append_value = BSON("$addToSet" << value);
 
         c->update(helpers::collection_name(Collections::BIO_SOURCE_EMBRACING()), query, append_value, true, false);
