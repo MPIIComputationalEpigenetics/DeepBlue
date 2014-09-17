@@ -419,8 +419,11 @@ namespace epidb {
 
         mongo::ScopedDbConnection c(config::get_mongodb_server());
 
+        std::cerr << norm_more_embracing_root << std::endl;
+        std::cerr << norm_less_embracing_root << std::endl;
+
         mongo::BSONObjBuilder query_builder;
-        query_builder.append("norm_bio_source_name", norm_bio_source_more_embracing);
+        query_builder.append("norm_bio_source_name", norm_more_embracing_root);
         mongo::BSONObj query = query_builder.obj();
 
         mongo::BSONObj value = BSON("subs" << norm_less_embracing_root);
