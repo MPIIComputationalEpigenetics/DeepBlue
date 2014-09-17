@@ -20,7 +20,6 @@ import overlaps
 import output
 import patterns
 import projects
-import related_bio_sources
 import samples
 import search
 import select_regions
