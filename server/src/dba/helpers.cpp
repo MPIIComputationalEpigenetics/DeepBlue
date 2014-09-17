@@ -199,7 +199,7 @@ namespace epidb {
         }
 
         if (results.size() == 0) {
-          msg = "Unable to retrieve the id of the '" + norm_name + "''.";
+          msg = "Unable to retrieve the id of the '" + norm_name + "''. Where: " + where;
           return false;
         }
 
