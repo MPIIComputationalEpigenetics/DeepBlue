@@ -63,38 +63,6 @@ namespace epidb {
           continue;
         }
 
-        // Code for ENCODE bigbed files
-        /*
-        if ((strs[0] == "#bedGraph") && (strs[1] == "section") && strs.size() == 3) {
-          std::vector<std::string> location;
-          boost::split(location, strs[2], boost::is_any_of(":"));
-          if (location.size() == 2) {
-            std::string chromosome = location[0];
-            std::vector<std::string> start_end;
-            boost::split(start_end, location[1], boost::is_any_of("-"));
-            if (start_end.size() == 2) {
-              Position start;
-              Position end;
-              if (!utils::string_to_position(start_end[0], start)) {
-                msg = "The start position " + line + " is not valid. (Line: " + line_str() + ")";
-                return false;
-              }
-
-              if (!utils::string_to_position(start_end[1], end)) {
-                msg = "The end position " + line + " is not valid. (Line: " + line_str() + ")";
-                return false;
-              }
-
-              if (actual_track) {
-                wig->add_track(actual_track);
-              }
-              actual_track = build_bedgraph_track(chromosome, start, end);
-            }
-          }
-          continue;
-        }
-        */
-
         if (line[0] == '#') {
           continue;
         }
