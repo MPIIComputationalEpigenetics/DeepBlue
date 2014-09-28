@@ -526,6 +526,7 @@ namespace epidb {
         }
         c.done();
 
+        res["_id"] = id;
         res["name"] = column_type->name();
         res["default_value"] = column_type->default_value();
         switch (column_type->type()) {
