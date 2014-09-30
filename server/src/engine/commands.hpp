@@ -47,6 +47,7 @@ namespace epidb {
     static const CommandCategory BIO_SOURCES("Bio sources", "Inserting and listing bio sources");
     static const CommandCategory BIO_SOURCE_RELATIONSHIP("Bio source relationship", "Set the relationship between different bio sources");
     static const CommandCategory COLUMN_TYPES("Column Types", "Inserting and listing different column types");
+    static const CommandCategory DATA_MODIFICATION("Data Modification", "Operations that modify the data content");
     static const CommandCategory EPIGENETIC_MARKS("Epigenetic marks", "Inserting and listing epigenetic marks");
     static const CommandCategory EXPERIMENTS("Experiments", "Inserting and listing experiments");
     static const CommandCategory GENERAL_INFORMATION("General Information", "Commands for all types of data");
