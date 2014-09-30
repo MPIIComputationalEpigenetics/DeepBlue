@@ -22,7 +22,7 @@ namespace epidb {
                                   bool is_bio_source, const bool is_syn,
                                   const std::string &user_key, std::string &msg);
 
-      bool get_bio_source_synonyms(const std::string &bio_source_name, const std::string &norm_bio_source_name,
+      bool get_bio_source_synonyms(const std::string &id, const std::string &bio_source_name, const std::string &norm_bio_source_name,
                                    bool is_bio_source, const std::string &user_key,
                                    std::vector<utils::IdName> &syns, std::string &msg);
 
@@ -30,11 +30,6 @@ namespace epidb {
                                     const std::string &bio_source_less_embracing, const std::string &norm_bio_source_less_embracing,
                                     bool more_embracing_is_syn, const bool less_embracing_is_syn,
                                     const std::string &user_key, std::string &msg);
-
-      bool get_bio_source_scope(const std::string &bio_source_name, const std::string &norm_bio_source_name,
-                                bool is_bio_source, const std::string &user_key,
-                                std::vector<utils::IdName> &related_bio_sources,
-                                std::string &msg);
 
       bool get_upper_term(const std::string &bio_source_name, const std::string &norm_bio_source_name,
                           bool is_bio_source,

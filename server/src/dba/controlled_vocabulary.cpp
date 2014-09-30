@@ -30,13 +30,17 @@ namespace epidb {
 
       std::map<std::string, std::string> cache_is_connected;
 
-      bool __get_synonyms_from_bio_source(const std::string &bio_source_name, const std::string &norm_bio_source_name,
+      bool __get_synonyms_from_bio_source(const std::string &id, const std::string &bio_source_name, const std::string &norm_bio_source_name,
                                           const std::string &user_key,
                                           std::vector<utils::IdName> &syns, std::string &msg)
       {
         utils::IdName id_name_bio_source;
-        if (!helpers::get_name(Collections::BIO_SOURCES(), norm_bio_source_name, id_name_bio_source, msg)) {
-          return false;
+        if (id.empty()) {
+          if (!helpers::get_name(Collections::BIO_SOURCES(), norm_bio_source_name, id_name_bio_source, msg)) {
+            return false;
+          }
+        } else {
+          id_name_bio_source = utils::IdName(id, bio_source_name);
         }
 
         syns.push_back(id_name_bio_source);
@@ -106,7 +110,7 @@ namespace epidb {
 
         c.done();
 
-        if (!__get_synonyms_from_bio_source(bio_source_name, norm_bio_source_name, user_key, syns, msg)) {
+        if (!__get_synonyms_from_bio_source("", bio_source_name, norm_bio_source_name, user_key, syns, msg)) {
           return false;
         }
 
@@ -118,12 +122,12 @@ namespace epidb {
                                 std::string &msg)
       {
         std::vector<utils::IdName> syns;
-        if (!__get_synonyms_from_bio_source(term, norm_term, "", syns, msg)) {
+        if (!__get_synonyms_from_bio_source("", term, norm_term, "", syns, msg)) {
           return false;
         }
 
         std::vector<std::string> terms;
-        BOOST_FOREACH(const utils::IdName& syn, syns) {
+        BOOST_FOREACH(const utils::IdName & syn, syns) {
           terms.push_back(syn.name);
           terms.push_back(utils::normalize_name(syn.name));
         }
@@ -134,13 +138,14 @@ namespace epidb {
           return false;
         }
 
-        BOOST_FOREACH(const std::string& norm_sub, norm_subs) {
+        BOOST_FOREACH(const std::string & norm_sub, norm_subs) {
           std::string bio_source_id;
           if (!helpers::get_bio_source_id(norm_sub, bio_source_id, msg)) {
             return false;
           }
 
-          BOOST_FOREACH(const std::string& term, terms) {
+          std::cerr << "insert related term " << bio_source_id << " term " << term << std::endl;
+          BOOST_FOREACH(const std::string & term, terms) {
             if (norm_sub != utils::normalize_name(term)) {
               if (!search::insert_related_term(bio_source_id, term, msg)) {
                 return false;
@@ -285,12 +290,13 @@ namespace epidb {
       }
 
 
-      bool get_bio_source_synonyms(const std::string &bio_source_name, const std::string &norm_bio_source_name,
+      bool get_bio_source_synonyms(const std::string &id, const std::string &bio_source_name,
+                                   const std::string &norm_bio_source_name,
                                    bool is_bio_source, const std::string &user_key,
                                    std::vector<utils::IdName> &syns, std::string &msg)
       {
         if (is_bio_source) {
-          return __get_synonyms_from_bio_source(bio_source_name, norm_bio_source_name, user_key, syns, msg);
+          return __get_synonyms_from_bio_source(id, bio_source_name, norm_bio_source_name, user_key, syns, msg);
         } else {
           return __get_synonyms_from_synonym(bio_source_name, norm_bio_source_name, user_key, syns, msg);
         }
