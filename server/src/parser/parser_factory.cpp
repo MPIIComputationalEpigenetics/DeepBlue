@@ -212,7 +212,6 @@ namespace epidb {
 
           // Check if it is metafield and has default value
           if (dba::Metafield::is_meta(field_string)) {
-            std::cerr << field_info[1] << std::endl;
             if (!dba::Metafield::build_column(field_info[0], field_info[1], column_type, msg)) {
               return false;
             }
