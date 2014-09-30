@@ -1,0 +1,75 @@
+only annotations, before compressing bed
+
+{
+  "db": "deepblue",
+  "collections": 107,
+  "objects": 13254208,
+  "avgObjSize": 130.40812940312995,
+  "dataSize": 1728456472,
+  "storageSize": 2405896192,
+  "numExtents": 447,
+  "indexes": 296,
+  "indexSize": 1874707744,
+  "fileSize": 6373244928,
+  "nsSizeMB": 16,
+  "dataFileVersion": {
+    "major": 4,
+    "minor": 6
+  },
+  "extentFreeList": {
+    "num": 0,
+    "totalSize": 0
+  },
+  "ok": 1
+}
+
+--- Blocks of 1000
+
+After compressing
+{
+  "db": "deepblue_compress",
+  "collections": 107,
+  "objects": 14727,
+  "avgObjSize": 35070.9727711007,
+  "dataSize": 516490216,
+  "storageSize": 688611328,
+  "numExtents": 261,
+  "indexes": 296,
+  "indexSize": 4022592,
+  "fileSize": 1006632960,
+  "nsSizeMB": 16,
+  "dataFileVersion": {
+    "major": 4,
+    "minor": 6
+  },
+  "extentFreeList": {
+    "num": 0,
+    "totalSize": 0
+  },
+  "ok": 1
+}
+
+--- Blocks of 100
+
+{
+  "db": "deepblue_compress",
+  "collections": 107,
+  "objects": 133975,
+  "avgObjSize": 4148.880970330286,
+  "dataSize": 555846328,
+  "storageSize": 717885440,
+  "numExtents": 333,
+  "indexes": 296,
+  "indexSize": 18281536,
+  "fileSize": 1006632960,
+  "nsSizeMB": 16,
+  "dataFileVersion": {
+    "major": 4,
+    "minor": 6
+  },
+  "extentFreeList": {
+    "num": 0,
+    "totalSize": 0
+  },
+  "ok": 1
+}
