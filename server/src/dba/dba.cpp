@@ -1047,7 +1047,7 @@ namespace epidb {
                                  std::vector<utils::IdName> &syns,
                                  std::string &msg)
     {
-      return cv::get_bio_source_synonyms(bio_source_name, norm_bio_source_name, is_bio_source, user_key, syns, msg);
+      return cv::get_bio_source_synonyms("", bio_source_name, norm_bio_source_name, is_bio_source, user_key, syns, msg);
     }
 
     bool set_bio_source_scope(const std::string &bio_source_more_embracing, const std::string &norm_bio_source_more_embracing,
