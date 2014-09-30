@@ -262,7 +262,7 @@ class TestSearch(helpers.TestCase):
 
     (res, info) = epidb.info(bsid1, self.admin_key)
     self.assertSuccess(res, info)
-    self.assertEquals(info, {'description': 'bio source A', 'synonyms': ['Bio Source A', 'synonym name for bio source a', 'bla bla blu blu', 'another synonym'], 'user': 'test_admin', '_id': 'bs2', 'type': 'bio_source', 'name': 'Bio Source A'})
+    self.assertEquals({'description': 'bio source A', 'synonyms': ['Bio Source A', 'synonym name for bio source a', 'bla bla blu blu', 'another synonym'], 'user': 'test_admin', '_id': 'bs2', 'type': 'bio_source', 'name': 'Bio Source A'}, info)
 
   def test_search_embracing(self):
     epidb = EpidbClient()
@@ -411,20 +411,20 @@ class TestSearch(helpers.TestCase):
 
     (s, ss) = epidb.search("string_column", "column_types", self.admin_key)
     (s, info) = epidb.info(ss[0][0], self.admin_key)
-    self.assertEqual(info, {'default_value': '.', 'type': 'column_type', 'name': 'string_column', 'column_type': 'string'})
+    self.assertEqual(info, {'_id': 'ct6', 'default_value': '.', 'description': 'description', 'type': 'column_type', 'name': 'string_column', 'column_type': 'string'})
 
     (s, ss) = epidb.search("integer_column", "column_types", self.admin_key)
     (s, info) = epidb.info(ss[0][0], self.admin_key)
-    self.assertEqual(info, {'column_type': 'integer', 'type': 'column_type', 'default_value': '0', 'name': 'integer_column'})
+    self.assertEqual(info, {'_id': 'ct7', 'column_type': 'integer', 'description': 'description',  'type': 'column_type', 'default_value': '0', 'name': 'integer_column'})
 
     (s, ss) = epidb.search("double_column", "column_types", self.admin_key)
     (s, info) = epidb.info(ss[0][0], self.admin_key)
-    self.assertEqual(info, {'column_type': 'double', 'type': 'column_type', 'default_value': '0.0', 'name': 'double_column'})
+    self.assertEqual(info, {'_id': 'ct8', 'column_type': 'double', 'description': 'description', 'type': 'column_type', 'default_value': '0.0', 'name': 'double_column'})
 
     (s, ss) = epidb.search("score", "column_types", self.admin_key)
     (s, info) = epidb.info(ss[0][0], self.admin_key)
-    self.assertEqual(info, {'type': 'column_type', 'default_value': 'X', 'maximum': '1', 'minimum': '0', 'name': 'score', 'column_type': 'range'})
+    self.assertEqual(info, {'_id': 'ct9','type': 'column_type', 'description': 'description', 'default_value': 'X', 'maximum': '1', 'minimum': '0', 'name': 'score', 'column_type': 'range'})
 
     (s, ss) = epidb.search("STRAND", "column_types", self.admin_key)
     (s, info) = epidb.info(ss[0][0], self.admin_key)
-    self.assertEqual(info, {'type': 'column_type', 'default_value': '.', 'name': 'STRAND', 'column_type': 'category', 'values': '+,-'})
+    self.assertEqual(info, {'_id': 'ct10', 'type': 'column_type', 'description': 'description', 'default_value': '.', 'name': 'STRAND', 'column_type': 'category', 'values': '+,-'})
