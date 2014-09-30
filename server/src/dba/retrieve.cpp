@@ -31,6 +31,8 @@
 #include "../extras/compress.hpp"
 #include "../extras/utils.hpp"
 
+#include "../parser/wig.hpp"
+
 #include "../regions.hpp"
 #include "../log.hpp"
 
