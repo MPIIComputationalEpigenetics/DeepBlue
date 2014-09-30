@@ -404,17 +404,18 @@ namespace epidb {
       }
       experiment_data_builder.append("extra_metadata", metadata_builder.obj());
 
-
       std::map<std::string, std::string> sample_data;
       if (!info::get_sample_by_id(sample_id, sample_data, msg, true)) {
         return false;
       }
+      mongo::BSONObjBuilder sample_builder;
       std::map<std::string, std::string>::iterator it;
       for (it = sample_data.begin(); it != sample_data.end(); ++it) {
         if ((it->first != "_id") && (it->first != "user")) {
-          experiment_data_builder.append(it->first, it->second);
+          sample_builder.append(it->first, it->second);
         }
       }
+      experiment_data_builder.append("sample_info", sample_builder.obj());
 
       mongo::BSONObj experiment_data = experiment_data_builder.obj();
       mongo::BSONObjBuilder experiment_builder;
@@ -624,12 +625,14 @@ namespace epidb {
       if (!info::get_sample_by_id(sample_id, sample_data, msg, true)) {
         return false;
       }
+      mongo::BSONObjBuilder sample_builder;
       std::map<std::string, std::string>::iterator it;
       for (it = sample_data.begin(); it != sample_data.end(); ++it) {
         if ((it->first != "_id") && (it->first != "user")) {
-          experiment_data_builder.append(it->first, it->second);
+          sample_builder.append(it->first, it->second);
         }
       }
+      experiment_data_builder.append("sample_info", sample_builder.obj());
 
       mongo::BSONObjBuilder experiment_builder;
       mongo::BSONObj experiment_data = experiment_data_builder.obj();

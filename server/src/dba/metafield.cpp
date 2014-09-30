@@ -210,7 +210,11 @@ namespace epidb {
     bool Metafield::bio_source(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const Region &region,
                                std::string &result, std::string &msg)
     {
-      result = get_by_region_set(obj, "bio_source_name");
+      if (obj.hasField("sample_info")) {
+        result =  obj["sample_info"]["bio_source_name"].str();
+      } else {
+        result = "";
+      }
       return true;
     }
 

@@ -79,19 +79,24 @@ namespace epidb {
             continue;
           }
 
-
-          if (std::string(e.fieldName()) == "extra_metadata") {
+          std::string field_name = std::string(e.fieldName());
+          if (field_name == "extra_metadata" || field_name == "sample_info") {
             for (mongo::BSONObj::iterator itt = e.Obj().begin(); itt.more(); ) {
               mongo::BSONElement em = itt.next();
               if (em.isSimpleType()) {
-                create_text_search_builder.append(std::string("extra_metadata_") + em.fieldName(), em.str());
+                create_text_search_builder.append(field_name + "_" + em.fieldName(), em.str());
               }
             }
           }
         }
 
         if (type == "experiments" || type == "samples") {
-          std::string norm_bio_source_name = data["norm_bio_source_name"].str();
+          std::string norm_bio_source_name;
+          if (type == "experiments") {
+            norm_bio_source_name = data["sample_info"]["norm_bio_source_name"].str();
+          } else {
+            norm_bio_source_name = data["norm_bio_source_name"].str();
+          }
           std::auto_ptr<mongo::DBClientCursor> cursor = c->query(helpers::collection_name(Collections::TEXT_SEARCH()),
               mongo::fromjson("{\"norm_name\": \"" + norm_bio_source_name + "\", \"type\": \"bio_sources\"}"));
 
@@ -99,6 +104,7 @@ namespace epidb {
             std::string s = Error::m(ERR_DATABASE_INVALID_BIO_SOURCE, norm_bio_source_name.c_str());
             EPIDB_LOG_TRACE(s);
             msg = s;
+            c.done();
             return false;
           }
 
@@ -166,6 +172,17 @@ namespace epidb {
         mongo::BSONObj update_related_query = update_related_query_builder.obj();
 
         c->update(helpers::collection_name(Collections::TEXT_SEARCH()), update_related_query, append_value, false, true);
+        if (!c->getLastError().empty()) {
+          msg = c->getLastError();
+          c.done();
+          return false;
+        }
+
+        mongo::BSONObjBuilder update_related_query_builder_for_experiments;
+        update_related_query_builder_for_experiments.append("sample_info_norm_bio_source_name", norm_bio_source_name);
+        mongo::BSONObj update_related_query_for_experiments = update_related_query_builder_for_experiments.obj();
+
+        c->update(helpers::collection_name(Collections::TEXT_SEARCH()), update_related_query_for_experiments, append_value, false, true);
         if (!c->getLastError().empty()) {
           msg = c->getLastError();
           c.done();

@@ -16,6 +16,8 @@
 
 #include "../engine/commands.hpp"
 
+#include <ctime>
+
 namespace epidb {
   namespace command {
 
@@ -73,8 +75,10 @@ namespace epidb {
           result.set_as_array(true);
         }
 
+        int c = 0;
         std::vector<std::string> synonyms;
         BOOST_FOREACH(const serialize::ParameterPtr &id_param, ids_param) {
+          clock_t dsysTime = clock();
           std::string id = id_param->as_string();
           std::string type;
           std::map<std::string, std::string> res;
@@ -156,6 +160,7 @@ namespace epidb {
             }
             info->add_child("extra_metadata", extra_metadata);
           }
+          std::cerr << "load info in " << (( ((float)  clock()) - dsysTime) / CLOCKS_PER_SEC) << std::endl;
           result.add_param(info);
         }
 
