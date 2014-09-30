@@ -10,12 +10,8 @@
 #ifndef EPIDB_DBA_DBA_HPP
 #define EPIDB_DBA_DBA_HPP
 
-#include <map>
 #include <string>
-#include <sstream>
 #include <vector>
-#include <utility>
-#include <iostream>
 
 #include <mongo/bson/bson.h>
 
@@ -25,7 +21,6 @@
 #include "../parser/field_type.hpp"
 #include "../parser/genome_data.hpp"
 #include "../parser/parser_factory.hpp"
-#include "../parser/wig_parser.hpp"
 
 namespace epidb {
   namespace dba {
