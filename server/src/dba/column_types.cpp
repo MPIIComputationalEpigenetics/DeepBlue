@@ -528,6 +528,7 @@ namespace epidb {
 
         res["_id"] = id;
         res["name"] = column_type->name();
+        res["description"] = o["description"].String();
         res["default_value"] = column_type->default_value();
         switch (column_type->type()) {
         case COLUMN_STRING: {
