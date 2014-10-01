@@ -3,7 +3,6 @@
 #include <vector>
 #include <map>
 #include <boost/shared_ptr.hpp>
-#include <boost/lexical_cast.hpp>
 
 #include "utils.hpp"
 #include "serialize.hpp"
@@ -52,7 +51,7 @@ namespace epidb {
       case DATABIN:
         return "bindata";
       default:
-        return "Unknown type: " + boost::lexical_cast<std::string>(t);
+        return "Unknown type: " + utils::integer_to_string(t);
       }
     }
 
@@ -235,11 +234,11 @@ namespace epidb {
     {}
 
     SimpleParameter::SimpleParameter(const long long i) :
-      type_(INTEGER), value_(boost::lexical_cast<std::string>(i))
+      type_(INTEGER), value_(utils::integer_to_string(i))
     {}
 
     SimpleParameter::SimpleParameter(const double d) :
-      type_(DOUBLE), value_(boost::lexical_cast<std::string>(d))
+      type_(DOUBLE), value_(utils::double_to_string(d))
     {}
 
     Type SimpleParameter::type() const
@@ -516,19 +515,19 @@ namespace epidb {
 
     void Parameters::add_string(int i)
     {
-      std::string value = boost::lexical_cast<std::string>(i);
+      std::string value = utils::integer_to_string(i);
       params_.push_back(ParameterPtr(new SimpleParameter(STRING, value)));
     }
 
     void Parameters::add_int(size_t i)
     {
-      std::string value = boost::lexical_cast<std::string>(i);
+      std::string value = utils::integer_to_string(i);
       params_.push_back(ParameterPtr(new SimpleParameter(INTEGER, value)));
     }
 
     void Parameters::add_double(double d)
     {
-      std::string value = boost::lexical_cast<std::string>(d);
+      std::string value = utils::double_to_string(d);
       params_.push_back(ParameterPtr(new SimpleParameter(DOUBLE, value)));
     }
 

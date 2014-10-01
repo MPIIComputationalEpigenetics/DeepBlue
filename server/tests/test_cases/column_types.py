@@ -67,7 +67,7 @@ class TestColumnTypes(helpers.TestCase):
     self.assertEqual(column_types[5][1], "column type name: 'string_column' default: '.' type: 'string'")
     self.assertEqual(column_types[6][1], "column type name: 'integer_column' default: '.' type: 'integer'")
     self.assertEqual(column_types[7][1], "column type name: 'double_column' default: '.' type: 'double'")
-    self.assertEqual(column_types[8][1], "column type name: 'score' default: '.' type: 'range' : 0,1")
+    self.assertEqual(column_types[8][1], "column type name: 'score' default: '.' type: 'range' : 0.0000,1.0000")
     self.assertEqual(column_types[9][1], "column type name: 'STRAND' default: '.' type: 'category' values: +,-")
 
 

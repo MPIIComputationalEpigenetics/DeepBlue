@@ -10,7 +10,6 @@
 #include <iostream>
 
 #include <boost/random.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/foreach.hpp>
 
 #include "commands.hpp"

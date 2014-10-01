@@ -21,7 +21,6 @@
 #include <format.h>
 
 #include <boost/algorithm/string.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/regex.hpp>
 
 #include "../log.hpp"
@@ -344,7 +343,7 @@ namespace epidb {
           EPIDB_LOG_ERR("Invalid position '" + position + "' in the normalize_epigenetic_mark");
           return normalize_name(epigenetic_mark);
         }
-        std::string norm_position = boost::lexical_cast<std::string>(value);
+        std::string norm_position = utils::integer_to_string(value);
         std::string norm_histone_modification = std::string("h") + histone + aa + norm_position + rest;
         return norm_histone_modification;
       }

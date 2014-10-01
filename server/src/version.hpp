@@ -13,8 +13,9 @@
 #include <string>
 
 #include <boost/config.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/version.hpp>
+
+#include "extras/utils.hpp"
 
 namespace epidb {
   class Version {
@@ -31,9 +32,9 @@ namespace epidb {
       static std::string _version_cache;
 
       if (_version_cache.length() == 0) {
-        _version_cache = boost::lexical_cast<std::string>(major_version) + std::string(".") +
-          boost::lexical_cast<std::string>(minor_version) + std::string(".") +
-          boost::lexical_cast<std::string>(fix_version);
+        _version_cache = utils::integer_to_string(major_version) + std::string(".") +
+          utils::integer_to_string(minor_version) + std::string(".") +
+          utils::integer_to_string(fix_version);
       }
 
       return _version_cache;

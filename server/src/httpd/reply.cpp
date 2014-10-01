@@ -17,9 +17,11 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include "reply.hpp"
 #include <string>
-#include <boost/lexical_cast.hpp>
+
+#include "reply.hpp"
+
+#include "extras/utils.hpp"
 
 namespace epidb {
   namespace httpd {
@@ -265,7 +267,7 @@ namespace epidb {
       rep.headers[1].name = "Access-Control-Allow-Origin";
       rep.headers[1].value = "*";
       rep.headers[2].name = "Content-Length";
-      rep.headers[2].value = boost::lexical_cast<std::string>(rep.content.size());
+      rep.headers[2].value = utils::integer_to_string(rep.content.size());
 
       return rep;
     }

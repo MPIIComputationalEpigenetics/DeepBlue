@@ -140,7 +140,7 @@ namespace epidb {
         for (std::vector<mongo::BSONElement>::iterator it = c.begin(); it != c.end(); it++) {
           mongo::BSONElement e = *it;
           std::string name = e["name"].String();
-          long long size = e["size"].Long();
+          int size = e["size"].Int();
           data[name] = size;
         }
 

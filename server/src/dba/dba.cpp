@@ -15,7 +15,6 @@
 #include <math.h>
 
 #include <boost/foreach.hpp>
-#include <boost/lexical_cast.hpp>
 
 #include <mongo/bson/bson.h>
 #include <mongo/client/dbclient.h>
@@ -211,7 +210,7 @@ namespace epidb {
         if (!helpers::get_counter("users", id, msg))  {
           return false;
         }
-        user_id = "u" + boost::lexical_cast<std::string>(id);
+        user_id = "u" + utils::integer_to_string(id);
       }
 
       mongo::BSONObjBuilder create_user_builder;
@@ -331,7 +330,7 @@ namespace epidb {
         if (!helpers::get_counter("genomes", id, msg))  {
           return false;
         }
-        genome_id = "g" + boost::lexical_cast<std::string>(id);
+        genome_id = "g" + utils::integer_to_string(id);
       }
 
       mongo::BSONObjBuilder search_data_builder;
@@ -349,7 +348,7 @@ namespace epidb {
       for (parser::ChromosomesInfo::const_iterator it = genome_info.begin(); it != genome_info.end(); it++) {
         mongo::BSONObjBuilder chromosome_builder;
         chromosome_builder.append("name", it->first);
-        chromosome_builder.append("size", it->second);
+        chromosome_builder.append("size", (int) it->second);
         ab.append(chromosome_builder.obj());
 
         if (!create_chromosome_collection(name, it->first, msg)) {
@@ -416,7 +415,7 @@ namespace epidb {
         if (!helpers::get_counter("epigenetic_marks", id, msg))  {
           return false;
         }
-        epigenetic_mark_id = "em" + boost::lexical_cast<std::string>(id);
+        epigenetic_mark_id = "em" + utils::integer_to_string(id);
       }
 
       mongo::BSONObjBuilder search_data_builder;
@@ -464,7 +463,7 @@ namespace epidb {
         if (!helpers::get_counter("biosources", id, msg))  {
           return false;
         }
-        biosource_id = "bs" + boost::lexical_cast<std::string>(id);
+        biosource_id = "bs" + utils::integer_to_string(id);
       }
 
       mongo::BSONObjBuilder search_data_builder;
@@ -530,7 +529,7 @@ namespace epidb {
         if (!helpers::get_counter("techniques", id, msg))  {
           return false;
         }
-        technique_id = "t" + boost::lexical_cast<std::string>(id);
+        technique_id = "t" + utils::integer_to_string(id);
       }
 
       mongo::BSONObjBuilder search_data_builder;
@@ -656,7 +655,7 @@ namespace epidb {
       if (!helpers::get_counter("samples", id, msg))  {
         return false;
       }
-      sample_id = "s" + boost::lexical_cast<std::string>(id);
+      sample_id = "s" + utils::integer_to_string(id);
 
       mongo::BSONObjBuilder create_sample_builder;
       create_sample_builder.append("_id", sample_id);
@@ -695,7 +694,7 @@ namespace epidb {
         if (!helpers::get_counter("sample_fields", id, msg))  {
           return false;
         }
-        sample_field_id = "f" + boost::lexical_cast<std::string>(id);
+        sample_field_id = "f" + utils::integer_to_string(id);
       }
       mongo::BSONObjBuilder create_sample_fields_builder;
       create_sample_fields_builder.append("_id", sample_field_id);
@@ -736,7 +735,7 @@ namespace epidb {
         if (!helpers::get_counter("projects", id, msg))  {
           return false;
         }
-        project_id = "p" + boost::lexical_cast<std::string>(id);
+        project_id = "p" + utils::integer_to_string(id);
       }
       mongo::BSONObjBuilder search_data_builder;
       search_data_builder.append("_id", project_id);

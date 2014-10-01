@@ -16,8 +16,6 @@
 #include <math.h>
 
 #include <boost/foreach.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/thread/mutex.hpp>
 
 #include <mongo/bson/bson.h>
 #include <mongo/client/dbclient.h>
@@ -32,7 +30,6 @@
 #include "dba.hpp"
 #include "collections.hpp"
 #include "config.hpp"
-#include "controlled_vocabulary.hpp"
 #include "full_text.hpp"
 #include "genomes.hpp"
 #include "info.hpp"
@@ -366,7 +363,7 @@ namespace epidb {
       if (!helpers::get_counter("experiments", e_id, msg))  {
         return false;
       }
-      experiment_id = "e" + boost::lexical_cast<std::string>(e_id);
+      experiment_id = "e" + utils::integer_to_string(e_id);
 
       int dataset_id;
       if (!helpers::get_counter("datasets", dataset_id, msg))  {
@@ -582,7 +579,7 @@ namespace epidb {
       if (!helpers::get_counter("experiments", e_id, msg))  {
         return false;
       }
-      experiment_id = "e" + boost::lexical_cast<std::string>(e_id);
+      experiment_id = "e" + utils::integer_to_string(e_id);
 
       int dataset_id;
       if (!helpers::get_counter("datasets", dataset_id, msg))  {
@@ -750,7 +747,7 @@ namespace epidb {
       if (!helpers::get_counter("annotations", a_id, msg))  {
         return false;
       }
-      annotation_id = "a" + boost::lexical_cast<std::string>(a_id);
+      annotation_id = "a" + utils::integer_to_string(a_id);
 
       int dataset_id;
       if (!helpers::get_counter("datasets", dataset_id, msg))  {
@@ -900,7 +897,7 @@ namespace epidb {
       if (!helpers::get_counter("annotations", a_id, msg))  {
         return false;
       }
-      annotation_id = "a" + boost::lexical_cast<std::string>(a_id);
+      annotation_id = "a" + utils::integer_to_string(a_id);
 
       int dataset_id;
       if (!helpers::get_counter("datasets", dataset_id, msg))  {

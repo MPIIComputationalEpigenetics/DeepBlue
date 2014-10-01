@@ -10,7 +10,6 @@
 #include <cstring>
 
 #include <boost/foreach.hpp>
-#include <boost/lexical_cast.hpp>
 
 #include <mongo/bson/bson.h>
 #include <mongo/client/dbclient.h>
@@ -44,7 +43,7 @@ namespace epidb {
         if (!helpers::get_counter("queries", query_counter, msg)) {
           return false;
         }
-        query_id = "q" + boost::lexical_cast<std::string>(query_counter);
+        query_id = "q" + utils::integer_to_string(query_counter);
         time_t time_;
         time(&time_);
 
@@ -623,7 +622,7 @@ namespace epidb {
           c.done();
           return false;
         }
-        std::string tiling_id = "tr" + boost::lexical_cast<std::string>(t_id);
+        std::string tiling_id = "tr" + utils::integer_to_string(t_id);
 
         if (!helpers::get_counter("datasets", dataset_id, msg))  {
           return false;

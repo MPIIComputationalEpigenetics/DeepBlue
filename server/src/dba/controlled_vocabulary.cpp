@@ -144,7 +144,6 @@ namespace epidb {
             return false;
           }
 
-          std::cerr << "insert related term " << biosource_id << " term " << term << std::endl;
           BOOST_FOREACH(const std::string & term, terms) {
             if (norm_sub != utils::normalize_name(term)) {
               if (!search::insert_related_term(biosource_id, term, msg)) {

@@ -10,7 +10,6 @@
 
 #include <boost/bind.hpp>
 #include <boost/enable_shared_from_this.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/ref.hpp>
 
 #include <mongo/bson/bson.h>
@@ -182,7 +181,7 @@ namespace epidb {
                            std::string &result, std::string &msg)
     {
 
-      result = boost::lexical_cast<std::string>(region.end() - region.start());
+      result = utils::integer_to_string(region.end() - region.start());
       return true;
     }
 
@@ -285,7 +284,7 @@ namespace epidb {
         return false;
       }
 
-      result = boost::lexical_cast<std::string>(count);
+      result = utils::integer_to_string(count);
       return true;
     }
 
@@ -303,7 +302,7 @@ namespace epidb {
       if (!count_pattern(pattern, genome, chrom, region, false, count, msg)) {
         return false;
       }
-      result = boost::lexical_cast<std::string>(count);
+      result = utils::integer_to_string(count);
 
       return true;
     }
@@ -380,7 +379,7 @@ namespace epidb {
                           std::string &result, std::string &msg)
     {
       if (region.has_stats()) {
-        result = boost::lexical_cast<std::string>(region.count());
+        result = utils::integer_to_string(region.count());
       } else {
         result = "";
       }

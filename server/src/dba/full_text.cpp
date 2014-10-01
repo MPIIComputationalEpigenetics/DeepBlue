@@ -15,7 +15,6 @@
 #include <math.h>
 
 #include <boost/foreach.hpp>
-#include <boost/lexical_cast.hpp>
 
 #include <mongo/bson/bson.h>
 #include <mongo/client/dbclient.h>

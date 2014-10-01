@@ -8,7 +8,6 @@
 
 #include <string>
 
-#include <boost/lexical_cast.hpp>
 #include <boost/thread/mutex.hpp>
 
 #include <mongo/bson/bson.h>
@@ -235,7 +234,7 @@ namespace epidb {
       // If not found useful letter, insert number
       if (stol_.find(sk) != stol_.end()) {
         while (!(stol_.find(sk) == stol_.end())) {
-          sk = l[0] + boost::lexical_cast<std::string>(i++);
+          sk = l[0] + utils::integer_to_string(i++);
         }
       }
 

@@ -19,7 +19,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::STATUS, "Debugging command to test type serialization.");
+        return CommandDescription(categories::ADMINISTRATION, "Debugging command to test type serialization.");
       }
 
       static Parameters parameters_()

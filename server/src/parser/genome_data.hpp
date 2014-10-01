@@ -17,7 +17,7 @@
 
 namespace epidb {
   namespace parser {
-    typedef std::pair<std::string, long long> ChromosomeSize;
+    typedef std::pair<std::string, size_t> ChromosomeSize;
     typedef std::vector<ChromosomeSize> ChromosomesInfo;
 
     bool string_to_genome_info(const std::string& s, ChromosomesInfo& g, std::string& msg);

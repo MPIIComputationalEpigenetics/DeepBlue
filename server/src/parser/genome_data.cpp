@@ -7,11 +7,14 @@
 //
 
 #include <iostream>
+#include <sstream>
+#include <string>
 
 #include <boost/algorithm/string.hpp>
-#include <boost/lexical_cast.hpp>
 
 #include "genome_data.hpp"
+
+#include "../extras/utils.hpp"
 
 namespace epidb {
   namespace parser {
@@ -41,7 +44,12 @@ namespace epidb {
 
         std::string s_size;
         ss_line >> s_size;
-        long long size = boost::lexical_cast<long long>(s_size);
+
+        size_t size;
+        if (!utils::string_to_long(s_size, size)) {
+          msg = "Invalid size " + s_size;
+          return false;
+        }
         ChromosomeSize cs(name, size);
         g.push_back(cs);
       }

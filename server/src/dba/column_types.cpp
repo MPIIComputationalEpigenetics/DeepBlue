@@ -10,8 +10,6 @@
 #include <string>
 #include <vector>
 
-#include <boost/algorithm/string.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/shared_ptr.hpp>
 
 #include <mongo/bson/bson.h>
@@ -136,8 +134,8 @@ namespace epidb {
       const std::string ColumnType<Range>::str() const
       {
         return AbstractColumnType::str() + " type: 'range' : "  +
-               boost::lexical_cast<std::string>(_content.first) + "," +
-               boost::lexical_cast<std::string>(_content.second);
+               utils::double_to_string(_content.first) + "," +
+               utils::double_to_string(_content.second);
       }
 
       template<>
@@ -233,7 +231,7 @@ namespace epidb {
           return false;
 
         default:
-          msg = "Invalid column type: " +  boost::lexical_cast<std::string>(type);;
+          msg = "Invalid column type: " +  utils::integer_to_string(type);;
           return false;
         }
       }
@@ -289,7 +287,7 @@ namespace epidb {
         if (!helpers::get_counter(Collections::COLUMN_TYPES(), id, msg))  {
           return false;
         }
-        column_type_id = "ct" + boost::lexical_cast<std::string>(id);
+        column_type_id = "ct" + utils::integer_to_string(id);
 
         mongo::BSONObjBuilder create_column_type_builder;
         create_column_type_builder.append("_id", column_type_id);
