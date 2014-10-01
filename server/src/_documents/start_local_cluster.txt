@@ -1,0 +1,12 @@
+mongod --configsvr --dbpath cfg &
+mongod --shardsvr --dbpath  1 --port 27000 &
+mongod --shardsvr --dbpath  2 --port 27001 &
+mongod --shardsvr --dbpath  3 --port 27002 &
+mongod --shardsvr --dbpath  4 --port 27003 &
+mongos --configdb localhost:27019 &
+
+
+sh.addShard("localhost:27000")
+sh.addShard("localhost:27001")
+sh.addShard("localhost:27002")
+sh.addShard("localhost:27003")
