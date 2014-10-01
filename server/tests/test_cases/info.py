@@ -118,11 +118,11 @@ class TestGetInfoCommand(helpers.TestCase):
     self.assertEqual(data['args'], '{ "experiment_name" : [ "exp1" ], "epigenetic_mark" : [ "Methylation" ], "sample_id" : [ "s1" ], "project" : [ "ENCODE" ], "technique" : [ "tech1" ], "has_filter" : true, "start" : 713500, "end" : 850000, "chromosomes" : [ "chr1" ], "genomes" : [ "hg19" ] }')
     self.assertEqual(data['user'], 'test_admin')
 
-  def test_bio_source_info(self):
+  def test_biosource_info(self):
     epidb = EpidbClient()
     self.init(epidb)
 
-    res, bsid = epidb.add_bio_source("K562", "desc1", {}, self.admin_key)
+    res, bsid = epidb.add_biosource("K562", "desc1", {}, self.admin_key)
     self.assertSuccess(res, bsid)
 
     res, data = epidb.info(bsid, self.admin_key)
@@ -142,14 +142,14 @@ class TestGetInfoCommand(helpers.TestCase):
     (status, sf_id_2) = epidb.add_sample_field("sex", "string", "Sex of the element: M or F", self.admin_key)
     self.assertSuccess(status, sf_id_2)
 
-    res, bsid = epidb.add_bio_source("K562", "desc1", {}, self.admin_key)
+    res, bsid = epidb.add_biosource("K562", "desc1", {}, self.admin_key)
     self.assertSuccess(res, bsid)
 
     res, sid = epidb.add_sample("K562", {"karyotype":"cancer","sex":"F"}, self.admin_key)
     self.assertSuccess(res, sid)
 
     res, data = epidb.info(sid, self.admin_key)
-    self.assertEqual(data['bio_source_name'], "K562")
+    self.assertEqual(data['biosource_name'], "K562")
     self.assertEqual(data['karyotype'], "cancer")
     self.assertEqual(data['sex'], "F")
     self.assertEqual(data['user'], "test_admin")

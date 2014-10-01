@@ -2,7 +2,7 @@ import admin
 import aggregate
 import annotations
 import bedgraph_parser
-import bio_sources
+import biosources
 import bugs
 import changes
 import column_types

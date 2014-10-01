@@ -208,9 +208,9 @@ class TestCase(unittest.TestCase):
     return emid
 
 
-  def insert_bio_source(self, epidb, name):
-    bs = data.BIO_SOURCES[name]
-    res, bsid = epidb.add_bio_source(name, bs["description"], bs["metadata"], self.admin_key)
+  def insert_biosource(self, epidb, name):
+    bs = data.BIOSOURCES[name]
+    res, bsid = epidb.add_biosource(name, bs["description"], bs["metadata"], self.admin_key)
     self.assertSuccess(res, bsid)
 
     return bsid
@@ -280,8 +280,8 @@ class TestCase(unittest.TestCase):
     for genome in data.GENOMES:
       self.insert_genome(epidb, genome)
 
-    for bsource in data.BIO_SOURCES:
-      self.insert_bio_source(epidb, bsource)
+    for bsource in data.BIOSOURCES:
+      self.insert_biosource(epidb, bsource)
 
     for tech in data.TECHNIQUES:
       self.insert_technique(epidb, tech)

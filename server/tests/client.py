@@ -49,25 +49,25 @@ class EpidbClient:
 
 
   ## Bio Sources
-  def add_bio_source(self, name, description, extra_metadata, user_key):
-    return self.server.add_bio_source(name, description, extra_metadata, user_key)
+  def add_biosource(self, name, description, extra_metadata, user_key):
+    return self.server.add_biosource(name, description, extra_metadata, user_key)
 
-  def list_bio_sources(self, user_key):
-    return self.server.list_bio_sources(user_key)
+  def list_biosources(self, user_key):
+    return self.server.list_biosources(user_key)
 
-  def list_similar_bio_sources(self, bio_source_name, user_key):
-    return self.server.list_similar_bio_sources(name, user_key)
+  def list_similar_biosources(self, biosource_name, user_key):
+    return self.server.list_similar_biosources(name, user_key)
 
 
   ## Samples
-  def add_sample(self, bio_source_name, fields, user_key):
-    return self.server.add_sample(bio_source_name, fields, user_key)
+  def add_sample(self, biosource_name, fields, user_key):
+    return self.server.add_sample(biosource_name, fields, user_key)
 
   def add_sample_field(self, name, type_, description, user_key):
     return self.server.add_sample_field(name, type_, description, user_key)
 
-  def list_samples(self, bio_source, metadata, user_key):
-    return self.server.list_samples(bio_source, metadata, user_key)
+  def list_samples(self, biosource, metadata, user_key):
+    return self.server.list_samples(biosource, metadata, user_key)
 
 
   ## Epigenetic Marks
@@ -118,20 +118,20 @@ class EpidbClient:
 
 
   ## Bio Source names
-  def set_bio_source_synonym(self, bio_source_name, synonym_name, user_key):
-    return self.server.set_bio_source_synonym(bio_source_name, synonym_name, user_key)
+  def set_biosource_synonym(self, biosource_name, synonym_name, user_key):
+    return self.server.set_biosource_synonym(biosource_name, synonym_name, user_key)
 
-  def get_bio_source_synonyms(self, bio_source_name, user_key):
-    return self.server.get_bio_source_synonyms(bio_source_name, user_key)
+  def get_biosource_synonyms(self, biosource_name, user_key):
+    return self.server.get_biosource_synonyms(biosource_name, user_key)
 
-  def set_bio_source_scope(self, bio_source_name_more_embracing, bio_source_name_less_embracing, user_key):
-    return self.server.set_bio_source_scope(bio_source_name_more_embracing, bio_source_name_less_embracing, user_key)
+  def set_biosource_scope(self, biosource_name_more_embracing, biosource_name_less_embracing, user_key):
+    return self.server.set_biosource_scope(biosource_name_more_embracing, biosource_name_less_embracing, user_key)
 
-  def get_bio_source_scope(self, bio_source_name, user_key):
-    return self.server.get_bio_source_scope(bio_source_name, user_key)
+  def get_biosource_scope(self, biosource_name, user_key):
+    return self.server.get_biosource_scope(biosource_name, user_key)
 
-  def get_bio_source_related(self, bio_source_name, user_key):
-    return self.server.get_bio_source_related(bio_source_name, user_key)
+  def get_biosource_related(self, biosource_name, user_key):
+    return self.server.get_biosource_related(biosource_name, user_key)
 
 
   ## Expermiments

@@ -453,22 +453,22 @@ namespace epidb {
       return true;
     }
 
-    bool add_bio_source(const std::string &name, const std::string &norm_name,
+    bool add_biosource(const std::string &name, const std::string &norm_name,
                         const std::string &description, const std::string &norm_description,
                         const Metadata &extra_metadata,
                         const std::string &user_key,
-                        std::string &bio_source_id, std::string &msg)
+                        std::string &biosource_id, std::string &msg)
     {
       {
         int id;
-        if (!helpers::get_counter("bio_sources", id, msg))  {
+        if (!helpers::get_counter("biosources", id, msg))  {
           return false;
         }
-        bio_source_id = "bs" + boost::lexical_cast<std::string>(id);
+        biosource_id = "bs" + boost::lexical_cast<std::string>(id);
       }
 
       mongo::BSONObjBuilder search_data_builder;
-      search_data_builder.append("_id", bio_source_id);
+      search_data_builder.append("_id", biosource_id);
       search_data_builder.append("name", name);
       search_data_builder.append("norm_name", norm_name);
       search_data_builder.append("description", description);
@@ -483,18 +483,18 @@ namespace epidb {
 
 
       mongo::BSONObj search_data = search_data_builder.obj();
-      mongo::BSONObjBuilder create_bio_source_builder;
-      create_bio_source_builder.appendElements(search_data);
+      mongo::BSONObjBuilder create_biosource_builder;
+      create_biosource_builder.appendElements(search_data);
 
       utils::IdName id_user_name;
       if (!get_user_name(user_key, id_user_name, msg)) {
         return false;
       }
-      create_bio_source_builder.append("user", id_user_name.name);
-      mongo::BSONObj cem = create_bio_source_builder.obj();
+      create_biosource_builder.append("user", id_user_name.name);
+      mongo::BSONObj cem = create_biosource_builder.obj();
 
       mongo::ScopedDbConnection c(config::get_mongodb_server());
-      c->insert(helpers::collection_name(Collections::BIO_SOURCES()), cem);
+      c->insert(helpers::collection_name(Collections::BIOSOURCES()), cem);
       if (!c->getLastError().empty()) {
         msg = c->getLastError();
         c.done();
@@ -503,14 +503,14 @@ namespace epidb {
 
       mongo::BSONObjBuilder index_name;
       index_name.append("norm_name", 1);
-      c->ensureIndex(helpers::collection_name(Collections::BIO_SOURCES()), index_name.obj());
+      c->ensureIndex(helpers::collection_name(Collections::BIOSOURCES()), index_name.obj());
       if (!c->getLastError().empty()) {
         msg = c->getLastError();
         c.done();
         return false;
       }
 
-      if (!search::insert_full_text(Collections::BIO_SOURCES(), bio_source_id, search_data, msg)) {
+      if (!search::insert_full_text(Collections::BIOSOURCES(), biosource_id, search_data, msg)) {
         c.done();
         return false;
       }
@@ -585,14 +585,14 @@ namespace epidb {
       return true;
     }
 
-    bool add_sample(const std::string &bio_source_name, const std::string &norm_bio_source_name,
+    bool add_sample(const std::string &biosource_name, const std::string &norm_biosource_name,
                     const Metadata &metadata,
                     const std::string &user_key,
                     std::string &sample_id, std::string &msg)
     {
       mongo::BSONObjBuilder data_builder;
-      data_builder.append("bio_source_name", bio_source_name);
-      data_builder.append("norm_bio_source_name", norm_bio_source_name);
+      data_builder.append("biosource_name", biosource_name);
+      data_builder.append("norm_biosource_name", norm_biosource_name);
 
       std::map<std::string, std::string> names_values;
       std::map<std::string, std::string>::iterator it;
@@ -825,25 +825,25 @@ namespace epidb {
       return helpers::collection_size(Collections::EXPERIMENTS(), size, msg);
     }
 
-    bool is_valid_bio_source_name(const std::string &name, const std::string &norm_name, std::string &msg)
+    bool is_valid_biosource_name(const std::string &name, const std::string &norm_name, std::string &msg)
     {
       bool exists = true;
-      if (!helpers::check_exist(Collections::BIO_SOURCES(), "norm_name", norm_name, exists, msg)) {
+      if (!helpers::check_exist(Collections::BIOSOURCES(), "norm_name", norm_name, exists, msg)) {
         return false;
       }
       if (exists) {
-        std::string e = Error::m(ERR_DUPLICATED_BIO_SOURCE_NAME, name.c_str());
+        std::string e = Error::m(ERR_DUPLICATED_BIOSOURCE_NAME, name.c_str());
         EPIDB_LOG_TRACE(e);
         msg = e;
         return false;
       }
 
       exists = true;
-      if (!helpers::check_exist(Collections::BIO_SOURCE_SYNONYM_NAMES(), "norm_synonym", norm_name, exists, msg)) {
+      if (!helpers::check_exist(Collections::BIOSOURCE_SYNONYM_NAMES(), "norm_synonym", norm_name, exists, msg)) {
         return false;
       }
       if (exists) {
-        std::string e = Error::m(ERR_DUPLICATED_BIO_SOURCE_NAME, name.c_str());
+        std::string e = Error::m(ERR_DUPLICATED_BIOSOURCE_NAME, name.c_str());
         EPIDB_LOG_TRACE(e);
         msg = e;
         return false;
@@ -944,22 +944,22 @@ namespace epidb {
       return helpers::check_exist(Collections::EPIGENETIC_MARKS(), "norm_name", norm_epigenetic_mark, r, msg);
     }
 
-    bool sample(const std::string &bio_source_name, bool &r, std::string &msg)
+    bool sample(const std::string &biosource_name, bool &r, std::string &msg)
     {
-      std::string norm_bio_source_name = utils::normalize_name(bio_source_name);
-      return helpers::check_exist(Collections::SAMPLES(), "norm_name", norm_bio_source_name, r, msg);
+      std::string norm_biosource_name = utils::normalize_name(biosource_name);
+      return helpers::check_exist(Collections::SAMPLES(), "norm_name", norm_biosource_name, r, msg);
     }
 
-    bool check_bio_source(const std::string &bio_source_name, bool &r, std::string &msg)
+    bool check_biosource(const std::string &biosource_name, bool &r, std::string &msg)
     {
-      std::string norm_bio_source_name = utils::normalize_name(bio_source_name);
-      return helpers::check_exist(Collections::BIO_SOURCES(), "norm_name", norm_bio_source_name, r, msg);
+      std::string norm_biosource_name = utils::normalize_name(biosource_name);
+      return helpers::check_exist(Collections::BIOSOURCES(), "norm_name", norm_biosource_name, r, msg);
     }
 
-    bool check_sample_field(const std::string &bio_source_name, bool &r, std::string &msg)
+    bool check_sample_field(const std::string &biosource_name, bool &r, std::string &msg)
     {
-      std::string norm_bio_source_name = utils::normalize_name(bio_source_name);
-      return helpers::check_exist(Collections::SAMPLE_FIELDS(), "norm_name", norm_bio_source_name, r, msg);
+      std::string norm_biosource_name = utils::normalize_name(biosource_name);
+      return helpers::check_exist(Collections::SAMPLE_FIELDS(), "norm_name", norm_biosource_name, r, msg);
     }
 
     bool check_technique(const std::string &technique_name, bool &r, std::string &msg)
@@ -968,10 +968,10 @@ namespace epidb {
       return helpers::check_exist(Collections::TECHNIQUES(), "norm_name", norm_technique_name, r, msg);
     }
 
-    bool check_bio_source_synonym(const std::string &bio_source_synonym, bool &r, std::string &msg)
+    bool check_biosource_synonym(const std::string &biosource_synonym, bool &r, std::string &msg)
     {
-      std::string norm_bio_source_synonym = utils::normalize_name(bio_source_synonym);
-      return helpers::check_exist(Collections::BIO_SOURCE_SYNONYM_NAMES(), "norm_synonym", norm_bio_source_synonym, r, msg);
+      std::string norm_biosource_synonym = utils::normalize_name(biosource_synonym);
+      return helpers::check_exist(Collections::BIOSOURCE_SYNONYM_NAMES(), "norm_synonym", norm_biosource_synonym, r, msg);
     }
 
     bool check_project(const std::string &project, bool &r, std::string &msg)
@@ -1033,49 +1033,49 @@ namespace epidb {
       return true;
     }
 
-    bool set_bio_source_synonym(const std::string &bio_source_name, const std::string &synonymous,
-                                bool is_bio_source, const bool is_syn, const std::string &user_key, std::string &msg)
+    bool set_biosource_synonym(const std::string &biosource_name, const std::string &synonymous,
+                                bool is_biosource, const bool is_syn, const std::string &user_key, std::string &msg)
     {
-      if (!cv::set_bio_source_synonym(bio_source_name, synonymous, is_bio_source, is_syn, user_key, msg))  {
+      if (!cv::set_biosource_synonym(biosource_name, synonymous, is_biosource, is_syn, user_key, msg))  {
         return false;
       }
       return true;
     }
 
-    bool get_bio_source_synonyms(const std::string &bio_source_name, const std::string &norm_bio_source_name,
-                                 bool is_bio_source, const std::string &user_key,
+    bool get_biosource_synonyms(const std::string &biosource_name, const std::string &norm_biosource_name,
+                                 bool is_biosource, const std::string &user_key,
                                  std::vector<utils::IdName> &syns,
                                  std::string &msg)
     {
-      return cv::get_bio_source_synonyms("", bio_source_name, norm_bio_source_name, is_bio_source, user_key, syns, msg);
+      return cv::get_biosource_synonyms("", biosource_name, norm_biosource_name, is_biosource, user_key, syns, msg);
     }
 
-    bool set_bio_source_scope(const std::string &bio_source_more_embracing, const std::string &norm_bio_source_more_embracing,
-                              const std::string &bio_source_less_embracing, const std::string &norm_bio_source_less_embracing,
+    bool set_biosource_scope(const std::string &biosource_more_embracing, const std::string &norm_biosource_more_embracing,
+                              const std::string &biosource_less_embracing, const std::string &norm_biosource_less_embracing,
                               bool more_embracing_is_syn, const bool less_embracing_is_syn,
                               const std::string &user_key, std::string &msg)
     {
-      return cv::set_bio_source_embracing(bio_source_more_embracing, norm_bio_source_more_embracing,
-                                          bio_source_less_embracing, norm_bio_source_less_embracing,
+      return cv::set_biosource_embracing(biosource_more_embracing, norm_biosource_more_embracing,
+                                          biosource_less_embracing, norm_biosource_less_embracing,
                                           more_embracing_is_syn, less_embracing_is_syn, user_key, msg);
     }
 
-    bool get_bio_source_scope(const std::string &bio_source_name, const std::string &norm_bio_source_name,
-                              bool is_bio_source, const std::string &user_key,
-                              std::vector<utils::IdName> &related_bio_sources, std::string &msg)
+    bool get_biosource_scope(const std::string &biosource_name, const std::string &norm_biosource_name,
+                              bool is_biosource, const std::string &user_key,
+                              std::vector<utils::IdName> &related_biosources, std::string &msg)
     {
       std::vector<std::string> norm_subs;
 
-      if (!cv::get_bio_source_embracing(bio_source_name, norm_bio_source_name, is_bio_source, user_key, norm_subs, msg)) {
+      if (!cv::get_biosource_embracing(biosource_name, norm_biosource_name, is_biosource, user_key, norm_subs, msg)) {
         return false;
       }
 
       BOOST_FOREACH(const std::string & norm_sub, norm_subs) {
-        utils::IdName sub_bio_source_name;
-        if (!helpers::get_name(Collections::BIO_SOURCES(), norm_sub, sub_bio_source_name, msg)) {
+        utils::IdName sub_biosource_name;
+        if (!helpers::get_name(Collections::BIOSOURCES(), norm_sub, sub_biosource_name, msg)) {
           return false;
         }
-        related_bio_sources.push_back(sub_bio_source_name);
+        related_biosources.push_back(sub_biosource_name);
       }
       return true;
     }

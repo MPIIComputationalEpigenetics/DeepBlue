@@ -20,7 +20,7 @@ namespace epidb {
     {
       std::vector<std::string> v;
       v.push_back(ANNOTATIONS());
-      v.push_back(BIO_SOURCES());
+      v.push_back(BIOSOURCES());
       v.push_back(COLUMN_TYPES());
       v.push_back(EPIGENETIC_MARKS());
       v.push_back(EXPERIMENTS());
@@ -56,28 +56,28 @@ namespace epidb {
       return genomes;
     }
 
-    const std::string &Collections::BIO_SOURCES()
+    const std::string &Collections::BIOSOURCES()
     {
-      static std::string bio_sources("bio_sources");
-      return bio_sources;
+      static std::string biosources("biosources");
+      return biosources;
     }
 
-    const std::string &Collections::BIO_SOURCE_SYNONYMS()
+    const std::string &Collections::BIOSOURCE_SYNONYMS()
     {
-      static std::string bio_source_synonyms("bio_source_synonyms");
-      return bio_source_synonyms;
+      static std::string biosource_synonyms("biosource_synonyms");
+      return biosource_synonyms;
     }
 
-    const std::string &Collections::BIO_SOURCE_SYNONYM_NAMES()
+    const std::string &Collections::BIOSOURCE_SYNONYM_NAMES()
     {
-      static std::string bio_source_synonyms_names("bio_source_synonyms_names");
-      return bio_source_synonyms_names;
+      static std::string biosource_synonyms_names("biosource_synonyms_names");
+      return biosource_synonyms_names;
     }
 
-    const std::string &Collections::BIO_SOURCE_EMBRACING()
+    const std::string &Collections::BIOSOURCE_EMBRACING()
     {
-      static std::string bio_source_embracing("bio_source_embracing");
-      return bio_source_embracing;
+      static std::string biosource_embracing("biosource_embracing");
+      return biosource_embracing;
     }
 
     const std::string &Collections::EPIGENETIC_MARKS()

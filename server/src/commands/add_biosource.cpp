@@ -1,5 +1,5 @@
 //
-//  add_bio_source.cpp
+//  add_biosource.cpp
 //  epidb
 //
 //  Created by Felipe Albrecht on 16.06.13.
@@ -22,14 +22,14 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::BIO_SOURCES, "Inserts a new bio source with the given parameters.");
+        return CommandDescription(categories::BIOSOURCES, "Inserts a new biosource with the given parameters.");
       }
 
       static Parameters parameters_()
       {
         Parameter p[] = {
-          Parameter("name", serialize::STRING, "bio source name"),
-          Parameter("description", serialize::STRING, "description of the bio source"),
+          Parameter("name", serialize::STRING, "biosource name"),
+          Parameter("description", serialize::STRING, "description of the biosource"),
           Parameter("extra_metadata", serialize::MAP, "additional metadata"),
           parameters::UserKey
         };
@@ -40,14 +40,14 @@ namespace epidb {
       static Parameters results_()
       {
         Parameter p[] = {
-          Parameter("id", serialize::STRING, "id of the newly inserted bio source")
+          Parameter("id", serialize::STRING, "id of the newly inserted biosource")
         };
         Parameters results(&p[0], &p[0] + 1);
         return results;
       }
 
     public:
-      AddBioSourceCommand() : Command("add_bio_source", parameters_(), results_(), desc_()) {}
+      AddBioSourceCommand() : Command("add_biosource", parameters_(), results_(), desc_()) {}
 
       virtual bool run(const std::string &ip,
                        const serialize::Parameters &parameters, serialize::Parameters &result) const
@@ -76,7 +76,7 @@ namespace epidb {
         }
 
         std::string norm_name = utils::normalize_name(name);
-        if (!dba::is_valid_bio_source_name(name, norm_name, msg)) {
+        if (!dba::is_valid_biosource_name(name, norm_name, msg)) {
           result.add_error(msg);
           return false;
         }
@@ -84,7 +84,7 @@ namespace epidb {
         std::string norm_description = utils::normalize_name(description);
 
         std::string id;
-        bool ret = dba::add_bio_source(name, norm_name, description, norm_description, extra_metadata, user_key, id, msg);
+        bool ret = dba::add_biosource(name, norm_name, description, norm_description, extra_metadata, user_key, id, msg);
         if (!ret) {
           result.add_error(msg);
         } else {

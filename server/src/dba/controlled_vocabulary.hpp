@@ -18,30 +18,30 @@ namespace epidb {
 
       extern std::map<std::string, std::string> cache_is_connected;
 
-      bool set_bio_source_synonym(const std::string &actual_existing_bio_source_name, const std::string &new_bio_source_name,
-                                  bool is_bio_source, const bool is_syn,
+      bool set_biosource_synonym(const std::string &actual_existing_biosource_name, const std::string &new_biosource_name,
+                                  bool is_biosource, const bool is_syn,
                                   const std::string &user_key, std::string &msg);
 
-      bool get_bio_source_synonyms(const std::string &id, const std::string &bio_source_name, const std::string &norm_bio_source_name,
-                                   bool is_bio_source, const std::string &user_key,
+      bool get_biosource_synonyms(const std::string &id, const std::string &biosource_name, const std::string &norm_biosource_name,
+                                   bool is_biosource, const std::string &user_key,
                                    std::vector<utils::IdName> &syns, std::string &msg);
 
-      bool set_bio_source_embracing(const std::string &bio_source_more_embracing, const std::string &norm_bio_source_more_embracing,
-                                    const std::string &bio_source_less_embracing, const std::string &norm_bio_source_less_embracing,
+      bool set_biosource_embracing(const std::string &biosource_more_embracing, const std::string &norm_biosource_more_embracing,
+                                    const std::string &biosource_less_embracing, const std::string &norm_biosource_less_embracing,
                                     bool more_embracing_is_syn, const bool less_embracing_is_syn,
                                     const std::string &user_key, std::string &msg);
 
-      bool get_upper_term(const std::string &bio_source_name, const std::string &norm_bio_source_name,
-                          bool is_bio_source,
+      bool get_upper_term(const std::string &biosource_name, const std::string &norm_biosource_name,
+                          bool is_biosource,
                           std::string &upper,
                           const std::string &user_key, std::string &msg);
 
-      bool get_bio_source_embracing(const std::string &bio_source_name, const std::string &norm_bio_source_name,
-                                    bool is_bio_source, const std::string &user_key,
+      bool get_biosource_embracing(const std::string &biosource_name, const std::string &norm_biosource_name,
+                                    bool is_biosource, const std::string &user_key,
                                     std::vector<std::string> &norm_subs, std::string &msg);
 
       bool get_synonym_root(const std::string &synonym, const std::string &norm_synonym,
-                            std::string &bio_source_name, std::string &norm_bio_source_name, std::string &msg);
+                            std::string &biosource_name, std::string &norm_biosource_name, std::string &msg);
     }
   }
 }

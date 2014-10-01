@@ -58,7 +58,7 @@ namespace epidb {
 
       bool project(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const Region &region, std::string &result, std::string &msg);
 
-      bool bio_source(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const Region &region, std::string &result, std::string &msg);
+      bool biosource(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const Region &region, std::string &result, std::string &msg);
 
       bool sample_id(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const Region &region, std::string &result, std::string &msg);
 

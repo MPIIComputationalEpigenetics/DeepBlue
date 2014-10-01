@@ -91,26 +91,26 @@ namespace epidb {
         }
 
         if (type == "experiments" || type == "samples") {
-          std::string norm_bio_source_name;
+          std::string norm_biosource_name;
           if (type == "experiments") {
-            norm_bio_source_name = data["sample_info"]["norm_bio_source_name"].str();
+            norm_biosource_name = data["sample_info"]["norm_biosource_name"].str();
           } else {
-            norm_bio_source_name = data["norm_bio_source_name"].str();
+            norm_biosource_name = data["norm_biosource_name"].str();
           }
           std::auto_ptr<mongo::DBClientCursor> cursor = c->query(helpers::collection_name(Collections::TEXT_SEARCH()),
-              mongo::fromjson("{\"norm_name\": \"" + norm_bio_source_name + "\", \"type\": \"bio_sources\"}"));
+              mongo::fromjson("{\"norm_name\": \"" + norm_biosource_name + "\", \"type\": \"biosources\"}"));
 
           if (!cursor->more()) {
-            std::string s = Error::m(ERR_DATABASE_INVALID_BIO_SOURCE, norm_bio_source_name.c_str());
+            std::string s = Error::m(ERR_DATABASE_INVALID_BIOSOURCE, norm_biosource_name.c_str());
             EPIDB_LOG_TRACE(s);
             msg = s;
             c.done();
             return false;
           }
 
-          mongo::BSONObj bio_source = cursor->next().getOwned();
-          if (bio_source.hasField("related_terms")) {
-            create_text_search_builder.append(bio_source["related_terms"]);
+          mongo::BSONObj biosource = cursor->next().getOwned();
+          if (biosource.hasField("related_terms")) {
+            create_text_search_builder.append(biosource["related_terms"]);
           }
         }
 
@@ -140,7 +140,7 @@ namespace epidb {
         mongo::BSONObj value = BSON("related_terms" << name);
         mongo::BSONObj append_value = BSON("$addToSet" << value);
 
-        // Update the bio_source term
+        // Update the biosource term
         c->update(helpers::collection_name(Collections::TEXT_SEARCH()), query, append_value, true, false);
         if (!c->getLastError().empty()) {
           msg = c->getLastError();
@@ -148,27 +148,27 @@ namespace epidb {
           return false;
         }
 
-        // Find the bio source to update the experiments and samples that use it
+        // Find the biosource to update the experiments and samples that use it
         std::auto_ptr<mongo::DBClientCursor> cursor =
           c->query(helpers::collection_name(Collections::TEXT_SEARCH()), query);
 
         if (!cursor->more()) {
-          msg = "Unable to find bio source " + id;
+          msg = "Unable to find biosource " + id;
           c.done();
           return false;
         }
 
         mongo::BSONObj o = cursor->next();
-        if (o["type"].str() != "bio_sources") {
-          msg = "Data id " + id + " is not a bio source";
+        if (o["type"].str() != "biosources") {
+          msg = "Data id " + id + " is not a biosource";
           c.done();
           return false;
         }
 
-        std::string norm_bio_source_name = o["norm_name"].str();
+        std::string norm_biosource_name = o["norm_name"].str();
 
         mongo::BSONObjBuilder update_related_query_builder;
-        update_related_query_builder.append("norm_bio_source_name", norm_bio_source_name);
+        update_related_query_builder.append("norm_biosource_name", norm_biosource_name);
         mongo::BSONObj update_related_query = update_related_query_builder.obj();
 
         c->update(helpers::collection_name(Collections::TEXT_SEARCH()), update_related_query, append_value, false, true);
@@ -179,7 +179,7 @@ namespace epidb {
         }
 
         mongo::BSONObjBuilder update_related_query_builder_for_experiments;
-        update_related_query_builder_for_experiments.append("sample_info_norm_bio_source_name", norm_bio_source_name);
+        update_related_query_builder_for_experiments.append("sample_info_norm_biosource_name", norm_biosource_name);
         mongo::BSONObj update_related_query_for_experiments = update_related_query_builder_for_experiments.obj();
 
         c->update(helpers::collection_name(Collections::TEXT_SEARCH()), update_related_query_for_experiments, append_value, false, true);

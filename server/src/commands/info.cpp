@@ -92,8 +92,8 @@ namespace epidb {
             ok = dba::info::get_project(id, res, msg);
             type = "project";
           } else if (id.compare(0, 2, "bs") == 0) {
-            ok = dba::info::get_bio_source(id, res, metadata, synonyms, msg);
-            type = "bio_source";
+            ok = dba::info::get_biosource(id, res, metadata, synonyms, msg);
+            type = "biosource";
           } else if (id.compare(0, 1, "s") == 0) {
             ok = dba::info::get_sample_by_id(id, res, msg);
             type = "sample";

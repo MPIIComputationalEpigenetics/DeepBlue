@@ -1,5 +1,5 @@
 //
-//  list_similar_bio_sources.cpp
+//  list_similar_biosources.cpp
 //  epidb
 //
 //  Created by Felipe Albrecht on 26.06.13.
@@ -26,13 +26,13 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::BIO_SOURCES, "Lists all bio sources similar to the one provided.");
+        return CommandDescription(categories::BIOSOURCES, "Lists all biosources similar to the one provided.");
       }
 
       static Parameters parameters_()
       {
         Parameter p[] = {
-          Parameter("name", serialize::STRING, "bio source name"),
+          Parameter("name", serialize::STRING, "biosource name"),
           parameters::UserKey
         };
         Parameters params(&p[0], &p[0] + 2);
@@ -42,14 +42,14 @@ namespace epidb {
       static Parameters results_()
       {
         Parameter p[] = {
-          Parameter("bio_sources", serialize::LIST, "similar bio sources")
+          Parameter("biosources", serialize::LIST, "similar biosources")
         };
         Parameters results(&p[0], &p[0] + 1);
         return results;
       }
 
     public:
-      ListSimilarBioSourcesCommand() : Command("list_similar_bio_sources", parameters_(), results_(), desc_()) {}
+      ListSimilarBioSourcesCommand() : Command("list_similar_biosources", parameters_(), results_(), desc_()) {}
 
       virtual bool run(const std::string &ip,
                        const serialize::Parameters &parameters, serialize::Parameters &result) const
@@ -70,7 +70,7 @@ namespace epidb {
         }
 
         std::vector<utils::IdName> names;
-        if (!dba::list::similar_bio_sources(name, user_key, names, msg)) {
+        if (!dba::list::similar_biosources(name, user_key, names, msg)) {
           result.add_error(msg);
           return false;
         }

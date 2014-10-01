@@ -41,9 +41,9 @@ namespace epidb {
 
       // ---
 
-      bool get_bio_source_id(const std::string &norm_name, std::string &id, std::string &msg)
+      bool get_biosource_id(const std::string &norm_name, std::string &id, std::string &msg)
       {
-        return get_id(Collections::BIO_SOURCES(), norm_name, id, msg);
+        return get_id(Collections::BIOSOURCES(), norm_name, id, msg);
       }
 
 

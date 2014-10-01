@@ -30,9 +30,9 @@ TECHNIQUES = {
   }
 }
 
-BIO_SOURCES = {
+BIOSOURCES = {
   "K562": {
-    "description": "some bio source",
+    "description": "some biosource",
     "metadata": {}
   }
 }

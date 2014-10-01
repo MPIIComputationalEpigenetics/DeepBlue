@@ -1,5 +1,5 @@
 //
-//  get_bio_source_related.cpp
+//  get_biosource_related.cpp
 //  epidb
 //
 //  Created by Felipe Albrecht on 20.08.13.
@@ -23,13 +23,13 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::BIO_SOURCE_RELATIONSHIP, "Gets bio sources related to the given one.");
+        return CommandDescription(categories::BIOSOURCE_RELATIONSHIP, "Gets biosources related to the given one.");
       }
 
       static  Parameters parameters_()
       {
         Parameter p[] = {
-          Parameter("bio_source", serialize::STRING, "name of the bio source"),
+          Parameter("biosource", serialize::STRING, "name of the biosource"),
           parameters::UserKey
         };
         Parameters params(&p[0], &p[0] + 2);
@@ -39,24 +39,24 @@ namespace epidb {
       static Parameters results_()
       {
         Parameter p[] = {
-          Parameter("bio_sources", serialize::LIST, "related bio sources")
+          Parameter("biosources", serialize::LIST, "related biosources")
         };
         Parameters results(&p[0], &p[0] + 1);
         return results;
       }
 
     public:
-      GetBioSourceRelatedCommand() : Command("get_bio_source_related", parameters_(), results_(), desc_()) {}
+      GetBioSourceRelatedCommand() : Command("get_biosource_related", parameters_(), results_(), desc_()) {}
 
       virtual bool run(const std::string &ip,
                        const serialize::Parameters &parameters, serialize::Parameters &result) const
       {
-        const std::string bio_source_name = parameters[0]->as_string();
+        const std::string biosource_name = parameters[0]->as_string();
         const std::string user_key = parameters[1]->as_string();
 
-        std::string norm_bio_source_name = utils::normalize_name(bio_source_name);
+        std::string norm_biosource_name = utils::normalize_name(biosource_name);
 
-        bool is_bio_source(false);
+        bool is_biosource(false);
         bool is_syn(false);
 
         std::string msg;
@@ -82,45 +82,45 @@ namespace epidb {
           return false;
         }
 
-        if (!dba::check_bio_source(norm_bio_source_name, is_bio_source, msg)) {
+        if (!dba::check_biosource(norm_biosource_name, is_biosource, msg)) {
           result.add_error(msg);
           return false;
         }
 
-        if (!is_bio_source) {
-          if (!dba::check_bio_source_synonym(norm_bio_source_name, is_syn, msg)) {
+        if (!is_biosource) {
+          if (!dba::check_biosource_synonym(norm_biosource_name, is_syn, msg)) {
             result.add_error(msg);
             return false;
           }
         }
 
-        if (!(is_bio_source || is_syn)) {
-          std::string s = Error::m(ERR_INVALID_BIO_SOURCE_NAME, bio_source_name.c_str());
+        if (!(is_biosource || is_syn)) {
+          std::string s = Error::m(ERR_INVALID_BIOSOURCE_NAME, biosource_name.c_str());
           EPIDB_LOG_TRACE(s);
           result.add_error(s);
           return false;
         }
 
-        std::vector<utils::IdName> related_bio_sources;
+        std::vector<utils::IdName> related_biosources;
 
-        if (!dba::get_bio_source_scope(bio_source_name, norm_bio_source_name,
-                                       is_bio_source, user_key, related_bio_sources, msg)) {
+        if (!dba::get_biosource_scope(biosource_name, norm_biosource_name,
+                                       is_biosource, user_key, related_biosources, msg)) {
           result.add_error(msg);
           return false;
         }
 
 
         std::vector<utils::IdName> final_result;
-        BOOST_FOREACH(const utils::IdName& related_bio_source, related_bio_sources) {
+        BOOST_FOREACH(const utils::IdName& related_biosource, related_biosources) {
           std::vector<utils::IdName> related_syns;
-          std::string norm_related_bio_source = utils::normalize_name(related_bio_source.name);
+          std::string norm_related_biosource = utils::normalize_name(related_biosource.name);
 
-          if (!dba::check_bio_source(norm_related_bio_source, is_bio_source, msg)) {
+          if (!dba::check_biosource(norm_related_biosource, is_biosource, msg)) {
             result.add_error(msg);
             return false;
           }
 
-          if (!dba::get_bio_source_synonyms(related_bio_source.name, norm_related_bio_source, is_bio_source, user_key, related_syns, msg)) {
+          if (!dba::get_biosource_synonyms(related_biosource.name, norm_related_biosource, is_biosource, user_key, related_syns, msg)) {
             result.add_error(msg);
             return false;
           }

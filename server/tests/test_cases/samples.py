@@ -4,19 +4,19 @@ from client import EpidbClient
 
 
 class TestSamples(helpers.TestCase):
-  
+
   def test_find_sample(self):
     epidb = EpidbClient()
     self.init(epidb)
 
-    res = epidb.add_bio_source("K562", "desc1", {}, self.admin_key)
+    res = epidb.add_biosource("K562", "desc1", {}, self.admin_key)
     self.assertSuccess(res)
 
     res = epidb.add_sample_field("age", "string", "", self.admin_key)
     self.assertSuccess(res)
     res = epidb.add_sample_field("health", "string", "", self.admin_key)
     self.assertSuccess(res)
-    
+
     res, sid = epidb.add_sample("K562", {"age":"55","health":"deceased"}, self.admin_key)
     self.assertSuccess(res, sid)
 
@@ -28,10 +28,10 @@ class TestSamples(helpers.TestCase):
     epidb = EpidbClient()
     self.init(epidb)
 
-    res = epidb.add_bio_source("K562", "desc1", {}, self.admin_key)
+    res = epidb.add_biosource("K562", "desc1", {}, self.admin_key)
     self.assertSuccess(res)
 
-    res = epidb.add_bio_source("KKKK", "desc1", {}, self.admin_key)
+    res = epidb.add_biosource("KKKK", "desc1", {}, self.admin_key)
     self.assertSuccess(res)
 
     res = epidb.add_sample_field("age", "string", "", self.admin_key)
@@ -60,15 +60,15 @@ class TestSamples(helpers.TestCase):
     self.assertTrue(id2 in found_ids)
     self.assertTrue(id3 in found_ids)
     self.assertFalse(id4 in found_ids)
-  
+
   def test_list_samples(self):
     epidb = EpidbClient()
     self.init(epidb)
 
-    res = epidb.add_bio_source("K562", "desc1", {}, self.admin_key)
+    res = epidb.add_biosource("K562", "desc1", {}, self.admin_key)
     self.assertSuccess(res)
 
-    res = epidb.add_bio_source("KKKK", "desc1", {}, self.admin_key)
+    res = epidb.add_biosource("KKKK", "desc1", {}, self.admin_key)
     self.assertSuccess(res)
 
     res = epidb.add_sample_field("age", "string", "", self.admin_key)
@@ -92,16 +92,16 @@ class TestSamples(helpers.TestCase):
     self.assertSuccess(res, k562_samples)
     self.assertEqual(3, len(k562_samples))
 
-    self.assertEqual(['s1', {'age': '55', '_id': 's1', 'health': 'deceased', 'user': 'test_admin', 'bio_source_name': 'K562'}], k562_samples[0])
+    self.assertEqual(['s1', {'age': '55', '_id': 's1', 'health': 'deceased', 'user': 'test_admin', 'biosource_name': 'K562'}], k562_samples[0])
 
-  def test_multiple_bio_sources_samples(self):
+  def test_multiple_biosources_samples(self):
     epidb = EpidbClient()
     self.init(epidb)
 
-    (res, k562_id) = epidb.add_bio_source("K562", "desc1", {}, self.admin_key)
-    (res, colon_id) = epidb.add_bio_source("Colon", "desc1", {}, self.admin_key)
-    (res, colon_md_id) = epidb.add_bio_source("Colon_MD", "desc1", {}, self.admin_key)
-    (res, intestine_id) = epidb.add_bio_source("Intestine", "desc1", {}, self.admin_key)
+    (res, k562_id) = epidb.add_biosource("K562", "desc1", {}, self.admin_key)
+    (res, colon_id) = epidb.add_biosource("Colon", "desc1", {}, self.admin_key)
+    (res, colon_md_id) = epidb.add_biosource("Colon_MD", "desc1", {}, self.admin_key)
+    (res, intestine_id) = epidb.add_biosource("Intestine", "desc1", {}, self.admin_key)
 
     res = epidb.add_sample_field("age", "string", "", self.admin_key)
     self.assertSuccess(res)
@@ -128,8 +128,8 @@ class TestSamples(helpers.TestCase):
 
     (res, multiple_samples) = epidb.list_samples(["K562", "Colon", "Colon_MD", "Intestine"], {}, self.admin_key)
 
-    returned_sources = [(y[1]["bio_source_name"]) for y in multiple_samples]
-    
+    returned_sources = [(y[1]["biosource_name"]) for y in multiple_samples]
+
     self.assertTrue("K562" in returned_sources)
     self.assertTrue("Colon" in returned_sources)
     self.assertTrue("Colon_MD" in returned_sources)

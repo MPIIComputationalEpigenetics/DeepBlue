@@ -40,7 +40,7 @@ namespace epidb {
       m["@SEQUENCE"] = &Metafield::sequence;
       m["@EPIGENETIC_MARK"] = &Metafield::epigenetic_mark;
       m["@PROJECT"] = &Metafield::project;
-      m["@BIO_SOURCE"] = &Metafield::bio_source;
+      m["@BIOSOURCE"] = &Metafield::biosource;
       m["@SAMPLE_ID"] = &Metafield::sample_id;
       m["@AGG.MIN"] = &Metafield::min;
       m["@AGG.MAX"] = &Metafield::max;
@@ -63,7 +63,7 @@ namespace epidb {
       m["@SEQUENCE"] = "string";
       m["@EPIGENETIC_MARK"] = "string";
       m["@PROJECT"] = "string";
-      m["@BIO_SOURCE"] = "string";
+      m["@BIOSOURCE"] = "string";
       m["@SAMPLE_ID"] = "string";
       m["@AGG.MIN"] = "double";
       m["@AGG.MAX"] = "double";
@@ -207,11 +207,11 @@ namespace epidb {
       return true;
     }
 
-    bool Metafield::bio_source(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const Region &region,
+    bool Metafield::biosource(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const Region &region,
                                std::string &result, std::string &msg)
     {
       if (obj.hasField("sample_info")) {
-        result =  obj["sample_info"]["bio_source_name"].str();
+        result =  obj["sample_info"]["biosource_name"].str();
       } else {
         result = "";
       }

@@ -1,5 +1,5 @@
 //
-//  list_bio_sources.cpp
+//  list_biosources.cpp
 //  epidb
 //
 //  Created by Felipe Albrecht on 17.06.13.
@@ -21,7 +21,7 @@ namespace epidb {
 
       private:
         static CommandDescription desc_() {
-          return CommandDescription(categories::BIO_SOURCES, "Lists all existing bio sources.");
+          return CommandDescription(categories::BIOSOURCES, "Lists all existing biosources.");
         }
 
         static Parameters parameters_() {
@@ -34,14 +34,14 @@ namespace epidb {
 
         static Parameters results_() {
           Parameter p[] = {
-            Parameter("bio_sources", serialize::LIST, "bio sources")
+            Parameter("biosources", serialize::LIST, "biosources")
           };
           Parameters results(&p[0], &p[0]+1);
           return results;
         }
 
       public:
-        ListBioSourcesCommand() : Command("list_bio_sources", parameters_(), results_(), desc_()) {}
+        ListBioSourcesCommand() : Command("list_biosources", parameters_(), results_(), desc_()) {}
 
         virtual bool run(const std::string& ip,
             const serialize::Parameters& parameters, serialize::Parameters& result) const
@@ -60,7 +60,7 @@ namespace epidb {
           }
 
           std::vector<utils::IdName> names;
-          if (!dba::list::bio_sources(user_key, names, msg)) {
+          if (!dba::list::biosources(user_key, names, msg)) {
             result.add_error(msg);
             return false;
           }

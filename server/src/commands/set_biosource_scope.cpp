@@ -1,5 +1,5 @@
 //
-//  set_bio_source_scope.cpp
+//  set_biosource_scope.cpp
 //  epidb
 //
 //  Created by Felipe Albrecht on 30.07.13.
@@ -23,7 +23,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::BIO_SOURCE_RELATIONSHIP, "Sets a bio source scope.");
+        return CommandDescription(categories::BIOSOURCE_RELATIONSHIP, "Sets a biosource scope.");
       }
 
       static  Parameters parameters_()
@@ -45,7 +45,7 @@ namespace epidb {
       }
 
     public:
-      SetBioSourceScopeCommand() : Command("set_bio_source_scope", parameters_(), results_(), desc_()) {}
+      SetBioSourceScopeCommand() : Command("set_biosource_scope", parameters_(), results_(), desc_()) {}
 
       virtual bool run(const std::string &ip,
                        const serialize::Parameters &parameters, serialize::Parameters &result) const
@@ -58,9 +58,9 @@ namespace epidb {
         std::string norm_bigger_scope = utils::normalize_name(bigger_scope);
         std::string norm_smaller_scope = utils::normalize_name(smaller_scope);
 
-        bool bigger_scope_is_bio_source(false);
+        bool bigger_scope_is_biosource(false);
         bool bigger_scope_is_syn(false);
-        bool smaller_scope_is_bio_source(false);
+        bool smaller_scope_is_biosource(false);
         bool smaller_scope_is_syn(false);
 
         std::string msg;
@@ -86,45 +86,45 @@ namespace epidb {
           return false;
         }
 
-        if (!dba::check_bio_source(norm_bigger_scope, bigger_scope_is_bio_source, msg)) {
+        if (!dba::check_biosource(norm_bigger_scope, bigger_scope_is_biosource, msg)) {
           result.add_error(msg);
           return false;
         }
 
-        if (!bigger_scope_is_bio_source) {
-          if (!dba::check_bio_source_synonym(norm_bigger_scope, bigger_scope_is_syn, msg)) {
+        if (!bigger_scope_is_biosource) {
+          if (!dba::check_biosource_synonym(norm_bigger_scope, bigger_scope_is_syn, msg)) {
             result.add_error(msg);
             return false;
           }
         }
 
-        if (!(bigger_scope_is_bio_source || bigger_scope_is_syn)) {
-          std::string s = Error::m(ERR_INVALID_BIO_SOURCE_NAME, bigger_scope.c_str());
+        if (!(bigger_scope_is_biosource || bigger_scope_is_syn)) {
+          std::string s = Error::m(ERR_INVALID_BIOSOURCE_NAME, bigger_scope.c_str());
           EPIDB_LOG_TRACE(s);
           result.add_error(s);
           return false;
         }
 
-        if (!dba::check_bio_source(norm_smaller_scope, smaller_scope_is_bio_source, msg)) {
+        if (!dba::check_biosource(norm_smaller_scope, smaller_scope_is_biosource, msg)) {
           result.add_error(msg);
           return false;
         }
 
-        if (!smaller_scope_is_bio_source) {
-          if (!dba::check_bio_source_synonym(norm_smaller_scope, smaller_scope_is_syn, msg)) {
+        if (!smaller_scope_is_biosource) {
+          if (!dba::check_biosource_synonym(norm_smaller_scope, smaller_scope_is_syn, msg)) {
             result.add_error(msg);
             return false;
           }
         }
 
-        if (!(smaller_scope_is_bio_source || smaller_scope_is_syn)) {
-          std::string s = Error::m(ERR_INVALID_BIO_SOURCE_NAME, smaller_scope.c_str());
+        if (!(smaller_scope_is_biosource || smaller_scope_is_syn)) {
+          std::string s = Error::m(ERR_INVALID_BIOSOURCE_NAME, smaller_scope.c_str());
           EPIDB_LOG_TRACE(s);
           result.add_error(s);
           return false;
         }
 
-        if (dba::set_bio_source_scope(bigger_scope, norm_bigger_scope,
+        if (dba::set_biosource_scope(bigger_scope, norm_bigger_scope,
                                       smaller_scope, norm_smaller_scope,
                                       bigger_scope_is_syn, smaller_scope_is_syn,
                                       user_key, msg)) {

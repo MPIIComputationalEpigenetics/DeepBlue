@@ -29,7 +29,7 @@
  * 01 - Experiment
  * 02 - Annotation
  * 03 - Sample
- * 04 - Bio Source
+ * 04 - BioSource
  * 05 - Epigenetic Mark
  * 06 - Technique
  * 07 - Project
@@ -84,10 +84,10 @@ namespace epidb {
 
   Error ERR_INVALID_USER_KEY("100000", "Invalid User Key.");
 
-  Error ERR_INVALID_BIO_SOURCE_NAME("104000", "Invalid Bio Source Name '%s'. No Bio Source or Synonym was defined with this name.");
-  Error ERR_DUPLICATED_BIO_SOURCE_NAME("104001", "Duplicated Bio Source Name '%s'. Bio Source or Synonym with this name already exists.");
-  Error ERR_MORE_EMBRACING_BIO_SOURCE_NAME("104901", "'%s' is already more embracing than '%s'.");
-  Error ERR_INVALID_BIO_SOURCE_SYNONYM("104400", "Invalid Bio Source Synonym '%s'. A Bio Source or a synonym with this name already exists.");
+  Error ERR_INVALID_BIOSOURCE_NAME("104000", "Invalid BioSource Name '%s'. No BioSource or Synonym was defined with this name.");
+  Error ERR_DUPLICATED_BIOSOURCE_NAME("104001", "Duplicated BioSource Name '%s'. BioSource or Synonym with this name already exists.");
+  Error ERR_MORE_EMBRACING_BIOSOURCE_NAME("104901", "'%s' is already more embracing than '%s'.");
+  Error ERR_INVALID_BIOSOURCE_SYNONYM("104400", "Invalid BioSource Synonym '%s'. A BioSource or a synonym with this name already exists.");
 
   Error ERR_DUPLICATED_EPIGENETIC_MARK_NAME("105001", "Duplicated Epigenetic Mark Name '%s'." );
 
@@ -101,5 +101,5 @@ namespace epidb {
 
   Error ERR_DATABASE_CONNECTION("466555", "MongoDB connection error: '%s'.");
   Error ERR_DATABASE_EXCEPTION("466666", "MongoDB exception at operation '%s': '%s'.");
-  Error ERR_DATABASE_INVALID_BIO_SOURCE("404666", "Bio Source '%s' not found.");
+  Error ERR_DATABASE_INVALID_BIOSOURCE("404666", "BioSource '%s' not found.");
 };

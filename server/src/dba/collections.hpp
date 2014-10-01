@@ -24,10 +24,10 @@ namespace epidb {
 
       static const std::string &EXPERIMENTS();
       static const std::string &GENOMES();
-      static const std::string &BIO_SOURCES();
-      static const std::string &BIO_SOURCE_SYNONYMS();
-      static const std::string &BIO_SOURCE_SYNONYM_NAMES();
-      static const std::string &BIO_SOURCE_EMBRACING();
+      static const std::string &BIOSOURCES();
+      static const std::string &BIOSOURCE_SYNONYMS();
+      static const std::string &BIOSOURCE_SYNONYM_NAMES();
+      static const std::string &BIOSOURCE_EMBRACING();
       static const std::string &EPIGENETIC_MARKS();
       static const std::string &REGIONS();
       static const std::string &ANNOTATIONS();

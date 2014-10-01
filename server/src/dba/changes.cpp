@@ -26,7 +26,7 @@ namespace epidb {
         if (id.compare(0, 1, "a") == 0) {
           collection = Collections::ANNOTATIONS();
         } else if (id.compare(0, 2, "bs") == 0) {
-          collection = Collections::BIO_SOURCES();
+          collection = Collections::BIOSOURCES();
         } else if (id.compare(0, 1, "s") == 0) {
           collection = Collections::SAMPLES();
         } else if (id.compare(0, 1, "e") == 0) {

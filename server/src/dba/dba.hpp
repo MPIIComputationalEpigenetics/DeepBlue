@@ -53,13 +53,13 @@ namespace epidb {
                              const std::string &user_key,
                              std::string &epigenetic_mark_id, std::string &msg);
 
-    bool add_bio_source(const std::string &name, const std::string &norm_name,
+    bool add_biosource(const std::string &name, const std::string &norm_name,
                         const std::string &description, const std::string &norm_description,
                         const Metadata &extra_metadata,
                         const std::string &user_key,
-                        std::string &bio_source_id, std::string &msg);
+                        std::string &biosource_id, std::string &msg);
 
-    bool add_sample(const std::string &bio_source_name, const std::string &norm_bio_source_name,
+    bool add_sample(const std::string &biosource_name, const std::string &norm_biosource_name,
                     const Metadata &metadata,
                     const std::string &user_key,
                     std::string &sample_id, std::string &msg);
@@ -74,19 +74,19 @@ namespace epidb {
                        const std::string &description, const std::string &norm_description,
                        const Metadata &extra_metadata,
                        const std::string &user_key,
-                       std::string &bio_source_id, std::string &msg);
+                       std::string &biosource_id, std::string &msg);
 
     bool add_project(const std::string &name, const std::string &norm_name,
                      const std::string &description, const std::string &norm_description,
                      const std::string &user_key,
                      std::string &project_id, std::string &msg);
 
-    bool set_bio_source_synonym(const std::string &bio_source_name, const std::string &synonymous,
-                                bool is_bio_source, const bool is_syn,
+    bool set_biosource_synonym(const std::string &biosource_name, const std::string &synonymous,
+                                bool is_biosource, const bool is_syn,
                                 const std::string &user_key, std::string &msg);
 
-    bool set_bio_source_scope(const std::string &bio_source_more_embracing, const std::string &norm_bio_source_more_embracing,
-                              const std::string &bio_source_less_embracing, const std::string &norm_bio_source_less_embracing,
+    bool set_biosource_scope(const std::string &biosource_more_embracing, const std::string &norm_biosource_more_embracing,
+                              const std::string &biosource_less_embracing, const std::string &norm_biosource_less_embracing,
                               bool more_embracing_is_syn, const bool less_embracing_is_syn,
                               const std::string &user_key, std::string &msg);
 
@@ -95,7 +95,7 @@ namespace epidb {
      * Validation
      */
 
-    bool is_valid_bio_source_name(const std::string &name, const std::string &norm_name, std::string &msg);
+    bool is_valid_biosource_name(const std::string &name, const std::string &norm_name, std::string &msg);
 
     bool is_valid_sample_field_name(const std::string &name, const std::string &norm_name, std::string &msg);
 
@@ -122,13 +122,13 @@ namespace epidb {
 
     bool check_epigenetic_mark(const std::string &epigenetic_mark, bool &r, std::string &msg);
 
-    bool check_bio_source(const std::string &bio_source_name_norm, bool &r, std::string &msg);
+    bool check_biosource(const std::string &biosource_name_norm, bool &r, std::string &msg);
 
-    bool check_bio_source_synonym(const std::string &bio_source_syn_norm, bool &r, std::string &msg);
+    bool check_biosource_synonym(const std::string &biosource_syn_norm, bool &r, std::string &msg);
 
-    bool check_sample(const std::string &bio_source_name_norm, bool &r, std::string &msg);
+    bool check_sample(const std::string &biosource_name_norm, bool &r, std::string &msg);
 
-    bool check_sample_field(const std::string &bio_source_name_norm, bool &r, std::string &msg);
+    bool check_sample_field(const std::string &biosource_name_norm, bool &r, std::string &msg);
 
     bool check_technique(const std::string &norm_technique_name, bool &r, std::string &msg);
 
@@ -145,12 +145,12 @@ namespace epidb {
     /**
      * Getters
      */
-    bool get_bio_source_scope(const std::string &bio_source_name, const std::string &norm_bio_source_name,
-                              bool is_bio_source, const std::string &user_key,
-                              std::vector<utils::IdName> &bio_sources, std::string &msg);
+    bool get_biosource_scope(const std::string &biosource_name, const std::string &norm_biosource_name,
+                              bool is_biosource, const std::string &user_key,
+                              std::vector<utils::IdName> &biosources, std::string &msg);
 
-    bool get_bio_source_synonyms(const std::string &bio_source_name, const std::string &norm_bio_source_name,
-                                 bool is_bio_source, const std::string &user_key,
+    bool get_biosource_synonyms(const std::string &biosource_name, const std::string &norm_biosource_name,
+                                 bool is_biosource, const std::string &user_key,
                                  std::vector<utils::IdName> &syns, std::string &msg);
 
     bool get_user_name(const std::string &user_key, std::string &name, std::string &msg);

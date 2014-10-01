@@ -39,9 +39,9 @@ namespace epidb {
         return helpers::get(Collections::GENOMES(), result, msg);
       }
 
-      bool bio_sources(const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg)
+      bool biosources(const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg)
       {
-        return helpers::get(Collections::BIO_SOURCES(), result, msg);
+        return helpers::get(Collections::BIOSOURCES(), result, msg);
       }
 
       bool techniques(const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg)
@@ -49,13 +49,13 @@ namespace epidb {
         return helpers::get(Collections::TECHNIQUES(), result, msg);
       }
 
-      bool samples(const std::string &user_key, const mongo::BSONArray &bio_sources, const Metadata &metadata,
+      bool samples(const std::string &user_key, const mongo::BSONArray &biosources, const Metadata &metadata,
                    std::vector<std::string> &result, std::string &msg)
       {
         mongo::BSONObjBuilder query_builder;
 
-        if (!bio_sources.isEmpty()) {
-          query_builder.append("norm_bio_source_name", BSON("$in" << bio_sources));
+        if (!biosources.isEmpty()) {
+          query_builder.append("norm_biosource_name", BSON("$in" << biosources));
         }
 
         Metadata::const_iterator it;
@@ -161,10 +161,10 @@ namespace epidb {
         return true;
       }
 
-      bool similar_bio_sources(const std::string name, const std::string &user_key,
+      bool similar_biosources(const std::string name, const std::string &user_key,
                                std::vector<utils::IdName> &result, std::string &msg)
       {
-        return similar(Collections::BIO_SOURCES(), name, user_key, result, msg);
+        return similar(Collections::BIOSOURCES(), name, user_key, result, msg);
       }
 
       bool similar_sample_fields(const std::string name, const std::string &user_key,

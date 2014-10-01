@@ -28,13 +28,13 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::SAMPLES, "Lists all existing samples of a Bio Source and Metadata.");
+        return CommandDescription(categories::SAMPLES, "Lists all existing samples of a BioSource and Metadata.");
       }
 
       static Parameters parameters_()
       {
         Parameter p[] = {
-          Parameter("bio_source", serialize::STRING, "the bio source name", true),
+          Parameter("biosource", serialize::STRING, "the biosource name", true),
           Parameter("metadata", serialize::MAP, "data the searched sample matches"),
           parameters::UserKey
         };
@@ -71,23 +71,23 @@ namespace epidb {
           return false;
         }
 
-        std::vector<serialize::ParameterPtr> bio_sources;
-        parameters[0]->children(bio_sources);
+        std::vector<serialize::ParameterPtr> s;
+        parameters[0]->children(s);
 
-        mongo::BSONArray bio_sources_array = dba::helpers::build_epigenetic_normalized_array(bio_sources);
+        mongo::BSONArray s_array = dba::helpers::build_epigenetic_normalized_array(s);
         Metadata metadata;
         if (!read_metadata(parameters[1], metadata, msg)) {
           result.add_error(msg);
           return false;
         }
 
-        if (bio_sources.empty() && metadata.empty()) {
-          result.add_error("At least one Bio Source or Metadata information should be informed.");
+        if (s.empty() && metadata.empty()) {
+          result.add_error("At least one BioSource or Metadata information should be informed.");
           return false;
         }
 
         std::vector<std::string> ids;
-        if (!dba::list::samples(user_key, bio_sources_array, metadata, ids, msg)) {
+        if (!dba::list::samples(user_key, s_array, metadata, ids, msg)) {
           result.add_error(msg);
           return false;
         }

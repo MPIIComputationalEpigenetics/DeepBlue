@@ -138,7 +138,7 @@ namespace epidb {
         return true;
       }
 
-      bool get_bio_source(const std::string &id, std::map<std::string, std::string> &res,
+      bool get_biosource(const std::string &id, std::map<std::string, std::string> &res,
                           std::map<std::string, std::string> &metadata,
                           std::vector<std::string> &synonyms,
                           std::string &msg,
@@ -147,19 +147,19 @@ namespace epidb {
         mongo::ScopedDbConnection c(config::get_mongodb_server());
 
         mongo::BSONObj query = BSON("_id" << id);
-        std::auto_ptr<mongo::DBClientCursor> data_cursor = c->query(helpers::collection_name(Collections::BIO_SOURCES()), query, 1);
+        std::auto_ptr<mongo::DBClientCursor> data_cursor = c->query(helpers::collection_name(Collections::BIOSOURCES()), query, 1);
         mongo::BSONObj result;
         if (data_cursor->more()) {
           result = data_cursor->next();
         } else {
-          msg = "bio source with id " + id + " not found.";
+          msg = "biosource with id " + id + " not found.";
           c.done();
           return false;
         }
         c.done();
 
-        std::string bio_source_name = result["name"].String();
-        std::string norm_bio_source_name = result["norm_name"].String();
+        std::string biosource_name = result["name"].String();
+        std::string norm_biosource_name = result["norm_name"].String();
 
         for (mongo::BSONObj::iterator it = result.begin(); it.more(); ) {
           mongo::BSONElement e = it.next();
@@ -173,9 +173,9 @@ namespace epidb {
           }
         }
 
-        utils::IdName id_name_bio_source(id, bio_source_name);
+        utils::IdName id_name_biosource(id, biosource_name);
         std::vector<utils::IdName> syns;
-        if (!get_bio_source_synonyms(bio_source_name, norm_bio_source_name, true, "", syns, msg)) {
+        if (!get_biosource_synonyms(biosource_name, norm_biosource_name, true, "", syns, msg)) {
           return false;
         }
         BOOST_FOREACH(const utils::IdName &id_name, syns) {
