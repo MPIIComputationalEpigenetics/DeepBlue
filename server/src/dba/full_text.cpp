@@ -193,6 +193,28 @@ namespace epidb {
         return true;
       }
 
+      bool change_extra_metadata_full_text(const std::string &id, const std::string &key, const std::string &value, std::string &msg)
+      {
+        mongo::ScopedDbConnection c(config::get_mongodb_server());
+
+        mongo::BSONObj query = BSON("epidb_id" << id);
+        mongo::BSONObj change_value;
+
+        if (value.empty()) {
+          change_value = BSON("$unset" << BSON("extra_metadata_" + key << value));
+        } else {
+          change_value = BSON("$set" << BSON("extra_metadata_" + key << value));
+        }
+
+        c->update(helpers::collection_name(Collections::TEXT_SEARCH()), query, change_value);
+        if (!c->getLastError().empty()) {
+          msg = c->getLastError();
+          c.done();
+          return false;
+        }
+        c.done();
+        return true;
+      }
 
       static bool __sort_search_full_text_result(TextSearchResult i, TextSearchResult j)
       {

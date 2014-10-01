@@ -4,6 +4,7 @@ import annotations
 import bedgraph_parser
 import bio_sources
 import bugs
+import changes
 import column_types
 import complex_queries
 import epigenetic_marks

@@ -189,6 +189,9 @@ class EpidbClient:
   def get_regions(self, query_id, format, user_key):
     return self.server.get_regions(query_id, format, user_key)
 
+  ## Data change
+  def change_extra_metadata(self, data_id, extra_metadata_key, extra_metadata_value, user_key):
+    return self.server.change_extra_metadata(data_id, extra_metadata_key, extra_metadata_value, user_key)
 
 ## Admin Operations
 

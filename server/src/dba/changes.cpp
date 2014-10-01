@@ -14,6 +14,7 @@
 #include "config.hpp"
 #include "collections.hpp"
 #include "helpers.hpp"
+#include "full_text.hpp"
 
 namespace epidb {
   namespace dba {
@@ -49,6 +50,11 @@ namespace epidb {
         c->update(helpers::collection_name(collection), query, change_value);
         if (!c->getLastError().empty()) {
           msg = c->getLastError();
+          c.done();
+          return false;
+        }
+
+        if (!search::change_extra_metadata_full_text(id, key, value, msg)) {
           c.done();
           return false;
         }

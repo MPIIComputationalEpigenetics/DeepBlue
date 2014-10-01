@@ -43,6 +43,8 @@ namespace epidb {
 
       bool insert_related_term(const std::string &id, const std::string &name, std::string &msg);
 
+      bool change_extra_metadata_full_text(const std::string &id, const std::string &key, const std::string &value, std::string &msg);
+
       bool search_full_text(const std::string &text, const std::vector<std::string> &types,
                             std::vector<TextSearchResult> &, std::string &msg);
     }
