@@ -75,7 +75,6 @@ namespace epidb {
           result.set_as_array(true);
         }
 
-        int c = 0;
         std::vector<std::string> synonyms;
         BOOST_FOREACH(const serialize::ParameterPtr &id_param, ids_param) {
           clock_t dsysTime = clock();
