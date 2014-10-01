@@ -21,6 +21,11 @@
 namespace epidb {
   std::map<std::string, Command *> *Command::commands_;
 
+  bool operator==(const CommandCategory &c1, const CommandCategory &c2)
+  {
+    return c1.name == c2.name;
+  }
+
   Command::Command(const std::string &name, const Parameters &params,
                    const Parameters &results, const CommandDescription &desc)
     : name_(name), desc_(desc), parameters_(params), results_(results)
@@ -59,7 +64,7 @@ namespace epidb {
   void Command::set_id_names_return(const std::vector<utils::IdName> &id_names, serialize::Parameters &result) const
   {
     result.set_as_array(true);
-    BOOST_FOREACH(const utils::IdName &id_name, id_names) {
+    BOOST_FOREACH(const utils::IdName & id_name, id_names) {
       std::vector<serialize::ParameterPtr> list;
       list.push_back(serialize::ParameterPtr(new serialize::SimpleParameter(serialize::STRING, id_name.id)));
       list.push_back(serialize::ParameterPtr(new serialize::SimpleParameter(serialize::STRING, id_name.name)));

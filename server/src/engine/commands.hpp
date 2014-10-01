@@ -41,6 +41,8 @@ namespace epidb {
     std::string description;
   };
 
+  bool operator==(const CommandCategory &c1, const CommandCategory &c2);
+
   namespace categories {
     static const CommandCategory ADMINISTRATION("Administration", "Administration commands");
     static const CommandCategory ANNOTATIONS("Annotations", "Inserting and listing annotations");

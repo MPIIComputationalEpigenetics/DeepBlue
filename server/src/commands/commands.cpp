@@ -51,6 +51,13 @@ namespace epidb {
         // add information about every command
         std::map<std::string, Command *>::const_iterator it;
         for (it = commands_->begin(); it != commands_->end(); ++it) {
+
+          // Occult "administration" commands
+          CommandDescription desc = it->second->description();
+          if (desc.category == categories::ADMINISTRATION) {
+            continue;
+          }
+
           serialize::ParameterPtr cmd_info(new serialize::MapParameter);
 
           // add parameter info
@@ -102,7 +109,6 @@ namespace epidb {
 
 
           // add description
-          CommandDescription desc = it->second->description();
           serialize::ParameterPtr description(new serialize::ListParameter);
           description->add_child(serialize::ParameterPtr(
                                    new serialize::SimpleParameter(serialize::STRING, desc.category.name)) );
