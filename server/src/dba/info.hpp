@@ -21,11 +21,12 @@ namespace epidb {
 
       bool get_project(const std::string &id, std::map<std::string, std::string> &res, std::string &msg, bool full = false);
 
-      bool get_biosource(const std::string &id, std::map<std::string, std::string> &res,
-                          std::map<std::string, std::string> &metadata,
-                          std::vector<std::string> &synonyms,
-                          std::string &msg,
-                          bool full = false);
+      bool get_biosource(const std::string &id,
+                         std::map<std::string, std::string> &metadata,
+                         std::map<std::string, std::string> &extra_metadata,
+                         std::vector<std::string> &synonyms,
+                         std::string &msg,
+                         bool full = false);
 
       bool get_technique(const std::string &id, std::map<std::string, std::string> &res,
                          std::map<std::string, std::string> &metadata, std::string &msg, bool full = false);
@@ -34,11 +35,18 @@ namespace epidb {
 
       bool get_epigenetic_mark(const std::string &id, std::map<std::string, std::string> &, std::string &msg, bool full = false);
 
-      bool get_annotation(const std::string &id, std::map<std::string, std::string> &res,
-                          std::map<std::string, std::string> &metadata, std::string &msg, bool full = false);
+      bool get_annotation(const std::string &id,
+                          std::map<std::string, std::string> &metadata,
+                          std::map<std::string, std::string> &extra_metadata,
+                          std::map<std::string, std::string> &upload_info,
+                          std::string &msg, bool full = false);
 
-      bool get_experiment(const std::string &id, std::map<std::string, std::string> &res,
-                          std::map<std::string, std::string> &metadata, std::string &msg, bool full = false);
+      bool get_experiment(const std::string &id,
+                          std::map<std::string, std::string> &metadata,
+                          std::map<std::string, std::string> &extra_metadata,
+                          std::map<std::string, std::string> &sample_info,
+                          std::map<std::string, std::string> &upload_info,
+                          std::string &msg, bool full = false);
 
       bool get_query(const std::string &id, std::map<std::string, std::string> &, std::string &msg);
 

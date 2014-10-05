@@ -309,35 +309,7 @@ namespace epidb {
       return true;
     }
 
-    bool wig_file_format(mongo::BSONArray &array, std::string &msg)
-    {
-      mongo::BSONArrayBuilder ab;
-      columns::ColumnTypePtr column_type;
-      if (!columns::load_column_type("CHROMOSOME", column_type, msg)) {
-        return false;
-      }
-      ab.append(column_type->BSONObj());
-
-      if (!columns::load_column_type("START", column_type, msg)) {
-        return false;
-      }
-      ab.append(column_type->BSONObj());
-
-      if (!columns::load_column_type("END", column_type, msg)) {
-        return false;
-      }
-      ab.append(column_type->BSONObj());
-
-      if (!columns::load_column_type("VALUE", column_type, msg)) {
-        return false;
-      }
-      ab.append(column_type->BSONObj());
-      array = ab.arr();
-
-      return true;
-    }
-
-    bool bed_file_format(const parser::FileFormat &format, mongo::BSONArray &array, std::string &msg)
+    bool file_format_builder(const parser::FileFormat &format, mongo::BSONArray &array, std::string &msg)
     {
       mongo::BSONArrayBuilder ab;
 
@@ -345,19 +317,22 @@ namespace epidb {
         mongo::BSONObj o = (*it)->BSONObj();
         ab.append(o);
       }
-
       array = ab.arr();
       return true;
     }
 
-    bool insert_experiment(const std::string &name, const std::string &norm_name,
-                           const std::string &genome, const std::string &norm_genome,
-                           const std::string &epigenetic_mark, const std::string &norm_epigenetic_mark,
-                           const std::string &sample_id, const std::string &technique, const std::string &norm_technique,
-                           const std::string &project, const std::string &norm_project,
-                           const std::string &description, const std::string &norm_description, const Metadata &extra_metadata,
-                           const std::string &user_key, const std::string &ip, const parser::WigPtr &wig,
-                           std::string &experiment_id, std::string &msg)
+    bool build_experiment_metadata(const std::string &name, const std::string &norm_name,
+                                   const std::string &genome, const std::string &norm_genome,
+                                   const std::string &epigenetic_mark, const std::string &norm_epigenetic_mark,
+                                   const std::string &sample_id, const std::string &technique, const std::string &norm_technique,
+                                   const std::string &project, const std::string &norm_project,
+                                   const std::string &description, const std::string &norm_description, const Metadata &extra_metadata,
+                                   const std::string &user_key, const std::string &ip,
+                                   const parser::FileFormat &format,
+                                   int &dataset_id,
+                                   std::string &experiment_id,
+                                   mongo::BSONObj &experiment_metadata,
+                                   std::string &msg)
     {
       int e_id;
       if (!helpers::get_counter("experiments", e_id, msg))  {
@@ -365,7 +340,6 @@ namespace epidb {
       }
       experiment_id = "e" + utils::integer_to_string(e_id);
 
-      int dataset_id;
       if (!helpers::get_counter("datasets", dataset_id, msg))  {
         return false;
       }
@@ -376,7 +350,7 @@ namespace epidb {
       experiment_data_builder.append("name", name);
       experiment_data_builder.append("norm_name", norm_name);
       experiment_data_builder.append("genome", genome);
-      experiment_data_builder.append("norm_genome", norm_genome);
+      experiment_data_builder.append("norm_genome", genome);
       experiment_data_builder.append("epigenetic_mark", epigenetic_mark);
       experiment_data_builder.append("norm_epigenetic_mark", norm_epigenetic_mark);
       experiment_data_builder.append("sample_id", sample_id);
@@ -386,10 +360,10 @@ namespace epidb {
       experiment_data_builder.append("norm_project", norm_project);
       experiment_data_builder.append("description", description);
       experiment_data_builder.append("norm_description", norm_description);
-      experiment_data_builder.append("content_format", "wig");
+      experiment_data_builder.append("format", format.format());
 
       mongo::BSONArray format_array;
-      if (!wig_file_format(format_array, msg)) {
+      if (!file_format_builder(format, format_array, msg)) {
         return false;
       }
       experiment_data_builder.append("columns", format_array);
@@ -414,23 +388,127 @@ namespace epidb {
       }
       experiment_data_builder.append("sample_info", sample_builder.obj());
 
-      mongo::BSONObj experiment_data = experiment_data_builder.obj();
-      mongo::BSONObjBuilder experiment_builder;
-      experiment_builder.appendElements(experiment_data);
+      experiment_metadata = experiment_data_builder.obj();
 
+      return true;
+    }
+
+
+    bool build_annotation_info(const std::string &name, const std::string &norm_name,
+                               const std::string &genome, const std::string &norm_genome,
+                               const std::string &description, const std::string &norm_description, const Metadata &extra_metadata,
+                               const std::string &user_key, const std::string &ip,
+                               const parser::FileFormat &format,
+                               int &dataset_id,
+                               std::string &annotation_id,
+                               mongo::BSONObj& annotation_metadata,
+                               std::string &msg)
+    {
+      int a_id;
+      if (!helpers::get_counter("annotations", a_id, msg))  {
+        return false;
+      }
+      annotation_id = "a" + utils::integer_to_string(a_id);
+
+      if (!helpers::get_counter("datasets", dataset_id, msg))  {
+        return false;
+      }
+
+      mongo::BSONObjBuilder annotation_data_builder;
+      annotation_data_builder.append("_id", annotation_id);
+      annotation_data_builder.append(KeyMapper::DATASET(), dataset_id);
+      annotation_data_builder.append("name", name);
+      annotation_data_builder.append("norm_name", norm_name);
+      annotation_data_builder.append("genome", genome);
+      annotation_data_builder.append("norm_genome", norm_genome);
+      annotation_data_builder.append("description", description);
+      annotation_data_builder.append("norm_description", norm_description);
+      annotation_data_builder.append("format", format.format());
+
+      mongo::BSONArray format_array;
+      if (!file_format_builder(format, format_array, msg)) {
+        return false;
+      }
+      annotation_data_builder.append("columns", format_array);
+
+      mongo::BSONObjBuilder extra_metadata_builder;
+      Metadata::const_iterator cit;
+      for (cit = extra_metadata.begin(); cit != extra_metadata.end(); ++cit) {
+        extra_metadata_builder.append(cit->first, cit->second);
+      }
+      annotation_data_builder.append("extra_metadata", extra_metadata_builder.obj());
+
+      annotation_metadata = annotation_data_builder.obj();
+      return true;
+    }
+
+    bool build_upload_info(const std::string &user_key, const std::string &client_address, const std::string &content_format,
+                           mongo::BSONObj &upload_info, std::string &msg)
+    {
       std::string user_name;
       if (!get_user_name(user_key, user_name, msg)) {
         return false;
       }
-      experiment_builder.append("user", user_name);
-      experiment_builder.append("done", false);
-      experiment_builder.append("client_address", ip);
+
+      mongo::BSONObjBuilder upload_info_builder;
+
+      upload_info_builder.append("user", user_name);
+      upload_info_builder.append("content_format", content_format);
+      upload_info_builder.append("done", false);
+      upload_info_builder.append("client_address", client_address);
       time_t time_;
       time(&time_);
-      experiment_builder.appendTimeT("upload_start", time_);
+      upload_info_builder.appendTimeT("upload_start", time_);
+
+      upload_info = upload_info_builder.obj();
+
+      return true;
+    }
+
+    bool update_upload_info(const std::string &collection, const std::string &annotation_id,
+                            const int total_size, std::string &msg)
+    {
+      mongo::ScopedDbConnection c(config::get_mongodb_server());
+      c->update(helpers::collection_name(collection), QUERY("_id" << annotation_id),
+                BSON("$set" << BSON("upload_info.total_size" << (unsigned int) total_size << "upload_info.done" << true << "upload_info.upload_end" << mongo::DATENOW)), false, true);
+
+      if (!c->getLastError().empty()) {
+        msg = c->getLastError();
+        c.done();
+        return false;
+      }
+      c.done();
+
+      return true;
+    }
+
+
+    bool insert_experiment(const std::string &name, const std::string &norm_name,
+                           const std::string &genome, const std::string &norm_genome,
+                           const std::string &epigenetic_mark, const std::string &norm_epigenetic_mark,
+                           const std::string &sample_id, const std::string &technique, const std::string &norm_technique,
+                           const std::string &project, const std::string &norm_project,
+                           const std::string &description, const std::string &norm_description, const Metadata &extra_metadata,
+                           const std::string &user_key, const std::string &ip, const parser::WigPtr &wig,
+                           std::string &experiment_id, std::string &msg)
+    {
+      mongo::BSONObj experiment_metadata;
+      int dataset_id;
+      if (!build_experiment_metadata(name, norm_name, genome, norm_genome, epigenetic_mark, norm_epigenetic_mark,
+                                     sample_id, technique, norm_technique, project, norm_project, description, norm_description, extra_metadata,
+                                     user_key, ip, parser::FileFormat::wig_format(), dataset_id,  experiment_id, experiment_metadata, msg)) {
+        return false;
+      }
+
+      mongo::BSONObj upload_info;
+      if (!build_upload_info(user_key, ip, "bed", upload_info, msg)) {
+        return false;
+      }
+      mongo::BSONObjBuilder experiment_builder;
+      experiment_builder.appendElements(experiment_metadata);
+      experiment_builder.append("upload_info", upload_info);
 
       mongo::BSONObj e = experiment_builder.obj();
-
       mongo::ScopedDbConnection c(config::get_mongodb_server());
       c->insert(helpers::collection_name(Collections::EXPERIMENTS()), e);
       if (!c->getLastError().empty()) {
@@ -439,7 +517,7 @@ namespace epidb {
         return false;
       }
 
-      if (!search::insert_full_text(Collections::EXPERIMENTS(), experiment_id, experiment_data, msg)) {
+      if (!search::insert_full_text(Collections::EXPERIMENTS(), experiment_id, experiment_metadata, msg)) {
         c.done();
         return false;
       }
@@ -551,12 +629,7 @@ namespace epidb {
         bulk.clear();
       }
 
-      c->update(helpers::collection_name(Collections::EXPERIMENTS()), QUERY("_id" << experiment_id),
-                BSON("$set" << BSON("total_size" << (unsigned int) total_size << "done" << true << "upload_end" << mongo::DATENOW)), false, true);
-
-      if (!c->getLastError().empty()) {
-        msg = c->getLastError();
-        c.done();
+      if (!update_upload_info(Collections::EXPERIMENTS(), experiment_id, total_size, msg)) {
         return false;
       }
 
@@ -575,76 +648,26 @@ namespace epidb {
                            const parser::FileFormat &format,
                            std::string &experiment_id, std::string &msg)
     {
-      int e_id;
-      if (!helpers::get_counter("experiments", e_id, msg))  {
-        return false;
-      }
-      experiment_id = "e" + utils::integer_to_string(e_id);
-
+      mongo::BSONObj experiment_metadata;
       int dataset_id;
-      if (!helpers::get_counter("datasets", dataset_id, msg))  {
+      if (!build_experiment_metadata(name, norm_name, genome, norm_genome,
+                                     epigenetic_mark, norm_epigenetic_mark,
+                                     sample_id, technique, norm_technique, project, norm_project,
+                                     description, norm_description, extra_metadata,
+                                     user_key, ip, format,
+                                     dataset_id,  experiment_id, experiment_metadata, msg)) {
         return false;
       }
 
-      mongo::BSONObjBuilder experiment_data_builder;
-      experiment_data_builder.append("_id", experiment_id);
-      experiment_data_builder.append(KeyMapper::DATASET(), dataset_id);
-      experiment_data_builder.append("name", name);
-      experiment_data_builder.append("norm_name", norm_name);
-      experiment_data_builder.append("genome", genome);
-      experiment_data_builder.append("norm_genome", genome);
-      experiment_data_builder.append("epigenetic_mark", epigenetic_mark);
-      experiment_data_builder.append("norm_epigenetic_mark", norm_epigenetic_mark);
-      experiment_data_builder.append("sample_id", sample_id);
-      experiment_data_builder.append("technique", technique);
-      experiment_data_builder.append("norm_technique", norm_technique);
-      experiment_data_builder.append("project", project);
-      experiment_data_builder.append("norm_project", norm_project);
-      experiment_data_builder.append("description", description);
-      experiment_data_builder.append("norm_description", norm_description);
-      experiment_data_builder.append("format", format.format());
-      experiment_data_builder.append("content_format", "bed");
-
-      mongo::BSONArray format_array;
-      if (!bed_file_format(format, format_array, msg)) {
+      mongo::BSONObj upload_info;
+      if (!build_upload_info(user_key, ip, "wig", upload_info, msg)) {
         return false;
       }
-      experiment_data_builder.append("columns", format_array);
-
-      mongo::BSONObjBuilder metadata_builder;
-      Metadata::const_iterator cit;
-      for (cit = extra_metadata.begin(); cit != extra_metadata.end(); ++cit) {
-        metadata_builder.append(cit->first, cit->second);
-      }
-      experiment_data_builder.append("extra_metadata", metadata_builder.obj());
-
-      std::map<std::string, std::string> sample_data;
-      if (!info::get_sample_by_id(sample_id, sample_data, msg, true)) {
-        return false;
-      }
-      mongo::BSONObjBuilder sample_builder;
-      std::map<std::string, std::string>::iterator it;
-      for (it = sample_data.begin(); it != sample_data.end(); ++it) {
-        if ((it->first != "_id") && (it->first != "user")) {
-          sample_builder.append(it->first, it->second);
-        }
-      }
-      experiment_data_builder.append("sample_info", sample_builder.obj());
 
       mongo::BSONObjBuilder experiment_builder;
-      mongo::BSONObj experiment_data = experiment_data_builder.obj();
-      experiment_builder.appendElements(experiment_data);
+      experiment_builder.appendElements(experiment_metadata);
+      experiment_builder.append("upload_info", upload_info);
 
-      std::string user_name;
-      if (!get_user_name(user_key, user_name, msg)) {
-        return false;
-      }
-      experiment_builder.append("user", user_name);
-      experiment_builder.append("done", false);
-      experiment_builder.append("client_address", ip);
-      time_t time_;
-      time(&time_);
-      experiment_builder.appendTimeT("upload_start", time_);
       mongo::BSONObj e = experiment_builder.obj();
 
       mongo::ScopedDbConnection c(config::get_mongodb_server());
@@ -655,7 +678,7 @@ namespace epidb {
         return false;
       }
 
-      if (!search::insert_full_text(Collections::EXPERIMENTS(), experiment_id, experiment_data, msg)) {
+      if (!search::insert_full_text(Collections::EXPERIMENTS(), experiment_id, experiment_metadata, msg)) {
         c.done();
         return false;
       }
@@ -722,12 +745,7 @@ namespace epidb {
         return false;
       }
 
-      c->update(helpers::collection_name(Collections::EXPERIMENTS()), QUERY("_id" << experiment_id),
-                BSON("$set" << BSON("total_size" << (unsigned int) total_size << "done" << true << "upload_end" << mongo::DATENOW)), false, true);
-
-      if (!c->getLastError().empty()) {
-        msg = c->getLastError();
-        c.done();
+      if (!update_upload_info(Collections::EXPERIMENTS(), experiment_id, total_size, msg)) {
         return false;
       }
 
@@ -743,69 +761,35 @@ namespace epidb {
                            const parser::FileFormat &format,
                            std::string &annotation_id, std::string &msg)
     {
-      int a_id;
-      if (!helpers::get_counter("annotations", a_id, msg))  {
-        return false;
-      }
-      annotation_id = "a" + utils::integer_to_string(a_id);
-
       int dataset_id;
-      if (!helpers::get_counter("datasets", dataset_id, msg))  {
+      mongo::BSONObj annotation_metadata;
+      if (!build_annotation_info(name, norm_name, genome, norm_genome,
+                                 description, norm_description, extra_metadata,
+                                 user_key, ip, format,
+                                 dataset_id, annotation_id, annotation_metadata, msg)) {
         return false;
       }
+
+      mongo::BSONObj upload_info;
+      if (!build_upload_info(user_key, ip, "internal", upload_info, msg)) {
+        return false;
+      }
+
+      mongo::BSONObjBuilder annotation_data_builder;
+      annotation_data_builder.appendElements(annotation_metadata);
+      annotation_data_builder.append("upload_info", upload_info);
+
+      mongo::BSONObj e = annotation_data_builder.obj();
 
       mongo::ScopedDbConnection c(config::get_mongodb_server());
-      mongo::BSONObjBuilder annotation_data_builder;
-      annotation_data_builder.append("_id", annotation_id);
-      annotation_data_builder.append(KeyMapper::DATASET(), dataset_id);
-      annotation_data_builder.append("name", name);
-      annotation_data_builder.append("norm_name", norm_name);
-      annotation_data_builder.append("genome", genome);
-      annotation_data_builder.append("norm_genome", norm_genome);
-      annotation_data_builder.append("description", description);
-      annotation_data_builder.append("norm_description", norm_description);
-      annotation_data_builder.append("format", format.format());
-
-      mongo::BSONArray format_array;
-      if (!bed_file_format(format, format_array, msg)) {
-        return false;
-      }
-      annotation_data_builder.append("columns", format_array);
-
-      mongo::BSONObjBuilder metadata_builder;
-      Metadata::const_iterator cit;
-      for (cit = extra_metadata.begin(); cit != extra_metadata.end(); ++cit) {
-        metadata_builder.append(cit->first, cit->second);
-      }
-      annotation_data_builder.append("extra_metadata", metadata_builder.obj());
-
-      // TODO: extra metadata
-      mongo::BSONObj search_data = annotation_data_builder.obj();
-      mongo::BSONObjBuilder annotation_builder;
-      annotation_builder.appendElements(search_data);
-
-      std::string user_name;
-      if (!get_user_name(user_key, user_name, msg)) {
-        c.done();
-        return false;
-      }
-      annotation_builder.append("user", user_name);
-      annotation_builder.append("done", false);
-      annotation_builder.append("client_address", ip);
-      time_t time_;
-      time(&time_);
-      annotation_builder.appendTimeT("upload_start", time_);
-      // TODO: internal metadata:
-      // - extra_columns
-      mongo::BSONObj a = annotation_builder.obj();
-      c->insert(helpers::collection_name(Collections::ANNOTATIONS()), a);
+      c->insert(helpers::collection_name(Collections::ANNOTATIONS()), e);
       if (!c->getLastError().empty()) {
         msg = c->getLastError();
         c.done();
         return false;
       }
 
-      if (!search::insert_full_text(Collections::ANNOTATIONS(), annotation_id, search_data, msg)) {
+      if (!search::insert_full_text(Collections::ANNOTATIONS(), annotation_id, annotation_metadata, msg)) {
         c.done();
         return false;
       }
@@ -872,12 +856,7 @@ namespace epidb {
         return false;
       }
 
-      c->update(helpers::collection_name(Collections::ANNOTATIONS()), QUERY("_id" << annotation_id),
-                BSON("$set" << BSON("total_size" << (unsigned int) total_size << "done" << true << "upload_end" << mongo::DATENOW)), false, true);
-
-      if (!c->getLastError().empty()) {
-        msg = c->getLastError();
-        c.done();
+      if (!update_upload_info(Collections::ANNOTATIONS(), annotation_id, total_size, msg)) {
         return false;
       }
 
@@ -893,69 +872,35 @@ namespace epidb {
                            const parser::FileFormat &format,
                            std::string &annotation_id, std::string &msg)
     {
-      int a_id;
-      if (!helpers::get_counter("annotations", a_id, msg))  {
-        return false;
-      }
-      annotation_id = "a" + utils::integer_to_string(a_id);
-
       int dataset_id;
-      if (!helpers::get_counter("datasets", dataset_id, msg))  {
+      mongo::BSONObj annotation_metadata;
+      if (!build_annotation_info(name, norm_name, genome, norm_genome,
+                                 description, norm_description, extra_metadata,
+                                 user_key, ip, format,
+                                 dataset_id, annotation_id, annotation_metadata, msg)) {
         return false;
       }
+
+      mongo::BSONObj upload_info;
+      if (!build_upload_info(user_key, ip, "internal", upload_info, msg)) {
+        return false;
+      }
+
+      mongo::BSONObjBuilder annotation_data_builder;
+      annotation_data_builder.appendElements(annotation_metadata);
+      annotation_data_builder.append("upload_info", upload_info);
+
+      mongo::BSONObj e = annotation_data_builder.obj();
 
       mongo::ScopedDbConnection c(config::get_mongodb_server());
-      mongo::BSONObjBuilder annotation_data_builder;
-      annotation_data_builder.append("_id", annotation_id);
-      annotation_data_builder.append(KeyMapper::DATASET(), dataset_id);
-      annotation_data_builder.append("name", name);
-      annotation_data_builder.append("norm_name", norm_name);
-      annotation_data_builder.append("genome", genome);
-      annotation_data_builder.append("norm_genome", norm_genome);
-      annotation_data_builder.append("description", description);
-      annotation_data_builder.append("norm_description", norm_description);
-      annotation_data_builder.append("format", format.format());
-
-      mongo::BSONArray format_array;
-      if (!bed_file_format(format, format_array, msg)) {
-        return false;
-      }
-      annotation_data_builder.append("columns", format_array);
-
-      mongo::BSONObjBuilder metadata_builder;
-      Metadata::const_iterator cit;
-      for (cit = extra_metadata.begin(); cit != extra_metadata.end(); ++cit) {
-        metadata_builder.append(cit->first, cit->second);
-      }
-      annotation_data_builder.append("extra_metadata", metadata_builder.obj());
-
-      // TODO: extra metadata
-      mongo::BSONObj search_data = annotation_data_builder.obj();
-      mongo::BSONObjBuilder annotation_builder;
-      annotation_builder.appendElements(search_data);
-
-      std::string user_name;
-      if (!get_user_name(user_key, user_name, msg)) {
-        c.done();
-        return false;
-      }
-      annotation_builder.append("user", user_name);
-      annotation_builder.append("done", false);
-      annotation_builder.append("client_address", ip);
-      time_t time_;
-      time(&time_);
-      annotation_builder.appendTimeT("upload_start", time_);
-      // TODO: internal metadata:
-      // - extra_columns
-      mongo::BSONObj a = annotation_builder.obj();
-      c->insert(helpers::collection_name(Collections::ANNOTATIONS()), a);
+      c->insert(helpers::collection_name(Collections::ANNOTATIONS()), e);
       if (!c->getLastError().empty()) {
         msg = c->getLastError();
         c.done();
         return false;
       }
 
-      if (!search::insert_full_text(Collections::ANNOTATIONS(), annotation_id, search_data, msg)) {
+      if (!search::insert_full_text(Collections::ANNOTATIONS(), annotation_id, annotation_metadata, msg)) {
         c.done();
         return false;
       }
@@ -1019,17 +964,33 @@ namespace epidb {
         }
       }
 
-      c->update(helpers::collection_name(Collections::ANNOTATIONS()), QUERY("_id" << annotation_id),
-                BSON("$set" << BSON("total_size" << (unsigned int) total_size << "done" << true << "upload_end" << mongo::DATENOW)), false, true);
-
-      if (!c->getLastError().empty()) {
-        msg = c->getLastError();
-        c.done();
+      if (!update_upload_info(Collections::ANNOTATIONS(), annotation_id, total_size, msg)) {
         return false;
       }
 
       c.done();
       return true;
     }
+
+    bool clone_dataset(const std::string &dataset_id, const std::string &description, const parser::FileFormat &format,
+                       const Metadata &extra_metadata, std::string &msg)
+    {
+
+      mongo::ScopedDbConnection c(config::get_mongodb_server());
+
+      mongo::BSONObj query = BSON("_id" << dataset_id);
+      std::auto_ptr<mongo::DBClientCursor> data_cursor = c->query(helpers::collection_name(Collections::EXPERIMENTS()), query, 1);
+      mongo::BSONObj result;
+      if (data_cursor->more()) {
+        result = data_cursor->next().getOwned();
+      } else {
+        msg = "experiment with id " + dataset_id + " not found.";
+        c.done();
+        return false;
+      }
+
+      return true;
+    }
+
   }
 }

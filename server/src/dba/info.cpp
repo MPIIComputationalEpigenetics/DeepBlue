@@ -139,10 +139,10 @@ namespace epidb {
       }
 
       bool get_biosource(const std::string &id, std::map<std::string, std::string> &res,
-                          std::map<std::string, std::string> &metadata,
-                          std::vector<std::string> &synonyms,
-                          std::string &msg,
-                          bool full = false)
+                         std::map<std::string, std::string> &metadata,
+                         std::vector<std::string> &synonyms,
+                         std::string &msg,
+                         bool full = false)
       {
         mongo::ScopedDbConnection c(config::get_mongodb_server());
 
@@ -178,7 +178,7 @@ namespace epidb {
         if (!get_biosource_synonyms(biosource_name, norm_biosource_name, true, "", syns, msg)) {
           return false;
         }
-        BOOST_FOREACH(const utils::IdName &id_name, syns) {
+        BOOST_FOREACH(const utils::IdName & id_name, syns) {
           synonyms.push_back(id_name.name);
         }
 
@@ -211,8 +211,11 @@ namespace epidb {
         return true;
       }
 
-      bool get_annotation(const std::string &id, std::map<std::string, std::string> &res,
-                          std::map<std::string, std::string> &metadata, std::string &msg, bool full = false)
+      bool get_annotation(const std::string &id, std::map<std::string,
+                          std::string> &metadata,
+                          std::map<std::string, std::string> &extra_metadata,
+                          std::map<std::string, std::string> &upload_info,
+                          std::string &msg, bool full = false)
       {
         mongo::ScopedDbConnection c(config::get_mongodb_server());
 
@@ -233,17 +236,25 @@ namespace epidb {
           if (std::string(e.fieldName()) == "extra_metadata") {
             for (mongo::BSONObj::iterator itt = e.Obj().begin(); itt.more(); ) {
               mongo::BSONElement ee = itt.next();
-              metadata[ee.fieldName()] = ee.str();
+              extra_metadata[ee.fieldName()] = ee.str();
+            }
+          } else if (std::string(e.fieldName()) == "upload_info") {
+            for (mongo::BSONObj::iterator itt = e.Obj().begin(); itt.more(); ) {
+              mongo::BSONElement ee = itt.next();
+              upload_info[ee.fieldName()] = ee.str();
             }
           } else if (full || (strncmp("norm_", e.fieldName(), 5) != 0)) {
-            res[e.fieldName()] = e.str();
+            metadata[e.fieldName()] = e.str();
           }
         }
         return true;
       }
 
-      bool get_experiment(const std::string &id, std::map<std::string, std::string> &res,
-                          std::map<std::string, std::string> &metadata, std::string &msg, bool full = false)
+      bool get_experiment(const std::string &id, std::map<std::string, std::string> &metadata,
+                          std::map<std::string, std::string> &extra_metadata,
+                          std::map<std::string, std::string> &sample_info,
+                          std::map<std::string, std::string> &upload_info,
+                          std::string &msg, bool full = false)
       {
         mongo::ScopedDbConnection c(config::get_mongodb_server());
 
@@ -261,13 +272,23 @@ namespace epidb {
 
         for (mongo::BSONObj::iterator it = result.begin(); it.more(); ) {
           mongo::BSONElement e = it.next();
-          if (std::string(e.fieldName()) == "extra_metadata") {
+          if (std::string(e.fieldName()) == "sample_info") {
             for (mongo::BSONObj::iterator itt = e.Obj().begin(); itt.more(); ) {
               mongo::BSONElement ee = itt.next();
-              metadata[ee.fieldName()] = ee.str();
+              sample_info[ee.fieldName()] = ee.str();
+            }
+          } else if (std::string(e.fieldName()) == "extra_metadata") {
+            for (mongo::BSONObj::iterator itt = e.Obj().begin(); itt.more(); ) {
+              mongo::BSONElement ee = itt.next();
+              extra_metadata[ee.fieldName()] = ee.str();
+            }
+          } else if (std::string(e.fieldName()) == "upload_info") {
+            for (mongo::BSONObj::iterator itt = e.Obj().begin(); itt.more(); ) {
+              mongo::BSONElement ee = itt.next();
+              upload_info[ee.fieldName()] = ee.str();
             }
           } else if (full || (strncmp("norm_", e.fieldName(), 5) != 0)) {
-            res[e.fieldName()] = e.str();
+            metadata[e.fieldName()] = e.str();
           }
         }
         return true;

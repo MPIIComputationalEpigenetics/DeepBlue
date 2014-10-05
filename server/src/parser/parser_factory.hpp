@@ -37,12 +37,14 @@ namespace epidb {
       std::vector<dba::columns::ColumnTypePtr> fields_;
 
       static const FileFormat default_format_builder();
+      static const FileFormat wig_format_builder();
 
     public:
       typedef std::vector<dba::columns::ColumnTypePtr>::iterator iterator;
       typedef std::vector<dba::columns::ColumnTypePtr>::const_iterator const_iterator;
 
       static const FileFormat default_format();
+      static const FileFormat wig_format();
 
       void set_format(const std::string format)
       {

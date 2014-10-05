@@ -113,6 +113,12 @@ namespace epidb {
       return DEFAULT_FORMAT;
     }
 
+    const FileFormat FileFormat::wig_format()
+    {
+      static FileFormat WIG_FORMAT = FileFormat::wig_format_builder();
+      return WIG_FORMAT;
+    }
+
     const FileFormat FileFormat::default_format_builder()
     {
       FileFormat format;
@@ -138,6 +144,40 @@ namespace epidb {
       format.add(chromosome);
       format.add(start);
       format.add(end);
+
+      return format;
+    }
+
+    const FileFormat FileFormat::wig_format_builder()
+    {
+      FileFormat format;
+
+      dba::columns::ColumnTypePtr chromosome;
+      dba::columns::ColumnTypePtr start;
+      dba::columns::ColumnTypePtr end;
+      dba::columns::ColumnTypePtr value;
+
+      std::string msg;
+
+      format.set_format("CHROMOSOME,START,END,VALUE");
+
+      if (!dba::columns::load_column_type("CHROMOSOME", chromosome, msg)) {
+        EPIDB_LOG_ERR(msg);
+      }
+      if (!dba::columns::load_column_type("START", start, msg)) {
+        EPIDB_LOG_ERR(msg);
+      }
+      if (!dba::columns::load_column_type("END", end, msg)) {
+        EPIDB_LOG_ERR(msg);
+      }
+      if (!dba::columns::load_column_type("VALUE", value, msg)) {
+        EPIDB_LOG_ERR(msg);
+      }
+
+      format.add(chromosome);
+      format.add(start);
+      format.add(end);
+      format.add(value);
 
       return format;
     }
@@ -170,7 +210,7 @@ namespace epidb {
           bool found = false;
 
           // Look into experiment columns
-          BOOST_FOREACH(const mongo::BSONObj& column, experiment_columns) {
+          BOOST_FOREACH(const mongo::BSONObj & column, experiment_columns) {
             if (found) {
               break;
             }
@@ -216,7 +256,7 @@ namespace epidb {
               return false;
             }
           } else {
-            msg = "Invalid column " + field_info[0] + ". Please inform the column type inside the column definition: '" + field_info[0] + ":(integer|double|string):" + field_info[1] +"'";
+            msg = "Invalid column " + field_info[0] + ". Please inform the column type inside the column definition: '" + field_info[0] + ":(integer|double|string):" + field_info[1] + "'";
             return false;
           }
           file_format.add(column_type);

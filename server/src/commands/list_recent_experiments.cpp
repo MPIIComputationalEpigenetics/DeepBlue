@@ -109,13 +109,13 @@ namespace epidb {
           time_t time_;
           time(&time_);
           mongo::Date_t after_date(time_ - days * 24 * 60 * 60);
-          mongo::BSONObjBuilder sub(args_builder.subobjStart("upload_end"));
+          mongo::BSONObjBuilder sub(args_builder.subobjStart("upload_info.upload_end"));
           sub.appendTimeT("$gt", after_date);
           sub.done();
 
           mongo::BSONObj o = args_builder.obj();
           const mongo::BSONObj q = dba::query::build_query(o);
-          mongo::Query query = mongo::Query(q).sort("upload_end", -1);
+          mongo::Query query = mongo::Query(q).sort("upload_info.upload_end", -1);
 
           std::vector<utils::IdName> names;
           if (!dba::list::experiments(query, names, msg)) {

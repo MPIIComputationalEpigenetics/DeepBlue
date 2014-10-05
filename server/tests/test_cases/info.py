@@ -54,7 +54,7 @@ class TestGetInfoCommand(helpers.TestCase):
     self.assertEqual(data['description'], "CpG islands are associated ...")
     self.assertEqual(data['genome'], "hg19")
     self.assertEqual(data['extra_metadata'], {"url":"genome.ucsc.edu...", "meta":"data"})
-    self.assertEqual(data['user'], "test_admin")
+    self.assertEqual(data['upload_info']['user'], "test_admin")
     self.assertEqual(data['format'], "CHROMOSOME,START,END")
     self.assertEqual(data['_id'], aid)
 

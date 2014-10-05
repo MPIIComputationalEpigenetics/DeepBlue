@@ -80,43 +80,45 @@ namespace epidb {
           clock_t dsysTime = clock();
           std::string id = id_param->as_string();
           std::string type;
-          std::map<std::string, std::string> res;
           std::map<std::string, std::string> metadata;
+          std::map<std::string, std::string> extra_metadata;
+          std::map<std::string, std::string> sample_info;
+          std::map<std::string, std::string> upload_info;
           if (id.compare(0, 1, "a") == 0) {
-            ok = dba::info::get_annotation(id, res, metadata, msg);
+            ok = dba::info::get_annotation(id, metadata, extra_metadata, upload_info, msg);
             type = "annotation";
           } else if (id.compare(0, 1, "g") == 0) {
-            ok = dba::info::get_genome(id, res, msg);
+            ok = dba::info::get_genome(id, metadata, msg);
             type = "genome";
           } else if (id.compare(0, 1, "p") == 0) {
-            ok = dba::info::get_project(id, res, msg);
+            ok = dba::info::get_project(id, metadata, msg);
             type = "project";
           } else if (id.compare(0, 2, "bs") == 0) {
-            ok = dba::info::get_biosource(id, res, metadata, synonyms, msg);
+            ok = dba::info::get_biosource(id, metadata, extra_metadata, synonyms, msg);
             type = "biosource";
           } else if (id.compare(0, 1, "s") == 0) {
-            ok = dba::info::get_sample_by_id(id, res, msg);
+            ok = dba::info::get_sample_by_id(id, metadata, msg);
             type = "sample";
           } else if (id.compare(0, 2, "em") == 0) {
-            ok = dba::info::get_epigenetic_mark(id, res, msg);
+            ok = dba::info::get_epigenetic_mark(id, metadata, msg);
             type = "epigenetic_mark";
           } else if (id.compare(0, 1, "e") == 0) {
-            ok = dba::info::get_experiment(id, res, metadata, msg);
+            ok = dba::info::get_experiment(id, metadata, extra_metadata, sample_info, upload_info, msg);
             type = "experiment";
           } else if (id.compare(0, 1, "q") == 0) {
-            ok = dba::info::get_query(id, res, msg);
+            ok = dba::info::get_query(id, metadata, msg);
             type = "query";
           } else if (id.compare(0, 2, "tr") == 0) {
-            ok = dba::info::get_tiling_region(id, res, msg);
+            ok = dba::info::get_tiling_region(id, metadata, msg);
             type = "tiling_region";
           } else if (id.compare(0, 1, "t") == 0) {
-            ok = dba::info::get_technique(id, res, metadata, msg);
+            ok = dba::info::get_technique(id, metadata, extra_metadata, msg);
             type = "technique";
           } else if (id.compare(0, 1, "f") == 0) {
-            ok = dba::info::get_sample_field(id, res, msg);
+            ok = dba::info::get_sample_field(id, metadata, msg);
             type = "sample_field";
           } else if (id.compare(0, 2, "ct") == 0) {
-            ok = dba::info::get_column_type(id, res, msg);
+            ok = dba::info::get_column_type(id, metadata, msg);
             type = "column_type";
           } else {
             result.add_error("Invalid identifier: " + id);
@@ -133,7 +135,7 @@ namespace epidb {
           info->add_child("type", pt);
 
           std::map<std::string, std::string>::iterator it;
-          for (it = res.begin(); it != res.end(); ++it) {
+          for (it = metadata.begin(); it != metadata.end(); ++it) {
             serialize::ParameterPtr p(new serialize::SimpleParameter(serialize::STRING, it->second));
             info->add_child(it->first, p);
           }
@@ -150,15 +152,36 @@ namespace epidb {
               info->add_child("synonyms", serialize_synonyms);
           }
 
-          if (metadata.size() > 0) {
-            serialize::ParameterPtr extra_metadata(new serialize::MapParameter());
+          if (extra_metadata.size() > 0) {
+            serialize::ParameterPtr extra_metadata_parameter(new serialize::MapParameter());
             std::map<std::string, std::string>::iterator it;
-            for (it = metadata.begin(); it != metadata.end(); ++it) {
+            for (it = extra_metadata.begin(); it != extra_metadata.end(); ++it) {
               serialize::ParameterPtr p(new serialize::SimpleParameter(serialize::STRING, it->second));
-              extra_metadata->add_child(it->first, p);
+              extra_metadata_parameter->add_child(it->first, p);
             }
-            info->add_child("extra_metadata", extra_metadata);
+            info->add_child("extra_metadata", extra_metadata_parameter);
           }
+
+          if (sample_info.size() > 0) {
+            serialize::ParameterPtr sample_info_parameter(new serialize::MapParameter());
+            std::map<std::string, std::string>::iterator it;
+            for (it = sample_info.begin(); it != sample_info.end(); ++it) {
+              serialize::ParameterPtr p(new serialize::SimpleParameter(serialize::STRING, it->second));
+              sample_info_parameter->add_child(it->first, p);
+            }
+            info->add_child("sample_info", sample_info_parameter);
+          }
+
+          if (upload_info.size() > 0) {
+            serialize::ParameterPtr upload_info_parameter(new serialize::MapParameter());
+            std::map<std::string, std::string>::iterator it;
+            for (it = upload_info.begin(); it != upload_info.end(); ++it) {
+              serialize::ParameterPtr p(new serialize::SimpleParameter(serialize::STRING, it->second));
+              upload_info_parameter->add_child(it->first, p);
+            }
+            info->add_child("upload_info", upload_info_parameter);
+          }
+
           std::cerr << "load info in " << (( ((float)  clock()) - dsysTime) / CLOCKS_PER_SEC) << std::endl;
           result.add_param(info);
         }

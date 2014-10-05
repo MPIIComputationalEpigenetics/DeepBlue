@@ -259,10 +259,10 @@ namespace epidb {
             experiments_query_builder.append("norm_technique", args["norm_technique"].str());
           }
         }
-        if (args.hasField("upload_end")) {
-          experiments_query_builder.append(args["upload_end"]);
+        if (args.hasField("upload_info.upload_end")) {
+          experiments_query_builder.append(args["upload_info.upload_end"]);
         }
-        experiments_query_builder.append("done", true);
+        experiments_query_builder.append("upload_info.done", true);
         return experiments_query_builder.obj();
       }
 
@@ -320,7 +320,7 @@ namespace epidb {
         } else {
           annotations_query_builder.append("norm_name", args["norm_annotation"].str());
         }
-        annotations_query_builder.append("done", true);
+        annotations_query_builder.append("upload_info.done", true);
 
         mongo::ScopedDbConnection c(config::get_mongodb_server());
         mongo::BSONObj annotation_query = annotations_query_builder.obj();

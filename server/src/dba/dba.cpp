@@ -355,7 +355,6 @@ namespace epidb {
           return false;
         }
       }
-
       create_genome_builder.append("chromosomes", ab.arr());
 
       utils::IdName id_user_name;
@@ -453,10 +452,10 @@ namespace epidb {
     }
 
     bool add_biosource(const std::string &name, const std::string &norm_name,
-                        const std::string &description, const std::string &norm_description,
-                        const Metadata &extra_metadata,
-                        const std::string &user_key,
-                        std::string &biosource_id, std::string &msg)
+                       const std::string &description, const std::string &norm_description,
+                       const Metadata &extra_metadata,
+                       const std::string &user_key,
+                       std::string &biosource_id, std::string &msg)
     {
       {
         int id;
@@ -1006,7 +1005,7 @@ namespace epidb {
       if (!get_user_name(user_key, id_user_name, msg)) {
         return false;
       }
-      query.push_back(helpers::QueryPair("user", id_user_name.name));
+      query.push_back(helpers::QueryPair("upload_info.user", id_user_name.name));
       std::vector<mongo::BSONObj> results;
 
       if (!helpers::get("experiments", query, results, msg)) {
@@ -1033,7 +1032,7 @@ namespace epidb {
     }
 
     bool set_biosource_synonym(const std::string &biosource_name, const std::string &synonymous,
-                                bool is_biosource, const bool is_syn, const std::string &user_key, std::string &msg)
+                               bool is_biosource, const bool is_syn, const std::string &user_key, std::string &msg)
     {
       if (!cv::set_biosource_synonym(biosource_name, synonymous, is_biosource, is_syn, user_key, msg))  {
         return false;
@@ -1042,26 +1041,26 @@ namespace epidb {
     }
 
     bool get_biosource_synonyms(const std::string &biosource_name, const std::string &norm_biosource_name,
-                                 bool is_biosource, const std::string &user_key,
-                                 std::vector<utils::IdName> &syns,
-                                 std::string &msg)
+                                bool is_biosource, const std::string &user_key,
+                                std::vector<utils::IdName> &syns,
+                                std::string &msg)
     {
       return cv::get_biosource_synonyms("", biosource_name, norm_biosource_name, is_biosource, user_key, syns, msg);
     }
 
     bool set_biosource_scope(const std::string &biosource_more_embracing, const std::string &norm_biosource_more_embracing,
-                              const std::string &biosource_less_embracing, const std::string &norm_biosource_less_embracing,
-                              bool more_embracing_is_syn, const bool less_embracing_is_syn,
-                              const std::string &user_key, std::string &msg)
+                             const std::string &biosource_less_embracing, const std::string &norm_biosource_less_embracing,
+                             bool more_embracing_is_syn, const bool less_embracing_is_syn,
+                             const std::string &user_key, std::string &msg)
     {
       return cv::set_biosource_embracing(biosource_more_embracing, norm_biosource_more_embracing,
-                                          biosource_less_embracing, norm_biosource_less_embracing,
-                                          more_embracing_is_syn, less_embracing_is_syn, user_key, msg);
+                                         biosource_less_embracing, norm_biosource_less_embracing,
+                                         more_embracing_is_syn, less_embracing_is_syn, user_key, msg);
     }
 
     bool get_biosource_scope(const std::string &biosource_name, const std::string &norm_biosource_name,
-                              bool is_biosource, const std::string &user_key,
-                              std::vector<utils::IdName> &related_biosources, std::string &msg)
+                             bool is_biosource, const std::string &user_key,
+                             std::vector<utils::IdName> &related_biosources, std::string &msg)
     {
       std::vector<std::string> norm_subs;
 
@@ -1203,7 +1202,7 @@ namespace epidb {
       }
       metadata_builder.append("pattern", pattern);
       annotations_query_builder.append("extra_metadata", metadata_builder.obj());
-      annotations_query_builder.append("done", true);
+      annotations_query_builder.append("upload_info.done", true);
 
       mongo::ScopedDbConnection c(config::get_mongodb_server());
 
