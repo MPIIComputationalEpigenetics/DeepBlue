@@ -8,7 +8,7 @@ COMMANDS = $(wildcard commands/*.cpp)
 COMMANDS_OBJS = $(COMMANDS:.cpp=.o)
 
 OBJS	= main.o version.o regions.o errors.o
-OBJLIBS	= $(COMMANDS_OBJS) libhttpd.a libdba.a libparser.a libengine.a libextras.a libalgorithms.a
+OBJLIBS	= $(COMMANDS_OBJS) libhttpd.a libdatatypes.a libdba.a libparser.a libengine.a libextras.a libalgorithms.a
 
 CXXFLAGS	= $(DEFCXXFLAGS)
 
@@ -20,7 +20,6 @@ $(EXE) : $(OBJS) $(OBJLIBS)
 libcommands.a: force_look
 	@$(ECHO) looking into commands : $(MAKE) $(MFLAGS)
 	cd commands; $(MAKE) $(MFLAGS)
-
 libalgorithms.a: force_look
 	@$(ECHO) looking into algorithms : $(MAKE) $(MFLAGS)
 	@cd algorithms; $(MAKE) $(MFLAGS)
@@ -32,6 +31,10 @@ libhttpd.a: force_look
 libengine.a: force_look
 	@$(ECHO) looking into engine : $(MAKE) $(MFLAGS)
 	@cd engine; $(MAKE) $(MFLAGS)
+
+libdatatypes.a: force_look
+	@$(ECHO) looking into datatypes : $(MAKE) $(MFLAGS)
+	@cd datatypes; $(MAKE) $(MFLAGS)
 
 libdba.a: force_look
 	@$(ECHO) looking into dba : $(MAKE) $(MFLAGS)

@@ -71,7 +71,7 @@ namespace epidb {
 
         std::string msg;
 
-        Metadata extra_metadata;
+        datatypes::Metadata extra_metadata;
         if (!read_metadata(parameters[5], extra_metadata, msg)) {
           result.add_error(msg);
           return false;

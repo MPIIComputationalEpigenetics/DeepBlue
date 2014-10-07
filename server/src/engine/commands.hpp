@@ -16,6 +16,8 @@
 #include <string>
 #include <vector>
 
+#include "../datatypes/metadata.hpp"
+
 #include "../extras/utils.hpp"
 #include "../extras/serialize.hpp"
 #include "../extras/xmlrpc.hpp"
@@ -23,10 +25,8 @@
 #include "parameters.hpp"
 
 namespace epidb {
-  typedef std::map<std::string, std::string> Metadata;
-
   bool read_metadata(const serialize::ParameterPtr &map,
-                     Metadata &metadata, std::string &msg);
+                     datatypes::Metadata &metadata, std::string &msg);
 
   struct CommandCategory {
     CommandCategory(const std::string &n, const std::string &d)

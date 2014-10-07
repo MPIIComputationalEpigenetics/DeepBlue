@@ -75,7 +75,7 @@ namespace epidb {
         parameters[0]->children(s);
 
         mongo::BSONArray s_array = dba::helpers::build_epigenetic_normalized_array(s);
-        Metadata metadata;
+        datatypes::Metadata metadata;
         if (!read_metadata(parameters[1], metadata, msg)) {
           result.add_error(msg);
           return false;

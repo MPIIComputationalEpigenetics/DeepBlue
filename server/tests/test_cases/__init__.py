@@ -5,6 +5,7 @@ import bedgraph_parser
 import biosources
 import bugs
 import changes
+import clone
 import column_types
 import complex_queries
 import epigenetic_marks

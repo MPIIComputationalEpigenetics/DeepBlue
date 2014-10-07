@@ -105,7 +105,7 @@ namespace epidb {
           norm_sample_biosource_name = norm_biosource_name;
         }
 
-        Metadata metadata;
+        datatypes::Metadata metadata;
         if (!read_metadata(parameters[1], metadata, msg)) {
           result.add_error(msg);
           return false;

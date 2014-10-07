@@ -58,7 +58,7 @@ namespace epidb {
         const std::string user_key = parameters[3]->as_string();
 
         std::string msg;
-        Metadata extra_metadata;
+        datatypes::Metadata extra_metadata;
         if (!read_metadata(parameters[2], extra_metadata, msg)) {
           result.add_error(msg);
           return false;

@@ -309,24 +309,14 @@ namespace epidb {
       return true;
     }
 
-    bool file_format_builder(const parser::FileFormat &format, mongo::BSONArray &array, std::string &msg)
-    {
-      mongo::BSONArrayBuilder ab;
-
-      for (parser::FileFormat::const_iterator it =  format.begin(); it != format.end(); it++) {
-        mongo::BSONObj o = (*it)->BSONObj();
-        ab.append(o);
-      }
-      array = ab.arr();
-      return true;
-    }
 
     bool build_experiment_metadata(const std::string &name, const std::string &norm_name,
                                    const std::string &genome, const std::string &norm_genome,
                                    const std::string &epigenetic_mark, const std::string &norm_epigenetic_mark,
                                    const std::string &sample_id, const std::string &technique, const std::string &norm_technique,
                                    const std::string &project, const std::string &norm_project,
-                                   const std::string &description, const std::string &norm_description, const Metadata &extra_metadata,
+                                   const std::string &description, const std::string &norm_description,
+                                   const datatypes::Metadata &extra_metadata,
                                    const std::string &user_key, const std::string &ip,
                                    const parser::FileFormat &format,
                                    int &dataset_id,
@@ -362,18 +352,10 @@ namespace epidb {
       experiment_data_builder.append("norm_description", norm_description);
       experiment_data_builder.append("format", format.format());
 
-      mongo::BSONArray format_array;
-      if (!file_format_builder(format, format_array, msg)) {
-        return false;
-      }
-      experiment_data_builder.append("columns", format_array);
+      experiment_data_builder.append("columns", format.to_bson());
 
-      mongo::BSONObjBuilder metadata_builder;
-      Metadata::const_iterator cit;
-      for (cit = extra_metadata.begin(); cit != extra_metadata.end(); ++cit) {
-        metadata_builder.append(cit->first, cit->second);
-      }
-      experiment_data_builder.append("extra_metadata", metadata_builder.obj());
+      mongo::BSONObj extra_metadata_obj = datatypes::extra_metadata_to_bson(extra_metadata);
+      experiment_data_builder.append("extra_metadata", extra_metadata_obj);
 
       std::map<std::string, std::string> sample_data;
       if (!info::get_sample_by_id(sample_id, sample_data, msg, true)) {
@@ -396,12 +378,13 @@ namespace epidb {
 
     bool build_annotation_info(const std::string &name, const std::string &norm_name,
                                const std::string &genome, const std::string &norm_genome,
-                               const std::string &description, const std::string &norm_description, const Metadata &extra_metadata,
+                               const std::string &description, const std::string &norm_description,
+                               const datatypes::Metadata &extra_metadata,
                                const std::string &user_key, const std::string &ip,
                                const parser::FileFormat &format,
                                int &dataset_id,
                                std::string &annotation_id,
-                               mongo::BSONObj& annotation_metadata,
+                               mongo::BSONObj &annotation_metadata,
                                std::string &msg)
     {
       int a_id;
@@ -425,18 +408,10 @@ namespace epidb {
       annotation_data_builder.append("norm_description", norm_description);
       annotation_data_builder.append("format", format.format());
 
-      mongo::BSONArray format_array;
-      if (!file_format_builder(format, format_array, msg)) {
-        return false;
-      }
-      annotation_data_builder.append("columns", format_array);
+      annotation_data_builder.append("columns", format.to_bson());
 
-      mongo::BSONObjBuilder extra_metadata_builder;
-      Metadata::const_iterator cit;
-      for (cit = extra_metadata.begin(); cit != extra_metadata.end(); ++cit) {
-        extra_metadata_builder.append(cit->first, cit->second);
-      }
-      annotation_data_builder.append("extra_metadata", extra_metadata_builder.obj());
+      mongo::BSONObj extra_metadata_obj = datatypes::extra_metadata_to_bson(extra_metadata);
+      annotation_data_builder.append("extra_metadata", extra_metadata_obj);
 
       annotation_metadata = annotation_data_builder.obj();
       return true;
@@ -488,7 +463,8 @@ namespace epidb {
                            const std::string &epigenetic_mark, const std::string &norm_epigenetic_mark,
                            const std::string &sample_id, const std::string &technique, const std::string &norm_technique,
                            const std::string &project, const std::string &norm_project,
-                           const std::string &description, const std::string &norm_description, const Metadata &extra_metadata,
+                           const std::string &description, const std::string &norm_description,
+                           const datatypes::Metadata &extra_metadata,
                            const std::string &user_key, const std::string &ip, const parser::WigPtr &wig,
                            std::string &experiment_id, std::string &msg)
     {
@@ -642,7 +618,8 @@ namespace epidb {
                            const std::string &epigenetic_mark, const std::string &norm_epigenetic_mark,
                            const std::string &sample_id, const std::string &technique, const std::string &norm_technique,
                            const std::string &project, const std::string &norm_project,
-                           const std::string &description, const std::string &norm_description, const Metadata &extra_metadata,
+                           const std::string &description, const std::string &norm_description,
+                           const datatypes::Metadata &extra_metadata,
                            const std::string &user_key, const std::string &ip,
                            const std::vector<parser::Tokens> &bed_file_tokenized,
                            const parser::FileFormat &format,
@@ -755,7 +732,8 @@ namespace epidb {
 
     bool insert_annotation(const std::string &name, const std::string &norm_name,
                            const std::string &genome, const std::string &norm_genome,
-                           const std::string &description, const std::string &norm_description, const Metadata &extra_metadata,
+                           const std::string &description, const std::string &norm_description,
+                           const datatypes::Metadata &extra_metadata,
                            const std::string &user_key, const std::string &ip,
                            const std::vector<parser::Tokens> &bed_file_tokenized,
                            const parser::FileFormat &format,
@@ -866,7 +844,8 @@ namespace epidb {
 
     bool insert_annotation(const std::string &name, const std::string &norm_name,
                            const std::string &genome, const std::string &norm_genome,
-                           const std::string &description, const std::string &norm_description, const Metadata &extra_metadata,
+                           const std::string &description, const std::string &norm_description,
+                           const datatypes::Metadata &extra_metadata,
                            const std::string &user_key, const std::string &ip,
                            const ChromosomeRegionsList &regions,
                            const parser::FileFormat &format,
@@ -971,26 +950,5 @@ namespace epidb {
       c.done();
       return true;
     }
-
-    bool clone_dataset(const std::string &dataset_id, const std::string &description, const parser::FileFormat &format,
-                       const Metadata &extra_metadata, std::string &msg)
-    {
-
-      mongo::ScopedDbConnection c(config::get_mongodb_server());
-
-      mongo::BSONObj query = BSON("_id" << dataset_id);
-      std::auto_ptr<mongo::DBClientCursor> data_cursor = c->query(helpers::collection_name(Collections::EXPERIMENTS()), query, 1);
-      mongo::BSONObj result;
-      if (data_cursor->more()) {
-        result = data_cursor->next().getOwned();
-      } else {
-        msg = "experiment with id " + dataset_id + " not found.";
-        c.done();
-        return false;
-      }
-
-      return true;
-    }
-
   }
 }

@@ -22,7 +22,7 @@
 #include "list.hpp"
 
 #include "../algorithms/levenshtein.hpp"
-#include "../engine/commands.hpp"
+#include "../datatypes/metadata.hpp"
 #include "../extras/utils.hpp"
 
 namespace epidb {
@@ -49,7 +49,7 @@ namespace epidb {
         return helpers::get(Collections::TECHNIQUES(), result, msg);
       }
 
-      bool samples(const std::string &user_key, const mongo::BSONArray &biosources, const Metadata &metadata,
+      bool samples(const std::string &user_key, const mongo::BSONArray &biosources, const datatypes::Metadata &metadata,
                    std::vector<std::string> &result, std::string &msg)
       {
         mongo::BSONObjBuilder query_builder;
@@ -58,7 +58,7 @@ namespace epidb {
           query_builder.append("norm_biosource_name", BSON("$in" << biosources));
         }
 
-        Metadata::const_iterator it;
+        datatypes::Metadata::const_iterator it;
         for (it = metadata.begin(); it != metadata.end(); ++it) {
           query_builder.append(it->first, it->second);
         }

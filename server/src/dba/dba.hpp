@@ -17,7 +17,8 @@
 
 #include "../regions.hpp"
 
-#include "../engine/commands.hpp"
+#include "../datatypes/metadata.hpp"
+
 #include "../parser/field_type.hpp"
 #include "../parser/genome_data.hpp"
 #include "../parser/parser_factory.hpp"
@@ -55,12 +56,12 @@ namespace epidb {
 
     bool add_biosource(const std::string &name, const std::string &norm_name,
                         const std::string &description, const std::string &norm_description,
-                        const Metadata &extra_metadata,
+                        const datatypes::Metadata &extra_metadata,
                         const std::string &user_key,
                         std::string &biosource_id, std::string &msg);
 
     bool add_sample(const std::string &biosource_name, const std::string &norm_biosource_name,
-                    const Metadata &metadata,
+                    const datatypes::Metadata &metadata,
                     const std::string &user_key,
                     std::string &sample_id, std::string &msg);
 
@@ -72,7 +73,7 @@ namespace epidb {
 
     bool add_technique(const std::string &name, const std::string &norm_name,
                        const std::string &description, const std::string &norm_description,
-                       const Metadata &extra_metadata,
+                       const datatypes::Metadata &extra_metadata,
                        const std::string &user_key,
                        std::string &biosource_id, std::string &msg);
 

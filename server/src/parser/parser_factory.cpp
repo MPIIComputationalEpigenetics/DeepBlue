@@ -182,6 +182,17 @@ namespace epidb {
       return format;
     }
 
+    mongo::BSONArray FileFormat::to_bson() const
+    {
+      mongo::BSONArrayBuilder ab;
+
+      for (parser::FileFormat::const_iterator it =  begin(); it != end(); it++) {
+        mongo::BSONObj o = (*it)->BSONObj();
+        ab.append(o);
+      }
+      return ab.arr();
+    }
+
     bool FileFormatBuilder::build_for_outout(const std::string &format, FileFormat &file_format,
         std::vector<mongo::BSONObj> experiment_columns, std::string &msg )
 
@@ -275,7 +286,7 @@ namespace epidb {
       return true;
     }
 
-    bool FileFormatBuilder::build(const std::string &format, FileFormat &file_format, std::string &msg )
+    bool FileFormatBuilder::build(const std::string &format, FileFormat &file_format, std::string &msg)
     {
       if (format.empty()) {
         file_format = FileFormat::default_format();

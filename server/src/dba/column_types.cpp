@@ -506,7 +506,7 @@ namespace epidb {
         return column_type_bsonobj_to_class(obj_column_type, column_type, msg);
       }
 
-      bool get_column_type(const std::string &id, std::map<std::string, std::string> &res, std::string &msg, bool full)
+      bool get_column_type(const std::string &id, std::map<std::string, std::string> &res, std::string &msg)
       {
         mongo::ScopedDbConnection c(config::get_mongodb_server());
         mongo::BSONObj query = BSON("_id" << id);
@@ -566,6 +566,19 @@ namespace epidb {
         }
 
         return true;
+      }
+
+      std::map<std::string, std::string> dataset_column_to_map(const mongo::BSONObj &o)
+      {
+        std::map<std::string, std::string> res;
+        for (mongo::BSONObj::iterator it = o.begin(); it.more(); ) {
+          mongo::BSONElement e = it.next();
+          std::string content = utils::bson_to_string(e);
+          if (!content.empty()) {
+            res[e.fieldName()] = content;
+          }
+        }
+        return res;
       }
     }
   }

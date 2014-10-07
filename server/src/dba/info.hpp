@@ -38,6 +38,7 @@ namespace epidb {
       bool get_annotation(const std::string &id,
                           std::map<std::string, std::string> &metadata,
                           std::map<std::string, std::string> &extra_metadata,
+                          std::vector<std::map<std::string, std::string> > &columns,
                           std::map<std::string, std::string> &upload_info,
                           std::string &msg, bool full = false);
 
@@ -45,6 +46,7 @@ namespace epidb {
                           std::map<std::string, std::string> &metadata,
                           std::map<std::string, std::string> &extra_metadata,
                           std::map<std::string, std::string> &sample_info,
+                          std::vector<std::map<std::string, std::string> > &columns,
                           std::map<std::string, std::string> &upload_info,
                           std::string &msg, bool full = false);
 
@@ -54,7 +56,7 @@ namespace epidb {
 
       bool get_tiling_region(const std::string &id, std::map<std::string, std::string> &res, std::string &msg, bool full = false);
 
-      bool get_column_type(const std::string &id, std::map<std::string, std::string> &res, std::string &msg, bool full = false);
+      bool get_column_type(const std::string &id, std::map<std::string, std::string> &res, std::string &msg);
     }
   }
 }

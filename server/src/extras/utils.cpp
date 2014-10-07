@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <climits>
 #include <cctype>
+#include <ctime>
 #include <cmath>
 #include <iomanip>
 #include <iostream>
@@ -245,6 +246,11 @@ namespace epidb {
       return fmt::FormatInt(t).str();
     }
 
+    const std::string long_to_string(const long t)
+    {
+      return fmt::FormatInt(t).str();
+    }
+
     bool is_number(const std::string &s_)
     {
       std::string ss(s_);
@@ -350,6 +356,39 @@ namespace epidb {
 
       return l;
     }
+
+    // FROM https://github.com/mongodb/mongo-cxx-driver/blob/6dc65e99af9979152deb0940b2313c560e61e2d9/src/mongo/bson/bsonelement.cpp
+    const std::string bson_to_string(const mongo::BSONElement &e)
+    {
+      switch ( e.type() ) {
+      case mongo::Date: {
+        std::time_t date = e.Date().toTimeT();
+        std::tm *ptm = std::localtime(&date);
+        char buffer[32];
+        // Format: Mo, 15.06.2009 20:20:00
+        std::strftime(buffer, 32, "%d.%m.%Y %H:%M:%S", ptm);
+        return std::string(buffer);
+      }
+      case mongo::NumberDouble: {
+        return double_to_string(e.Double());
+      }
+      case mongo::NumberLong: {
+        return long_to_string(e.Long());
+      }
+      case mongo::NumberInt: {
+        return integer_to_string(e.Int());
+      }
+      case mongo::Bool: {
+        return ( e.boolean() ? "true" : "false" );
+      }
+      case mongo::Symbol:
+      case mongo::String: {
+        return e.valuestr();
+      }
+      default: {
+        return "[type " + integer_to_string(e.type()) + " not implemented to string conversion]";
+      }
+      }
+    }
   }
 }
-

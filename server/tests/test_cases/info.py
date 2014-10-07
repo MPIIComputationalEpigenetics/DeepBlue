@@ -4,7 +4,7 @@ from client import EpidbClient
 
 
 class TestGetInfoCommand(helpers.TestCase):
-
+  maxDiff = None
   def test_genome_info(self):
     epidb = EpidbClient()
     self.init(epidb)
@@ -86,6 +86,9 @@ class TestGetInfoCommand(helpers.TestCase):
       self.assertSuccess(res, eid)
 
     res, data = epidb.info(eid, self.admin_key)
+    data["upload_info"]["upload_start"] = '0'
+    data["upload_info"]["upload_end"] = '0'
+    self.assertEqual(data, {'D': '3', 'format': 'CHROMOSOME,START,END,name:String:.,score:Integer:0,strand:String:.,signalValue:Double:-1,pValue:Double:-1,qValue:Double:-1,peak:Integer:-1', 'extra_metadata': {'foo': 'bar', 'extra': '123'}, 'sample_info': {'norm_karyotype': 'cancer', 'sex': 'F', 'biosource_name': 'K562', 'norm_biosource_name': 'k562', 'karyotype': 'cancer', 'norm_sex': 'f'}, 'technique': 'tech1', 'upload_info': {'total_size': '652', 'content_format': 'wig', 'done': 'true', 'user': 'test_admin', 'upload_end': '0', 'upload_start': '0', 'client_address': '::1'}, 'name': 'exp1', 'project': 'ENCODE', 'genome': 'hg19', 'sample_id': 's1', 'epigenetic_mark': 'Methylation', '_id': 'e1', 'type': 'experiment', 'columns': [{'name': 'CHROMOSOME', 'column_type': 'string'}, {'name': 'START', 'column_type': 'integer'}, {'name': 'END', 'column_type': 'integer'}, {'default_value': '.', 'name': 'name', 'column_type': 'string'}, {'default_value': '0', 'name': 'score', 'column_type': 'integer'}, {'default_value': '.', 'name': 'strand', 'column_type': 'string'}, {'default_value': '-1', 'name': 'signalValue', 'column_type': 'double'}, {'default_value': '-1', 'name': 'pValue', 'column_type': 'double'}, {'default_value': '-1', 'name': 'qValue', 'column_type': 'double'}, {'default_value': '-1', 'name': 'peak', 'column_type': 'integer'}], 'description': 'desc1'})
     self.assertEqual(res, 'okay')
     self.assertEqual(data['sample_id'], sample_id)
     self.assertEqual(data['description'], "desc1")
@@ -95,7 +98,7 @@ class TestGetInfoCommand(helpers.TestCase):
     self.assertEqual(data['name'], "exp1")
     self.assertEqual(data['project'], "ENCODE")
     self.assertEqual(data['technique'], "tech1")
-    self.assertEqual(data['user'], "test_admin")
+    self.assertEqual(data['upload_info']['user'], "test_admin")
     self.assertEqual(data['format'], "CHROMOSOME,START,END,name:String:.,score:Integer:0,strand:String:.,signalValue:Double:-1,pValue:Double:-1,qValue:Double:-1,peak:Integer:-1")
     self.assertEqual(data['_id'], eid)
 
@@ -114,7 +117,6 @@ class TestGetInfoCommand(helpers.TestCase):
     self.assertSuccess(res, data)
     self.assertEqual(data['_id'], qid)
     self.assertEqual(data['type'], 'experiment_select')
-    #self.assertEqual(data['args'], '{ "experiment_name" : [ "exp1" ], "epigenetic_mark" : [ "Methylation" ], "sample_id" : [ "s1" ], "project" : [ "ENCODE" ], "technique" : [ "tech1" ], "has_filter" : true, "start" : { "$numberLong" : "713500" }, "end" : { "$numberLong" : "850000" }, "chromosomes" : [ "chr1" ], "genomes" : [ "hg19" ] }')
     self.assertEqual(data['args'], '{ "experiment_name" : [ "exp1" ], "epigenetic_mark" : [ "Methylation" ], "sample_id" : [ "s1" ], "project" : [ "ENCODE" ], "technique" : [ "tech1" ], "has_filter" : true, "start" : 713500, "end" : 850000, "chromosomes" : [ "chr1" ], "genomes" : [ "hg19" ] }')
     self.assertEqual(data['user'], 'test_admin')
 

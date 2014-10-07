@@ -193,6 +193,9 @@ class EpidbClient:
   def change_extra_metadata(self, data_id, extra_metadata_key, extra_metadata_value, user_key):
     return self.server.change_extra_metadata(data_id, extra_metadata_key, extra_metadata_value, user_key)
 
+  def clone_dataset(self, dataset_id, new_name, description, format, extra_metadata, user_key):
+    return self.server.clone_dataset(dataset_id, new_name, description, format, extra_metadata, user_key)
+
 ## Admin Operations
 
   def init_system(self, name, email, institution):

@@ -16,6 +16,8 @@
 #include <iterator>
 #include <iostream>
 
+#include <mongo/bson/bson.h>
+
 #include "serialize.hpp"
 
 #include "../types.hpp"
@@ -48,8 +50,8 @@ namespace epidb {
 
     class ExperimentInfo {
     public:
-      ExperimentInfo(std::string &i, std::string& n, std::string &em, std::string s, std::string& t,
-      std::string& p, std::string& d):
+      ExperimentInfo(std::string &i, std::string &n, std::string &em, std::string s, std::string &t,
+                     std::string &p, std::string &d):
         id(i),
         name(n),
         epigenetic_mark(em),
@@ -101,6 +103,8 @@ namespace epidb {
     const std::string normalize_annotation_name(const std::string &annotation_name);
 
     const std::string normalize_epigenetic_mark(const std::string &histone_modification);
+
+    const std::string bson_to_string(const mongo::BSONElement &e);
   }
 }
 

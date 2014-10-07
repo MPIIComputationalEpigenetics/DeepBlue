@@ -43,8 +43,36 @@ namespace epidb {
       typedef std::vector<dba::columns::ColumnTypePtr>::iterator iterator;
       typedef std::vector<dba::columns::ColumnTypePtr>::const_iterator const_iterator;
 
+      mongo::BSONArray to_bson() const;
+
       static const FileFormat default_format();
       static const FileFormat wig_format();
+
+      bool operator==(const FileFormat &other) const
+      {
+        if (size() != other.size()) {
+          return false;
+        }
+
+        for (const_iterator this_it = begin(); this_it < begin(); this_it++) {
+          bool found = false;
+          for (const_iterator other_it = begin(); other_it < begin(); other_it++) {
+            if ((*this_it)->name() == (*other_it)->name()) {
+              found = true;
+              break;
+            }
+            if (!found) {
+              return false;
+            }
+          }
+        }
+
+        return true;
+      }
+
+      bool operator !=(const FileFormat &other) const {
+        return !(*this == other);
+      }
 
       void set_format(const std::string format)
       {

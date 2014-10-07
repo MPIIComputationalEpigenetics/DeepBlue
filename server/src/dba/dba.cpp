@@ -20,6 +20,9 @@
 #include <mongo/client/dbclient.h>
 
 #include "../algorithms/patterns.hpp"
+
+#include "../datatypes/metadata.hpp"
+
 #include "../extras/utils.hpp"
 #include "../parser/field_type.hpp"
 #include "../parser/genome_data.hpp"
@@ -392,7 +395,7 @@ namespace epidb {
       std::string ann_norm_name = utils::normalize_annotation_name(ann_name);
       std::string ann_description = "Chromosomes and sizes of the genome " + name;
       std::string ann_norm_description = utils::normalize_name(description);
-      Metadata extra_metadata;
+      datatypes::Metadata extra_metadata;
       std::string annotation_id;
 
       if (!insert_annotation(ann_name, ann_norm_name, name, norm_name, ann_description, ann_norm_description, extra_metadata,
@@ -453,7 +456,7 @@ namespace epidb {
 
     bool add_biosource(const std::string &name, const std::string &norm_name,
                        const std::string &description, const std::string &norm_description,
-                       const Metadata &extra_metadata,
+                       const datatypes::Metadata &extra_metadata,
                        const std::string &user_key,
                        std::string &biosource_id, std::string &msg)
     {
@@ -473,7 +476,7 @@ namespace epidb {
       search_data_builder.append("norm_description", norm_description);
 
       mongo::BSONObjBuilder metadata_builder;
-      Metadata::const_iterator cit;
+      datatypes::Metadata::const_iterator cit;
       for (cit = extra_metadata.begin(); cit != extra_metadata.end(); ++cit) {
         metadata_builder.append(cit->first, cit->second);
       }
@@ -519,7 +522,7 @@ namespace epidb {
 
     bool add_technique(const std::string &name, const std::string &norm_name,
                        const std::string &description, const std::string &norm_description,
-                       const Metadata &extra_metadata,
+                       const datatypes::Metadata &extra_metadata,
                        const std::string &user_key,
                        std::string &technique_id, std::string &msg)
     {
@@ -539,7 +542,7 @@ namespace epidb {
       search_data_builder.append("norm_description", norm_description);
 
       mongo::BSONObjBuilder metadata_builder;
-      Metadata::const_iterator cit;
+      datatypes::Metadata::const_iterator cit;
       for (cit = extra_metadata.begin(); cit != extra_metadata.end(); ++cit) {
         metadata_builder.append(cit->first, cit->second);
       }
@@ -584,7 +587,7 @@ namespace epidb {
     }
 
     bool add_sample(const std::string &biosource_name, const std::string &norm_biosource_name,
-                    const Metadata &metadata,
+                    const datatypes::Metadata &metadata,
                     const std::string &user_key,
                     std::string &sample_id, std::string &msg)
     {
@@ -597,7 +600,7 @@ namespace epidb {
 
       std::string err_msg;
       bool err = false;
-      BOOST_FOREACH(const Metadata::value_type & kv, metadata) {
+      BOOST_FOREACH(const datatypes::Metadata::value_type & kv, metadata) {
         if (kv.second.empty()) {
           msg = "The field " + kv.first + " does not have the right value. (key:value).";
           return false;
@@ -1164,7 +1167,7 @@ namespace epidb {
       std::string description = "All localization of the pattern '" + pattern + "' in the genome " + genome;
       std::string norm_description = utils::normalize_name(description);
 
-      Metadata extra_metadata;
+      datatypes::Metadata extra_metadata;
       extra_metadata["pattern"] = pattern;
       if (overlap) {
         extra_metadata["overlap-style"] = "overlap";

@@ -10,6 +10,8 @@
 #include <string>
 #include <vector>
 
+#include "../datatypes/metadata.hpp"
+
 #include "../parser/parser_factory.hpp"
 #include "../parser/wig.hpp"
 #include "../regions.hpp"
@@ -24,7 +26,8 @@ namespace epidb {
 
     bool insert_annotation(const std::string &name, const std::string &norm_name,
                            const std::string &genome, const std::string &norm_genome,
-                           const std::string &description, const std::string &norm_description, const Metadata &extra_metadata,
+                           const std::string &description, const std::string &norm_description,
+                           const datatypes::Metadata &extra_metadata,
                            const std::string &user_key, const std::string &ip,
                            const std::vector<parser::Tokens> &bed_file_tokenized,
                            const parser::FileFormat &format,
@@ -32,7 +35,8 @@ namespace epidb {
 
     bool insert_annotation(const std::string &name, const std::string &norm_name,
                            const std::string &genome, const std::string &norm_genome,
-                           const std::string &description, const std::string &norm_description, const Metadata &extra_metadata,
+                           const std::string &description, const std::string &norm_description,
+                           const datatypes::Metadata &extra_metadata,
                            const std::string &user_key, const std::string &ip,
                            const ChromosomeRegionsList &regions,
                            const parser::FileFormat &format,
@@ -43,7 +47,8 @@ namespace epidb {
                            const std::string &epigenetic_mark, const std::string &norm_epigenetic_mark,
                            const std::string &sample_id, const std::string &technique, const std::string &norm_technique,
                            const std::string &project, const std::string &norm_project,
-                           const std::string &description, const std::string &norm_description, const Metadata &extra_metadata,
+                           const std::string &description, const std::string &norm_description,
+                           const datatypes::Metadata &extra_metadata,
                            const std::string &user_key, const std::string &ip, const parser::WigPtr &wig,
                            std::string &experiment_id, std::string &msg);
 
@@ -52,14 +57,18 @@ namespace epidb {
                            const std::string &epigenetic_mark, const std::string &norm_epigenetic_mark,
                            const std::string &sample_id, const std::string &technique, const std::string &nrm_technique,
                            const std::string &project, const std::string &norm_project,
-                           const std::string &description, const std::string &norm_description, const Metadata &extra_metadata,
+                           const std::string &description, const std::string &norm_description,
+                           const datatypes::Metadata &extra_metadata,
                            const std::string &user_key, const std::string &ip,
                            const std::vector<parser::Tokens> &bed_file_tokenized,
                            const parser::FileFormat &format,
                            std::string &experiment_id, std::string &msg);
 
-    bool clone_dataset(const std::string &idataset_d, const std::string &description, const parser::FileFormat &format,
-                       const Metadata &extra_metadata, std::string &msg);
+    bool clone_dataset(const std::string &dataset_id, const std::string &name, const std::string &norm_name,
+                       const std::string &description, const std::string &norm_description,
+                       const parser::FileFormat &format,
+                       const datatypes::Metadata &extra_metadata,
+                       std::string &_id, std::string &msg);
 
   }
 }

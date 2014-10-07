@@ -15,6 +15,7 @@
 #include "commands.hpp"
 #include "../log.hpp"
 
+#include "../datatypes/metadata.hpp"
 #include "../extras/utils.hpp"
 
 namespace epidb {
@@ -169,7 +170,7 @@ namespace epidb {
 
 
   bool read_metadata(const serialize::ParameterPtr &map,
-                     Metadata &metadata, std::string &msg)
+                     datatypes::Metadata &metadata, std::string &msg)
   {
     if (map->isNull()) {
       return true;

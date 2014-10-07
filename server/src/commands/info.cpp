@@ -76,7 +76,7 @@ namespace epidb {
         }
 
         std::vector<std::string> synonyms;
-        BOOST_FOREACH(const serialize::ParameterPtr &id_param, ids_param) {
+        BOOST_FOREACH(const serialize::ParameterPtr & id_param, ids_param) {
           clock_t dsysTime = clock();
           std::string id = id_param->as_string();
           std::string type;
@@ -84,8 +84,9 @@ namespace epidb {
           std::map<std::string, std::string> extra_metadata;
           std::map<std::string, std::string> sample_info;
           std::map<std::string, std::string> upload_info;
+          std::vector<std::map<std::string, std::string> > columns;
           if (id.compare(0, 1, "a") == 0) {
-            ok = dba::info::get_annotation(id, metadata, extra_metadata, upload_info, msg);
+            ok = dba::info::get_annotation(id, metadata, extra_metadata, columns, upload_info, msg);
             type = "annotation";
           } else if (id.compare(0, 1, "g") == 0) {
             ok = dba::info::get_genome(id, metadata, msg);
@@ -103,7 +104,7 @@ namespace epidb {
             ok = dba::info::get_epigenetic_mark(id, metadata, msg);
             type = "epigenetic_mark";
           } else if (id.compare(0, 1, "e") == 0) {
-            ok = dba::info::get_experiment(id, metadata, extra_metadata, sample_info, upload_info, msg);
+            ok = dba::info::get_experiment(id, metadata, extra_metadata, sample_info, columns, upload_info, msg);
             type = "experiment";
           } else if (id.compare(0, 1, "q") == 0) {
             ok = dba::info::get_query(id, metadata, msg);
@@ -141,15 +142,15 @@ namespace epidb {
           }
 
           if (synonyms.size() > 0) {
-              serialize::ParameterPtr serialize_synonyms(new serialize::ListParameter());
-              std::vector<std::string>::iterator it_syns = synonyms.begin();
+            serialize::ParameterPtr serialize_synonyms(new serialize::ListParameter());
+            std::vector<std::string>::iterator it_syns = synonyms.begin();
 
-              for ( ; it_syns != synonyms.end(); it_syns++) {
-                serialize::ParameterPtr p(new serialize::SimpleParameter(serialize::STRING, *it_syns));
-                serialize_synonyms->add_child(p);
-              }
+            for ( ; it_syns != synonyms.end(); it_syns++) {
+              serialize::ParameterPtr p(new serialize::SimpleParameter(serialize::STRING, *it_syns));
+              serialize_synonyms->add_child(p);
+            }
 
-              info->add_child("synonyms", serialize_synonyms);
+            info->add_child("synonyms", serialize_synonyms);
           }
 
           if (extra_metadata.size() > 0) {
@@ -180,6 +181,21 @@ namespace epidb {
               upload_info_parameter->add_child(it->first, p);
             }
             info->add_child("upload_info", upload_info_parameter);
+          }
+
+          if (columns.size() > 0) {
+            serialize::ParameterPtr columns_parameters(new serialize::ListParameter());
+            for (std::vector< std::map<std::string, std::string> >::iterator c_it = columns.begin(); c_it != columns.end(); c_it++) {
+
+              serialize::ParameterPtr column_parameter(new serialize::MapParameter());
+              std::map<std::string, std::string>::iterator it;
+              for (it = c_it->begin(); it != c_it->end(); ++it) {
+                serialize::ParameterPtr p(new serialize::SimpleParameter(serialize::STRING, it->second));
+                column_parameter->add_child(it->first, p);
+              }
+              columns_parameters->add_child(column_parameter);
+            }
+            info->add_child("columns", columns_parameters);
           }
 
           std::cerr << "load info in " << (( ((float)  clock()) - dsysTime) / CLOCKS_PER_SEC) << std::endl;

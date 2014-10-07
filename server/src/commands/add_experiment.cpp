@@ -98,7 +98,7 @@ namespace epidb {
           return false;
         }
 
-        Metadata extra_metadata;
+        datatypes::Metadata extra_metadata;
         if (!read_metadata(parameters[9], extra_metadata, msg)) {
           result.add_error(msg);
           return false;

@@ -38,7 +38,7 @@ namespace epidb {
         std::auto_ptr<mongo::DBClientCursor> data_cursor = c->query(helpers::collection_name(Collections::SAMPLES()), query, 1);
         mongo::BSONObj result;
         if (data_cursor->more()) {
-          result = data_cursor->next().getOwned();
+          result = data_cursor->next();
         } else {
           msg = "Sample id '" + id + "' not found.";
           c.done();
@@ -49,7 +49,7 @@ namespace epidb {
         for (mongo::BSONObj::iterator it = result.begin(); it.more(); ) {
           mongo::BSONElement e = it.next();
           if (full || (strncmp("norm_", e.fieldName(), 5) != 0)) {
-            res[e.fieldName()] = e.str();
+            res[e.fieldName()] = utils::bson_to_string(e);
           }
         }
         return true;
@@ -64,7 +64,7 @@ namespace epidb {
         std::auto_ptr<mongo::DBClientCursor> data_cursor = c->query(helpers::collection_name(Collections::GENOMES()), query, 1);
         mongo::BSONObj result;
         if (data_cursor->more()) {
-          result = data_cursor->next().getOwned();
+          result = data_cursor->next();
         } else {
           msg = "genome with id " + id + " not found.";
           c.done();
@@ -75,7 +75,7 @@ namespace epidb {
         for (mongo::BSONObj::iterator it = result.begin(); it.more(); ) {
           mongo::BSONElement e = it.next();
           if (full || (strncmp("norm_", e.fieldName(), 5) != 0)) {
-            res[e.fieldName()] = e.str();
+            res[e.fieldName()] = utils::bson_to_string(e);
           }
         }
         return true;
@@ -90,7 +90,7 @@ namespace epidb {
         std::auto_ptr<mongo::DBClientCursor> data_cursor = c->query(helpers::collection_name(Collections::PROJECTS()), query, 1);
         mongo::BSONObj result;
         if (data_cursor->more()) {
-          result = data_cursor->next().getOwned();
+          result = data_cursor->next();
         } else {
           msg = "project with id " + id + " not found.";
           c.done();
@@ -101,7 +101,7 @@ namespace epidb {
         for (mongo::BSONObj::iterator it = result.begin(); it.more(); ) {
           mongo::BSONElement e = it.next();
           if (full || (strncmp("norm_", e.fieldName(), 5) != 0)) {
-            res[e.fieldName()] = e.str();
+            res[e.fieldName()] = utils::bson_to_string(e);
           }
         }
         return true;
@@ -129,10 +129,10 @@ namespace epidb {
           if (std::string(e.fieldName()) == "extra_metadata") {
             for (mongo::BSONObj::iterator itt = e.Obj().begin(); itt.more(); ) {
               mongo::BSONElement ee = itt.next();
-              metadata[ee.fieldName()] = ee.str();
+              metadata[ee.fieldName()] = utils::bson_to_string(ee);
             }
           } else if (full || (strncmp("norm_", e.fieldName(), 5) != 0)) {
-            res[e.fieldName()] = e.str();
+            res[e.fieldName()] = utils::bson_to_string(e);
           }
         }
         return true;
@@ -166,10 +166,10 @@ namespace epidb {
           if (std::string(e.fieldName()) == "extra_metadata") {
             for (mongo::BSONObj::iterator itt = e.Obj().begin(); itt.more(); ) {
               mongo::BSONElement ee = itt.next();
-              metadata[ee.fieldName()] = ee.str();
+              metadata[ee.fieldName()] = utils::bson_to_string(ee);
             }
           } else if (full || (strncmp("norm_", e.fieldName(), 5) != 0)) {
-            res[e.fieldName()] = e.str();
+            res[e.fieldName()] = utils::bson_to_string(e);
           }
         }
 
@@ -194,7 +194,7 @@ namespace epidb {
         std::auto_ptr<mongo::DBClientCursor> data_cursor = c->query(helpers::collection_name(Collections::EPIGENETIC_MARKS()), query, 1);
         mongo::BSONObj result;
         if (data_cursor->more()) {
-          result = data_cursor->next().getOwned();
+          result = data_cursor->next();
         } else {
           msg = "epigenetic mark with id " + id + " not found.";
           c.done();
@@ -205,7 +205,7 @@ namespace epidb {
         for (mongo::BSONObj::iterator it = result.begin(); it.more(); ) {
           mongo::BSONElement e = it.next();
           if (full || (strncmp("norm_", e.fieldName(), 5) != 0)) {
-            res[e.fieldName()] = e.str();
+            res[e.fieldName()] = utils::bson_to_string(e);
           }
         }
         return true;
@@ -214,6 +214,7 @@ namespace epidb {
       bool get_annotation(const std::string &id, std::map<std::string,
                           std::string> &metadata,
                           std::map<std::string, std::string> &extra_metadata,
+                          std::vector<std::map<std::string, std::string> > &columns,
                           std::map<std::string, std::string> &upload_info,
                           std::string &msg, bool full = false)
       {
@@ -223,7 +224,7 @@ namespace epidb {
         std::auto_ptr<mongo::DBClientCursor> data_cursor = c->query(helpers::collection_name(Collections::ANNOTATIONS()), query, 1);
         mongo::BSONObj result;
         if (data_cursor->more()) {
-          result = data_cursor->next().getOwned();
+          result = data_cursor->next();
         } else {
           msg = "annotation with id " + id + " not found.";
           c.done();
@@ -236,15 +237,20 @@ namespace epidb {
           if (std::string(e.fieldName()) == "extra_metadata") {
             for (mongo::BSONObj::iterator itt = e.Obj().begin(); itt.more(); ) {
               mongo::BSONElement ee = itt.next();
-              extra_metadata[ee.fieldName()] = ee.str();
+              extra_metadata[ee.fieldName()] = utils::bson_to_string(ee);
             }
           } else if (std::string(e.fieldName()) == "upload_info") {
             for (mongo::BSONObj::iterator itt = e.Obj().begin(); itt.more(); ) {
               mongo::BSONElement ee = itt.next();
-              upload_info[ee.fieldName()] = ee.str();
+              upload_info[ee.fieldName()] = utils::bson_to_string(ee);
+            }
+          } else if (std::string(e.fieldName()) == "columns") {
+            for (mongo::BSONObj::iterator itt = e.Obj().begin(); itt.more(); ) {
+              mongo::BSONElement ee = itt.next();
+              columns.push_back(columns::dataset_column_to_map(ee.Obj()));
             }
           } else if (full || (strncmp("norm_", e.fieldName(), 5) != 0)) {
-            metadata[e.fieldName()] = e.str();
+            metadata[e.fieldName()] = utils::bson_to_string(e);
           }
         }
         return true;
@@ -253,6 +259,7 @@ namespace epidb {
       bool get_experiment(const std::string &id, std::map<std::string, std::string> &metadata,
                           std::map<std::string, std::string> &extra_metadata,
                           std::map<std::string, std::string> &sample_info,
+                          std::vector<std::map<std::string, std::string> > &columns,
                           std::map<std::string, std::string> &upload_info,
                           std::string &msg, bool full = false)
       {
@@ -262,7 +269,7 @@ namespace epidb {
         std::auto_ptr<mongo::DBClientCursor> data_cursor = c->query(helpers::collection_name(Collections::EXPERIMENTS()), query, 1);
         mongo::BSONObj result;
         if (data_cursor->more()) {
-          result = data_cursor->next().getOwned();
+          result = data_cursor->next();
         } else {
           msg = "experiment with id " + id + " not found.";
           c.done();
@@ -275,20 +282,25 @@ namespace epidb {
           if (std::string(e.fieldName()) == "sample_info") {
             for (mongo::BSONObj::iterator itt = e.Obj().begin(); itt.more(); ) {
               mongo::BSONElement ee = itt.next();
-              sample_info[ee.fieldName()] = ee.str();
+              sample_info[ee.fieldName()] = utils::bson_to_string(ee);
             }
           } else if (std::string(e.fieldName()) == "extra_metadata") {
             for (mongo::BSONObj::iterator itt = e.Obj().begin(); itt.more(); ) {
               mongo::BSONElement ee = itt.next();
-              extra_metadata[ee.fieldName()] = ee.str();
+              extra_metadata[ee.fieldName()] = utils::bson_to_string(ee);
             }
           } else if (std::string(e.fieldName()) == "upload_info") {
             for (mongo::BSONObj::iterator itt = e.Obj().begin(); itt.more(); ) {
               mongo::BSONElement ee = itt.next();
-              upload_info[ee.fieldName()] = ee.str();
+              upload_info[ee.fieldName()] = utils::bson_to_string(ee);
+            }
+          } else if (std::string(e.fieldName()) == "columns") {
+            for (mongo::BSONObj::iterator itt = e.Obj().begin(); itt.more(); ) {
+              mongo::BSONElement ee = itt.next();
+              columns.push_back(columns::dataset_column_to_map(ee.Obj()));
             }
           } else if (full || (strncmp("norm_", e.fieldName(), 5) != 0)) {
-            metadata[e.fieldName()] = e.str();
+            metadata[e.fieldName()] = utils::bson_to_string(e);
           }
         }
         return true;
@@ -307,7 +319,7 @@ namespace epidb {
         }
         mongo::BSONObj result;
         if (data_cursor->more()) {
-          result = data_cursor->next().getOwned();
+          result = data_cursor->next();
         } else {
           msg = "query with id " + id + " not found.";
           c.done();
@@ -315,10 +327,10 @@ namespace epidb {
         }
         c.done();
 
-        res["genome"] = result.getField("genome").str();
-        res["_id"] = result.getField("_id").str();
-        res["user"] = result.getField("user").str();
-        res["type"] = result.getField("type").str();
+        res["genome"] = utils::bson_to_string(result["genome"]);
+        res["_id"] = utils::bson_to_string(result["_id"]);
+        res["user"] = utils::bson_to_string(result["user"]);
+        res["type"] = utils::bson_to_string(result["type"]);
 
         mongo::BSONObjBuilder arg_builder;
         mongo::BSONObj args = result.getField("args").Obj();
@@ -348,7 +360,7 @@ namespace epidb {
         std::auto_ptr<mongo::DBClientCursor> data_cursor = c->query(helpers::collection_name(Collections::SAMPLE_FIELDS()), query, 1);
         mongo::BSONObj result;
         if (data_cursor->more()) {
-          result = data_cursor->next().getOwned();
+          result = data_cursor->next();
         } else {
           msg = "Sample Field with id " + id + " not found.";
           c.done();
@@ -359,7 +371,7 @@ namespace epidb {
         for (mongo::BSONObj::iterator it = result.begin(); it.more(); ) {
           mongo::BSONElement e = it.next();
           if (full || (strncmp("norm_", e.fieldName(), 5) != 0)) {
-            res[e.fieldName()] = e.str();
+            res[e.fieldName()] = utils::bson_to_string(e);
           }
         }
         return true;
@@ -374,7 +386,7 @@ namespace epidb {
         std::auto_ptr<mongo::DBClientCursor> data_cursor = c->query(helpers::collection_name(Collections::TILINGS()), query, 1);
         mongo::BSONObj result;
         if (data_cursor->more()) {
-          result = data_cursor->next().getOwned();
+          result = data_cursor->next();
         } else {
           msg = "Tiling Regions id " + id + " not found.";
           c.done();
@@ -385,15 +397,15 @@ namespace epidb {
         for (mongo::BSONObj::iterator it = result.begin(); it.more(); ) {
           mongo::BSONElement e = it.next();
           if (full || (strncmp("norm_", e.fieldName(), 5) != 0)) {
-            res[e.fieldName()] = e.str();
+            res[e.fieldName()] = utils::bson_to_string(e);
           }
         }
         return true;
       }
 
-      bool get_column_type(const std::string &id, std::map<std::string, std::string> &res, std::string &msg, bool full = false)
+      bool get_column_type(const std::string &id, std::map<std::string, std::string> &res, std::string &msg)
       {
-        return columns::get_column_type(id, res, msg, full);
+        return columns::get_column_type(id, res, msg);
       }
 
     }
