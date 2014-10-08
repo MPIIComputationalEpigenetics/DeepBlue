@@ -74,6 +74,8 @@ namespace epidb {
 
     std::pair<std::string, std::string> string_to_pair(const std::string &s, const char sep = ',');
 
+    bool string_to_int(const std::string &s, int &i);
+
     bool string_to_long(const std::string &s, size_t &i);
 
     bool string_to_double(const std::string &s, double &d);

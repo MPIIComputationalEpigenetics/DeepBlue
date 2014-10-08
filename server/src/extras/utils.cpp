@@ -93,6 +93,11 @@ namespace epidb {
       return true;
     }
 
+    bool string_to_int(const std::string &s, int &i)
+    {
+      return string_to_fixed_point<int>(s, i);
+    }
+
     bool string_to_long(const std::string &s, size_t &i)
     {
       return string_to_fixed_point<size_t>(s, i);
