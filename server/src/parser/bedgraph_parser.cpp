@@ -66,7 +66,7 @@ namespace epidb {
 
         bed_graph_line row;
         if (!strtk::parse(line,"\t ",row.chr, row.start, row.end, row.score)) {
-          msg = "Failed to parse line : " + utils::integer_to_string(actual_line_) + " " + line;
+          msg = "Failed to parse line : " + line_str() + " " + line;
           return false;
         }
 
@@ -89,6 +89,11 @@ namespace epidb {
 
         return true;
       });
+
+      // Verify error
+      if (!msg.empty()) {
+        return false;
+      }
 
       if (actual_track) {
         wig->add_track(actual_track);
