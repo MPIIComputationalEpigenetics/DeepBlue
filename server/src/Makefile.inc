@@ -37,7 +37,7 @@ endif
 ifeq ($(host),macosx)
  CXX = clang++
  # -O3 -Ofast -ffast-math -march=native
- DEFCXXFLAGS = -g -std=c++11 -stdlib=libc++ -Werror -Wall -Wextra  -Weffc++ -Wno-unused-parameter -Wno-ignored-qualifiers -I/opt/boost-new-new/include/ -I/Users/albrecht/mpi/DeepBlue/server/third_party/drivers/macosx_new/include -I/Users/albrecht/mpi/DeepBlue/server/third_party/cppformat/ -I/Users/albrecht/mpi/DeepBlue/server/third_party/strtk -I/Users/albrecht/mpi/DeepBlue/server/third_party/minilzo/
+ DEFCXXFLAGS = -O3 -Ofast -ffast-math -march=native -std=c++11 -stdlib=libc++ -Werror -Wall -Wextra  -Weffc++ -Wno-unused-parameter -Wno-ignored-qualifiers -I/opt/boost-new-new/include/ -I/Users/albrecht/mpi/DeepBlue/server/third_party/drivers/macosx_new/include -I/Users/albrecht/mpi/DeepBlue/server/third_party/cppformat/ -I/Users/albrecht/mpi/DeepBlue/server/third_party/strtk -I/Users/albrecht/mpi/DeepBlue/server/third_party/minilzo/
  BOOST_DIR = /opt/boost-new-new/lib
  LD	= clang++
  LDFLAGS =
