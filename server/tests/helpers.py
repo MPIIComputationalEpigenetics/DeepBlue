@@ -137,13 +137,16 @@ class TestCase(unittest.TestCase):
     #self.epidb_process.terminate()
 
   def assertSuccess(self, result, data=None):
-    if data is None:
-      result = result[0]
-      if len(result) > 0:
-        data = result[1]
+    if isinstance(result, tuple) or isinstance(result, list):
+      status = result[0]
+    else:
+      status = result
 
-    if result != 'okay':
-      msg = "Command failed: %s %s" % (result, data)
+    if status != 'okay':
+      if data == None:
+        msg = "Command failed: %s" % (result)
+      else:
+        msg = "Command failed: %s %s" % (result, data)
       raise self.failureException, msg
 
   def assertFailure(self, result, data=None):

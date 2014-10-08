@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <cstdlib>
 #include <cmath>
+#include <ctime>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -19,6 +20,8 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/shared_ptr.hpp>
+
+#include <strtk.hpp>
 
 #include "wig_parser.hpp"
 
@@ -64,7 +67,7 @@ namespace epidb {
                                     std::string &msg)
     {
       params.clear();
-      //params["mode"] = strs[0];
+
       for (size_t i = 1; i < strs.size(); i++ ) {
         std::vector<std::string> kv;
         size_t pos = strs[i].find_first_of("=");
@@ -86,17 +89,21 @@ namespace epidb {
       return true;
     }
 
-    bool WIGParser::read_format(const std::vector<std::string> &strs, TrackPtr &track, std::string &msg)
+    bool WIGParser::read_format(std::string &line, TrackPtr &track, std::string &msg)
     {
+      boost::trim(line);
+      std::vector<std::string> strs;
+      boost::split(strs, line, boost::is_any_of("\t "));
+
       std::map<std::string, std::string> params;
       if (!read_parameters(strs, params, msg)) {
         return false;
       }
 
       std::string mode(strs[0]);
-      size_t start;
-      size_t step;
-      size_t span;
+      int start;
+      int step;
+      int span;
 
       if (params.find("chrom") == params.end()) {
         msg = "The track doesn't specify a chromosome. Line: " + line_str();
@@ -106,8 +113,8 @@ namespace epidb {
 
       if (params.find("span") == params.end()) {
         span = 1;
-      } else if (utils::string_to_long(params["span"], span)) {
-        if (span == 0) {
+      } else if (utils::string_to_int(params["span"], span)) {
+        if (span <= 0) {
           msg = "The span value should be bigger than 0. Line: " + line_str();
           return false;
         }
@@ -128,8 +135,21 @@ namespace epidb {
           msg = "The track has a negative or null step value. Line: " + line_str();
           return false;
         }
-        start = atoi(params["start"].c_str());
-        step = atoi(params["step"].c_str());
+        if (!utils::string_to_int(params["start"], start)) {
+          msg = "The start value is not valid. Line: " + line_str();
+        }
+
+        if (!utils::string_to_int(params["step"], step)) {
+          msg = "The step value is not valid. Line: " + line_str();
+        }
+
+        if (step <= 0) {
+          msg = "The step value should be bigger than 0. Line: " + line_str();
+        }
+
+        if (start < 0) {
+          msg = "The start value should be positive. Line: " + line_str();
+        }
 
         if (span > step) {
           msg = "The span value (" + utils::integer_to_string(span) + ") is bigger than the step value (" +
@@ -182,18 +202,19 @@ namespace epidb {
 
     bool WIGParser::get(WigPtr &wig, std::string &msg)
     {
-      wig = boost::shared_ptr<WigFile>(new WigFile());
-      std::string line;
+      clock_t init = clock();
 
-      while (!input_.eof()) {
-        std::getline(input_, line);
-        boost::trim(line);
+      wig = boost::shared_ptr<WigFile>(new WigFile());
+      strtk::for_each_line_conditional(input_, [&](std::string & line) -> bool {
+        //std::cerr << line << std::endl;
         actual_line_++;
-        if (line.empty()) {
-          continue;
+        if (line.empty())
+        {
+          return true;
         }
 
-        while (*line.rbegin() == '\\') {
+        while (*line.rbegin() == '\\')
+        {
           line = line.substr(0, line.size() - 1);
           std::string new_line;
           std::getline(input_, new_line);
@@ -202,18 +223,13 @@ namespace epidb {
           line = line + new_line;
         }
 
-        if (line[0] == '#') {
-          continue;
+        if (line.empty() || line[0] == '#' || line.compare(0, 7, "browser") == 0)
+        {
+          return true;
         }
 
-        std::vector<std::string> strs;
-        boost::split(strs, line, boost::is_any_of("\t "));
-
-        if (strs[0] == "browser") {
-          continue;
-        }
-
-        if (strs[0] == "track") {
+        if (line.compare(0, 5, "track") == 0)
+        {
           if (declare_track_)  {
             msg = "It is allowed only one track by file. Line: " + line_str();
             return false;
@@ -225,14 +241,15 @@ namespace epidb {
           }
 
           declare_track_ = true;
-          continue;
+          return true;
         }
 
-        if (strs[0] == "variableStep" ||
-            strs[0] == "fixedStep") {
+        if ((line.compare(0, 12, "variableStep") == 0)  ||
+            line.compare(0, 9, "fixedStep") == 0)
+        {
 
           TrackPtr new_track;
-          if (!read_format(strs, new_track, msg)) {
+          if (!read_format(line, new_track, msg)) {
             return false;
           }
 
@@ -246,15 +263,17 @@ namespace epidb {
             actual_track = new_track;
           }
 
-          continue;
+          return true;
         }
 
-        if (!actual_track) {
+        if (!actual_track)
+        {
           msg = "The track is missing a fixedStep or variableStep directive. Line: "  + line_str();
           return false;
         }
 
-        if (actual_track->type() == FIXED_STEP) {
+        if (actual_track->type() == FIXED_STEP)
+        {
           double value;
           if (!utils::string_to_double(line, value)) {
             msg = "The feature value " + line + " at the line " + line_str() + " is not a valid number";
@@ -271,19 +290,13 @@ namespace epidb {
 
           actual_track->add_feature(value);
 
-        } else if (actual_track->type() == VARIABLE_STEP) {
-          if (strs.size() != 2) {
-            msg = "The track has invalid or missing values. Line: " + line_str();
-            return false;
-          }
+        } else if (actual_track->type() == VARIABLE_STEP)
+        {
           size_t position;
           double value;
-          if (!utils::string_to_long(strs[0], position)) {
-            msg = "The feature position " + strs[0] + " at the line " + line_str();
-            return false;
-          }
-          if (!utils::string_to_double(strs[1], value)) {
-            msg = "The feature value " + strs[0] + " at the line " + line_str();
+
+          if (!strtk::parse(line, "\t ", position, value)) {
+            msg = "Failed to parse line : " + line_str() + " " + line;
             return false;
           }
 
@@ -296,6 +309,12 @@ namespace epidb {
           msg = "The track is missing a fixedStep or variableStep directive at the line " + line_str();
           return false;
         }
+        return true;
+      });
+
+      // Verify error
+      if (!msg.empty()) {
+        return false;
       }
 
       if (actual_track) {
@@ -307,6 +326,7 @@ namespace epidb {
         return false;
       }
 
+      std::cerr << "Total: " << (( ((float)  clock()) - init) / CLOCKS_PER_SEC) << std::endl;
       return true;
     }
   }
