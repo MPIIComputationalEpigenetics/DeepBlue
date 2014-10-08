@@ -36,18 +36,18 @@ endif
 # Felipe Albrecht's mac
 ifeq ($(host),macosx)
  CXX = clang++
- # -O3 -Ofast -ffast-math -march=native -Werror -Wall -Wextra  -Weffc++ -Wno-unused-parameter -Wno-ignored-qualifiers
- DEFCXXFLAGS = -g -I/opt/boost/include/ -I/Users/albrecht/mpi/DeepBlue/server/third_party/drivers/macosx/include -I/Users/albrecht/mpi/DeepBlue/server/third_party/cppformat/ -I/Users/albrecht/mpi/DeepBlue/server/third_party/minilzo/
- BOOST_DIR = /opt/boost/lib
+ # -O3 -Ofast -ffast-math -march=native
+ DEFCXXFLAGS = -g -std=c++11 -stdlib=libc++ -Werror -Wall -Wextra  -Weffc++ -Wno-unused-parameter -Wno-ignored-qualifiers -I/opt/boost-new-new/include/ -I/Users/albrecht/mpi/DeepBlue/server/third_party/drivers/macosx_new/include -I/Users/albrecht/mpi/DeepBlue/server/third_party/cppformat/ -I/Users/albrecht/mpi/DeepBlue/server/third_party/strtk -I/Users/albrecht/mpi/DeepBlue/server/third_party/minilzo/
+ BOOST_DIR = /opt/boost-new-new/lib
  LD	= clang++
- LDFLAGS = -g
- MONGOLIBS =  -L/Users/albrecht/mpi/DeepBlue/server/third_party/drivers/macosx/lib -lmongoclient
- BOOSTLIBS = $(BOOST_DIR)/libboost_filesystem.a $(BOOST_DIR)/libboost_thread.a $(BOOST_DIR)/libboost_system.a $(BOOST_DIR)/libboost_regex.a $(BOOST_DIR)/libboost_log.a  $(BOOST_DIR)/libboost_timer.a  $(BOOST_DIR)/libboost_chrono.a $(BOOST_DIR)/libboost_program_options.a
+ LDFLAGS =
+ MONGOLIBS =  -L/Users/albrecht/mpi/DeepBlue/server/third_party/drivers/macosx_new/lib -lmongoclient
+ BOOSTLIBS = -L$(BOOST_DIR) -lboost_log_setup -lboost_log -lboost_filesystem -lboost_thread -lboost_system -lboost_regex -lboost_timer -lboost_chrono -lboost_program_options
  THIRDLIBS = ../third_party/libexpat_macosx.a
 endif
 
 CPPFORMAT = ../third_party/cppformat/format.cc ../third_party/minilzo/minilzo.c
-DEFLIBS = $(MONGOLIBS) $(BOOSTLIBS) $(CPPFORMAT)
+DEFLIBS = $(CPPFORMAT) $(BOOSTLIBS) $(MONGOLIBS)
 
 AR	= ar
 ARFLAGS	=

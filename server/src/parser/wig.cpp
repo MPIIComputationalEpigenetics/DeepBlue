@@ -48,7 +48,7 @@ namespace epidb {
     Track::Track(std::string &chr, Length span) :
       _type(VARIABLE_STEP),
       _chromosome(chr),
-      _start(std::numeric_limits<size_t>::max()),
+      _start(std::numeric_limits<Position>::max()),
       _end(0),
       _step(0),
       _span(span)

@@ -13,6 +13,8 @@
 
 #include <ctime>
 
+#include <strtk.hpp>
+
 #include "bedgraph_parser.hpp"
 #include "wig.hpp"
 
@@ -21,6 +23,12 @@
 namespace epidb {
   namespace parser {
 
+    struct bed_graph_line {
+      std::string chr;
+      Position start;
+      Position end;
+      double score;
+    };
 
     BedGraphParser::BedGraphParser(const std::string &content) :
       WIGParser(content) {}
@@ -28,27 +36,20 @@ namespace epidb {
     bool BedGraphParser::get(parser::WigPtr &wig, std::string &msg)
     {
       wig = boost::shared_ptr<WigFile>(new WigFile());
-      std::string line;
       std::string current_chr;
 
       clock_t dsysTime = clock();
+      clock_t init = clock();
 
-      while (!input_.eof()) {
-        std::getline(input_, line);
-        boost::trim(line);
+      static const std::string delimiters = "\t ";
+      strtk::for_each_line_conditional(input_, [&](const std::string & line) -> bool {
+
         actual_line_++;
-        if (line.empty()) {
-          continue;
+        if (line.empty() || line[0] == '#' || line.compare(0, 7, "browser") == 0) {
+          return true;
         }
 
-        std::vector<std::string> strs;
-        boost::split(strs, line, boost::is_any_of("\t "));
-
-        if (strs[0] == "browser") {
-          continue;
-        }
-
-        if (strs[0] == "track") {
+        if (line.compare(0, 5, "track") == 0) {
           if (declare_track_)  {
             msg = "It is allowed only one track by file. Line: " + line_str();
             return false;
@@ -60,59 +61,40 @@ namespace epidb {
           }
 
           declare_track_ = true;
-          continue;
+          return true;
         }
 
-        if (line[0] == '#') {
-          continue;
-        }
-
-        if (strs.size() != 4) {
-          msg = "Invalid line (" + line_str() + ") : " + line;
+        bed_graph_line row;
+        if (!strtk::parse(line,"\t ",row.chr, row.start, row.end, row.score)) {
+          msg = "Failed to parse line : " + utils::integer_to_string(actual_line_) + " " + line;
           return false;
         }
 
-        std::string chromosome = strs[0];
-
         if (!actual_track) {
-          actual_track = build_bedgraph_track(chromosome);
+          actual_track = build_bedgraph_track(row.chr);
         } else {
-          if (actual_track->chromosome() != chromosome) {
+          if (actual_track->chromosome() != row.chr) {
             wig->add_track(actual_track);
-            actual_track = build_bedgraph_track(chromosome);
+            actual_track = build_bedgraph_track(row.chr);
           }
         }
 
-        Position start;
-        Position end;
-        Score score;
-
-        if (!utils::string_to_position(strs[1], start)) {
-          msg = "The start position '" + line + "' is not valid. (Line: " + line_str() + ")";
-          return false;
-        }
-
-        if (!utils::string_to_position(strs[2], end)) {
-          msg = "The end position '" + line + "'' is not valid. (Line: " + line_str() + ")";
-          return false;
-        }
-
-        if (!utils::string_to_score(strs[3], score)) {
-          msg = "The score '" + line + "' is not valid. (Line: " + line_str() + ")";
-          return false;
-        }
-
-        if (actual_line_ % 600000 == 0){
-          std::cerr << (( ((float)  clock()) - dsysTime)/CLOCKS_PER_SEC) << std::endl;
+        if (actual_line_ % 2500000 == 0) {
+          std::cerr << (( ((float)  clock()) - dsysTime) / CLOCKS_PER_SEC) << std::endl;
           dsysTime = clock();
         }
 
         check_block_size(wig);
-        actual_track->add_feature(start, end, score);
-      }
+        actual_track->add_feature(row.start, row.end, row.score);
+
+        return true;
+      });
+
       if (actual_track) {
         wig->add_track(actual_track);
       }
+
+      std::cerr << "Total: " << (( ((float)  clock()) - init) / CLOCKS_PER_SEC) << std::endl;
       return true;
     }
   }
