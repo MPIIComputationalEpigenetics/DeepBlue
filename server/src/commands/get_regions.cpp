@@ -123,6 +123,7 @@ namespace epidb {
 
             std::vector<mongo::BSONObj> columns;
             if (!dba::query::get_columns_from_dataset(id, columns, msg)) {
+              result.add_error(msg);
               return false;
             }
 
