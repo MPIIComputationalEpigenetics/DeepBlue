@@ -78,8 +78,8 @@ namespace epidb {
     {
       const char *p = s.c_str();
       bool neg((*p == '-') ? 1 : 0);
-      register T num(0);
-      register size_t pos(strlen(p + neg) - 1);
+      T num(0);
+      size_t pos(strlen(p + neg) - 1);
       if (neg)  {
         ++p;
       }
