@@ -14,8 +14,10 @@
 #include <mongo/bson/bson.h>
 #include <mongo/client/dbclient.h>
 
+#include "../errors.hpp"
 #include "../regions.hpp"
 #include "../log.hpp"
+
 #include "../algorithms/aggregate.hpp"
 #include "../algorithms/intersection.hpp"
 #include "../algorithms/merge.hpp"
@@ -726,7 +728,7 @@ namespace epidb {
 
       bool get_columns_from_dataset(DatasetId &dataset_id, std::vector<mongo::BSONObj> &columns, std::string &msg)
       {
-        if (dataset_id == 0) {
+        if (dataset_id == DATASET_EMPTY_ID) {
           return true;
         }
 
@@ -791,7 +793,7 @@ namespace epidb {
           }
         }
         c.done();
-        msg = "Dataset " + utils::integer_to_string(dataset_id) + " not found";
+        msg = Error::m(ERR_DATASET_NOT_FOUND, dataset_id);
         return false;
       }
     }
