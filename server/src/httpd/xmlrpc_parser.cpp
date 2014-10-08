@@ -9,6 +9,8 @@
 #include <string>
 #include <string.h>
 
+#include <iostream>
+
 #include "request.hpp"
 #include "xmlrpc_parser.hpp"
 
