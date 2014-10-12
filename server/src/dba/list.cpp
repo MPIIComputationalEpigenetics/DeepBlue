@@ -70,7 +70,7 @@ namespace epidb {
           return false;
         }
 
-        BOOST_FOREACH(const mongo::BSONObj &o, samples) {
+        BOOST_FOREACH(const mongo::BSONObj & o, samples) {
           result.push_back(o["_id"].String());
         }
 
@@ -113,7 +113,7 @@ namespace epidb {
           return false;
         }
 
-        BOOST_FOREACH(const mongo::BSONObj &o, objects) {
+        BOOST_FOREACH(const mongo::BSONObj & o, objects) {
           utils::IdName id_name(o["_id"].String(), o["name"].String());
           result.push_back(id_name);
         }
@@ -128,7 +128,7 @@ namespace epidb {
           return false;
         }
 
-        BOOST_FOREACH(const mongo::BSONObj &o, objects) {
+        BOOST_FOREACH(const mongo::BSONObj & o, objects) {
           utils::IdName names(o["_id"].String(), o["name"].String());
           result.push_back(names);
         }
@@ -162,7 +162,7 @@ namespace epidb {
       }
 
       bool similar_biosources(const std::string name, const std::string &user_key,
-                               std::vector<utils::IdName> &result, std::string &msg)
+                              std::vector<utils::IdName> &result, std::string &msg)
       {
         return similar(Collections::BIOSOURCES(), name, user_key, result, msg);
       }
@@ -213,13 +213,13 @@ namespace epidb {
 
         std::vector<std::string> names;
         std::map<std::string, std::string> id_name_map;
-        BOOST_FOREACH(const utils::IdName &id_name, id_names) {
+        BOOST_FOREACH(const utils::IdName & id_name, id_names) {
           id_name_map[id_name.name] = id_name.id;
           names.push_back(id_name.name);
         }
         std::vector<std::string> ordered = epidb::algorithms::Levenshtein::order_by_score(what, names);
 
-        BOOST_FOREACH(const std::string& name, ordered) {
+        BOOST_FOREACH(const std::string & name, ordered) {
           utils::IdName id_name(id_name_map[name], name);
           result.push_back(id_name);
         }
@@ -247,11 +247,58 @@ namespace epidb {
 
         std::vector<std::string> ordered = epidb::algorithms::Levenshtein::order_by_score(what, names);
 
-        BOOST_FOREACH(const std::string& name, ordered) {
+        BOOST_FOREACH(const std::string & name, ordered) {
           utils::IdName id_name(id_name_map[name], name);
           result.push_back(id_name);
         }
 
+        return true;
+      }
+
+      bool in_use(const std::string &collection, const std::string &key_name, const std::string &user_key,
+                  std::vector<utils::IdNameCount> &names, std::string &msg)
+      {
+        mongo::BSONArray pipeline = BSON_ARRAY(
+                                      BSON( "$group" <<
+                                            BSON( "_id" << key_name << "total" << BSON( "$sum" << 1 ) )
+                                          )
+                                    );
+
+        mongo::BSONObj agg_command = BSON( "aggregate" << Collections::EXPERIMENTS() << "pipeline" << pipeline);
+
+        mongo::ScopedDbConnection c(config::get_mongodb_server());
+
+        mongo::BSONObj res;
+        c->runCommand(config::DATABASE_NAME(), agg_command, res);
+
+        if (!res.getField("ok").trueValue()) {
+          msg = res.getStringField("errmsg");
+          c.done();
+          return false;
+        }
+
+        std::vector<mongo::BSONElement> result = res["result"].Array();
+
+
+        BOOST_FOREACH(const mongo::BSONElement & be, result) {
+          std::string norm_name = be["_id"].String();
+          long count = be["total"].safeNumberLong();
+
+          utils::IdNameCount inc;
+          if (collection == Collections::SAMPLES()) {
+            inc = utils::IdNameCount(norm_name, "", count);
+          } else {
+            utils::IdName id_name;
+            if (!helpers::get_name(collection, norm_name, id_name, msg)) {
+              c.done();
+              return false;
+            }
+            inc = utils::IdNameCount(id_name.id, id_name.name, count);
+          }
+          names.push_back(inc);
+        }
+
+        c.done();
         return true;
       }
     }

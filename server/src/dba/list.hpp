@@ -88,6 +88,13 @@ namespace epidb {
       bool similar(const std::string &where, const std::string &field, const std::string &what,
                    const std::string &filter_field, const std::string &filter_what,
                    const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg);
+
+      /**
+       * List in use
+       */
+
+      bool in_use(const std::string &collection, const std::string &field_name, const std::string &user_key,
+                  std::vector<utils::IdNameCount> &names, std::string& msg);
     }
   }
 }
