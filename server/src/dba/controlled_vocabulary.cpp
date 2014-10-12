@@ -31,8 +31,8 @@ namespace epidb {
       std::map<std::string, std::string> cache_is_connected;
 
       bool __get_synonyms_from_biosource(const std::string &id, const std::string &biosource_name, const std::string &norm_biosource_name,
-                                          const std::string &user_key,
-                                          std::vector<utils::IdName> &syns, std::string &msg)
+                                         const std::string &user_key,
+                                         std::vector<utils::IdName> &syns, std::string &msg)
       {
         utils::IdName id_name_biosource;
         if (id.empty()) {
@@ -134,7 +134,7 @@ namespace epidb {
 
         std::vector<std::string> norm_subs;
         if (!get_biosource_embracing(biosource, norm_biosource,
-                                      true, "", norm_subs, msg)) {
+                                     true, "", norm_subs, msg)) {
           return false;
         }
 
@@ -183,8 +183,8 @@ namespace epidb {
       }
 
       bool set_biosource_synonym(const std::string &input_biosource_name, const std::string &synonym,
-                                  bool is_biosource, const bool is_syn, const std::string &user_key,
-                                  std::string &msg)
+                                 bool is_biosource, const bool is_syn, const std::string &user_key,
+                                 std::string &msg)
       {
         std::string biosource_name;
         std::string norm_biosource_name;
@@ -290,9 +290,9 @@ namespace epidb {
 
 
       bool get_biosource_synonyms(const std::string &id, const std::string &biosource_name,
-                                   const std::string &norm_biosource_name,
-                                   bool is_biosource, const std::string &user_key,
-                                   std::vector<utils::IdName> &syns, std::string &msg)
+                                  const std::string &norm_biosource_name,
+                                  bool is_biosource, const std::string &user_key,
+                                  std::vector<utils::IdName> &syns, std::string &msg)
       {
         if (is_biosource) {
           return __get_synonyms_from_biosource(id, biosource_name, norm_biosource_name, user_key, syns, msg);
@@ -363,9 +363,9 @@ namespace epidb {
       }
 
       bool set_biosource_embracing(const std::string &biosource_more_embracing, const std::string &norm_biosource_more_embracing,
-                                    const std::string &biosource_less_embracing, const std::string &norm_biosource_less_embracing,
-                                    bool more_embracing_is_syn, const bool less_embracing_is_syn,
-                                    const std::string &user_key, std::string &msg)
+                                   const std::string &biosource_less_embracing, const std::string &norm_biosource_less_embracing,
+                                   bool more_embracing_is_syn, const bool less_embracing_is_syn,
+                                   const std::string &user_key, std::string &msg)
       {
         std::string more_embracing_root;
         std::string norm_more_embracing_root;
@@ -527,8 +527,8 @@ namespace epidb {
       }
 
       bool get_biosource_embracing(const std::string &biosource_name, const std::string &norm_biosource_name,
-                                    bool is_biosource, const std::string &user_key,
-                                    std::vector<std::string> &norm_subs, std::string &msg)
+                                   bool is_biosource, const std::string &user_key,
+                                   std::vector<std::string> &norm_subs, std::string &msg)
       {
         std::string more_embracing_root;
         std::string norm_more_embracing_root;
