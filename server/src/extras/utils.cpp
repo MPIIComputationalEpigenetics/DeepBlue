@@ -36,6 +36,13 @@ namespace epidb {
       return os;
     }
 
+    std::ostream &operator<<(std::ostream &os, const IdNameCount &o)
+    {
+      os << "[" << o.id << "," << o.name << "," << o.count << "]";
+      return os;
+    }
+
+
     std::vector<std::string> string_to_vector(const std::string &s, const char sep)
     {
       std::vector<std::string> tokens;

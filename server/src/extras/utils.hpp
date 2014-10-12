@@ -37,6 +37,21 @@ namespace epidb {
 
     std::ostream &operator<<(std::ostream &os, const IdName &o);
 
+    class IdNameCount {
+    public:
+      IdNameCount() :
+        id(""), name(""), count(0) {}
+      IdNameCount(std::string i, std::string n, size_t c) :
+        id(i), name(n), count(c) {}
+      std::string id;
+      std::string name;
+      size_t count;
+    };
+
+    std::ostream &operator<<(std::ostream &os, const IdName &o);
+
+    std::ostream &operator<<(std::ostream &os, const IdNameCount &o);
+
     template <typename Type> std::string vector_to_string(std::vector<Type> vector)
     {
       std::ostringstream oss;
