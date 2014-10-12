@@ -465,7 +465,8 @@ namespace epidb {
                            const std::string &project, const std::string &norm_project,
                            const std::string &description, const std::string &norm_description,
                            const datatypes::Metadata &extra_metadata,
-                           const std::string &user_key, const std::string &ip, const parser::WigPtr &wig,
+                           const std::string &user_key, const std::string &ip,
+                           const parser::WigPtr &wig,
                            std::string &experiment_id, std::string &msg)
     {
       mongo::BSONObj experiment_metadata;
@@ -477,7 +478,7 @@ namespace epidb {
       }
 
       mongo::BSONObj upload_info;
-      if (!build_upload_info(user_key, ip, "bed", upload_info, msg)) {
+      if (!build_upload_info(user_key, ip, "wig", upload_info, msg)) {
         return false;
       }
       mongo::BSONObjBuilder experiment_builder;
@@ -637,7 +638,7 @@ namespace epidb {
       }
 
       mongo::BSONObj upload_info;
-      if (!build_upload_info(user_key, ip, "wig", upload_info, msg)) {
+      if (!build_upload_info(user_key, ip, "bed", upload_info, msg)) {
         return false;
       }
 
