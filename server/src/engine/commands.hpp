@@ -87,6 +87,8 @@ namespace epidb {
 
     void set_id_names_return(const std::vector<utils::IdName> &id_names, serialize::Parameters &result) const;
 
+    void set_id_names_count_return(const std::vector<utils::IdNameCount> &id_name_counts, serialize::Parameters &result) const;
+
     void init();
 
   public:

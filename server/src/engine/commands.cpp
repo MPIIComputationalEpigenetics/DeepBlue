@@ -72,6 +72,19 @@ namespace epidb {
     }
   }
 
+  void Command::set_id_names_count_return(const std::vector<utils::IdNameCount> &id_name_counts, serialize::Parameters &result) const
+  {
+    result.set_as_array(true);
+    BOOST_FOREACH(const utils::IdNameCount & id_name_count, id_name_counts) {
+      std::vector<serialize::ParameterPtr> list;
+      list.push_back(serialize::ParameterPtr(new serialize::SimpleParameter(serialize::STRING, id_name_count.id)));
+      list.push_back(serialize::ParameterPtr(new serialize::SimpleParameter(serialize::STRING, id_name_count.name)));
+      list.push_back(serialize::ParameterPtr(new serialize::SimpleParameter((long long) id_name_count.count)));
+      result.add_list(list);
+    }
+  }
+
+
   int seed = rand();
   const std::string Command::gen_random(const size_t len) const
   {
