@@ -140,7 +140,7 @@ namespace epidb {
 
         BOOST_FOREACH(const std::string & norm_sub, norm_subs) {
           std::string biosource_id;
-          if (!helpers::get_biosource_id(norm_sub, biosource_id, msg)) {
+          if (!helpers::get_id(Collections::BIOSOURCES(), norm_sub, biosource_id, msg)) {
             return false;
           }
 

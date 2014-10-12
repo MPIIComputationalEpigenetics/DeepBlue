@@ -27,12 +27,6 @@ namespace epidb {
 
       const std::string region_collection_name(const std::string &genome, const std::string &chromosome);
 
-      // ----
-
-      bool get_biosource_id(const std::string &norm_name, std::string &id, std::string &msg);
-
-      // ----
-
       // Get **all** content from **entire** colection
       bool get(const std::string &where,
                std::vector<std::string> &result, std::string &msg);
