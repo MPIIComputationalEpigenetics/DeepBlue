@@ -1081,6 +1081,27 @@ namespace epidb {
       return true;
     }
 
+    bool get_biosource_wider(const std::string &biosource_name, const std::string &norm_biosource_name,
+                             bool is_biosource, const std::string &user_key,
+                             std::vector<utils::IdName> &related_biosources, std::string &msg)
+    {
+      std::vector<std::string> norm_subs;
+
+      if (!cv::get_biosource_wider(biosource_name, norm_biosource_name, is_biosource, user_key, norm_subs, msg)) {
+        return false;
+      }
+
+      BOOST_FOREACH(const std::string & norm_sub, norm_subs) {
+        utils::IdName sub_biosource_name;
+        if (!helpers::get_name(Collections::BIOSOURCES(), norm_sub, sub_biosource_name, msg)) {
+          return false;
+        }
+        related_biosources.push_back(sub_biosource_name);
+      }
+      return true;
+    }
+
+
     bool get_user_name(const std::string &user_key, std::string &name, std::string &msg)
     {
       utils::IdName id_name;

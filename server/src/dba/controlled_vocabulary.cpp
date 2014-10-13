@@ -494,38 +494,6 @@ namespace epidb {
         return true;
       }
 
-      bool __get_upper_connected(const std::string &norm_s1,
-                                 std::vector<std::string> &norm_uppers, std::string &msg)
-      {
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
-
-        mongo::BSONObjBuilder query_builder;
-        query_builder.append("subs", BSON("$eq" << norm_s1));
-        mongo::BSONObj query_obj = query_builder.obj();
-        mongo::Query query = mongo::Query(query_obj);
-        std::auto_ptr<mongo::DBClientCursor> syns_cursor = c->query(helpers::collection_name(Collections::BIOSOURCE_EMBRACING()), query);
-
-        if (!syns_cursor->more()) {
-          c.done();
-          return true;
-        }
-
-        mongo::BSONObj syn_bson = syns_cursor->next().getOwned();
-        std::vector<mongo::BSONElement> e = syn_bson["subs"].Array();
-
-        c.done();
-
-        std::list<std::string> subs;
-        BOOST_FOREACH(const mongo::BSONElement & be, e) {
-          std::string sub = be.str();
-          if (!__get_upper_connected(sub, norm_uppers, msg)) {
-            return false;
-          }
-        }
-
-        return true;
-      }
-
       bool get_biosource_embracing(const std::string &biosource_name, const std::string &norm_biosource_name,
                                    bool is_biosource, const std::string &user_key,
                                    std::vector<std::string> &norm_subs, std::string &msg)
@@ -548,6 +516,52 @@ namespace epidb {
         }
         return true;
       }
+
+      bool __get_upper_connected(const std::string &norm_s1,
+                                 std::vector<std::string> &norm_uppers, std::string &msg)
+      {
+        mongo::ScopedDbConnection c(config::get_mongodb_server());
+
+        mongo::BSONObjBuilder query_builder;
+        query_builder.append("subs", norm_s1);
+        mongo::BSONObj query_obj = query_builder.obj();
+        mongo::Query query = mongo::Query(query_obj);
+        std::auto_ptr<mongo::DBClientCursor> upper_cursor = c->query(helpers::collection_name(Collections::BIOSOURCE_EMBRACING()), query);
+
+        while (upper_cursor->more()) {
+          mongo::BSONObj upper_bson = upper_cursor->next();
+          std::string e = upper_bson["norm_biosource_name"].String();
+          norm_uppers.push_back(e);
+        }
+
+        c.done();
+        return true;
+      }
+
+      bool get_biosource_wider(const std::string &biosource_name, const std::string &norm_biosource_name,
+                               bool is_biosource,
+                               const std::string &user_key,
+                               std::vector<std::string> &norm_uppers, std::string &msg)
+      {
+        std::string more_embracing_root;
+        std::string norm_more_embracing_root;
+
+        if (!is_biosource) {
+          if (!get_synonym_root(biosource_name, norm_biosource_name,
+                                more_embracing_root, norm_more_embracing_root, msg)) {
+            return false;
+          }
+        } else {
+          more_embracing_root = biosource_name;
+          norm_more_embracing_root = norm_biosource_name;
+        }
+
+        if (!__get_upper_connected(norm_more_embracing_root, norm_uppers, msg)) {
+          return false;
+        }
+        return true;
+      }
+
     }
   }
 }

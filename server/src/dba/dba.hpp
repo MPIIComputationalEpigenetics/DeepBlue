@@ -150,6 +150,11 @@ namespace epidb {
                               bool is_biosource, const std::string &user_key,
                               std::vector<utils::IdName> &biosources, std::string &msg);
 
+
+    bool get_biosource_wider(const std::string &biosource_name, const std::string &norm_biosource_name,
+                             bool is_biosource, const std::string &user_key,
+                             std::vector<utils::IdName> &related_biosources, std::string &msg);
+
     bool get_biosource_synonyms(const std::string &biosource_name, const std::string &norm_biosource_name,
                                  bool is_biosource, const std::string &user_key,
                                  std::vector<utils::IdName> &syns, std::string &msg);
