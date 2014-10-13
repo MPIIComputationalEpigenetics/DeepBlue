@@ -30,6 +30,9 @@
 namespace epidb {
   namespace dba {
     namespace info {
+
+      const static std::string NORM_("norm_");
+
       bool get_sample_by_id(const std::string &id, std::map<std::string, std::string> &res, std::string &msg, bool full = false)
       {
         mongo::ScopedDbConnection c(config::get_mongodb_server());
@@ -237,19 +240,30 @@ namespace epidb {
           if (std::string(e.fieldName()) == "extra_metadata") {
             for (mongo::BSONObj::iterator itt = e.Obj().begin(); itt.more(); ) {
               mongo::BSONElement ee = itt.next();
-              extra_metadata[ee.fieldName()] = utils::bson_to_string(ee);
+              std::string field_name = ee.fieldName();
+              if (field_name.compare(0, 5, NORM_) != 0) {
+                extra_metadata[field_name] = utils::bson_to_string(ee);
+              }
             }
           } else if (std::string(e.fieldName()) == "upload_info") {
             for (mongo::BSONObj::iterator itt = e.Obj().begin(); itt.more(); ) {
               mongo::BSONElement ee = itt.next();
-              upload_info[ee.fieldName()] = utils::bson_to_string(ee);
+              std::string field_name = ee.fieldName();
+              if (field_name.compare(0, 5, NORM_) != 0) {
+                upload_info[field_name] = utils::bson_to_string(ee);
+              }
             }
           } else if (std::string(e.fieldName()) == "columns") {
             for (mongo::BSONObj::iterator itt = e.Obj().begin(); itt.more(); ) {
               mongo::BSONElement ee = itt.next();
-              columns.push_back(columns::dataset_column_to_map(ee.Obj()));
+              std::string field_name = ee.fieldName();
+              if (field_name.compare(0, 5, NORM_) != 0) {
+                columns.push_back(columns::dataset_column_to_map(ee.Obj()));
+              }
             }
-          } else if (full || (strncmp("norm_", e.fieldName(), 5) != 0)) {
+          }
+          std::string field_name = e.fieldName();
+          if (full || field_name.compare(0, 5, "norm_") != 0) {
             metadata[e.fieldName()] = utils::bson_to_string(e);
           }
         }
@@ -282,25 +296,40 @@ namespace epidb {
           if (std::string(e.fieldName()) == "sample_info") {
             for (mongo::BSONObj::iterator itt = e.Obj().begin(); itt.more(); ) {
               mongo::BSONElement ee = itt.next();
-              sample_info[ee.fieldName()] = utils::bson_to_string(ee);
+              std::string field_name = ee.fieldName();
+              if (field_name.compare(0, 5, "norm_") != 0) {
+                sample_info[field_name] = utils::bson_to_string(ee);
+              }
             }
           } else if (std::string(e.fieldName()) == "extra_metadata") {
             for (mongo::BSONObj::iterator itt = e.Obj().begin(); itt.more(); ) {
               mongo::BSONElement ee = itt.next();
-              extra_metadata[ee.fieldName()] = utils::bson_to_string(ee);
+              std::string field_name = ee.fieldName();
+              if (field_name.compare(0, 5, "norm_") != 0) {
+                extra_metadata[field_name] = utils::bson_to_string(ee);
+              }
             }
           } else if (std::string(e.fieldName()) == "upload_info") {
             for (mongo::BSONObj::iterator itt = e.Obj().begin(); itt.more(); ) {
               mongo::BSONElement ee = itt.next();
-              upload_info[ee.fieldName()] = utils::bson_to_string(ee);
+              std::string field_name = ee.fieldName();
+              if (field_name.compare(0, 5, "norm_") != 0) {
+                upload_info[field_name] = utils::bson_to_string(ee);
+              }
             }
           } else if (std::string(e.fieldName()) == "columns") {
             for (mongo::BSONObj::iterator itt = e.Obj().begin(); itt.more(); ) {
               mongo::BSONElement ee = itt.next();
-              columns.push_back(columns::dataset_column_to_map(ee.Obj()));
+              std::string field_name = ee.fieldName();
+              if (field_name.compare(0, 5, "norm_") != 0) {
+                columns.push_back(columns::dataset_column_to_map(ee.Obj()));
+              }
             }
-          } else if (full || (strncmp("norm_", e.fieldName(), 5) != 0)) {
-            metadata[e.fieldName()] = utils::bson_to_string(e);
+          } else {
+            std::string field_name = e.fieldName();
+            if (full || field_name.compare(0, 5, "norm_") != 0) {
+              metadata[e.fieldName()] = utils::bson_to_string(e);
+            }
           }
         }
         return true;
@@ -337,11 +366,11 @@ namespace epidb {
         for (mongo::BSONObj::iterator it = args.begin(); it.more();) {
           mongo::BSONElement e = it.next();
           std::string fieldName = std::string(e.fieldName());
-          if (fieldName.find("start") == 0) {
+          if (fieldName == "start") {
             arg_builder.appendNumber("start", e.Int());
-          } else if (fieldName.find("end") == 0) {
+          } else if (fieldName == "end") {
             arg_builder.appendNumber("end", e.Int());
-          } else if (fieldName.find("norm_") != 0) {
+          } else if (fieldName.compare(0, 5, "norm_") != 0) {
             arg_builder.append(e);
           }
         }
@@ -370,8 +399,9 @@ namespace epidb {
 
         for (mongo::BSONObj::iterator it = result.begin(); it.more(); ) {
           mongo::BSONElement e = it.next();
-          if (full || (strncmp("norm_", e.fieldName(), 5) != 0)) {
-            res[e.fieldName()] = utils::bson_to_string(e);
+          std::string field_name = e.fieldName();
+          if (full || field_name.compare(0, 5, "norm_") != 0) {
+            res[field_name] = utils::bson_to_string(e);
           }
         }
         return true;
@@ -396,7 +426,8 @@ namespace epidb {
 
         for (mongo::BSONObj::iterator it = result.begin(); it.more(); ) {
           mongo::BSONElement e = it.next();
-          if (full || (strncmp("norm_", e.fieldName(), 5) != 0)) {
+          std::string field_name = e.fieldName();
+          if (full || field_name.compare(0, 5, "norm_") != 0) {
             res[e.fieldName()] = utils::bson_to_string(e);
           }
         }
