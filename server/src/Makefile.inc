@@ -24,12 +24,11 @@ ifeq ($(host),production)
  CXX = g++
  LD  = g++
  LDFLAGS   = -pthread
- MONGOLIBS = -L/local/data/DeepBlue/server/third_party/drivers/linux/lib -lmongoclient
+ MONGOLIBS = /opt/mongodb/install/mongo-driver/lib/libmongoclient.a
  BOOST_DIR = /opt/mongodb/boost/lib
- DEFCXXFLAGS = -Wall -O3 -march=native -Ofast -I/opt/mongodb/boost/include/ -I/local/data/DeepBlue/server/third_party/drivers/linux/include/ -I/local/data/DeepBlue/server/third_party/minilzo/ -I/local/data/DeepBlue/server/third_party/cppformat/
+ DEFCXXFLAGS = -std=c++11 -Wall -O3 -ffast-math -march=native -Ofast -I/opt/mongodb/install/mongo-driver/include/ -I/local/data/DeepBlue/server/third_party/minilzo/ -I/local/data/DeepBlue/server/third_party/cppformat/ -I/local/data/DeepBlue/server/third_party/strtk/
  BOOSTLIBS = $(BOOST_DIR)/libboost_filesystem.a $(BOOST_DIR)/libboost_thread.a $(BOOST_DIR)/libboost_system.a $(BOOST_DIR)/libboost_regex.a $(BOOST_DIR)/libboost_log.a  $(BOOST_DIR)/libboost_timer.a  $(BOOST_DIR)/libboost_chrono.a $(BOOST_DIR)/libboost_program_options.a -lrt
  THIRDLIBS = ../third_party/libexpat_linux.a
-
 endif
 
 # -O3 -Ofast
@@ -47,7 +46,7 @@ ifeq ($(host),macosx)
 endif
 
 CPPFORMAT = ../third_party/cppformat/format.cc ../third_party/minilzo/minilzo.c
-DEFLIBS = $(CPPFORMAT) $(BOOSTLIBS) $(MONGOLIBS)
+DEFLIBS = $(CPPFORMAT) $(MONGOLIBS) $(BOOSTLIBS)
 
 AR	= ar
 ARFLAGS	=
