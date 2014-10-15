@@ -12,17 +12,14 @@
 
 # Author: Fabian Reinartz <fab.reinartz@gmail.com>
 
-PATH=/bin:/usr/bin
 DESC="mongodb shard deamon"
-NAME=mongod
-BIN=/opt/mongodb/mongodb/bin/$NAME
-CONF=/opt/mongodb/epidb/src/epidb/mongo/etc/mongod_shard.conf
-
-# Exit if the binary is not installed
-[ -x "$BIN" ] || { echo "$BIN not found"; exit 0; }
+CONF=/local/data/DeepBlue/conf/mongo/mongod_shard.conf
 
 # Read configuration variable file if it is present, exit otherwise
 [ -r $CONF ] && . $CONF || { echo "$CONF not found"; exit 0; }
+
+# Exit if the binary is not installed
+[ -x "$BIN" ] || { echo "$BIN not found"; exit 0; }
 
 start_shard()
 {
@@ -45,8 +42,8 @@ start_shard()
     return 2
   else
     echo "starting mongodb shard on port $PORT"
-    echo "cmd: numactl --interleave=all $BIN -fork -port $PORT --nssize 2047 -dbpath $DBPATH -logpath $LOGPATH -pidfilepath $PIDFILEPATH"
-    numactl --interleave=all $BIN -fork -port $PORT --nssize 2047 -dbpath $DBPATH -logpath $LOGPATH -pidfilepath $PIDFILEPATH
+    echo "cmd: numactl --interleave=all $BIN -fork -port $PORT -dbpath $DBPATH -logpath $LOGPATH -pidfilepath $PIDFILEPATH --directoryperdb"
+    numactl --interleave=all $BIN -fork -port $PORT -dbpath $DBPATH -logpath $LOGPATH -pidfilepath $PIDFILEPATH --directoryperdb
   fi
 
   return 0
@@ -58,7 +55,7 @@ stop_shard()
     return 1
   fi
 
-  local PIDFILEPATH="$PIDPATH_PREFIX/$1/$PIDFILE"
+  local PIDFILEPATH="$PIDPATH_PREFIX/$1.$PIDFILE"
 
   echo "checking if mongodb shard $1 is running"
   if [ -r $PIDFILEPATH ]; then
@@ -69,7 +66,7 @@ stop_shard()
     return 2
   fi
   echo "stopping mongodb shard $1"
-  kill -2 $PID
+  kill $PID
   rm -f $PIDFILEPATH
   return 0
 }
