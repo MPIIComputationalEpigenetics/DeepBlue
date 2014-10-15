@@ -26,13 +26,13 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::SAMPLES, "Inserts a new sample with the given parameters.");
+        return CommandDescription(categories::SAMPLES, "Inserts a new sample of a given biosourcea.");
       }
 
       static Parameters parameters_()
       {
         Parameter p[] = {
-          Parameter("name", serialize::STRING, "sample name"),
+          Parameter("name", serialize::STRING, "biosource name"),
           Parameter("metadata", serialize::MAP, "sample metadata"),
           parameters::UserKey
         };
