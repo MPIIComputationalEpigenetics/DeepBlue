@@ -14,12 +14,26 @@ ifeq ($(UNAME_S),Linux)
 	ifeq ($(UNAME_N),infao3901)
 		host = production
 	endif
+	ifeq ($(UNAME_N),srv-13-41)
+		host = new_server
+	endif
 endif
 ifeq ($(UNAME_S),Darwin)
 	host = macosx
 endif
 
 # Servers
+ifeq ($(host),new_server)
+ CXX = g++
+ LD  = g++
+ LDFLAGS   = -pthread
+ MONGOLIBS = /local/data/libraries/mongo-cxx-driver/lib/libmongoclient.a
+ BOOST_DIR = /local/data/libraries/boost/lib
+ DEFCXXFLAGS = -std=c++11 -Wall -O3 -ffast-math -march=native -Ofast -I/local/data/libraries/mongo-cxx-driver/include/ -I/local/data/libraries/boost/include/ -I/local/data/DeepBlue/server/third_party/minilzo/ -I/local/data/DeepBlue/server/third_party/cppformat/ -I/local/data/DeepBlue/server/third_party/strtk/
+ BOOSTLIBS = $(BOOST_DIR)/libboost_filesystem.a $(BOOST_DIR)/libboost_thread.a $(BOOST_DIR)/libboost_system.a $(BOOST_DIR)/libboost_regex.a $(BOOST_DIR)/libboost_log.a  $(BOOST_DIR)/libboost_timer.a  $(BOOST_DIR)/libboost_chrono.a $(BOOST_DIR)/libboost_program_options.a -lrt
+ THIRDLIBS = ../third_party/libexpat_linux.a
+endif
+
 ifeq ($(host),production)
  CXX = g++
  LD  = g++
