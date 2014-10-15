@@ -219,3 +219,31 @@ chrX 100000"""
     x = epidb.chromosomes("Genome Example", self.admin_key)
     self.assertEquals(x, ['okay', [['chr1', 1000000], ['chr2', 900000], ['chr3', 500000], ['chrX', 100000]]])
 
+  def test_sample_search_from_synonym(self):
+    epidb = EpidbClient()
+    self.init_base(epidb)
+
+    s = epidb.add_biosource("Bio Source A", "", {}, self.admin_key)
+    self.assertSuccess(s)
+
+    s = epidb.set_biosource_synonym("Bio Source A", "BSA", self.admin_key)
+    self.assertSuccess(s)
+
+    s = epidb.add_sample("BSA", {}, self.admin_key)
+    self.assertSuccess(s)
+
+    s = epidb.list_samples("Bio Source A", {}, self.admin_key)
+    self.assertSuccess(s)
+
+    list_bio_source_a = s[1]
+    self.assertTrue(len(list_bio_source_a) > 0)
+
+    s = epidb.list_samples("BSA", {}, self.admin_key)
+    self.assertSuccess(s)
+
+    list_bsa = s[1]
+    self.assertTrue(len(list_bsa) > 0)
+
+    self.assertEqual(list_bio_source_a, list_bsa)
+
+

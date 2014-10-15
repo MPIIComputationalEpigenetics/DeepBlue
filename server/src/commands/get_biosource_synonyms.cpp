@@ -81,7 +81,7 @@ namespace epidb {
         }
 
         if (!is_biosource) {
-          if (!dba::check_biosource(norm_biosource_name, is_syn, msg)) {
+          if (!dba::check_biosource_synonym(norm_biosource_name, is_syn, msg)) {
             result.add_error(msg);
             return false;
           }

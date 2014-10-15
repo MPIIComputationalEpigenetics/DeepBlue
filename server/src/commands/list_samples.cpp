@@ -6,10 +6,14 @@
 //  Copyright (c) 2013,2014 Max Planck Institute for Computer Science. All rights reserved.
 //
 
+#include <string>
+#include <vector>
+
 #include <boost/foreach.hpp>
 
 #include "../engine/commands.hpp"
 
+#include "../dba/controlled_vocabulary.hpp"
 #include "../dba/dba.hpp"
 #include "../dba/helpers.hpp"
 #include "../dba/list.hpp"
@@ -28,14 +32,14 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::SAMPLES, "Lists all existing samples of a BioSource and Metadata.");
+        return CommandDescription(categories::SAMPLES, "Lists all existing samples that matches the given biosource and metadata.");
       }
 
       static Parameters parameters_()
       {
         Parameter p[] = {
-          Parameter("biosource", serialize::STRING, "the biosource name", true),
-          Parameter("metadata", serialize::MAP, "data the searched sample matches"),
+          Parameter("biosource", serialize::STRING, "biosource name", true),
+          Parameter("metadata", serialize::MAP, "metadadata to be matched"),
           parameters::UserKey
         };
         Parameters params(&p[0], &p[0] + 3);
@@ -74,7 +78,51 @@ namespace epidb {
         std::vector<serialize::ParameterPtr> s;
         parameters[0]->children(s);
 
-        mongo::BSONArray s_array = dba::helpers::build_epigenetic_normalized_array(s);
+        mongo::BSONArrayBuilder ab;
+        BOOST_FOREACH(serialize::ParameterPtr & p, s) {
+          std::string biosource = p->as_string();
+          std::string norm_biosource_name = utils::normalize_name(biosource);
+
+          bool is_biosource(false);
+          bool is_syn(false);
+
+          if (!dba::check_biosource(norm_biosource_name, is_biosource, msg)) {
+            result.add_error(msg);
+            return false;
+          }
+
+          if (!is_biosource) {
+            if (!dba::check_biosource_synonym(norm_biosource_name, is_syn, msg)) {
+              result.add_error(msg);
+              return false;
+            }
+          }
+
+          if (!(is_biosource || is_syn)) {
+            std::string s = Error::m(ERR_INVALID_BIOSOURCE_NAME, biosource.c_str());
+            EPIDB_LOG_TRACE(s);
+            result.add_error(s);
+            return false;
+          }
+
+          std::string biosource_root;
+          std::string norm_biosource_root;
+          if (is_syn) {
+            if (!dba::cv::get_synonym_root(biosource, norm_biosource_name,
+                                           biosource_root, norm_biosource_root, msg)) {
+              return false;
+            }
+          } else {
+            biosource_root = biosource;
+            norm_biosource_root = norm_biosource_name;
+          }
+
+          ab.append(norm_biosource_root);
+        }
+
+        mongo::BSONArray s_array = ab.arr();
+
+
         datatypes::Metadata metadata;
         if (!read_metadata(parameters[1], metadata, msg)) {
           result.add_error(msg);
@@ -85,6 +133,7 @@ namespace epidb {
           result.add_error("At least one BioSource or Metadata information should be informed.");
           return false;
         }
+
 
         std::vector<std::string> ids;
         if (!dba::list::samples(user_key, s_array, metadata, ids, msg)) {
