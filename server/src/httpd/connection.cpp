@@ -67,6 +67,7 @@ namespace epidb {
       if (!error) {
         bool result = request_parser_.parse(request_, &streambuf_);
         m_expected_length = request_.content_length;
+        m_content_->reserve(m_expected_length);
         request_.ip =  socket_.remote_endpoint().address().to_string();
         if (result) {
           read_data();
