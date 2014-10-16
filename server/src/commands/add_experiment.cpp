@@ -6,6 +6,8 @@
 //  Copyright (c) 2013,2014 Max Planck Institute for Computer Science. All rights reserved.
 //
 
+#include <fstream>
+#include <iostream>
 #include <string>
 #include <sstream>
 
@@ -205,18 +207,30 @@ namespace epidb {
 
         if (format == "wig" || format == "bedgraph") {
           parser::WigPtr wig;
+          std::unique_ptr<std::istream> _input;
+          if (extra_metadata.find("__local_file__") != extra_metadata.end()) {
+            std::string& file_name = extra_metadata["__local_file__"];
+            _input = std::unique_ptr<std::istream>(new std::ifstream(file_name.c_str()));
+            if (!_input->good()) {
+              result.add_error("File " + file_name + " does not exist or it is not accessible.");
+              return false;
+            }
+          } else {
+            _input = std::unique_ptr<std::istream>(new std::stringstream(data));
+          }
+
           if (format == "wig") {
-            parser::WIGParser wig_parser(data);
+            parser::WIGParser wig_parser(std::move(_input));
             if (!wig_parser.get(wig, msg)) {
               result.add_error(msg);
               return false;
             }
           } else {
-            parser::BedGraphParser bedgraph_parser(data);
-            if (!bedgraph_parser.get(wig, msg)) {
-              result.add_error(msg);
-              return false;
-            }
+              parser::BedGraphParser bedgraph_parser(std::move(_input));
+              if (!bedgraph_parser.get(wig, msg)) {
+                result.add_error(msg);
+                return false;
+              }
           }
 
           std::string id;

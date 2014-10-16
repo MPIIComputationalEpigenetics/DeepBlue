@@ -9,6 +9,7 @@
 #ifndef WIG_PARSER_HPP
 #define WIG_PARSER_HPP
 
+#include <memory>
 #include <sstream>
 #include <list>
 
@@ -24,7 +25,7 @@ namespace epidb {
     class WIGParser {
     protected:
       size_t actual_line_;
-      std::stringstream input_;
+      std::unique_ptr<std::istream> input_;
       std::map<std::string, std::string> info_;
       bool declare_track_;
       TrackPtr actual_track;
@@ -42,7 +43,7 @@ namespace epidb {
       }
 
     public:
-      WIGParser(const std::string &content);
+      WIGParser(std::unique_ptr<std::istream> &&input);
       bool get(WigPtr &wig, std::string &msg);
       size_t actual_line();
       bool eof();

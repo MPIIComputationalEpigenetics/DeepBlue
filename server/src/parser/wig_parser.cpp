@@ -14,6 +14,7 @@
 #include <fstream>
 #include <string>
 #include <map>
+#include <memory>
 #include <vector>
 
 #include <boost/algorithm/string.hpp>
@@ -31,9 +32,9 @@
 namespace epidb {
   namespace parser {
 
-    WIGParser::WIGParser(const std::string &content) :
+    WIGParser::WIGParser(std::unique_ptr<std::istream> &&input) :
       actual_line_(0),
-      input_(content),
+      input_(std::move(input)),
       declare_track_(false),
       actual_track(),
       map_overlap_counter()
@@ -205,7 +206,7 @@ namespace epidb {
       clock_t init = clock();
 
       wig = boost::shared_ptr<WigFile>(new WigFile());
-      strtk::for_each_line_conditional(input_, [&](std::string & line) -> bool {
+      strtk::for_each_line_conditional(*input_, [&](std::string & line) -> bool {
         //std::cerr << line << std::endl;
         actual_line_++;
         if (line.empty())
@@ -217,7 +218,7 @@ namespace epidb {
         {
           line = line.substr(0, line.size() - 1);
           std::string new_line;
-          std::getline(input_, new_line);
+          std::getline(*input_, new_line);
           boost::trim(new_line);
           actual_line_++;
           line = line + new_line;

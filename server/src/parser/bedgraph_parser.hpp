@@ -22,7 +22,7 @@ namespace epidb {
 
     class BedGraphParser : public WIGParser {
     public:
-    	BedGraphParser(const std::string &content);
+    	BedGraphParser(std::unique_ptr<std::istream> &&input);
     	bool get(parser::WigPtr& wig, std::string &msg);
     };
   }

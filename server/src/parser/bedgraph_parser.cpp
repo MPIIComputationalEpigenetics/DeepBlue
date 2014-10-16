@@ -30,8 +30,8 @@ namespace epidb {
       double score;
     };
 
-    BedGraphParser::BedGraphParser(const std::string &content) :
-      WIGParser(content) {}
+    BedGraphParser::BedGraphParser(std::unique_ptr<std::istream> &&input) :
+      WIGParser(std::move(input)) {}
 
     bool BedGraphParser::get(parser::WigPtr &wig, std::string &msg)
     {
@@ -42,7 +42,7 @@ namespace epidb {
       clock_t init = clock();
 
       static const std::string delimiters = "\t ";
-      strtk::for_each_line_conditional(input_, [&](const std::string & line) -> bool {
+      strtk::for_each_line_conditional(*input_, [&](const std::string & line) -> bool {
 
         actual_line_++;
         if (line.empty() || line[0] == '#' || line.compare(0, 7, "browser") == 0) {

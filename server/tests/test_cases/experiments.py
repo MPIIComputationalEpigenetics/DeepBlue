@@ -34,6 +34,30 @@ class TestExperiments(helpers.TestCase):
     self.assertTrue("test_exp1" in experiments_names)
     self.assertTrue("test_exp2" in experiments_names)
 
+
+  def test_insert_local_file(self):
+    epidb = EpidbClient()
+    self.init_base(epidb)
+    sample_id = self.sample_ids[0]
+
+    # adding two experiments with the same data should work
+    res = epidb.add_experiment("test_exp1", "hg19", "Methylation", sample_id, "tech1",
+              "ENCODE", "desc1", "", "wig", {"__local_file__": "../tests/data/wig/scores1.wig"}, self.admin_key)
+    self.assertSuccess(res)
+
+    res = epidb.add_experiment("test_exp1", "hg19", "Methylation", sample_id, "tech1",
+              "ENCODE", "desc1", "", "wig", {"__local_file__": "inexistent_file.wig"}, self.admin_key)
+    self.assertFailure(res)
+
+    res, experiments = epidb.list_experiments("hg19", None, None, None, None, self.admin_key)
+    self.assertSuccess(res, experiments)
+    self.assertEqual(len(experiments), 1)
+
+    res, qid1 = epidb.select_regions("test_exp1", "hg19", None, None, None, None, None, None, None, self.admin_key)
+    self.assertSuccess(res, qid1)
+    (s, regions_1) = epidb.get_regions(qid1, "CHROMOSOME,START,END", self.admin_key)
+    self.assertSuccess(s, regions_1)
+
   def test_double_experiment_pass(self):
     epidb = EpidbClient()
     self.init_base(epidb)
