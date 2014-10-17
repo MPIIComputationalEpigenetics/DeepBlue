@@ -123,7 +123,7 @@ namespace epidb {
           return false;
         }
         if (!ok) {
-          std::string s = "The experiment name " + name + " is already being used.";
+          std::string s = Error::m(ERR_DUPLICATED_EXPERIMENT_NAME, name.c_str());
           result.add_error(s);
           return false;
         }

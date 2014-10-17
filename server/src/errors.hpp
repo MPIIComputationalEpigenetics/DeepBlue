@@ -24,6 +24,8 @@ namespace epidb {
 
   extern Error ERR_INVALID_USER_KEY;
 
+  extern Error ERR_DUPLICATED_EXPERIMENT_NAME;
+
   extern Error ERR_INVALID_BIOSOURCE_NAME;
   extern Error ERR_DUPLICATED_BIOSOURCE_NAME;
   extern Error ERR_MORE_EMBRACING_BIOSOURCE_NAME;

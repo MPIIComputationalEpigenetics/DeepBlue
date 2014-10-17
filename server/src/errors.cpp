@@ -84,6 +84,8 @@ namespace epidb {
 
   Error ERR_INVALID_USER_KEY("100000", "Invalid User Key.");
 
+  Error ERR_DUPLICATED_EXPERIMENT_NAME("102001", "The experiment name '%s' is already being used.");
+
   Error ERR_INVALID_BIOSOURCE_NAME("104000", "Invalid BioSource Name '%s'. No BioSource or Synonym was defined with this name.");
   Error ERR_DUPLICATED_BIOSOURCE_NAME("104001", "Duplicated BioSource Name '%s'. BioSource or Synonym with this name already exists.");
   Error ERR_MORE_EMBRACING_BIOSOURCE_NAME("104901", "'%s' is already more embracing than '%s'.");
