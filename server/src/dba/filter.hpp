@@ -244,16 +244,24 @@ namespace epidb {
       typedef boost::shared_ptr<Filter> FilterPtr;
 
     private:
-      std::vector<std::string> operations;
 
-      FilterBuilder( )
+      static std::vector<std::string> build_operations()
       {
+        std::vector<std::string> operations;
+
         operations.push_back("==");
         operations.push_back("=!");
         operations.push_back(">");
         operations.push_back(">=");
         operations.push_back("<");
         operations.push_back("<=");
+
+        return operations;
+      }
+
+      FilterBuilder( )
+      {
+
       }
       FilterBuilder(const FilterBuilder &);
 
@@ -293,11 +301,11 @@ namespace epidb {
           if ((operation == "==") || (operation == "!=")) {
             return true;
           } else {
-            msg = "Only equals (==) or not equals (!=) are available for strings";
+            msg = "Only equals (==) or not equals (!=) are available for type 'string'";
             return false;
           }
         } else if (type == "number") {
-          BOOST_FOREACH(const std::string &op, operations) {
+          BOOST_FOREACH(const std::string & op, operations()) {
             if (operation == op) {
               return true;
             }
@@ -308,6 +316,22 @@ namespace epidb {
       }
 
     public:
+      static std::vector<std::string> &operations()
+      {
+        static std::vector<std::string> operations = build_operations();
+        return operations;
+      }
+
+      static bool is_valid_operations(const std::string &in_op)
+      {
+        for (std::string op : operations()) {
+          if (in_op == op) {
+            return true;
+          }
+        }
+        return false;
+      }
+
       FilterPtr build(const std::string &field, const std::string &op, const std::string &value,
                       bool &error, std::string &msg)
       {
