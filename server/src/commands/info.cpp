@@ -27,13 +27,13 @@ namespace epidb {
       static CommandDescription desc_()
       {
         return CommandDescription(categories::GENERAL_INFORMATION,
-                                  "Gets the information for the given id which includes all its public attributes.");
+                                  "Return information for the given ID (or IDs).");
       }
 
       static  Parameters parameters_()
       {
         Parameter p[] = {
-          Parameter("id", serialize::STRING, "id of the data", true),
+          Parameter("id", serialize::STRING, "ID or an array of IDs", true),
           parameters::UserKey
         };
         Parameters params(&p[0], &p[0] + 2);
@@ -43,7 +43,7 @@ namespace epidb {
       static Parameters results_()
       {
         Parameter p[] = {
-          Parameter("information", serialize::MAP, "information about the object")
+          Parameter("information", serialize::MAP, "Array of Maps containing the objects information", true)
         };
         Parameters results(&p[0], &p[0] + 1);
         return results;
