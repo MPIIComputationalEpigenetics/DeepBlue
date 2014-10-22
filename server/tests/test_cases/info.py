@@ -17,10 +17,10 @@ class TestGetInfoCommand(helpers.TestCase):
     self.assertSuccess(res, gid)
 
     res, data = epidb.info(gid, self.admin_key)
-    self.assertEqual(data['description'], "Human genome 19")
-    self.assertEqual(data['name'], "hg19")
-    self.assertEqual(data['user'], "test_admin")
-    self.assertEqual(data['_id'], gid)
+    self.assertEqual(data[0]['description'], "Human genome 19")
+    self.assertEqual(data[0]['name'], "hg19")
+    self.assertEqual(data[0]['user'], "test_admin")
+    self.assertEqual(data[0]['_id'], gid)
 
 
   def test_epigenetic_mark_info(self):
@@ -31,10 +31,10 @@ class TestGetInfoCommand(helpers.TestCase):
     self.assertSuccess(res, emid)
 
     res, data = epidb.info(emid, self.admin_key)
-    self.assertEqual(data['name'], "Methylation")
-    self.assertEqual(data['description'], "DNA Methylation")
-    self.assertEqual(data['user'], "test_admin")
-    self.assertEqual(data['_id'], emid)
+    self.assertEqual(data[0]['name'], "Methylation")
+    self.assertEqual(data[0]['description'], "DNA Methylation")
+    self.assertEqual(data[0]['user'], "test_admin")
+    self.assertEqual(data[0]['_id'], emid)
 
 
   def test_annotation_info(self):
@@ -50,13 +50,13 @@ class TestGetInfoCommand(helpers.TestCase):
 
     res, data = epidb.info(aid, self.admin_key)
     self.assertEqual(res, 'okay')
-    self.assertEqual(data['name'], "Cpg Islands")
-    self.assertEqual(data['description'], "CpG islands are associated ...")
-    self.assertEqual(data['genome'], "hg19")
-    self.assertEqual(data['extra_metadata'], {"url":"genome.ucsc.edu...", "meta":"data"})
-    self.assertEqual(data['upload_info']['user'], "test_admin")
-    self.assertEqual(data['format'], "CHROMOSOME,START,END")
-    self.assertEqual(data['_id'], aid)
+    self.assertEqual(data[0]['name'], "Cpg Islands")
+    self.assertEqual(data[0]['description'], "CpG islands are associated ...")
+    self.assertEqual(data[0]['genome'], "hg19")
+    self.assertEqual(data[0]['extra_metadata'], {"url":"genome.ucsc.edu...", "meta":"data"})
+    self.assertEqual(data[0]['upload_info']['user'], "test_admin")
+    self.assertEqual(data[0]['format'], "CHROMOSOME,START,END")
+    self.assertEqual(data[0]['_id'], aid)
 
 
   def test_experiment_info(self):
@@ -86,24 +86,24 @@ class TestGetInfoCommand(helpers.TestCase):
       self.assertSuccess(res, eid)
 
     res, data = epidb.info(eid, self.admin_key)
-    data["upload_info"]["upload_start"] = '0'
-    data["upload_info"]["upload_end"] = '0'
-    data["upload_info"]["client_address"] = '0'
-    data["upload_info"]["total_size"] = '0'
-    self.assertEqual(data, {'D': '3', 'format': 'CHROMOSOME,START,END,name:String:.,score:Integer:0,strand:String:.,signalValue:Double:-1,pValue:Double:-1,qValue:Double:-1,peak:Integer:-1', 'extra_metadata': {'foo': 'bar', 'extra': '123'}, 'sample_info': {'karyotype': 'cancer', 'biosource_name': 'K562', 'karyotype': 'cancer', 'sex': 'F'}, 'technique': 'tech1', 'upload_info': {'total_size': '0', 'content_format': 'bed', 'done': 'true', 'user': 'test_admin', 'upload_end': '0', 'upload_start': '0', 'client_address': '0'}, 'name': 'exp1', 'project': 'ENCODE', 'genome': 'hg19', 'sample_id': 's1', 'epigenetic_mark': 'Methylation', '_id': 'e1', 'type': 'experiment', 'columns': [{'name': 'CHROMOSOME', 'column_type': 'string'}, {'name': 'START', 'column_type': 'integer'}, {'name': 'END', 'column_type': 'integer'}, {'default_value': '.', 'name': 'name', 'column_type': 'string'}, {'default_value': '0', 'name': 'score', 'column_type': 'integer'}, {'default_value': '.', 'name': 'strand', 'column_type': 'string'}, {'default_value': '-1', 'name': 'signalValue', 'column_type': 'double'}, {'default_value': '-1', 'name': 'pValue', 'column_type': 'double'}, {'default_value': '-1', 'name': 'qValue', 'column_type': 'double'}, {'default_value': '-1', 'name': 'peak', 'column_type': 'integer'}], 'description': 'desc1'})
+    data[0]["upload_info"]["upload_start"] = '0'
+    data[0]["upload_info"]["upload_end"] = '0'
+    data[0]["upload_info"]["client_address"] = '0'
+    data[0]["upload_info"]["total_size"] = '0'
+    self.assertEqual(data[0], {'D': '3', 'format': 'CHROMOSOME,START,END,name:String:.,score:Integer:0,strand:String:.,signalValue:Double:-1,pValue:Double:-1,qValue:Double:-1,peak:Integer:-1', 'extra_metadata': {'foo': 'bar', 'extra': '123'}, 'sample_info': {'karyotype': 'cancer', 'biosource_name': 'K562', 'karyotype': 'cancer', 'sex': 'F'}, 'technique': 'tech1', 'upload_info': {'total_size': '0', 'content_format': 'bed', 'done': 'true', 'user': 'test_admin', 'upload_end': '0', 'upload_start': '0', 'client_address': '0'}, 'name': 'exp1', 'project': 'ENCODE', 'genome': 'hg19', 'sample_id': 's1', 'epigenetic_mark': 'Methylation', '_id': 'e1', 'type': 'experiment', 'columns': [{'name': 'CHROMOSOME', 'column_type': 'string'}, {'name': 'START', 'column_type': 'integer'}, {'name': 'END', 'column_type': 'integer'}, {'default_value': '.', 'name': 'name', 'column_type': 'string'}, {'default_value': '0', 'name': 'score', 'column_type': 'integer'}, {'default_value': '.', 'name': 'strand', 'column_type': 'string'}, {'default_value': '-1', 'name': 'signalValue', 'column_type': 'double'}, {'default_value': '-1', 'name': 'pValue', 'column_type': 'double'}, {'default_value': '-1', 'name': 'qValue', 'column_type': 'double'}, {'default_value': '-1', 'name': 'peak', 'column_type': 'integer'}], 'description': 'desc1'})
     self.assertEqual(res, 'okay')
-    self.assertEqual(data['sample_id'], sample_id)
-    self.assertEqual(data['description'], "desc1")
+    self.assertEqual(data[0]['sample_id'], sample_id)
+    self.assertEqual(data[0]['description'], "desc1")
 
-    self.assertEqual(data['extra_metadata'], {"foo":"bar", "extra":"123"})
-    self.assertEqual(data['epigenetic_mark'], "Methylation")
-    self.assertEqual(data['genome'], "hg19")
-    self.assertEqual(data['name'], "exp1")
-    self.assertEqual(data['project'], "ENCODE")
-    self.assertEqual(data['technique'], "tech1")
-    self.assertEqual(data['upload_info']['user'], "test_admin")
-    self.assertEqual(data['format'], "CHROMOSOME,START,END,name:String:.,score:Integer:0,strand:String:.,signalValue:Double:-1,pValue:Double:-1,qValue:Double:-1,peak:Integer:-1")
-    self.assertEqual(data['_id'], eid)
+    self.assertEqual(data[0]['extra_metadata'], {"foo":"bar", "extra":"123"})
+    self.assertEqual(data[0]['epigenetic_mark'], "Methylation")
+    self.assertEqual(data[0]['genome'], "hg19")
+    self.assertEqual(data[0]['name'], "exp1")
+    self.assertEqual(data[0]['project'], "ENCODE")
+    self.assertEqual(data[0]['technique'], "tech1")
+    self.assertEqual(data[0]['upload_info']['user'], "test_admin")
+    self.assertEqual(data[0]['format'], "CHROMOSOME,START,END,name:String:.,score:Integer:0,strand:String:.,signalValue:Double:-1,pValue:Double:-1,qValue:Double:-1,peak:Integer:-1")
+    self.assertEqual(data[0]['_id'], eid)
 
   def test_query_info(self):
     epidb = EpidbClient()
@@ -118,10 +118,10 @@ class TestGetInfoCommand(helpers.TestCase):
 
     res, data = epidb.info(qid, self.admin_key)
     self.assertSuccess(res, data)
-    self.assertEqual(data['_id'], qid)
-    self.assertEqual(data['type'], 'experiment_select')
-    self.assertEqual(data['args'], '{ "experiment_name" : [ "exp1" ], "epigenetic_mark" : [ "Methylation" ], "sample_id" : [ "s1" ], "project" : [ "ENCODE" ], "technique" : [ "tech1" ], "has_filter" : true, "start" : 713500, "end" : 850000, "chromosomes" : [ "chr1" ], "genomes" : [ "hg19" ] }')
-    self.assertEqual(data['user'], 'test_admin')
+    self.assertEqual(data[0]['_id'], qid)
+    self.assertEqual(data[0]['type'], 'experiment_select')
+    self.assertEqual(data[0]['args'], '{ "experiment_name" : [ "exp1" ], "epigenetic_mark" : [ "Methylation" ], "sample_id" : [ "s1" ], "project" : [ "ENCODE" ], "technique" : [ "tech1" ], "has_filter" : true, "start" : 713500, "end" : 850000, "chromosomes" : [ "chr1" ], "genomes" : [ "hg19" ] }')
+    self.assertEqual(data[0]['user'], 'test_admin')
 
   def test_biosource_info(self):
     epidb = EpidbClient()
@@ -132,10 +132,10 @@ class TestGetInfoCommand(helpers.TestCase):
 
     res, data = epidb.info(bsid, self.admin_key)
     self.assertEqual(res, "okay")
-    self.assertEqual(data['description'], "desc1")
-    self.assertEqual(data['name'], "K562")
-    self.assertEqual(data['user'], "test_admin")
-    self.assertEqual(data['_id'], bsid)
+    self.assertEqual(data[0]['description'], "desc1")
+    self.assertEqual(data[0]['name'], "K562")
+    self.assertEqual(data[0]['user'], "test_admin")
+    self.assertEqual(data[0]['_id'], bsid)
 
   def test_sample_info(self):
     epidb = EpidbClient()
@@ -154,11 +154,11 @@ class TestGetInfoCommand(helpers.TestCase):
     self.assertSuccess(res, sid)
 
     res, data = epidb.info(sid, self.admin_key)
-    self.assertEqual(data['biosource_name'], "K562")
-    self.assertEqual(data['karyotype'], "cancer")
-    self.assertEqual(data['sex'], "F")
-    self.assertEqual(data['user'], "test_admin")
-    self.assertEqual(data['_id'], sid)
+    self.assertEqual(data[0]['biosource_name'], "K562")
+    self.assertEqual(data[0]['karyotype'], "cancer")
+    self.assertEqual(data[0]['sex'], "F")
+    self.assertEqual(data[0]['user'], "test_admin")
+    self.assertEqual(data[0]['_id'], sid)
 
 
     (status, infos) = epidb.info([sf_id_1, sf_id_2, bsid, sid], self.admin_key)

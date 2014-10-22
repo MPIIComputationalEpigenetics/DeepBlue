@@ -14,8 +14,8 @@ class TestTechniques(helpers.TestCase):
 
     res, info = epidb.info(res[1], self.admin_key)
     self.assertSuccess(res, info)
-    self.assertEquals(info["name"], 'ChIP-seq')
-    self.assertEquals(info["description"], "ChIP-sequencing")
+    self.assertEquals(info[0]["name"], 'ChIP-seq')
+    self.assertEquals(info[0]["description"], "ChIP-sequencing")
 
 
   def test_list_techniques(self):
@@ -51,4 +51,3 @@ class TestTechniques(helpers.TestCase):
     res, similar_techniques = epidb.list_similar_techniques("chipseq", self.admin_key)
     self.assertSuccess(res, similar_techniques)
     self.assertEquals(similar_techniques[0][1], 'ChIP-seq')
-    

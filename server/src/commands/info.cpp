@@ -71,9 +71,7 @@ namespace epidb {
         std::vector<serialize::ParameterPtr> ids_param;
         parameters[0]->children(ids_param);
 
-        if (ids_param.size() > 1) {
-          result.set_as_array(true);
-        }
+        result.set_as_array(true);
 
         std::vector<std::string> synonyms;
         BOOST_FOREACH(const serialize::ParameterPtr & id_param, ids_param) {

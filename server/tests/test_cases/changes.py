@@ -25,7 +25,7 @@ class TestChanges(helpers.TestCase):
 
     status, info = epidb.info(_id, self.admin_key)
     self.assertSuccess(status, info)
-    self.assertEqual({"NAME":"JOSE", "LAST_NAME":"FERNANDES"}, info["extra_metadata"])
+    self.assertEqual({"NAME":"JOSE", "LAST_NAME":"FERNANDES"}, info[0]["extra_metadata"])
 
     (status, ss) = epidb.search("JOSE", "", self.admin_key)
     self.assertEqual(1, len(ss))
