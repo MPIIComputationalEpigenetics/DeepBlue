@@ -4,3 +4,6 @@
 [submodule "server/third_party/snappy"]
 	path = server/third_party/snappy
 	url = https://github.com/google/snappy.git
+[submodule "server/third_party/luajit-2.0"]
+	path = server/third_party/luajit-2.0
+	url = http://luajit.org/git/luajit-2.0.git
