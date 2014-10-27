@@ -1,7 +1,0 @@
-Load data:
- -
-
-
-
- value = row('SCORE')
- return log(value)
