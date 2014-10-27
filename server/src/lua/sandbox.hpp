@@ -6,10 +6,11 @@
 //  Copyright (c) 2014 Max Planck Institute for Computer Science. All rights reserved.
 //
 
-
 #include <string>
 
 #include <lua.hpp>
+
+#include "../regions.hpp"
 
 namespace epidb {
   namespace lua {
@@ -19,6 +20,7 @@ namespace epidb {
     private:
       lua_State *L;
       std::string error_msg;
+      const Region *current_region;
 
     public:
       typedef boost::shared_ptr<Sandbox> LuaPtr;
@@ -28,7 +30,11 @@ namespace epidb {
       ~Sandbox();
 
       bool store_row_code(const std::string &code, std::string &msg);
-      bool execute_row_code(std::string &value, std::string &msg);
+      bool execute_row_code(std::string &value, const Region *region, std::string &msg);
+
+      static int call_field_content(lua_State *L);
+
+      int field_content(lua_State *L);
 
       static void MaximumInstructionsReached(lua_State *, lua_Debug *);
     };

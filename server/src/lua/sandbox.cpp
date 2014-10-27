@@ -15,6 +15,8 @@
 
 #include "sandbox.hpp"
 
+#include "../regions.hpp"
+
 namespace epidb {
   namespace lua {
 
@@ -32,6 +34,7 @@ namespace epidb {
         std::string msg = std::string(lua_tostring(L, -1));
         std::cerr << msg << std::endl;
       }
+      current_region = nullptr;
     }
 
     Sandbox::~Sandbox()
@@ -53,12 +56,16 @@ namespace epidb {
         return false;
       }
 
+      lua_pushlightuserdata(L, this);
+      lua_pushcclosure(L, &Sandbox::call_field_content, 1);
+      lua_setglobal(L, "field_content");
       return true;
     }
 
-
-    bool Sandbox::execute_row_code(std::string &value, std::string &msg)
+    bool Sandbox::execute_row_code(std::string &value, const Region *region, std::string &msg)
     {
+      current_region = region;
+
       lua_sethook(L, &Sandbox::MaximumInstructionsReached, LUA_MASKCOUNT, 1000);
       lua_getglobal(L, "row_value");
       if (lua_pcall(L, 0, 1, 0)) {
@@ -83,31 +90,39 @@ namespace epidb {
       return false;
     }
 
+    int Sandbox::call_field_content(lua_State *lua_state)
+    {
+      Sandbox *sandbox = (Sandbox *) lua_touserdata(lua_state, lua_upvalueindex(1));
+      return sandbox->field_content(lua_state);
+    }
+
+    int Sandbox::field_content(lua_State *lua_state)
+    {
+      int n = lua_gettop(lua_state);
+      if (n != 1) {
+        lua_pushstring(lua_state, "invalid number of arguments for the content() function");
+      }
+      const char *field_name = lua_tostring(lua_state, -1);
+
+      std::string content = current_region->get(std::string(field_name));
+      if (content.length() > 0) {
+        lua_pushstring(lua_state, content.c_str());
+        return 1;
+      }
+
+      Score value = current_region->value(field_name);
+      if (value != std::numeric_limits<Score>::min()) {
+        lua_pushnumber(lua_state, value);
+        return 1;
+      }
+
+      lua_pushstring(lua_state, "");
+      return 1;
+    }
+
     void Sandbox::MaximumInstructionsReached(lua_State *, lua_Debug *)
     {
       std::cerr <<  "The maximum number of instructions has been reached" << std::endl;
     }
   }
 }
-
-/*
-int main (void)
-{
-  char buff[256];
-  int error;
-  epidb::lua::Sandbox::LuaPtr lua_ptr = epidb::lua::Sandbox::new_instance();
-  std::string msg;
-  std::string value;
-
-  if (!lua_ptr->store_row_code("value = 1312 return math.log(value)", msg)) {
-    std::cerr << msg << std::endl;
-    return -1;
-  }
-  if (!lua_ptr->execute_row_code(value, msg)) {
-    std::cerr << msg << std::endl;
-    return -2;
-  }
-  std::cerr << value << std::endl;
-  return 0;
-}
-*/
