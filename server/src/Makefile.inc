@@ -22,6 +22,22 @@ ifeq ($(UNAME_S),Darwin)
 	host = macosx
 endif
 
+#Root Directory
+ifeq ($(host),new_server)
+	ROOT=/local/data/DeepBlue/server/
+endif
+ifeq ($(host),production)
+	ROOT=/local/data/DeepBlue/server/
+endif
+ifeq ($(host),macosx)
+	ROOT=/Users/albrecht/mpi/DeepBlue/server/
+endif
+
+LUA=$(ROOT)/third_party/luajit-2.0/src
+MINILZO=$(ROOT)/third_party/minilzo
+STRTK=$(ROOT)/third_party/strtk
+CPPFORMAT=$(ROOT)/third_party/cppformat
+
 # Servers
 ifeq ($(host),new_server)
  CXX = g++
@@ -29,7 +45,7 @@ ifeq ($(host),new_server)
  LDFLAGS   = -pthread
  MONGOLIBS = /local/data/libraries/mongo-cxx-driver/lib/libmongoclient.a
  BOOST_DIR = /local/data/libraries/boost/lib
- DEFCXXFLAGS = -std=c++11 -Wall -O3 -ffast-math -march=native -Ofast -I/local/data/libraries/mongo-cxx-driver/include/ -I/local/data/libraries/boost/include/ -I/local/data/DeepBlue/server/third_party/minilzo/ -I/local/data/DeepBlue/server/third_party/cppformat/ -I/local/data/DeepBlue/server/third_party/strtk/
+ DEFCXXFLAGS = -std=c++11 -Wall -O3 -ffast-math -march=native -Ofast -I/local/data/libraries/mongo-cxx-driver/include/ -I/local/data/libraries/boost/include/ -I$(MINILZO) -I$(CPPFORMAT) -I$(STRTK) -I$(LUA)
  BOOSTLIBS = $(BOOST_DIR)/libboost_filesystem.a $(BOOST_DIR)/libboost_thread.a $(BOOST_DIR)/libboost_system.a $(BOOST_DIR)/libboost_regex.a $(BOOST_DIR)/libboost_log.a  $(BOOST_DIR)/libboost_timer.a  $(BOOST_DIR)/libboost_chrono.a $(BOOST_DIR)/libboost_program_options.a -lrt
  THIRDLIBS = ../third_party/libexpat_linux.a
 endif
@@ -40,7 +56,7 @@ ifeq ($(host),production)
  LDFLAGS   = -pthread
  MONGOLIBS = /opt/mongodb/install/mongo-driver/lib/libmongoclient.a
  BOOST_DIR = /opt/mongodb/boost/lib
- DEFCXXFLAGS = -std=c++11 -Wall -O3 -ffast-math -march=native -Ofast -I/opt/mongodb/install/mongo-driver/include/ -I/local/data/DeepBlue/server/third_party/minilzo/ -I/local/data/DeepBlue/server/third_party/cppformat/ -I/local/data/DeepBlue/server/third_party/strtk/
+ DEFCXXFLAGS = -std=c++11 -Wall -O3 -ffast-math -march=native -Ofast -I/opt/mongodb/install/mongo-driver/include/ -I$(MINILZO) -I$(CPPFORMAT) -I$(STRTK) -I$(LUA)
  BOOSTLIBS = $(BOOST_DIR)/libboost_filesystem.a $(BOOST_DIR)/libboost_thread.a $(BOOST_DIR)/libboost_system.a $(BOOST_DIR)/libboost_regex.a $(BOOST_DIR)/libboost_log.a  $(BOOST_DIR)/libboost_timer.a  $(BOOST_DIR)/libboost_chrono.a $(BOOST_DIR)/libboost_program_options.a -lrt
  THIRDLIBS = ../third_party/libexpat_linux.a
 endif
@@ -50,17 +66,18 @@ endif
 ifeq ($(host),macosx)
  CXX = clang++
  # -O3 -Ofast -ffast-math -march=native
- DEFCXXFLAGS = -O3 -Ofast -ffast-math -march=native -std=c++11 -stdlib=libc++ -Werror -Wall -Wextra  -Weffc++ -Wno-unused-parameter -Wno-ignored-qualifiers -I/opt/boost-new-new/include/ -I/Users/albrecht/mpi/DeepBlue/server/third_party/drivers/macosx_new/include -I/Users/albrecht/mpi/DeepBlue/server/third_party/cppformat/ -I/Users/albrecht/mpi/DeepBlue/server/third_party/strtk -I/Users/albrecht/mpi/DeepBlue/server/third_party/minilzo/
+ DEFCXXFLAGS = -O3 -Ofast -ffast-math -march=native -std=c++11 -stdlib=libc++ -Werror -Wall -Wextra  -Weffc++ -Wno-unused-parameter -Wno-ignored-qualifiers -I/opt/boost-new-new/include/ -I/Users/albrecht/mpi/DeepBlue/server/third_party/drivers/macosx_new/include -I$(CPPFORMAT) -I$(STRTK) -I$(MINILZO) -I$(LUA)
  BOOST_DIR = /opt/boost-new-new/lib
- LD	= clang++
+ LD	= clang++ -pagezero_size 10000 -image_base 100000000  #LuaJit options
  LDFLAGS =
  MONGOLIBS =  -L/Users/albrecht/mpi/DeepBlue/server/third_party/drivers/macosx_new/lib -lmongoclient
  BOOSTLIBS = -L$(BOOST_DIR) -lboost_log_setup -lboost_log -lboost_filesystem -lboost_thread -lboost_system -lboost_regex -lboost_timer -lboost_chrono -lboost_program_options
  THIRDLIBS = ../third_party/libexpat_macosx.a
 endif
 
-CPPFORMAT = ../third_party/cppformat/format.cc ../third_party/minilzo/minilzo.c
-DEFLIBS = $(CPPFORMAT) $(MONGOLIBS) $(BOOSTLIBS)
+CPPFORMAT_LIB = ../third_party/cppformat/format.cc ../third_party/minilzo/minilzo.c
+
+DEFLIBS = $(CPPFORMAT_LIB) $(MONGOLIBS) $(BOOSTLIBS) -L$(LUA) -lluajit
 
 AR	= ar
 ARFLAGS	=
