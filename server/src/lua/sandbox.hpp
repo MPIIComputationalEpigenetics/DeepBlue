@@ -42,8 +42,6 @@ namespace epidb {
 
     static const char *LUA_ENV =
       "-- sample sandbox environment\n"
-      "print(value_of)\n"
-      "print(ipairs)\n"
       "sandbox_env = {\n"
       " print = print,\n"
       " value_of = value_of,\n"
