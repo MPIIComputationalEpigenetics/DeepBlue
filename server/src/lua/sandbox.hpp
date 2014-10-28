@@ -30,7 +30,8 @@ namespace epidb {
       ~Sandbox();
 
       bool store_row_code(const std::string &code, std::string &msg);
-      bool execute_row_code(std::string &value, const Region *region, std::string &msg);
+      void set_current_region(const Region *region);
+      bool execute_row_code(std::string &value, std::string &msg);
 
       static int call_field_content(lua_State *L);
 
@@ -41,8 +42,11 @@ namespace epidb {
 
     static const char *LUA_ENV =
       "-- sample sandbox environment\n"
+      "print(value_of)\n"
+      "print(ipairs)\n"
       "sandbox_env = {\n"
       " print = print,\n"
+      " value_of = value_of,\n"
       " ipairs = ipairs,\n"
       " next = next,\n"
       " pairs = pairs,\n"
@@ -51,9 +55,6 @@ namespace epidb {
       " tostring = tostring,\n"
       " type = type,\n"
       " unpack = unpack,\n"
-      " coroutine = { create = coroutine.create, resume = coroutine.resume,\n"
-      "   running = coroutine.running, status = coroutine.status,\n"
-      "   wrap = coroutine.wrap },\n"
       " string = { byte = string.byte, char = string.char, find = string.find,\n"
       "   format = string.format, gmatch = string.gmatch, gsub = string.gsub,\n"
       "   len = string.len, lower = string.lower, match = string.match,\n"

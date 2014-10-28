@@ -56,6 +56,8 @@ namespace epidb {
 
       bool epigenetic_mark(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const Region &region, std::string &result, std::string &msg);
 
+      bool calculated(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const Region &region, std::string &result, std::string &msg);
+
       bool project(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const Region &region, std::string &result, std::string &msg);
 
       bool biosource(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const Region &region, std::string &result, std::string &msg);

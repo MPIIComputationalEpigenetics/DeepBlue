@@ -30,6 +30,11 @@ namespace epidb {
     {
       L = luaL_newstate();
       luaL_openlibs(L);
+
+      lua_pushlightuserdata(L, this);
+      lua_pushcclosure(L, &Sandbox::call_field_content, 1);
+      lua_setglobal(L, "value_of");
+
       if (luaL_loadstring(L, epidb::lua::LUA_ENV) || lua_pcall(L, 0, 0, 0)) {
         std::string msg = std::string(lua_tostring(L, -1));
         std::cerr << msg << std::endl;
@@ -56,16 +61,16 @@ namespace epidb {
         return false;
       }
 
-      lua_pushlightuserdata(L, this);
-      lua_pushcclosure(L, &Sandbox::call_field_content, 1);
-      lua_setglobal(L, "field_content");
       return true;
     }
 
-    bool Sandbox::execute_row_code(std::string &value, const Region *region, std::string &msg)
+    void Sandbox::set_current_region(const Region *region)
     {
       current_region = region;
+    }
 
+    bool Sandbox::execute_row_code(std::string &value,  std::string &msg)
+    {
       lua_sethook(L, &Sandbox::MaximumInstructionsReached, LUA_MASKCOUNT, 1000);
       lua_getglobal(L, "row_value");
       if (lua_pcall(L, 0, 1, 0)) {
@@ -84,8 +89,7 @@ namespace epidb {
         lua_pop(L, 1);
         return true;
       }
-
-      msg = "Invalid return type from the Lua code";
+      msg = "Invalid return type from Lua code";
 
       return false;
     }

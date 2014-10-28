@@ -24,6 +24,8 @@
 #include "queries.hpp"
 #include "retrieve.hpp"
 
+#include "../lua/sandbox.hpp"
+
 #include "../errors.hpp"
 #include "../log.hpp"
 #include "../extras/utils.hpp"
@@ -50,6 +52,7 @@ namespace epidb {
       m["@AGG.COUNT"] = &Metafield::count;
       m["@COUNT.OVERLAP"] = &Metafield::count_overlap;
       m["@COUNT.NON-OVERLAP"] = &Metafield::count_non_overlap;
+      m["@CALCULATED"] = &Metafield::calculated;
 
       return m;
     }
@@ -73,6 +76,7 @@ namespace epidb {
       m["@AGG.COUNT"] = "integer";
       m["@COUNT.OVERLAP"] = "integer";
       m["@COUNT.NON-OVERLAP"] = "integer";
+      m["@CALCULATED"] = "string";
 
       return m;
     }
@@ -207,7 +211,7 @@ namespace epidb {
     }
 
     bool Metafield::biosource(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const Region &region,
-                               std::string &result, std::string &msg)
+                              std::string &result, std::string &msg)
     {
       if (obj.hasField("sample_info")) {
         result =  obj["sample_info"]["biosource_name"].str();
@@ -384,6 +388,22 @@ namespace epidb {
         result = "";
       }
       return true;
+    }
+
+    bool Metafield::calculated(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const Region &region,
+                          std::string &result, std::string &msg)
+    {
+      unsigned int s = op.find("(") + 1;
+      unsigned int e = op.find_last_of(")");
+      unsigned int length = e - s;
+
+      std::string code = op.substr(s, length);
+
+      lua::Sandbox::LuaPtr lua = lua::Sandbox::new_instance();
+      lua->store_row_code(code, msg);
+      lua->set_current_region(&region);
+
+      return lua->execute_row_code(result, msg);
     }
   }
 }
