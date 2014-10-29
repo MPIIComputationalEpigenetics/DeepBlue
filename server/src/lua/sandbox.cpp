@@ -15,9 +15,12 @@
 
 #include "sandbox.hpp"
 
+#include "../dba/key_mapper.hpp"
 #include "../extras/utils.hpp"
 
 #include "../regions.hpp"
+
+#include "../log.hpp"
 
 namespace epidb {
   namespace lua {
@@ -35,6 +38,14 @@ namespace epidb {
       current_chromosome(EMPTY_CHROMOSOME),
       current_region(EMPTY_REGION),
       current_metafield(EMPTY_METAFIELD)
+    { }
+
+    Sandbox::~Sandbox()
+    {
+      lua_close(L);
+    }
+
+    bool Sandbox::store_row_code(const std::string &code, std::string &msg)
     {
       L = luaL_newstate();
       luaL_openlibs(L);
@@ -44,18 +55,10 @@ namespace epidb {
       lua_setglobal(L, "value_of");
 
       if (luaL_loadstring(L, epidb::lua::LUA_ENV) || lua_pcall(L, 0, 0, 0)) {
-        std::string msg = std::string(lua_tostring(L, -1));
-        std::cerr << msg << std::endl;
+        msg = std::string(lua_tostring(L, -1));
+        return false;
       }
-    }
 
-    Sandbox::~Sandbox()
-    {
-      lua_close(L);
-    }
-
-    bool Sandbox::store_row_code(const std::string &code, std::string &msg)
-    {
       std::string full_function = LUA_FUNCTION_HEADER + code + LUA_FUNCTION_FOOTER;
 
       if (luaL_loadstring(L, full_function.c_str()) || lua_pcall(L, 0, 0, 0)) {
@@ -118,18 +121,14 @@ namespace epidb {
 
       const std::string field_name(field_name_c);
 
+      std::string msg;
       if (dba::Metafield::is_meta(field_name)) {
-        std::string msg;
         std::string result;
         if (!current_metafield.process(field_name, current_chromosome, current_region, result, msg)) {
-          std::cerr << "err" << std::endl;
-          std::cerr << msg << std::endl;
           lua_pushstring(lua_state, msg.c_str());
           return 1;
         }
-        std::cerr << "result: " << result << std::endl;
         std::string type = dba::Metafield::command_type(field_name);
-        std::cerr << type << std::endl;
         if (type == "string") {
           lua_pushstring(lua_state, result.c_str());
           return 1;
@@ -152,13 +151,20 @@ namespace epidb {
         return 1;
       }
 
-      std::string content = current_region.get(field_name);
+      std::string short_name;
+
+      if (!dba::KeyMapper::to_short(field_name, short_name, msg)) {
+        lua_pushstring(lua_state, msg.c_str());
+        return 1;
+      }
+
+      std::string content = current_region.get(short_name);
       if (content.length() > 0) {
         lua_pushstring(lua_state, content.c_str());
         return 1;
       }
 
-      Score value = current_region.value(field_name);
+      Score value = current_region.value(short_name);
       if (value != std::numeric_limits<Score>::min()) {
         lua_pushnumber(lua_state, value);
         return 1;
@@ -168,9 +174,9 @@ namespace epidb {
       return 1;
     }
 
-    void Sandbox::MaximumInstructionsReached(lua_State *, lua_Debug *)
+    void Sandbox::MaximumInstructionsReached(lua_State *lua_state, lua_Debug *)
     {
-      std::cerr <<  "The maximum number of instructions has been reached" << std::endl;
+      luaL_error(lua_state, "The maximum number of instructions has been reached");
     }
   }
 }
