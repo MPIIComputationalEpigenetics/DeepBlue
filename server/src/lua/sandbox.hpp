@@ -6,6 +6,9 @@
 //  Copyright (c) 2014 Max Planck Institute for Computer Science. All rights reserved.
 //
 
+#ifndef EPIDB_LUA_SANDBOX_HPP
+#define EPIDB_LUA_SANDBOX_HPP
+
 #include <string>
 
 #include <lua.hpp>
@@ -20,7 +23,8 @@ namespace epidb {
     private:
       lua_State *L;
       std::string error_msg;
-      const Region *current_region;
+      std::string &current_chromosome;
+      Region &current_region;
 
     public:
       typedef boost::shared_ptr<Sandbox> LuaPtr;
@@ -30,7 +34,7 @@ namespace epidb {
       ~Sandbox();
 
       bool store_row_code(const std::string &code, std::string &msg);
-      void set_current_region(const Region *region);
+      void set_current_region(const std::string &chromosome, const Region &region);
       bool execute_row_code(std::string &value, std::string &msg);
 
       static int call_field_content(lua_State *L);
@@ -79,3 +83,5 @@ namespace epidb {
     static const char *LUA_SET_SANDBOX = "setfenv(row_value, sandbox_env)\n";
   }
 }
+
+#endif

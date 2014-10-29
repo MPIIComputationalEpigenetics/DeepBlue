@@ -400,8 +400,10 @@ namespace epidb {
       std::string code = op.substr(s, length);
 
       lua::Sandbox::LuaPtr lua = lua::Sandbox::new_instance();
-      lua->store_row_code(code, msg);
-      lua->set_current_region(&region);
+      if (!lua->store_row_code(code, msg)) {
+        return false;
+      }
+      lua->set_current_region(chrom, region);
 
       return lua->execute_row_code(result, msg);
     }

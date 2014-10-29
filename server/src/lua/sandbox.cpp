@@ -20,13 +20,17 @@
 namespace epidb {
   namespace lua {
 
+    static epidb::Region EMPTY_REGION;
+    static std::string EMPTY_CHROMOSOME;
 
     Sandbox::LuaPtr Sandbox::new_instance()
     {
       return boost::shared_ptr<Sandbox>(new Sandbox());
     }
 
-    Sandbox::Sandbox()
+    Sandbox::Sandbox() :
+      current_chromosome(EMPTY_CHROMOSOME),
+      current_region(EMPTY_REGION)
     {
       L = luaL_newstate();
       luaL_openlibs(L);
@@ -39,7 +43,6 @@ namespace epidb {
         std::string msg = std::string(lua_tostring(L, -1));
         std::cerr << msg << std::endl;
       }
-      current_region = nullptr;
     }
 
     Sandbox::~Sandbox()
@@ -64,8 +67,9 @@ namespace epidb {
       return true;
     }
 
-    void Sandbox::set_current_region(const Region *region)
+    void Sandbox::set_current_region(const std::string &chromosome, const Region &region)
     {
+      current_chromosome = chromosome;
       current_region = region;
     }
 
@@ -106,15 +110,28 @@ namespace epidb {
       if (n != 1) {
         lua_pushstring(lua_state, "invalid number of arguments for the content() function");
       }
-      const char *field_name = lua_tostring(lua_state, -1);
+      const char *field_name_c = lua_tostring(lua_state, -1);
 
-      std::string content = current_region->get(std::string(field_name));
+      const std::string field_name(field_name_c);
+
+      if (field_name == "CHROMOSOME") {
+        lua_pushstring(lua_state, current_chromosome.c_str());
+        return 1;
+      } else if (field_name == "START") {
+        lua_pushnumber(lua_state, current_region.start());
+        return 1;
+      } else if (field_name == "END") {
+        lua_pushnumber(lua_state, current_region.end());
+        return 1;
+      }
+
+      std::string content = current_region.get(field_name);
       if (content.length() > 0) {
         lua_pushstring(lua_state, content.c_str());
         return 1;
       }
 
-      Score value = current_region->value(field_name);
+      Score value = current_region.value(field_name);
       if (value != std::numeric_limits<Score>::min()) {
         lua_pushnumber(lua_state, value);
         return 1;

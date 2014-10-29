@@ -21,6 +21,9 @@
 #include "key_mapper.hpp"
 
 #include "../extras/utils.hpp"
+
+#include "../lua/sandbox.hpp"
+
 #include "../log.hpp"
 
 namespace epidb {
@@ -33,10 +36,12 @@ namespace epidb {
         COLUMN_DOUBLE,
         COLUMN_RANGE,
         COLUMN_CATEGORY,
+        COLUMN_CALCULATED,
         COLUMN_ERR,
       };
 
       typedef std::string Token;
+      typedef std::pair<std::string, lua::Sandbox::LuaPtr> Code;
       typedef std::pair<double, double> Range;
       typedef std::vector<std::string> Category;
 
@@ -63,7 +68,8 @@ namespace epidb {
           return _name;
         }
 
-        const std::string internal_name() {
+        const std::string internal_name()
+        {
           if (!_has_internal_name) {
             std::string msg;
             if (!dba::KeyMapper::to_short(_name, _internal_name, msg)) {
@@ -76,7 +82,8 @@ namespace epidb {
           return _internal_name;
         }
 
-        const std::string default_value() {
+        const std::string default_value()
+        {
           return _default_value;
         }
 
@@ -88,6 +95,12 @@ namespace epidb {
         bool ignore(const Token &verify) const
         {
           return _default_value == verify;
+        }
+
+        virtual bool execute(const std::string& chromosome, const Region& region, std::string& result, std::string& msg)
+        {
+          msg = "Execute method not implemented for this class: " + str();
+          return false;
         }
 
         virtual const std::string str() const
@@ -130,6 +143,11 @@ namespace epidb {
           return AbstractColumnType::check(verify);
         }
 
+        bool execute(const std::string& chromosome, const Region &region, std::string &result, std::string &msg)
+        {
+          return AbstractColumnType::execute(chromosome, region, result, msg);
+        }
+
         const std::string str() const
         {
           return AbstractColumnType::str();
@@ -140,7 +158,8 @@ namespace epidb {
           return AbstractColumnType::BSONObj();
         }
 
-        const Type content() {
+        const Type content()
+        {
           return _content;
         }
 
@@ -194,7 +213,13 @@ namespace epidb {
       const std::string ColumnType<Category>::str() const;
 
       template<>
-      const mongo::BSONObj ColumnType<Category>::BSONObj() const;
+      bool ColumnType<Code>::check(const std::string &verify) const;
+
+      template<>
+      const std::string ColumnType<Code>::str() const;
+
+      template<>
+      const mongo::BSONObj ColumnType<Code>::BSONObj() const;
 
       bool list_column_types(const std::string &user_key, std::vector<utils::IdName> &content, std::string  &msg);
 
@@ -229,6 +254,12 @@ namespace epidb {
                                     const double minimum, const double maximum,
                                     const std::string &user_key,
                                     std::string &id, std::string &msg);
+
+      bool create_column_type_calculated(const std::string &name, const std::string &norm_name,
+                                         const std::string &description, const std::string &norm_description,
+                                         const std::string &code,
+                                         const std::string &user_key,
+                                         std::string &id, std::string &msg);
 
       bool column_type_bsonobj_to_class(const mongo::BSONObj &obj, ColumnTypePtr &column_type, std::string &msg);
 

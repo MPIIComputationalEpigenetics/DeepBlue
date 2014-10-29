@@ -91,6 +91,9 @@ class EpidbClient:
   def create_column_type_category(self, name, description, ignore_if, items, user_key):
     return self.server.create_column_type_category(name, description, ignore_if, items, user_key)
 
+  def create_column_type_calculated(self, name, description, code, user_key):
+    return self.server.create_column_type_calculated(name, description, code, user_key)
+
   def list_column_types(self, user_key):
     return self.server.list_column_types(user_key)
 

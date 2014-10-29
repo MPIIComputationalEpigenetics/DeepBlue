@@ -16,6 +16,8 @@
 
 #include "../extras/utils.hpp"
 
+#include "../lua/sandbox.hpp"
+
 #include "collections.hpp"
 #include "config.hpp"
 #include "dba.hpp"
@@ -190,6 +192,47 @@ namespace epidb {
         return builder.obj();
       }
 
+      template<>
+      bool ColumnType<Code>::execute(const std::string& chromosome, const Region &region, std::string &result, std::string &msg)
+      {
+        lua::Sandbox::LuaPtr lua = _content.second;
+        lua->set_current_region(chromosome, region);
+        return lua->execute_row_code(result, msg);
+      }
+
+      template<>
+      bool ColumnType<Code>::check(const std::string &verify) const
+      {
+        return false; //Calculated column types can not be used as input
+      }
+
+      template<>
+      const std::string ColumnType<Code>::str() const
+      {
+        return AbstractColumnType::str() + " type: 'code' : "  + _content.first;
+      }
+
+      template<>
+      const mongo::BSONObj ColumnType<Code>::BSONObj() const
+      {
+        mongo::BSONObj super = AbstractColumnType::BSONObj();
+
+        mongo::BSONObjBuilder builder;
+        builder.appendElements(super);
+        builder.append("column_type", "calculated");
+        builder.append("code", _content.first);
+
+        return builder.obj();
+      }
+
+      template<>
+      COLUMN_TYPES ColumnType<Code>::type() const
+      {
+        return COLUMN_CALCULATED;
+      }
+
+      /* -------- */
+
       bool get_column_type(const std::string &type_name, COLUMN_TYPES type, std::string &msg)
       {
         if (type_name == "string") {
@@ -325,7 +368,7 @@ namespace epidb {
 
         mongo::BSONObj obj;
         if (!__create_column_base(name, norm_name, description, norm_description,
-                                  default_value, type, user_key, column_type_id, obj, msg)) {
+                                  default_value, norm_type, user_key, column_type_id, obj, msg)) {
           return false;
         }
 
@@ -346,6 +389,50 @@ namespace epidb {
 
         return true;
       }
+
+
+      bool create_column_type_calculated(const std::string &name, const std::string &norm_name,
+                                         const std::string &description, const std::string &norm_description,
+                                         const std::string &code,
+                                         const std::string &user_key,
+                                         std::string &column_type_id, std::string &msg)
+      {
+        lua::Sandbox::LuaPtr lua = lua::Sandbox::new_instance();
+        if (!lua->store_row_code(code, msg)) {
+          std::cerr << msg << std::endl;
+          return false;
+        }
+
+        mongo::BSONObj obj;
+        if (!__create_column_base(name, norm_name, description, norm_description,
+                                  "", "calculated", user_key, column_type_id, obj, msg)) {
+          return false;
+        }
+
+
+        mongo::BSONObjBuilder create_column_type_calculated_builder;
+        create_column_type_calculated_builder.appendElements(obj);
+
+        create_column_type_calculated_builder.append("code", code);
+
+        mongo::ScopedDbConnection c(config::get_mongodb_server());
+        c->insert(helpers::collection_name(Collections::COLUMN_TYPES()), create_column_type_calculated_builder.obj());
+        if (!c->getLastError().empty()) {
+          msg = c->getLastError();
+          c.done();
+          return false;
+        }
+
+        if (!search::insert_full_text(Collections::COLUMN_TYPES(), column_type_id, obj, msg)) {
+          c.done();
+          return false;
+        }
+
+        c.done();
+
+        return true;
+      }
+
 
       bool create_column_type_category(const std::string &name, const std::string &norm_name,
                                        const std::string &description, const std::string &norm_description,
@@ -468,11 +555,18 @@ namespace epidb {
           double maximum = obj["maximum"].Double();
           Range range(minimum, maximum);
           column_type = boost::shared_ptr<ColumnType<Range > >(new ColumnType<Range>(name, range, default_value));
+        } else if (type == "calculated") {
+          std::string code = obj["code"].String();
+          lua::Sandbox::LuaPtr lua = lua::Sandbox::new_instance();
+          if (!lua->store_row_code(code, msg)) {
+            return false;
+          }
+          std::pair<std::string, lua::Sandbox::LuaPtr> p(code, lua);
+          column_type = boost::shared_ptr<ColumnType<Code > >(new ColumnType<Code>(name, p, default_value));
         } else {
           msg = "Column type '" + type + "' is invalid";
           return false;
         }
-
         return true;
       }
 
@@ -556,6 +650,13 @@ namespace epidb {
           res["column_type"] = "category";
           ColumnType<Category> *column = static_cast<ColumnType<Category> *>(column_type.get());
           res["values"] = utils::vector_to_string(column->content());
+          break;
+        }
+
+        case COLUMN_CALCULATED: {
+          res["column_type"] = "calculated";
+          ColumnType<Code> *column = static_cast<ColumnType<Code> *>(column_type.get());
+          res["code"] = column->content().first;
           break;
         }
 
