@@ -149,44 +149,51 @@ namespace epidb {
       {
         std::string err;
         for (parser::FileFormat::const_iterator it =  format.begin(); it != format.end(); it++) {
+          const dba::columns::ColumnTypePtr &column = *it;
           if (it != format.begin()) {
             ss << "\t";
           }
-          if ( (*it)->name() == "CHROMOSOME") {
+          if ( column->name() == "CHROMOSOME") {
             ss << chromosome;
-          } else if ((*it)->name() == "START") {
+          } else if (column->name() == "START") {
             ss << region.start();
-          } else if ((*it)->name() == "END") {
+          } else if (column->name() == "END") {
             ss << region.end();
-          } else if (dba::Metafield::is_meta((*it)->name())) {
+          } else if (dba::Metafield::is_meta(column->name())) {
             std::string result;
-            if (!metafield.process((*it)->name(), chromosome, region, result, msg)) {
+            if (!metafield.process(column->name(), chromosome, region, result, msg)) {
               return false;
             }
             if (result.empty()) {
-              ss << (*it)->default_value();
+              ss << column->default_value();
             } else {
               ss << result;
             }
           } else {
-            if ((*it)->type() == dba::columns::COLUMN_INTEGER) {
-              Score v = region.value((*it)->internal_name());
+            if (column->type() == dba::columns::COLUMN_CALCULATED) {
+              std::string result;
+              if (!column->execute(chromosome, region, result, msg)) {
+                return false;
+              }
+              ss << result;
+            } else if (column->type() == dba::columns::COLUMN_INTEGER) {
+              Score v = region.value(column->internal_name());
               if (v == std::numeric_limits<Score>::min()) {
-                ss << (*it)->default_value();
+                ss << column->default_value();
               } else {
                 ss << utils::integer_to_string((int)v);
               }
-            } else if ( ( (*it)->type() == dba::columns::COLUMN_DOUBLE) ||  ((*it)->type() == dba::columns::COLUMN_RANGE)) {
-              Score v = region.value((*it)->internal_name());
+            } else if ( ( column->type() == dba::columns::COLUMN_DOUBLE) ||  (column->type() == dba::columns::COLUMN_RANGE)) {
+              Score v = region.value(column->internal_name());
               if (v == std::numeric_limits<Score>::min()) {
-                ss << (*it)->default_value();
+                ss << column->default_value();
               } else {
                 ss << utils::double_to_string(v);
               }
             } else {
-              std::string o = region.get((*it)->internal_name());
+              std::string o = region.get(column->internal_name());
               if (o.empty()) {
-                ss << (*it)->default_value();
+                ss << column->default_value();
               } else {
                 ss << o;
               }
