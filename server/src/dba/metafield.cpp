@@ -17,7 +17,6 @@
 
 #include "config.hpp"
 #include "collections.hpp"
-#include "column_types.hpp"
 #include "helpers.hpp"
 #include "key_mapper.hpp"
 #include "metafield.hpp"
@@ -81,23 +80,13 @@ namespace epidb {
       return m;
     }
 
-    bool Metafield::build_column(const std::string &name, columns::ColumnTypePtr &column_type, std::string &msg)
+    std::string Metafield::command_type(const std::string &command)
     {
-      return build_column(name, "", column_type, msg);
-    }
-
-    bool Metafield::build_column(const std::string &op, const std::string &default_value,
-                                 columns::ColumnTypePtr &column_type, std::string &msg)
-    {
-      std::string command = op.substr(0, op.find('('));
       std::map<std::string, std::string>::iterator it = functionsReturns.find(command);
       if (it == functionsReturns.end()) {
-        msg = "Metafield " + command + " does not exist.";
-        return false;
+        return std::string();
       }
-      const std::string &type = it->second;
-
-      return columns::column_type_simple(op, type, default_value, column_type, msg);
+      return it->second;
     }
 
     bool Metafield::is_meta(const std::string &s)
@@ -391,7 +380,7 @@ namespace epidb {
     }
 
     bool Metafield::calculated(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const Region &region,
-                          std::string &result, std::string &msg)
+                               std::string &result, std::string &msg)
     {
       unsigned int s = op.find("(") + 1;
       unsigned int e = op.find_last_of(")");
@@ -403,7 +392,7 @@ namespace epidb {
       if (!lua->store_row_code(code, msg)) {
         return false;
       }
-      lua->set_current_region(chrom, region);
+      lua->set_current_context(chrom, region, *this);
 
       return lua->execute_row_code(result, msg);
     }

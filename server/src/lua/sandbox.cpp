@@ -15,6 +15,8 @@
 
 #include "sandbox.hpp"
 
+#include "../extras/utils.hpp"
+
 #include "../regions.hpp"
 
 namespace epidb {
@@ -22,6 +24,7 @@ namespace epidb {
 
     static epidb::Region EMPTY_REGION;
     static std::string EMPTY_CHROMOSOME;
+    static dba::Metafield EMPTY_METAFIELD;
 
     Sandbox::LuaPtr Sandbox::new_instance()
     {
@@ -30,7 +33,8 @@ namespace epidb {
 
     Sandbox::Sandbox() :
       current_chromosome(EMPTY_CHROMOSOME),
-      current_region(EMPTY_REGION)
+      current_region(EMPTY_REGION),
+      current_metafield(EMPTY_METAFIELD)
     {
       L = luaL_newstate();
       luaL_openlibs(L);
@@ -67,7 +71,7 @@ namespace epidb {
       return true;
     }
 
-    void Sandbox::set_current_region(const std::string &chromosome, const Region &region)
+    void Sandbox::set_current_context(const std::string &chromosome, const Region &region, dba::Metafield &metafield)
     {
       current_chromosome = chromosome;
       current_region = region;
@@ -113,6 +117,29 @@ namespace epidb {
       const char *field_name_c = lua_tostring(lua_state, -1);
 
       const std::string field_name(field_name_c);
+
+      if (dba::Metafield::is_meta(field_name)) {
+        std::string msg;
+        std::string result;
+        if (!current_metafield.process(field_name, current_chromosome, current_region, result, msg)) {
+          std::cerr << "err" << std::endl;
+          std::cerr << msg << std::endl;
+          lua_pushstring(lua_state, msg.c_str());
+          return 1;
+        }
+        std::cerr << "result: " << result << std::endl;
+        std::string type = dba::Metafield::command_type(field_name);
+        std::cerr << type << std::endl;
+        if (type == "string") {
+          lua_pushstring(lua_state, result.c_str());
+          return 1;
+        } else {
+          double d;
+          utils::string_to_double(result, d);
+          lua_pushnumber(lua_state, d);
+          return 1;
+        }
+      }
 
       if (field_name == "CHROMOSOME") {
         lua_pushstring(lua_state, current_chromosome.c_str());

@@ -97,7 +97,7 @@ namespace epidb {
           return _default_value == verify;
         }
 
-        virtual bool execute(const std::string& chromosome, const Region& region, std::string& result, std::string& msg)
+        virtual bool execute(const std::string& chromosome, const Region& region, dba::Metafield &metafield,std::string& result, std::string& msg)
         {
           msg = "Execute method not implemented for this class: " + str();
           return false;
@@ -143,9 +143,9 @@ namespace epidb {
           return AbstractColumnType::check(verify);
         }
 
-        bool execute(const std::string& chromosome, const Region &region, std::string &result, std::string &msg)
+        bool execute(const std::string& chromosome, const Region &region, dba::Metafield &metafield, std::string &result, std::string &msg)
         {
-          return AbstractColumnType::execute(chromosome, region, result, msg);
+          return AbstractColumnType::execute(chromosome, region, metafield, result, msg);
         }
 
         const std::string str() const

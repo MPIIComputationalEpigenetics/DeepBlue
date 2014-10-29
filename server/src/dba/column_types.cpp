@@ -193,10 +193,10 @@ namespace epidb {
       }
 
       template<>
-      bool ColumnType<Code>::execute(const std::string& chromosome, const Region &region, std::string &result, std::string &msg)
+      bool ColumnType<Code>::execute(const std::string& chromosome, const Region &region, dba::Metafield &metafield,std::string &result, std::string &msg)
       {
         lua::Sandbox::LuaPtr lua = _content.second;
-        lua->set_current_region(chromosome, region);
+        lua->set_current_context(chromosome, region, metafield);
         return lua->execute_row_code(result, msg);
       }
 
@@ -399,7 +399,6 @@ namespace epidb {
       {
         lua::Sandbox::LuaPtr lua = lua::Sandbox::new_instance();
         if (!lua->store_row_code(code, msg)) {
-          std::cerr << msg << std::endl;
           return false;
         }
 

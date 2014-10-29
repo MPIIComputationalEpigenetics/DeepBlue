@@ -172,7 +172,7 @@ namespace epidb {
           } else {
             if (column->type() == dba::columns::COLUMN_CALCULATED) {
               std::string result;
-              if (!column->execute(chromosome, region, result, msg)) {
+              if (!column->execute(chromosome, region, metafield, result, msg)) {
                 return false;
               }
               ss << result;

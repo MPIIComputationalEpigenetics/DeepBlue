@@ -15,7 +15,6 @@
 
 #include <boost/enable_shared_from_this.hpp>
 
-#include "../dba/column_types.hpp"
 #include "../dba/retrieve.hpp"
 
 #include "../regions.hpp"
@@ -80,11 +79,9 @@ namespace epidb {
 
     public:
       static bool is_meta(const std::string &s);
-      bool process(const std::string &, const std::string &, const Region &region, std::string &result, std::string &msg);
-      static bool build_column(const std::string &name, columns::ColumnTypePtr &column_type, std::string &msg);
+      static std::string command_type(const std::string &command);
 
-      static bool build_column(const std::string &name, const std::string &default_value,
-                        columns::ColumnTypePtr &column_type, std::string &msg);
+      bool process(const std::string &, const std::string &, const Region &region, std::string &result, std::string &msg);
     };
   }
 }

@@ -236,7 +236,7 @@ namespace epidb {
 
           // Check if it is metafield
           if (dba::Metafield::is_meta(field_string)) {
-            if (!dba::Metafield::build_column(field_info[0], column_type, msg)) {
+            if (!build_metafield_column(field_info[0], column_type, msg)) {
               return false;
             }
             found = true;
@@ -263,7 +263,7 @@ namespace epidb {
 
           // Check if it is metafield and has default value
           if (dba::Metafield::is_meta(field_string)) {
-            if (!dba::Metafield::build_column(field_info[0], field_info[1], column_type, msg)) {
+            if (!build_metafield_column(field_info[0], field_info[1], column_type, msg)) {
               return false;
             }
           } else {
@@ -328,8 +328,20 @@ namespace epidb {
           return false;
         }
       }
-
       return true;
+    }
+
+    bool FileFormatBuilder::build_metafield_column(const std::string &op, dba::columns::ColumnTypePtr &column_type, std::string &msg)
+    {
+        return build_metafield_column(op, "", column_type, msg);
+    }
+
+    bool FileFormatBuilder::build_metafield_column(const std::string &op, const std::string &default_value,
+        dba::columns::ColumnTypePtr &column_type, std::string &msg)
+    {
+      std::string command = op.substr(0, op.find('('));
+      std::string type = dba::Metafield::command_type(command);
+      return dba::columns::column_type_simple(op, type, default_value, column_type, msg);
     }
   }
 }

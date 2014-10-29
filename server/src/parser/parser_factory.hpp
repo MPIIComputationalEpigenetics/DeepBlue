@@ -120,6 +120,10 @@ namespace epidb {
       static bool build(const std::string &format, FileFormat &file_format, std::string &msg);
       static bool build_for_outout(const std::string &format, FileFormat &file_format,
                                    std::vector<mongo::BSONObj> experiment_columns, std::string &msg );
+    private:
+      static bool build_metafield_column(const std::string &name, epidb::dba::columns::ColumnTypePtr &column_type, std::string &msg);
+      static bool build_metafield_column(const std::string &name, const std::string &default_value,
+                        dba::columns::ColumnTypePtr &column_type, std::string &msg);
     };
 
     class Parser {
