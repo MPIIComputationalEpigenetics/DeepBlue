@@ -130,7 +130,8 @@ namespace epidb {
         for (mongo::BSONObj::iterator it = result.begin(); it.more(); ) {
           mongo::BSONElement e = it.next();
           if (std::string(e.fieldName()) == "extra_metadata") {
-            for (mongo::BSONObj::iterator itt = e.Obj().begin(); itt.more(); ) {
+            mongo::BSONObj::iterator itt = e.Obj().begin();
+            while (itt.more()) {
               mongo::BSONElement ee = itt.next();
               metadata[ee.fieldName()] = utils::bson_to_string(ee);
             }
@@ -167,7 +168,8 @@ namespace epidb {
         for (mongo::BSONObj::iterator it = result.begin(); it.more(); ) {
           mongo::BSONElement e = it.next();
           if (std::string(e.fieldName()) == "extra_metadata") {
-            for (mongo::BSONObj::iterator itt = e.Obj().begin(); itt.more(); ) {
+            mongo::BSONObj::iterator itt = e.Obj().begin();
+            while (itt.more()) {
               mongo::BSONElement ee = itt.next();
               metadata[ee.fieldName()] = utils::bson_to_string(ee);
             }
@@ -238,7 +240,8 @@ namespace epidb {
         for (mongo::BSONObj::iterator it = result.begin(); it.more(); ) {
           mongo::BSONElement e = it.next();
           if (std::string(e.fieldName()) == "extra_metadata") {
-            for (mongo::BSONObj::iterator itt = e.Obj().begin(); itt.more(); ) {
+            mongo::BSONObj::iterator itt = e.Obj().begin();
+            while (itt.more()) {
               mongo::BSONElement ee = itt.next();
               std::string field_name = ee.fieldName();
               if (field_name.compare(0, 5, NORM_) != 0) {
@@ -246,7 +249,8 @@ namespace epidb {
               }
             }
           } else if (std::string(e.fieldName()) == "upload_info") {
-            for (mongo::BSONObj::iterator itt = e.Obj().begin(); itt.more(); ) {
+            mongo::BSONObj::iterator itt = e.Obj().begin();
+            while (itt.more()) {
               mongo::BSONElement ee = itt.next();
               std::string field_name = ee.fieldName();
               if (field_name.compare(0, 5, NORM_) != 0) {
@@ -254,17 +258,19 @@ namespace epidb {
               }
             }
           } else if (std::string(e.fieldName()) == "columns") {
-            for (mongo::BSONObj::iterator itt = e.Obj().begin(); itt.more(); ) {
+            mongo::BSONObj::iterator itt = e.Obj().begin();
+            while (itt.more()) {
               mongo::BSONElement ee = itt.next();
               std::string field_name = ee.fieldName();
               if (field_name.compare(0, 5, NORM_) != 0) {
                 columns.push_back(columns::dataset_column_to_map(ee.Obj()));
               }
             }
-          }
-          std::string field_name = e.fieldName();
-          if (full || field_name.compare(0, 5, "norm_") != 0) {
-            metadata[e.fieldName()] = utils::bson_to_string(e);
+          } else {
+            std::string field_name = e.fieldName();
+            if (full || field_name.compare(0, 5, "norm_") != 0) {
+              metadata[e.fieldName()] = utils::bson_to_string(e);
+            }
           }
         }
         return true;
@@ -294,7 +300,8 @@ namespace epidb {
         for (mongo::BSONObj::iterator it = result.begin(); it.more(); ) {
           mongo::BSONElement e = it.next();
           if (std::string(e.fieldName()) == "sample_info") {
-            for (mongo::BSONObj::iterator itt = e.Obj().begin(); itt.more(); ) {
+            mongo::BSONObj::iterator itt = e.Obj().begin();
+            while (itt.more()) {
               mongo::BSONElement ee = itt.next();
               std::string field_name = ee.fieldName();
               if (field_name.compare(0, 5, "norm_") != 0) {
@@ -302,7 +309,8 @@ namespace epidb {
               }
             }
           } else if (std::string(e.fieldName()) == "extra_metadata") {
-            for (mongo::BSONObj::iterator itt = e.Obj().begin(); itt.more(); ) {
+            mongo::BSONObj::iterator itt = e.Obj().begin();
+            while (itt.more()) {
               mongo::BSONElement ee = itt.next();
               std::string field_name = ee.fieldName();
               if (field_name.compare(0, 5, "norm_") != 0) {
@@ -310,7 +318,8 @@ namespace epidb {
               }
             }
           } else if (std::string(e.fieldName()) == "upload_info") {
-            for (mongo::BSONObj::iterator itt = e.Obj().begin(); itt.more(); ) {
+            mongo::BSONObj::iterator itt = e.Obj().begin();
+            while (itt.more()) {
               mongo::BSONElement ee = itt.next();
               std::string field_name = ee.fieldName();
               if (field_name.compare(0, 5, "norm_") != 0) {
@@ -318,7 +327,8 @@ namespace epidb {
               }
             }
           } else if (std::string(e.fieldName()) == "columns") {
-            for (mongo::BSONObj::iterator itt = e.Obj().begin(); itt.more(); ) {
+            mongo::BSONObj::iterator itt = e.Obj().begin();
+            while (itt.more()) {
               mongo::BSONElement ee = itt.next();
               std::string field_name = ee.fieldName();
               if (field_name.compare(0, 5, "norm_") != 0) {
@@ -363,7 +373,8 @@ namespace epidb {
 
         mongo::BSONObjBuilder arg_builder;
         mongo::BSONObj args = result.getField("args").Obj();
-        for (mongo::BSONObj::iterator it = args.begin(); it.more();) {
+        mongo::BSONObj::iterator it = args.begin();
+        while (it.more()) {
           mongo::BSONElement e = it.next();
           std::string fieldName = std::string(e.fieldName());
           if (fieldName == "start") {
@@ -397,7 +408,8 @@ namespace epidb {
         }
         c.done();
 
-        for (mongo::BSONObj::iterator it = result.begin(); it.more(); ) {
+        mongo::BSONObj::iterator it = result.begin();
+        while (it.more()) {
           mongo::BSONElement e = it.next();
           std::string field_name = e.fieldName();
           if (full || field_name.compare(0, 5, "norm_") != 0) {
@@ -424,7 +436,8 @@ namespace epidb {
         }
         c.done();
 
-        for (mongo::BSONObj::iterator it = result.begin(); it.more(); ) {
+        mongo::BSONObj::iterator it = result.begin();
+        while (it.more()) {
           mongo::BSONElement e = it.next();
           std::string field_name = e.fieldName();
           if (full || field_name.compare(0, 5, "norm_") != 0) {
