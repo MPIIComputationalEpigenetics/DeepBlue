@@ -20,104 +20,102 @@
 #include "../errors.hpp"
 
 namespace epidb {
-    namespace command {
+  namespace command {
 
-      class UploadChromosomeCommand: public Command {
+    class UploadChromosomeCommand: public Command {
 
-      private:
-        static CommandDescription desc_() {
-          return CommandDescription(categories::GENOMES, "Uploads the sequence data of the chromosome.");
-        }
+    private:
+      static CommandDescription desc_()
+      {
+        return CommandDescription(categories::GENOMES, "Uploads the sequence data of the chromosome.");
+      }
 
-        static Parameters parameters_() {
-          Parameter p[] = {
-            parameters::Genome,
-            Parameter("chromosome", serialize::STRING, "chromosome name"),
-            Parameter("data", serialize::DATASTRING, "chromosome sequence data"),
-            parameters::UserKey
-          };
-          Parameters params(&p[0], &p[0]+4);
-          return params;
-        }
+      static Parameters parameters_()
+      {
+        Parameter p[] = {
+          parameters::Genome,
+          Parameter("chromosome", serialize::STRING, "chromosome name"),
+          Parameter("data", serialize::DATASTRING, "chromosome sequence data"),
+          parameters::UserKey
+        };
+        Parameters params(&p[0], &p[0] + 4);
+        return params;
+      }
 
-        static Parameters results_() {
-          Parameter p[] = {};
-          Parameters results(&p[0], &p[0]);
-          return results;
-        }
+      static Parameters results_()
+      {
+        Parameter p[] = {};
+        Parameters results(&p[0], &p[0]);
+        return results;
+      }
 
-      public:
-        UploadChromosomeCommand() : Command("upload_chromosome", parameters_(), results_(), desc_()) {}
+    public:
+      UploadChromosomeCommand() : Command("upload_chromosome", parameters_(), results_(), desc_()) {}
 
-        virtual bool run(const std::string& ip,
-            const serialize::Parameters& parameters, serialize::Parameters& result) const
-        {
-          const std::string genome = parameters[0]->as_string();
-          const std::string chromosome = parameters[1]->as_string();
-          const std::string data = parameters[2]->as_string();
-          const std::string user_key = parameters[3]->as_string();
+      virtual bool run(const std::string &ip,
+                       const serialize::Parameters &parameters, serialize::Parameters &result) const
+      {
+        const std::string genome = parameters[0]->as_string();
+        const std::string chromosome = parameters[1]->as_string();
+        const std::string data = parameters[2]->as_string();
+        const std::string user_key = parameters[3]->as_string();
 
-          std::string msg;
-          bool ok;
-          if (!dba::check_user(user_key, ok, msg)) {
-            result.add_error(msg);
-            return false;
-          }
-          if (!ok) {
-          std::string s = Error::m(ERR_INVALID_USER_KEY);
-          result.add_error(s);
+        std::string msg;
+        if (!Command::checks(user_key, msg)) {
+          result.add_error(msg);
           return false;
-          }
-
-          std::string norm_genome = utils::normalize_name(genome);
-          if (!dba::check_genome(norm_genome, ok, msg)) {
-            result.add_error(msg);
-            return false;
-          }
-          if (!ok) {
-            result.add_error("Invalid genome '" + genome + "'");
-            return false;
-          }
-
-          dba::genomes::GenomeInfoPtr genome_info;
-          if (!dba::genomes::get_genome_info(genome, genome_info, msg)) {
-            result.add_error("Could not get the genome " + msg + " information.");
-            return false;
-          }
-
-          std::string clear_data;
-
-          if (!parser::fasta::clean_up(data, clear_data, msg)) {
-            result.add_error(msg);
-            return false;
-          }
-
-          dba::genomes::ChromosomeInfo chromosome_info;
-          if (!genome_info->get_chromosome(chromosome, chromosome_info, msg)) {
-            result.add_error(msg);
-            return false;
-          }
-
-          if (clear_data.length() != chromosome_info.size) {
-            std::stringstream ss;
-            ss << "Uploaded sequence does not have the correct size.";
-            ss << " It is expected a chromosome with ";
-            ss << chromosome_info.size;
-            ss << " but the given chromosome has ";
-            ss << clear_data.length();
-            ss << " bases.";
-            result.add_error(ss.str());
-            return false;
-          }
-
-          std::string id;
-          bool ret = dba::add_chromosome_sequence(genome, norm_genome, chromosome, clear_data, user_key, msg);
-
-          if (!ret) {
-            result.add_error(msg);
-          }
-          return ret;
         }
-      } uploadChromosomeCommand;
+
+        bool ok = false;
+        std::string norm_genome = utils::normalize_name(genome);
+        if (!dba::check_genome(norm_genome, ok, msg)) {
+          result.add_error(msg);
+          return false;
+        }
+        if (!ok) {
+          result.add_error("Invalid genome '" + genome + "'");
+          return false;
+        }
+
+        dba::genomes::GenomeInfoPtr genome_info;
+        if (!dba::genomes::get_genome_info(genome, genome_info, msg)) {
+          result.add_error("Could not get the genome " + msg + " information.");
+          return false;
+        }
+
+        std::string clear_data;
+
+        if (!parser::fasta::clean_up(data, clear_data, msg)) {
+          result.add_error(msg);
+          return false;
+        }
+
+        dba::genomes::ChromosomeInfo chromosome_info;
+        if (!genome_info->get_chromosome(chromosome, chromosome_info, msg)) {
+          result.add_error(msg);
+          return false;
+        }
+
+        if (clear_data.length() != chromosome_info.size) {
+          std::stringstream ss;
+          ss << "Uploaded sequence does not have the correct size.";
+          ss << " It is expected a chromosome with ";
+          ss << chromosome_info.size;
+          ss << " but the given chromosome has ";
+          ss << clear_data.length();
+          ss << " bases.";
+          result.add_error(ss.str());
+          return false;
+        }
+
+        std::string id;
+        bool ret = dba::add_chromosome_sequence(genome, norm_genome, chromosome, clear_data, user_key, msg);
+
+        if (!ret) {
+          result.add_error(msg);
+        }
+        return ret;
+      }
+    } uploadChromosomeCommand;
   }
 }

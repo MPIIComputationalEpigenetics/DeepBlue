@@ -17,62 +17,60 @@
 #include "../extras/serialize.hpp"
 
 namespace epidb {
-    namespace command {
+  namespace command {
 
-      class ListProjectsCommand: public Command {
+    class ListProjectsCommand: public Command {
 
-      private:
-        static CommandDescription desc_() {
-          return CommandDescription(categories::PROJECTS, "Lists all existing projects.");
+    private:
+      static CommandDescription desc_()
+      {
+        return CommandDescription(categories::PROJECTS, "Lists all existing projects.");
+      }
+
+      static Parameters parameters_()
+      {
+        Parameter p[] = {
+          parameters::UserKey
+        };
+        Parameters params(&p[0], &p[0] + 1);
+        return params;
+      }
+
+      static Parameters results_()
+      {
+        Parameter p[] = {
+          Parameter("projects", serialize::LIST, "project names")
+        };
+        Parameters results(&p[0], &p[0] + 1);
+        return results;
+      }
+
+    public:
+      ListProjectsCommand() : Command("list_projects", parameters_(), results_(), desc_()) {}
+
+      virtual bool run(const std::string &ip,
+                       const serialize::Parameters &parameters, serialize::Parameters &result) const
+      {
+        const std::string user_key = parameters[0]->as_string();
+
+        std::string msg;
+        if (!Command::checks(user_key, msg)) {
+          result.add_error(msg);
+          return false;
         }
 
-        static Parameters parameters_() {
-          Parameter p[] = {
-            parameters::UserKey
-          };
-          Parameters params(&p[0], &p[0]+1);
-          return params;
+        std::vector<utils::IdName> names;
+        bool ret = dba::list::projects(user_key, names, msg);
+
+        if (!ret) {
+          result.add_error(msg);
+          return false;
         }
 
-        static Parameters results_() {
-          Parameter p[] = {
-            Parameter("projects", serialize::LIST, "project names")
-          };
-          Parameters results(&p[0], &p[0]+1);
-          return results;
-        }
+        set_id_names_return(names, result);
 
-      public:
-        ListProjectsCommand() : Command("list_projects", parameters_(), results_(), desc_()) {}
-
-        virtual bool run(const std::string& ip,
-            const serialize::Parameters& parameters, serialize::Parameters& result) const
-        {
-          const std::string user_key = parameters[0]->as_string();
-
-          std::string msg;
-          bool ok;
-          if (!dba::check_user(user_key, ok, msg)) {
-            result.add_error(msg);
-            return false;
-          }
-          if (!ok) {
-            result.add_error("Invalid user key.");
-            return false;
-          }
-
-          std::vector<utils::IdName> names;
-          bool ret = dba::list::projects(user_key, names, msg);
-
-          if (!ret) {
-            result.add_error(msg);
-            return false;
-          }
-
-          set_id_names_return(names, result);
-
-          return true;
-        }
-      } listProjectsCommand;
+        return true;
+      }
+    } listProjectsCommand;
   }
 }

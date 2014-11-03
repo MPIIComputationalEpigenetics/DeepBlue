@@ -77,6 +77,8 @@ namespace epidb {
 
     static std::map<std::string, Command *> *commands_;
 
+    static bool checks(const std::string &user_key, std::string &msg);
+
     bool check_local(const std::string &ip, bool &r, std::string &msg) const;
 
     bool check_init(bool &r, std::string &msg) const;

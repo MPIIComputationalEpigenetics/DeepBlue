@@ -66,9 +66,9 @@ endif
 ifeq ($(host),macosx)
  CXX = clang++
  # -O3 -Ofast -ffast-math -march=native
- DEFCXXFLAGS = -g -std=c++11 -stdlib=libc++ -Werror -Wall -Wextra  -Weffc++ -Wno-unused-parameter -Wno-ignored-qualifiers -I/opt/boost-new-new/include/ -I/Users/albrecht/mpi/DeepBlue/server/third_party/drivers/macosx_new/include -I$(CPPFORMAT) -I$(STRTK) -I$(MINILZO) -I$(LUA)
+ DEFCXXFLAGS = -std=c++11 -stdlib=libc++ -Werror -Wall -Wextra  -Weffc++ -Wno-unused-parameter -Wno-ignored-qualifiers -I/opt/boost-new-new/include/ -I/Users/albrecht/mpi/DeepBlue/server/third_party/drivers/macosx_new/include -I$(CPPFORMAT) -I$(STRTK) -I$(MINILZO) -I$(LUA)
  BOOST_DIR = /opt/boost-new-new/lib
- LD	= clang++ -g -pagezero_size 10000 -image_base 100000000  #LuaJit options
+ LD	= clang++ -pagezero_size 10000 -image_base 100000000  #LuaJit options
  LDFLAGS =
  MONGOLIBS =  -L/Users/albrecht/mpi/DeepBlue/server/third_party/drivers/macosx_new/lib -lmongoclient
  BOOSTLIBS = -L$(BOOST_DIR) -lboost_log_setup -lboost_log -lboost_filesystem -lboost_thread -lboost_system -lboost_regex -lboost_timer -lboost_chrono -lboost_program_options

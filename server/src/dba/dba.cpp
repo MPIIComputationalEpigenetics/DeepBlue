@@ -30,6 +30,7 @@
 #include "../parser/wig_parser.hpp"
 
 #include "dba.hpp"
+#include "users.hpp"
 #include "config.hpp"
 #include "collections.hpp"
 #include "controlled_vocabulary.hpp"
@@ -95,10 +96,10 @@ namespace epidb {
       }
 
       std::string user_id;
-      if (!add_user(name, email, institution, key, user_id, msg)) {
+      if (!users::add_user(name, email, institution, key, user_id, msg)) {
         return false;
       }
-      if (!set_user_admin(user_id, true, msg)) {
+      if (!users::set_user_admin(user_id, true, msg)) {
         return false;
       }
 
@@ -159,87 +160,6 @@ namespace epidb {
 
       // Clear caches
       cv::cache_is_connected.clear();
-
-      c.done();
-      return true;
-    }
-
-    bool set_user_admin(const std::string &user_id, const bool value, std::string &msg)
-    {
-      mongo::BSONObj o = BSON("findandmodify" << Collections::USERS() <<
-                              "query" << BSON("_id" << user_id) <<
-                              "update" << BSON("$set" << BSON("admin" << value)));
-
-      mongo::ScopedDbConnection c(config::get_mongodb_server());
-      mongo::BSONObj info;
-      bool result = c->runCommand(config::DATABASE_NAME(), o, info);
-      if (!result) {
-        // TODO: get info error
-        msg = "error setting admin in user '" + user_id + "'.";
-        c.done();
-        return  false;
-      }
-      c.done();
-      return true;
-    }
-
-    bool is_admin_key(const std::string &admin_key, bool &ret, std::string &msg)
-    {
-      mongo::ScopedDbConnection c(config::get_mongodb_server());
-
-      mongo::BSONObjBuilder query_builder;
-
-      query_builder.append("admin", true);
-      query_builder.append("key", admin_key);
-
-      mongo::BSONObj query = query_builder.obj();
-      long long count = c->count(helpers::collection_name(Collections::USERS()), query);
-      if (!c->getLastError().empty()) {
-        msg = c->getLastError();
-        c.done();
-        return false;
-      }
-
-      ret = count > 0;
-      c.done();
-      return true;
-    }
-
-    bool add_user(const std::string &name, const std::string &email, const std::string &institution,
-                  const std::string &key, std::string &user_id, std::string &msg)
-    {
-      {
-        int id;
-        if (!helpers::get_counter("users", id, msg))  {
-          return false;
-        }
-        user_id = "u" + utils::integer_to_string(id);
-      }
-
-      mongo::BSONObjBuilder create_user_builder;
-      create_user_builder.append("_id", user_id);
-      create_user_builder.append("name", name);
-      create_user_builder.append("email", email);
-      create_user_builder.append("institution", institution);
-      create_user_builder.append("key", key);
-      mongo::BSONObj cu = create_user_builder.obj();
-
-      mongo::ScopedDbConnection c(config::get_mongodb_server());
-      c->insert(helpers::collection_name(Collections::USERS()), cu);
-      if (!c->getLastError().empty()) {
-        msg = c->getLastError();
-        c.done();
-        return false;
-      }
-
-      mongo::BSONObjBuilder index_name;
-      index_name.append("key", 1);
-      c->ensureIndex(helpers::collection_name(Collections::USERS()), index_name.obj());
-      if (!c->getLastError().empty()) {
-        msg = c->getLastError();
-        c.done();
-        return false;
-      }
 
       c.done();
       return true;
@@ -361,7 +281,7 @@ namespace epidb {
       create_genome_builder.append("chromosomes", ab.arr());
 
       utils::IdName id_user_name;
-      if (!get_user_name(user_key, id_user_name, msg)) {
+      if (!users::get_user_name(user_key, id_user_name, msg)) {
         return false;
       }
       create_genome_builder.append("user", id_user_name.name);
@@ -432,7 +352,7 @@ namespace epidb {
       create_epi_mark_builder.appendElements(search_data);
 
       utils::IdName id_user_name;
-      if (!get_user_name(user_key, id_user_name, msg)) {
+      if (!users::get_user_name(user_key, id_user_name, msg)) {
         return false;
       }
       create_epi_mark_builder.append("user", id_user_name.name);
@@ -488,7 +408,7 @@ namespace epidb {
       create_biosource_builder.appendElements(search_data);
 
       utils::IdName id_user_name;
-      if (!get_user_name(user_key, id_user_name, msg)) {
+      if (!users::get_user_name(user_key, id_user_name, msg)) {
         return false;
       }
       create_biosource_builder.append("user", id_user_name.name);
@@ -554,7 +474,7 @@ namespace epidb {
       create_technique_builder.appendElements(search_data);
 
       utils::IdName id_user_name;
-      if (!get_user_name(user_key, id_user_name, msg)) {
+      if (!users::get_user_name(user_key, id_user_name, msg)) {
         return false;
       }
       create_technique_builder.append("user", id_user_name.name);
@@ -664,7 +584,7 @@ namespace epidb {
       create_sample_builder.appendElements(data);
 
       utils::IdName id_user_name;
-      if (!get_user_name(user_key, id_user_name, msg)) {
+      if (!users::get_user_name(user_key, id_user_name, msg)) {
         return false;
       }
       create_sample_builder.append("user", id_user_name.name);
@@ -708,7 +628,7 @@ namespace epidb {
       create_sample_fields_builder.append("norm_description", norm_description);
 
       utils::IdName id_user_name;
-      if (!get_user_name(user_key, id_user_name, msg)) {
+      if (!users::get_user_name(user_key, id_user_name, msg)) {
         return false;
       }
       create_sample_fields_builder.append("user", id_user_name.name);
@@ -751,7 +671,7 @@ namespace epidb {
       create_project_builder.appendElements(search_data);
 
       utils::IdName id_user_name;
-      if (!get_user_name(user_key, id_user_name, msg)) {
+      if (!users::get_user_name(user_key, id_user_name, msg)) {
         return false;
       }
       create_project_builder.append("user", id_user_name.name);
@@ -913,26 +833,6 @@ namespace epidb {
       return true;
     }
 
-    bool is_valid_email(const std::string &email, std::string &msg)
-    {
-      bool exists = true;
-      if (!helpers::check_exist(Collections::USERS(), "email", email, exists, msg)) {
-        return false;
-      }
-      if (exists) {
-        std::stringstream ss;
-        ss << "Email '" << email << "' is already being used.";
-        msg = ss.str();
-        return false;
-      }
-      return true;
-    }
-
-    bool check_user(const std::string &user_key, bool &r, std::string &msg)
-    {
-      return helpers::check_exist(Collections::USERS(), "key", user_key, r, msg);
-    }
-
     bool check_genome(const std::string &genome, bool &r, std::string &msg)
     {
       std::string norm_genome = utils::normalize_name(genome);
@@ -1005,7 +905,7 @@ namespace epidb {
       query.push_back(helpers::QueryPair("norm_name", norm_name));
 
       utils::IdName id_user_name;
-      if (!get_user_name(user_key, id_user_name, msg)) {
+      if (!users::get_user_name(user_key, id_user_name, msg)) {
         return false;
       }
       query.push_back(helpers::QueryPair("upload_info.user", id_user_name.name));
@@ -1023,7 +923,7 @@ namespace epidb {
     bool check_query(const std::string &user_key, const std::string &query_id, bool &r, std::string &msg)
     {
       utils::IdName id_user_name;
-      if (!get_user_name(user_key, id_user_name, msg)) {
+      if (!users::get_user_name(user_key, id_user_name, msg)) {
         return false;
       }
       mongo::BSONObj o = BSON("_id" << query_id << "user" << id_user_name.name);
@@ -1099,22 +999,6 @@ namespace epidb {
         related_biosources.push_back(sub_biosource_name);
       }
       return true;
-    }
-
-
-    bool get_user_name(const std::string &user_key, std::string &name, std::string &msg)
-    {
-      utils::IdName id_name;
-      if (!helpers::get_name(Collections::USERS(), user_key, id_name, msg)) {
-        return false;
-      }
-      name = id_name.name;
-      return true;
-    }
-
-    bool get_user_name(const std::string &user_key, utils::IdName &id_name, std::string &msg)
-    {
-      return helpers::get_name(Collections::USERS(), user_key, id_name, msg);
     }
 
     const std::string build_pattern_annotation_name(const std::string &pattern, const std::string &genome, const bool overlap)

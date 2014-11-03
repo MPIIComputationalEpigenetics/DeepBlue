@@ -57,18 +57,9 @@ namespace epidb {
         const std::string user_key = parameters[1]->as_string();
 
         std::string msg;
-
-        {
-          // TODO: put in a auxiliar function
-          bool ok(false);
-          if (!dba::check_user(user_key, ok, msg)) {
-            result.add_error(msg);
-            return false;
-          }
-          if (!ok) {
-            result.add_error("Invalid user key.");
-            return false;
-          }
+        if (!Command::checks(user_key, msg)) {
+          result.add_error(msg);
+          return false;
         }
 
         std::string norm_biosource_name = utils::normalize_name(biosource_name);

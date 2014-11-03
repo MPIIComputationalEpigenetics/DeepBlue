@@ -62,25 +62,8 @@ namespace epidb {
         bool is_syn(false);
 
         std::string msg;
-
-        bool is_initialized(false);
-        if (!dba::is_initialized(is_initialized, msg)) {
+        if (!Command::checks(user_key, msg)) {
           result.add_error(msg);
-          return false;
-        }
-        if (!is_initialized) {
-          result.add_error("The system was not initialized.");
-          return false;
-        }
-
-        bool ok(false);
-        if (!dba::check_user(user_key, ok, msg)) {
-          result.add_error(msg);
-          return false;
-        }
-        if (!ok) {
-          std::string s = Error::m(ERR_INVALID_USER_KEY);
-          result.add_error(s);
           return false;
         }
 

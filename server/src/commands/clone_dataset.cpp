@@ -62,22 +62,16 @@ namespace epidb {
         const std::string user_key = parameters[5]->as_string();
 
         std::string msg;
+        if (!Command::checks(user_key, msg)) {
+          result.add_error(msg);
+          return false;
+        }
+
         datatypes::Metadata extra_metadata;
         if (!read_metadata(parameters[4], extra_metadata, msg)) {
           result.add_error(msg);
           return false;
         }
-
-        bool ok;
-        if (!dba::check_user(user_key, ok, msg)) {
-          result.add_error(msg);
-          return false;
-        }
-        if (!ok) {
-          result.add_error("Invalid user key.");
-          return false;
-        }
-
 
         std::string norm_name = utils::normalize_name(name);
         std::string norm_description = utils::normalize_name(description);

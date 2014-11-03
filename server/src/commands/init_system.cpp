@@ -9,10 +9,13 @@
 #include <sstream>
 
 #include "../dba/dba.hpp"
-#include "../parser/parser_factory.hpp"
-#include "../extras/serialize.hpp"
+#include "../dba/users.hpp"
 
 #include "../engine/commands.hpp"
+
+#include "../extras/serialize.hpp"
+
+#include "../parser/parser_factory.hpp"
 
 namespace epidb {
     namespace command {
@@ -75,7 +78,7 @@ namespace epidb {
             return false;
           }
 
-          if (!dba::is_valid_email(email, msg)) {
+          if (!dba::users::is_valid_email(email, msg)) {
             result.add_error(msg);
             return false;
           }

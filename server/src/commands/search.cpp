@@ -65,28 +65,22 @@ namespace epidb {
         const std::string keyword = parameters[0]->as_string();
         const std::string user_key = parameters[2]->as_string();
 
+        std::string msg;
+        if (!Command::checks(user_key, msg)) {
+          result.add_error(msg);
+          return false;
+        }
+
         std::vector<serialize::ParameterPtr> types;
         parameters[1]->children(types);
         std::vector<std::string> types_s;
         for (std::vector<serialize::ParameterPtr>::iterator it = types.begin(); it != types.end(); ++it) {
           std::string type = (**it).as_string();
           if (!dba::Collections::is_valid_search_collection(type)) {
-            result.add_error(type + " is not a valid type. The valid types are: '" + utils::vector_to_string(dba::Collections::valid_search_Collections())+ "'");
+            result.add_error(type + " is not a valid type. The valid types are: '" + utils::vector_to_string(dba::Collections::valid_search_Collections()) + "'");
             return false;
           }
           types_s.push_back(type);
-        }
-
-        std::string msg;
-        bool ok;
-        if (!dba::check_user(user_key, ok, msg)) {
-          result.add_error(msg);
-          return false;
-        }
-        if (!ok) {
-          std::string s = Error::m(ERR_INVALID_USER_KEY);
-          result.add_error(s);
-          return false;
         }
 
         std::vector<dba::search::TextSearchResult> search_res;

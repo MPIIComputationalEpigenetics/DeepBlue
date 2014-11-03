@@ -13,10 +13,14 @@
 #include <boost/foreach.hpp>
 
 #include "commands.hpp"
-#include "../log.hpp"
 
 #include "../datatypes/metadata.hpp"
+#include "../dba/dba.hpp"
+#include "../dba/users.hpp"
 #include "../extras/utils.hpp"
+
+#include "../errors.hpp"
+#include "../log.hpp"
 
 namespace epidb {
   std::map<std::string, Command *> *Command::commands_;
@@ -58,6 +62,28 @@ namespace epidb {
   bool Command::check_email(const std::string &email, bool &r, std::string &msg) const
   {
     r = true;
+    return true;
+  }
+
+  bool Command::checks(const std::string &user_key, std::string &msg)
+  {
+    bool is_initialized(false);
+    if (!dba::is_initialized(is_initialized, msg)) {
+      return false;
+    }
+    if (!is_initialized) {
+      msg = "The system was not initialized.";
+      return false;
+    }
+
+    bool ok = false;
+    if (!dba::users::check_user(user_key, ok, msg)) {
+      return false;
+    }
+    if (!ok) {
+      msg = Error::m(ERR_INVALID_USER_KEY);
+      return false;
+    }
     return true;
   }
 

@@ -70,6 +70,10 @@ namespace epidb {
         const std::string user_key = parameters[6]->as_string();
 
         std::string msg;
+        if (!Command::checks(user_key, msg)) {
+          result.add_error(msg);
+          return false;
+        }
 
         datatypes::Metadata extra_metadata;
         if (!read_metadata(parameters[5], extra_metadata, msg)) {
@@ -81,16 +85,6 @@ namespace epidb {
         std::string norm_genome = utils::normalize_name(genome);
 
         bool ok;
-        if (!dba::check_user(user_key, ok, msg)) {
-          result.add_error(msg);
-          return false;
-        }
-        if (!ok) {
-          std::string s = Error::m(ERR_INVALID_USER_KEY);
-          result.add_error(s);
-          return false;
-        }
-
         if (!dba::check_annotation(norm_name, norm_genome, ok, msg)) {
           result.add_error(msg);
           return false;

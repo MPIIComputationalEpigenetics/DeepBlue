@@ -33,6 +33,7 @@
 #include "metafield.hpp"
 #include "queries.hpp"
 #include "retrieve.hpp"
+#include "users.hpp"
 
 namespace epidb {
   namespace dba {
@@ -53,7 +54,7 @@ namespace epidb {
 
         stored_query_builder.append("_id", query_id);
         std::string user_name;
-        if (!get_user_name(user_key, user_name, msg)) {
+        if (!users::get_user_name(user_key, user_name, msg)) {
           return false;
         }
         stored_query_builder.append("user", user_name);

@@ -8,6 +8,7 @@
 
 #include "../version.hpp"
 #include "../dba/dba.hpp"
+#include "../dba/users.hpp"
 #include "../extras/serialize.hpp"
 
 #include "../engine/commands.hpp"
@@ -48,7 +49,7 @@ namespace epidb {
 
           std::string msg;
           bool ok;
-          if (!dba::check_user(user_key, ok, msg)) {
+          if (!dba::users::check_user(user_key, ok, msg)) {
             result.add_error(msg);
             return false;
           }
@@ -57,7 +58,7 @@ namespace epidb {
           if (!ok) {
             name = "a Stranger";
           } else {
-            if (!dba::get_user_name(user_key, name, msg)) {
+            if (!dba::users::get_user_name(user_key, name, msg)) {
               result.add_error(msg);
             }
           }

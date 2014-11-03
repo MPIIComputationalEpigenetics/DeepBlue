@@ -35,6 +35,7 @@
 #include "info.hpp"
 #include "helpers.hpp"
 #include "key_mapper.hpp"
+#include "users.hpp"
 
 #include "../regions.hpp"
 #include "../log.hpp"
@@ -421,7 +422,7 @@ namespace epidb {
                            mongo::BSONObj &upload_info, std::string &msg)
     {
       std::string user_name;
-      if (!get_user_name(user_key, user_name, msg)) {
+      if (!users::get_user_name(user_key, user_name, msg)) {
         return false;
       }
 

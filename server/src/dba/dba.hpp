@@ -34,10 +34,6 @@ namespace epidb {
     bool init_system(const std::string &name, const std::string &email, const std::string &institution,
                      const std::string &key, std::string &msg);
 
-    bool add_user(const std::string &name, const std::string &email, const std::string &institution,
-                  const std::string &key,
-                  std::string &user_id, std::string &msg);
-
     bool add_genome(const std::string &name, const std::string &norm_name,
                     const std::string &description, const std::string &norm_description,
                     const parser::ChromosomesInfo &g,
@@ -106,18 +102,11 @@ namespace epidb {
 
     bool is_valid_genome(const std::string &genome, const std::string &norm_genome, std::string &msg);
 
-    bool is_valid_email(const std::string &email, std::string &msg);
-
     bool is_initialized(bool &ret, std::string &msg);
-
-    bool is_admin_key(const std::string &admin_key, bool &ret, std::string &msg);
-
 
     /**
      * Checks
      */
-
-    bool check_user(const std::string &user_key, bool &r, std::string &msg);
 
     bool check_genome(const std::string &genome, bool &r, std::string &msg);
 
@@ -159,17 +148,7 @@ namespace epidb {
                                  bool is_biosource, const std::string &user_key,
                                  std::vector<utils::IdName> &syns, std::string &msg);
 
-    bool get_user_name(const std::string &user_key, std::string &name, std::string &msg);
-
-    bool get_user_name(const std::string &user_key, utils::IdName &id_name, std::string &msg);
-
     bool count_experiments(unsigned long long &size, const std::string &user_key, std::string &msg);
-
-    /**
-     * Permissions
-     */
-
-    bool set_user_admin(const std::string &user_id, const bool value, std::string &msg);
 
     /**
      * Pattern

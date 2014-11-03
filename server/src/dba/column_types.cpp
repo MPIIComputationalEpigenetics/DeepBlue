@@ -23,6 +23,7 @@
 #include "dba.hpp"
 #include "full_text.hpp"
 #include "helpers.hpp"
+#include "users.hpp"
 
 #include "column_types.hpp"
 
@@ -342,7 +343,7 @@ namespace epidb {
         create_column_type_builder.append("column_type", type);
 
         std::string user_name;
-        if (!get_user_name(user_key, user_name, msg)) {
+        if (!users::get_user_name(user_key, user_name, msg)) {
           return false;
         }
         create_column_type_builder.append("user", user_name);

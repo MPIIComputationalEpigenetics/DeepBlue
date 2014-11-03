@@ -68,15 +68,10 @@ namespace epidb {
         const std::string output_format = parameters[1]->as_string();
         const std::string user_key = parameters[2]->as_string();
 
-        std::string msg;
         bool ok = false;
-        if (!dba::check_user(user_key, ok, msg)) {
+        std::string msg;
+        if (!Command::checks(user_key, msg)) {
           result.add_error(msg);
-          return false;
-        }
-        if (!ok) {
-          std::string s = Error::m(ERR_INVALID_USER_KEY);
-          result.add_error(s);
           return false;
         }
 
