@@ -19,3 +19,4 @@
 server/src/server
 api_auto.html
 server/src/server.dSYM
+cli/src/.deepblue_cli_config
