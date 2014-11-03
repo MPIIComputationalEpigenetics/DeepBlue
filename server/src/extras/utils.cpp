@@ -397,6 +397,10 @@ namespace epidb {
       case mongo::String: {
         return e.valuestr();
       }
+      case mongo::Object: {
+        return e.Obj().toString();
+      }
+
       default: {
         return "[type " + integer_to_string(e.type()) + " not implemented to string conversion]";
       }
