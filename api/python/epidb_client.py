@@ -8,8 +8,8 @@ class EpidbClient:
             url = "http://%s:%d" % (address, port)
         else:
             url = "http://%s" % (address)
-            self.server = xmlrpclib.Server(url, encoding='UTF-8',
-                                           allow_none=True, verbose=False)
+        self.server = xmlrpclib.Server(url, encoding='UTF-8',
+                                       allow_none=True, verbose=False)
 
 ## Status command
     def echo(self, user_key):
