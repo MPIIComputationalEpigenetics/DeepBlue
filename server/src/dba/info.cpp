@@ -180,12 +180,14 @@ namespace epidb {
 
         utils::IdName id_name_biosource(id, biosource_name);
         std::vector<utils::IdName> syns;
+        /*
         if (!get_biosource_synonyms(biosource_name, norm_biosource_name, true, "", syns, msg)) {
           return false;
         }
         BOOST_FOREACH(const utils::IdName & id_name, syns) {
           synonyms.push_back(id_name.name);
         }
+        */
 
         return true;
       }
