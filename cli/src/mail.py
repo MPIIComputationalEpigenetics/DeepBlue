@@ -33,6 +33,7 @@ def send_new_user_mail(user, key, user_email):
     text = text + " Please, do not share it.\n\n"
     text = text + "Do not hesitate to contact us if you have any question.\n\n"
     text = text + "DeepBlue Team\n"
-    text = text + "deepblue@mpi-inf.mpg.de"
+    text = text + "deepblue@mpi-inf.mpg.de\n"
+    text = text + "http://deepblue.mpi-inf.mpg.de\n"
 
     send_email(subject, text, config.email_sender, user_email)
