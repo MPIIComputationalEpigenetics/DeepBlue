@@ -315,7 +315,8 @@ namespace epidb {
             while (itt.more()) {
               mongo::BSONElement ee = itt.next();
               std::string field_name = ee.fieldName();
-              if (field_name.compare(0, 5, "norm_") != 0) {
+              if (field_name.compare(0, 5, "norm_") != 0 ||
+                  field_name.compare(0, 2, "__") != 0) {
                 extra_metadata[field_name] = utils::bson_to_string(ee);
               }
             }
