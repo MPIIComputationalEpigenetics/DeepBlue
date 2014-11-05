@@ -339,7 +339,9 @@ namespace epidb {
             }
           } else {
             std::string field_name = e.fieldName();
-            if (full || field_name.compare(0, 5, "norm_") != 0) {
+            if (full ||
+                field_name.compare(0, 5, "norm_") != 0 ||
+                field_name.compare(0, 2, "__") != 0) {
               metadata[e.fieldName()] = utils::bson_to_string(e);
             }
           }
