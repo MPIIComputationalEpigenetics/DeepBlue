@@ -13,7 +13,7 @@ if __name__ == '__main__':
     parser.add_option("--server", dest="server",
                       default="localhost", help="Server address")
     parser.add_option("--port", type="int", dest="port",
-                      default=31415, help="Server port")
+                      default=0, help="Server port")
 
     args = parser.parse_args()
 

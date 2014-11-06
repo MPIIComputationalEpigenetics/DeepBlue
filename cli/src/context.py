@@ -18,7 +18,7 @@ class Context:
 
     @property
     def epidb(self):
-        epidb = EpidbClient(self._address, self._port)
+        epidb = EpidbClient("deepblue.mpi-inf.mpg.de/xmlrpc", None)
         return epidb
 
     @property

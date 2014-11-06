@@ -1,6 +1,5 @@
 from commands import get_command
 
-
 class Shell:
     def __init__(self, context):
         self._context = context
@@ -8,7 +7,8 @@ class Shell:
     def loop(self):
         ok = True
         while ok is True:
-            line = raw_input("> ")
+            epidb = self._context.epidb
+            line = raw_input(str(epidb.echo(self._context.user_key)) + " > ")
             cmd = line.strip()
             if len(cmd) == 0:
                 continue
