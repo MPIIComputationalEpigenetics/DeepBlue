@@ -94,15 +94,27 @@ namespace epidb {
         return helpers::get_name(Collections::USERS(), user_key, id_name, msg);
       }
 
-      const std::string build_pattern_annotation_name(const std::string &pattern, const std::string &genome, const bool overlap)
+      bool bind_user(const std::string &email, const std::string &password, const std::string &user_key, const std::string &admin_key, std::string &id, std::string &msg)
       {
-        std::string name = "Pattern " + pattern;
-        if (overlap) {
-          name = name + " (overlap)";
-        } else {
-          name = name + " (non-overlap)";
+        mongo::BSONObjBuilder builder;
+
+        builder.append("_id", _id);
+        builder.append("email", email);
+        builder.append("password", password);
+        builder.append("key", password);
+
+        mongo::ScopedDbConnection c(config::get_mongodb_server());
+        c->insert(helpers::collection_name(Collections::WEB_ACCESS()), create_column_type_calculated_builder.obj());
+
+        mongo::BSONObjBuilder index;
+        index.append("email", 1);
+        index.append("password", 1);
+        c->ensureIndex(helpers::collection_name(Collections::WEB_ACCESS()), index.obj());
+        if (!c->getLastError().empty()) {
+          msg = c->getLastError();
+          c.done();
+          return false;
         }
-        return name + " in the genome " + genome;
       }
 
       bool set_user_admin(const std::string &user_id, const bool value, std::string &msg)
