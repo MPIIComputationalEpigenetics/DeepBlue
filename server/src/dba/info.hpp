@@ -12,7 +12,6 @@
 #include <string>
 #include <map>
 
-
 namespace epidb {
   namespace dba {
     namespace info {
