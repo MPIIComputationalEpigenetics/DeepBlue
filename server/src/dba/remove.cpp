@@ -44,6 +44,7 @@ namespace epidb {
       {
         mongo::BSONObj annotation;
         if (!data::annotation(id, annotation, msg)) {
+          msg = "Annotation " + id + " not found";
           return false;
         }
 
@@ -77,10 +78,49 @@ namespace epidb {
         return true;
       }
 
+      bool experiment(const std::string &id, const std::string &user_id, std::string &msg)
+      {
+        mongo::BSONObj experiment;
+        if (!data::experiment(id, experiment, msg)) {
+          msg = "Experiment " + id + " not found";
+          return false;
+        }
+
+        int dataset_id = experiment[KeyMapper::DATASET()].Int();
+        std::string genome_name = experiment["norm_genome"].String();
+
+        // find others experiments with the same id
+        std::vector<mongo::BSONObj> results;
+        if (!helpers::get(Collections::EXPERIMENTS(), BSON(KeyMapper::DATASET() << dataset_id), results, msg)) {
+          return false;
+        }
+
+        // keep it if it has more than one experiment pointing to this dataset
+        // if have one, remove dataset
+        if (results.size() == 1) {
+          if (!remove::dataset(dataset_id, genome_name, msg)) {
+            return false;
+          }
+        }
+
+        // delete from full text search
+        if (!search::remove(id, msg)) {
+          return false;
+        }
+
+        // Delete from collection
+        if (!helpers::remove_one(helpers::collection_name(Collections::EXPERIMENTS()), id, msg)) {
+          return false;
+        }
+
+        return true;
+      }
+
       bool genome(const std::string &id, const std::string &user_id, std::string &msg)
       {
         mongo::BSONObj genome;
         if (!data::genome(id, genome, msg)) {
+          msg = "Genome " + id + " not found";
           return false;
         }
 
@@ -92,7 +132,7 @@ namespace epidb {
           return false;
         }
         if (!experiments.empty()) {
-          msg = "Some experiments are still using this genome. Use the list_experiments command for obtaining them.";
+          msg = "This genome is being used some experiments.";
           return false;
         }
 
@@ -104,7 +144,7 @@ namespace epidb {
         }
         if (annotations.size() > 1) {
           //  (TODO: show experiments)
-          msg = "Some annotations are still using this genome. Use the list_annotations command for obtaining them.";
+          msg = "This genome is being used some annotations.";
           return false;
         }
 
@@ -113,7 +153,7 @@ namespace epidb {
           std::string own_annotation_name = annotations[0]["norm_name"].String();
           if (own_annotation_name != genome_name) {
             //  (TODO: show experiments)
-            msg = "Some annotations are still using this genome. Use the list_annotations command for obtaining them.";
+            msg = "This genome is being used some annotations.";
             return false;
           }
           std::string own_annotation_id = annotations[0]["_id"].String();
@@ -169,6 +209,7 @@ namespace epidb {
       {
         mongo::BSONObj project;
         if (!data::project(id, project, msg)) {
+          msg = "Project " + id + " not found";
           return false;
         }
 
@@ -181,7 +222,7 @@ namespace epidb {
         }
         if (!experiments.empty()) {
           //  (TODO: show experiments)
-          msg = "Some experiments are still using this project.";
+          msg = "This project is being used some experiments.";
           return false;
         }
 
@@ -201,20 +242,82 @@ namespace epidb {
 
       bool biosource(const std::string &id, const std::string &user_id, std::string &msg)
       {
-        return false;
+        mongo::BSONObj biosource;
+        if (!data::biosource(id, biosource, msg)) {
+          msg = "Biosource " + id + " not found";
+          return false;
+        }
+
+        const std::string biosource_name = biosource["norm_name"].String();
+
+        // Check if some experiment is still using this project
+        std::vector<mongo::BSONObj> samples;
+        if (!helpers::get(Collections::SAMPLES(), "norm_biosource_name", biosource_name, samples, msg)) {
+          return false;
+        }
+        if (!samples.empty()) {
+          //  (TODO: show experiments)
+          msg = "This biosource is being used by some samples.";
+          return false;
+        }
+
+        // Start deleting the data
+        // delete from full text search
+        if (!search::remove(id, msg)) {
+          return false;
+        }
+
+        // Delete project from projects collection
+
+        // TODO: check relationship
+        //   if is leaf, okay, otherwise error
+        //   remove from search
+        // TODO: check synonyms
+        //    remove if is a synonyms?
+        //    synonym ownership tracking (another collection)
+        if (!helpers::remove_one(helpers::collection_name(Collections::BIOSOURCES()), id, msg)) {
+          return false;
+        }
+
+        return true;
       }
 
-      bool sample_by_id(const std::string &id, const std::string &user_id, std::string &msg)
+      bool sample(const std::string &id, const std::string &user_id, std::string &msg)
       {
-        return false;
+        mongo::BSONObj sample;
+        if (!data::sample(id, sample, msg)) {
+          msg = "Sample " + id + " not found";
+          return false;
+        }
+
+        const std::string sample_id = sample["_id"].String();
+
+        // Check if some experiment is still using this project
+        std::vector<mongo::BSONObj> experiments;
+        if (!helpers::get(Collections::EXPERIMENTS(), "sample_id", sample_id, experiments, msg)) {
+          return false;
+        }
+        if (!experiments.empty()) {
+          //  (TODO: show experiments)
+          msg = "This sample is being used some experiments.";
+          return false;
+        }
+
+        // Start deleting the data
+        // delete from full text search
+        if (!search::remove(id, msg)) {
+          return false;
+        }
+
+        // Delete sample from samples collection
+        if (!helpers::remove_one(helpers::collection_name(Collections::SAMPLES()), id, msg)) {
+          return false;
+        }
+
+        return true;
       }
 
       bool epigenetic_mark(const std::string &id, const std::string &user_id, std::string &msg)
-      {
-        return false;
-      }
-
-      bool experiment(const std::string &id, const std::string &user_id, std::string &msg)
       {
         return false;
       }

@@ -24,7 +24,7 @@ namespace epidb {
 
       bool biosource(const std::string &id, const std::string &user_id, std::string &msg);
 
-      bool sample_by_id(const std::string &id, const std::string &user_id, std::string &msg);
+      bool sample(const std::string &id, const std::string &user_id, std::string &msg);
 
       bool epigenetic_mark(const std::string &id, const std::string &user_id, std::string &msg);
 

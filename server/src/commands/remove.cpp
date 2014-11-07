@@ -76,7 +76,7 @@ namespace epidb {
         } else if (id.compare(0, 2, "bs") == 0) {
           ok = dba::remove::biosource(id, user_key, msg);
         } else if (id.compare(0, 1, "s") == 0) {
-          ok = dba::remove::sample_by_id(id, user_key, msg);
+          ok = dba::remove::sample(id, user_key, msg);
         } else if (id.compare(0, 2, "em") == 0) {
           ok = dba::remove::epigenetic_mark(id, user_key, msg);
         } else if (id.compare(0, 1, "e") == 0) {
