@@ -35,7 +35,7 @@ namespace epidb {
       bool get(const std::string &where, const std::string &field, const std::string &expected_content,
                std::vector<mongo::BSONObj> &result, std::string &msg);
 
-      // Get returned_field field content from all elements from the colection
+      // Get returned_field field content from all elements from the collection
       bool get(const std::string &where, const std::string &returned_field,
                std::vector<std::string> &result, std::string &msg);
 
@@ -50,6 +50,14 @@ namespace epidb {
       // Get **all** content where the fields match the query parameter, using mongo::Query
       bool get(const std::string &where, const mongo::Query &query,
                std::vector<mongo::BSONObj> &results, std::string &msg);
+
+      // Get **all** content where the fields match the query parameter, using mongo::Query
+      bool get_one(const std::string &where, const mongo::BSONObj &query,
+                   mongo::BSONObj &result, std::string &msg);
+
+      // Get **all** content where the fields match the query parameter, using mongo::Query
+      bool get_one(const std::string &where, const mongo::Query &query,
+                   mongo::BSONObj &result, std::string &msg);
 
       // Get Id and Name from the given collection documents.
       bool get(const std::string &where, std::vector<utils::IdName> &results, std::string &msg);
@@ -69,6 +77,12 @@ namespace epidb {
 
       bool check_exist(const std::string &where, const std::string &field, const bool content,
                        bool &r, std::string &msg);
+
+      bool remove_one(const std::string &collection, const std::string &id, std::string &msg, const std::string& field="_id");
+
+      bool remove_all(const std::string &collection, const mongo::Query &query, std::string &msg);
+
+      bool remove_collection(const std::string &collection, std::string &msg);
 
       bool collection_size(const std::string &where, unsigned long long &size, std::string &msg);
 

@@ -68,7 +68,7 @@ namespace epidb {
           return false;
         }
 
-        BOOST_FOREACH(const mongo::BSONObj &o, objs) {
+        BOOST_FOREACH(const mongo::BSONObj & o, objs) {
           result.push_back(o[returned_field].String());
         }
 
@@ -80,7 +80,7 @@ namespace epidb {
                std::vector<mongo::BSONObj> &results, std::string &msg)
       {
         mongo::BSONObjBuilder query_builder;
-        BOOST_FOREACH(const QueryPair &p, conditions) {
+        BOOST_FOREACH(const QueryPair & p, conditions) {
           query_builder.append(p.first, p.second);
         }
         mongo::BSONObj query = query_builder.obj();
@@ -115,7 +115,7 @@ namespace epidb {
           return false;
         }
 
-        BOOST_FOREACH(const mongo::BSONObj &o, r) {
+        BOOST_FOREACH(const mongo::BSONObj & o, r) {
           utils::IdName utils(o["_id"].str(), o["name"].str());
           results.push_back(utils);
         }
@@ -131,7 +131,7 @@ namespace epidb {
         mongo::ScopedDbConnection c(config::get_mongodb_server());
 
         mongo::BSONObjBuilder b;
-        BOOST_FOREACH(const std::string &f, fields) {
+        BOOST_FOREACH(const std::string & f, fields) {
           b.append(f, 1);
         }
         mongo::BSONObj projection = b.obj();
@@ -144,6 +144,30 @@ namespace epidb {
 
         c.done();
         return true;
+      }
+
+      bool get_one(const std::string &where, const mongo::BSONObj &query,
+                   mongo::BSONObj &result, std::string &msg)
+      {
+        return get_one(where, mongo::Query(query), result, msg);
+      }
+
+      // Get content where the field content match with the query object and the fields.
+      // Return all elements if fields is empty.
+      bool get_one(const std::string &where, const mongo::Query &query,
+                   mongo::BSONObj &result, std::string &msg)
+      {
+        mongo::ScopedDbConnection c(config::get_mongodb_server());
+        const std::string collection = collection_name(where);
+        std::auto_ptr<mongo::DBClientCursor> data_cursor = c->query(collection, query);
+        if (data_cursor->more()) {
+          result = data_cursor->next().getOwned();
+          c.done();
+          return true;
+        } else {
+          c.done();
+          return false;
+        }
       }
 
       bool get_name(const std::string &where, const std::string norm_name,
@@ -235,20 +259,55 @@ namespace epidb {
         return true;
       }
 
-      bool collection_size(const std::string &where, unsigned long long &size, std::string &msg)
+      bool remove_one(const std::string &collection, const std::string &id, std::string &msg, const std::string &field)
       {
         mongo::ScopedDbConnection c(config::get_mongodb_server());
-        const std::string collection = collection_name(where);
-
-        unsigned long long count = c->count(collection);
+        c->remove(collection, QUERY(field << id), 1);
         if (!c->getLastError().empty()) {
           msg = c->getLastError();
           c.done();
           return false;
         }
+        c.done();
+        return true;
+      }
+
+      bool remove_all(const std::string &collection, const mongo::Query &query, std::string &msg)
+      {
+        mongo::ScopedDbConnection c(config::get_mongodb_server());
+        c->remove(collection, query);
+        if (!c->getLastError().empty()) {
+          msg = c->getLastError();
+          c.done();
+          return false;
+        }
+        c.done();
+        return true;
+      }
+
+      bool collection_size(const std::string &where, unsigned long long &size, std::string &msg)
+      {
+        mongo::ScopedDbConnection c(config::get_mongodb_server());
+        const std::string collection = collection_name(where);
+        size = c->count(collection);
+        c.done();
+        return true;
+      }
+
+      bool remove_collection(const std::string &collection, std::string &msg)
+      {
+        mongo::ScopedDbConnection c(config::get_mongodb_server());
+        mongo::BSONObj info;
+        c->dropCollection(collection, &info);
+
+        if (!info.getField("ok").trueValue()) {
+          msg = info.getStringField("errmsg");
+          c.done();
+          return false;
+        }
 
         c.done();
-        return count;
+        return true;
       }
 
       boost::mutex counter_mutex;
