@@ -19,6 +19,11 @@ class TestRemoveCommands(helpers.TestCase):
     self.assertSuccess(res)
     genome_id = res[1]
 
+    res, user = epidb.add_user("user1", "test1@example.com", "test", self.admin_key)
+    self.assertSuccess(res, user)
+    res = epidb.remove(genome_id, user[1])
+    self.assertFailure(res)
+
     res = epidb.add_genome("A1", "XUXA", genome_info, self.admin_key)
     self.assertFailure(res)
 
@@ -64,6 +69,11 @@ class TestRemoveCommands(helpers.TestCase):
     self.assertSuccess(res)
 
     annotation_id = res[1]
+    res, user = epidb.add_user("user1", "test1@example.com", "test", self.admin_key)
+    self.assertSuccess(res, user)
+    res = epidb.remove(annotation_id, user[1])
+    self.assertFailure(res)
+
     res = epidb.remove(annotation_id, self.admin_key)
     self.assertSuccess(res)
 
@@ -126,9 +136,13 @@ class TestRemoveCommands(helpers.TestCase):
     (s, regions) = epidb.get_regions(q, "CHROMOSOME,START,END", self.admin_key)
     self.assertSuccess(s, regions)
 
-    (s, id_clone_plus) = epidb.clone_dataset(eid1, "novo experimen", "getting only the default values", "", {"new data": "true", "cool": "a lot"}, self.admin_key)
+    (s, id_clone_plus) = epidb.clone_dataset(eid1, "novo experimen", "getting only the default values", "", {"new data": "true", "cool": "a lot"}, user[1])
     self.assertSuccess(s, id_clone_plus)
 
+    res, user = epidb.add_user("user1", "test1@example.com", "test", self.admin_key)
+    self.assertSuccess(res, user)
+    res = epidb.remove(eid1, user[1])
+    self.assertFailure(res)
     (s, id_removed) = epidb.remove(eid1, self.admin_key)
     self.assertSuccess(s, id_removed)
     self.assertEqual(id_removed, eid1)
@@ -139,7 +153,7 @@ class TestRemoveCommands(helpers.TestCase):
     (s, regions2) = epidb.get_regions(q2, "CHROMOSOME,START,END", self.admin_key)
     self.assertSuccess(s, regions)
 
-    (s, id_removed) = epidb.remove(id_clone_plus, self.admin_key)
+    (s, id_removed) = epidb.remove(id_clone_plus, user[1])
     self.assertSuccess(s, id_removed)
     self.assertEqual(id_removed, id_clone_plus)
 
