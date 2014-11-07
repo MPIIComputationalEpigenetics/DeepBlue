@@ -313,8 +313,8 @@ namespace epidb {
 
       std::string ann_name = name;
       std::string ann_norm_name = utils::normalize_annotation_name(ann_name);
-      std::string ann_description = "Chromosomes and sizes of the genome " + name;
-      std::string ann_norm_description = utils::normalize_name(description);
+      std::string ann_description = "Chromosomes and sizes of the genome " + name + " ("+description+")";
+      std::string ann_norm_description = utils::normalize_name(ann_description);
       datatypes::Metadata extra_metadata;
       std::string annotation_id;
 
