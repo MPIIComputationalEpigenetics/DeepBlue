@@ -10,6 +10,7 @@
 #define EPIDB_DBA_COLLECTIONS_HPP
 
 #include <string>
+#include <vector>
 
 namespace epidb {
   namespace dba {
@@ -42,6 +43,7 @@ namespace epidb {
 
       static const std::string &PROJECTS();
       static const std::string &USERS();
+      static const std::string &WEB_ACCESS();
       static const std::string &TEXT_SEARCH();
       static const std::string &SETTINGS();
       static const std::string &COUNTERS();
