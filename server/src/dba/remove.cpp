@@ -132,7 +132,7 @@ namespace epidb {
           return false;
         }
         if (!experiments.empty()) {
-          msg = "This genome is being used some experiments.";
+          msg = "This genome is being used by experiments.";
           return false;
         }
 
@@ -144,7 +144,7 @@ namespace epidb {
         }
         if (annotations.size() > 1) {
           //  (TODO: show experiments)
-          msg = "This genome is being used some annotations.";
+          msg = "This genome is being used by annotations.";
           return false;
         }
 
@@ -153,7 +153,7 @@ namespace epidb {
           std::string own_annotation_name = annotations[0]["norm_name"].String();
           if (own_annotation_name != genome_name) {
             //  (TODO: show experiments)
-            msg = "This genome is being used some annotations.";
+            msg = "This genome is being used by annotations.";
             return false;
           }
           std::string own_annotation_id = annotations[0]["_id"].String();
@@ -222,7 +222,7 @@ namespace epidb {
         }
         if (!experiments.empty()) {
           //  (TODO: show experiments)
-          msg = "This project is being used some experiments.";
+          msg = "This project is being used by experiments.";
           return false;
         }
 
@@ -257,7 +257,7 @@ namespace epidb {
         }
         if (!samples.empty()) {
           //  (TODO: show experiments)
-          msg = "This biosource is being used by some samples.";
+          msg = "This biosource is being used by samples.";
           return false;
         }
 
@@ -299,7 +299,7 @@ namespace epidb {
         }
         if (!experiments.empty()) {
           //  (TODO: show experiments)
-          msg = "This sample is being used some experiments.";
+          msg = "This sample is being used by experiments.";
           return false;
         }
 
@@ -319,7 +319,72 @@ namespace epidb {
 
       bool epigenetic_mark(const std::string &id, const std::string &user_id, std::string &msg)
       {
-        return false;
+        mongo::BSONObj epigenetic_mark;
+        if (!data::epigenetic_mark(id, epigenetic_mark, msg)) {
+          msg = "Epigenetic Mark " + id + " not found";
+          return false;
+        }
+
+        const std::string epigenetic_mark_name = epigenetic_mark["norm_name"].String();
+
+        // Check if some experiment is still using this project
+        std::vector<mongo::BSONObj> experiments;
+        if (!helpers::get(Collections::EXPERIMENTS(), "norm_epigenetic_mark", epigenetic_mark_name, experiments, msg)) {
+          return false;
+        }
+        if (!experiments.empty()) {
+          //  (TODO: show experiments)
+          msg = "This epigenetic mark is being used by experiments.";
+          return false;
+        }
+
+        // Start deleting the data
+        // delete from full text search
+        if (!search::remove(id, msg)) {
+          return false;
+        }
+
+        // Delete epigenetic mark from epigenetic marks collection
+        if (!helpers::remove_one(helpers::collection_name(Collections::EPIGENETIC_MARKS()), id, msg)) {
+          return false;
+        }
+
+        return true;
+      }
+
+      bool technique(const std::string &id, const std::string &user_id, std::string &msg)
+      {
+        mongo::BSONObj technique;
+        if (!data::technique(id, technique, msg)) {
+          msg = "Technique " + id + " not found";
+          return false;
+        }
+
+        const std::string technique_name = technique["norm_name"].String();
+
+        // Check if some experiment is still using this project
+        std::vector<mongo::BSONObj> experiments;
+        if (!helpers::get(Collections::EXPERIMENTS(), "norm_technique", technique_name, experiments, msg)) {
+          return false;
+        }
+        if (!experiments.empty()) {
+          //  (TODO: show experiments)
+          msg = "This technique is being used by experiments.";
+          return false;
+        }
+
+        // Start deleting the data
+        // delete from full text search
+        if (!search::remove(id, msg)) {
+          return false;
+        }
+
+        // Delete epigenetic mark from epigenetic marks collection
+        if (!helpers::remove_one(helpers::collection_name(Collections::TECHNIQUES()), id, msg)) {
+          return false;
+        }
+
+        return true;
       }
 
       bool query(const std::string &id, const std::string &user_id, std::string &msg)
@@ -328,11 +393,6 @@ namespace epidb {
       }
 
       bool tiling_region(const std::string &id, const std::string &user_id, std::string &msg)
-      {
-        return false;
-      }
-
-      bool technique(const std::string &id, const std::string &user_id, std::string &msg)
       {
         return false;
       }

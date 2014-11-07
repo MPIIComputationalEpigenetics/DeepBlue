@@ -78,7 +78,7 @@ class TestRemoveCommands(helpers.TestCase):
     res, genomes = epidb.search("hg19", "genomes", self.admin_key)
     res, anns = epidb.remove(genomes[0][0], self.admin_key)
     self.assertFailure(res, anns)
-    self.assertEqual(anns, "This genome is being used some annotations.")
+    self.assertEqual(anns, "This genome is being used by annotations.")
 
     res = epidb.add_annotation("Cpg Islands", "hg19", "CpG islands are associated ...",
           file_data,
@@ -210,4 +210,52 @@ class TestRemoveCommands(helpers.TestCase):
     res = epidb.remove(sample_id, self.admin_key )
     self.assertSuccess(res)
 
+  def test_remove_epigenetic_mark(self):
+    epidb = EpidbClient()
+    self.init_base(epidb)
 
+    sample_id = self.sample_ids[0]
+    regions_data = helpers.load_bed("hg19_chr1_1")
+    format = data_info.EXPERIMENTS["hg19_chr1_1"]["format"]
+
+    (res, epigenetic_mark_id) = epidb.add_epigenetic_mark("H3K666ac3", "acetil metal \,,,/", self.admin_key)
+    self.assertSuccess(res, epigenetic_mark_id)
+
+    # adding two experiments with the same data should work
+    res, eid = epidb.add_experiment("test_exp1", "hg19", "H3K666ac3", sample_id, "tech1",
+              "ENCODE", "desc1", regions_data, format, None, self.admin_key)
+    self.assertSuccess(res)
+
+    res = epidb.remove(epigenetic_mark_id, self.admin_key )
+    self.assertFailure(res)
+
+    res = epidb.remove(eid, self.admin_key)
+    self.assertSuccess(res)
+
+    res = epidb.remove(epigenetic_mark_id, self.admin_key )
+    self.assertSuccess(res)
+
+  def test_remove_technique(self):
+    epidb = EpidbClient()
+    self.init_base(epidb)
+
+    sample_id = self.sample_ids[0]
+    regions_data = helpers.load_bed("hg19_chr1_1")
+    format = data_info.EXPERIMENTS["hg19_chr1_1"]["format"]
+
+    (res, add_technique_id) = epidb.add_technique("Hypster Technique", "I knew this technique before everybody else", {}, self.admin_key)
+    self.assertSuccess(res, add_technique_id)
+
+    # adding two experiments with the same data should work
+    res, eid = epidb.add_experiment("test_exp1", "hg19", "Methylation", sample_id, "Hypster Technique",
+              "ENCODE", "desc1", regions_data, format, None, self.admin_key)
+    self.assertSuccess(res)
+
+    res = epidb.remove(add_technique_id, self.admin_key )
+    self.assertFailure(res)
+
+    res = epidb.remove(eid, self.admin_key)
+    self.assertSuccess(res)
+
+    res = epidb.remove(add_technique_id, self.admin_key )
+    self.assertSuccess(res)
