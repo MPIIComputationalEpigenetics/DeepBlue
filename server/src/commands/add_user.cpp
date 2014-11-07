@@ -38,7 +38,7 @@ namespace epidb {
       static Parameters results_()
       {
         Parameter p[] = {
-          Parameter("id", serialize::STRING, "id of the newly inserted user")
+          Parameter("id", serialize::STRING, "id of the newly inserted user"),
           Parameter("user_key", serialize::STRING, "key of the newly inserted user")
         };
         Parameters results(&p[0], &p[0] + 1);
