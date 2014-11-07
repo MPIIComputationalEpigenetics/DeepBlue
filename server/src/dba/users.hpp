@@ -28,6 +28,8 @@ namespace epidb {
 
       bool get_user_name(const std::string &user_key, utils::IdName &id_name, std::string &msg);
 
+      bool bind_user(const std::string &email, const std::string &password, const std::string &user_key, const std::string &admin_key, std::string &id, std::string &msg);
+
       /**
        * Permissions
        */

@@ -96,6 +96,10 @@ namespace epidb {
 
       bool bind_user(const std::string &email, const std::string &password, const std::string &user_key, const std::string &admin_key, std::string &id, std::string &msg)
       {
+
+        return false;
+
+        /*
         mongo::BSONObjBuilder builder;
 
         builder.append("_id", _id);
@@ -115,6 +119,7 @@ namespace epidb {
           c.done();
           return false;
         }
+        */
       }
 
       bool set_user_admin(const std::string &user_id, const bool value, std::string &msg)
