@@ -719,7 +719,7 @@ namespace epidb {
 
       gfs.setChunkSize(2 << 12); // 8KB
 
-      mongo::BSONObj file = gfs.storeFile(utils::upper(sequence).c_str(), sequence.size(), filename);
+      mongo::BSONObj file = gfs.storeFile(sequence.c_str(), sequence.size(), filename);
 
       if (!c->getLastError().empty()) {
         msg = c->getLastError();
