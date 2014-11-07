@@ -125,11 +125,7 @@ namespace epidb {
         }
 
         if (result.size() == 0) {
-          std::stringstream ss;
-          ss << "Genome '";
-          ss << name;
-          ss << "' not found";
-          msg = ss.str();
+          msg = "Genome '" + name +  "' not found";
           return false;
         }
 
