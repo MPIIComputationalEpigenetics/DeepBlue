@@ -13,19 +13,11 @@
 #include <boost/foreach.hpp>
 
 #include <mongo/bson/bson.h>
-#include <mongo/client/dbclient.h>
 
-#include "../engine/commands.hpp"
 #include "../extras/utils.hpp"
-#include "../parser/genome_data.hpp"
 
-#include "config.hpp"
-#include "collections.hpp"
 #include "column_types.hpp"
-#include "dba.hpp"
-#include "helpers.hpp"
-
-#include "../regions.hpp"
+#include "data.hpp"
 
 namespace epidb {
   namespace dba {
@@ -35,19 +27,10 @@ namespace epidb {
 
       bool get_sample_by_id(const std::string &id, std::map<std::string, std::string> &res, std::string &msg, bool full = false)
       {
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
-
-        mongo::BSONObj query = BSON("_id" << id);
-        std::auto_ptr<mongo::DBClientCursor> data_cursor = c->query(helpers::collection_name(Collections::SAMPLES()), query, 1);
         mongo::BSONObj result;
-        if (data_cursor->more()) {
-          result = data_cursor->next();
-        } else {
-          msg = "Sample id '" + id + "' not found.";
-          c.done();
+        if (!data::sample(id, result, msg))  {
           return false;
         }
-        c.done();
 
         for (mongo::BSONObj::iterator it = result.begin(); it.more(); ) {
           mongo::BSONElement e = it.next();
@@ -60,20 +43,10 @@ namespace epidb {
 
       bool get_genome(const std::string &id, std::map<std::string, std::string> &res, std::string &msg, bool full = false)
       {
-        //  TODO: move to a generic function
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
-
-        mongo::BSONObj query = BSON("_id" << id);
-        std::auto_ptr<mongo::DBClientCursor> data_cursor = c->query(helpers::collection_name(Collections::GENOMES()), query, 1);
         mongo::BSONObj result;
-        if (data_cursor->more()) {
-          result = data_cursor->next();
-        } else {
-          msg = "genome with id " + id + " not found.";
-          c.done();
+        if (!data::genome(id, result, msg))  {
           return false;
         }
-        c.done();
 
         for (mongo::BSONObj::iterator it = result.begin(); it.more(); ) {
           mongo::BSONElement e = it.next();
@@ -86,20 +59,10 @@ namespace epidb {
 
       bool get_project(const std::string &id, std::map<std::string, std::string> &res, std::string &msg, bool full = false)
       {
-        //  TODO: move to a generic function
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
-
-        mongo::BSONObj query = BSON("_id" << id);
-        std::auto_ptr<mongo::DBClientCursor> data_cursor = c->query(helpers::collection_name(Collections::PROJECTS()), query, 1);
         mongo::BSONObj result;
-        if (data_cursor->more()) {
-          result = data_cursor->next();
-        } else {
-          msg = "project with id " + id + " not found.";
-          c.done();
+        if (!data::project(id, result, msg))  {
           return false;
         }
-        c.done();
 
         for (mongo::BSONObj::iterator it = result.begin(); it.more(); ) {
           mongo::BSONElement e = it.next();
@@ -113,19 +76,10 @@ namespace epidb {
       bool get_technique(const std::string &id, std::map<std::string, std::string> &res,
                          std::map<std::string, std::string> &metadata, std::string &msg, bool full = false)
       {
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
-
-        mongo::BSONObj query = BSON("_id" << id);
-        std::auto_ptr<mongo::DBClientCursor> data_cursor = c->query(helpers::collection_name(Collections::TECHNIQUES()), query, 1);
         mongo::BSONObj result;
-        if (data_cursor->more()) {
-          result = data_cursor->next().getOwned();
-        } else {
-          msg = "technique with id " + id + " not found.";
-          c.done();
+        if (!data::technique(id, result, msg))  {
           return false;
         }
-        c.done();
 
         for (mongo::BSONObj::iterator it = result.begin(); it.more(); ) {
           mongo::BSONElement e = it.next();
@@ -148,19 +102,10 @@ namespace epidb {
                          std::string &msg,
                          bool full = false)
       {
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
-
-        mongo::BSONObj query = BSON("_id" << id);
-        std::auto_ptr<mongo::DBClientCursor> data_cursor = c->query(helpers::collection_name(Collections::BIOSOURCES()), query, 1);
         mongo::BSONObj result;
-        if (data_cursor->more()) {
-          result = data_cursor->next();
-        } else {
-          msg = "biosource with id " + id + " not found.";
-          c.done();
+        if (!data::biosource(id, result, msg))  {
           return false;
         }
-        c.done();
 
         std::string biosource_name = result["name"].String();
         std::string norm_biosource_name = result["norm_name"].String();
@@ -194,20 +139,10 @@ namespace epidb {
 
       bool get_epigenetic_mark(const std::string &id, std::map<std::string, std::string> &res, std::string &msg, bool full = false)
       {
-        //  TODO: move to a generic function
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
-
-        mongo::BSONObj query = BSON("_id" << id);
-        std::auto_ptr<mongo::DBClientCursor> data_cursor = c->query(helpers::collection_name(Collections::EPIGENETIC_MARKS()), query, 1);
         mongo::BSONObj result;
-        if (data_cursor->more()) {
-          result = data_cursor->next();
-        } else {
-          msg = "epigenetic mark with id " + id + " not found.";
-          c.done();
+        if (!data::epigenetic_mark(id, result, msg))  {
           return false;
         }
-        c.done();
 
         for (mongo::BSONObj::iterator it = result.begin(); it.more(); ) {
           mongo::BSONElement e = it.next();
@@ -225,19 +160,10 @@ namespace epidb {
                           std::map<std::string, std::string> &upload_info,
                           std::string &msg, bool full = false)
       {
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
-
-        mongo::BSONObj query = BSON("_id" << id);
-        std::auto_ptr<mongo::DBClientCursor> data_cursor = c->query(helpers::collection_name(Collections::ANNOTATIONS()), query, 1);
         mongo::BSONObj result;
-        if (data_cursor->more()) {
-          result = data_cursor->next();
-        } else {
-          msg = "annotation with id " + id + " not found.";
-          c.done();
+        if (!data::annotation(id, result, msg))  {
           return false;
         }
-        c.done();
 
         for (mongo::BSONObj::iterator it = result.begin(); it.more(); ) {
           mongo::BSONElement e = it.next();
@@ -285,19 +211,10 @@ namespace epidb {
                           std::map<std::string, std::string> &upload_info,
                           std::string &msg, bool full = false)
       {
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
-
-        mongo::BSONObj query = BSON("_id" << id);
-        std::auto_ptr<mongo::DBClientCursor> data_cursor = c->query(helpers::collection_name(Collections::EXPERIMENTS()), query, 1);
         mongo::BSONObj result;
-        if (data_cursor->more()) {
-          result = data_cursor->next();
-        } else {
-          msg = "experiment with id " + id + " not found.";
-          c.done();
+        if (!data::experiment(id, result, msg))  {
           return false;
         }
-        c.done();
 
         for (mongo::BSONObj::iterator it = result.begin(); it.more(); ) {
           mongo::BSONElement e = it.next();
@@ -315,7 +232,7 @@ namespace epidb {
             while (itt.more()) {
               mongo::BSONElement ee = itt.next();
               std::string field_name = ee.fieldName();
-              if (field_name.compare(0, 5, "norm_") != 0 ||
+              if (field_name.compare(0, 5, "norm_") != 0 &&
                   field_name.compare(0, 2, "__") != 0) {
                 extra_metadata[field_name] = utils::bson_to_string(ee);
               }
@@ -340,9 +257,9 @@ namespace epidb {
             }
           } else {
             std::string field_name = e.fieldName();
-            if (full ||
-                field_name.compare(0, 5, "norm_") != 0 ||
-                field_name.compare(0, 2, "__") != 0) {
+            if (full || (
+                field_name.compare(0, 5, "norm_") != 0 &&
+                field_name.compare(0, 2, "__") != 0)) {
               metadata[e.fieldName()] = utils::bson_to_string(e);
             }
           }
@@ -352,24 +269,10 @@ namespace epidb {
 
       bool get_query(const std::string &id, std::map<std::string, std::string> &res, std::string &msg)
       {
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
-
-        mongo::BSONObj query = BSON("_id" << id);
-        std::auto_ptr<mongo::DBClientCursor> data_cursor = c->query(helpers::collection_name(Collections::QUERIES()), query, 1);
-        if (!c->getLastError().empty()) {
-          msg = c->getLastError();
-          c.done();
-          return false;
-        }
         mongo::BSONObj result;
-        if (data_cursor->more()) {
-          result = data_cursor->next();
-        } else {
-          msg = "query with id " + id + " not found.";
-          c.done();
+        if (!data::query(id, result, msg))  {
           return false;
         }
-        c.done();
 
         res["genome"] = utils::bson_to_string(result["genome"]);
         res["_id"] = utils::bson_to_string(result["_id"]);
@@ -398,20 +301,10 @@ namespace epidb {
 
       bool get_sample_field(const std::string &id, std::map<std::string, std::string> &res, std::string &msg, bool full = false)
       {
-        //  TODO: move to a generic function
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
-
-        mongo::BSONObj query = BSON("_id" << id);
-        std::auto_ptr<mongo::DBClientCursor> data_cursor = c->query(helpers::collection_name(Collections::SAMPLE_FIELDS()), query, 1);
         mongo::BSONObj result;
-        if (data_cursor->more()) {
-          result = data_cursor->next();
-        } else {
-          msg = "Sample Field with id " + id + " not found.";
-          c.done();
+        if (!data::sample_field(id, result, msg))  {
           return false;
         }
-        c.done();
 
         mongo::BSONObj::iterator it = result.begin();
         while (it.more()) {
@@ -426,20 +319,10 @@ namespace epidb {
 
       bool get_tiling_region(const std::string &id, std::map<std::string, std::string> &res, std::string &msg, bool full = false)
       {
-        //  TODO: move to a generic function
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
-
-        mongo::BSONObj query = BSON("_id" << id);
-        std::auto_ptr<mongo::DBClientCursor> data_cursor = c->query(helpers::collection_name(Collections::TILINGS()), query, 1);
         mongo::BSONObj result;
-        if (data_cursor->more()) {
-          result = data_cursor->next();
-        } else {
-          msg = "Tiling Regions id " + id + " not found.";
-          c.done();
+        if (!data::tiling_region(id, result, msg))  {
           return false;
         }
-        c.done();
 
         mongo::BSONObj::iterator it = result.begin();
         while (it.more()) {
@@ -456,7 +339,6 @@ namespace epidb {
       {
         return columns::get_column_type(id, res, msg);
       }
-
     }
   }
 }
