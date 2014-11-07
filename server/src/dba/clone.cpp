@@ -21,6 +21,7 @@
 #include "config.hpp"
 #include "full_text.hpp"
 #include "helpers.hpp"
+#include "users.hpp"
 
 #include "../log.hpp"
 
@@ -30,10 +31,9 @@ namespace epidb {
 
     bool clone_dataset(const std::string &dataset_id, const std::string &name, const std::string &norm_name,
                        const std::string &description, const std::string &norm_description,
-                       const parser::FileFormat &format,
-                       const datatypes::Metadata &extra_metadata,
-                       std::string &_id,
-                       std::string &msg)
+                       const parser::FileFormat &format, const datatypes::Metadata &extra_metadata,
+                       const std::string user_key,
+                       std::string &_id, std::string &msg)
     {
 
       mongo::ScopedDbConnection c(config::get_mongodb_server());
@@ -185,7 +185,13 @@ namespace epidb {
       mongo::BSONObjBuilder clone_final_builder;
       clone_final_builder.appendElements(cloned_metadata);
 
+      std::string user_name;
+      if (!users::get_user_name(user_key, user_name, msg)) {
+        return false;
+      }
+
       mongo::BSONObjBuilder upload_info_builder;
+      upload_info_builder.append("user", user_name);
       upload_info_builder.append("cloned_from", dataset_id);
       upload_info_builder.append("done", true);
       upload_info_builder.append("upload_end", mongo::jsTime());

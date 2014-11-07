@@ -19,8 +19,9 @@ namespace epidb {
 
     bool clone_dataset(const std::string &dataset_id, const std::string &name, const std::string &norm_name,
                        const std::string &description, const std::string &norm_description,
-                       const parser::FileFormat &format,
-                       const datatypes::Metadata &extra_metadata, std::string &_id, std::string &msg);
+                       const parser::FileFormat &format, const datatypes::Metadata &extra_metadata,
+                       const std::string user_id,
+                       std::string &_id, std::string &msg);
 
   }
 }
