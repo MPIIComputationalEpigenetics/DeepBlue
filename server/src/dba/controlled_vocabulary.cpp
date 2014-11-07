@@ -562,6 +562,59 @@ namespace epidb {
         return true;
       }
 
+      bool remove_biosouce(const std::string &id, const std::string &biosource_name , const std::string &norm_biosource_name, std::string &msg)
+      {
+        mongo::ScopedDbConnection c(config::get_mongodb_server());
+
+        // Start deleting the data
+        // delete from full text search
+        if (!search::remove(id, msg)) {
+          c.done();
+          return false;
+        }
+
+        c->update(helpers::collection_name(Collections::TEXT_SEARCH()), BSON("related_terms" << norm_biosource_name), BSON("$pull" << BSON("related_terms" << norm_biosource_name)), false, true);
+        if (!c->getLastError().empty()) {
+          msg = c->getLastError();
+          c.done();
+          return false;
+        }
+
+        // Remove from embracing collection // useless. just for sake
+        if (!helpers::remove_all(helpers::collection_name(Collections::BIOSOURCE_EMBRACING()), BSON("norm_biosource_name" << norm_biosource_name), msg)) {
+          c.done();
+          return false;
+        }
+
+        // Remove from the others biosources scope
+        c->update(helpers::collection_name(Collections::BIOSOURCE_EMBRACING()), BSON("subs" << norm_biosource_name), BSON("$pull" << BSON("related_terms" << norm_biosource_name)), false, true);
+        if (!c->getLastError().empty()) {
+          msg = c->getLastError();
+          c.done();
+          return false;
+        }
+
+        // remove from synonyms collection
+        if (!helpers::remove_all(helpers::collection_name(Collections::BIOSOURCE_SYNONYMS()), BSON("norm_name" << norm_biosource_name), msg)) {
+          return false;
+        }
+
+        // remove from synonyms names collection
+        if (!helpers::remove_all(helpers::collection_name(Collections::BIOSOURCE_SYNONYM_NAMES()), BSON("norm_biosource_name" << norm_biosource_name), msg)) {
+          c.done();
+          return false;
+        }
+
+
+        // remove itself
+        if (!helpers::remove_one(helpers::collection_name(Collections::BIOSOURCES()), id, msg)) {
+          c.done();
+          return false;
+        }
+
+        c.done();
+        return true;
+      }
     }
   }
 }

@@ -12,6 +12,8 @@
 #include <iostream>
 #include <vector>
 
+#include "../extras/utils.hpp"
+
 namespace epidb {
   namespace dba {
     namespace cv {
@@ -43,6 +45,8 @@ namespace epidb {
 
       bool get_synonym_root(const std::string &synonym, const std::string &norm_synonym,
                             std::string &biosource_name, std::string &norm_biosource_name, std::string &msg);
+
+      bool remove_biosouce(const std::string &id, const std::string &biosource_name , const std::string &norm_biosource_name, std::string &msg);
     }
   }
 }

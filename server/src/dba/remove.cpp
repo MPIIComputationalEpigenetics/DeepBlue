@@ -11,6 +11,7 @@
 #include <mongo/bson/bson.h>
 
 #include "collections.hpp"
+#include "controlled_vocabulary.hpp"
 #include "data.hpp"
 #include "full_text.hpp"
 #include "genomes.hpp"
@@ -300,11 +301,12 @@ namespace epidb {
           return false;
         }
 
-        const std::string biosource_name = biosource["norm_name"].String();
+        const std::string biosource_name = biosource["name"].String();
+        const std::string norm_biosource_name = biosource["norm_name"].String();
 
         // Check if some experiment is still using this project
         std::vector<mongo::BSONObj> samples;
-        if (!helpers::get(Collections::SAMPLES(), "norm_biosource_name", biosource_name, samples, msg)) {
+        if (!helpers::get(Collections::SAMPLES(), "norm_biosource_name", norm_biosource_name, samples, msg)) {
           return false;
         }
         if (!samples.empty()) {
@@ -313,25 +315,19 @@ namespace epidb {
           return false;
         }
 
-        // Start deleting the data
-        // delete from full text search
-        if (!search::remove(id, msg)) {
+        std::vector<std::string> norm_subs;
+        if (!cv::get_biosource_embracing(biosource_name, norm_biosource_name, true, user_key, norm_subs, msg)) {
           return false;
         }
 
-        // Delete project from projects collection
 
-        // TODO: check relationship
-        //   if is leaf, okay, otherwise error
-        //   remove from search
-        // TODO: check synonyms
-        //    remove if is a synonyms?
-        //    synonym ownership tracking (another collection)
-        if (!helpers::remove_one(helpers::collection_name(Collections::BIOSOURCES()), id, msg)) {
+        // get_biosource_embracing return at least 1 element , that is the given biosource
+        if (norm_subs.size() > 1) {
+          msg = "This biosource has terms into his scope and can not be removed";
           return false;
         }
 
-        return true;
+        return cv::remove_biosouce(id, biosource_name , norm_biosource_name, msg);
       }
 
       bool sample(const std::string &id, const std::string &user_key, std::string &msg)
