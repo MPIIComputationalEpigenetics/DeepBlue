@@ -83,7 +83,7 @@ namespace epidb {
         }
 
         std::string id_clone;
-        if (!dba::clone_dataset(id, name, norm_name, description, norm_description, fileFormat, extra_metadata, id_clone, msg)) {
+        if (!dba::clone_dataset(id, name, norm_name, description, norm_description, fileFormat, extra_metadata, user_key, id_clone, msg)) {
           result.add_error(msg);
           return false;
         }
