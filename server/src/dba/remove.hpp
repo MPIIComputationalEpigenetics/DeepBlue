@@ -30,10 +30,6 @@ namespace epidb {
 
       bool experiment(const std::string &id, const std::string &user_id, std::string &msg);
 
-      bool query(const std::string &id, const std::string &user_id, std::string &msg);
-
-      bool tiling_region(const std::string &id, const std::string &user_id, std::string &msg);
-
       bool technique(const std::string &id, const std::string &user_id, std::string &msg);
 
       bool sample_field(const std::string &id, const std::string &user_id, std::string &msg);

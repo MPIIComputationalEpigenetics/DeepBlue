@@ -12,15 +12,47 @@
 
 #include "collections.hpp"
 #include "data.hpp"
+#include "full_text.hpp"
 #include "genomes.hpp"
 #include "helpers.hpp"
 #include "key_mapper.hpp"
 #include "remove.hpp"
-#include "full_text.hpp"
+#include "users.hpp"
 
 namespace epidb {
   namespace dba {
     namespace remove {
+
+      bool has_permission(mongo::BSONObj entity, const std::string &user_key, bool is_exp_ann, std::string &msg)
+      {
+        bool is_admin = false;
+        if (!users::is_admin_key(user_key, is_admin, msg)) {
+          return false;
+        }
+
+        if (is_admin) {
+          return true;
+        }
+
+        std::string name;
+        if (!users::get_user_name(user_key, name, msg)) {
+          return false;
+        }
+
+        std::string owner;
+        if (is_exp_ann) {
+          owner = entity["upload_info"]["user"].String();
+        } else {
+          owner = entity["user"].String();
+        }
+
+        if (owner == name) {
+          return true;
+        } else {
+          msg = "You do not have permission to delete this.";
+          return false;
+        }
+      }
 
       bool dataset(const int dataset_id, const std::string &genome_name, std::string &msg)
       {
@@ -40,11 +72,15 @@ namespace epidb {
         return true;
       }
 
-      bool annotation(const std::string &id, const std::string &user_id, std::string &msg)
+      bool annotation(const std::string &id, const std::string &user_key, std::string &msg)
       {
         mongo::BSONObj annotation;
         if (!data::annotation(id, annotation, msg)) {
           msg = "Annotation " + id + " not found";
+          return false;
+        }
+
+        if (!has_permission(annotation, user_key, true, msg)) {
           return false;
         }
 
@@ -78,11 +114,15 @@ namespace epidb {
         return true;
       }
 
-      bool experiment(const std::string &id, const std::string &user_id, std::string &msg)
+      bool experiment(const std::string &id, const std::string &user_key, std::string &msg)
       {
         mongo::BSONObj experiment;
         if (!data::experiment(id, experiment, msg)) {
           msg = "Experiment " + id + " not found";
+          return false;
+        }
+
+        if (!has_permission(experiment, user_key, true, msg)) {
           return false;
         }
 
@@ -116,11 +156,15 @@ namespace epidb {
         return true;
       }
 
-      bool genome(const std::string &id, const std::string &user_id, std::string &msg)
+      bool genome(const std::string &id, const std::string &user_key, std::string &msg)
       {
         mongo::BSONObj genome;
         if (!data::genome(id, genome, msg)) {
           msg = "Genome " + id + " not found";
+          return false;
+        }
+
+        if (!has_permission(genome, user_key, false, msg)) {
           return false;
         }
 
@@ -158,7 +202,7 @@ namespace epidb {
           }
           std::string own_annotation_id = annotations[0]["_id"].String();
           std::cerr << own_annotation_id << std::endl;
-          if (!remove::annotation(own_annotation_id, user_id, msg)) {
+          if (!remove::annotation(own_annotation_id, user_key, msg)) {
             return false;
           }
         }
@@ -205,11 +249,15 @@ namespace epidb {
         return true;
       }
 
-      bool project(const std::string &id, const std::string &user_id, std::string &msg)
+      bool project(const std::string &id, const std::string &user_key, std::string &msg)
       {
         mongo::BSONObj project;
         if (!data::project(id, project, msg)) {
           msg = "Project " + id + " not found";
+          return false;
+        }
+
+        if (!has_permission(project, user_key, false, msg)) {
           return false;
         }
 
@@ -240,11 +288,15 @@ namespace epidb {
         return true;
       }
 
-      bool biosource(const std::string &id, const std::string &user_id, std::string &msg)
+      bool biosource(const std::string &id, const std::string &user_key, std::string &msg)
       {
         mongo::BSONObj biosource;
         if (!data::biosource(id, biosource, msg)) {
           msg = "Biosource " + id + " not found";
+          return false;
+        }
+
+        if (!has_permission(biosource, user_key, false, msg)) {
           return false;
         }
 
@@ -282,11 +334,15 @@ namespace epidb {
         return true;
       }
 
-      bool sample(const std::string &id, const std::string &user_id, std::string &msg)
+      bool sample(const std::string &id, const std::string &user_key, std::string &msg)
       {
         mongo::BSONObj sample;
         if (!data::sample(id, sample, msg)) {
           msg = "Sample " + id + " not found";
+          return false;
+        }
+
+        if (!has_permission(sample, user_key, false, msg)) {
           return false;
         }
 
@@ -317,11 +373,15 @@ namespace epidb {
         return true;
       }
 
-      bool epigenetic_mark(const std::string &id, const std::string &user_id, std::string &msg)
+      bool epigenetic_mark(const std::string &id, const std::string &user_key, std::string &msg)
       {
         mongo::BSONObj epigenetic_mark;
         if (!data::epigenetic_mark(id, epigenetic_mark, msg)) {
           msg = "Epigenetic Mark " + id + " not found";
+          return false;
+        }
+
+        if (!has_permission(epigenetic_mark, user_key, false, msg)) {
           return false;
         }
 
@@ -352,11 +412,15 @@ namespace epidb {
         return true;
       }
 
-      bool technique(const std::string &id, const std::string &user_id, std::string &msg)
+      bool technique(const std::string &id, const std::string &user_key, std::string &msg)
       {
         mongo::BSONObj technique;
         if (!data::technique(id, technique, msg)) {
           msg = "Technique " + id + " not found";
+          return false;
+        }
+
+        if (!has_permission(technique, user_key, false, msg)) {
           return false;
         }
 
@@ -387,22 +451,12 @@ namespace epidb {
         return true;
       }
 
-      bool query(const std::string &id, const std::string &user_id, std::string &msg)
+      bool sample_field(const std::string &id, const std::string &user_key, std::string &msg)
       {
         return false;
       }
 
-      bool tiling_region(const std::string &id, const std::string &user_id, std::string &msg)
-      {
-        return false;
-      }
-
-      bool sample_field(const std::string &id, const std::string &user_id, std::string &msg)
-      {
-        return false;
-      }
-
-      bool column_type(const std::string &id, const std::string &user_id, std::string &msg)
+      bool column_type(const std::string &id, const std::string &user_key, std::string &msg)
       {
         return false;
       }
