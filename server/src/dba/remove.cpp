@@ -48,7 +48,7 @@ namespace epidb {
         }
 
         int dataset_id = annotation[KeyMapper::DATASET()].Int();
-        std::string genome_name = annotation["genome"].String();
+        std::string genome_name = annotation["norm_genome"].String();
 
         // find others annotations with the same id
         std::vector<mongo::BSONObj> results;
@@ -56,7 +56,7 @@ namespace epidb {
           return false;
         }
 
-        // if have more than one, keep the dataset
+        // keep it if it has more than one experiment pointing to this dataset
         // if have one, remove dataset
         if (results.size() == 1) {
           if (!remove::dataset(dataset_id, genome_name, msg)) {
@@ -88,38 +88,36 @@ namespace epidb {
 
         // Check if some experiment is still using this genome
         std::vector<mongo::BSONObj> experiments;
-
-        if (!helpers::get(Collections::EXPERIMENTS(), "genome", genome_name, experiments, msg)) {
+        if (!helpers::get(Collections::EXPERIMENTS(), "norm_genome", genome_name, experiments, msg)) {
           return false;
         }
         if (!experiments.empty()) {
-          //  (TODO: show experiments)
-          msg = "Some experiments are still using this genome.";
+          msg = "Some experiments are still using this genome. Use the list_experiments command for obtaining them.";
           return false;
         }
 
         // Check if some annotations is still using this genome
-        // TODO: delete the automatically created annotation
         std::vector<mongo::BSONObj> annotations;
         std::cerr << genome_name << std::endl;
-        if (!helpers::get(Collections::ANNOTATIONS(), "genome", genome_name, annotations, msg)) {
+        if (!helpers::get(Collections::ANNOTATIONS(), "norm_genome", genome_name, annotations, msg)) {
           return false;
         }
         if (annotations.size() > 1) {
           //  (TODO: show experiments)
-          msg = "Some annotations are still using this genome.";
+          msg = "Some annotations are still using this genome. Use the list_annotations command for obtaining them.";
           return false;
         }
 
         std::cerr << annotations.size() << std::endl;
         if (annotations.size() == 1) {
-          std::string own_annotation_name = annotations[0]["name"].String();
+          std::string own_annotation_name = annotations[0]["norm_name"].String();
           if (own_annotation_name != genome_name) {
             //  (TODO: show experiments)
-            msg = "Some annotations are still using this genome.";
+            msg = "Some annotations are still using this genome. Use the list_annotations command for obtaining them.";
             return false;
           }
           std::string own_annotation_id = annotations[0]["_id"].String();
+          std::cerr << own_annotation_id << std::endl;
           if (!remove::annotation(own_annotation_id, user_id, msg)) {
             return false;
           }
@@ -145,7 +143,6 @@ namespace epidb {
         }
 
         // Start deleting the data
-
         // delete from full text search
         if (!search::remove(id, msg)) {
           return false;
@@ -170,7 +167,36 @@ namespace epidb {
 
       bool project(const std::string &id, const std::string &user_id, std::string &msg)
       {
-        return false;
+        mongo::BSONObj project;
+        if (!data::project(id, project, msg)) {
+          return false;
+        }
+
+        const std::string project_name = project["norm_name"].String();
+
+        // Check if some experiment is still using this project
+        std::vector<mongo::BSONObj> experiments;
+        if (!helpers::get(Collections::EXPERIMENTS(), "norm_project", project_name, experiments, msg)) {
+          return false;
+        }
+        if (!experiments.empty()) {
+          //  (TODO: show experiments)
+          msg = "Some experiments are still using this project.";
+          return false;
+        }
+
+        // Start deleting the data
+        // delete from full text search
+        if (!search::remove(id, msg)) {
+          return false;
+        }
+
+        // Delete project from projects collection
+        if (!helpers::remove_one(helpers::collection_name(Collections::PROJECTS()), id, msg)) {
+          return false;
+        }
+
+        return true;
       }
 
       bool biosource(const std::string &id, const std::string &user_id, std::string &msg)
