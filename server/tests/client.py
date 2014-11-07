@@ -24,12 +24,14 @@ class EpidbClient:
 ## Main Operations
 
   ## General information
-  def info(self, id, user_key):
-    return self.server.info(id, user_key)
+  def info(self, _id, user_key):
+    return self.server.info(_id, user_key)
 
   def search(self, text, type_, user_key):
     return self.server.search(text, type_, user_key)
 
+  def remove(self, _id, user_key):
+    return self.server.remove(_id, user_key)
 
   ## Genomes
   def add_genome(self, name, description, chromosomes, user_key):

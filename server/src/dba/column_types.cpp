@@ -194,7 +194,7 @@ namespace epidb {
       }
 
       template<>
-      bool ColumnType<Code>::execute(const std::string& chromosome, const Region &region, dba::Metafield &metafield,std::string &result, std::string &msg)
+      bool ColumnType<Code>::execute(const std::string &chromosome, const Region &region, dba::Metafield &metafield, std::string &result, std::string &msg)
       {
         lua::Sandbox::LuaPtr lua = _content.second;
         lua->set_current_context(chromosome, region, metafield);
@@ -602,21 +602,15 @@ namespace epidb {
 
       bool get_column_type(const std::string &id, std::map<std::string, std::string> &res, std::string &msg)
       {
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
-        mongo::BSONObj query = BSON("_id" << id);
-        std::auto_ptr<mongo::DBClientCursor> data_cursor = c->query(helpers::collection_name(Collections::COLUMN_TYPES()), query, 1);
-        if (!data_cursor->more()) {
-          msg = "Column type id " + id + " not found";
-          c.done();
+        mongo::BSONObj o;
+        if (!helpers::get_one(Collections::COLUMN_TYPES(), mongo::Query(BSON("_id" << id)), o, msg)) {
           return false;
         }
 
         ColumnTypePtr column_type;
-        mongo::BSONObj o = data_cursor->next().getOwned();
         if (!column_type_bsonobj_to_class(o, column_type, msg)) {
           return false;
         }
-        c.done();
 
         res["_id"] = id;
         res["name"] = column_type->name();

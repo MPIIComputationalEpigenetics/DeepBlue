@@ -270,6 +270,12 @@ namespace epidb {
 
         return true;
       }
+
+      bool remove(const std::string &id, std::string &msg)
+      {
+        const std::string collection = helpers::collection_name(Collections::TEXT_SEARCH());
+        return helpers::remove_all(collection, QUERY("epidb_id" << id), msg);
+      }
     }
   }
 }

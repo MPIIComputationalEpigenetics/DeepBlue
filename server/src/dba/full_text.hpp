@@ -24,6 +24,7 @@
 
 namespace epidb {
   namespace dba {
+    // TODO: rename namespace to full_text
     namespace search {
 
       struct TextSearchResult {
@@ -34,17 +35,22 @@ namespace epidb {
         double score;
       };
 
+      // TODO: rename namespace to insert
       bool insert_full_text(const std::string &type, const std::string &id,
                             const mongo::BSONObj &extra_data, std::string &msg);
 
+      // TODO: rename namespace to search
       bool search_full_text(const std::string &text, std::vector<TextSearchResult> &, std::string &msg);
 
       bool insert_related_term(const std::string &id, const std::string &name, std::string &msg);
 
       bool change_extra_metadata_full_text(const std::string &id, const std::string &key, const std::string &value, std::string &msg);
 
+      // TODO: rename namespace to search
       bool search_full_text(const std::string &text, const std::vector<std::string> &types,
                             std::vector<TextSearchResult> &, std::string &msg);
+
+      bool remove(const std::string &id, std::string &msg);
     }
   }
 }
