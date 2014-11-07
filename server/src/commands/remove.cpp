@@ -81,10 +81,6 @@ namespace epidb {
           ok = dba::remove::epigenetic_mark(id, user_key, msg);
         } else if (id.compare(0, 1, "e") == 0) {
           ok = dba::remove::experiment(id, user_key, msg);
-        } else if (id.compare(0, 1, "q") == 0) {
-          ok = dba::remove::query(id, user_key, msg);
-        } else if (id.compare(0, 2, "tr") == 0) {
-          ok = dba::remove::tiling_region(id, user_key, msg);
         } else if (id.compare(0, 1, "t") == 0) {
           ok = dba::remove::technique(id, user_key, msg);
         } else if (id.compare(0, 1, "f") == 0) {
