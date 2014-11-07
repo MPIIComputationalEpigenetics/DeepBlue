@@ -78,7 +78,7 @@ class TestRemoveCommands(helpers.TestCase):
     res, genomes = epidb.search("hg19", "genomes", self.admin_key)
     res, anns = epidb.remove(genomes[0][0], self.admin_key)
     self.assertFailure(res, anns)
-    self.assertEqual(anns, "Some annotations are still using this genome. Use the list_annotations command for obtaining them.")
+    self.assertEqual(anns, "This genome is being used some annotations.")
 
     res = epidb.add_annotation("Cpg Islands", "hg19", "CpG islands are associated ...",
           file_data,
@@ -114,6 +114,36 @@ class TestRemoveCommands(helpers.TestCase):
     self.assertSuccess(res, anns)
     self.assertEqual(len(anns), 0)
 
+  def removeest_remove_experiment(self):
+    epidb = EpidbClient()
+    self.init_base(epidb)
+
+    eid1 = self.insert_experiment(epidb, "hg18_chr1_1")
+
+    (s, q) = epidb.select_regions("hg18_chr1_1", "hg18", None, None, None, None, None, None, None, self.admin_key)
+    self.assertSuccess(s, q)
+
+    (s, regions) = epidb.get_regions(q, "CHROMOSOME,START,END", self.admin_key)
+    self.assertSuccess(s, regions)
+
+    (s, id_clone_plus) = epidb.clone_dataset(eid1, "novo experimen", "getting only the default values", "", {"new data": "true", "cool": "a lot"}, self.admin_key)
+    self.assertSuccess(s, id_clone_plus)
+
+    (s, id_removed) = epidb.remove(eid1, self.admin_key)
+    self.assertSuccess(s, id_removed)
+    self.assertEqual(id_removed, eid1)
+
+    (s, q2) = epidb.select_regions("novo experimen", "hg18", None, None, None, None, None, None, None, self.admin_key)
+    self.assertSuccess(s, q)
+
+    (s, regions2) = epidb.get_regions(q2, "CHROMOSOME,START,END", self.admin_key)
+    self.assertSuccess(s, regions)
+
+    (s, id_removed) = epidb.remove(id_clone_plus, self.admin_key)
+    self.assertSuccess(s, id_removed)
+    self.assertEqual(id_removed, id_clone_plus)
+
+
   def test_remove_project(self):
     epidb = EpidbClient()
     self.init_base(epidb)
@@ -125,10 +155,59 @@ class TestRemoveCommands(helpers.TestCase):
     res, projects = epidb.list_projects(self.admin_key)
 
     # adding two experiments with the same data should work
-    res = epidb.add_experiment("test_exp1", "hg19", "Methylation", sample_id, "tech1",
+    res, eid = epidb.add_experiment("test_exp1", "hg19", "Methylation", sample_id, "tech1",
               projects[0][1], "desc1", regions_data, format, None, self.admin_key)
-    self.assertSuccess(res)
+    self.assertSuccess(res, eid)
 
     res = epidb.remove(projects[0][0], self.admin_key )
     self.assertFailure(res)
+
+    res = epidb.remove(eid, self.admin_key)
+    self.assertSuccess(res)
+
+    res = epidb.remove(projects[0][0], self.admin_key )
+    self.assertSuccess(res)
+
+  def test_remove_biosource(self):
+    epidb = EpidbClient()
+    self.init_base(epidb)
+
+    res, biosources = epidb.list_biosources(self.admin_key)
+
+    for biosource in biosources:
+      res = epidb.remove(biosource[0], self.admin_key)
+      self.assertFailure(res)
+
+    for biosource in biosources:
+      res, samples = epidb.list_samples(biosource[1], {}, self.admin_key)
+      for sample in samples:
+        res = epidb.remove(sample[0], self.admin_key)
+        self.assertSuccess(res)
+
+    for biosource in biosources:
+      res = epidb.remove(biosource[0], self.admin_key)
+      self.assertSuccess(res)
+
+  def test_remove_sample(self):
+    epidb = EpidbClient()
+    self.init_base(epidb)
+
+    sample_id = self.sample_ids[0]
+    regions_data = helpers.load_bed("hg19_chr1_1")
+    format = data_info.EXPERIMENTS["hg19_chr1_1"]["format"]
+
+    # adding two experiments with the same data should work
+    res, eid = epidb.add_experiment("test_exp1", "hg19", "Methylation", sample_id, "tech1",
+              "ENCODE", "desc1", regions_data, format, None, self.admin_key)
+    self.assertSuccess(res)
+
+    res = epidb.remove(sample_id, self.admin_key )
+    self.assertFailure(res)
+
+    res = epidb.remove(eid, self.admin_key)
+    self.assertSuccess(res)
+
+    res = epidb.remove(sample_id, self.admin_key )
+    self.assertSuccess(res)
+
 
