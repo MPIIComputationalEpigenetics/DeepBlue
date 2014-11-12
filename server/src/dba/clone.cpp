@@ -83,6 +83,7 @@ namespace epidb {
       std::string original_format = original["format"].str();
       parser::FileFormat original_file_format;
       if (!parser::FileFormatBuilder::build(original_format, original_file_format, msg)) {
+        c.done();
         return false;
       }
 
@@ -108,6 +109,7 @@ namespace epidb {
           }
           if (!found) {
             msg = "Column " + clone_column["name"].str() +  " not found in the original dataset";
+            c.done();
             return false;
           }
         }
@@ -136,12 +138,14 @@ namespace epidb {
       if (dataset_id[0] == 'a') {
         int a_id;
         if (!helpers::get_counter("annotations", a_id, msg))  {
+          c.done();
           return false;
         }
         _id = "a" + utils::integer_to_string(a_id);
       } else {
         int e_id;
         if (!helpers::get_counter("experiments", e_id, msg))  {
+          c.done();
           return false;
         }
         _id = "e" + utils::integer_to_string(e_id);
@@ -187,6 +191,7 @@ namespace epidb {
 
       std::string user_name;
       if (!users::get_user_name(user_key, user_name, msg)) {
+        c.done();
         return false;
       }
 
