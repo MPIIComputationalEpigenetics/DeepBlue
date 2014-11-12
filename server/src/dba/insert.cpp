@@ -21,7 +21,6 @@
 #include <mongo/client/dbclient.h>
 
 #include "../extras/compress.hpp"
-#include "../parser/field_type.hpp"
 #include "../parser/genome_data.hpp"
 #include "../parser/parser_factory.hpp"
 #include "../extras/utils.hpp"
@@ -49,32 +48,30 @@ namespace epidb {
     const size_t MAXIMUM_SIZE = 10000000; // from mongodb maximum message size: 48000000
 
     static const bool fill_region_builder(mongo::BSONObjBuilder &builder,
-                                          const parser::Tokens &tokens, const parser::FileFormat &file_format,
-                                          std::string &chromosome, size_t &start, size_t &end, std::string &msg)
+                                          const parser::BedLine &bed_line, const parser::FileFormat &file_format,
+                                          std::string &msg)
     {
-      if (tokens.size() != file_format.size()) {
-        msg = "size of tokens doesn't match size of file format.";
+      if (bed_line.size() != file_format.size()) {
+        msg = "number of line elements doesn't match the file format size.";
         return false;
       }
 
-      size_t i(0);
-      bool chr_found = false;
-      bool start_found = false;
-      bool end_found = false;
+      builder.append(KeyMapper::START(), bed_line.start);
+      builder.append(KeyMapper::END(), bed_line.end);
 
+      size_t i(0);
       BOOST_FOREACH(const dba::columns::ColumnTypePtr & column_type, file_format) {
         std::string field_name = column_type->name();
+
+        if ((field_name == "CHROMOSOME") || (field_name == "START") || (field_name == "END")) {
+          continue;
+        }
+
         std::string name;
         if (!KeyMapper::to_short(field_name, name, msg)) {
           return false;
         }
-        parser::Token token = tokens[i++];
-
-        if (!chr_found && field_name == "CHROMOSOME") {
-          chr_found = true;
-          chromosome = token;
-          continue;
-        }
+        std::string token = bed_line.tokens[i++];
 
         if (column_type->ignore(token)) {
           continue;
@@ -116,50 +113,12 @@ namespace epidb {
           msg = err;
           return false;
         }
-
-        if (!start_found && field_name == "START") {
-          start_found = true;
-          size_t l;
-          if (!utils::string_to_long(token, l)) {
-            msg = "The field START should be an integer, but the value '" + token + "' is not a valid integer.";
-            return false;
-          }
-          start = l;
-        }
-
-        if (!end_found && field_name == "END") {
-          end_found = true;
-          size_t l;
-          if (!utils::string_to_long(token, l)) {
-            msg = "The field END should be an integer, but the value '" + token + "' is not a valid integer.";
-            return false;
-          }
-          end = l;
-        }
-      }
-
-      if (!start_found) {
-        msg = "Start position was not informed or was ignored. Line content: ";
-        BOOST_FOREACH(const std::string & s, tokens) {
-          msg += s;
-          msg += "\t";
-        }
-        return false;
-      }
-
-      if (!end_found) {
-        msg = "End position was not informed or was ignored. Line content: ";
-        BOOST_FOREACH(const std::string & s, tokens) {
-          msg += s;
-          msg += "\t";
-        }
-        return false;
       }
 
       return true;
     }
 
-    std::string out_of_range_message(size_t start, size_t end, std::string &chrom )
+    std::string out_of_range_message(size_t start, size_t end, const std::string &chrom )
     {
       std::stringstream ss;
       ss << "Invalid region: ";
@@ -623,7 +582,7 @@ namespace epidb {
                            const std::string &description, const std::string &norm_description,
                            const datatypes::Metadata &extra_metadata,
                            const std::string &user_key, const std::string &ip,
-                           const std::vector<parser::Tokens> &bed_file_tokenized,
+                           const std::vector<parser::BedLine> &bed_file_tokenized,
                            const parser::FileFormat &format,
                            std::string &experiment_id, std::string &msg)
     {
@@ -675,18 +634,14 @@ namespace epidb {
       std::vector<mongo::BSONObj> blocks_bulk;
       std::string prev_collection;
 
-      BOOST_FOREACH(const parser::Tokens & tokens, bed_file_tokenized) {
+      BOOST_FOREACH(const parser::BedLine & bed_line, bed_file_tokenized) {
         mongo::BSONObjBuilder region_builder;
-        std::string chromosome;
-        size_t start;
-        size_t end;
-
-        if (!fill_region_builder(region_builder, tokens, format, chromosome, start, end, msg)) {
+        if (!fill_region_builder(region_builder, bed_line, format, msg)) {
           c.done();
           return false;
         }
         std::string internal_chromosome;
-        if (!genome_info->internal_chromosome(chromosome, internal_chromosome, msg)) {
+        if (!genome_info->internal_chromosome(bed_line.chromosome, internal_chromosome, msg)) {
           // TODO: delete data already included.
           c.done();
           return false;
@@ -698,8 +653,8 @@ namespace epidb {
           return false;
         }
 
-        if (start > size || end > size) {
-          msg = out_of_range_message(start, end, chromosome);
+        if (bed_line.start > size || bed_line.end > size) {
+          msg = out_of_range_message(bed_line.start, bed_line.end, bed_line.chromosome);
           c.done();
           return false;
         }
@@ -737,7 +692,7 @@ namespace epidb {
                            const std::string &description, const std::string &norm_description,
                            const datatypes::Metadata &extra_metadata,
                            const std::string &user_key, const std::string &ip,
-                           const std::vector<parser::Tokens> &bed_file_tokenized,
+                           const std::vector<parser::BedLine> &bed_file_tokenized,
                            const parser::FileFormat &format,
                            std::string &annotation_id, std::string &msg)
     {
@@ -787,18 +742,15 @@ namespace epidb {
       std::vector<mongo::BSONObj> blocks_bulk;
       std::string prev_collection;
 
-      BOOST_FOREACH(const parser::Tokens & tokens, bed_file_tokenized) {
+      BOOST_FOREACH(const parser::BedLine & bed_line, bed_file_tokenized) {
         mongo::BSONObjBuilder region_builder;
-        std::string chromosome;
-        size_t start;
-        size_t end;
 
-        if (!fill_region_builder(region_builder, tokens, format, chromosome, start, end, msg)) {
+        if (!fill_region_builder(region_builder, bed_line, format, msg)) {
           c.done();
           return false;
         }
         std::string internal_chromosome;
-        if (!genome_info->internal_chromosome(chromosome, internal_chromosome, msg)) {
+        if (!genome_info->internal_chromosome(bed_line.chromosome, internal_chromosome, msg)) {
           // TODO: delete data already included.
           c.done();
           return false;
@@ -810,8 +762,8 @@ namespace epidb {
           return false;
         }
 
-        if (start > size || end > size) {
-          msg = out_of_range_message(start, end, chromosome);
+        if (bed_line.start > size || bed_line.end > size) {
+          msg = out_of_range_message(bed_line.start, bed_line.end, bed_line.chromosome);
           c.done();
           return false;
         }

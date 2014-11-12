@@ -59,7 +59,7 @@ class TestAnnotationCommands(helpers.TestCase):
 
     with open("data/cpgIslandExtFull.txt", 'r') as f:
       file_data = f.read()
-      regions_count = len(file_data.split("\n")) -1
+      regions_count = len(file_data.split("\n"))
       (res, a_1) = epidb.add_annotation("Cpg Islands", "hg19", "Complete CpG islands", file_data, cpg_island, None, self.admin_key)
       self.assertSuccess(res, a_1)
       res, qid_1 = epidb.select_annotations("Cpg Islands", "hg19", None, None, None, self.admin_key)

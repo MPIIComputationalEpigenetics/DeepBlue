@@ -20,15 +20,25 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/foreach.hpp>
 
-#include "field_type.hpp"
-
 #include "../dba/column_types.hpp"
 
 namespace epidb {
   namespace parser {
 
+    typedef struct BedLine
+    {
+      std::string chromosome;
+      unsigned int start;
+      unsigned int end;
+      std::vector<std::string> tokens;
+
+      size_t size() const {
+        return tokens.size() + 3;
+      }
+    } BedLine;
+
     typedef std::map<std::string, std::string> ParsedLine;
-    typedef std::vector<Token> Tokens;
+    //typedef std::vector<bed_line> Tokens;
 
     // TODO: move to bed_format.hpp
     class FileFormat {
@@ -135,11 +145,15 @@ namespace epidb {
       std::stringstream input_;
       bool first_;
       FileFormat format_;
+      int chromosome_pos;
+      int start_pos;
+      int end_pos;
 
     public:
       Parser(const std::string &content, FileFormat &format);
-      bool parse_line(Tokens &tokens);
-      bool check_length(const Tokens &tokens);
+      bool check_format(std::string& msg);
+      bool parse_line(BedLine &bed_line, std::string& msg);
+      bool check_length(const BedLine &bed_line);
       size_t actual_line();
       const std::string actual_line_content();
       size_t count_fields();

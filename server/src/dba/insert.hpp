@@ -29,7 +29,7 @@ namespace epidb {
                            const std::string &description, const std::string &norm_description,
                            const datatypes::Metadata &extra_metadata,
                            const std::string &user_key, const std::string &ip,
-                           const std::vector<parser::Tokens> &bed_file_tokenized,
+                           const std::vector<parser::BedLine> &bed_file_tokenized,
                            const parser::FileFormat &format,
                            std::string &annotation_id, std::string &msg);
 
@@ -60,7 +60,7 @@ namespace epidb {
                            const std::string &description, const std::string &norm_description,
                            const datatypes::Metadata &extra_metadata,
                            const std::string &user_key, const std::string &ip,
-                           const std::vector<parser::Tokens> &bed_file_tokenized,
+                           const std::vector<parser::BedLine> &bed_file_tokenized,
                            const parser::FileFormat &format,
                            std::string &experiment_id, std::string &msg);
 

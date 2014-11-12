@@ -13,6 +13,7 @@
 #include <boost/algorithm/string.hpp>
 
 #include "../dba/metafield.hpp"
+#include "../extras/utils.hpp"
 
 #include "parser_factory.hpp"
 
@@ -28,16 +29,54 @@ namespace epidb {
       first_column_useless(false),
       input_(content),
       first_(true),
-      format_(format)
+      format_(format),
+      chromosome_pos(-1),
+      start_pos(-1),
+      end_pos(-1)
     {
+      // TODO: check duplicated fields
+      // TODO: check missing fields
+      int count = 0;
+      for (auto &column : format_) {
+        if (column->name() == "CHROMOSOME") {
+          chromosome_pos = count;
+        }
+
+        if (column->name() == "START") {
+          start_pos = count;
+        }
+
+        if (column->name() == "END") {
+          end_pos = count;
+        }
+        count++;
+      }
     }
 
-    bool Parser::parse_line(Tokens &tokens)
+    bool Parser::check_format(std::string &msg)
     {
-      if (input_.eof()) {
+      if (chromosome_pos == -1) {
+        msg = "CHROMOSOME field was not informed in the format.";
+        return false;
+      }
+      if (start_pos == -1) {
+        msg = "START field was not informed in the format.";
+        return false;
+      }
+      if (end_pos == -1) {
+        msg = "END field was not informed in the format.";
         return false;
       }
 
+      return true;
+    }
+
+    bool Parser::parse_line(BedLine &bed_line, std::string& msg)
+    {
+      if (input_.eof()) {
+        msg = "Unexpected EOF";
+        return false;
+      }
       std::string line;
       std::getline(input_, line);
       actual_line_content_ = line;
@@ -45,6 +84,7 @@ namespace epidb {
       boost::trim(line);
 
       if (line.empty()) {
+        msg = "Empty line";
         return false;
       }
 
@@ -68,19 +108,39 @@ namespace epidb {
         it++;
       }
 
-      for (; it < strs.end(); it++) {
+      for (int pos = 0; it < strs.end(); pos++, it++) {
         std::string s = *it;
         boost::trim(s);
-        tokens.push_back(s);
+
+        if (pos == chromosome_pos) {
+          bed_line.chromosome = s;
+        } else if (pos == start_pos) {
+          Position start;
+          if (!utils::string_to_position(s, start)) {
+            msg = s + " is not a valid start position";
+            return false;
+          }
+          bed_line.start = start;
+        } else if (pos == end_pos) {
+          Position end;
+          if (!utils::string_to_position(s, end)) {
+            msg = s + " is not a valid end position";
+            return false;
+          }
+          bed_line.end = end;
+        } else {
+          bed_line.tokens.push_back(s);
+        }
       }
 
       actual_line_++;
       return true;
     }
 
-    bool Parser::check_length(const Tokens &tokens)
+    bool Parser::check_length(const BedLine &bed_line)
     {
-      if (tokens.size() != format_.size() ) {
+      // +3 for the mandatory fields // chrom, start, end
+      if (bed_line.size() != format_.size() ) {
         return false;
       }
 
@@ -333,7 +393,7 @@ namespace epidb {
 
     bool FileFormatBuilder::build_metafield_column(const std::string &op, dba::columns::ColumnTypePtr &column_type, std::string &msg)
     {
-        return build_metafield_column(op, "", column_type, msg);
+      return build_metafield_column(op, "", column_type, msg);
     }
 
     bool FileFormatBuilder::build_metafield_column(const std::string &op, const std::string &default_value,

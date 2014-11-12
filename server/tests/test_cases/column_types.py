@@ -91,7 +91,7 @@ class TestColumnTypes(helpers.TestCase):
     self.assertEqual(column_types[5][1], "column type name: 'string_column' default: '' type: 'string'")
 
 
-  def test_insert_experiment(self):
+  def test_insert_experiment_fail(self):
     epidb = EpidbClient()
     self.init_base(epidb)
 
@@ -124,7 +124,8 @@ class TestColumnTypes(helpers.TestCase):
 
     res = epidb.add_experiment("test_exp1", "hg19", "Methylation", sample_id, "tech1",
                                "ENCODE", "desc1", "", format, None, self.admin_key)
-    self.assertSuccess(res)
+    self.assertFailure(res)
+    self.assertEqual(res[1], "CHROMOSOME field was not informed in the format.")
 
 
   def test_range_fail(self):
@@ -167,7 +168,6 @@ class TestColumnTypes(helpers.TestCase):
     self.assertFailure(res, msg)
     self.assertTrue("p_value" in msg.lower())
     # self.assertEqual(msg, "Invalid value '69.6' for column P_VALUE")
-
 
   def test_category_fail(self):
     epidb = EpidbClient()

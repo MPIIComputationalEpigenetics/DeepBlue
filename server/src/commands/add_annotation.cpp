@@ -15,7 +15,6 @@
 #include "../engine/commands.hpp"
 #include "../extras/utils.hpp"
 #include "../extras/serialize.hpp"
-#include "../parser/field_type.hpp"
 #include "../parser/parser_factory.hpp"
 
 #include "../errors.hpp"
@@ -112,25 +111,41 @@ namespace epidb {
         }
 
         parser::Parser parser(data, fileFormat);
-        std::vector<parser::Tokens> bed_file_tokenized;
+        if (!parser.check_format(msg)) {
+          result.add_error(msg);
+          return false;
+        }
+        std::vector<parser::BedLine> bed_file_tokenized;
         while (!parser.eof()) {
-          parser::Tokens tokens;
+          parser::BedLine bed_line;
 
-          if (parser.parse_line(tokens)) {
-            if (parser.check_length(tokens)) {
-              bed_file_tokenized.push_back(tokens);
-            } else {
-              std::stringstream m;
-              m << "Error while reading the BED file. Line: ";
-              m << parser.actual_line();
-              m << ". It is expected " ;
-              m << parser.count_fields();
-              m << " but when splitting the line by tabs, it has " ;
-              m << tokens.size();
-              m << " fields.";
-              result.add_error(m.str());
-              return false;
-            }
+          if (!parser.parse_line(bed_line, msg)) {
+            std::stringstream m;
+            m << "Error while reading the BED file. Line: ";
+            m << parser.actual_line();
+            m << ". - '";
+            m << msg;
+            m << "'";
+            result.add_error(m.str());
+            return false;
+          }
+
+          if (!parser.check_length(bed_line)) {
+            std::stringstream m;
+            m << "Error while reading the BED file. Line: ";
+            m << parser.actual_line();
+            m << ". - '";
+            m << parser.actual_line_content();
+            m << "'. The number of tokens (" ;
+            m << bed_line.size() ;
+            m << ") is different from the format size (" ;
+            m << parser.count_fields();
+            m << ") - ";
+            m << fileFormat.format();
+            result.add_error(m.str());
+            return false;
+          } else {
+            bed_file_tokenized.push_back(bed_line);
           }
         }
 

@@ -24,7 +24,6 @@
 #include "../datatypes/metadata.hpp"
 
 #include "../extras/utils.hpp"
-#include "../parser/field_type.hpp"
 #include "../parser/genome_data.hpp"
 #include "../parser/parser_factory.hpp"
 #include "../parser/wig_parser.hpp"

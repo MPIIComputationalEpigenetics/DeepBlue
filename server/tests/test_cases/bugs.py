@@ -37,7 +37,7 @@ class TestBugs(helpers.TestCase):
 
     self.assertFailure(r, a)
 
-    self.assertEquals(a, "Start position was not informed or was ignored. Line content: 1146\t43\t0\t18\tchr19\t59118819\t1000\t-10000\t+\t(TTAGGG)n\tSimple_repeat\tSimple_repeat\t5\t165\t0\t1\t")
+    self.assertEquals(a, "CHROMOSOME field was not informed in the format.")
 
     rmsk2 = [
   "swScore:Integer:0",
@@ -105,7 +105,7 @@ class TestBugs(helpers.TestCase):
       res = epidb.add_annotation("Cpg Islands", "hg19", "Complete CpG islands", file_data, cpg_island, None, self.admin_key)
       self.assertSuccess(res)
 
-    size_total = len(file_data.split("\n"))-1 # -1 last line
+    size_total = len(file_data.split("\n"))
 
     (status, qid_cpg) = epidb.select_annotations("Cpg Islands", "hg19", "chr1", None, None, self.admin_key)
 

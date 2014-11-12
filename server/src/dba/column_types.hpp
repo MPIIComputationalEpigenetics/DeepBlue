@@ -40,7 +40,6 @@ namespace epidb {
         COLUMN_ERR,
       };
 
-      typedef std::string Token;
       typedef std::pair<std::string, lua::Sandbox::LuaPtr> Code;
       typedef std::pair<double, double> Range;
       typedef std::vector<std::string> Category;
@@ -87,14 +86,14 @@ namespace epidb {
           return _default_value;
         }
 
-        virtual bool check(const Token &verify) const
+        virtual bool check(const std::string &verify) const
         {
           return false;
         }
 
-        bool ignore(const Token &verify) const
+        bool ignore(const std::string &verify) const
         {
-          return _default_value == verify;
+          return (_default_value == "*" || _default_value == verify);
         }
 
         virtual bool execute(const std::string& chromosome, const Region& region, dba::Metafield &metafield,std::string& result, std::string& msg)
