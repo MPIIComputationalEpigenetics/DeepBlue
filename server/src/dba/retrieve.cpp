@@ -295,6 +295,19 @@ namespace epidb {
         }
       }
 
+      bool get_regions(const std::string &genome, std::string &chromosome,
+                       const mongo::BSONObj &regions_query,
+                       Regions &regions, std::string &msg)
+      {
+        std::string collection = helpers::region_collection_name(genome, chromosome);
+        regions = build_regions();
+        if (!get_regions_from_collection(collection, regions_query, regions, msg)) {
+          EPIDB_LOG_ERR(msg);
+          return false;
+        }
+        return true;
+      }
+
       bool get_regions(const std::string &genome, std::vector<std::string> &chromosomes,
                        const mongo::BSONObj &regions_query,
                        ChromosomeRegionsList &results, std::string &msg)

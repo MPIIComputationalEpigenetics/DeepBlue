@@ -9,9 +9,6 @@
 #ifndef EPIDB_ALGORITHMS_AGGREGATE_HPP
 #define EPIDB_ALGORITHMS_AGGREGATE_HPP
 
-
-#include "intersection.hpp"
-
 #include <vector>
 #include <set>
 #include <iostream>

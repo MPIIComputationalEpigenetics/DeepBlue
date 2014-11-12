@@ -269,6 +269,33 @@ namespace epidb {
         return experiments_query_builder.obj();
       }
 
+      bool build_experiment_query(const int start, const int end, const std::string &experiment_name,
+                                  const std::string &user_key,  mongo::BSONObj &regions_query, std::string &msg)
+      {
+        mongo::ScopedDbConnection c(config::get_mongodb_server());
+        std::string norm_name = utils::normalize_name(experiment_name);
+        std::auto_ptr<mongo::DBClientCursor> cursor =
+          c->query(helpers::collection_name(Collections::EXPERIMENTS()), BSON("norm_name" << norm_name));
+
+        if (!cursor->more()) {
+          msg = "Experiments name '" + experiment_name + "' not found";
+          c.done();
+          return false;
+        }
+
+        mongo::BSONObj p = cursor->next();
+        mongo::BSONElement dataset_id = p.getField(KeyMapper::DATASET());
+        mongo::BSONObjBuilder regions_query_builder;
+        regions_query_builder.append(KeyMapper::DATASET(), dataset_id.Int());
+        regions_query_builder.append(KeyMapper::START(), BSON("$lte" << end));
+        regions_query_builder.append(KeyMapper::END(), BSON("$gte" << start));
+        regions_query = regions_query_builder.obj();
+
+        c.done();
+
+        return true;
+      }
+
       bool build_experiment_query(const std::string &user_key, const mongo::BSONObj &query,
                                   mongo::BSONObj &regions_query, std::string &msg)
       {

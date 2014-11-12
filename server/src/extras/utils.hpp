@@ -52,11 +52,11 @@ namespace epidb {
 
     std::ostream &operator<<(std::ostream &os, const IdNameCount &o);
 
-    template <typename Type> std::string vector_to_string(std::vector<Type> vector)
+    template <typename Type> std::string vector_to_string(std::vector<Type> vector, std::string sep=",")
     {
       std::ostringstream oss;
       if (!vector.empty()) {
-        std::ostream_iterator<Type> oss_it(oss, ",");
+        std::ostream_iterator<Type> oss_it(oss, sep.c_str());
         std::copy(vector.begin(), vector.end() - 1, oss_it);
         oss << vector.back();
       }

@@ -46,6 +46,9 @@ namespace epidb {
                                   mongo::BSONObj &regions_query, std::vector<std::string> &annotations_id,
                                   std::string &msg);
 
+      bool build_experiment_query(const int start, const int end, const std::string &experiment_name,
+                                  const std::string &user_key,  mongo::BSONObj &regions_query, std::string &msg);
+
       bool build_experiment_query(const std::string &user_key, const mongo::BSONObj &query,
                                   mongo::BSONObj &regions_query, std::vector<std::string> &experiments_id,
                                   std::string &msg);

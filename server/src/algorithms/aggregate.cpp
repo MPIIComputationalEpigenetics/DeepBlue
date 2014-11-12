@@ -6,16 +6,15 @@
 //  Copyright (c) 2014 Max Planck Institute for Computer Science. All rights reserved.
 //
 
-#include <cmath>
 #include <iostream>
 #include <limits>
-#include <numeric>
 #include <set>
 #include <vector>
 
 #include <boost/foreach.hpp>
 
 #include "aggregate.hpp"
+#include "accumulator.hpp"
 
 #include "../dba/key_mapper.hpp"
 #include "../dba/metafield.hpp"
@@ -28,101 +27,8 @@
 namespace epidb {
   namespace algorithms {
 
-    class Accumulator {
-    private:
-      std::vector<double> values;
-      bool _calculated;
-      double _min;
-      double _max;
-      double _median;
-      double _mean;
-      double _var;
-      double _sd;
-
-    public:
-      Accumulator() : _calculated(false),
-        _min(0.0),
-        _max(0.0),
-        _median(0.0),
-        _mean(0.0),
-        _var(0.0),
-        _sd(0.0) {}
-
-      void push(double value)
-      {
-        values.push_back(value);
-        _calculated = false;
-      }
-
-      double min()
-      {
-        calculate();
-        return _min;
-      }
-
-      double max()
-      {
-        calculate();
-        return _max;
-      }
-
-      double mean()
-      {
-        calculate();
-        return _mean;
-      }
-
-      double var()
-      {
-        calculate();
-        return _var;
-      }
-
-      double sd()
-      {
-        calculate();
-        return _sd;
-      }
-
-      double median()
-      {
-        calculate();
-        return _median;
-      }
-
-      double count()
-      {
-        return values.size();
-      }
-
-      void calculate()
-      {
-        if (_calculated || values.empty()) {
-          return;
-        }
-
-        std::sort(values.begin(), values.end());
-
-        _min = values[0];
-        _max = values[values.size() - 1];
-        _median = values[values.size() / 2];
-
-        double sum = std::accumulate(values.begin(), values.end(), 0.0);
-        _mean = sum / values.size();
-
-        std::vector<double> diff(values.size());
-        std::transform(values.begin(), values.end(), diff.begin(),
-                       std::bind2nd(std::minus<double>(), _mean));
-        double sq_sum = std::inner_product(diff.begin(), diff.end(), diff.begin(), 0.0);
-        _var = sq_sum / values.size();
-        _sd = std::sqrt(_var);
-
-        _calculated = true;
-      }
-    };
-
-    bool aggregate_regions(const std::string& chrom, const Regions &data, const Regions &ranges, const std::string &field,
-                           dba::Metafield& metafield, Regions &chr_regions, std::string &msg)
+    bool aggregate_regions(const std::string &chrom, const Regions &data, const Regions &ranges, const std::string &field,
+                           dba::Metafield &metafield, Regions &chr_regions, std::string &msg)
     {
       chr_regions = build_regions();
       RegionsConstIterator it_data = data->begin();
