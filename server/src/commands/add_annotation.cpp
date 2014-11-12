@@ -136,7 +136,7 @@ namespace epidb {
             }
           }
 
-          if (!parser.check_length(bed_line)) {
+          if (!parser.check_length(bed_line) && msg != "Empty line") {
             std::stringstream m;
             m << "Error while reading the BED file. Line: ";
             m << parser.actual_line();
