@@ -400,6 +400,15 @@ namespace epidb {
         return ab.arr();
       }
 
+      std::vector<std::string> build_vector(const std::vector<serialize::ParameterPtr> &params)
+      {
+        std::vector<std::string> vector;
+        for (std::vector<serialize::ParameterPtr>::const_iterator it = params.begin(); it != params.end(); it++) {
+          vector.push_back((**it).as_string());
+        }
+        return vector;
+      }
+
     }
   }
 }
