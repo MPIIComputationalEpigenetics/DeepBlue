@@ -23,6 +23,16 @@
 namespace epidb {
   namespace parser {
 
+    size_t BedLine::size() const
+    {
+      return tokens.size() + 3;
+    }
+
+    bool operator<(const BedLine &a, const BedLine &b)
+    {
+      return a.start < b.start;
+    }
+
     Parser::Parser(const std::string &content, FileFormat &format) :
       actual_line_content_(""),
       actual_line_(0),
@@ -71,7 +81,7 @@ namespace epidb {
       return true;
     }
 
-    bool Parser::parse_line(BedLine &bed_line, std::string& msg)
+    bool Parser::parse_line(BedLine &bed_line, std::string &msg)
     {
       if (input_.eof()) {
         msg = "Unexpected EOF";

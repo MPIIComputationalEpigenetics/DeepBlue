@@ -240,6 +240,8 @@ namespace epidb {
 
         } else {
           parser::FileFormat fileFormat;
+          parser::ChromosomeRegionsMap map_regions;
+
           if (!parser::FileFormatBuilder::build(format, fileFormat, msg)) {
             result.add_error(msg);
             return false;
@@ -250,22 +252,24 @@ namespace epidb {
             result.add_error(msg);
             return false;
           }
-          std::vector<parser::BedLine> bed_file_tokenized;
           while (!parser.eof()) {
             parser::BedLine bed_line;
 
             if (!parser.parse_line(bed_line, msg)) {
-              std::stringstream m;
-              m << "Error while reading the BED file. Line: ";
-              m << parser.actual_line();
-              m << ". - '";
-              m << msg;
-              m << "'";
-              result.add_error(m.str());
-              return false;
+              // Ignore Empty Line Error
+              if (msg != "Empty line") {
+                std::stringstream m;
+                m << "Error while reading the BED file. Line: ";
+                m << parser.actual_line();
+                m << ". - '";
+                m << msg;
+                m << "'";
+                result.add_error(m.str());
+                return false;
+              }
             }
 
-            if (!parser.check_length(bed_line)) {
+            if (!parser.check_length(bed_line) && msg != "Empty line") {
               std::stringstream m;
               m << "Error while reading the BED file. Line: ";
               m << parser.actual_line();
@@ -280,14 +284,16 @@ namespace epidb {
               result.add_error(m.str());
               return false;
             } else {
-              bed_file_tokenized.push_back(bed_line);
+              map_regions.insert(std::move(bed_line));
             }
           }
+
+          map_regions.finish();
 
           std::string id;
           bool ret = dba::insert_experiment(name, norm_name, genome, norm_genome, epigenetic_mark, norm_epigenetic_mark, sample,
                                             technique, norm_technique, project, norm_project, description, norm_description,
-                                            extra_metadata, user_key, ip, bed_file_tokenized, fileFormat, id, msg);
+                                            extra_metadata, user_key, ip, map_regions, fileFormat, id, msg);
           if (ret) {
             result.add_string(id);
           } else {

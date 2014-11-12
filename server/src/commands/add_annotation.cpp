@@ -81,6 +81,7 @@ namespace epidb {
         }
 
         std::string norm_name = utils::normalize_annotation_name(name);
+        std::string norm_description = utils::normalize_name(description);
         std::string norm_genome = utils::normalize_name(genome);
 
         bool ok;
@@ -115,19 +116,24 @@ namespace epidb {
           result.add_error(msg);
           return false;
         }
-        std::vector<parser::BedLine> bed_file_tokenized;
+
+        parser::ChromosomeRegionsMap map_regions;
+
         while (!parser.eof()) {
           parser::BedLine bed_line;
 
           if (!parser.parse_line(bed_line, msg)) {
-            std::stringstream m;
-            m << "Error while reading the BED file. Line: ";
-            m << parser.actual_line();
-            m << ". - '";
-            m << msg;
-            m << "'";
-            result.add_error(m.str());
-            return false;
+            // Ignore Empty Line Error
+            if (msg != "Empty line") {
+              std::stringstream m;
+              m << "Error while reading the BED file. Line: ";
+              m << parser.actual_line();
+              m << ". - '";
+              m << msg;
+              m << "'";
+              result.add_error(m.str());
+              return false;
+            }
           }
 
           if (!parser.check_length(bed_line)) {
@@ -145,15 +151,15 @@ namespace epidb {
             result.add_error(m.str());
             return false;
           } else {
-            bed_file_tokenized.push_back(bed_line);
+            map_regions.insert(std::move(bed_line));
           }
         }
 
-        std::string norm_description = utils::normalize_name(description);
+        map_regions.finish();
 
         std::string id;
         bool ret = dba::insert_annotation(name, norm_name, genome, norm_genome, description, norm_description, extra_metadata,
-                                          user_key, ip, bed_file_tokenized, fileFormat, id, msg);
+                                          user_key, ip, map_regions, fileFormat, id, msg);
 
         if (ret) {
           result.add_string(id);

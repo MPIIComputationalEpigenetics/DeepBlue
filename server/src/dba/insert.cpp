@@ -224,27 +224,6 @@ namespace epidb {
       return true;
     }
 
-    // Verify if the collection (in this case, the chromosome) changed and applies changes.
-    inline bool check_collection(const int dataset_id,
-                                 const std::string &collection, std::string &prev_collection,
-                                 size_t &count,
-                                 std::vector<mongo::BSONObj> &block, std::vector<mongo::BSONObj> &blocks_bulk,
-                                 size_t &bulk_size, size_t &total_size,
-                                 std::string &msg)
-    {
-      if (prev_collection == collection) {
-        return true;
-      }
-
-      if (!compress_and_insert_region_block(dataset_id, prev_collection, count, block, blocks_bulk, bulk_size, total_size, msg)) {
-        return false;
-      }
-
-      prev_collection = collection;
-      return true;
-    }
-
-
     inline bool check_bulk_size(const int dataset_id, const std::string &collection, size_t &count,
                                 std::vector<mongo::BSONObj> &block, std::vector<mongo::BSONObj> &blocks_bulk,
                                 size_t &bulk_size, size_t &total_size,
@@ -582,7 +561,7 @@ namespace epidb {
                            const std::string &description, const std::string &norm_description,
                            const datatypes::Metadata &extra_metadata,
                            const std::string &user_key, const std::string &ip,
-                           const std::vector<parser::BedLine> &bed_file_tokenized,
+                           const parser::ChromosomeRegionsMap &map_regions,
                            const parser::FileFormat &format,
                            std::string &experiment_id, std::string &msg)
     {
@@ -629,23 +608,16 @@ namespace epidb {
 
       size_t count = 0;
       size_t total_size = 0;
-      size_t bulk_size = 0;
-      std::vector<mongo::BSONObj> block;
-      std::vector<mongo::BSONObj> blocks_bulk;
-      std::string prev_collection;
 
-      BOOST_FOREACH(const parser::BedLine & bed_line, bed_file_tokenized) {
-        mongo::BSONObjBuilder region_builder;
-        if (!fill_region_builder(region_builder, bed_line, format, msg)) {
-          c.done();
-          return false;
-        }
+      BOOST_FOREACH(parser::ChromosomeBedLines chrom_lines, map_regions) {
+
         std::string internal_chromosome;
-        if (!genome_info->internal_chromosome(bed_line.chromosome, internal_chromosome, msg)) {
+        if (!genome_info->internal_chromosome(chrom_lines.first, internal_chromosome, msg)) {
           // TODO: delete data already included.
           c.done();
           return false;
         }
+
         size_t size;
         if (!genome_info->chromosome_size(internal_chromosome, size, msg)) {
           // TODO: delete data already included.
@@ -653,30 +625,39 @@ namespace epidb {
           return false;
         }
 
-        if (bed_line.start > size || bed_line.end > size) {
-          msg = out_of_range_message(bed_line.start, bed_line.end, bed_line.chromosome);
-          c.done();
-          return false;
-        }
-        mongo::BSONObj r = region_builder.obj();
         std::string collection = helpers::region_collection_name(genome, internal_chromosome);
 
-        if (!check_collection(dataset_id, collection, prev_collection, count, block, blocks_bulk, bulk_size, total_size, msg)) {
+
+        size_t bulk_size = 0;
+        std::vector<mongo::BSONObj> block;
+        std::vector<mongo::BSONObj> blocks_bulk;
+        BOOST_FOREACH(const parser::BedLine & bed_line, chrom_lines.second) {
+          mongo::BSONObjBuilder region_builder;
+          if (!fill_region_builder(region_builder, bed_line, format, msg)) {
+            c.done();
+            return false;
+          }
+
+          if (bed_line.start > size || bed_line.end > size) {
+            msg = out_of_range_message(bed_line.start, bed_line.end, bed_line.chromosome);
+            c.done();
+            return false;
+          }
+          mongo::BSONObj r = region_builder.obj();
+          std::string collection = helpers::region_collection_name(genome, internal_chromosome);
+
+          block.push_back(r);
+
+          if (!check_bulk_size(dataset_id, collection, count, block, blocks_bulk, bulk_size, total_size, msg)) {
+            c.done();
+            return false;
+          }
+        }
+
+        if (!check_remainings(dataset_id, collection, count, block, blocks_bulk, bulk_size, total_size, msg)) {
           c.done();
           return false;
         }
-
-        block.push_back(r);
-
-        if (!check_bulk_size(dataset_id, collection, count, block, blocks_bulk, bulk_size, total_size, msg)) {
-          c.done();
-          return false;
-        }
-      }
-
-      if (!check_remainings(dataset_id, prev_collection, count, block, blocks_bulk, bulk_size, total_size, msg)) {
-        c.done();
-        return false;
       }
 
       if (!update_upload_info(Collections::EXPERIMENTS(), experiment_id, total_size, msg)) {
@@ -692,7 +673,7 @@ namespace epidb {
                            const std::string &description, const std::string &norm_description,
                            const datatypes::Metadata &extra_metadata,
                            const std::string &user_key, const std::string &ip,
-                           const std::vector<parser::BedLine> &bed_file_tokenized,
+                           const parser::ChromosomeRegionsMap &map_regions,
                            const parser::FileFormat &format,
                            std::string &annotation_id, std::string &msg)
     {
@@ -740,21 +721,16 @@ namespace epidb {
       size_t bulk_size = 0;
       std::vector<mongo::BSONObj> block;
       std::vector<mongo::BSONObj> blocks_bulk;
-      std::string prev_collection;
 
-      BOOST_FOREACH(const parser::BedLine & bed_line, bed_file_tokenized) {
-        mongo::BSONObjBuilder region_builder;
+      BOOST_FOREACH(parser::ChromosomeBedLines chrom_lines, map_regions) {
 
-        if (!fill_region_builder(region_builder, bed_line, format, msg)) {
-          c.done();
-          return false;
-        }
         std::string internal_chromosome;
-        if (!genome_info->internal_chromosome(bed_line.chromosome, internal_chromosome, msg)) {
+        if (!genome_info->internal_chromosome(chrom_lines.first, internal_chromosome, msg)) {
           // TODO: delete data already included.
           c.done();
           return false;
         }
+
         size_t size;
         if (!genome_info->chromosome_size(internal_chromosome, size, msg)) {
           // TODO: delete data already included.
@@ -762,30 +738,35 @@ namespace epidb {
           return false;
         }
 
-        if (bed_line.start > size || bed_line.end > size) {
-          msg = out_of_range_message(bed_line.start, bed_line.end, bed_line.chromosome);
-          c.done();
-          return false;
-        }
-        mongo::BSONObj r = region_builder.obj();
         std::string collection = helpers::region_collection_name(genome, internal_chromosome);
 
-        if (!check_collection(dataset_id, collection, prev_collection, count, block, blocks_bulk, bulk_size, total_size, msg)) {
+        BOOST_FOREACH(const parser::BedLine & bed_line, chrom_lines.second) {
+          mongo::BSONObjBuilder region_builder;
+
+          if (bed_line.start > size || bed_line.end > size) {
+            msg = out_of_range_message(bed_line.start, bed_line.end, bed_line.chromosome);
+            c.done();
+            return false;
+          }
+
+          if (!fill_region_builder(region_builder, bed_line, format, msg)) {
+            c.done();
+            return false;
+          }
+
+          mongo::BSONObj r = region_builder.obj();
+          block.push_back(r);
+          if (!check_bulk_size(dataset_id, collection, count, block, blocks_bulk, bulk_size, total_size, msg)) {
+            c.done();
+            return false;
+          }
+        }
+
+        if (!check_remainings(dataset_id, collection, count, block, blocks_bulk, bulk_size, total_size, msg)) {
           c.done();
           return false;
         }
 
-        block.push_back(r);
-
-        if (!check_bulk_size(dataset_id, collection, count, block, blocks_bulk, bulk_size, total_size, msg)) {
-          c.done();
-          return false;
-        }
-      }
-
-      if (!check_remainings(dataset_id, prev_collection, count, block, blocks_bulk, bulk_size, total_size, msg)) {
-        c.done();
-        return false;
       }
 
       if (!update_upload_info(Collections::ANNOTATIONS(), annotation_id, total_size, msg)) {
@@ -868,7 +849,6 @@ namespace epidb {
         }
 
         std::string collection = helpers::region_collection_name(genome, internal_chromosome);
-        std::vector<mongo::BSONObj> bulk;
 
         for (RegionsIterator it = chromosome_regions.second->begin(); it != chromosome_regions.second->end(); it++) {
           const Region &region = *it;

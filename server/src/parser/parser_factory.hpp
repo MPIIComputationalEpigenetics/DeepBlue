@@ -9,6 +9,8 @@
 #ifndef EPIDB_PARSER_PARSER_FACTORY_HPP
 #define EPIDB_PARSER_PARSER_FACTORY_HPP
 
+
+#include <algorithm>
 #include <iostream>
 #include <map>
 #include <sstream>
@@ -25,17 +27,62 @@
 namespace epidb {
   namespace parser {
 
-    typedef struct BedLine
-    {
+    class BedLine {
+    public:
       std::string chromosome;
       unsigned int start;
       unsigned int end;
       std::vector<std::string> tokens;
+      size_t size() const;
+    };
 
-      size_t size() const {
-        return tokens.size() + 3;
+    bool operator<(const BedLine &a, const BedLine &b);
+
+    typedef std::vector<parser::BedLine> BedLines;
+    typedef std::pair<std::string, BedLines> ChromosomeBedLines;
+
+    typedef struct ChromosomeRegionsMap {
+      typedef std::map<std::string, BedLines>::iterator iterator;
+      typedef std::map<std::string, BedLines>::const_iterator const_iterator;
+      std::map<std::string, BedLines > data_;
+
+      iterator begin()
+      {
+        return data_.begin();
       }
-    } BedLine;
+
+      const_iterator begin() const
+      {
+        return data_.begin();
+      }
+
+      iterator end()
+      {
+        return data_.end();
+      }
+
+      const_iterator end() const
+      {
+        return data_.end();
+      }
+
+      void insert(BedLine  &&region)
+      {
+        const std::string &chromosome = region.chromosome;
+        if (data_.find(chromosome) == data_.end()) {
+          data_[chromosome] = std::vector<parser::BedLine>();
+        }
+        data_[chromosome].push_back(std::move(region));
+      }
+
+      void finish()
+      {
+        for (iterator it = data_.begin(); it != data_.end(); it++) {
+          std::vector<parser::BedLine> &regions = it->second;
+          std::sort(regions.begin(), regions.end());
+        }
+      }
+    } ChromosomeRegionsMap;
 
     typedef std::map<std::string, std::string> ParsedLine;
     //typedef std::vector<bed_line> Tokens;
@@ -80,7 +127,8 @@ namespace epidb {
         return true;
       }
 
-      bool operator !=(const FileFormat &other) const {
+      bool operator !=(const FileFormat &other) const
+      {
         return !(*this == other);
       }
 
@@ -133,7 +181,7 @@ namespace epidb {
     private:
       static bool build_metafield_column(const std::string &name, epidb::dba::columns::ColumnTypePtr &column_type, std::string &msg);
       static bool build_metafield_column(const std::string &name, const std::string &default_value,
-                        dba::columns::ColumnTypePtr &column_type, std::string &msg);
+                                         dba::columns::ColumnTypePtr &column_type, std::string &msg);
     };
 
     class Parser {
@@ -151,8 +199,8 @@ namespace epidb {
 
     public:
       Parser(const std::string &content, FileFormat &format);
-      bool check_format(std::string& msg);
-      bool parse_line(BedLine &bed_line, std::string& msg);
+      bool check_format(std::string &msg);
+      bool parse_line(BedLine &bed_line, std::string &msg);
       bool check_length(const BedLine &bed_line);
       size_t actual_line();
       const std::string actual_line_content();
