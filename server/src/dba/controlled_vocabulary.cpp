@@ -587,7 +587,7 @@ namespace epidb {
         }
 
         // Remove from the others biosources scope
-        c->update(helpers::collection_name(Collections::BIOSOURCE_EMBRACING()), BSON("subs" << norm_biosource_name), BSON("$pull" << BSON("related_terms" << norm_biosource_name)), false, true);
+        c->update(helpers::collection_name(Collections::BIOSOURCE_EMBRACING()), BSON("subs" << norm_biosource_name), BSON("$pull" << BSON("subs" << norm_biosource_name)), false, true);
         if (!c->getLastError().empty()) {
           msg = c->getLastError();
           c.done();
