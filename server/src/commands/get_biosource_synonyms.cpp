@@ -8,6 +8,7 @@
 
 #include <boost/foreach.hpp>
 
+#include "../dba/controlled_vocabulary.hpp"
 #include "../dba/dba.hpp"
 #include "../extras/utils.hpp"
 #include "../extras/serialize.hpp"
@@ -64,6 +65,7 @@ namespace epidb {
 
         std::string norm_biosource_name = utils::normalize_name(biosource_name);
 
+        // TODO Move to a helper function: get_biosource_root
         bool is_biosource(false);
         bool is_syn(false);
         if (!dba::check_biosource(norm_biosource_name, is_biosource, msg)) {
@@ -78,7 +80,7 @@ namespace epidb {
           }
         }
 
-        if (!(is_biosource || !is_syn)) {
+        if (!(is_biosource || is_syn)) {
           std::string s = Error::m(ERR_INVALID_BIOSOURCE_NAME, biosource_name.c_str());
           EPIDB_LOG_TRACE(s);
           result.add_error(s);
