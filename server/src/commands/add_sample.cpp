@@ -66,6 +66,7 @@ namespace epidb {
 
         const std::string norm_biosource_name = utils::normalize_name(biosource_name);
 
+        // TODO Move to a helper function: get_biosource_root
         bool is_biosource(false);
         bool is_syn(false);
         if (!dba::check_biosource(norm_biosource_name, is_biosource, msg)) {
