@@ -88,6 +88,7 @@ namespace epidb {
 
         if (!dba::get_biosource_scope(biosource_name, norm_biosource_name,
                                        is_biosource, user_key, related_biosources, msg)) {
+          result.add_error(msg);
           return false;
         }
 
