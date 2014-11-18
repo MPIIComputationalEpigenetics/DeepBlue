@@ -54,7 +54,7 @@ namespace epidb {
     static const CommandCategory OPERATIONS("Regions Operations", "Operating on the data regions");
     static const CommandCategory PROJECTS("Projects", "Inserting and listing projects");
     static const CommandCategory SAMPLES("Samples", "Inserting and listing samples");
-    static const CommandCategory STATUS("Status", "Checking Deep Blue status");
+    static const CommandCategory STATUS("Status", "Checking DeepBlue status");
     static const CommandCategory TECHNIQUES("Techniques", "Inserting and listing techniques");
   }
 

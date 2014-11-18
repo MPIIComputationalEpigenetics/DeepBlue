@@ -63,7 +63,7 @@ namespace epidb {
             }
           }
 
-          std::string echo = "Deep Blue (" + Version::version() + ")" + " says hi to " + name;
+          std::string echo = "DeepBlue (" + Version::version() + ")" + " says hi to " + name;
           result.add_string(echo);
           return true;
         }
