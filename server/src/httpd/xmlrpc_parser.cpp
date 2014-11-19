@@ -137,6 +137,7 @@ namespace epidb {
         else if (t == xmlrpc::STRUCT) {
           p = serialize::ParameterPtr(new serialize::MapParameter());
         }
+        // TODO: Check for all types, if no one match, return error. (longer but safer)
         else {
           p = serialize::ParameterPtr(new serialize::SimpleParameter(serialize::from_xml_type(t)));
         }
