@@ -160,6 +160,8 @@ namespace epidb {
               unsigned char *data = epidb::compress::decompress(compressed_data, db_data_size, real_size, uncompressed_size);
               mongo::BSONObj arrobj((char *) data);
 
+              // TODO: check uncompressed_size == real_size
+
               mongo::BSONObj::iterator regions_it = arrobj.begin();
               while (regions_it.more()) {
                 const mongo::BSONObj &region_bson = regions_it.next().Obj();
@@ -189,6 +191,8 @@ namespace epidb {
                 _regions->push_back(region);
                 _count++;
               }
+              free(data);
+
               // Grouped in blocks but not compressed
             } else {
               const char *data = region_bson[KeyMapper::BED_DATA()].binData(db_data_size);
