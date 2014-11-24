@@ -133,7 +133,7 @@ namespace epidb {
         }
 
         std::vector<std::string> norm_subs;
-        if (!get_biosource_embracing(biosource, norm_biosource,
+        if (!get_biosource_children(biosource, norm_biosource,
                                      true, "", norm_subs, msg)) {
           return false;
         }
@@ -362,7 +362,7 @@ namespace epidb {
         return true;
       }
 
-      bool set_biosource_embracing(const std::string &biosource_more_embracing, const std::string &norm_biosource_more_embracing,
+      bool set_biosource_parent(const std::string &biosource_more_embracing, const std::string &norm_biosource_more_embracing,
                                    const std::string &biosource_less_embracing, const std::string &norm_biosource_less_embracing,
                                    bool more_embracing_is_syn, const bool less_embracing_is_syn,
                                    const std::string &user_key, std::string &msg)
@@ -494,7 +494,7 @@ namespace epidb {
         return true;
       }
 
-      bool get_biosource_embracing(const std::string &biosource_name, const std::string &norm_biosource_name,
+      bool get_biosource_children(const std::string &biosource_name, const std::string &norm_biosource_name,
                                    bool is_biosource, const std::string &user_key,
                                    std::vector<std::string> &norm_subs, std::string &msg)
       {
@@ -538,7 +538,7 @@ namespace epidb {
         return true;
       }
 
-      bool get_biosource_wider(const std::string &biosource_name, const std::string &norm_biosource_name,
+      bool get_biosource_parents(const std::string &biosource_name, const std::string &norm_biosource_name,
                                bool is_biosource,
                                const std::string &user_key,
                                std::vector<std::string> &norm_uppers, std::string &msg)

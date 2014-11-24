@@ -312,7 +312,7 @@ namespace epidb {
 
       std::string ann_name = name;
       std::string ann_norm_name = utils::normalize_annotation_name(ann_name);
-      std::string ann_description = "Chromosomes and sizes of the genome " + name + " ("+description+")";
+      std::string ann_description = "Chromosomes and sizes of the genome " + name + " (" + description + ")";
       std::string ann_norm_description = utils::normalize_name(ann_description);
       datatypes::Metadata extra_metadata;
       std::string annotation_id;
@@ -950,23 +950,23 @@ namespace epidb {
       return cv::get_biosource_synonyms("", biosource_name, norm_biosource_name, is_biosource, user_key, syns, msg);
     }
 
-    bool set_biosource_scope(const std::string &biosource_more_embracing, const std::string &norm_biosource_more_embracing,
-                             const std::string &biosource_less_embracing, const std::string &norm_biosource_less_embracing,
-                             bool more_embracing_is_syn, const bool less_embracing_is_syn,
-                             const std::string &user_key, std::string &msg)
+    bool set_biosource_parent(const std::string &biosource_more_embracing, const std::string &norm_biosource_more_embracing,
+                              const std::string &biosource_less_embracing, const std::string &norm_biosource_less_embracing,
+                              bool more_embracing_is_syn, const bool less_embracing_is_syn,
+                              const std::string &user_key, std::string &msg)
     {
-      return cv::set_biosource_embracing(biosource_more_embracing, norm_biosource_more_embracing,
+      return cv::set_biosource_parent(biosource_more_embracing, norm_biosource_more_embracing,
                                          biosource_less_embracing, norm_biosource_less_embracing,
                                          more_embracing_is_syn, less_embracing_is_syn, user_key, msg);
     }
 
-    bool get_biosource_scope(const std::string &biosource_name, const std::string &norm_biosource_name,
-                             bool is_biosource, const std::string &user_key,
-                             std::vector<utils::IdName> &related_biosources, std::string &msg)
+    bool get_biosource_children(const std::string &biosource_name, const std::string &norm_biosource_name,
+                              bool is_biosource, const std::string &user_key,
+                              std::vector<utils::IdName> &related_biosources, std::string &msg)
     {
       std::vector<std::string> norm_subs;
 
-      if (!cv::get_biosource_embracing(biosource_name, norm_biosource_name, is_biosource, user_key, norm_subs, msg)) {
+      if (!cv::get_biosource_children(biosource_name, norm_biosource_name, is_biosource, user_key, norm_subs, msg)) {
         return false;
       }
 
@@ -980,13 +980,13 @@ namespace epidb {
       return true;
     }
 
-    bool get_biosource_wider(const std::string &biosource_name, const std::string &norm_biosource_name,
+    bool get_biosource_parents(const std::string &biosource_name, const std::string &norm_biosource_name,
                              bool is_biosource, const std::string &user_key,
                              std::vector<utils::IdName> &related_biosources, std::string &msg)
     {
       std::vector<std::string> norm_subs;
 
-      if (!cv::get_biosource_wider(biosource_name, norm_biosource_name, is_biosource, user_key, norm_subs, msg)) {
+      if (!cv::get_biosource_parents(biosource_name, norm_biosource_name, is_biosource, user_key, norm_subs, msg)) {
         return false;
       }
 

@@ -23,7 +23,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::BIOSOURCE_RELATIONSHIP, "Gets biosources related to the given one.");
+        return CommandDescription(categories::BIOSOURCE_RELATIONSHIP, "Gets biosources related to the given one. e.g. the children terms and theirs synonyms.");
       }
 
       static  Parameters parameters_()
@@ -86,7 +86,7 @@ namespace epidb {
 
         std::vector<utils::IdName> related_biosources;
 
-        if (!dba::get_biosource_scope(biosource_name, norm_biosource_name,
+        if (!dba::get_biosource_children(biosource_name, norm_biosource_name,
                                        is_biosource, user_key, related_biosources, msg)) {
           result.add_error(msg);
           return false;

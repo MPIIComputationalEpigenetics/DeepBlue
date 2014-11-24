@@ -316,12 +316,12 @@ namespace epidb {
         }
 
         std::vector<std::string> norm_subs;
-        if (!cv::get_biosource_embracing(biosource_name, norm_biosource_name, true, user_key, norm_subs, msg)) {
+        if (!cv::get_biosource_children(biosource_name, norm_biosource_name, true, user_key, norm_subs, msg)) {
           return false;
         }
 
 
-        // get_biosource_embracing return at least 1 element , that is the given biosource
+        // get_biosource_children return at least 1 element , that is the given biosource
         if (norm_subs.size() > 1) {
           msg = "This biosource has terms into his scope and can not be removed";
           return false;

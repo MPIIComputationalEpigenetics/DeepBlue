@@ -289,25 +289,25 @@ class TestSearch(helpers.TestCase):
     s = epidb.add_biosource("Brunete Cinza Cerva", "Brunete Cinza Cerva", {}, self.admin_key)
     self.assertSuccess(s)
 
-    s = epidb.set_biosource_scope("Ana", "Carolina", self.admin_key)
+    s = epidb.set_biosource_parent("Ana", "Carolina", self.admin_key)
     self.assertSuccess(s)
 
-    s = epidb.set_biosource_scope("Bianca Carolina", "Brunete Cinza Cerva", self.admin_key)
+    s = epidb.set_biosource_parent("Bianca Carolina", "Brunete Cinza Cerva", self.admin_key)
     self.assertSuccess(s)
 
-    s = epidb.set_biosource_scope("Beatriz", "Bianca Carolina", self.admin_key)
+    s = epidb.set_biosource_parent("Beatriz", "Bianca Carolina", self.admin_key)
     self.assertSuccess(s)
 
-    s = epidb.set_biosource_scope("Beatriz", "Bruna branca", self.admin_key)
+    s = epidb.set_biosource_parent("Beatriz", "Bruna branca", self.admin_key)
     self.assertSuccess(s)
 
     s = epidb.set_biosource_synonym("Ana", "Zebra", self.admin_key)
     self.assertSuccess(s)
 
-    s = epidb.set_biosource_scope("Beatriz", "Bianca Ana", self.admin_key)
+    s = epidb.set_biosource_parent("Beatriz", "Bianca Ana", self.admin_key)
     self.assertSuccess(s)
 
-    s = epidb.set_biosource_scope("Ana", "Beatriz", self.admin_key)
+    s = epidb.set_biosource_parent("Ana", "Beatriz", self.admin_key)
     self.assertSuccess(s)
 
     (s, r1) = epidb.search("Ana Zebra Beatriz", None, self.admin_key)
@@ -333,13 +333,13 @@ class TestSearch(helpers.TestCase):
     s = epidb.add_biosource("Carolina", "Carolina", {}, self.admin_key)
     self.assertSuccess(s)
 
-    s = epidb.set_biosource_scope("Beatriz", "Carolina", self.admin_key)
+    s = epidb.set_biosource_parent("Beatriz", "Carolina", self.admin_key)
     self.assertSuccess(s)
 
     s = epidb.add_sample("Carolina", {}, self.admin_key)
     self.assertSuccess(s)
 
-    s = epidb.set_biosource_scope("Ana", "Beatriz", self.admin_key)
+    s = epidb.set_biosource_parent("Ana", "Beatriz", self.admin_key)
     self.assertSuccess(s)
 
     s = epidb.set_biosource_synonym("Ana", "Zebra", self.admin_key)
@@ -368,7 +368,7 @@ class TestSearch(helpers.TestCase):
     s = epidb.add_biosource("Carolina", "Carolina", {}, self.admin_key)
     self.assertSuccess(s)
 
-    s = epidb.set_biosource_scope("Beatriz", "Carolina", self.admin_key)
+    s = epidb.set_biosource_parent("Beatriz", "Carolina", self.admin_key)
     self.assertSuccess(s)
 
     (s, sid) = epidb.add_sample("Carolina", {}, self.admin_key)
@@ -378,7 +378,7 @@ class TestSearch(helpers.TestCase):
     (s, e) = epidb.add_experiment("las chicas", "hg19", "Methylation", sid, "tech1", "ENCODE", "interesting experiment", data, "CHROMOSOME,START,END", {}, self.admin_key)
     self.assertSuccess(s, e)
 
-    s = epidb.set_biosource_scope("Ana", "Beatriz", self.admin_key)
+    s = epidb.set_biosource_parent("Ana", "Beatriz", self.admin_key)
     self.assertSuccess(s)
 
     s = epidb.set_biosource_synonym("Ana", "Zebra", self.admin_key)

@@ -58,18 +58,18 @@ class TestBioSourceCommands(helpers.TestCase):
     self.assertTrue("blood" in biosources_names)
     self.assertTrue("mesoderm" in biosources_names)
 
-    self.assertSuccess(epidb.set_biosource_scope("blood", "GM12878", self.admin_key))
-    self.assertSuccess(epidb.set_biosource_scope("blood", "K562", self.admin_key))
-    self.assertSuccess(epidb.set_biosource_scope("blood", "Adult_CD4_naive", self.admin_key))
-    self.assertSuccess(epidb.set_biosource_scope("mesoderm", "blood", self.admin_key))
+    self.assertSuccess(epidb.set_biosource_parent("blood", "GM12878", self.admin_key))
+    self.assertSuccess(epidb.set_biosource_parent("blood", "K562", self.admin_key))
+    self.assertSuccess(epidb.set_biosource_parent("blood", "Adult_CD4_naive", self.admin_key))
+    self.assertSuccess(epidb.set_biosource_parent("mesoderm", "blood", self.admin_key))
 
-    res = epidb.set_biosource_scope("GM12878", "mesoderm", self.admin_key)
+    res = epidb.set_biosource_parent("GM12878", "mesoderm", self.admin_key)
     self.assertFailure(res)
 
-    epidb.set_biosource_scope("avacado", "mesoderm", self.admin_key)
+    epidb.set_biosource_parent("avacado", "mesoderm", self.admin_key)
     self.assertFailure(res)
 
-    res, scope = epidb.get_biosource_scope("mesoderm", self.admin_key)
+    res, scope = epidb.get_biosource_children("mesoderm", self.admin_key)
     self.assertSuccess(res, scope)
     scope_names = [x[1] for x in scope]
     self.assertEquals(scope_names, ['mesoderm', 'blood', 'GM12878', 'K562', 'Adult_CD4_naive'])
@@ -84,15 +84,15 @@ class TestBioSourceCommands(helpers.TestCase):
     self.assertSuccess(epidb.add_biosource("A E", None, {}, self.admin_key))
     self.assertSuccess(epidb.add_biosource("C D", None, {}, self.admin_key))
 
-    res = epidb.set_biosource_scope("A", "A C", self.admin_key)
+    res = epidb.set_biosource_parent("A", "A C", self.admin_key)
     self.assertSuccess(res)
-    res = epidb.set_biosource_scope("A", "A D", self.admin_key)
+    res = epidb.set_biosource_parent("A", "A D", self.admin_key)
     self.assertSuccess(res)
-    res = epidb.set_biosource_scope("A", "A E", self.admin_key)
+    res = epidb.set_biosource_parent("A", "A E", self.admin_key)
     self.assertSuccess(res)
-    res = epidb.set_biosource_scope("A", "C D", self.admin_key)
+    res = epidb.set_biosource_parent("A", "C D", self.admin_key)
     self.assertSuccess(res)
-    res = epidb.set_biosource_scope("A", "C D", self.admin_key)
+    res = epidb.set_biosource_parent("A", "C D", self.admin_key)
     self.assertFailure(res)
     self.assertEqual(res[1], "104901:'A' is already more embracing than 'C D'.")
 
@@ -112,7 +112,7 @@ class TestBioSourceCommands(helpers.TestCase):
 	res = epidb.add_biosource("C", None, {}, self.admin_key)
 	self.assertSuccess(res)
 
-	res = epidb.set_biosource_scope("B", "C", self.admin_key)
+	res = epidb.set_biosource_parent("B", "C", self.admin_key)
 	self.assertSuccess(res)
 
 	res = epidb.get_biosource_related("A", self.admin_key)

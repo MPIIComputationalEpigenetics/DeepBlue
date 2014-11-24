@@ -129,11 +129,11 @@ class EpidbClient:
   def get_biosource_synonyms(self, biosource_name, user_key):
     return self.server.get_biosource_synonyms(biosource_name, user_key)
 
-  def set_biosource_scope(self, biosource_name_more_embracing, biosource_name_less_embracing, user_key):
-    return self.server.set_biosource_scope(biosource_name_more_embracing, biosource_name_less_embracing, user_key)
+  def set_biosource_parent(self, biosource_name_more_embracing, biosource_name_less_embracing, user_key):
+    return self.server.set_biosource_parent(biosource_name_more_embracing, biosource_name_less_embracing, user_key)
 
-  def get_biosource_scope(self, biosource_name, user_key):
-    return self.server.get_biosource_scope(biosource_name, user_key)
+  def get_biosource_children(self, biosource_name, user_key):
+    return self.server.get_biosource_children(biosource_name, user_key)
 
   def get_biosource_related(self, biosource_name, user_key):
     return self.server.get_biosource_related(biosource_name, user_key)

@@ -1,12 +1,14 @@
 //
-//  get_biosource_scope.cpp
+//  get_biosource_parents.cpp
 //  epidb
 //
-//  Created by Felipe Albrecht on 20.08.13.
+//  Created by Felipe Albrecht on 12.10.14.
 //  Copyright (c) 2013,2014 Max Planck Institute for Computer Science. All rights reserved.
 //
 
 #include "../dba/dba.hpp"
+#include "../dba/controlled_vocabulary.hpp"
+
 #include "../extras/utils.hpp"
 #include "../extras/serialize.hpp"
 
@@ -18,12 +20,12 @@
 namespace epidb {
   namespace command {
 
-    class GetBioSourceScopeCommand: public Command {
+    class GetBioSourceParentsCommand: public Command {
 
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::BIOSOURCE_RELATIONSHIP, "Gets the scope for the biosource.");
+        return CommandDescription(categories::BIOSOURCE_RELATIONSHIP, "Gets the biosources that are parents of the given biosource.");
       }
 
       static  Parameters parameters_()
@@ -39,14 +41,14 @@ namespace epidb {
       static Parameters results_()
       {
         Parameter p[] = {
-          Parameter("biosources", serialize::LIST, "related biosources")
+          Parameter("biosources", serialize::LIST, "parents biosources")
         };
         Parameters results(&p[0], &p[0] + 1);
         return results;
       }
 
     public:
-      GetBioSourceScopeCommand() : Command("get_biosource_scope", parameters_(), results_(), desc_()) {}
+      GetBioSourceParentsCommand() : Command("get_biosource_parents", parameters_(), results_(), desc_()) {}
 
       virtual bool run(const std::string &ip,
                        const serialize::Parameters &parameters, serialize::Parameters &result) const
@@ -85,10 +87,8 @@ namespace epidb {
         }
 
         std::vector<utils::IdName> related_biosources;
-
-        if (!dba::get_biosource_scope(biosource_name, norm_biosource_name,
-                                       is_biosource, user_key, related_biosources, msg)) {
-          result.add_error(msg);
+        if (!dba::get_biosource_parents(biosource_name, norm_biosource_name,
+                                       is_biosource,  user_key, related_biosources, msg)) {
           return false;
         }
 
@@ -97,6 +97,6 @@ namespace epidb {
         return true;
       }
 
-    } getBioSourceScopeCommand;
+    } getBioSourceParentsCommand;
   }
 }

@@ -1,5 +1,5 @@
 //
-//  set_biosource_scope.cpp
+//  set_biosource_parent.cpp
 //  epidb
 //
 //  Created by Felipe Albrecht on 30.07.13.
@@ -18,19 +18,19 @@
 namespace epidb {
   namespace command {
 
-    class SetBioSourceScopeCommand: public Command {
+    class SetBioSourceParentCommand: public Command {
 
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::BIOSOURCE_RELATIONSHIP, "Sets a biosource scope.");
+        return CommandDescription(categories::BIOSOURCE_RELATIONSHIP, "Sets a biosource parent.");
       }
 
       static  Parameters parameters_()
       {
         Parameter p[] = {
-          Parameter("bigger_scope", serialize::STRING, "bigger scope"),
-          Parameter("smaller_scope", serialize::STRING, "smaller scope"),
+          Parameter("parent", serialize::STRING, "parent"),
+          Parameter("child", serialize::STRING, "child"),
           parameters::UserKey
         };
         Parameters params(&p[0], &p[0] + 3);
@@ -45,7 +45,7 @@ namespace epidb {
       }
 
     public:
-      SetBioSourceScopeCommand() : Command("set_biosource_scope", parameters_(), results_(), desc_()) {}
+      SetBioSourceParentCommand() : Command("set_biosource_parent", parameters_(), results_(), desc_()) {}
 
       virtual bool run(const std::string &ip,
                        const serialize::Parameters &parameters, serialize::Parameters &result) const
@@ -107,10 +107,10 @@ namespace epidb {
           return false;
         }
 
-        if (dba::set_biosource_scope(bigger_scope, norm_bigger_scope,
-                                     smaller_scope, norm_smaller_scope,
-                                     bigger_scope_is_syn, smaller_scope_is_syn,
-                                     user_key, msg)) {
+        if (dba::set_biosource_parent(bigger_scope, norm_bigger_scope,
+                                      smaller_scope, norm_smaller_scope,
+                                      bigger_scope_is_syn, smaller_scope_is_syn,
+                                      user_key, msg)) {
           result.add_string(bigger_scope);
           result.add_string(smaller_scope);
           return true;
@@ -121,6 +121,6 @@ namespace epidb {
 
       }
 
-    } setBioSourceScopeCommand;
+    } setBioSourceParentCommand;
   }
 }
