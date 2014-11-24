@@ -29,8 +29,8 @@ namespace epidb {
       static  Parameters parameters_()
       {
         Parameter p[] = {
-          Parameter("smaller_scope", serialize::STRING, "bigger scope"),
-          Parameter("bigger_scope", serialize::STRING, "smaller scope"),
+          Parameter("bigger_scope", serialize::STRING, "bigger scope"),
+          Parameter("smaller_scope", serialize::STRING, "smaller scope"),
           parameters::UserKey
         };
         Parameters params(&p[0], &p[0] + 3);
