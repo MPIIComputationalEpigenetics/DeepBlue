@@ -21,6 +21,16 @@ class EpidbClient:
     def commands(self):
         return self.server.commands()
 
+    def remove(self, _id, user_key):
+      return self.server.remove(_id, user_key)
+
+    def clone_dataset(self, dataset_id, new_name, description, format, extra_metadata, user_key):
+      return self.server.clone_dataset(dataset_id, new_name, description, format, extra_metadata, user_key)
+
+    def change_extra_metadata(self, _id, key, value, user_key):
+      return self.server.change_extra_metadata(_id, key, value, user_key)
+
+
 ## Main Operations
 
     ## General information
@@ -96,6 +106,12 @@ class EpidbClient:
         return self.server.create_column_type_category(name, description,
                                                        ignore_if,
                                                        items, user_key)
+
+    def create_column_type_calculated(self, name, description, code,
+                                      user_key):
+        return self.server.create_column_type_calculated(name, description,
+                                                       code,
+                                                       user_key)
 
     def list_column_types(self, user_key):
         return self.server.list_column_types(user_key)
