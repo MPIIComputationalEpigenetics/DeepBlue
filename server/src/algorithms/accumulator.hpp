@@ -9,6 +9,8 @@
 #ifndef EPIDB_ALGORITHMS_ACCUMULATOR_HPP
 #define EPIDB_ALGORITHMS_ACCUMULATOR_HPP
 
+#include <string>
+
 namespace epidb {
   namespace algorithms {
 
