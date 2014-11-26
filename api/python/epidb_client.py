@@ -68,6 +68,9 @@ class EpidbClient:
     def list_similar_biosources(self, biosource_name, user_key):
         return self.server.list_similar_biosources(biosource_name, user_key)
 
+    def is_biosource(self, biosource_name, user_key):
+        return self.server.is_biosource(biosource_name, user_key)
+
   ## Samples
     def add_sample(self, biosource_name, fields, user_key):
         return self.server.add_sample(biosource_name, fields, user_key)
