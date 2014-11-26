@@ -161,11 +161,11 @@ namespace epidb {
         ss << "START\t";
         ss << "END\t";
         bool first = true;
-        for (auto &experiments_formats : experiments_formats) {
+	for (auto &experiments_format : experiments_formats) {
           if (!first) {
             ss << "\t";
           }
-          ss << experiments_formats.first;
+          ss << experiments_format.first;
           first = false;
         }
         ss << std::endl;
