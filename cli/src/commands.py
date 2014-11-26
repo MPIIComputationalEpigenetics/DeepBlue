@@ -33,25 +33,6 @@ def list_users(context):
     for user in users:
         print user
 
-"""
-def add_users(context):
-    users = """
-    # users
-    """
-    epidb = context.epidb
-
-    list_users = users.split("\n")
-    for user in list_users:
-        (s, user_key) = epidb.add_user(user, user, "HiWi", context.user_key)
-        if s == 'okay':
-            print user
-            print('Okay.')
-            print(user_key)
-            mail.send_new_user_mail(user, user_key[1], user)
-        else:
-            print(user_key)
-"""
-
 commands_callback = {'create_user': create_user, 'list_users': list_users}
 
 
