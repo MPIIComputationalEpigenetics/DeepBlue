@@ -53,6 +53,7 @@
  *
  * // Controlled vocabulary errors
  * 901 - More Embracing
+ * 902 - Already parent
  */
 
 namespace epidb {
@@ -89,6 +90,7 @@ namespace epidb {
   Error ERR_INVALID_BIOSOURCE_NAME("104000", "Invalid BioSource Name '%s'. No BioSource or Synonym was defined with this name.");
   Error ERR_DUPLICATED_BIOSOURCE_NAME("104001", "Duplicated BioSource Name '%s'. BioSource or Synonym with this name already exists.");
   Error ERR_MORE_EMBRACING_BIOSOURCE_NAME("104901", "'%s' is already more embracing than '%s'.");
+  Error ERR_ALREADY_PARENT_BIOSOURCE_NAME("104902", "'%s' is already parent of '%s'.");
   Error ERR_INVALID_BIOSOURCE_SYNONYM("104400", "Invalid BioSource Synonym '%s'. A BioSource or a synonym with this name already exists.");
 
   Error ERR_DUPLICATED_EPIGENETIC_MARK_NAME("105001", "Duplicated Epigenetic Mark Name '%s'." );
