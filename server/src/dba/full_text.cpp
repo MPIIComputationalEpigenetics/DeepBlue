@@ -19,6 +19,8 @@
 #include <mongo/bson/bson.h>
 #include <mongo/client/dbclient.h>
 
+#include "../extras/utils.hpp"
+
 #include "collections.hpp"
 #include "config.hpp"
 #include "helpers.hpp"
@@ -128,48 +130,30 @@ namespace epidb {
         return true;
       }
 
-      bool insert_related_term(const std::string &id, const std::string &name, std::string &msg)
+      bool insert_related_term(const utils::IdName &id_name, const std::vector<std::string> &related_terms,
+        std::string &msg)
       {
         mongo::ScopedDbConnection c(config::get_mongodb_server());
 
         mongo::BSONObjBuilder query_builder;
-        query_builder.append("epidb_id", id);
+        query_builder.append("epidb_id", id_name.id);
         mongo::BSONObj query = query_builder.obj();
 
-        mongo::BSONObj value = BSON("related_terms" << name);
-        mongo::BSONObj append_value = BSON("$addToSet" << value);
+        mongo::BSONArray related_terms_arr = helpers::build_array(related_terms);
+        mongo::BSONObj append_value = BSON("$addToSet" << BSON("related_terms" << BSON("$each" << related_terms_arr)));
 
-        // Update the biosource term
-        c->update(helpers::collection_name(Collections::TEXT_SEARCH()), query, append_value, true, false);
+        // Update the biosource term (that were informed in the id_names.name)
+        c->update(helpers::collection_name(Collections::TEXT_SEARCH()), query, append_value, false, true);
         if (!c->getLastError().empty()) {
           msg = c->getLastError();
           c.done();
           return false;
         }
 
-        // Find the biosource to update the experiments and samples that use it
-        std::auto_ptr<mongo::DBClientCursor> cursor =
-          c->query(helpers::collection_name(Collections::TEXT_SEARCH()), query);
-
-        if (!cursor->more()) {
-          msg = "Unable to find biosource " + id;
-          c.done();
-          return false;
-        }
-
-        mongo::BSONObj o = cursor->next();
-        if (o["type"].str() != "biosources") {
-          msg = "Data id " + id + " is not a biosource";
-          c.done();
-          return false;
-        }
-
-        std::string norm_biosource_name = o["norm_name"].str();
-
+        // Update the experiments (that were informed in the id_names.id)
         mongo::BSONObjBuilder update_related_query_builder;
-        update_related_query_builder.append("norm_biosource_name", norm_biosource_name);
+        update_related_query_builder.append("norm_biosource_name",  id_name.name);
         mongo::BSONObj update_related_query = update_related_query_builder.obj();
-
         c->update(helpers::collection_name(Collections::TEXT_SEARCH()), update_related_query, append_value, false, true);
         if (!c->getLastError().empty()) {
           msg = c->getLastError();
@@ -177,10 +161,11 @@ namespace epidb {
           return false;
         }
 
-        mongo::BSONObjBuilder update_related_query_builder_for_experiments;
-        update_related_query_builder_for_experiments.append("sample_info_norm_biosource_name", norm_biosource_name);
-        mongo::BSONObj update_related_query_for_experiments = update_related_query_builder_for_experiments.obj();
 
+        // Update the samples
+        mongo::BSONObjBuilder update_related_query_builder_for_experiments;
+        update_related_query_builder_for_experiments.append("sample_info_norm_biosource_name", id_name.name);
+        mongo::BSONObj update_related_query_for_experiments = update_related_query_builder_for_experiments.obj();
         c->update(helpers::collection_name(Collections::TEXT_SEARCH()), update_related_query_for_experiments, append_value, false, true);
         if (!c->getLastError().empty()) {
           msg = c->getLastError();

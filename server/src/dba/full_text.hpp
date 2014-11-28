@@ -22,6 +22,8 @@
 
 #include <mongo/bson/bson.h>
 
+#include "../extras/utils.hpp"
+
 namespace epidb {
   namespace dba {
     // TODO: rename namespace to full_text
@@ -42,7 +44,8 @@ namespace epidb {
       // TODO: rename namespace to search
       bool search_full_text(const std::string &text, std::vector<TextSearchResult> &, std::string &msg);
 
-      bool insert_related_term(const std::string &id, const std::string &name, std::string &msg);
+      bool insert_related_term(const utils::IdName &id_name, const std::vector<std::string> &related_terms,
+        std::string &msg);
 
       bool change_extra_metadata_full_text(const std::string &id, const std::string &key, const std::string &value, std::string &msg);
 

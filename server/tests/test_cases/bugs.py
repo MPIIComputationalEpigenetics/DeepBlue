@@ -247,3 +247,45 @@ chrX 100000"""
     self.assertEqual(list_bio_source_a, list_bsa)
 
 
+  # Bug that does not allow to set the true hierarchy
+  # A is parent of B, that is parent of C that is parent of D
+  # A is also parent of D
+  def test_biosource_true_hierarchy(self):
+    epidb = EpidbClient()
+    self.init(epidb)
+
+    self.assertSuccess(epidb.add_biosource("AAA", None, {}, self.admin_key))
+    self.assertSuccess(epidb.add_biosource("BBB", None, {}, self.admin_key))
+    self.assertSuccess(epidb.add_biosource("CCC", None, {}, self.admin_key))
+    self.assertSuccess(epidb.add_biosource("DDD", None, {}, self.admin_key))
+
+    res = epidb.set_biosource_parent("AAA", "BBB", self.admin_key)
+    self.assertSuccess(res)
+    res = epidb.set_biosource_parent("BBB", "CCC", self.admin_key)
+    self.assertSuccess(res)
+    res = epidb.set_biosource_parent("CCC", "DDD", self.admin_key)
+    self.assertSuccess(res)
+    res = epidb.set_biosource_parent("AAA", "DDD", self.admin_key)
+    self.assertSuccess(res)
+    res = epidb.set_biosource_parent("DDD", "BBB", self.admin_key)
+    self.assertFailure(res)
+    self.assertSuccess(epidb.add_biosource("EEE", None, {}, self.admin_key))
+    res = epidb.set_biosource_parent("DDD", "EEE", self.admin_key)
+    self.assertSuccess(res)
+    res = epidb.set_biosource_parent("AAA", "EEE", self.admin_key)
+    self.assertSuccess(res)
+    res = epidb.set_biosource_parent("EEE", "BBB", self.admin_key)
+    self.assertFailure(res)
+    res = epidb.set_biosource_parent("EEE", "CCC", self.admin_key)
+    self.assertFailure(res)
+    res = epidb.set_biosource_synonym("AAA", "macaco", self.admin_key)
+    self.assertSuccess(res)
+
+    expected = [['bs1', 'AAA', 'biosources'], ['bs2', 'BBB', 'biosources'], ['bs3', 'CCC', 'biosources'], ['bs4', 'DDD', 'biosources'], ['bs5', 'EEE', 'biosources']]
+    (res, s) = epidb.search("macaco", None, self.admin_key)
+    self.assertSuccess(res, s)
+    self.assertEquals(s, expected)
+
+    (res, s) = epidb.search("AAA", None, self.admin_key)
+    self.assertSuccess(res, s)
+    self.assertEquals(s, expected)

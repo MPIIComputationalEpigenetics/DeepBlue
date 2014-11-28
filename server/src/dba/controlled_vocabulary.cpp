@@ -28,7 +28,7 @@ namespace epidb {
   namespace dba {
     namespace cv {
 
-      std::map<std::string, std::string> cache_is_connected;
+      BiosourceConnectedCache biosources_cache;
 
       bool __get_synonyms_from_biosource(const std::string &id, const std::string &biosource_name, const std::string &norm_biosource_name,
                                          const std::string &user_key,
@@ -121,37 +121,41 @@ namespace epidb {
                                 const std::string &biosource, const std::string &norm_biosource,
                                 std::string &msg)
       {
+
+        // Get the synonyms from this term
         std::vector<utils::IdName> syns;
         if (!__get_synonyms_from_biosource("", term, norm_term, "", syns, msg)) {
           return false;
         }
 
-        std::vector<std::string> terms;
+        std::vector<std::string> synonyms_terms;
         BOOST_FOREACH(const utils::IdName & syn, syns) {
-          terms.push_back(syn.name);
-          terms.push_back(utils::normalize_name(syn.name));
+          synonyms_terms.push_back(syn.name);
+          synonyms_terms.push_back(utils::normalize_name(syn.name));
         }
 
+        // Get the sub terms
         std::vector<std::string> norm_subs;
         if (!get_biosource_children(biosource, norm_biosource,
-                                     true, "", norm_subs, msg)) {
+                                    true, "", norm_subs, msg)) {
           return false;
         }
-
+        std::vector<utils::IdName> id_names;
         BOOST_FOREACH(const std::string & norm_sub, norm_subs) {
           std::string biosource_id;
           if (!helpers::get_id(Collections::BIOSOURCES(), norm_sub, biosource_id, msg)) {
             return false;
           }
+          id_names.push_back(utils::IdName(biosource_id, norm_sub));
+        }
 
-          BOOST_FOREACH(const std::string & term, terms) {
-            if (norm_sub != utils::normalize_name(term)) {
-              if (!search::insert_related_term(biosource_id, term, msg)) {
-                return false;
-              }
-            }
+        // Update
+        for (auto &id_name : id_names) {
+          if (!search::insert_related_term(id_name, synonyms_terms, msg)) {
+            return false;
           }
         }
+
         return true;
       }
 
@@ -302,14 +306,12 @@ namespace epidb {
       }
 
       bool __is_connected(const std::string &norm_s1, const std::string &norm_s2,
+                          const bool recursive,
                           bool &r, std::string &msg)
       {
-        std::map<std::string, std::string>::iterator it = cache_is_connected.find(norm_s1);
-        for ( ; it != cache_is_connected.end(); it++) {
-          if (it->second == norm_s2) {
-            r = true;
-            return true;
-          }
+        if (biosources_cache.is_connected(norm_s1, norm_s2)) {
+          r = true;
+          return true;
         }
 
         mongo::ScopedDbConnection c(config::get_mongodb_server());
@@ -338,23 +340,25 @@ namespace epidb {
           std::string sub = be.str();
           if (sub == norm_s2) {
             r = true;
-            cache_is_connected[norm_s1] = norm_s2;
-            cache_is_connected[sub] = norm_s2;
+            biosources_cache.set_connection(norm_s1, norm_s2);
+            biosources_cache.set_connection(sub, norm_s2);
             return true;
           }
           subs.push_back(sub);
         }
 
-        BOOST_FOREACH(const std::string & norm_sub, subs) {
-          bool rr;
-          if (!__is_connected(norm_sub, norm_s2, rr, msg)) {
-            return false;
-          }
-          if (rr) {
-            r = true;
-            cache_is_connected[norm_s1] = norm_s2;
-            cache_is_connected[norm_sub] = norm_s2;
-            return true;
+        if (recursive) {
+          BOOST_FOREACH(const std::string & norm_sub, subs) {
+            bool rr;
+            if (!__is_connected(norm_sub, norm_s2, recursive, rr, msg)) {
+              return false;
+            }
+            if (rr) {
+              r = true;
+              biosources_cache.set_connection(norm_s1, norm_s2);
+              biosources_cache.set_connection(norm_sub, norm_s2);
+              return true;
+            }
           }
         }
 
@@ -363,9 +367,9 @@ namespace epidb {
       }
 
       bool set_biosource_parent(const std::string &biosource_more_embracing, const std::string &norm_biosource_more_embracing,
-                                   const std::string &biosource_less_embracing, const std::string &norm_biosource_less_embracing,
-                                   bool more_embracing_is_syn, const bool less_embracing_is_syn,
-                                   const std::string &user_key, std::string &msg)
+                                const std::string &biosource_less_embracing, const std::string &norm_biosource_less_embracing,
+                                bool more_embracing_is_syn, const bool less_embracing_is_syn,
+                                const std::string &user_key, std::string &msg)
       {
         std::string more_embracing_root;
         std::string norm_more_embracing_root;
@@ -398,7 +402,7 @@ namespace epidb {
         }
 
         bool is_connected(false);
-        if (!__is_connected(norm_more_embracing_root, norm_less_embracing_root, is_connected, msg)) {
+        if (!__is_connected(norm_more_embracing_root, norm_less_embracing_root, false, is_connected, msg)) {
           return false;
         }
 
@@ -410,7 +414,7 @@ namespace epidb {
           return false;
         }
 
-        if (!__is_connected(norm_less_embracing_root, norm_more_embracing_root, is_connected, msg)) {
+        if (!__is_connected(norm_less_embracing_root, norm_more_embracing_root, true, is_connected, msg)) {
           return false;
         }
 
@@ -438,8 +442,6 @@ namespace epidb {
           return false;
         }
 
-        cache_is_connected[norm_biosource_more_embracing] = norm_biosource_less_embracing;
-
         mongo::BSONObjBuilder index_name;
         index_name.append("norm_biosource_name", 1);
         c->ensureIndex(helpers::collection_name(Collections::BIOSOURCE_EMBRACING()), index_name.obj());
@@ -455,6 +457,8 @@ namespace epidb {
                                   less_embracing_root, norm_less_embracing_root, msg)) {
           return false;
         }
+
+        biosources_cache.set_connection(norm_biosource_more_embracing, norm_biosource_less_embracing);
 
         return true;
       }
@@ -495,8 +499,8 @@ namespace epidb {
       }
 
       bool get_biosource_children(const std::string &biosource_name, const std::string &norm_biosource_name,
-                                   bool is_biosource, const std::string &user_key,
-                                   std::vector<std::string> &norm_subs, std::string &msg)
+                                  bool is_biosource, const std::string &user_key,
+                                  std::vector<std::string> &norm_subs, std::string &msg)
       {
         std::string more_embracing_root;
         std::string norm_more_embracing_root;
@@ -539,9 +543,9 @@ namespace epidb {
       }
 
       bool get_biosource_parents(const std::string &biosource_name, const std::string &norm_biosource_name,
-                               bool is_biosource,
-                               const std::string &user_key,
-                               std::vector<std::string> &norm_uppers, std::string &msg)
+                                 bool is_biosource,
+                                 const std::string &user_key,
+                                 std::vector<std::string> &norm_uppers, std::string &msg)
       {
         std::string more_embracing_root;
         std::string norm_more_embracing_root;
