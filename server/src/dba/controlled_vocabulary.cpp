@@ -407,7 +407,7 @@ namespace epidb {
         }
 
         if (is_connected) {
-          std::string e = Error::m(ERR_MORE_EMBRACING_BIOSOURCE_NAME,
+          std::string e = Error::m(ERR_ALREADY_CONECTED_BIOSOURCE_NAME,
                                    biosource_more_embracing.c_str(), biosource_less_embracing.c_str());
           EPIDB_LOG_TRACE(e);
           msg = e;
@@ -419,8 +419,8 @@ namespace epidb {
         }
 
         if (is_connected) {
-          std::string e = Error::m(ERR_MORE_EMBRACING_BIOSOURCE_NAME,
-                                   biosource_less_embracing.c_str(), biosource_more_embracing.c_str());
+          std::string e = Error::m(ERR_ALREADY_CONECTED_BIOSOURCE_NAME,
+                                   biosource_more_embracing.c_str(), biosource_less_embracing.c_str());
           EPIDB_LOG_TRACE(e);
           msg = e;
           return false;
