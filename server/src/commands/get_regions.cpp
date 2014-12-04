@@ -7,9 +7,9 @@
 //
 
 #include <limits>
-#include <sstream>
 #include <vector>
 #include <map>
+#include <unordered_map>
 
 #include <boost/algorithm/string.hpp>
 
@@ -22,6 +22,7 @@
 
 #include "../extras/utils.hpp"
 #include "../extras/serialize.hpp"
+#include "../extras/stringbuilder.hpp"
 
 #include "../errors.hpp"
 #include "../log.hpp"
@@ -90,9 +91,26 @@ namespace epidb {
           return false;
         }
 
-        std::map<int, parser::FileFormat> datasets_format;
+        StringBuilder<char> sb;
+
+        if (!process(output_format, chromosomeRegionsList, sb, msg)) {
+          result.add_error(msg);
+          return false;
+        }
+
+        result.add_string(std::move(sb.ToString()));
+
+        return true;
+      }
+
+
+      bool process(const std::string &output_format, const ChromosomeRegionsList &chromosomeRegionsList,
+                   StringBuilder<char> &sb, std::string &msg) const
+      {
+        std::unordered_map<DatasetId, std::vector<mongo::BSONObj>> datasets_columns;
+        std::unordered_map<DatasetId, parser::FileFormat> datasets_formats;
         dba::Metafield metafield;
-        std::stringstream ss;
+
         for (ChromosomeRegionsList::const_iterator it = chromosomeRegionsList.begin();
              it != chromosomeRegionsList.end(); it++) {
           std::string chromosome = it->first;
@@ -104,65 +122,72 @@ namespace epidb {
           }
 
           if (it != chromosomeRegionsList.begin()) {
-            ss << std::endl;
+            sb.endLine();
           }
 
           for (RegionsIterator cit = regions->begin() ; cit != regions->end(); cit++) {
             if (cit != regions->begin()) {
-              ss << std::endl;
+              sb.endLine();
             }
 
             const Region &region = *cit;
-
-            DatasetId id = region.dataset_id();
+            DatasetId dataset_id = region.dataset_id();
 
             std::vector<mongo::BSONObj> columns;
-            if (!dba::query::get_columns_from_dataset(id, columns, msg)) {
-              result.add_error(msg);
-              return false;
+            parser::FileFormat format;
+
+            int total = 0;
+            auto it = datasets_columns.find(dataset_id);
+            if (it == datasets_columns.end()) {
+              std::cerr << "total : " << total++ << std::endl;
+              if (!dba::query::get_columns_from_dataset(dataset_id, columns, msg)) {
+                return false;
+              }
+              datasets_columns[dataset_id] = columns;
+
+              if (!parser::FileFormatBuilder::build_for_outout(output_format, columns, format, msg)) {
+                return false;
+              }
+
+              datasets_formats[dataset_id] = format;
+
+            } else {
+              columns = it->second;
+              auto format_it = datasets_formats.find(dataset_id);
+              format = format_it->second;
             }
 
-            parser::FileFormat format;
-            if (!parser::FileFormatBuilder::build_for_outout(output_format, format, columns, msg)) {
-              result.add_error(msg);
-              return false;
-            }
-            if (!format_region(ss, chromosome, region, format, metafield, msg)) {
-              result.add_error(msg);
+            if (!format_region(sb, chromosome, region, format, metafield, msg)) {
               return false;
             }
           }
         }
-
-        result.add_string(ss.str());
-
         return true;
       }
 
-      inline bool format_region(std::stringstream &ss, const std::string &chromosome, const Region &region,
+      inline bool format_region(StringBuilder<char> &sb, const std::string &chromosome, const Region &region,
                                 const parser::FileFormat &format, dba::Metafield &metafield, std::string &msg) const
       {
-        std::string err;
         for (parser::FileFormat::const_iterator it =  format.begin(); it != format.end(); it++) {
           const dba::columns::ColumnTypePtr &column = *it;
           if (it != format.begin()) {
-            ss << "\t";
+            sb.endLine();
           }
           if ( column->name() == "CHROMOSOME") {
-            ss << chromosome;
+            sb.append(chromosome);
           } else if (column->name() == "START") {
-            ss << region.start();
+            sb.append(std::move(utils::integer_to_string(region.start())));
           } else if (column->name() == "END") {
-            ss << region.end();
+            sb.append(std::move(utils::integer_to_string(region.end())));
           } else if (dba::Metafield::is_meta(column->name())) {
             std::string result;
             if (!metafield.process(column->name(), chromosome, region, result, msg)) {
               return false;
             }
             if (result.empty()) {
-              ss << column->default_value();
+              sb.append(column->default_value());
             } else {
-              ss << result;
+              sb.append(std::move(result));
             }
           } else {
             if (column->type() == dba::columns::COLUMN_CALCULATED) {
@@ -170,27 +195,27 @@ namespace epidb {
               if (!column->execute(chromosome, region, metafield, result, msg)) {
                 return false;
               }
-              ss << result;
+              sb.append(std::move(result));
             } else if (column->type() == dba::columns::COLUMN_INTEGER) {
-              Score v = region.value(column->internal_name());
+              const Score &v = region.value(column->internal_name());
               if (v == std::numeric_limits<Score>::min()) {
-                ss << column->default_value();
+                sb.append(column->default_value());
               } else {
-                ss << utils::integer_to_string((int)v);
+                sb.append(std::move(utils::integer_to_string((int)v)));
               }
             } else if ( ( column->type() == dba::columns::COLUMN_DOUBLE) ||  (column->type() == dba::columns::COLUMN_RANGE)) {
-              Score v = region.value(column->internal_name());
+              const Score &v = region.value(column->internal_name());
               if (v == std::numeric_limits<Score>::min()) {
-                ss << column->default_value();
+                sb.append(column->default_value());
               } else {
-                ss << utils::double_to_string(v);
+                sb.append(std::move(utils::double_to_string(v)));
               }
             } else {
-              std::string o = region.get(column->internal_name());
+              const std::string& o = region.get(column->internal_name());
               if (o.empty()) {
-                ss << column->default_value();
+                sb.append(column->default_value());
               } else {
-                ss << o;
+                sb.append(o);
               }
             }
           }

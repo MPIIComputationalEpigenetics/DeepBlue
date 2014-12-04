@@ -269,6 +269,7 @@ namespace epidb {
       std::string ts = xmlrpc::type_string(to_xml_type(type_));
       ss << "<value>";
       ss << "<" << ts << ">";
+      // TODO: remove this encode and put in the commands directly.
       ss << encode(value_);
       ss << "</" << ts << ">";
       ss << "</value>";

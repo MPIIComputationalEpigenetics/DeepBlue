@@ -69,6 +69,9 @@ namespace epidb {
             Length span = region_bson[KeyMapper::WIG_SPAN()].numberInt();
             Length size = region_bson[KeyMapper::FEATURES()].numberInt();
 
+            std::cerr << size << std::endl;
+            _regions->reserve(size);
+
             int db_data_size;
             const char *data;
             lzo_bytep decompressed_data;
@@ -99,7 +102,7 @@ namespace epidb {
                 }
                 Region region(start + (i * step), start + (i * step) + span, dataset_id);
                 region.set(KeyMapper::VALUE(), scores[i]);
-                _regions->push_back(region);
+                _regions->push_back(std::move(region));
                 _count++;
               }
 
@@ -117,7 +120,7 @@ namespace epidb {
                 }
                 Region region(starts[i], starts[i] + span, dataset_id);
                 region.set(KeyMapper::VALUE(), scores[i]);
-                _regions->push_back(region);
+                _regions->push_back(std::move(region));
                 _count++;
               }
 
@@ -137,7 +140,7 @@ namespace epidb {
                 }
                 Region region(starts[i], ends[i], dataset_id);
                 region.set(KeyMapper::VALUE(), scores[i]);
-                _regions->push_back(region);
+                _regions->push_back(std::move(region));
                 _count++;
               }
             }
@@ -177,18 +180,17 @@ namespace epidb {
                 Region region(start, end, dataset_id);
 
                 while ( i.more() ) {
-                  mongo::BSONElement e = i.next();
-                  if (e.type() == mongo::String) {
-                    region.set(e.fieldName(), e.str());
-                  } else if (e.type() == mongo::NumberDouble) {
-                    region.set(e.fieldName(), (float) e.Double());
-                  } else if (e.type() == mongo::NumberInt) {
-                    region.set(e.fieldName(), (int) e.Int());
-                  } else {
-                    region.set(e.fieldName(), e.toString(false));
+                  const mongo::BSONElement& e = i.next();
+                  std::string field_name = e.fieldName();
+
+                  switch (e.type()) {
+                    case mongo::String : region.set(std::move(field_name), std::move(e.str())); break;
+                    case mongo::NumberDouble : region.set(std::move(field_name), std::move((float) e._numberDouble())); break;
+                    case mongo::NumberInt : region.set(std::move(field_name), std::move(e._numberInt())); break;
+                    default: region.set(field_name, e.toString(false));
                   }
                 }
-                _regions->push_back(region);
+                _regions->push_back(std::move(region));
                 _count++;
               }
               free(data);
@@ -214,7 +216,7 @@ namespace epidb {
                 Region region(start, end, dataset_id);
 
                 while ( i.more() ) {
-                  mongo::BSONElement e = i.next();
+                  const mongo::BSONElement& e = i.next();
                   if (e.type() == mongo::String) {
                     region.set(e.fieldName(), e.str());
                   } else if (e.type() == mongo::NumberDouble) {
@@ -225,7 +227,7 @@ namespace epidb {
                     region.set(e.fieldName(), e.toString(false));
                   }
                 }
-                _regions->push_back(region);
+                _regions->push_back(std::move(region));
                 _count++;
               }
             }

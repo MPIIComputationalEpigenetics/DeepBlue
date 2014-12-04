@@ -103,25 +103,25 @@ namespace epidb {
 
     bool string_to_score(const std::string &s, Score &c);
 
-    const std::string double_to_string(const double d);
+    std::string double_to_string(const double d);
 
-    const std::string integer_to_string(const int d);
+    std::string integer_to_string(const int d);
 
     bool is_number(const std::string &s);
 
     bool valid_input_string(const std::string &in);
 
-    const std::string lower(const std::string &in);
+    std::string lower(const std::string &in);
 
-    const std::string upper(const std::string &in);
+    std::string upper(const std::string &in);
 
-    const std::string normalize_name(const std::string &name);
+    std::string normalize_name(const std::string &name);
 
-    const std::string normalize_annotation_name(const std::string &annotation_name);
+    std::string normalize_annotation_name(const std::string &annotation_name);
 
-    const std::string normalize_epigenetic_mark(const std::string &histone_modification);
+    std::string normalize_epigenetic_mark(const std::string &histone_modification);
 
-    const std::string bson_to_string(const mongo::BSONElement &e);
+    std::string bson_to_string(const mongo::BSONElement &e);
   }
 }
 

@@ -263,9 +263,7 @@ namespace epidb {
       return ab.arr();
     }
 
-    bool FileFormatBuilder::build_for_outout(const std::string &format, FileFormat &file_format,
-        std::vector<mongo::BSONObj> experiment_columns, std::string &msg )
-
+    bool FileFormatBuilder::build_for_outout(const std::string &format, const std::vector<mongo::BSONObj>& experiment_columns, FileFormat &file_format, std::string &msg )
     {
       if (format.empty()) {
         file_format = FileFormat::default_format();

@@ -248,17 +248,17 @@ namespace epidb {
       return string_to_floating_point<Score>(c, s_.c_str());
     }
 
-    const std::string double_to_string(const double d)
+    std::string double_to_string(const double d)
     {
       return fmt::format("{:-.4f}", d);
     }
 
-    const std::string integer_to_string(const int t)
+    std::string integer_to_string(const int t)
     {
       return fmt::FormatInt(t).str();
     }
 
-    const std::string long_to_string(const long t)
+    std::string long_to_string(const long t)
     {
       return fmt::FormatInt(t).str();
     }
@@ -290,21 +290,21 @@ namespace epidb {
       return true;
     }
 
-    const std::string lower(const std::string &in)
+    std::string lower(const std::string &in)
     {
       std::string data(in);
       std::transform(data.begin(), data.end(), data.begin(), ::tolower);
       return data;
     }
 
-    const std::string upper(const std::string &in)
+    std::string upper(const std::string &in)
     {
       std::string data(in);
       std::transform(data.begin(), data.end(), data.begin(), ::toupper);
       return data;
     }
 
-    const std::string normalize_name(const std::string &in)
+    std::string normalize_name(const std::string &in)
     {
       std::string tmp(in);
       boost::trim(tmp);
@@ -322,7 +322,7 @@ namespace epidb {
       return out;
     }
 
-    const std::string normalize_annotation_name(const std::string &annotation_name)
+    std::string normalize_annotation_name(const std::string &annotation_name)
     {
       std::string tmp(annotation_name);
       boost::trim(tmp);
@@ -343,7 +343,7 @@ namespace epidb {
       return out;
     }
 
-    const std::string normalize_epigenetic_mark(const std::string &epigenetic_mark)
+    std::string normalize_epigenetic_mark(const std::string &epigenetic_mark)
     {
       const std::string l = normalize_name(epigenetic_mark);
 
@@ -370,7 +370,7 @@ namespace epidb {
     }
 
     // FROM https://github.com/mongodb/mongo-cxx-driver/blob/6dc65e99af9979152deb0940b2313c560e61e2d9/src/mongo/bson/bsonelement.cpp
-    const std::string bson_to_string(const mongo::BSONElement &e)
+    std::string bson_to_string(const mongo::BSONElement &e)
     {
       switch ( e.type() ) {
       case mongo::Date: {

@@ -68,24 +68,42 @@ namespace epidb {
   void Region::set(const std::string &key, const std::string &value)
   {
     std::pair<std::string, std::string> p(key, value);
-    _string_data.push_back(p);
+    _string_data.push_front(std::move(p));
   }
 
   void Region::set(const std::string &key, const Score value)
   {
     std::pair<std::string, Score> p(key, value);
-    _numeric_data.push_back(p);
+    _numeric_data.push_front(std::move(p));
   }
 
   void Region::set(const std::string &key, const int value)
   {
     std::pair<std::string, Score> p(key, value);
-    _numeric_data.push_back(p);
+    _numeric_data.push_front(std::move(p));
+  }
+
+  void Region::set(std::string &&key, std::string &&value)
+  {
+    std::pair<std::string, std::string> p(std::move(key), value);
+    _string_data.push_front(std::move(p));
+  }
+
+  void Region::set(std::string &&key, Score &&value)
+  {
+    std::pair<std::string, Score> p(std::move(key), std::move(value));
+    _numeric_data.push_front(std::move(p));
+  }
+
+  void Region::set(std::string &&key, int &&value)
+  {
+    std::pair<std::string, Score> p(std::move(key), std::move(value));
+    _numeric_data.push_front(std::move(p));
   }
 
   const std::string &Region::get(const std::string &key) const
   {
-    for (std::vector<std::pair<std::string, std::string> >::const_iterator it = _string_data.begin();
+    for (std::forward_list<std::pair<std::string, std::string> >::const_iterator it = _string_data.begin();
          it != _string_data.end(); it++) {
       if (it->first == key) {
         return it->second;
@@ -97,7 +115,7 @@ namespace epidb {
 
   Score Region::value(const std::string &key) const
   {
-    for (std::vector<std::pair<std::string, Score> >::const_iterator it = _numeric_data.begin();
+    for (std::forward_list<std::pair<std::string, Score> >::const_iterator it = _numeric_data.begin();
          it != _numeric_data.end(); it++) {
       if (it->first == key) {
         return it->second;
