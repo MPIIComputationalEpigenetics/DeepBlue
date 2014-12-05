@@ -13,15 +13,15 @@ def create_user(context):
         if in_okay == 'Y':
             okay = True
 
-        epidb = context.epidb
-        (s, user_key) = epidb.add_user(user_name, email, institution,
+    epidb = context.epidb
+    (s, user_key) = epidb.add_user(user_name, email, institution,
                                        context.user_key)
-        if s == 'okay':
-            print('Okay.')
-            print(user_key)
-            mail.send_new_user_mail(user_name, user_key[1], email)
-        else:
-            print(user_key)
+    if s == 'okay':
+        print('Okay.')
+        print(user_key)
+        mail.send_new_user_mail(user_name, user_key[1], email)
+    else:
+        print(user_key)
 
 
 def list_users(context):
