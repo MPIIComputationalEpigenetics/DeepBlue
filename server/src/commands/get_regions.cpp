@@ -111,6 +111,10 @@ namespace epidb {
         std::unordered_map<DatasetId, parser::FileFormat> datasets_formats;
         dba::Metafield metafield;
 
+        DatasetId actual_id = -1;
+        std::vector<mongo::BSONObj> columns;
+        parser::FileFormat format;
+
         for (ChromosomeRegionsList::const_iterator it = chromosomeRegionsList.begin();
              it != chromosomeRegionsList.end(); it++) {
           std::string chromosome = it->first;
@@ -133,28 +137,26 @@ namespace epidb {
             const Region &region = *cit;
             DatasetId dataset_id = region.dataset_id();
 
-            std::vector<mongo::BSONObj> columns;
-            parser::FileFormat format;
+            if (actual_id != dataset_id) {
+              auto it = datasets_columns.find(dataset_id);
+              if (it == datasets_columns.end()) {
+                if (!dba::query::get_columns_from_dataset(dataset_id, columns, msg)) {
+                  return false;
+                }
+                datasets_columns[dataset_id] = columns;
 
-            int total = 0;
-            auto it = datasets_columns.find(dataset_id);
-            if (it == datasets_columns.end()) {
-              std::cerr << "total : " << total++ << std::endl;
-              if (!dba::query::get_columns_from_dataset(dataset_id, columns, msg)) {
-                return false;
+                if (!parser::FileFormatBuilder::build_for_outout(output_format, columns, format, msg)) {
+                  return false;
+                }
+
+                datasets_formats[dataset_id] = format;
+
+              } else {
+                columns = it->second;
+                auto format_it = datasets_formats.find(dataset_id);
+                format = format_it->second;
               }
-              datasets_columns[dataset_id] = columns;
-
-              if (!parser::FileFormatBuilder::build_for_outout(output_format, columns, format, msg)) {
-                return false;
-              }
-
-              datasets_formats[dataset_id] = format;
-
-            } else {
-              columns = it->second;
-              auto format_it = datasets_formats.find(dataset_id);
-              format = format_it->second;
+              actual_id = dataset_id;
             }
 
             if (!format_region(sb, chromosome, region, format, metafield, msg)) {
@@ -171,7 +173,7 @@ namespace epidb {
         for (parser::FileFormat::const_iterator it =  format.begin(); it != format.end(); it++) {
           const dba::columns::ColumnTypePtr &column = *it;
           if (it != format.begin()) {
-            sb.endLine();
+            sb.tab();
           }
           if ( column->name() == "CHROMOSOME") {
             sb.append(chromosome);
@@ -211,7 +213,7 @@ namespace epidb {
                 sb.append(std::move(utils::double_to_string(v)));
               }
             } else {
-              const std::string& o = region.get(column->internal_name());
+              const std::string &o = region.get(column->internal_name());
               if (o.empty()) {
                 sb.append(column->default_value());
               } else {
