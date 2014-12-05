@@ -6,14 +6,11 @@
 template <typename chr>
 class StringBuilder {
     typedef std::basic_string<chr> string_t;
-    // Tried also vector and list. Deque wan, albeit by a narrow margin.
     typedef std::deque<string_t> container_t;
-    // Reuse the size type in the string.
     typedef typename string_t::size_type size_type;
     container_t m_Data;
     size_type m_totalSize;
 
-    // No copy constructor, no assignement.
     StringBuilder(const StringBuilder &);
     StringBuilder & operator = (const StringBuilder &);
 
@@ -38,9 +35,16 @@ public:
         m_totalSize += src.size();
     }
 
+    void tab() {
+        static std::string tab("\t");
+        m_Data.push_back(tab);
+        m_totalSize += 1;
+    }
+
     void endLine() {
-        static chr lineFeed[] { 10, 0 };
-        m_Data.push_back(lineFeed);
+        static std::string new_line("\n");
+        m_Data.push_back(new_line);
+        m_totalSize += 2;
     }
 
     string_t ToString() const {
