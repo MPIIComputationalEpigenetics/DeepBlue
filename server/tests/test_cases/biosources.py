@@ -94,7 +94,7 @@ class TestBioSourceCommands(helpers.TestCase):
     self.assertSuccess(res)
     res = epidb.set_biosource_parent("A", "C D", self.admin_key)
     self.assertFailure(res)
-    self.assertEqual(res[1], "104901:'A' is already more embracing than 'C D'.")
+    self.assertEqual(res[1], "104903:'A' and 'C D' are already connected.")
 
     res = epidb.set_biosource_parent("A C", "A D", self.admin_key)
     self.assertSuccess(res)
@@ -103,7 +103,7 @@ class TestBioSourceCommands(helpers.TestCase):
 
     res = epidb.set_biosource_parent("C D", "A", self.admin_key)
     self.assertFailure(res)
-    self.assertEqual(res[1], "104901:'A' is already more embracing than 'C D'.")
+    self.assertEqual(res[1], "104903:'C D' and 'A' are already connected.")
 
   def test_check_embracing_bug(self):
 	epidb = EpidbClient()
