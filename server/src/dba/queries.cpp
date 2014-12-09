@@ -21,6 +21,11 @@
 #include "../algorithms/aggregate.hpp"
 #include "../algorithms/intersection.hpp"
 #include "../algorithms/merge.hpp"
+
+#include "../datatypes/column_types_def.hpp"
+
+#include "../dba/experiments.hpp"
+
 #include "../extras/utils.hpp"
 
 #include "collections.hpp"
@@ -531,7 +536,7 @@ namespace epidb {
       }
 
 
-      bool filter_region(Region &region, const std::string &field, const std::string &field_key,
+      bool filter_region(const Region &region, const std::string &field, const int &pos,
                          Metafield &metafield, const std::string &chrom, FilterBuilder::FilterPtr filter)
       {
         if (field.compare("START") == 0) {
@@ -551,7 +556,7 @@ namespace epidb {
           }
           return filter->is(value);
         } else {
-          return filter->is(region.get(field_key));
+          return filter->is(region.value(pos));
         }
       }
 
@@ -592,11 +597,9 @@ namespace epidb {
         }
 
         std::string err;
-        std::string field_key;
-        if (!KeyMapper::to_short(field, field_key, err)) {
-          msg = "Field " + field + " is not being used. (" + err + ")";
-          return false;
-        }
+        DatasetId dataset_id = -1;
+        int pos;
+        datatypes::COLUMN_TYPES column_type;
 
         size_t total = 0;
         size_t removed = 0;
@@ -608,9 +611,21 @@ namespace epidb {
           Regions regs = it->second;
           Regions saved = build_regions();
           for (RegionsIterator it = regs->begin(); it != regs->end(); it++) {
+            const Region &region = *it;
+            if (!dba::Metafield::is_meta(field)) {
+              if (region.dataset_id() != dataset_id) {
+                dataset_id = region.dataset_id();
+                if (!dba::experiments::get_field_pos(dataset_id, field, pos, column_type, msg)) {
+                  return false;
+                }
+              }
+              dataset_id = region.dataset_id();
+            }
             total++;
-            if (filter_region(*it, field, field_key, metafield, chromosome, filter)) {
-              saved->push_back(*it);
+
+            // TODO: use column_type for better filtering. i.e. type conversion
+            if (filter_region(region, field, pos, metafield, chromosome, filter)) {
+              saved->push_back(region);
               keep++;
             } else {
               removed++;
@@ -754,7 +769,7 @@ namespace epidb {
         return algorithms::aggregate(data, ranges, field, regions, msg);
       }
 
-      bool get_columns_from_dataset(DatasetId &dataset_id, std::vector<mongo::BSONObj> &columns, std::string &msg)
+      bool get_columns_from_dataset(const DatasetId &dataset_id, std::vector<mongo::BSONObj> &columns, std::string &msg)
       {
         if (dataset_id == DATASET_EMPTY_ID) {
           return true;
@@ -772,14 +787,47 @@ namespace epidb {
         while (cursor->more()) {
           mongo::BSONObj experiment = cursor->next();
           if (experiment.hasField("columns")) {
+            int s_count = 0;
+            int n_count = 0;
+
             std::vector<mongo::BSONElement> tmp_columns = experiment["columns"].Array();
             BOOST_FOREACH(const mongo::BSONElement & e, tmp_columns) {
-              columns.push_back(e.Obj().getOwned());
+              mongo::BSONObj column = e.Obj();
+              const std::string &column_type = column["column_type"].str();
+              const std::string &column_name = column["name"].str();
+
+              int pos = -1;
+
+              mongo::BSONObjBuilder bob;
+              bob.appendElements(column);
+
+              if (column_name != "CHROMOSOME" && column_name != "START" &&  column_name != "END") {
+                if (column_type == "string") {
+                  pos = s_count++;
+                } else if (column_type == "integer") {
+                  pos = n_count++;
+                } else if (column_type == "double") {
+                  pos = n_count++;
+                } else if (column_type == "range") {
+                  pos = n_count++;
+                } else if (column_type == "category") {
+                  pos = s_count++;
+                } else if (column_type == "calculated") {
+                  msg = "Calculated field does not have data";
+                  return false;
+                } else {
+                  msg = "Unknown column type: " + column_type;
+                  return false;
+                }
+                bob.append("pos", pos);
+              }
+
+              mongo::BSONObj o = bob.obj();
+              columns.push_back(o);
             }
             c.done();
             return true;
           } else {
-            std::cerr <<  "Experiment dataset" << dataset_id << " does not have columns!!" << std::endl;
             c.done();
             return false;
           }
@@ -789,9 +837,41 @@ namespace epidb {
         while (cursor->more()) {
           mongo::BSONObj annotation = cursor->next().getOwned();
           if (annotation.hasField("columns")) {
+            int s_count = 0;
+            int n_count = 0;
             std::vector<mongo::BSONElement> tmp_columns = annotation["columns"].Array();
             BOOST_FOREACH(const mongo::BSONElement & e, tmp_columns) {
-              columns.push_back(e.Obj().getOwned());
+              mongo::BSONObj column = e.Obj();
+              const std::string &column_type = column["column_type"].str();
+              const std::string &column_name = column["name"].str();
+
+              int pos = -1;
+
+              mongo::BSONObjBuilder bob;
+              bob.appendElements(column);
+
+              if (column_name != "CHROMOSOME" && column_name != "START" &&  column_name != "END") {
+                if (column_type == "string") {
+                  pos = s_count++;
+                } else if (column_type == "integer") {
+                  pos = n_count++;
+                } else if (column_type == "double") {
+                  pos = n_count++;
+                } else if (column_type == "range") {
+                  pos = n_count++;
+                } else if (column_type == "category") {
+                  pos = s_count++;
+                } else if (column_type == "calculated") {
+                  msg = "Calculated field does not have data";
+                  return false;
+                } else {
+                  msg = "Unknown column type: " + column_type;
+                  return false;
+                }
+                bob.append("pos", pos);
+              }
+
+              columns.push_back(bob.obj());
             }
             c.done();
             return true;

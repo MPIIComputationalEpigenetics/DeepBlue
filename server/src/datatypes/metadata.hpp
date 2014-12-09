@@ -6,6 +6,9 @@
 //  Copyright (c) 2013,2014 Max Planck Institute for Computer Science. All rights reserved.
 //
 
+#ifndef METADATA_HPP
+#define METADATA_HPP
+
 #include <map>
 
 #include <mongo/bson/bson.h>
@@ -17,3 +20,5 @@ namespace epidb {
     mongo::BSONObj extra_metadata_to_bson(const Metadata &extra_metadata);
   }
 }
+
+#endif

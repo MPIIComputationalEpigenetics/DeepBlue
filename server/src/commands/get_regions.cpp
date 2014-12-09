@@ -13,10 +13,12 @@
 
 #include <boost/algorithm/string.hpp>
 
+#include "../datatypes/column_types_def.hpp"
+
 #include "../dba/dba.hpp"
+#include "../dba/column_types.hpp"
 #include "../dba/metafield.hpp"
 #include "../dba/queries.hpp"
-#include "../dba/key_mapper.hpp"
 
 #include "../engine/commands.hpp"
 
@@ -107,12 +109,10 @@ namespace epidb {
       bool process(const std::string &output_format, const ChromosomeRegionsList &chromosomeRegionsList,
                    StringBuilder<char> &sb, std::string &msg) const
       {
-        std::unordered_map<DatasetId, std::vector<mongo::BSONObj>> datasets_columns;
         std::unordered_map<DatasetId, parser::FileFormat> datasets_formats;
         dba::Metafield metafield;
 
         DatasetId actual_id = -1;
-        std::vector<mongo::BSONObj> columns;
         parser::FileFormat format;
 
         for (ChromosomeRegionsList::const_iterator it = chromosomeRegionsList.begin();
@@ -138,21 +138,20 @@ namespace epidb {
             DatasetId dataset_id = region.dataset_id();
 
             if (actual_id != dataset_id) {
-              auto it = datasets_columns.find(dataset_id);
-              if (it == datasets_columns.end()) {
+              std::vector<mongo::BSONObj> columns;
+              auto it = datasets_formats.find(dataset_id);
+              if (it == datasets_formats.end()) {
                 if (!dba::query::get_columns_from_dataset(dataset_id, columns, msg)) {
                   return false;
                 }
-                datasets_columns[dataset_id] = columns;
-
-                if (!parser::FileFormatBuilder::build_for_outout(output_format, columns, format, msg)) {
+                parser::FileFormat new_format;
+                if (!parser::FileFormatBuilder::build_for_outout(output_format, columns, new_format, msg)) {
                   return false;
                 }
-
-                datasets_formats[dataset_id] = format;
+                datasets_formats[dataset_id] = new_format;
+                format = new_format;
 
               } else {
-                columns = it->second;
                 auto format_it = datasets_formats.find(dataset_id);
                 format = format_it->second;
               }
@@ -172,13 +171,19 @@ namespace epidb {
       {
         for (parser::FileFormat::const_iterator it =  format.begin(); it != format.end(); it++) {
           const dba::columns::ColumnTypePtr &column = *it;
+
           if (it != format.begin()) {
             sb.tab();
           }
+          // Change to use column->pos()
           if ( column->name() == "CHROMOSOME") {
             sb.append(chromosome);
+
+          // Change to use column->pos()
           } else if (column->name() == "START") {
             sb.append(std::move(utils::integer_to_string(region.start())));
+
+          // Change to use column->pos()
           } else if (column->name() == "END") {
             sb.append(std::move(utils::integer_to_string(region.end())));
           } else if (dba::Metafield::is_meta(column->name())) {
@@ -192,28 +197,28 @@ namespace epidb {
               sb.append(std::move(result));
             }
           } else {
-            if (column->type() == dba::columns::COLUMN_CALCULATED) {
+            if (column->type() == datatypes::COLUMN_CALCULATED) {
               std::string result;
               if (!column->execute(chromosome, region, metafield, result, msg)) {
                 return false;
               }
               sb.append(std::move(result));
-            } else if (column->type() == dba::columns::COLUMN_INTEGER) {
-              const Score &v = region.value(column->internal_name());
+            } else if (column->type() == datatypes::COLUMN_INTEGER) {
+              const Score &v = region.value(column->pos());
               if (v == std::numeric_limits<Score>::min()) {
                 sb.append(column->default_value());
               } else {
                 sb.append(std::move(utils::integer_to_string((int)v)));
               }
-            } else if ( ( column->type() == dba::columns::COLUMN_DOUBLE) ||  (column->type() == dba::columns::COLUMN_RANGE)) {
-              const Score &v = region.value(column->internal_name());
+            } else if ( ( column->type() == datatypes::COLUMN_DOUBLE) ||  (column->type() == datatypes::COLUMN_RANGE)) {
+              const Score &v = region.value(column->pos());
               if (v == std::numeric_limits<Score>::min()) {
                 sb.append(column->default_value());
               } else {
                 sb.append(std::move(utils::double_to_string(v)));
               }
             } else {
-              const std::string &o = region.get(column->internal_name());
+              const std::string &o = region.get(column->pos());
               if (o.empty()) {
                 sb.append(column->default_value());
               } else {

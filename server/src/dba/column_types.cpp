@@ -14,6 +14,8 @@
 
 #include <mongo/bson/bson.h>
 
+#include "../datatypes/column_types_def.hpp"
+
 #include "../extras/utils.hpp"
 
 #include "../lua/sandbox.hpp"
@@ -57,9 +59,9 @@ namespace epidb {
       }
 
       template<>
-      COLUMN_TYPES ColumnType<long long>::type() const
+      datatypes::COLUMN_TYPES ColumnType<long long>::type() const
       {
-        return COLUMN_INTEGER;
+        return datatypes::COLUMN_INTEGER;
       }
 
       template <>
@@ -76,9 +78,9 @@ namespace epidb {
       }
 
       template<>
-      COLUMN_TYPES ColumnType<double>::type() const
+      datatypes::COLUMN_TYPES ColumnType<double>::type() const
       {
-        return COLUMN_DOUBLE;
+        return datatypes::COLUMN_DOUBLE;
       }
 
       template<>
@@ -106,9 +108,9 @@ namespace epidb {
       }
 
       template<>
-      COLUMN_TYPES ColumnType<std::string>::type() const
+      datatypes::COLUMN_TYPES ColumnType<std::string>::type() const
       {
-        return COLUMN_STRING;
+        return datatypes::COLUMN_STRING;
       }
 
       template<>
@@ -142,9 +144,9 @@ namespace epidb {
       }
 
       template<>
-      COLUMN_TYPES ColumnType<Range>::type() const
+      datatypes::COLUMN_TYPES ColumnType<Range>::type() const
       {
-        return COLUMN_RANGE;
+        return datatypes::COLUMN_RANGE;
       }
 
       template<>
@@ -174,9 +176,9 @@ namespace epidb {
       }
 
       template<>
-      COLUMN_TYPES ColumnType<Category>::type() const
+      datatypes::COLUMN_TYPES ColumnType<Category>::type() const
       {
-        return COLUMN_CATEGORY;
+        return datatypes::COLUMN_CATEGORY;
       }
 
       template<>
@@ -227,23 +229,23 @@ namespace epidb {
       }
 
       template<>
-      COLUMN_TYPES ColumnType<Code>::type() const
+      datatypes::COLUMN_TYPES ColumnType<Code>::type() const
       {
-        return COLUMN_CALCULATED;
+        return datatypes::COLUMN_CALCULATED;
       }
 
       /* -------- */
 
-      bool get_column_type(const std::string &type_name, COLUMN_TYPES type, std::string &msg)
+      bool get_column_type(const std::string &type_name, datatypes::COLUMN_TYPES type, std::string &msg)
       {
         if (type_name == "string") {
-          type = COLUMN_STRING;
+          type = datatypes::COLUMN_STRING;
           return true;
         } else if (type_name == "integer") {
-          type = COLUMN_INTEGER;
+          type = datatypes::COLUMN_INTEGER;
           return true;
         } else if (type_name == "double") {
-          type = COLUMN_DOUBLE;
+          type = datatypes::COLUMN_DOUBLE;
           return true;
         } else {
           msg = "Invalid column type '" + type_name + "'";
@@ -251,26 +253,25 @@ namespace epidb {
         }
       }
 
-      bool column_type_simple(const std::string &name, COLUMN_TYPES type, const std::string &default_value,
-                              ColumnTypePtr &column_type, std::string &msg)
+      bool column_type_simple(const std::string &name, datatypes::COLUMN_TYPES type, const std::string &default_value, ColumnTypePtr &column_type, std::string &msg)
       {
         switch (type) {
-        case COLUMN_STRING:
-          column_type = boost::shared_ptr<ColumnType<std::string > >(new ColumnType<std::string>(name, "", default_value));
+        case datatypes::COLUMN_STRING:
+          column_type = boost::shared_ptr<ColumnType<std::string > >(new ColumnType<std::string>(name, "", default_value, -1));
           return true;
 
-        case COLUMN_INTEGER:
-          column_type = boost::shared_ptr<ColumnType<size_t> >(new ColumnType<size_t>(name, 0, default_value));
+        case datatypes::COLUMN_INTEGER:
+          column_type = boost::shared_ptr<ColumnType<size_t> >(new ColumnType<size_t>(name, 0, default_value, -1));
           return true;
 
-        case COLUMN_DOUBLE:
-          column_type = boost::shared_ptr<ColumnType<double> >(new ColumnType<double>(name, 0.0, default_value));
+        case datatypes::COLUMN_DOUBLE:
+          column_type = boost::shared_ptr<ColumnType<double> >(new ColumnType<double>(name, 0.0, default_value, -1));
           return true;
 
-        case COLUMN_RANGE:
+        case datatypes::COLUMN_RANGE:
           msg = "Range Columns should be created first and them loaded.";
           return false;
-        case COLUMN_CATEGORY:
+        case datatypes::COLUMN_CATEGORY:
           msg = "Category Columns should be created first and them loaded.";
           return false;
 
@@ -285,13 +286,13 @@ namespace epidb {
       {
         std::string type_l(utils::lower(type));
         if (type_l == "string") {
-          column_type = boost::shared_ptr<ColumnType<std::string > >(new ColumnType<std::string>(name, "", default_value));
+          column_type = boost::shared_ptr<ColumnType<std::string > >(new ColumnType<std::string>(name, "", default_value, -1));
           return true;
         } else if (type_l == "integer") {
-          column_type = boost::shared_ptr<ColumnType<long long> >(new ColumnType<long long>(name, 0, default_value));
+          column_type = boost::shared_ptr<ColumnType<long long> >(new ColumnType<long long>(name, 0, default_value, -1));
           return true;
         } else if (type_l == "double") {
-          column_type = boost::shared_ptr<ColumnType<double> >(new ColumnType<double>(name, 0.0, default_value));
+          column_type = boost::shared_ptr<ColumnType<double> >(new ColumnType<double>(name, 0.0, default_value, -1));
           return true;
         } else {
           msg = "Invalid column type '" + type_l + "'";
@@ -529,6 +530,10 @@ namespace epidb {
       {
         const std::string name = obj["name"].String();
         const std::string type = obj["column_type"].String();
+        int pos = -1;
+        if (obj.hasField("pos")) {
+          pos = obj["pos"].Int();
+        }
         std::string default_value;
         if (obj.hasField("default_value")) {
           default_value = obj["default_value"].String();
@@ -537,24 +542,24 @@ namespace epidb {
         }
 
         if (type == "string") {
-          column_type = boost::shared_ptr<ColumnType<std::string > >(new ColumnType<std::string>(name, "", default_value));
+          column_type = boost::shared_ptr<ColumnType<std::string > >(new ColumnType<std::string>(name, "", default_value, pos));
           return true;
         } else if (type == "integer") {
-          column_type = boost::shared_ptr<ColumnType<long long > >(new ColumnType<long long>(name, 0, default_value));
+          column_type = boost::shared_ptr<ColumnType<long long > >(new ColumnType<long long>(name, 0, default_value, pos));
         } else if (type == "double") {
-          column_type = boost::shared_ptr<ColumnType<double > >(new ColumnType<double>(name, 0.0, default_value));
+          column_type = boost::shared_ptr<ColumnType<double > >(new ColumnType<double>(name, 0.0, default_value, pos));
         } else if (type == "category") {
           Category category;
           std::vector<mongo::BSONElement> e = obj["items"].Array();
           BOOST_FOREACH(const mongo::BSONElement & be, e) {
             category.push_back(be.str());
           }
-          column_type = boost::shared_ptr<ColumnType<Category > >(new ColumnType<Category>(name, category, default_value));
+          column_type = boost::shared_ptr<ColumnType<Category > >(new ColumnType<Category>(name, category, default_value, pos));
         } else if (type == "range") {
           double minimum = obj["minimum"].Double();
           double maximum = obj["maximum"].Double();
           Range range(minimum, maximum);
-          column_type = boost::shared_ptr<ColumnType<Range > >(new ColumnType<Range>(name, range, default_value));
+          column_type = boost::shared_ptr<ColumnType<Range > >(new ColumnType<Range>(name, range, default_value, pos));
         } else if (type == "calculated") {
           std::string code = obj["code"].String();
           lua::Sandbox::LuaPtr lua = lua::Sandbox::new_instance();
@@ -562,7 +567,7 @@ namespace epidb {
             return false;
           }
           std::pair<std::string, lua::Sandbox::LuaPtr> p(code, lua);
-          column_type = boost::shared_ptr<ColumnType<Code > >(new ColumnType<Code>(name, p, default_value));
+          column_type = boost::shared_ptr<ColumnType<Code > >(new ColumnType<Code>(name, p, default_value, pos));
         } else {
           msg = "Column type '" + type + "' is invalid";
           return false;
@@ -617,22 +622,22 @@ namespace epidb {
         res["description"] = o["description"].String();
         res["default_value"] = column_type->default_value();
         switch (column_type->type()) {
-        case COLUMN_STRING: {
+        case datatypes::COLUMN_STRING: {
           res["column_type"] = "string";
           break;
         }
 
-        case COLUMN_INTEGER: {
+        case datatypes::COLUMN_INTEGER: {
           res["column_type"] = "integer";
           break;
         }
 
-        case COLUMN_DOUBLE: {
+        case datatypes::COLUMN_DOUBLE: {
           res["column_type"] = "double";
           break;
         }
 
-        case COLUMN_RANGE: {
+        case datatypes::COLUMN_RANGE: {
           res["column_type"] = "range";
           ColumnType<Range> *column = static_cast<ColumnType<Range> *>(column_type.get());
           res["minimum"] = utils::integer_to_string(column->content().first);
@@ -640,21 +645,21 @@ namespace epidb {
           break;
         }
 
-        case COLUMN_CATEGORY: {
+        case datatypes::COLUMN_CATEGORY: {
           res["column_type"] = "category";
           ColumnType<Category> *column = static_cast<ColumnType<Category> *>(column_type.get());
           res["values"] = utils::vector_to_string(column->content());
           break;
         }
 
-        case COLUMN_CALCULATED: {
+        case datatypes::COLUMN_CALCULATED: {
           res["column_type"] = "calculated";
           ColumnType<Code> *column = static_cast<ColumnType<Code> *>(column_type.get());
           res["code"] = column->content().first;
           break;
         }
 
-        case COLUMN_ERR: {
+        case datatypes::COLUMN_ERR: {
           msg = "Invalid column id: " + id;
           return false;
         }

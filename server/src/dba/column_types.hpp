@@ -20,25 +20,14 @@
 
 #include "key_mapper.hpp"
 
+#include "../datatypes/column_types_def.hpp"
 #include "../extras/utils.hpp"
-
 #include "../lua/sandbox.hpp"
-
 #include "../log.hpp"
 
 namespace epidb {
   namespace dba {
     namespace columns {
-
-      enum COLUMN_TYPES {
-        COLUMN_STRING,
-        COLUMN_INTEGER,
-        COLUMN_DOUBLE,
-        COLUMN_RANGE,
-        COLUMN_CATEGORY,
-        COLUMN_CALCULATED,
-        COLUMN_ERR,
-      };
 
       typedef std::pair<std::string, lua::Sandbox::LuaPtr> Code;
       typedef std::pair<double, double> Range;
@@ -49,41 +38,39 @@ namespace epidb {
       protected:
         std::string _name;
         std::string _default_value;
-        bool _has_internal_name;
-        std::string _internal_name;
+        int _pos;
 
         AbstractColumnType(const std::string n, const std::string i) :
           _name(n),
           _default_value(i),
-          _has_internal_name(false),
-          _internal_name()
-        {}
+          _pos(-1)
+        {
+
+
+        }
+
+        AbstractColumnType(const std::string n, const std::string i, int pos) :
+          _name(n),
+          _default_value(i),
+          _pos(pos)
+        { }
 
       public:
-        virtual COLUMN_TYPES type() const = 0;
+        virtual datatypes::COLUMN_TYPES type() const = 0;
 
         const std::string name()
         {
           return _name;
         }
 
-        const std::string internal_name()
-        {
-          if (!_has_internal_name) {
-            std::string msg;
-            if (!dba::KeyMapper::to_short(_name, _internal_name, msg)) {
-              EPIDB_LOG_ERR(msg);
-              _internal_name = "There was not possible to load " + _name;
-            }
-            _has_internal_name = true;
-          }
-
-          return _internal_name;
-        }
-
         const std::string default_value()
         {
           return _default_value;
+        }
+
+        int pos() const
+        {
+          return _pos;
         }
 
         virtual bool check(const std::string &verify) const
@@ -96,7 +83,7 @@ namespace epidb {
           return (_default_value == "*" || _default_value == verify);
         }
 
-        virtual bool execute(const std::string& chromosome, const Region& region, dba::Metafield &metafield,std::string& result, std::string& msg)
+        virtual bool execute(const std::string &chromosome, const Region &region, dba::Metafield &metafield, std::string &result, std::string &msg)
         {
           msg = "Execute method not implemented for this class: " + str();
           return false;
@@ -127,14 +114,14 @@ namespace epidb {
         Type _content;
 
       public:
-        ColumnType(const std::string &n, const Type c, const std::string &i) :
-          AbstractColumnType(n, i),
+        ColumnType(const std::string &n, const Type c, const std::string &i, int pos) :
+          AbstractColumnType(n, i, pos),
           _content(c)
         {}
 
-        COLUMN_TYPES type() const
+        datatypes::COLUMN_TYPES type() const
         {
-          return COLUMN_ERR;
+          return datatypes::COLUMN_ERR;
         }
 
         bool check(const std::string &verify) const
@@ -142,7 +129,7 @@ namespace epidb {
           return AbstractColumnType::check(verify);
         }
 
-        bool execute(const std::string& chromosome, const Region &region, dba::Metafield &metafield, std::string &result, std::string &msg)
+        bool execute(const std::string &chromosome, const Region &region, dba::Metafield &metafield, std::string &result, std::string &msg)
         {
           return AbstractColumnType::execute(chromosome, region, metafield, result, msg);
         }
@@ -222,8 +209,7 @@ namespace epidb {
 
       bool list_column_types(const std::string &user_key, std::vector<utils::IdName> &content, std::string  &msg);
 
-      bool column_type_simple(const std::string &name, COLUMN_TYPES type, const std::string &default_value,
-                              ColumnTypePtr &column_type, std::string &msg);
+      bool column_type_simple(const std::string &name, datatypes::COLUMN_TYPES type, const std::string &default_value, ColumnTypePtr &column_type, std::string &msg);
 
       bool column_type_simple(const std::string &name, const std::string &type, const std::string &default_value,
                               ColumnTypePtr &column_type, std::string &msg);
@@ -262,7 +248,7 @@ namespace epidb {
 
       bool column_type_bsonobj_to_class(const mongo::BSONObj &obj, ColumnTypePtr &column_type, std::string &msg);
 
-      bool get_column_type(const std::string &id, mongo::BSONObj& result, std::string &msg);
+      bool get_column_type(const std::string &id, mongo::BSONObj &result, std::string &msg);
 
       bool get_column_type(const std::string &id, std::map<std::string, std::string> &res, std::string &msg);
 
@@ -271,4 +257,4 @@ namespace epidb {
   }
 }
 
-#endif /* defined(EPIDB_DBA_COLUMN_TYPES()_HPP) */
+#endif /* defined(EPIDB_DBA_COLUMN_TYPES_HPP) */

@@ -16,6 +16,9 @@
 #include "aggregate.hpp"
 #include "accumulator.hpp"
 
+#include "../datatypes/column_types_def.hpp"
+
+#include "../dba/experiments.hpp"
 #include "../dba/key_mapper.hpp"
 #include "../dba/metafield.hpp"
 
@@ -35,13 +38,17 @@ namespace epidb {
       RegionsConstIterator it_ranges = ranges->begin();
 
       Regions agg_regions;
+
+      int pos =1;
+      DatasetId dataset_id = -1;
+      datatypes::COLUMN_TYPES column_type;
+
       while (it_ranges != ranges->end()) {
         Accumulator acc;
         while (it_data != data->end() &&
                it_data->start() >= it_ranges->start() && it_data->start() <= it_ranges->end()) {
 
           if (it_data->start() >= it_ranges->start() && it_data->end() <= it_ranges->end()) {
-
             if (field[0] == '@') {
               std::string value;
               if (!metafield.process(field, chrom, *it_data, value, msg)) {
@@ -52,7 +59,14 @@ namespace epidb {
               utils::string_to_double(value, v);
               acc.push(v);
             } else {
-              acc.push(it_data->value(field));
+              const Region &region = *it_data;
+              if (dataset_id != region.dataset_id()) {
+                dataset_id = region.dataset_id();
+                if (!dba::experiments::get_field_pos(dataset_id, field, pos, column_type, msg)) {
+                  return false;
+                }
+              }
+              acc.push(it_data->value(pos));
             }
           }
           it_data++;

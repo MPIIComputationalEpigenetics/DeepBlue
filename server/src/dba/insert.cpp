@@ -20,10 +20,13 @@
 #include <mongo/bson/bson.h>
 #include <mongo/client/dbclient.h>
 
+#include "../datatypes/column_types_def.hpp"
+
 #include "../extras/compress.hpp"
+#include "../extras/utils.hpp"
+
 #include "../parser/genome_data.hpp"
 #include "../parser/parser_factory.hpp"
-#include "../extras/utils.hpp"
 #include "../parser/wig.hpp"
 
 #include "dba.hpp"
@@ -82,25 +85,25 @@ namespace epidb {
           return false;
         }
 
-        if (column_type->type() == dba::columns::COLUMN_STRING) {
+        if (column_type->type() == datatypes::COLUMN_STRING) {
           builder.append(name, token);
-        } else if (column_type->type() == dba::columns::COLUMN_INTEGER) {
+        } else if (column_type->type() == datatypes::COLUMN_INTEGER) {
           size_t l;
           if (!utils::string_to_long(token, l)) {
             msg = "The field '" + field_name + "' is an integer, but the value '" + token + "' is not a valid integer.";
             return false;
           }
           builder.append(name, (int) l);
-        } else if (column_type->type() == dba::columns::COLUMN_DOUBLE) {
+        } else if (column_type->type() == datatypes::COLUMN_DOUBLE) {
           double d;
           if (!utils::string_to_double(token, d)) {
             msg = "The field '" + field_name + "' is a double, but the value '" + token + "' is not a valid double.";
             return false;
           }
           builder.append(name, d);
-        } else if (column_type->type() == dba::columns::COLUMN_CATEGORY) {
+        } else if (column_type->type() == datatypes::COLUMN_CATEGORY) {
           builder.append(name, token);
-        } else if (column_type->type() == dba::columns::COLUMN_RANGE) {
+        } else if (column_type->type() == datatypes::COLUMN_RANGE) {
           double d;
           if (!utils::string_to_double(token, d)) {
             msg = "The field '" + field_name + "' is a double, but the value '" + token + "' is not a valid integer.";

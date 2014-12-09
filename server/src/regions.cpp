@@ -65,63 +65,41 @@ namespace epidb {
     _end = e;
   }
 
-  void Region::set(const std::string &key, const std::string &value)
+  void Region::insert(const std::string &value)
   {
-    std::pair<std::string, std::string> p(key, value);
-    _string_data.push_front(std::move(p));
+    _string_data.push_back(value);
   }
 
-  void Region::set(const std::string &key, const Score value)
+  void Region::insert(std::string &&value)
   {
-    std::pair<std::string, Score> p(key, value);
-    _numeric_data.push_front(std::move(p));
+    _string_data.push_back(std::move(value));
   }
 
-  void Region::set(const std::string &key, const int value)
+  void Region::insert(const Score value)
   {
-    std::pair<std::string, Score> p(key, value);
-    _numeric_data.push_front(std::move(p));
+    _numeric_data.push_back(value);
   }
 
-  void Region::set(std::string &&key, std::string &&value)
+  void Region::insert(const int value)
   {
-    std::pair<std::string, std::string> p(std::move(key), value);
-    _string_data.push_front(std::move(p));
+    _numeric_data.push_back(value);
   }
 
-  void Region::set(std::string &&key, Score &&value)
+  const std::string &Region::get(const size_t pos) const
   {
-    std::pair<std::string, Score> p(std::move(key), std::move(value));
-    _numeric_data.push_front(std::move(p));
-  }
-
-  void Region::set(std::string &&key, int &&value)
-  {
-    std::pair<std::string, Score> p(std::move(key), std::move(value));
-    _numeric_data.push_front(std::move(p));
-  }
-
-  const std::string &Region::get(const std::string &key) const
-  {
-    for (std::forward_list<std::pair<std::string, std::string> >::const_iterator it = _string_data.begin();
-         it != _string_data.end(); it++) {
-      if (it->first == key) {
-        return it->second;
-      }
+    if (pos >= _string_data.size()) {
+      return empty_string;
     }
 
-    return empty_string;
+    return _string_data[pos];
   }
 
-  Score Region::value(const std::string &key) const
+  Score Region::value(const int pos) const
   {
-    for (std::forward_list<std::pair<std::string, Score> >::const_iterator it = _numeric_data.begin();
-         it != _numeric_data.end(); it++) {
-      if (it->first == key) {
-        return it->second;
-      }
+    if (pos >= static_cast<int>(_numeric_data.size()) || pos < 0) {
+      return std::numeric_limits<Score>::min();
     }
-    return std::numeric_limits<Score>::min();
+    return _numeric_data[pos];
   }
 
   bool Region::has_stats() const

@@ -12,7 +12,7 @@ all : $(OBJLIBS)
 	$(RANLIB) ../liblua.a
 
 clean :
-	$(ECHO) cleaning up in extras/
+	$(ECHO) cleaning up in lua/
 	-$(RM) -f $(OBJS)
 
 force_look :

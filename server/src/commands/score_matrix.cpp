@@ -11,9 +11,13 @@
 #include <vector>
 
 #include "../algorithms/accumulator.hpp"
+
+#include "../datatypes/column_types_def.hpp"
+
 #include "../dba/helpers.hpp"
 #include "../dba/queries.hpp"
 #include "../dba/experiments.hpp"
+
 #include "../engine/commands.hpp"
 #include "../extras/serialize.hpp"
 
@@ -103,7 +107,7 @@ namespace epidb {
         std::string norm_genome;
 
         // Change names to norm_names and columns
-        std::vector<std::pair<std::string, std::string>> norm_experiments_formats;
+        std::vector<std::pair<std::string, int>> norm_experiments_formats;
         for (auto &experiment_input : experiments_formats) {
           mongo::BSONObj experiment;
           const std::string &experiment_name = experiment_input.first;
@@ -112,13 +116,25 @@ namespace epidb {
             return false;
           }
           std::string norm_name = experiment["norm_name"].String();
+          DatasetId dataset_id = experiment[dba::KeyMapper::DATASET()].Int();
+          int pos;
+          datatypes::COLUMN_TYPES type;
 
-          std::string short_column;
-          if (!dba::KeyMapper::to_short(experiment_input.second, short_column, msg)) {
+          if (!dba::experiments::get_field_pos(dataset_id, experiment_input.second, pos, type, msg)) {
             result.add_error(msg);
+            return false;
           }
 
-          std::pair<std::string, std::string> p(norm_name, short_column);
+          if (type != datatypes::COLUMN_INTEGER || type != datatypes::COLUMN_DOUBLE || type == datatypes::COLUMN_RANGE) {
+            msg = "The column " + experiment_input.second + "in the experiment " + experiment_name + " does not contain numerical values.";
+            return false;
+          }
+
+          if (pos == -1) {
+            msg = "Column " + experiment_input.second + " does not exist in the experiment " + experiment_name;
+          }
+
+          std::pair<std::string, int> p(norm_name, pos);
           norm_experiments_formats.push_back(p);
 
           // TODO: check if are all from the same genome
@@ -161,7 +177,7 @@ namespace epidb {
         ss << "START\t";
         ss << "END\t";
         bool first = true;
-	for (auto &experiments_format : experiments_formats) {
+        for (auto &experiments_format : experiments_formats) {
           if (!first) {
             ss << "\t";
           }

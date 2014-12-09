@@ -14,7 +14,6 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include <forward_list>
 
 #include <boost/foreach.hpp>
 #include <boost/shared_ptr.hpp>
@@ -48,8 +47,8 @@ namespace epidb {
     Position _start;
     Position _end;
     boost::shared_ptr<StatsValue> _stats_value;
-    std::forward_list<std::pair<std::string, std::string> > _string_data;
-    std::forward_list<std::pair<std::string, float> > _numeric_data;
+    std::vector<std::string> _string_data;
+    std::vector<float> _numeric_data;
 
   public:
     Region() :
@@ -88,14 +87,12 @@ namespace epidb {
     Position end() const;
     void set_start(Position s);
     void set_end(Position e);
-    void set(const std::string &key, const std::string &value);
-    void set(const std::string &key, const float value);
-    void set(const std::string &key, const int value);
-    void set(std::string &&key,  std::string &&value);
-    void set(std::string &&key,  float &&value);
-    void set(std::string &&key,  int &&value);
-    const std::string  &get(const std::string &key) const;
-    Score value(const std::string &key) const;
+    void insert(const std::string &value);
+    void insert(std::string &&value);
+    void insert(const float value);
+    void insert(const int value);
+    const std::string  &get(const size_t pos) const;
+    Score value(const int pos) const;
 
     bool has_stats() const;
     Score min() const;

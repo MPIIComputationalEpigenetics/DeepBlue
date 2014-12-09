@@ -15,7 +15,9 @@
 
 #include "sandbox.hpp"
 
-#include "../dba/key_mapper.hpp"
+#include "../datatypes/column_types_def.hpp"
+#include "../dba/experiments.hpp"
+
 #include "../extras/utils.hpp"
 
 #include "../regions.hpp"
@@ -151,23 +153,35 @@ namespace epidb {
         return 1;
       }
 
-      std::string short_name;
+      DatasetId dataset_id = current_region.dataset_id();
+      datatypes::COLUMN_TYPES column_type = datatypes::COLUMN_ERR;
+      int pos = -1;
 
-      if (!dba::KeyMapper::to_short(field_name, short_name, msg)) {
-        lua_pushstring(lua_state, msg.c_str());
+      // TODO: better error handling
+      if (!dba::experiments::get_field_pos(dataset_id, field_name, pos, column_type, msg)) {
+        lua_pushstring(lua_state, "");
         return 1;
       }
 
-      std::string content = current_region.get(short_name);
-      if (content.length() > 0) {
-        lua_pushstring(lua_state, content.c_str());
+      // TODO: better error handling
+      if (pos == -1) {
+        lua_pushstring(lua_state, "");
         return 1;
       }
 
-      Score value = current_region.value(short_name);
-      if (value != std::numeric_limits<Score>::min()) {
-        lua_pushnumber(lua_state, value);
-        return 1;
+      if (column_type == datatypes::COLUMN_STRING || column_type == datatypes::COLUMN_CATEGORY) {
+        std::string content = current_region.get(pos);
+        if (content.length() > 0) {
+          lua_pushstring(lua_state, content.c_str());
+          return 1;
+        }
+
+      } else if (column_type == datatypes::COLUMN_INTEGER || column_type == datatypes::COLUMN_DOUBLE || column_type == datatypes::COLUMN_RANGE) {
+        Score value = current_region.value(pos);
+        if (value != std::numeric_limits<Score>::min()) {
+          lua_pushnumber(lua_state, value);
+          return 1;
+        }
       }
 
       lua_pushstring(lua_state, "");

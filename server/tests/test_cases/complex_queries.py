@@ -31,7 +31,7 @@ class TestComplexQueries(helpers.TestCase):
 
     expected_regions = helpers.get_result("complex1")
     self.assertEqual(regions, expected_regions)
-    
+
   def test_complex2(self):
     epidb = EpidbClient()
     self.init_full(epidb)
@@ -68,7 +68,7 @@ class TestComplexQueries(helpers.TestCase):
     res, count = epidb.count_regions(qid_3_1, self.admin_key)
     self.assertSuccess(res, count)
 
-    res, qid_4_1 = epidb.filter_regions(qid_3_1, "start",  ">=", "2000000", "number", self.admin_key)
+    res, qid_4_1 = epidb.filter_regions(qid_3_1, "START",  ">=", "2000000", "number", self.admin_key)
     self.assertSuccess(res, qid_4_1)
     res, count = epidb.count_regions(qid_4_1, self.admin_key)
     self.assertSuccess(res, count)
@@ -84,7 +84,7 @@ class TestComplexQueries(helpers.TestCase):
     res, count = epidb.count_regions(qid_5_1, self.admin_key)
     self.assertSuccess(res, count)
 
-    res, qid_6_1 = epidb.filter_regions(qid_5_1, "end",  "<", "2200000", "number", self.admin_key)
+    res, qid_6_1 = epidb.filter_regions(qid_5_1, "END",  "<", "2200000", "number", self.admin_key)
     self.assertSuccess(res, qid_6_1)
 
     res, regions = epidb.get_regions(qid_6_1, "CHROMOSOME,START,END", self.admin_key)
