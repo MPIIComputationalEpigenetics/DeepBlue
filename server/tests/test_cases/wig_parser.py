@@ -64,7 +64,6 @@ class TestWigFiles(helpers.TestCase):
                                  "ENCODE", "desc1", wig_data, "wig", None, self.admin_key)
       self.assertFailure(res)
 
-
   """
   def test_include_big_file(self):
     epidb = EpidbClient()
@@ -72,11 +71,9 @@ class TestWigFiles(helpers.TestCase):
 
     sample_id = self.sample_ids[0]
 
-
     wig_data = open("/Users/albrecht/Downloads/G199.CPG_methylation_sd.bs_call.20140106.wig").read()
 
-    res = epidb.add_experiment("G199.CPG_methylation_sd.bs_call.20140106.wig", "hg19", "Methylation", sample_id, "tech1",
-                                 "ENCODE", "desc1", wig_data, "wig", None, self.admin_key)
+    res = epidb.add_experiment("G199.CPG_methylation_sd.bs_call.20140106.wig", "hg19", "Methylation", sample_id, "tech1", "ENCODE", "desc1", wig_data, "wig", None, self.admin_key)
 
-    print res
+    self.assertSucess(res)
   """

@@ -207,7 +207,6 @@ namespace epidb {
 
       wig = boost::shared_ptr<WigFile>(new WigFile());
       strtk::for_each_line_conditional(*input_, [&](std::string & line) -> bool {
-        //std::cerr << line << std::endl;
         actual_line_++;
         if (line.empty())
         {

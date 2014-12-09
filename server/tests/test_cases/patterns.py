@@ -107,8 +107,4 @@ class TestPattern(helpers.TestCase):
     self.assertSuccess(res, regions)
 
     expected = "chr19\t0\t59128983\thg19_only_chr19\t59128983\t159464\t336889\t496353"
-    print
-    print fmt
-    print regions
-    print expected
     self.assertEquals(expected, regions)

@@ -183,7 +183,6 @@ namespace epidb {
 
         // Check if some annotations is still using this genome
         std::vector<mongo::BSONObj> annotations;
-        std::cerr << genome_name << std::endl;
         if (!helpers::get(Collections::ANNOTATIONS(), "norm_genome", genome_name, annotations, msg)) {
           return false;
         }
@@ -193,7 +192,6 @@ namespace epidb {
           return false;
         }
 
-        std::cerr << annotations.size() << std::endl;
         if (annotations.size() == 1) {
           std::string own_annotation_name = annotations[0]["norm_name"].String();
           if (own_annotation_name != genome_name) {
@@ -202,7 +200,6 @@ namespace epidb {
             return false;
           }
           std::string own_annotation_id = annotations[0]["_id"].String();
-          std::cerr << own_annotation_id << std::endl;
           if (!remove::annotation(own_annotation_id, user_key, msg)) {
             return false;
           }
@@ -218,7 +215,6 @@ namespace epidb {
           std::string collection = helpers::region_collection_name(genome_name, internal_chromosome);
           unsigned long long size;
           if (!helpers::collection_size(collection, size, msg)) {
-            std::cerr << "false " << std::endl;
             return false;
           }
           if (size > 0) {
