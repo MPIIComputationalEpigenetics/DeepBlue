@@ -315,6 +315,7 @@ namespace epidb {
           }
 
           // Create own column
+          // TODO: remove ?
           if (!found && dba::columns::column_type_simple(field_info[0], "string", "", column_type, msg)) {
             found = true;
           }
@@ -327,6 +328,7 @@ namespace epidb {
           }
 
         } else if (s == 2) {
+          // TODO: remove ?
           dba::columns::ColumnTypePtr column_type;
 
           // Check if it is metafield and has default value
@@ -340,6 +342,7 @@ namespace epidb {
           }
           file_format.add(column_type);
         } else if (s >= 3) {
+          // TODO: remove ?
           dba::columns::ColumnTypePtr column_type;
           if (!dba::columns::column_type_simple(field_info[0], field_info[1], field_info[2], column_type, msg)) {
             return false;
