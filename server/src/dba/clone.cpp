@@ -52,7 +52,7 @@ namespace epidb {
       if (data_cursor->more()) {
         original = data_cursor->next().getOwned();
       } else {
-        msg = "experiment with id " + dataset_id + " not found.";
+        msg = "experiment with ID " + dataset_id + " not found.";
         c.done();
         return false;
       }
