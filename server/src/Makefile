@@ -8,7 +8,7 @@ COMMANDS = $(wildcard commands/*.cpp)
 COMMANDS_OBJS = $(COMMANDS:.cpp=.o)
 
 OBJS	= main.o version.o regions.o errors.o
-OBJLIBS	= $(COMMANDS_OBJS) libhttpd.a libdba.a libparser.a libengine.a libextras.a libalgorithms.a libdatatypes.a liblua.a
+OBJLIBS	= $(COMMANDS_OBJS) libhttpd.a libdba.a libparser.a libengine.a libextras.a libalgorithms.a libdatatypes.a liblua.a libexternal.a
 
 CXXFLAGS	= $(DEFCXXFLAGS)
 
@@ -51,6 +51,11 @@ libextras.a: force_look
 liblua.a: force_look
 	@$(ECHO) looking into lua : $(MAKE) $(MFLAGS)
 	@cd lua; $(MAKE) $(MFLAGS)
+
+libexternal.a: force_look
+	@$(ECHO) looking into external : $(MAKE) $(MFLAGS)
+	@cd external; $(MAKE) $(MFLAGS)
+
 
 clean :
 	$(ECHO) cleaning up in .
