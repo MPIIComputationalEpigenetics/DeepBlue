@@ -29,7 +29,7 @@ namespace epidb {
       static  Parameters parameters_()
       {
         Parameter p[] = {
-          Parameter("id", serialize::STRING, "Data id to be removed."),
+          Parameter("id", serialize::STRING, "Data ID to be removed."),
           parameters::UserKey
         };
         Parameters params(&p[0], &p[0] + 2);
