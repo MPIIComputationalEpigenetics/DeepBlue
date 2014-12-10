@@ -115,6 +115,10 @@ public:
           handler, ec, bytes_transferred));
   }
 
+  const option_set get_options_() {
+    return options_;
+  }
+
 private:
   boost::asio::io_service& io_service_;
   option_set& options_;

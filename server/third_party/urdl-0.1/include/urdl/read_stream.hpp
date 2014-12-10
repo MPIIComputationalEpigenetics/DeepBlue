@@ -740,7 +740,7 @@ private:
     }
 
     template <typename Function>
-    friend void asio_handler_invoke(const Function& function,
+    void asio_handler_invoke(const Function& function,
         open_coro<Handler>* this_handler)
     {
       using boost::asio::asio_handler_invoke;

@@ -213,11 +213,11 @@ public:
   }
 
   template <typename Function>
-  friend void asio_handler_invoke(const Function& function,
+  void asio_handler_invoke(const Function& function,
       handshake_coro<Handler>* this_handler)
   {
     using boost::asio::asio_handler_invoke;
-    asio_handler_invoke(function, &this_handler->handler_);
+    asio_handler_invoke(function, boost::asio::detail::addressof(this_handler->handler_));
   }
 
 private:

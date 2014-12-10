@@ -353,11 +353,11 @@ public:
     }
 
     template <typename Function>
-    friend void asio_handler_invoke(const Function& function,
+    void asio_handler_invoke(const Function& function,
         open_coro<Handler>* this_handler)
     {
       using boost::asio::asio_handler_invoke;
-      asio_handler_invoke(function, &this_handler->handler_);
+      asio_handler_invoke(function, boost::asio::detail::addressof(this_handler->handler_));
     }
 
   private:
@@ -485,11 +485,11 @@ public:
     }
 
     template <typename Function>
-    friend void asio_handler_invoke(const Function& function,
+    void asio_handler_invoke(const Function& function,
         read_handler<Handler>* this_handler)
     {
       using boost::asio::asio_handler_invoke;
-      asio_handler_invoke(function, &this_handler->handler_);
+      asio_handler_invoke(function, boost::asio::detail::addressof(this_handler->handler_));
     }
 
   private:
