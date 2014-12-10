@@ -520,6 +520,11 @@ namespace epidb {
       std::string err_msg;
       bool err = false;
       BOOST_FOREACH(const datatypes::Metadata::value_type & kv, metadata) {
+        if (kv.first[0] == '!') {
+          names_values[kv.first] = kv.second;
+          continue;
+        }
+
         if (kv.second.empty()) {
           msg = "The field " + kv.first + " does not have the right value. (key:value).";
           return false;
@@ -573,7 +578,7 @@ namespace epidb {
       }
 
       int id;
-      if (!helpers::get_counter("samples", id, msg))  {
+      if (!helpers::get_counter("samples", id, msg)) {
         return false;
       }
       sample_id = "s" + utils::integer_to_string(id);
@@ -956,13 +961,13 @@ namespace epidb {
                               const std::string &user_key, std::string &msg)
     {
       return cv::set_biosource_parent(biosource_more_embracing, norm_biosource_more_embracing,
-                                         biosource_less_embracing, norm_biosource_less_embracing,
-                                         more_embracing_is_syn, less_embracing_is_syn, user_key, msg);
+                                      biosource_less_embracing, norm_biosource_less_embracing,
+                                      more_embracing_is_syn, less_embracing_is_syn, user_key, msg);
     }
 
     bool get_biosource_children(const std::string &biosource_name, const std::string &norm_biosource_name,
-                              bool is_biosource, const std::string &user_key,
-                              std::vector<utils::IdName> &related_biosources, std::string &msg)
+                                bool is_biosource, const std::string &user_key,
+                                std::vector<utils::IdName> &related_biosources, std::string &msg)
     {
       std::vector<std::string> norm_subs;
 
@@ -981,8 +986,8 @@ namespace epidb {
     }
 
     bool get_biosource_parents(const std::string &biosource_name, const std::string &norm_biosource_name,
-                             bool is_biosource, const std::string &user_key,
-                             std::vector<utils::IdName> &related_biosources, std::string &msg)
+                               bool is_biosource, const std::string &user_key,
+                               std::vector<utils::IdName> &related_biosources, std::string &msg)
     {
       std::vector<std::string> norm_subs;
 
