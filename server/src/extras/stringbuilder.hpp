@@ -1,6 +1,15 @@
-//http://www.codeproject.com/Articles/647856/Performance-Improvement-with-the-StringBuilde
+//
+//  stringbuilder.cpp
+//  epidb
+//
+//  Created by Felipe Albrecht on 01.12.14.
+//  Copyright (c) 2013,2014 Max Planck Institute for Computer Science. All rights reserved.
+//
+
+// Based on http://www.codeproject.com/Articles/647856/Performance-Improvement-with-the-StringBuilde
 
 #include <numeric>
+#include <deque>
 
 
 template <typename chr>
