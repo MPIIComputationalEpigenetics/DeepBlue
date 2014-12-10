@@ -39,7 +39,6 @@ namespace epidb {
 
         return true;
       }
-
     }
   }
 }
