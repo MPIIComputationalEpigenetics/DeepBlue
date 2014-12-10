@@ -20,7 +20,7 @@ namespace epidb {
         if (helpers::get_one(Collections::SAMPLES(), mongo::Query(BSON("_id" << id)), result, msg)) {
           return true;
         } else {
-          msg = "Sample id '" + id + "' not found.";
+          msg = "Sample ID '" + id + "' not found.";
           return false;
         }
       }
@@ -30,7 +30,7 @@ namespace epidb {
         if (helpers::get_one(Collections::GENOMES(), mongo::Query(BSON("_id" << id)), result, msg)) {
           return true;
         } else {
-          msg = "Genome id '" + id + "' not found.";
+          msg = "Genome ID '" + id + "' not found.";
           return false;
         }
       }
@@ -40,7 +40,7 @@ namespace epidb {
         if (helpers::get_one(Collections::PROJECTS(), mongo::Query(BSON("_id" << id)), result, msg)) {
           return true;
         } else {
-          msg = "Project id '" + id + "' not found.";
+          msg = "Project ID '" + id + "' not found.";
           return false;
         }
       }
@@ -50,7 +50,7 @@ namespace epidb {
         if (helpers::get_one(Collections::TECHNIQUES(), mongo::Query(BSON("_id" << id)), result, msg)) {
           return true;
         } else {
-          msg = "Technique id '" + id + "' not found.";
+          msg = "Technique ID '" + id + "' not found.";
           return false;
         }
       }
@@ -60,7 +60,7 @@ namespace epidb {
         if (helpers::get_one(Collections::BIOSOURCES(), mongo::Query(BSON("_id" << id)), result, msg)) {
           return true;
         } else {
-          msg = "BioSource id '" + id + "' not found.";
+          msg = "BioSource ID '" + id + "' not found.";
           return false;
         }
       }
@@ -70,7 +70,7 @@ namespace epidb {
         if (helpers::get_one(Collections::EPIGENETIC_MARKS(), mongo::Query(BSON("_id" << id)), result, msg)) {
           return true;
         } else {
-          msg = "Epigenetic Mark id '" + id + "' not found.";
+          msg = "Epigenetic Mark ID '" + id + "' not found.";
           return false;
         }
       }
@@ -80,7 +80,7 @@ namespace epidb {
         if (helpers::get_one(Collections::ANNOTATIONS(), mongo::Query(BSON("_id" << id)), result, msg)) {
           return true;
         } else {
-          msg = "Annotation id '" + id + "' not found.";
+          msg = "Annotation ID '" + id + "' not found.";
           return false;
         }
       }
@@ -90,7 +90,7 @@ namespace epidb {
         if (helpers::get_one(Collections::EXPERIMENTS(), mongo::Query(BSON("_id" << id)), result, msg)) {
           return true;
         } else {
-          msg = "Experiment id '" + id + "' not found.";
+          msg = "Experiment ID '" + id + "' not found.";
           return false;
         }
       }
@@ -100,7 +100,7 @@ namespace epidb {
         if (helpers::get_one(Collections::QUERIES(), mongo::Query(BSON("_id" << id)), result, msg)) {
           return true;
         } else {
-          msg = "Query id '" + id + "' not found.";
+          msg = "Query ID '" + id + "' not found.";
           return false;
         }
       }
@@ -110,7 +110,7 @@ namespace epidb {
         if (helpers::get_one(Collections::SAMPLE_FIELDS(), mongo::Query(BSON("_id" << id)), result, msg)) {
           return true;
         } else {
-          msg = "Experiment id '" + id + "' not found.";
+          msg = "Experiment ID '" + id + "' not found.";
           return false;
         }
       }
@@ -120,7 +120,7 @@ namespace epidb {
         if (helpers::get_one(Collections::TILINGS(), mongo::Query(BSON("_id" << id)), result, msg)) {
           return true;
         } else {
-          msg = "Tiling Regions id '" + id + "' not found.";
+          msg = "Tiling Regions ID '" + id + "' not found.";
           return false;
         }
       }
@@ -130,7 +130,7 @@ namespace epidb {
         if (!helpers::get_one(Collections::COLUMN_TYPES(), mongo::Query(BSON("_id" << id)),  result, msg)) {
           return false;
         } else {
-          msg = "Column type id " + id + " not found";
+          msg = "Column type ID " + id + " not found";
           return false;
         }
       }
