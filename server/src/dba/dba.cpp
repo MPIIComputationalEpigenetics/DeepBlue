@@ -310,7 +310,7 @@ namespace epidb {
         chromosome_regions_list.push_back(chromosome_regions);
       }
 
-      std::string ann_name = name;
+      std::string ann_name = "Chromosomes size for " + name;
       std::string ann_norm_name = utils::normalize_annotation_name(ann_name);
       std::string ann_description = "Chromosomes and sizes of the genome " + name + " (" + description + ")";
       std::string ann_norm_description = utils::normalize_name(ann_description);
