@@ -520,13 +520,8 @@ namespace epidb {
       std::string err_msg;
       bool err = false;
       BOOST_FOREACH(const datatypes::Metadata::value_type & kv, metadata) {
-        if (kv.first[0] == '!') {
-          names_values[kv.first] = kv.second;
-          continue;
-        }
-
         if (kv.second.empty()) {
-          msg = "The field " + kv.first + " does not have the right value. (key:value).";
+          msg = "The field " + kv.first + " does not have the value value.";
           return false;
         }
 
@@ -535,21 +530,7 @@ namespace epidb {
           return false;
         }
 
-        bool r = false;
-        if (!check_sample_field(utils::normalize_name(kv.first), r, msg)) {
-          return false;
-        } else if (!r) {
-          // TODO: return the similar sample_field names
-          msg = "Field '" + kv.first + "' is not registered. Please use add_sample_field command or check the field name.";
-          if (err_msg.empty()) {
-            err_msg = msg;
-          } else {
-            err_msg = err_msg + " " + msg;
-          }
-          err = true;
-        } else {
-          names_values[kv.first] = kv.second;
-        }
+        names_values[kv.first] = kv.second;
       }
 
       if (err) {
@@ -861,6 +842,7 @@ namespace epidb {
       return helpers::check_exist(Collections::BIOSOURCES(), "norm_name", norm_biosource_name, r, msg);
     }
 
+    // TODO: remove
     bool check_sample_field(const std::string &biosource_name, bool &r, std::string &msg)
     {
       std::string norm_biosource_name = utils::normalize_name(biosource_name);
