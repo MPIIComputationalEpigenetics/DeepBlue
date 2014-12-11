@@ -69,6 +69,22 @@ namespace epidb {
           return false;
         }
 
+        mongo::BSONArray s_array;
+        std::vector<std::string> existing_ids;
+        datatypes::Metadata verify_metadata;
+        verify_metadata["GSM_SAMPLE"] = gsm_id;
+        if (!dba::list::samples(user_key, s_array, verify_metadata, existing_ids, msg)) {
+          result.add_error(msg);
+          return false;
+        }
+
+        if (!existing_ids.empty()) {
+          msg = "The ID " + gsm_id + " was already imported under the sample " + existing_ids[0];
+          result.add_error(msg);
+          return false;
+        }
+
+
         // TODO Move to a helper function: get_biosource_root
         bool is_biosource(false);
         bool is_syn(false);

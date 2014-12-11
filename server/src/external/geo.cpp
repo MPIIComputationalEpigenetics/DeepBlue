@@ -27,6 +27,7 @@ namespace epidb {
 
       bool parse_gsm(const std::string &content, datatypes::Metadata &metadata, std::string &msg)
       {
+        bool found = false;
         std::stringstream ss(content);
         strtk::for_each_line_conditional(ss, [&](std::string & line) -> bool {
           boost::trim(line);
@@ -49,10 +50,26 @@ namespace epidb {
 
               if (key == "^SAMPLE") {
                 metadata["GSM_SAMPLE"] = value;
+                found = true;
                 return true;
               }
+
+              if (key == "!Sample_characteristics_ch1") {
+                std::vector<std::string> sample_chars_strs;
+                boost::split(sample_chars_strs, value, boost::is_any_of(":"));
+                if (sample_chars_strs.size() == 2) {
+                  key = "!"+sample_chars_strs[0];
+                  value = sample_chars_strs[1];
+                }
+              }
+
               if (key[0] == '!') {
-                metadata[key] = value;
+                key = key.substr(1);
+                if (metadata.find(key) != metadata.end()) {
+                  metadata[key] = metadata[key] + "\n" + value;
+                } else {
+                  metadata[key] = value;
+                }
                 return true;
               }
             }
@@ -60,7 +77,7 @@ namespace epidb {
           return true;
         });
 
-        return true;
+        return found;
       }
 
       bool load_gsm(const std::string &gsm_id, datatypes::Metadata &metadata, std::string &msg)
@@ -73,7 +90,10 @@ namespace epidb {
           return false;
         }
 
+        std::cerr << content << std::endl;
+
         if (!parse_gsm(content, metadata, msg)) {
+          msg = gsm_id + " is an invalid identifier.";
           return false;
         }
 
