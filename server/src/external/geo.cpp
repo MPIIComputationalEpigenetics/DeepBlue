@@ -14,9 +14,9 @@
 
 #include <strtk.hpp>
 
-#import "../datatypes/metadata.hpp"
+#include "../datatypes/metadata.hpp"
 
-#import "url_loader.hpp"
+#include "url_loader.hpp"
 
 
 namespace epidb {
