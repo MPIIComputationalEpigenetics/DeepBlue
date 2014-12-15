@@ -194,8 +194,8 @@ namespace epidb {
 
         if (annotations.size() == 1) {
           std::string own_annotation_name = annotations[0]["norm_name"].String();
-          if (own_annotation_name != genome_name) {
-            //  (TODO: show experiments)
+          if (own_annotation_name != utils::normalize_name("Chromosomes size for " + genome_name)) {
+            //  (TODO: show annotations)
             msg = "This genome is being used by annotations.";
             return false;
           }
@@ -443,10 +443,6 @@ namespace epidb {
         return true;
       }
 
-      bool sample_field(const std::string &id, const std::string &user_key, std::string &msg)
-      {
-        return false;
-      }
 
       bool column_type(const std::string &id, const std::string &user_key, std::string &msg)
       {

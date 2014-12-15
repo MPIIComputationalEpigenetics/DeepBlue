@@ -109,9 +109,6 @@ namespace epidb {
           } else if (id.compare(0, 1, "t") == 0) {
             ok = dba::info::get_technique(id, metadata, extra_metadata, msg);
             type = "technique";
-          } else if (id.compare(0, 1, "f") == 0) {
-            ok = dba::info::get_sample_field(id, metadata, msg);
-            type = "sample_field";
           } else if (id.compare(0, 2, "ct") == 0) {
             ok = dba::info::get_column_type(id, metadata, msg);
             type = "column_type";

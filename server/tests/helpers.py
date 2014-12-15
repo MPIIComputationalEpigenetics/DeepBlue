@@ -195,14 +195,6 @@ class TestCase(unittest.TestCase):
     return sid
 
 
-  def insert_sample_field(self, epidb, name):
-    field = data.SAMPLE_FIELDS[name]
-    res, sfid = epidb.add_sample_field(name, field["type"], field["description"], self.admin_key)
-    self.assertSuccess(res, sfid)
-
-    return sfid
-
-
   def insert_epigenetic_mark(self, epidb, name):
     mark = data.EPIGENETIC_MARKS[name]
     res, emid = epidb.add_epigenetic_mark(name, mark["description"], self.admin_key)
@@ -291,9 +283,6 @@ class TestCase(unittest.TestCase):
 
     for epimark in data.EPIGENETIC_MARKS:
       self.insert_epigenetic_mark(epidb, epimark)
-
-    for s_field in data.SAMPLE_FIELDS:
-      self.insert_sample_field(epidb, s_field)
 
     for project in data.PROJECTS:
       self.insert_project(epidb, project)

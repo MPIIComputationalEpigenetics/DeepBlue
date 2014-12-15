@@ -590,48 +590,6 @@ namespace epidb {
       return true;
     }
 
-    bool add_sample_field(const std::string &name, const std::string &norm_name,
-                          const std::string &type,
-                          const std::string &description, const std::string &norm_description,
-                          const std::string &user_key,
-                          std::string &sample_field_id, std::string &msg)
-    {
-      {
-        int id;
-        if (!helpers::get_counter("sample_fields", id, msg))  {
-          return false;
-        }
-        sample_field_id = "f" + utils::integer_to_string(id);
-      }
-      mongo::BSONObjBuilder create_sample_fields_builder;
-      create_sample_fields_builder.append("_id", sample_field_id);
-      create_sample_fields_builder.append("name", name);
-      create_sample_fields_builder.append("norm_name", norm_name);
-      create_sample_fields_builder.append("type", type);
-      create_sample_fields_builder.append("norm_name", norm_name);
-      create_sample_fields_builder.append("description", description);
-      create_sample_fields_builder.append("norm_description", norm_description);
-
-      utils::IdName id_user_name;
-      if (!users::get_user_name(user_key, id_user_name, msg)) {
-        return false;
-      }
-      create_sample_fields_builder.append("user", id_user_name.name);
-      mongo::BSONObj cem = create_sample_fields_builder.obj();
-
-      mongo::ScopedDbConnection c(config::get_mongodb_server());
-      c->insert(helpers::collection_name(Collections::SAMPLE_FIELDS()), cem);
-      if (!c->getLastError().empty()) {
-        msg = c->getLastError();
-        c.done();
-        return false;
-      }
-
-      c.done();
-      return true;
-
-    }
-
     bool add_project(const std::string &name, const std::string &norm_name,
                      const std::string &description, const std::string &norm_description,
                      const std::string &user_key,
@@ -758,21 +716,6 @@ namespace epidb {
       return true;
     }
 
-    bool is_valid_sample_field_name(const std::string &name, const std::string &norm_name, std::string &msg)
-    {
-      bool exists = true;
-      if (!helpers::check_exist(Collections::SAMPLE_FIELDS(), "norm_name", norm_name, exists, msg)) {
-        return false;
-      }
-      if (exists) {
-        std::string s = Error::m(ERR_DUPLICATE_SAMPLE_FIELD_NAME, name.c_str());
-        EPIDB_LOG_TRACE(s);
-        msg = s;
-        return false;
-      }
-      return true;
-    }
-
     bool is_valid_epigenetic_mark(const std::string &name, const std::string &norm_name, std::string &msg)
     {
       bool exists = true;
@@ -842,13 +785,6 @@ namespace epidb {
       return helpers::check_exist(Collections::BIOSOURCES(), "norm_name", norm_biosource_name, r, msg);
     }
 
-    // TODO: remove
-    bool check_sample_field(const std::string &biosource_name, bool &r, std::string &msg)
-    {
-      std::string norm_biosource_name = utils::normalize_name(biosource_name);
-      return helpers::check_exist(Collections::SAMPLE_FIELDS(), "norm_name", norm_biosource_name, r, msg);
-    }
-
     bool check_technique(const std::string &technique_name, bool &r, std::string &msg)
     {
       std::string norm_technique_name = utils::normalize_name(technique_name);
@@ -890,11 +826,6 @@ namespace epidb {
       std::vector<helpers::QueryPair> query;
       query.push_back(helpers::QueryPair("norm_name", norm_name));
 
-      utils::IdName id_user_name;
-      if (!users::get_user_name(user_key, id_user_name, msg)) {
-        return false;
-      }
-      query.push_back(helpers::QueryPair("upload_info.user", id_user_name.name));
       std::vector<mongo::BSONObj> results;
 
       if (!helpers::get("experiments", query, results, msg)) {

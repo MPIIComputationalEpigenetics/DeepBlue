@@ -75,9 +75,6 @@ class EpidbClient:
     def add_sample(self, biosource_name, fields, user_key):
         return self.server.add_sample(biosource_name, fields, user_key)
 
-    def add_sample_field(self, name, type_, description, user_key):
-        return self.server.add_sample_field(name, type_, description, user_key)
-
     def list_samples(self, biosource, metadata, user_key):
         return self.server.list_samples(biosource, metadata, user_key)
 

@@ -105,16 +105,6 @@ namespace epidb {
         }
       }
 
-      bool sample_field(const std::string &id, mongo::BSONObj &result, std::string &msg)
-      {
-        if (helpers::get_one(Collections::SAMPLE_FIELDS(), mongo::Query(BSON("_id" << id)), result, msg)) {
-          return true;
-        } else {
-          msg = "Experiment ID '" + id + "' not found.";
-          return false;
-        }
-      }
-
       bool tiling_region(const std::string &id, mongo::BSONObj &result, std::string &msg)
       {
         if (helpers::get_one(Collections::TILINGS(), mongo::Query(BSON("_id" << id)), result, msg)) {

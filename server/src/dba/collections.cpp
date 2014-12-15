@@ -27,7 +27,6 @@ namespace epidb {
       v.push_back(GENOMES());
       v.push_back(PROJECTS());
       v.push_back(SAMPLES());
-      v.push_back(SAMPLE_FIELDS());
       v.push_back(TECHNIQUES());
       v.push_back(TILINGS());
       return v;
@@ -108,12 +107,6 @@ namespace epidb {
     {
       static std::string samples("samples");
       return samples;
-    }
-
-    const std::string &Collections::SAMPLE_FIELDS()
-    {
-      static std::string samples_fields("samples.fields");
-      return samples_fields;
     }
 
     const std::string &Collections::SEQUENCES()

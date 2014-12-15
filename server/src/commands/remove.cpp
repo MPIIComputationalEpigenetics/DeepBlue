@@ -83,8 +83,6 @@ namespace epidb {
           ok = dba::remove::experiment(id, user_key, msg);
         } else if (id.compare(0, 1, "t") == 0) {
           ok = dba::remove::technique(id, user_key, msg);
-        } else if (id.compare(0, 1, "f") == 0) {
-          ok = dba::remove::sample_field(id, user_key, msg);
         } else if (id.compare(0, 2, "ct") == 0) {
           ok = dba::remove::column_type(id, user_key, msg);
         } else {
