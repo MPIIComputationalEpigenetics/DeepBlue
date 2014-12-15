@@ -21,14 +21,17 @@
 #include "config.hpp"
 #include "full_text.hpp"
 #include "helpers.hpp"
+#include "info.hpp"
 #include "users.hpp"
+
 
 #include "../log.hpp"
 
 namespace epidb {
   namespace dba {
 
-    bool clone_dataset(const std::string &dataset_id, const std::string &clone_name, const std::string &norm_clone_name,
+    bool clone_dataset(const std::string &dataset_id,
+                       const std::string &clone_name, const std::string &norm_clone_name,
                        const std::string &genome, const std::string &norm_genome,
                        const std::string &epigenetic_mark, const std::string &norm_epigenetic_mark,
                        const std::string &sample_id,
@@ -55,9 +58,71 @@ namespace epidb {
       if (data_cursor->more()) {
         original = data_cursor->next().getOwned();
       } else {
-        msg = "experiment with ID " + dataset_id + " not found.";
+        msg = "Internal Error:  experiment with ID " + dataset_id + " not found.";
         c.done();
         return false;
+      }
+
+      std::string clone_genome;
+      std::string clone_norm_genome;
+      if (genome.empty()) {
+        clone_genome = original["genome"].str();
+        clone_norm_genome = original["norm_genome"].str();
+      } else {
+        clone_genome = genome;
+        clone_norm_genome = norm_genome;
+      }
+
+      std::string clone_epigenetic_mark;
+      std::string clone_norm_epigenetic_mark;
+      if (epigenetic_mark.empty()) {
+        clone_epigenetic_mark = original["epigenetic_mark"].str();
+        clone_norm_genome = original["norm_epigenetic_mark"].str();
+      } else {
+        clone_epigenetic_mark = epigenetic_mark;
+        clone_norm_epigenetic_mark = norm_epigenetic_mark;
+      }
+
+      std::string clone_sample_id;
+      if (sample_id.empty()) {
+        clone_sample_id = original["sample_id"].str();
+      } else {
+        clone_sample_id = sample_id;
+      }
+
+      std::map<std::string, std::string> sample_data;
+      if (!info::get_sample_by_id(clone_sample_id, sample_data, msg, true)) {
+        return false;
+      }
+      mongo::BSONObjBuilder sample_builder;
+      std::map<std::string, std::string>::iterator it;
+      for (it = sample_data.begin(); it != sample_data.end(); ++it) {
+        if ((it->first != "_id") && (it->first != "user")) {
+          sample_builder.append(it->first, it->second);
+        }
+      }
+      mongo::BSONObj sample_info = sample_builder.obj();
+
+
+      std::string clone_technique;
+      std::string clone_norm_technique;
+      if (technique.empty()) {
+        clone_technique = original["technique"].str();
+        clone_norm_technique = original["norm_technique"].str();
+      } else {
+        clone_technique = technique;
+        clone_norm_technique = norm_technique;
+      }
+
+
+      std::string clone_project;
+      std::string clone_norm_project;
+      if (project.empty()) {
+        clone_project = original["project"].str();
+        clone_norm_project = original["norm_project"].str();
+      } else {
+        clone_project = project;
+        clone_norm_project = norm_project;
       }
 
       // Check if the description should be replaced
@@ -79,16 +144,15 @@ namespace epidb {
         return false;
       }
 
+
+      // TODO: REVISE THIS PART OF THE CODE
       mongo::BSONArray clone_format_array;
       std::string clone_format_string;
       if (format != original_file_format) {
         clone_format_array = format.to_bson();
         std::vector< mongo::BSONElement > original_columns = original["columns"].Array();
-
         mongo::BSONObjIterator clone_columns_it = clone_format_array.begin();
-
         while (clone_columns_it.more()) {
-
           mongo::BSONObj clone_column = clone_columns_it.next().Obj();
           bool found = false;
           for (std::vector< mongo::BSONElement>::iterator original_it = original_columns.begin();
@@ -105,12 +169,9 @@ namespace epidb {
             return false;
           }
         }
-
         clone_format_string = format.format();
-
       } else {
         std::vector< mongo::BSONElement > columns = original["columns"].Array();
-
         mongo::BSONArrayBuilder ab;
         for (std::vector< mongo::BSONElement >::iterator it = columns.begin(); it < columns.end(); it++) {
           ab.append(*it);
@@ -118,6 +179,7 @@ namespace epidb {
         clone_format_array = ab.arr();
         clone_format_string = original["format"].str();
       }
+      // REVISE
 
       // Check if the extra_metadata should be replaced
       mongo::BSONObj extra_metadata_obj;
