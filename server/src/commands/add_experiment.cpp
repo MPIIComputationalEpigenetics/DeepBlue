@@ -92,6 +92,11 @@ namespace epidb {
           return false;
         }
 
+        if (name.empty()) {
+          result.add_error("Experiment name can not be empty.");
+          return false;
+        }
+
         datatypes::Metadata extra_metadata;
         if (!read_metadata(parameters[9], extra_metadata, msg)) {
           result.add_error(msg);
