@@ -78,7 +78,7 @@ endif
 
 CPPFORMAT_LIB = ../third_party/cppformat/format.cc ../third_party/minilzo/minilzo.c
 
-DEFLIBS = $(CPPFORMAT_LIB) $(MONGOLIBS) $(BOOSTLIBS) -L$(LUA) -ltcmalloc -lluajit
+DEFLIBS = $(CPPFORMAT_LIB) $(MONGOLIBS) $(BOOSTLIBS) -L$(LUA) -lluajit
 
 AR	= ar
 ARFLAGS	=
