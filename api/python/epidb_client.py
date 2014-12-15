@@ -24,8 +24,8 @@ class EpidbClient:
     def remove(self, _id, user_key):
       return self.server.remove(_id, user_key)
 
-    def clone_dataset(self, dataset_id, new_name, description, format, extra_metadata, user_key):
-      return self.server.clone_dataset(dataset_id, new_name, description, format, extra_metadata, user_key)
+    def clone_dataset(self, dataset_id, new_name, new_genome, new_epigenetic_mark, new_sample, new_technique, new_project, description, format, extra_metadata, user_key):
+      return self.server.clone_dataset(dataset_id, new_name, new_genome, new_epigenetic_mark, new_sample, new_technique, new_project, description, format, extra_metadata, user_key)
 
     def change_extra_metadata(self, _id, key, value, user_key):
       return self.server.change_extra_metadata(_id, key, value, user_key)

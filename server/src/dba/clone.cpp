@@ -28,14 +28,17 @@
 namespace epidb {
   namespace dba {
 
-
-    bool clone_dataset(const std::string &dataset_id, const std::string &name, const std::string &norm_name,
+    bool clone_dataset(const std::string &dataset_id, const std::string &clone_name, const std::string &norm_clone_name,
+                       const std::string &genome, const std::string &norm_genome,
+                       const std::string &epigenetic_mark, const std::string &norm_epigenetic_mark,
+                       const std::string &sample_id,
+                       const std::string &technique, const std::string &norm_technique,
+                       const std::string &project, const std::string &norm_project,
                        const std::string &description, const std::string &norm_description,
                        const parser::FileFormat &format, const datatypes::Metadata &extra_metadata,
                        const std::string user_key,
                        std::string &_id, std::string &msg)
     {
-
       mongo::ScopedDbConnection c(config::get_mongodb_server());
 
       mongo::BSONObj query = BSON("_id" << dataset_id);
@@ -55,17 +58,6 @@ namespace epidb {
         msg = "experiment with ID " + dataset_id + " not found.";
         c.done();
         return false;
-      }
-
-      // Check if the name should be replaced
-      std::string clone_name;
-      std::string clone_norm_name;
-      if (description.empty()) {
-        clone_name = original["name"].str();
-        clone_norm_name = original["norm_name"].str();
-      } else {
-        clone_name = name;
-        clone_norm_name = norm_name;
       }
 
       // Check if the description should be replaced
@@ -161,7 +153,7 @@ namespace epidb {
         } else if (e.fieldName() == std::string("name")) {
           cloned_builder.append("name", clone_name);
         } else if (e.fieldName() == std::string("norm_name")) {
-          cloned_builder.append("norm_name", clone_norm_name);
+          cloned_builder.append("norm_name", norm_clone_name);
         } else if (e.fieldName() == std::string("description")) {
           cloned_builder.append("description", clone_description);
         } else if (e.fieldName() == std::string("norm_description")) {
