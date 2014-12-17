@@ -101,10 +101,10 @@ class TestPattern(helpers.TestCase):
     self.assertSuccess(res)
 
     d = "chr19\t1\t59128983"
-    res, qid = epidb.select_annotations("hg19_only_chr19", "hg19_only_chr19", None, None, None, self.admin_key)
+    res, qid = epidb.select_annotations("Chromosomes size for hg19_only_chr19", "hg19_only_chr19", None, None, None, self.admin_key)
     fmt = "CHROMOSOME,START,END,@NAME:none,@LENGTH,@COUNT.NON-OVERLAP(TATA),@COUNT.NON-OVERLAP(GAGA),@COUNT.NON-OVERLAP((TATA|GAGA))"
     res, regions = epidb.get_regions(qid, fmt, self.admin_key)
     self.assertSuccess(res, regions)
 
-    expected = "chr19\t0\t59128983\thg19_only_chr19\t59128983\t159464\t336889\t496353"
+    expected = "chr19\t0\t59128983\tChromosomes size for hg19_only_chr19\t59128983\t159464\t336889\t496353"
     self.assertEquals(expected, regions)

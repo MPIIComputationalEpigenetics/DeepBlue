@@ -34,7 +34,6 @@ namespace epidb {
       static const std::string &ANNOTATIONS();
       static const std::string &QUERIES();
       static const std::string &SAMPLES();
-      static const std::string &SAMPLE_FIELDS();
       static const std::string &SEQUENCES();
       static const std::string &TECHNIQUES();
       static const std::string &TILINGS();

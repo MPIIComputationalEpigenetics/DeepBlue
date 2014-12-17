@@ -77,11 +77,6 @@ namespace epidb {
         return true;
       }
 
-      bool sample_fields(const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg)
-      {
-        return helpers::get(Collections::SAMPLE_FIELDS(), result, msg);
-      }
-
       bool projects(const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg)
       {
         return helpers::get(Collections::PROJECTS(), result, msg);
@@ -165,12 +160,6 @@ namespace epidb {
                               std::vector<utils::IdName> &result, std::string &msg)
       {
         return similar(Collections::BIOSOURCES(), name, user_key, result, msg);
-      }
-
-      bool similar_sample_fields(const std::string name, const std::string &user_key,
-                                 std::vector<utils::IdName> &result, std::string &msg)
-      {
-        return similar(Collections::SAMPLE_FIELDS(), name, user_key, result, msg);
       }
 
       bool similar_techniques(const std::string name, const std::string &user_key,

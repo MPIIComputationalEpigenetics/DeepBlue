@@ -35,7 +35,7 @@
  * 07 - Project
  * 08 - Data
  * 09 - Format
- * 10 - Sample Field
+ * 10 -
  * 11 - Genome
  * 12 - ..
  * 50 - Dataset
@@ -99,8 +99,6 @@ namespace epidb {
   Error ERR_DUPLICATED_EPIGENETIC_MARK_NAME("105001", "Duplicated Epigenetic Mark Name '%s'." );
 
   Error ERR_DUPLICATE_PROJECT_NAME("107001", "Duplicated Project Name '%s'.");
-
-  Error ERR_DUPLICATE_SAMPLE_FIELD_NAME("111001", "Duplicated Sample Field Name '%s'.");
 
   Error ERR_DUPLICATE_GENOME_NAME("111101", "Duplicated Genome Name '%s'.");
 

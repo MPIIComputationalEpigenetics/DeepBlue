@@ -24,7 +24,7 @@ class TestAnnotationCommands(helpers.TestCase):
     self.assertSuccess(res, annotations)
     self.assertEqual(len(annotations), 2)
 
-    self.assertEqual(annotations[0][1], "hg19")
+    self.assertEqual(annotations[0][1], "Chromosomes size for hg19")
     self.assertEqual(annotations[1][1], "Cpg Islands")
 
     size = len(file_data.split("\n"))

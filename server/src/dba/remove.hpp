@@ -32,8 +32,6 @@ namespace epidb {
 
       bool technique(const std::string &id, const std::string &user_id, std::string &msg);
 
-      bool sample_field(const std::string &id, const std::string &user_id, std::string &msg);
-
       bool column_type(const std::string &id, const std::string &user_id, std::string &msg);
     }
   }

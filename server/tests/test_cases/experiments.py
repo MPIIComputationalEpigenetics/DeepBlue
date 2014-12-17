@@ -58,7 +58,7 @@ class TestExperiments(helpers.TestCase):
     (s, regions_1) = epidb.get_regions(qid1, "CHROMOSOME,START,END", self.admin_key)
     self.assertSuccess(s, regions_1)
 
-  def test_double_experiment_pass(self):
+  def test_double_experiment_same_user_fail(self):
     epidb = EpidbClient()
     self.init_base(epidb)
 
@@ -76,7 +76,8 @@ class TestExperiments(helpers.TestCase):
     self.assertSuccess(res)
 
     res = epidb.add_experiment(*(exp + (user_key,)))
-    self.assertSuccess(res)
+    self.assertFailure(res)
+    self.assertEqual(res[1], "102001:The experiment name 'test_exp1' is already being used.")
 
 
   def test_double_experiment_fail(self):

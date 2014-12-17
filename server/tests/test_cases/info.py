@@ -141,12 +141,6 @@ class TestGetInfoCommand(helpers.TestCase):
     epidb = EpidbClient()
     self.init(epidb)
 
-    (status, sf_id_1) = epidb.add_sample_field("karyotype", "string", "Sample Karyotype: cancer or normal", self.admin_key)
-    self.assertSuccess(status, sf_id_1)
-
-    (status, sf_id_2) = epidb.add_sample_field("sex", "string", "Sex of the element: M or F", self.admin_key)
-    self.assertSuccess(status, sf_id_2)
-
     res, bsid = epidb.add_biosource("K562", "desc1", {}, self.admin_key)
     self.assertSuccess(res, bsid)
 
@@ -159,7 +153,3 @@ class TestGetInfoCommand(helpers.TestCase):
     self.assertEqual(data[0]['sex'], "F")
     self.assertEqual(data[0]['user'], "test_admin")
     self.assertEqual(data[0]['_id'], sid)
-
-
-    (status, infos) = epidb.info([sf_id_1, sf_id_2, bsid, sid], self.admin_key)
-    self.assertEqual(len(infos), 4)

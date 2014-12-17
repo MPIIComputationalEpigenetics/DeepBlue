@@ -60,12 +60,6 @@ namespace epidb {
                     const std::string &user_key,
                     std::string &sample_id, std::string &msg);
 
-    bool add_sample_field(const std::string &name, const std::string &norm_name,
-                          const std::string &type,
-                          const std::string &description, const std::string &norm_description,
-                          const std::string &user_key,
-                          std::string &sample_field_id, std::string &msg);
-
     bool add_technique(const std::string &name, const std::string &norm_name,
                        const std::string &description, const std::string &norm_description,
                        const datatypes::Metadata &extra_metadata,
@@ -93,8 +87,6 @@ namespace epidb {
 
     bool is_valid_biosource_name(const std::string &name, const std::string &norm_name, std::string &msg);
 
-    bool is_valid_sample_field_name(const std::string &name, const std::string &norm_name, std::string &msg);
-
     bool is_valid_epigenetic_mark(const std::string &name, const std::string &norm_name, std::string &msg);
 
     bool is_project_valid(const std::string &name, const std::string &norm_name, std::string &msg);
@@ -116,8 +108,6 @@ namespace epidb {
     bool check_biosource_synonym(const std::string &biosource_syn_norm, bool &r, std::string &msg);
 
     bool check_sample(const std::string &biosource_name_norm, bool &r, std::string &msg);
-
-    bool check_sample_field(const std::string &biosource_name_norm, bool &r, std::string &msg);
 
     bool check_technique(const std::string &norm_technique_name, bool &r, std::string &msg);
 

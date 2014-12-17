@@ -12,11 +12,6 @@ class TestSamples(helpers.TestCase):
     res = epidb.add_biosource("K562", "desc1", {}, self.admin_key)
     self.assertSuccess(res)
 
-    res = epidb.add_sample_field("age", "string", "", self.admin_key)
-    self.assertSuccess(res)
-    res = epidb.add_sample_field("health", "string", "", self.admin_key)
-    self.assertSuccess(res)
-
     res, sid = epidb.add_sample("K562", {"age":"55","health":"deceased"}, self.admin_key)
     self.assertSuccess(res, sid)
 
@@ -32,11 +27,6 @@ class TestSamples(helpers.TestCase):
     self.assertSuccess(res)
 
     res = epidb.add_biosource("KKKK", "desc1", {}, self.admin_key)
-    self.assertSuccess(res)
-
-    res = epidb.add_sample_field("age", "string", "", self.admin_key)
-    self.assertSuccess(res)
-    res = epidb.add_sample_field("health", "string", "", self.admin_key)
     self.assertSuccess(res)
 
     res, id1 = epidb.add_sample("K562", {"age":"55","health":"deceased"}, self.admin_key)
@@ -71,11 +61,6 @@ class TestSamples(helpers.TestCase):
     res = epidb.add_biosource("KKKK", "desc1", {}, self.admin_key)
     self.assertSuccess(res)
 
-    res = epidb.add_sample_field("age", "string", "", self.admin_key)
-    self.assertSuccess(res)
-    res = epidb.add_sample_field("health", "string", "", self.admin_key)
-    self.assertSuccess(res)
-
     res, id1 = epidb.add_sample("K562", {"age":"55","health":"deceased"}, self.admin_key)
     self.assertSuccess(res, id1)
 
@@ -102,11 +87,6 @@ class TestSamples(helpers.TestCase):
     (res, colon_id) = epidb.add_biosource("Colon", "desc1", {}, self.admin_key)
     (res, colon_md_id) = epidb.add_biosource("Colon_MD", "desc1", {}, self.admin_key)
     (res, intestine_id) = epidb.add_biosource("Intestine", "desc1", {}, self.admin_key)
-
-    res = epidb.add_sample_field("age", "string", "", self.admin_key)
-    self.assertSuccess(res)
-    res = epidb.add_sample_field("health", "string", "", self.admin_key)
-    self.assertSuccess(res)
 
     res, id1 = epidb.add_sample("K562", {"age":"55","health":"deceased"}, self.admin_key)
     self.assertSuccess(res, id1)

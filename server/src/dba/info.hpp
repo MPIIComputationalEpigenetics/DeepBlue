@@ -51,8 +51,6 @@ namespace epidb {
 
       bool get_query(const std::string &id, std::map<std::string, std::string> &, std::string &msg);
 
-      bool get_sample_field(const std::string &id, std::map<std::string, std::string> &res, std::string &msg, bool full = false);
-
       bool get_tiling_region(const std::string &id, std::map<std::string, std::string> &res, std::string &msg, bool full = false);
 
       bool get_column_type(const std::string &id, std::map<std::string, std::string> &res, std::string &msg);

@@ -298,25 +298,6 @@ namespace epidb {
         return true;
       }
 
-
-      bool get_sample_field(const std::string &id, std::map<std::string, std::string> &res, std::string &msg, bool full = false)
-      {
-        mongo::BSONObj result;
-        if (!data::sample_field(id, result, msg))  {
-          return false;
-        }
-
-        mongo::BSONObj::iterator it = result.begin();
-        while (it.more()) {
-          mongo::BSONElement e = it.next();
-          std::string field_name = e.fieldName();
-          if (full || field_name.compare(0, 5, "norm_") != 0) {
-            res[field_name] = utils::bson_to_string(e);
-          }
-        }
-        return true;
-      }
-
       bool get_tiling_region(const std::string &id, std::map<std::string, std::string> &res, std::string &msg, bool full = false)
       {
         mongo::BSONObj result;

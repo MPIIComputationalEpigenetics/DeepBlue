@@ -128,19 +128,8 @@ class TestSearch(helpers.TestCase):
     res = epidb.add_biosource("K562", "desc1", {}, self.admin_key)
     self.assertSuccess(res)
 
-    res = epidb.add_sample_field("age", "string", "", self.admin_key)
-    self.assertSuccess(res)
-    res = epidb.add_sample_field("health", "string", "", self.admin_key)
-    self.assertSuccess(res)
-
     res, sid = epidb.add_sample("K562", {"age":"55", "health":"deceased"}, self.admin_key)
     self.assertSuccess(res, sid)
-
-    res = epidb.add_sample_field("karyotype", "string", "Sample Karyotype: cancer or normal", self.admin_key)
-    self.assertSuccess(res)
-
-    res = epidb.add_sample_field("sex", "string", "Sex of the element: M or F", self.admin_key)
-    self.assertSuccess(res)
 
     res = epidb.add_sample("K562", {"karyotype":"cancer", "sex":"F"}, self.admin_key)
     self.assertSuccess(res)
@@ -236,7 +225,7 @@ class TestSearch(helpers.TestCase):
     epidb = EpidbClient()
     self.init(epidb)
     s, e = epidb.search("hg19", "genome", self.admin_key)
-    self.assertEqual("genome is not a valid type. The valid types are: 'annotations,biosources,column_types,epigenetic_marks,experiments,genomes,projects,samples,samples.fields,techniques,tilings'", e)
+    self.assertEqual("genome is not a valid type. The valid types are: 'annotations,biosources,column_types,epigenetic_marks,experiments,genomes,projects,samples,techniques,tilings'", e)
 
   def test_search_synonyms(self):
     epidb = EpidbClient()
