@@ -192,7 +192,6 @@ namespace epidb {
             info->add_child("columns", columns_parameters);
           }
 
-          std::cerr << "load info in " << (( ((float)  clock()) - dsysTime) / CLOCKS_PER_SEC) << std::endl;
           result.add_param(info);
         }
 
