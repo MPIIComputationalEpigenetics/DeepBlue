@@ -236,23 +236,6 @@ namespace epidb {
 
       /* -------- */
 
-      bool get_column_type(const std::string &type_name, datatypes::COLUMN_TYPES type, std::string &msg)
-      {
-        if (type_name == "string") {
-          type = datatypes::COLUMN_STRING;
-          return true;
-        } else if (type_name == "integer") {
-          type = datatypes::COLUMN_INTEGER;
-          return true;
-        } else if (type_name == "double") {
-          type = datatypes::COLUMN_DOUBLE;
-          return true;
-        } else {
-          msg = "Invalid column type '" + type_name + "'";
-          return false;
-        }
-      }
-
       bool column_type_simple(const std::string &name, datatypes::COLUMN_TYPES type, const std::string &default_value, ColumnTypePtr &column_type, std::string &msg)
       {
         switch (type) {
