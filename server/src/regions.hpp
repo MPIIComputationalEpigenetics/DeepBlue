@@ -76,9 +76,18 @@ namespace epidb {
       _string_data(),
       _numeric_data() {}
 
+    // The value returned indicates whether the element passed as first argument is considered to go before the second in the specific strict weak ordering it defines.
     bool operator<(const Region &other) const
     {
-      return _start < other._start;
+      if (_start < other._start) {
+        return true;
+      }
+
+      if (other._start < _start) {
+        return false;
+      }
+
+      return _end < other._end;
     }
 
     DatasetId dataset_id() const;
