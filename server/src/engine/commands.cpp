@@ -148,7 +148,6 @@ namespace epidb {
       // check for DATASTRING type
       if (p_ == serialize::DATASTRING && p == serialize::STRING) {
         p = serialize::DATASTRING;
-        parameters[i] = serialize::ParameterPtr(new serialize::SimpleParameter(p, parameters[i]->as_string()));
       }
 
       if (p != serialize::NIL && p != p_) {
