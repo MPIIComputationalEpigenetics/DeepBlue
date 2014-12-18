@@ -2,11 +2,11 @@
 #define EPIDB_EXTRAS_SERIALIZE_HPP_
 
 #include <string>
-#include <sstream>
 #include <vector>
 #include <map>
 #include <boost/shared_ptr.hpp>
-#include <boost/lexical_cast.hpp>
+
+#include "stringbuilder.hpp"
 
 #include "xmlrpc.hpp"
 
@@ -37,6 +37,8 @@ namespace epidb {
       virtual Type type() const = 0;
 
       virtual bool set_value(const std::string& v);
+
+      virtual void set_type(Type type);
 
       virtual bool add_child(const boost::shared_ptr<Parameter>& p);
 
@@ -95,6 +97,8 @@ namespace epidb {
 
       bool set_value(const std::string& v);
 
+      void set_type(Type type);
+
       const std::string get_xml() const;
     };
 
@@ -110,6 +114,7 @@ namespace epidb {
       const std::string as_string() const;
 
       Type type() const;
+
       const std::string value() const;
 
       const std::string get_xml() const;
@@ -184,6 +189,8 @@ namespace epidb {
       void add_error(const std::string& msg);
 
       void add_string(const std::string& str);
+
+      void add_stringbuilder(StringBuilder &sb);
 
       void add_string(int i);
 

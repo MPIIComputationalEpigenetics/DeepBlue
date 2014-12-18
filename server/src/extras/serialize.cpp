@@ -6,26 +6,10 @@
 
 #include "utils.hpp"
 #include "serialize.hpp"
+#include "stringbuilder.hpp"
 
 namespace epidb {
   namespace serialize {
-
-    std::string encode(const std::string &data)
-    {
-      std::string buffer;
-      buffer.reserve(data.size() * 1.05);
-      for (size_t pos = 0; pos != data.size(); ++pos) {
-        switch (data[pos]) {
-        case '&':  buffer.append("&amp;");       break;
-        case '\"': buffer.append("&quot;");      break;
-        case '\'': buffer.append("&apos;");      break;
-        case '<':  buffer.append("&lt;");        break;
-        case '>':  buffer.append("&gt;");        break;
-        default:   buffer.append(&data[pos], 1); break;
-        }
-      }
-      return buffer;
-    }
 
     std::string type_name(const Type t)
     {
@@ -109,6 +93,11 @@ namespace epidb {
     bool Parameter::set_value(const std::string &v)
     {
       return false;
+    }
+
+    void Parameter::set_type(Type type)
+    {
+      std::cerr << "Nothing." << std::endl;
     }
 
     bool Parameter::add_child(const boost::shared_ptr<Parameter> &p)
@@ -222,11 +211,11 @@ namespace epidb {
     {}
 
     SimpleParameter::SimpleParameter(const Type &type, const std::string &value) :
-      type_(type), value_(value)
+      type_(type), value_(utils::sanitize(value))
     {}
 
     SimpleParameter::SimpleParameter(const std::string &s) :
-      type_(STRING), value_(s)
+      type_(STRING), value_(utils::sanitize(s))
     {}
 
     SimpleParameter::SimpleParameter(const bool b) :
@@ -244,6 +233,14 @@ namespace epidb {
     Type SimpleParameter::type() const
     {
       return type_;
+    }
+
+    void SimpleParameter::set_type(Type type)
+    {
+      std::cerr << "mudou" << std::endl;
+      std::cerr << type_ << std::endl;
+      std::cerr << type << std::endl;
+      type_ = type;
     }
 
     bool SimpleParameter::set_value(const std::string &v)
@@ -269,8 +266,7 @@ namespace epidb {
       std::string ts = xmlrpc::type_string(to_xml_type(type_));
       ss << "<value>";
       ss << "<" << ts << ">";
-      // TODO: remove this encode and put in the commands directly.
-      ss << encode(value_);
+      ss << value_;
       ss << "</" << ts << ">";
       ss << "</value>";
       return ss.str();
@@ -349,7 +345,7 @@ namespace epidb {
       if (ordered) {
         std::map<std::string, ParameterPtr>::const_iterator it;
         for (it = map_.begin(); it != map_.end(); ++it) {
-          key_order_.push_back(it->first);
+          key_order_.push_back(utils::sanitize(it->first));
         }
       }
     }
@@ -401,7 +397,7 @@ namespace epidb {
         std::vector<std::string>::const_iterator it;
         for (it = key_order_.begin(); it != key_order_.end(); ++it) {
           ss << "<member>";
-          ss << "<name>" << encode(*it) << "</name>";
+          ss << "<name>" << *it << "</name>";
           ss << (*(const_cast<std::map<std::string, ParameterPtr> *>(&map_)))[*it]->get_xml();
           ss << "</member>" << std::endl;
         }
@@ -409,7 +405,7 @@ namespace epidb {
         std::map<std::string, ParameterPtr>::const_iterator it;
         for (it = map_.begin(); it != map_.end(); ++it) {
           ss << "<member>";
-          ss << "<name>" << encode(it->first) << "</name>";
+          ss << "<name>" << it->first << "</name>";
           ss << it->second->get_xml();
           ss << "</member>" << std::endl;
         }
@@ -422,10 +418,11 @@ namespace epidb {
 
     bool MapParameter::add_child(const std::string &key, const ParameterPtr &p)
     {
+      std::string s_key = utils::sanitize(key);
       if (ordered_) {
-        key_order_.push_back(key);
+        key_order_.push_back(s_key);
       }
-      map_[key] = p;
+      map_[s_key] = p;
       return true;
     }
 
@@ -445,7 +442,7 @@ namespace epidb {
       } else {
         std::map<std::string, ParameterPtr>::const_iterator it;
         for (it = map_.begin(); it != map_.end(); ++it) {
-          results.push_back(std::pair<std::string, ParameterPtr>(it->first, it->second));
+          results.push_back(std::pair<std::string, ParameterPtr>(utils::sanitize(it->first), it->second));
         }
       }
       return true;
@@ -511,13 +508,19 @@ namespace epidb {
 
     void Parameters::add_string(const std::string &str)
     {
-      params_.push_back(ParameterPtr(new SimpleParameter(STRING, str)));
+      params_.push_back(ParameterPtr(new SimpleParameter(STRING, utils::sanitize(str))));
     }
 
     void Parameters::add_string(int i)
     {
       std::string value = utils::integer_to_string(i);
       params_.push_back(ParameterPtr(new SimpleParameter(STRING, value)));
+    }
+
+    void Parameters::add_stringbuilder(StringBuilder &sb)
+    {
+      // TODO: In fact, read the file content only when build the xml response.
+      params_.push_back(ParameterPtr(new SimpleParameter(STRING, sb.to_string())));
     }
 
     void Parameters::add_int(size_t i)

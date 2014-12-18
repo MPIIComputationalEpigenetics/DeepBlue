@@ -93,21 +93,21 @@ namespace epidb {
           return false;
         }
 
-        StringBuilder<char> sb;
+        StringBuilder sb;
 
         if (!process(output_format, chromosomeRegionsList, sb, msg)) {
           result.add_error(msg);
           return false;
         }
 
-        result.add_string(std::move(sb.ToString()));
+        result.add_stringbuilder(sb);
 
         return true;
       }
 
 
       bool process(const std::string &output_format, const ChromosomeRegionsList &chromosomeRegionsList,
-                   StringBuilder<char> &sb, std::string &msg) const
+                   StringBuilder &sb, std::string &msg) const
       {
         std::unordered_map<DatasetId, parser::FileFormat> datasets_formats;
         dba::Metafield metafield;
@@ -166,7 +166,7 @@ namespace epidb {
         return true;
       }
 
-      inline bool format_region(StringBuilder<char> &sb, const std::string &chromosome, const Region &region,
+      inline bool format_region(StringBuilder &sb, const std::string &chromosome, const Region &region,
                                 const parser::FileFormat &format, dba::Metafield &metafield, std::string &msg) const
       {
         for (parser::FileFormat::const_iterator it =  format.begin(); it != format.end(); it++) {
