@@ -312,7 +312,7 @@ namespace epidb {
                        const mongo::BSONObj &regions_query,
                        ChromosomeRegionsList &results, std::string &msg)
       {
-        const size_t max_threads = 1;
+        const size_t max_threads = 8;
         std::vector<boost::thread *> threads;
         std::vector<boost::shared_ptr<ChromosomeRegionsList> > result_parts;
 
@@ -381,7 +381,6 @@ namespace epidb {
           std::string msg;
           if (!get_regions_from_collection(collection_name, regions_query, regions, msg)) {
             EPIDB_LOG_ERR(msg);
-            size = 0;
             return;
           }
           size += regions->size();;
@@ -393,7 +392,7 @@ namespace epidb {
                          std::vector<std::string> &chromosomes, const mongo::BSONObj &regions_query,
                          size_t &size, std::string &msg)
       {
-        const size_t max_threads = 10;
+        const size_t max_threads = 8;
         std::vector<boost::thread *> threads;
         std::vector<boost::shared_ptr<std::vector<size_t> > > result_parts;
 
