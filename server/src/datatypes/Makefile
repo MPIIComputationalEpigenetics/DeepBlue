@@ -3,7 +3,7 @@ include ../Makefile.inc
 CXXFLAGS	= $(DEFCXXFLAGS) -I..
 
 OBJLIBS	= ../libdatatypes.a
-OBJS    = column_types_def.o metadata.o
+OBJS    = column_types_def.o metadata.o regions.o
 
 all : $(OBJLIBS)
 
