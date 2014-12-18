@@ -17,10 +17,11 @@
 
 #include "../datatypes/metadata.hpp"
 
+#include "annotations.hpp"
 #include "collections.hpp"
 #include "config.hpp"
+#include "experiments.hpp"
 #include "full_text.hpp"
-#include "helpers.hpp"
 #include "info.hpp"
 #include "users.hpp"
 
@@ -39,7 +40,7 @@ namespace epidb {
                        const std::string &project, const std::string &norm_project,
                        const std::string &description, const std::string &norm_description,
                        const parser::FileFormat &format, const datatypes::Metadata &extra_metadata,
-                       const std::string user_key,
+                       const std::string user_key, const std::string& ip,
                        std::string &_id, std::string &msg)
     {
       mongo::ScopedDbConnection c(config::get_mongodb_server());
@@ -90,19 +91,6 @@ namespace epidb {
         clone_sample_id = sample_id;
       }
 
-      std::map<std::string, std::string> sample_data;
-      if (!info::get_sample_by_id(clone_sample_id, sample_data, msg, true)) {
-        return false;
-      }
-      mongo::BSONObjBuilder sample_builder;
-      std::map<std::string, std::string>::iterator it;
-      for (it = sample_data.begin(); it != sample_data.end(); ++it) {
-        if ((it->first != "_id") && (it->first != "user")) {
-          sample_builder.append(it->first, it->second);
-        }
-      }
-      mongo::BSONObj sample_info = sample_builder.obj();
-
 
       std::string clone_technique;
       std::string clone_norm_technique;
@@ -145,9 +133,16 @@ namespace epidb {
       }
 
 
-      // TODO: REVISE THIS PART OF THE CODE
       mongo::BSONArray clone_format_array;
-      std::string clone_format_string;
+      mongo::BSONArray original_columns_array;
+      std::vector< mongo::BSONElement > columns = original["columns"].Array();
+      mongo::BSONArrayBuilder ab;
+      for (std::vector< mongo::BSONElement >::iterator it = columns.begin(); it < columns.end(); it++) {
+        ab.append(*it);
+      }
+      original_columns_array = ab.arr();
+
+      // Check format
       if (format != original_file_format) {
         clone_format_array = format.to_bson();
         std::vector< mongo::BSONElement > original_columns = original["columns"].Array();
@@ -169,17 +164,7 @@ namespace epidb {
             return false;
           }
         }
-        clone_format_string = format.format();
-      } else {
-        std::vector< mongo::BSONElement > columns = original["columns"].Array();
-        mongo::BSONArrayBuilder ab;
-        for (std::vector< mongo::BSONElement >::iterator it = columns.begin(); it < columns.end(); it++) {
-          ab.append(*it);
-        }
-        clone_format_array = ab.arr();
-        clone_format_string = original["format"].str();
       }
-      // REVISE
 
       // Check if the extra_metadata should be replaced
       mongo::BSONObj extra_metadata_obj;
@@ -189,6 +174,10 @@ namespace epidb {
         extra_metadata_obj = original["extra_metadata"].Obj();
       }
 
+      DatasetId internal_dataset_id = original[KeyMapper::DATASET()].Int();
+      mongo::BSONObj cloned_metadata;
+
+
       if (dataset_id[0] == 'a') {
         int a_id;
         if (!helpers::get_counter("annotations", a_id, msg))  {
@@ -196,6 +185,13 @@ namespace epidb {
           return false;
         }
         _id = "a" + utils::integer_to_string(a_id);
+        if (!annotations::build_metadata(clone_name, norm_clone_name, clone_genome, clone_norm_genome,
+                                   clone_description, clone_norm_description, extra_metadata,
+                                   user_key, ip, format,
+                                   internal_dataset_id, _id, cloned_metadata, msg)) {
+          return false;
+        }
+
       } else {
         int e_id;
         if (!helpers::get_counter("experiments", e_id, msg))  {
@@ -203,37 +199,17 @@ namespace epidb {
           return false;
         }
         _id = "e" + utils::integer_to_string(e_id);
-      }
-
-      mongo::BSONObjBuilder cloned_builder;
-
-      mongo::BSONObj::iterator i = original.begin();
-      while ( i.more() ) {
-        mongo::BSONElement e = i.next();
-        if (e.fieldName() == std::string("_id")) {
-          cloned_builder.append("_id", _id);
-        } else if (e.fieldName() == std::string("name")) {
-          cloned_builder.append("name", clone_name);
-        } else if (e.fieldName() == std::string("norm_name")) {
-          cloned_builder.append("norm_name", norm_clone_name);
-        } else if (e.fieldName() == std::string("description")) {
-          cloned_builder.append("description", clone_description);
-        } else if (e.fieldName() == std::string("norm_description")) {
-          cloned_builder.append("norm_description", clone_norm_description);
-        }  else if (e.fieldName() == std::string("format")) {
-          cloned_builder.append("format", clone_format_string);
-        } else if (e.fieldName() == std::string("columns")) {
-          cloned_builder.append("columns", clone_format_array);
-        } else if (e.fieldName() == std::string("extra_metadata")) {
-          cloned_builder.append("extra_metadata", extra_metadata_obj);
-        } else if (e.fieldName() == std::string("upload_info")) {
-          // Inserting upload_info latter
-        } else {
-          cloned_builder.append(e);
+        if (!experiments::build_metadata(clone_name, norm_clone_name, clone_genome, clone_norm_genome,
+                                       clone_epigenetic_mark, clone_norm_epigenetic_mark,
+                                       clone_sample_id, clone_technique, clone_norm_technique,
+                                       clone_project, clone_norm_project,
+                                       clone_description, clone_norm_description,
+                                       extra_metadata, user_key, ip,
+                                       format, internal_dataset_id,
+                                       _id, cloned_metadata, msg)) {
+          return false;
         }
       }
-
-      mongo::BSONObj cloned_metadata  = cloned_builder.obj();
 
       if (!search::insert_full_text(collection, _id, cloned_metadata, msg)) {
         c.done();

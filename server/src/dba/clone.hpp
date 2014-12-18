@@ -24,7 +24,7 @@ namespace epidb {
                        const std::string &project, const std::string &norm_project,
                        const std::string &description, const std::string &norm_description,
                        const parser::FileFormat &format, const datatypes::Metadata &extra_metadata,
-                       const std::string user_key,
+                       const std::string user_key, const std::string& ip,
                        std::string &_id, std::string &msg);
 
   }
