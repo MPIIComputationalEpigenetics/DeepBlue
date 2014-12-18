@@ -203,7 +203,7 @@ namespace epidb {
         }
 
         std::string id_clone;
-        if (!dba::clone_dataset(id, name, norm_name, genome, norm_genome, epigenetic_mark, norm_epigenetic_mark, sample, technique, norm_technique, project, norm_project, description, norm_description, fileFormat, extra_metadata, user_key, id_clone, msg)) {
+        if (!dba::clone_dataset(id, name, norm_name, genome, norm_genome, epigenetic_mark, norm_epigenetic_mark, sample, technique, norm_technique, project, norm_project, description, norm_description, fileFormat, extra_metadata, user_key, ip, id_clone, msg)) {
           result.add_error(msg);
           return false;
         }
