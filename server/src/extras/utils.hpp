@@ -18,8 +18,6 @@
 
 #include <mongo/bson/bson.h>
 
-#include "serialize.hpp"
-
 #include "../types.hpp"
 
 namespace epidb {
@@ -122,6 +120,8 @@ namespace epidb {
     std::string normalize_epigenetic_mark(const std::string &histone_modification);
 
     std::string bson_to_string(const mongo::BSONElement &e);
+
+    std::string sanitize(const std::string &data);
   }
 }
 
