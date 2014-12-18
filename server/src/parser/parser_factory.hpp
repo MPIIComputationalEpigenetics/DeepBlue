@@ -118,9 +118,9 @@ namespace epidb {
               found = true;
               break;
             }
-            if (!found) {
-              return false;
-            }
+          }
+          if (!found) {
+            return false;
           }
         }
 
