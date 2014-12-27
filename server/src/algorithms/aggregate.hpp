@@ -15,14 +15,14 @@
 
 #include "utils/interval_tree.hpp"
 
-#include "../regions.hpp"
+#include "../datatypes/regions.hpp"
 #include "intersection.hpp"
 
 
 namespace epidb {
   namespace algorithms {
-    bool aggregate(const ChromosomeRegionsList &data, const  ChromosomeRegionsList &ranges, const std::string &field,
-                         ChromosomeRegionsList &regions, std::string& msg);
+    bool aggregate(ChromosomeRegionsList &data, ChromosomeRegionsList &ranges, const std::string &field,
+                   ChromosomeRegionsList &regions, std::string &msg);
   } // namespace algorithms
 } // namespace epidb
 

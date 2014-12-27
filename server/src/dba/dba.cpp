@@ -22,6 +22,7 @@
 #include "../algorithms/patterns.hpp"
 
 #include "../datatypes/metadata.hpp"
+#include "../datatypes/regions.hpp"
 
 #include "../extras/utils.hpp"
 #include "../parser/genome_data.hpp"
@@ -43,7 +44,6 @@
 #include "info.hpp"
 
 #include "../errors.hpp"
-#include "../regions.hpp"
 #include "../log.hpp"
 
 namespace epidb {
@@ -303,11 +303,10 @@ namespace epidb {
 
       ChromosomeRegionsList chromosome_regions_list;
       for (parser::ChromosomesInfo::const_iterator it = genome_info.begin(); it != genome_info.end(); it++) {
-        Regions regions = build_regions();
-        Region region(0, it->second, id);
-        regions->push_back(region);
-        ChromosomeRegions chromosome_regions(it->first, regions);
-        chromosome_regions_list.push_back(chromosome_regions);
+        Regions regions = build_regions(1);
+        regions.push_back(build_bed_region(0, it->second, id));
+        ChromosomeRegions chromosome_regions(it->first, std::move(regions));
+        chromosome_regions_list.push_back(std::move(chromosome_regions));
       }
 
       std::string ann_name = "Chromosomes size for " + name;
@@ -982,8 +981,8 @@ namespace epidb {
         } else {
           regions = pf.non_overlap_regions();
         }
-        ChromosomeRegions chromosome_regions(chromosome_info.name, regions);
-        pattern_regions.push_back(chromosome_regions);
+        ChromosomeRegions chromosome_regions(chromosome_info.name, std::move(regions));
+        pattern_regions.push_back(std::move(chromosome_regions));
       }
 
       std::string description = "All localization of the pattern '" + pattern + "' in the genome " + genome;

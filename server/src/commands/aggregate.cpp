@@ -12,6 +12,8 @@
 
 #include <boost/algorithm/string.hpp>
 
+#include "../datatypes/regions.hpp"
+
 #include "../dba/dba.hpp"
 #include "../dba/helpers.hpp"
 #include "../dba/queries.hpp"
@@ -22,7 +24,6 @@
 #include "../extras/serialize.hpp"
 
 #include "../log.hpp"
-#include "../regions.hpp"
 #include "../errors.hpp"
 
 namespace epidb {

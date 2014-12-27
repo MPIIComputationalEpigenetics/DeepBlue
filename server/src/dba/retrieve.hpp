@@ -15,7 +15,7 @@
 
 #include <mongo/bson/bson.h>
 
-#include "../regions.hpp"
+#include "../datatypes/regions.hpp"
 
 namespace epidb {
   namespace dba {

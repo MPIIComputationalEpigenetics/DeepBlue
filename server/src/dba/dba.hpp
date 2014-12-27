@@ -15,8 +15,7 @@
 
 #include <mongo/bson/bson.h>
 
-#include "../regions.hpp"
-
+#include "../datatypes/regions.hpp"
 #include "../datatypes/metadata.hpp"
 
 #include "../parser/genome_data.hpp"

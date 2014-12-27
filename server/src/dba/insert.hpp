@@ -11,10 +11,10 @@
 #include <vector>
 
 #include "../datatypes/metadata.hpp"
+#include "../datatypes/regions.hpp"
 
 #include "../parser/parser_factory.hpp"
 #include "../parser/wig.hpp"
-#include "../regions.hpp"
 
 namespace epidb {
   namespace dba {

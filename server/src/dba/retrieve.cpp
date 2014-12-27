@@ -28,12 +28,13 @@
 #include "key_mapper.hpp"
 #include "queries.hpp"
 
+#include "../datatypes/regions.hpp"
+
 #include "../extras/compress.hpp"
 #include "../extras/utils.hpp"
 
 #include "../parser/wig.hpp"
 
-#include "../regions.hpp"
 #include "../log.hpp"
 
 #include "retrieve.hpp"
@@ -69,7 +70,7 @@ namespace epidb {
             Length span = region_bson[KeyMapper::WIG_SPAN()].numberInt();
             Length size = region_bson[KeyMapper::FEATURES()].numberInt();
 
-            _regions->reserve(size);
+            _regions.reserve(_regions.size() + size);
 
             int db_data_size;
             const char *data;
@@ -99,9 +100,8 @@ namespace epidb {
                 if ((start + (i * step) < _query_start) ||  start + (i * step) + span > _query_end) {
                   continue;
                 }
-                Region region(start + (i * step), start + (i * step) + span, dataset_id);
-                region.insert(scores[i]);
-                _regions->push_back(std::move(region));
+                RegionPtr region = build_wig_region(start + (i * step), start + (i * step) + span, dataset_id, scores[i]);
+                _regions.push_back(std::move(region));
                 _count++;
               }
 
@@ -117,9 +117,8 @@ namespace epidb {
                 if ((starts[i] < _query_start) || (starts[i] + span > _query_end)) {
                   continue;
                 }
-                Region region(starts[i], starts[i] + span, dataset_id);
-                region.insert(scores[i]);
-                _regions->push_back(std::move(region));
+                RegionPtr region = build_wig_region(start + (i * step), start + (i * step) + span, dataset_id, scores[i]);
+                _regions.push_back(std::move(region));
                 _count++;
               }
 
@@ -137,9 +136,8 @@ namespace epidb {
                 if ((starts[i] < _query_start) || (ends[i] > _query_end)) {
                   continue;
                 }
-                Region region(starts[i], ends[i], dataset_id);
-                region.insert(scores[i]);
-                _regions->push_back(std::move(region));
+                RegionPtr region = build_wig_region(start + (i * step), start + (i * step) + span, dataset_id, scores[i]);
+                _regions.push_back(std::move(region));
                 _count++;
               }
             }
@@ -176,18 +174,18 @@ namespace epidb {
                   continue;
                 }
 
-                Region region(start, end, dataset_id);
+                RegionPtr region = build_bed_region(start, end, dataset_id);
 
                 while ( i.more() ) {
-                  const mongo::BSONElement& e = i.next();
+                  const mongo::BSONElement &e = i.next();
                   switch (e.type()) {
-                    case mongo::String : region.insert(std::move(e.str())); break;
-                    case mongo::NumberDouble : region.insert((float) e._numberDouble()); break;
-                    case mongo::NumberInt : region.insert(e._numberInt()); break;
-                    default: region.insert(std::move(e.toString(false)));
+                  case mongo::String : region->insert(std::move(e.str())); break;
+                  case mongo::NumberDouble : region->insert((float) e._numberDouble()); break;
+                  case mongo::NumberInt : region->insert(e._numberInt()); break;
+                  default: region->insert(std::move(e.toString(false)));
                   }
                 }
-                _regions->push_back(std::move(region));
+                _regions.push_back(std::move(region));
                 _count++;
               }
               free(data);
@@ -210,18 +208,18 @@ namespace epidb {
                   continue;
                 }
 
-                Region region(start, end, dataset_id);
+                RegionPtr region = build_bed_region(start, end, dataset_id);
 
                 while ( i.more() ) {
-                  const mongo::BSONElement& e = i.next();
+                  const mongo::BSONElement &e = i.next();
                   switch (e.type()) {
-                    case mongo::String : region.insert(std::move(e.str())); break;
-                    case mongo::NumberDouble : region.insert((float) e._numberDouble()); break;
-                    case mongo::NumberInt : region.insert(e._numberInt()); break;
-                    default: region.insert(std::move(e.toString(false)));
+                  case mongo::String : region->insert(std::move(e.str())); break;
+                  case mongo::NumberDouble : region->insert((float) e._numberDouble()); break;
+                  case mongo::NumberInt : region->insert(e._numberInt()); break;
+                  default: region->insert(std::move(e.toString(false)));
                   }
                 }
-                _regions->push_back(std::move(region));
+                _regions.push_back(std::move(region));
                 _count++;
               }
             }
@@ -267,7 +265,8 @@ namespace epidb {
           }
         }
 
-        std::sort(regions->begin(), regions->end());
+        // TODO: Optimize here!
+        std::sort(regions.begin(), regions.end());
 
         c.done();
         return true;
@@ -288,9 +287,9 @@ namespace epidb {
             return;
           }
 
-          if (regions->size() > 0) {
-            ChromosomeRegions chromossomeRegions(*chrom_it, regions);
-            result->push_back(chromossomeRegions);
+          if (regions.size() > 0) {
+            ChromosomeRegions chromossomeRegions(*chrom_it, std::move(regions));
+            result->push_back(std::move(chromossomeRegions));
           }
         }
       }
@@ -345,10 +344,9 @@ namespace epidb {
 
         // unite results
         std::vector<boost::shared_ptr<ChromosomeRegionsList> >::iterator it;
-        for (it = result_parts.begin(); it != result_parts.end(); ++it) {
-          ChromosomeRegionsList::iterator cit;
-          for (cit = (**it).begin(); cit != (**it).end(); ++cit) {
-            results.push_back(*cit);
+        for (auto &chromosome_regions_pre_result : result_parts) {
+          for (auto &chromosome_regions_list : *chromosome_regions_pre_result) {
+            results.push_back(std::move(chromosome_regions_list));
           }
         }
         return true;
@@ -366,7 +364,7 @@ namespace epidb {
           count = 0;
           return false;
         }
-        count = regions->size();
+        count = regions.size();
         return true;
       }
 
@@ -383,7 +381,7 @@ namespace epidb {
             EPIDB_LOG_ERR(msg);
             return;
           }
-          size += regions->size();;
+          size += regions.size();;
         }
         results->push_back(size);
       }

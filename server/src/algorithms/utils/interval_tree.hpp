@@ -24,10 +24,10 @@ public:
   K start;
   K stop;
   T value;
-  Interval(K s, K e, const T& v)
+  Interval(K s, K e, T&& v)
     : start(s)
     , stop(e)
-    , value(v)
+    , value(std::move(v))
   { }
 };
 
@@ -78,7 +78,7 @@ public:
     center = other.center;
     intervals = other.intervals;
     if (other.left) {
-      left = (intervalTree*) malloc(sizeof(intervalTree));
+      left = new intervalTree();
       *left = *other.left;
     } else {
       left = NULL;
@@ -123,7 +123,7 @@ public:
 
     --depth;
     if (depth == 0 || (ivals.size() < minbucket && ivals.size() < maxbucket)) {
-      intervals = ivals;
+      intervals = std::move(ivals);
     } else {
       if (leftextent == 0 && rightextent == 0) {
         // sort intervals by start
@@ -156,11 +156,11 @@ public:
       for (typename intervalVector::iterator i = ivals.begin(); i != ivals.end(); ++i) {
         interval& interval = *i;
         if (interval.stop < center) {
-          lefts.push_back(interval);
+          lefts.push_back(std::move(interval));
         } else if (interval.start > center) {
-          rights.push_back(interval);
+          rights.push_back(std::move(interval));
         } else {
-          intervals.push_back(interval);
+          intervals.push_back(std::move(interval));
         }
       }
 
@@ -178,7 +178,7 @@ public:
       for (typename intervalVector::iterator i = intervals.begin(); i != intervals.end(); ++i) {
         interval& interval = *i;
         if (interval.stop >= start && interval.start <= stop) {
-          overlapping.push_back(interval);
+          overlapping.push_back(std::move(interval));
         }
       }
     }
@@ -218,7 +218,7 @@ public:
       for (typename intervalVector::iterator i = intervals.begin(); i != intervals.end(); ++i) {
         interval& interval = *i;
         if (interval.start >= start && interval.stop <= stop) {
-          contained.push_back(interval);
+          contained.push_back(std::move(interval));
         }
       }
     }

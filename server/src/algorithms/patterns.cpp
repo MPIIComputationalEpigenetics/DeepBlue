@@ -24,8 +24,9 @@ namespace epidb {
   namespace algorithms {
     void PatternFinder::non_overlap_regex_callback(const boost::match_results<std::string::const_iterator> &what)
     {
-      Region region(what.position(), what.position() + what.str().size(), DATASET_EMPTY_ID);
-      non_overlap_localizations->push_back(region);
+      non_overlap_localizations.push_back(
+        build_simple_region(what.position(), what.position() + what.str().size(), DATASET_EMPTY_ID)
+      );
     }
 
     bool PatternFinder::non_overlap_pattern_location(const std::string &chromosome, const std::string &pattern)
@@ -39,16 +40,13 @@ namespace epidb {
                     boost::bind(&PatternFinder::non_overlap_regex_callback, boost::ref(*this), _1)
                    );
 
-      non_overlap_processed = true;
       return true;
     }
 
     Regions PatternFinder::non_overlap_regions()
     {
-      if (!non_overlap_processed) {
-        non_overlap_pattern_location(sequence, pattern);
-      }
-      return non_overlap_localizations;
+      non_overlap_pattern_location(sequence, pattern);
+      return std::move(non_overlap_localizations);
     }
 
     bool PatternFinder::overlap_pattern_location(const std::string &chromosome, const std::string &pattern)
@@ -62,8 +60,9 @@ namespace epidb {
       boost::match_flag_type flags = boost::match_default;
       int pos = 0;
       while (boost::regex_search(start, end, what, expression, flags)) {
-        Region region(pos, pos + what.str().size(), DATASET_EMPTY_ID);
-        overlap_localizations->push_back(region);
+        overlap_localizations.push_back(
+          build_simple_region(pos, pos + what.str().size(), DATASET_EMPTY_ID)
+        );
         start = what[0].first + 1;
         pos += (what.position() + 1);
         flags |= boost::match_prev_avail;
@@ -75,10 +74,8 @@ namespace epidb {
 
     Regions PatternFinder::overlap_regions()
     {
-      if (!overlap_processed) {
-        overlap_pattern_location(sequence, pattern);
-      }
-      return overlap_localizations;
+      overlap_pattern_location(sequence, pattern);
+      return std::move(overlap_localizations);
     }
   }
 }

@@ -36,7 +36,7 @@ namespace epidb {
 
         static Parameters results_() {
           Parameter p[] = {
-            Parameter("password", serialize::STRING, "user password")
+            Parameter("password", serialize::STRING, "user id")
           };
           Parameters results(&p[0], &p[0]+1);
           return results;
@@ -55,17 +55,6 @@ namespace epidb {
 
           std::string msg;
 
-          bool is_initialized;
-          if (!dba::is_initialized(is_initialized, msg)) {
-            result.add_error(msg);
-            return false;
-          }
-          if (!is_initialized) {
-            result.add_error("The system was not initialized.");
-            return false;
-          }
-
-
           bool is_admin_key;
           if (!dba::users::is_admin_key(admin_key, is_admin_key, msg)) {
             result.add_error(msg);
@@ -76,22 +65,24 @@ namespace epidb {
             return false;
           }
 
+          if (!Command::checks(user_key, msg)) {
+            result.add_error(msg);
+            return false;
+          }
+
           if (!dba::users::is_valid_email(email, msg)) {
             result.add_error("The given email is not registered into DeepBlue");
             return false;
           }
 
-          /*
           std::string id;
-          if (dba::users::bind_user(email, password, user_key, admin_key)) {
+          if (dba::users::bind_user(email, password, user_key, admin_key, id, msg)) {
             result.add_string(id);
-            result.add_string(key);
             return true;
           } else {
             result.add_error(msg);
             return false;
           }
-          */
 
           return true;
         }

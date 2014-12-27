@@ -9,13 +9,13 @@
 #ifndef EPIDB_ALGORITHMS_INTERSECTION_HPP
 #define EPIDB_ALGORITHMS_INTERSECTION_HPP
 
-#include "../regions.hpp"
+#include "../datatypes/regions.hpp"
 
 namespace epidb {
   namespace algorithms {
 
-    bool intersect(const ChromosomeRegionsList &regions_a, const ChromosomeRegionsList &regions_b,
-                         ChromosomeRegionsList &intersections);
+    bool intersect(ChromosomeRegionsList &regions_a, ChromosomeRegionsList &regions_b,
+                   ChromosomeRegionsList &intersections);
 
   } // namespace algorithms
 } // namespace epidb

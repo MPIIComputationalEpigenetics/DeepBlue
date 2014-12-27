@@ -16,18 +16,18 @@
 #include "sandbox.hpp"
 
 #include "../datatypes/column_types_def.hpp"
+#include "../datatypes/regions.hpp"
+
 #include "../dba/experiments.hpp"
 
 #include "../extras/utils.hpp"
-
-#include "../regions.hpp"
 
 #include "../log.hpp"
 
 namespace epidb {
   namespace lua {
 
-    static epidb::Region EMPTY_REGION;
+    static AbstractRegion EMPTY_REGION;
     static std::string EMPTY_CHROMOSOME;
     static dba::Metafield EMPTY_METAFIELD;
 
@@ -76,7 +76,7 @@ namespace epidb {
       return true;
     }
 
-    void Sandbox::set_current_context(const std::string &chromosome, const Region &region, dba::Metafield &metafield)
+    void Sandbox::set_current_context(const std::string &chromosome, const AbstractRegion& region, dba::Metafield &metafield)
     {
       current_chromosome = chromosome;
       current_region = region;
@@ -155,7 +155,7 @@ namespace epidb {
 
       DatasetId dataset_id = current_region.dataset_id();
       datatypes::COLUMN_TYPES column_type = datatypes::COLUMN_ERR;
-      int pos = -1;
+      size_t pos = dba::experiments::FIELD_NOT_FOUND;
 
       // TODO: better error handling
       if (!dba::experiments::get_field_pos(dataset_id, field_name, pos, column_type, msg)) {
@@ -164,13 +164,13 @@ namespace epidb {
       }
 
       // TODO: better error handling
-      if (pos == -1) {
+      if (pos == dba::experiments::FIELD_NOT_FOUND) {
         lua_pushstring(lua_state, "");
         return 1;
       }
 
       if (column_type == datatypes::COLUMN_STRING || column_type == datatypes::COLUMN_CATEGORY) {
-        std::string content = current_region.get(pos);
+        std::string content = current_region.get_string(pos);
         if (content.length() > 0) {
           lua_pushstring(lua_state, content.c_str());
           return 1;

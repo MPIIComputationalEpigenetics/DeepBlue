@@ -138,15 +138,15 @@ namespace epidb {
       return false;
     }
 
-    bool Metafield::process(const std::string &op, const std::string &chrom, const Region &region,
+    bool Metafield::process(const std::string &op, const std::string &chrom, const AbstractRegion &region_ref,
                             std::string &result, std::string &msg)
     {
 
       mongo::BSONObj obj;
 
       // TODO: Workaround - because aggregates does not have a region_set_id
-      if (region.dataset_id() != DATASET_EMPTY_ID) {
-        if (!get_bson_by_dataset_id(region.dataset_id(), obj, msg)) {
+      if (region_ref.dataset_id() != DATASET_EMPTY_ID) {
+        if (!get_bson_by_dataset_id(region_ref.dataset_id(), obj, msg)) {
           return false;
         }
       }
@@ -156,7 +156,7 @@ namespace epidb {
       it = functions.find(command);
       if (it != functions.end()) {
         Function f = it->second;
-        return (*this.*f)(op, chrom, obj, region, result, msg);
+        return (*this.*f)(op, chrom, obj, region_ref, result, msg);
       }
       msg = "Metafield " + op + " does not exist.";
       return false;
@@ -170,36 +170,36 @@ namespace epidb {
       return obj.getField(field).str();
     }
 
-    bool Metafield::length(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const Region &region,
+    bool Metafield::length(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion &region_ref,
                            std::string &result, std::string &msg)
     {
 
-      result = utils::integer_to_string(region.end() - region.start());
+      result = utils::integer_to_string(region_ref.end() - region_ref.start());
       return true;
     }
 
-    bool Metafield::name(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const Region &region,
+    bool Metafield::name(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion &region_ref,
                          std::string &result, std::string &msg)
     {
       result = get_by_region_set(obj, "name");
       return true;
     }
 
-    bool Metafield::epigenetic_mark(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const Region &region,
+    bool Metafield::epigenetic_mark(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion &region_ref,
                                     std::string &result, std::string &msg)
     {
       result = get_by_region_set(obj, "epigenetic_mark");
       return true;
     }
 
-    bool Metafield::project(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const Region &region,
+    bool Metafield::project(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion &region_ref,
                             std::string &result, std::string &msg)
     {
       result = get_by_region_set(obj, "project");
       return true;
     }
 
-    bool Metafield::biosource(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const Region &region,
+    bool Metafield::biosource(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion &region_ref,
                               std::string &result, std::string &msg)
     {
       if (obj.hasField("sample_info")) {
@@ -210,14 +210,14 @@ namespace epidb {
       return true;
     }
 
-    bool Metafield::sample_id(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const Region &region,
+    bool Metafield::sample_id(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion &region_ref,
                               std::string &result, std::string &msg)
     {
       result = get_by_region_set(obj, "sample_id");
       return true;
     }
 
-    bool Metafield::sequence(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const Region &region,
+    bool Metafield::sequence(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion &region_ref,
                              std::string &result, std::string &msg)
     {
 
@@ -225,7 +225,7 @@ namespace epidb {
 
       std::string sequence;
       if (seq_retr.exists(genome, chrom)) {
-        if (!seq_retr.retrieve(genome, chrom, region.start(), region.end(), sequence, msg)) {
+        if (!seq_retr.retrieve(genome, chrom, region_ref.start(), region_ref.end(), sequence, msg)) {
           return false;
         }
         result = sequence;
@@ -236,7 +236,7 @@ namespace epidb {
     }
 
     bool Metafield::count_pattern(const std::string &pattern, const std::string &genome, const std::string &chrom,
-                                  const Region &region, const bool overlap,
+                                  const AbstractRegion &region_ref, const bool overlap,
                                   size_t &count, std::string &msg)
     {
       DatasetId dataset_id;
@@ -248,8 +248,8 @@ namespace epidb {
       mongo::BSONObjBuilder region_query_builder;
 
       region_query_builder.append(KeyMapper::DATASET(), dataset_id);
-      region_query_builder.append(KeyMapper::START(), BSON("$gte" << (int) region.start() << "$lte" << (int) region.end()));
-      region_query_builder.append(KeyMapper::END(), BSON("$gte" << (int) region.start() << "$lte" << (int) region.end()));
+      region_query_builder.append(KeyMapper::START(), BSON("$gte" << (int) region_ref.start() << "$lte" << (int) region_ref.end()));
+      region_query_builder.append(KeyMapper::END(), BSON("$gte" << (int) region_ref.start() << "$lte" << (int) region_ref.end()));
 
       mongo::BSONObj region_query = region_query_builder.obj();
 
@@ -262,7 +262,7 @@ namespace epidb {
       return true;
     }
 
-    bool Metafield::count_overlap(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const Region &region,
+    bool Metafield::count_overlap(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion &region_ref,
                                   std::string &result, std::string &msg)
     {
       unsigned int s = op.find("(") + 1;
@@ -273,7 +273,7 @@ namespace epidb {
 
       std::string genome = get_by_region_set(obj, "genome");
       size_t count = 0;
-      if (!count_pattern(pattern, genome, chrom, region, true, count, msg)) {
+      if (!count_pattern(pattern, genome, chrom, region_ref, true, count, msg)) {
         return false;
       }
 
@@ -281,7 +281,7 @@ namespace epidb {
       return true;
     }
 
-    bool Metafield::count_non_overlap(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const Region &region,
+    bool Metafield::count_non_overlap(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion &region_ref,
                                       std::string &result, std::string &msg)
     {
       unsigned int s = op.find("(") + 1;
@@ -292,7 +292,7 @@ namespace epidb {
 
       std::string genome = get_by_region_set(obj, "genome");
       size_t count = 0;
-      if (!count_pattern(pattern, genome, chrom, region, false, count, msg)) {
+      if (!count_pattern(pattern, genome, chrom, region_ref, false, count, msg)) {
         return false;
       }
       result = utils::integer_to_string(count);
@@ -301,44 +301,48 @@ namespace epidb {
     }
 
 
-    bool Metafield::min(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const Region &region,
+    bool Metafield::min(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion &region_ref,
                         std::string &result, std::string &msg)
     {
-      if (region.has_stats()) {
-        result = utils::double_to_string(region.min());
+      if (region_ref.has_stats()) {
+        const AggregateRegion* aggregate_region = static_cast<const AggregateRegion*>(&region_ref);
+        result = utils::double_to_string(aggregate_region->min());
       } else {
         result = "";
       }
       return true;
     }
 
-    bool Metafield::max(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const Region &region,
+    bool Metafield::max(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion &region_ref,
                         std::string &result, std::string &msg)
     {
-      if (region.has_stats()) {
-        result = utils::double_to_string(region.max());
+      if (region_ref.has_stats()) {
+        const AggregateRegion* aggregate_region = static_cast<const AggregateRegion*>(&region_ref);
+        result = utils::double_to_string(aggregate_region->max());
       } else {
         result = "";
       }
       return true;
     }
 
-    bool Metafield::median(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const Region &region,
+    bool Metafield::median(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion &region_ref,
                            std::string &result, std::string &msg)
     {
-      if (region.has_stats()) {
-        result = utils::double_to_string(region.median());
+      if (region_ref.has_stats()) {
+        const AggregateRegion* aggregate_region = static_cast<const AggregateRegion*>(&region_ref);
+        result = utils::double_to_string(aggregate_region->median());
       } else {
         result = "";
       }
       return true;
     }
 
-    bool Metafield::mean(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const Region &region,
+    bool Metafield::mean(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion &region_ref,
                          std::string &result, std::string &msg)
     {
-      if (region.has_stats()) {
-        result = utils::double_to_string(region.mean());
+      if (region_ref.has_stats()) {
+        const AggregateRegion* aggregate_region = static_cast<const AggregateRegion*>(&region_ref);
+        result = utils::double_to_string(aggregate_region->mean());
       } else {
         result = "";
       }
@@ -346,40 +350,43 @@ namespace epidb {
     }
 
 
-    bool Metafield::var(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const Region &region,
+    bool Metafield::var(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion &region_ref,
                         std::string &result, std::string &msg)
     {
-      if (region.has_stats()) {
-        result = utils::double_to_string(region.var());
+      if (region_ref.has_stats()) {
+        const AggregateRegion* aggregate_region = static_cast<const AggregateRegion*>(&region_ref);
+        result = utils::double_to_string(aggregate_region->var());
       } else {
         result = "";
       }
       return true;
     }
 
-    bool Metafield::sd(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const Region &region,
+    bool Metafield::sd(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion &region_ref,
                        std::string &result, std::string &msg)
     {
-      if (region.has_stats()) {
-        result = utils::double_to_string(region.sd());
+      if (region_ref.has_stats()) {
+        const AggregateRegion* aggregate_region = static_cast<const AggregateRegion*>(&region_ref);
+        result = utils::double_to_string(aggregate_region->sd());
       } else {
         result = "";
       }
       return true;
     }
 
-    bool Metafield::count(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const Region &region,
+    bool Metafield::count(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion &region_ref,
                           std::string &result, std::string &msg)
     {
-      if (region.has_stats()) {
-        result = utils::integer_to_string(region.count());
+      if (region_ref.has_stats()) {
+        const AggregateRegion* aggregate_region = static_cast<const AggregateRegion*>(&region_ref);
+        result = utils::integer_to_string(aggregate_region->count());
       } else {
         result = "";
       }
       return true;
     }
 
-    bool Metafield::calculated(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const Region &region,
+    bool Metafield::calculated(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion &region_ref,
                                std::string &result, std::string &msg)
     {
       unsigned int s = op.find("(") + 1;
@@ -392,7 +399,7 @@ namespace epidb {
       if (!lua->store_row_code(code, msg)) {
         return false;
       }
-      lua->set_current_context(chrom, region, *this);
+      lua->set_current_context(chrom, region_ref, *this);
 
       return lua->execute_row_code(result, msg);
     }

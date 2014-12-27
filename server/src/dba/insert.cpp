@@ -21,6 +21,7 @@
 #include <mongo/client/dbclient.h>
 
 #include "../datatypes/column_types_def.hpp"
+#include "../datatypes/regions.hpp"
 
 #include "../extras/compress.hpp"
 #include "../extras/utils.hpp"
@@ -41,7 +42,6 @@
 #include "key_mapper.hpp"
 #include "users.hpp"
 
-#include "../regions.hpp"
 #include "../log.hpp"
 
 
@@ -747,18 +747,17 @@ namespace epidb {
 
         std::string collection = helpers::region_collection_name(genome, internal_chromosome);
 
-        for (RegionsIterator it = chromosome_regions.second->begin(); it != chromosome_regions.second->end(); it++) {
-          const Region &region = *it;
+        for (auto & region : chromosome_regions.second) {
           mongo::BSONObjBuilder region_builder;
 
-          if (region.start() > chromosome_size || region.end() > chromosome_size) {
-            msg = out_of_range_message(region.start(), region.end(), chromosome);
+          if (region->start() > chromosome_size || region->end() > chromosome_size) {
+            msg = out_of_range_message(region->start(), region->end(), chromosome);
             c.done();
             return false;
           }
 
-          region_builder.append(KeyMapper::START(), (int) region.start());
-          region_builder.append(KeyMapper::END(), (int) region.end());
+          region_builder.append(KeyMapper::START(), (int) region->start());
+          region_builder.append(KeyMapper::END(), (int) region->end());
 
           mongo::BSONObj r = region_builder.obj();
           block.push_back(r);

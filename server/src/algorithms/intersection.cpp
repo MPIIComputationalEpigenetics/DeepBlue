@@ -10,22 +10,20 @@
 #include <set>
 #include <iostream>
 
-#include "utils/interval_tree.hpp"
-
-#include "../regions.hpp"
 #include "intersection.hpp"
 
+#include "utils/interval_tree.hpp"
+
+#include "../datatypes/regions.hpp"
 
 namespace epidb {
   namespace algorithms {
 
-    bool get_chromosome_regions(const ChromosomeRegionsList &qr, const std::string &chr,
-                                      Regions &chr_regions)
+    bool get_chromosome_regions(ChromosomeRegionsList &qr, const std::string &chr, Regions &chr_regions)
     {
-      ChromosomeRegionsList::const_iterator cit;
-      for (cit = qr.begin(); cit != qr.end(); ++cit) {
+      for (auto cit = qr.begin(); cit != qr.end(); ++cit) {
         if (cit->first == chr) {
-          chr_regions = cit->second;
+          chr_regions = std::move(cit->second);
           return true;
         }
       }
@@ -33,7 +31,7 @@ namespace epidb {
     }
 
     bool merge_chromosomes(const ChromosomeRegionsList &regions_a, const ChromosomeRegionsList &regions_b,
-                                 std::set<std::string> &chromosomes)
+                           std::set<std::string> &chromosomes)
     {
       ChromosomeRegionsList::const_iterator ait;
       for (ait = regions_a.begin(); ait != regions_a.end(); ++ait) {
@@ -47,8 +45,7 @@ namespace epidb {
       return true;
     }
 
-    bool intersect(const ChromosomeRegionsList &regions_a, const ChromosomeRegionsList &regions_b,
-                         ChromosomeRegionsList &intersections)
+    bool intersect(ChromosomeRegionsList &regions_a, ChromosomeRegionsList &regions_b, ChromosomeRegionsList &intersections)
     {
       // get intersection of regions on equal ChromosomeRegions
       std::set<std::string> chromosomes;
@@ -65,33 +62,34 @@ namespace epidb {
         }
 
         // build an interval tree of region set B
-        std::vector<Interval<Region> > intervals;
-        for (RegionsConstIterator rcit = chr_regions_b->begin(); rcit != chr_regions_b->end(); ++rcit) {
-          intervals.push_back(Interval<Region>(rcit->start(), rcit->end(), *rcit)); // XXX: mem?
+        std::vector<Interval<RegionPtr> > intervals;
+        for (auto &region_b : chr_regions_b) {
+          Interval<RegionPtr> interval(region_b->start(), region_b->end(), std::move(region_b));
+          intervals.push_back(std::move(interval));
         }
-        IntervalTree<Region> tree(intervals);
+        IntervalTree<RegionPtr> tree(intervals);
 
         Regions chr_intersections = build_regions();
         // find all overlaps of regions from set A in the tree
-        for (RegionsConstIterator rcit = chr_regions_a->begin(); rcit != chr_regions_a->end(); ++rcit) {
-          std::vector<Interval<Region> > overlaps;
-          tree.findOverlapping(rcit->start(), rcit->end(), overlaps);
+        for (auto &region_a : chr_regions_a) {
+          std::vector<Interval<RegionPtr> > overlaps;
+          tree.findOverlapping(region_a->start(), region_a->end(), overlaps);
 
           // add overlaps to the total of intersections
-          chr_intersections->reserve(intersections.size() + overlaps.size());
+          chr_intersections.reserve(intersections.size() + overlaps.size());
 
-          std::vector<Interval<Region> >::const_iterator ocit;
-          for (ocit = overlaps.begin(); ocit != overlaps.end(); ++ocit) {
-            Region region = ocit->value;
+          std::vector<Interval<RegionPtr> >::const_iterator ocit;
+          for (auto ocit = overlaps.begin(); ocit != overlaps.end(); ++ocit) {
+            RegionPtr region = std::move(ocit->value);
             // change the region to only the actually intersecting part
-            region.set_start(rcit->start() > region.start() ? rcit->start() : region.start());
-            region.set_end(rcit->end() > region.end() ? region.end() : rcit->end());
+            region->set_start(region_a->start() > region->start() ? region_a->start() : region->start());
+            region->set_end(region_a->end() > region->end() ? region->end() : region_a->end());
 
-            chr_intersections->push_back(region);
+            chr_intersections.push_back(std::move(region));
           }
         }
         // add found intersections to query result
-        intersections.push_back(ChromosomeRegions(*cit, chr_intersections));
+        intersections.push_back(ChromosomeRegions(*cit, std::move(chr_intersections)));
       }
 
       return true;

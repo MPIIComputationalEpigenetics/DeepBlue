@@ -14,7 +14,7 @@
 
 #include <boost/regex.hpp>
 
-#include "../regions.hpp"
+#include "../datatypes/regions.hpp"
 
 namespace epidb {
   namespace algorithms {
@@ -23,9 +23,6 @@ namespace epidb {
     private:
       const std::string &sequence;
       const std::string &pattern;
-
-      bool non_overlap_processed;
-      bool overlap_processed;
 
       Regions non_overlap_localizations;
       Regions overlap_localizations;
@@ -37,7 +34,7 @@ namespace epidb {
 
     public:
       PatternFinder(const std::string &s, const std::string &p) :
-        sequence(s), pattern(p), non_overlap_processed(false), overlap_processed(false) {}
+        sequence(s), pattern(p) {}
 
       Regions non_overlap_regions();
       Regions overlap_regions();

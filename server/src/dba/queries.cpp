@@ -15,7 +15,6 @@
 #include <mongo/client/dbclient.h>
 
 #include "../errors.hpp"
-#include "../regions.hpp"
 #include "../log.hpp"
 
 #include "../algorithms/aggregate.hpp"
@@ -23,6 +22,7 @@
 #include "../algorithms/merge.hpp"
 
 #include "../datatypes/column_types_def.hpp"
+#include "../datatypes/regions.hpp"
 
 #include "../dba/experiments.hpp"
 
@@ -140,10 +140,9 @@ namespace epidb {
         }
 
         std::set<DatasetId> datasets_it_set;
-        for (ChromosomeRegionsList::const_iterator it = chromossome_regions.begin(); it != chromossome_regions.end(); it++) {
-          Regions regions = it->second;
-          for (RegionsIterator it = regions->begin(); it != regions->end(); it++) {
-            datasets_it_set.insert(it->dataset_id());
+        for (auto  &regions : chromossome_regions) {
+          for (auto &region : regions.second) {
+            datasets_it_set.insert(region->dataset_id());
           }
         }
 
@@ -211,8 +210,7 @@ namespace epidb {
         count = 0;
         for (ChromosomeRegionsList::const_iterator it = regions.begin(); it != regions.end(); it++) {
           std::string chromosome = it->first;
-          Regions regions = it->second;
-          count += regions->size();
+          count += it->second.size();
         }
 
         return true;
@@ -414,21 +412,17 @@ namespace epidb {
           if (!retrieve::get_regions(git->str(), chromosomes, regions_query, reg, msg)) {
             return false;
           }
-          genome_regions.push_back(reg);
+          genome_regions.push_back(std::move(reg));
         }
 
         // merge region data of all genomes
         std::vector<ChromosomeRegionsList>::iterator rit = genome_regions.begin();
-        ChromosomeRegionsList last = *rit;
+        ChromosomeRegionsList &last = *rit;
         rit++;
         for (; rit != genome_regions.end(); ++rit) {
-          ChromosomeRegionsList res;
-          if (!algorithms::merge_chromosome_regions(last, *rit, res)) {
-            return false;
-          }
-          last = res;
+          last = algorithms::merge_chromosome_regions(last, *rit);
         }
-        regions = last;
+        regions = std::move(last);
 
         return true;
       }
@@ -460,21 +454,17 @@ namespace epidb {
           if (!retrieve::get_regions(git->str(), chromosomes, regions_query, reg, msg)) {
             return false;
           }
-          genome_regions.push_back(reg);
+          genome_regions.push_back(std::move(reg));
         }
 
         // merge region data of all genomes
         std::vector<ChromosomeRegionsList>::iterator rit = genome_regions.begin();
-        ChromosomeRegionsList last = *rit;
+        ChromosomeRegionsList &last = *rit;
         rit++;
         for (; rit != genome_regions.end(); ++rit) {
-          ChromosomeRegionsList res;
-          if (!algorithms::merge_chromosome_regions(last, *rit, res)) {
-            return false;
-          }
-          last = res;
+          last = algorithms::merge_chromosome_regions(last, *rit);
         }
-        regions = last;
+        regions = std::move(last);
 
         return true;
       }
@@ -528,35 +518,33 @@ namespace epidb {
           return false;
         }
 
-        if (!algorithms::merge_chromosome_regions(regions_a, regions_b, regions)) {
-          return false;
-        }
+        regions = algorithms::merge_chromosome_regions(regions_a, regions_b);
 
         return true;
       }
 
 
-      bool filter_region(const Region &region, const std::string &field, const int &pos,
+      bool filter_region(const AbstractRegion &region_ref, const std::string &field, const int &pos,
                          Metafield &metafield, const std::string &chrom, FilterBuilder::FilterPtr filter)
       {
         if (field.compare("START") == 0) {
-          return filter->is(region.start());
+          return filter->is(region_ref.start());
         }
         if (field.compare("END") == 0) {
-          return filter->is(region.end());
+          return filter->is(region_ref.end());
         }
 
         // TODO: optimize for "@AGG." values
         if (field[0] == '@') {
           std::string value;
           std::string msg;
-          if (!metafield.process(field, chrom, region, value, msg)) {
+          if (!metafield.process(field, chrom, region_ref, value, msg)) {
             EPIDB_LOG_ERR(msg);
             return false;
           }
           return filter->is(value);
         } else {
-          return filter->is(region.value(pos));
+          return filter->is(region_ref.value(pos));
         }
       }
 
@@ -598,7 +586,7 @@ namespace epidb {
 
         std::string err;
         DatasetId dataset_id = -1;
-        int pos;
+        size_t pos;
         datatypes::COLUMN_TYPES column_type;
 
         size_t total = 0;
@@ -606,33 +594,31 @@ namespace epidb {
         size_t keep = 0;
 
         Metafield metafield;
-        for (ChromosomeRegionsList::const_iterator it = regions.begin(); it != regions.end(); it++) {
-          std::string chromosome = it->first;
-          Regions regs = it->second;
+        for (ChromosomeRegionsList::iterator it = regions.begin(); it != regions.end(); it++) {
+          const std::string &chromosome = it->first;
           Regions saved = build_regions();
-          for (RegionsIterator it = regs->begin(); it != regs->end(); it++) {
-            const Region &region = *it;
+          for (auto &region : it->second) {
             if (!dba::Metafield::is_meta(field)) {
-              if (region.dataset_id() != dataset_id) {
-                dataset_id = region.dataset_id();
+              if (region->dataset_id() != dataset_id) {
+                dataset_id = region->dataset_id();
                 if (!dba::experiments::get_field_pos(dataset_id, field, pos, column_type, msg)) {
                   return false;
                 }
               }
-              dataset_id = region.dataset_id();
+              dataset_id = region->dataset_id();
             }
             total++;
 
             // TODO: use column_type for better filtering. i.e. type conversion
-            if (filter_region(region, field, pos, metafield, chromosome, filter)) {
-              saved->push_back(region);
+            if (filter_region(region->ref(), field, pos, metafield, chromosome, filter)) {
+              saved.push_back(std::move(region));
               keep++;
             } else {
               removed++;
             }
           }
-          ChromosomeRegions chr_region(chromosome, saved);
-          filtered_regions.push_back(chr_region);
+          ChromosomeRegions chr_region(chromosome, std::move(saved));
+          filtered_regions.push_back(std::move(chr_region));
         }
 
         return true;
@@ -736,9 +722,9 @@ namespace epidb {
           }
           Regions regs = build_regions();
           for (size_t i = 0; i + tiling_size < chromosome_info.size; i += tiling_size) {
-            regs->push_back(Region(i, i + tiling_size, tiling_id));
+            regs.push_back(build_simple_region(i, i + tiling_size, tiling_id));
           }
-          regions.push_back(ChromosomeRegions(*cit, regs));
+          regions.push_back(ChromosomeRegions(*cit, std::move(regs)));
         }
 
         return true;

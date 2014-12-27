@@ -17,14 +17,14 @@
 
 #include "../dba/retrieve.hpp"
 
-#include "../regions.hpp"
+#include "../datatypes/regions.hpp"
 
 namespace epidb {
   namespace dba {
     class Metafield {
 
     private:
-      typedef bool (Metafield::*Function)(const std::string &, const std::string &, const mongo::BSONObj &, const Region &, std::string &, std::string &);
+      typedef bool (Metafield::*Function)(const std::string &, const std::string &, const mongo::BSONObj &, const AbstractRegion &, std::string &, std::string &);
 
       static std::map<std::string, Function> functions;
       static std::map<std::string, std::string> functionsReturns;
@@ -40,48 +40,48 @@ namespace epidb {
       bool get_bson_by_dataset_id(DatasetId dataset_id, mongo::BSONObj &obj, std::string &msg);
 
       bool count_pattern(const std::string &pattern, const std::string &genome, const std::string &chrom,
-                         const Region &region, const bool overlap,
+                         const AbstractRegion &region_ref, const bool overlap,
                          size_t &count, std::string &msg);
 
-      bool length(const std::string &, const std::string &, const mongo::BSONObj &obj, const Region &region, std::string &result, std::string &msg);
+      bool length(const std::string &, const std::string &, const mongo::BSONObj &obj, const AbstractRegion &region_ref, std::string &result, std::string &msg);
 
-      bool name(const std::string &, const std::string &, const mongo::BSONObj &obj, const Region &region, std::string &result, std::string &msg);
+      bool name(const std::string &, const std::string &, const mongo::BSONObj &obj, const AbstractRegion &region_ref, std::string &result, std::string &msg);
 
-      bool sequence(const std::string &, const std::string &, const mongo::BSONObj &obj, const Region &region, std::string &result, std::string &msg);
+      bool sequence(const std::string &, const std::string &, const mongo::BSONObj &obj, const AbstractRegion &region_ref, std::string &result, std::string &msg);
 
-      bool count_overlap(const std::string &, const std::string &, const mongo::BSONObj &obj, const Region &region, std::string &result, std::string &msg);
+      bool count_overlap(const std::string &, const std::string &, const mongo::BSONObj &obj, const AbstractRegion &region_ref, std::string &result, std::string &msg);
 
-      bool count_non_overlap(const std::string &, const std::string &, const mongo::BSONObj &obj, const Region &region, std::string &result, std::string &msg);
+      bool count_non_overlap(const std::string &, const std::string &, const mongo::BSONObj &obj, const AbstractRegion &region_ref, std::string &result, std::string &msg);
 
-      bool epigenetic_mark(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const Region &region, std::string &result, std::string &msg);
+      bool epigenetic_mark(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion &region_ref, std::string &result, std::string &msg);
 
-      bool calculated(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const Region &region, std::string &result, std::string &msg);
+      bool calculated(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion &region_ref, std::string &result, std::string &msg);
 
-      bool project(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const Region &region, std::string &result, std::string &msg);
+      bool project(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion &region_ref, std::string &result, std::string &msg);
 
-      bool biosource(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const Region &region, std::string &result, std::string &msg);
+      bool biosource(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion &region_ref, std::string &result, std::string &msg);
 
-      bool sample_id(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const Region &region, std::string &result, std::string &msg);
+      bool sample_id(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion &region_ref, std::string &result, std::string &msg);
 
-      bool min(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const Region &region, std::string &result, std::string &msg);
+      bool min(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion &region_ref, std::string &result, std::string &msg);
 
-      bool max(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const Region &region, std::string &result, std::string &msg);
+      bool max(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion &region_ref, std::string &result, std::string &msg);
 
-      bool median(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const Region &region, std::string &result, std::string &msg);
+      bool median(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion &region_ref, std::string &result, std::string &msg);
 
-      bool mean(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const Region &region, std::string &result, std::string &msg);
+      bool mean(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion &region_ref, std::string &result, std::string &msg);
 
-      bool var(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const Region &region, std::string &result, std::string &msg);
+      bool var(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion &region_ref, std::string &result, std::string &msg);
 
-      bool sd(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const Region &region, std::string &result, std::string &msg);
+      bool sd(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion &region_ref, std::string &result, std::string &msg);
 
-      bool count(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const Region &region, std::string &result, std::string &msg);
+      bool count(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion &region_ref, std::string &result, std::string &msg);
 
     public:
       static bool is_meta(const std::string &s);
       static std::string command_type(const std::string &command);
 
-      bool process(const std::string &, const std::string &, const Region &region, std::string &result, std::string &msg);
+      bool process(const std::string &, const std::string &, const AbstractRegion &region, std::string &result, std::string &msg);
     };
   }
 }

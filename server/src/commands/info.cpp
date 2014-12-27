@@ -71,7 +71,6 @@ namespace epidb {
 
         std::vector<std::string> synonyms;
         BOOST_FOREACH(const serialize::ParameterPtr & id_param, ids_param) {
-          clock_t dsysTime = clock();
           std::string id = id_param->as_string();
           std::string type;
           std::map<std::string, std::string> metadata;

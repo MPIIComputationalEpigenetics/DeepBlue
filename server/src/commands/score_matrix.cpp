@@ -13,6 +13,7 @@
 #include "../algorithms/accumulator.hpp"
 
 #include "../datatypes/column_types_def.hpp"
+#include "../datatypes/regions.hpp"
 
 #include "../dba/helpers.hpp"
 #include "../dba/queries.hpp"
@@ -23,7 +24,6 @@
 
 #include "../errors.hpp"
 #include "../log.hpp"
-#include "../regions.hpp"
 
 namespace epidb {
   namespace command {
@@ -117,7 +117,7 @@ namespace epidb {
           }
           std::string norm_name = experiment["norm_name"].String();
           DatasetId dataset_id = experiment[dba::KeyMapper::DATASET()].Int();
-          int pos;
+          size_t pos;
           datatypes::COLUMN_TYPES type;
 
           if (!dba::experiments::get_field_pos(dataset_id, experiment_input.second, pos, type, msg)) {
@@ -130,7 +130,7 @@ namespace epidb {
             return false;
           }
 
-          if (pos == -1) {
+          if (pos == dba::experiments::FIELD_NOT_FOUND) {
             msg = "Column " + experiment_input.second + " does not exist in the experiment " + experiment_name;
           }
 
@@ -141,16 +141,16 @@ namespace epidb {
           norm_genome = experiment["norm_genome"].String();
         }
 
-        std::map<std::string, std::vector<std::pair<Region, std::vector<algorithms::Accumulator>>>> chromosome_accs;
+        std::map<std::string, std::vector<std::pair<RegionPtr, std::vector<algorithms::Accumulator>>>> chromosome_accs;
         for (auto &chromosome : range_regions) {
           // Get the accumulators from each region
-          std::vector<std::pair<Region, std::vector<algorithms::Accumulator>>> regions_accs;
-          for (auto &region : *chromosome.second) {
+          std::vector<std::pair<RegionPtr, std::vector<algorithms::Accumulator>>> regions_accs;
+          for (auto &region : chromosome.second) {
             // Get the accumulator from each experiment
             std::vector<algorithms::Accumulator> experiments_accs;
             for (auto &experiment_format : norm_experiments_formats) {
               mongo::BSONObj regions_query;
-              if (!dba::query::build_experiment_query(region.start(), region.end(), experiment_format.first, user_key, regions_query, msg)) {
+              if (!dba::query::build_experiment_query(region->start(), region->end(), experiment_format.first, user_key, regions_query, msg)) {
                 result.add_error(msg);
                 return false;
               }
@@ -160,15 +160,15 @@ namespace epidb {
                 return false;
               }
               algorithms::Accumulator acc;
-              for (auto &experiment_region : *regions) {
-                acc.push(experiment_region.value(experiment_format.second));
+              for (auto &experiment_region : regions) {
+                acc.push(experiment_region->value(experiment_format.second));
               }
               experiments_accs.push_back(acc);
             }
-            std::pair<Region, std::vector<algorithms::Accumulator> > region_accs = std::pair<Region, std::vector<algorithms::Accumulator> >(region, experiments_accs);
-            regions_accs.push_back(region_accs);
+            std::pair<RegionPtr, std::vector<algorithms::Accumulator> > region_accs(std::move(region), experiments_accs);
+            regions_accs.push_back(std::move(region_accs));
           }
-          chromosome_accs[chromosome.first] = regions_accs;
+          chromosome_accs[chromosome.first] = std::move(regions_accs);
         }
 
 
@@ -185,17 +185,17 @@ namespace epidb {
           first = false;
         }
         ss << std::endl;
-        for (std::map<std::string, std::vector<std::pair<Region, std::vector<algorithms::Accumulator>>>>::iterator chromosome_accs_it = chromosome_accs.begin(); chromosome_accs_it != chromosome_accs.end(); chromosome_accs_it++ ) {
+        for (auto chromosome_accs_it = chromosome_accs.begin(); chromosome_accs_it != chromosome_accs.end(); chromosome_accs_it++ ) {
           const std::string &chromosome = chromosome_accs_it->first;
-          std::vector<std::pair<Region, std::vector<algorithms::Accumulator>>> &region_accs = chromosome_accs_it->second;
-          for (std::vector<std::pair<Region, std::vector<algorithms::Accumulator>>>::iterator regions_accs_it = region_accs.begin(); regions_accs_it != region_accs.end(); regions_accs_it++) {
+          auto &region_accs = chromosome_accs_it->second;
+          for (auto regions_accs_it = region_accs.begin(); regions_accs_it != region_accs.end(); regions_accs_it++) {
 
-            Region region = regions_accs_it->first;
+            RegionPtr region = std::move(regions_accs_it->first);
             std::vector<algorithms::Accumulator> &experiments_accs = regions_accs_it->second;
 
             ss << chromosome << "\t";
-            ss << region.start() << "\t";
-            ss << region.end() << "\t";
+            ss << region->start() << "\t";
+            ss << region->end() << "\t";
 
             for (std::vector<algorithms::Accumulator>::iterator accs_it = experiments_accs.begin();
                  accs_it != experiments_accs.end(); accs_it++) {

@@ -28,6 +28,10 @@ namespace epidb {
       if (name == "category") {
         return COLUMN_CATEGORY;
       }
+      if (name == "calculated") {
+        return COLUMN_CALCULATED;
+      }
+
       return COLUMN_ERR;
     }
   }

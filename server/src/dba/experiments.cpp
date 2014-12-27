@@ -6,33 +6,35 @@
 //  Copyright (c) 2014 Max Planck Institute for Computer Science. All rights reserved.
 //
 
+#include <limits>
 #include <string>
 
 #include <mongo/bson/bson.h>
 
 #include "../datatypes/column_types_def.hpp"
+#include "../datatypes/regions.hpp"
 
 #include "collections.hpp"
 #include "info.hpp"
 #include "helpers.hpp"
 #include "queries.hpp"
 
-#include "../regions.hpp"
-
 namespace epidb {
   namespace dba {
     namespace experiments {
+
+      size_t FIELD_NOT_FOUND = std::numeric_limits<size_t>::max();
+
       bool by_name(const std::string &name, mongo::BSONObj &experiment, std::string &msg)
       {
         const std::string norm_name = utils::normalize_name(name);
         return helpers::get_one(Collections::EXPERIMENTS(), BSON("norm_name" << norm_name), experiment, msg);
       }
 
-      bool get_field_pos(const DatasetId &dataset_id, const std::string &column_name, int &pos, datatypes::COLUMN_TYPES &type, std::string &msg)
+      bool get_field_pos(const DatasetId &dataset_id, const std::string &column_name, size_t &pos, datatypes::COLUMN_TYPES &type, std::string &msg)
       {
-        pos = -1;
+        pos = FIELD_NOT_FOUND;
         type = datatypes::COLUMN_ERR;
-
 
         if (column_name == "CHROMOSOME") {
           type = datatypes::COLUMN_STRING;
@@ -59,7 +61,7 @@ namespace epidb {
           }
         }
 
-        if (pos == -1) {
+        if (pos == FIELD_NOT_FOUND) {
           msg = "Invalid column name " + column_name;
           return false;
         }
@@ -67,9 +69,9 @@ namespace epidb {
         return true;
       }
 
-      bool get_field_pos(const std::string &experiment_name, const std::string &column_name, int &pos, datatypes::COLUMN_TYPES &type, std::string &msg)
+      bool get_field_pos(const std::string &experiment_name, const std::string &column_name, size_t &pos, datatypes::COLUMN_TYPES &type, std::string &msg)
       {
-        pos = -1;
+        pos = FIELD_NOT_FOUND;
 
         // TODO: cache experiment
         mongo::BSONObj experiment;
@@ -82,7 +84,7 @@ namespace epidb {
           return false;
         }
 
-        if (pos == -1) {
+        if (pos == FIELD_NOT_FOUND) {
           msg = "Invalid column name " + column_name + " for the experiment " + experiment_name;
           return false;
         }

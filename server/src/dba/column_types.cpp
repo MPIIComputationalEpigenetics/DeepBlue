@@ -196,7 +196,7 @@ namespace epidb {
       }
 
       template<>
-      bool ColumnType<Code>::execute(const std::string &chromosome, const Region &region, dba::Metafield &metafield, std::string &result, std::string &msg)
+      bool ColumnType<Code>::execute(const std::string &chromosome, const AbstractRegion& region, dba::Metafield &metafield, std::string &result, std::string &msg)
       {
         lua::Sandbox::LuaPtr lua = _content.second;
         lua->set_current_context(chromosome, region, metafield);

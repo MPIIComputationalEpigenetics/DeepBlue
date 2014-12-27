@@ -11,12 +11,11 @@
 #include <set>
 #include <vector>
 
-#include <boost/foreach.hpp>
-
 #include "aggregate.hpp"
 #include "accumulator.hpp"
 
 #include "../datatypes/column_types_def.hpp"
+#include "../datatypes/regions.hpp"
 
 #include "../dba/experiments.hpp"
 #include "../dba/key_mapper.hpp"
@@ -24,34 +23,33 @@
 
 #include "../extras/utils.hpp"
 
-#include "../regions.hpp"
 #include "../log.hpp"
 
 namespace epidb {
   namespace algorithms {
 
-    bool aggregate_regions(const std::string &chrom, const Regions &data, const Regions &ranges, const std::string &field,
+    bool aggregate_regions(const std::string &chrom, Regions &data, const Regions &ranges, const std::string &field,
                            dba::Metafield &metafield, Regions &chr_regions, std::string &msg)
     {
       chr_regions = build_regions();
-      RegionsConstIterator it_data = data->begin();
-      RegionsConstIterator it_ranges = ranges->begin();
+      auto it_data = data.begin();
+      auto it_ranges = ranges.begin();
 
       Regions agg_regions;
 
-      int pos =1;
+      size_t pos = 0;
       DatasetId dataset_id = -1;
       datatypes::COLUMN_TYPES column_type;
 
-      while (it_ranges != ranges->end()) {
+      while (it_ranges != ranges.end()) {
         Accumulator acc;
-        while (it_data != data->end() &&
-               it_data->start() >= it_ranges->start() && it_data->start() <= it_ranges->end()) {
+        while (it_data != data.end() &&
+               (*it_data)->start() >= (*it_ranges)->start() && (*it_data)->start() <= (*it_ranges)->end()) {
 
-          if (it_data->start() >= it_ranges->start() && it_data->end() <= it_ranges->end()) {
+          if ((*it_data)->start() >= (*it_ranges)->start() && (*it_data)->end() <= (*it_ranges)->end()) {
             if (field[0] == '@') {
               std::string value;
-              if (!metafield.process(field, chrom, *it_data, value, msg)) {
+              if (!metafield.process(field, chrom, (*it_data)->ref(), value, msg)) {
                 return false;
               }
               double v;
@@ -59,30 +57,28 @@ namespace epidb {
               utils::string_to_double(value, v);
               acc.push(v);
             } else {
-              const Region &region = *it_data;
-              if (dataset_id != region.dataset_id()) {
-                dataset_id = region.dataset_id();
+              RegionPtr region = std::move(*it_data);
+              if (dataset_id != region->dataset_id()) {
+                dataset_id = region->dataset_id();
                 if (!dba::experiments::get_field_pos(dataset_id, field, pos, column_type, msg)) {
                   return false;
                 }
               }
-              acc.push(it_data->value(pos));
+              acc.push((*it_data)->value(pos));
             }
           }
           it_data++;
-
         }
-        Region region(it_ranges->start(), it_ranges->end(), DATASET_EMPTY_ID,
-                      acc.min(), acc.max(), acc.median(), acc.mean(), acc.var(), acc.sd(), acc.count());
 
-        chr_regions->push_back(region);
+        chr_regions.push_back(build_aggregte_region((*it_ranges)->start(), (*it_ranges)->end(), DATASET_EMPTY_ID,
+                              acc.min(), acc.max(), acc.median(), acc.mean(), acc.var(), acc.sd(), acc.count()));
         it_ranges++;
       }
 
       return true;
     }
 
-    bool aggregate(const ChromosomeRegionsList &data, const ChromosomeRegionsList &ranges, const std::string &field,
+    bool aggregate(ChromosomeRegionsList &data, ChromosomeRegionsList &ranges, const std::string &field,
                    ChromosomeRegionsList &regions, std::string &msg)
     {
       //-- move to queries.cpp --//
@@ -104,15 +100,15 @@ namespace epidb {
       // TODO :optimize it for finding the ChromosomeRegionsList data not in O(N) time
 
       dba::Metafield metafield;
-      BOOST_FOREACH(const ChromosomeRegions & range, ranges) {
-        BOOST_FOREACH(const ChromosomeRegions & datum, data) {
+      for (auto &range : ranges) {
+        for (auto &datum : data) {
           Regions chr_regions;
           if (range.first == datum.first) {
             if (!aggregate_regions(range.first, datum.second, range.second, field_value, metafield, chr_regions, msg)) {
               return false;
             }
-            std::pair<std::string, Regions> r(range.first, chr_regions);
-            regions.push_back(r);
+            std::pair<std::string, Regions> r(range.first, std::move(chr_regions));
+            regions.push_back(std::move(r));
           }
         }
       }
