@@ -61,6 +61,7 @@ class IntervalTree {
 public:
   typedef Interval<T,K> interval;
   typedef vector<interval> intervalVector;
+  typedef vector<T> overlapVector;
   typedef IntervalTree<T,K> intervalTree;
 
   intervalVector intervals;
@@ -173,12 +174,12 @@ public:
     }
   }
 
-  void findOverlapping(K start, K stop, intervalVector& overlapping) {
+  void findOverlapping(K start, K stop, overlapVector& overlapping) {
     if (!intervals.empty() && ! (stop < intervals.front().start)) {
       for (typename intervalVector::iterator i = intervals.begin(); i != intervals.end(); ++i) {
         interval& interval = *i;
         if (interval.stop >= start && interval.start <= stop) {
-          overlapping.push_back(std::move(interval));
+          overlapping.push_back(std::move(interval.value->clone()));
         }
       }
     }
@@ -213,12 +214,12 @@ public:
     return false;
   }
 
-  void findContained(K start, K stop, intervalVector& contained) {
+  void findContained(K start, K stop, overlapVector& contained) {
     if (!intervals.empty() && ! (stop < intervals.front().start)) {
       for (typename intervalVector::iterator i = intervals.begin(); i != intervals.end(); ++i) {
         interval& interval = *i;
         if (interval.start >= start && interval.stop <= stop) {
-          contained.push_back(std::move(interval));
+          contained.push_back(std::move(interval.value->clone()));
         }
       }
     }

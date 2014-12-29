@@ -10,6 +10,8 @@
 #include <set>
 #include <map>
 
+#include <iostream>
+
 #include "merge.hpp"
 
 #include "../datatypes/regions.hpp"
@@ -19,32 +21,42 @@ namespace epidb {
 
     Regions merge_regions(Regions &regions_a, Regions &regions_b)
     {
+      std::cerr << "0" << std::endl;
       size_t size = regions_a.size() + regions_b.size();
       Regions results = build_regions(size);
       if (size == 0) {
         return results;
       }
 
+      std::cerr << "1" << std::endl;
+
       Regions sorted = build_regions(regions_a.size() + regions_b.size());
       sorted.insert(sorted.end(), std::make_move_iterator(regions_a.begin()), std::make_move_iterator(regions_a.end()));
       sorted.insert(sorted.end(), std::make_move_iterator(regions_b.begin()), std::make_move_iterator(regions_b.end()));
-      std::sort(sorted.begin(), sorted.end());
+      std::sort(sorted.begin(), sorted.end(), RegionPtrComparer);
+
+      std::cerr << "2" << std::endl;
 
       // fill results and remove duplicates
-      RegionPtr *last = &sorted[0];
       results.push_back(std::move(sorted[0]));
 
+      std::cerr << "3" << std::endl;
       for (auto it = sorted.begin() + 1; it != sorted.end(); ++it) {
-        if ( (*it)->start() != (*last)->start() || (*it)->end() != (*last)->end() || (*it)->dataset_id() != (*last)->dataset_id()) {
-          last = &(*it);
+        const AbstractRegion& last = results[results.size()-1]->ref();
+        std::cerr << last.start() << " " << last.end() << std::endl;
+        if ( (*it)->start() != last.start() || (*it)->end() != last.end() || (*it)->dataset_id() != last.dataset_id()) {
           results.push_back(std::move(*it));
         }
       }
+
+      std::cerr << "4" << std::endl;
       return results;
     }
 
     ChromosomeRegionsList merge_chromosome_regions(ChromosomeRegionsList &chrregions_a, ChromosomeRegionsList &chrregions_b)
     {
+      std::cerr << "merge_chromosome_regions" << std::endl;
+
       ChromosomeRegionsList results;
       // find out common chromosomes
       std::map<std::string, Regions> chromosomes_a;

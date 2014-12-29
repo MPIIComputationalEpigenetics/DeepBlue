@@ -82,6 +82,8 @@ namespace epidb {
       bool retrieve_query(const std::string &user_key, const std::string &query_id,
                           ChromosomeRegionsList &regions, std::string &msg)
       {
+        std::cerr << "retrieve_query" << std::endl;
+
         std::vector<mongo::BSONObj> result;
         if (!helpers::get("queries", "_id", query_id, result, msg)) {
           return false;
@@ -128,12 +130,14 @@ namespace epidb {
           return false;
         }
 
+        std::cerr << "leave retrieve_query" << std::endl;
         return true;
       }
 
       bool get_experiments_by_query(const std::string &user_key, const std::string &query_id,
                                     std::vector<utils::IdName> &experiments_name, std::string &msg)
       {
+        std::cerr << "get_experiments_by_query" << std::endl;
         ChromosomeRegionsList chromossome_regions;
         if (!retrieve_query(user_key, query_id, chromossome_regions, msg)) {
           return false;
@@ -189,6 +193,7 @@ namespace epidb {
       bool count_regions(const std::string &user_key, const std::string &query_id,
                          size_t &count, std::string &msg)
       {
+        std::cerr << "count_regions" << std::endl;
         std::vector<mongo::BSONObj> result;
         if (!helpers::get("queries", "_id", query_id, result, msg)) {
           return false;
@@ -387,7 +392,7 @@ namespace epidb {
       bool retrieve_experiment_select_query(const std::string &user_key, const mongo::BSONObj &query,
                                             ChromosomeRegionsList &regions, std::string &msg)
       {
-
+        std::cerr << "retrieve_experiment_select_query" << std::endl;
         mongo::BSONObj regions_query;
         if (!build_experiment_query(user_key, query, regions_query, msg)) {
           return false;
@@ -415,6 +420,7 @@ namespace epidb {
           genome_regions.push_back(std::move(reg));
         }
 
+        std::cerr << "pegou as regioes" << std::endl;
         // merge region data of all genomes
         std::vector<ChromosomeRegionsList>::iterator rit = genome_regions.begin();
         ChromosomeRegionsList &last = *rit;
@@ -424,6 +430,7 @@ namespace epidb {
         }
         regions = std::move(last);
 
+        std::cerr << "leave retrieve_experiment_select_query" << std::endl;
         return true;
       }
 
@@ -431,6 +438,7 @@ namespace epidb {
       bool retrieve_annotation_select_query(const std::string &user_key, const mongo::BSONObj &query,
                                             ChromosomeRegionsList &regions, std::string &msg)
       {
+        std::cerr << "retrieve_annotation_select_query" << std::endl;
         mongo::BSONObj regions_query;
         if (!build_annotation_query(user_key, query, regions_query, msg)) {
           return false;
@@ -464,6 +472,8 @@ namespace epidb {
         for (; rit != genome_regions.end(); ++rit) {
           last = algorithms::merge_chromosome_regions(last, *rit);
         }
+
+        std::cerr << "saiu do merge_chromosome_regions" << std::endl;
         regions = std::move(last);
 
         return true;
@@ -472,6 +482,7 @@ namespace epidb {
       bool retrieve_intersection_query(const std::string &user_key, const mongo::BSONObj &query,
                                        ChromosomeRegionsList &regions, std::string &msg)
       {
+        std::cerr << "retrieve_intersection_query" << std::endl;
         mongo::BSONObj args = query["args"].Obj();
 
         // load both region sets.
@@ -494,6 +505,7 @@ namespace epidb {
           return false;
         }
 
+        std::cerr << "leave retrieve_intersection_query" << std::endl;
         return true;
       }
 
@@ -501,6 +513,7 @@ namespace epidb {
       bool retrieve_merge_query(const std::string &user_key, const mongo::BSONObj &query,
                                 ChromosomeRegionsList &regions, std::string &msg)
       {
+        std::cerr << "retrieve_merge_query" << std::endl;
         mongo::BSONObj args = query["args"].Obj();
 
         // load both region sets.
@@ -551,6 +564,7 @@ namespace epidb {
       bool retrieve_filter_query(const std::string &user_key, const mongo::BSONObj &query,
                                  ChromosomeRegionsList &filtered_regions, std::string &msg)
       {
+        std::cerr << "retrieve_filter_query" << std::endl;
         mongo::BSONObj args = query["args"].Obj();
 
         // load original query
@@ -686,6 +700,7 @@ namespace epidb {
       bool retrieve_tiling_query(const mongo::BSONObj &query,
                                  ChromosomeRegionsList &regions, std::string &msg)
       {
+        std::cerr << "retrieve_tiling_query" << std::endl;
         mongo::BSONObj args = query["args"].Obj();
 
         const std::string genome = args["genome"].str();
@@ -733,6 +748,7 @@ namespace epidb {
       bool process_aggregate(const std::string &user_key, const mongo::BSONObj &query,
                              ChromosomeRegionsList &regions, std::string &msg)
       {
+        std::cerr << "process_aggregate" << std::endl;
         mongo::BSONObj args = query["args"].Obj();
         const std::string query_id = args["data_id"].str();
         const std::string regions_id = args["ranges_id"].str();

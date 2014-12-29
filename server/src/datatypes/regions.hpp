@@ -9,7 +9,10 @@
 #ifndef EPIDB_REGIONS_HPP
 #define EPIDB_REGIONS_HPP
 
+#include <iostream>
+
 #include <limits>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -18,6 +21,9 @@
 namespace epidb {
 
   typedef int DatasetId;
+
+  class AbstractRegion;
+  typedef std::unique_ptr<AbstractRegion> RegionPtr;
 
   extern DatasetId DATASET_EMPTY_ID;
 
@@ -39,20 +45,6 @@ namespace epidb {
       _end(e) {}
 
 
-    // The value returned indicates whether the element passed as first argument is considered to go before the second in the specific strict weak ordering it defines.
-    bool operator<(const AbstractRegion &other) const
-    {
-      if (_start < other._start) {
-        return true;
-      }
-
-      if (other._start < _start) {
-        return false;
-      }
-
-      return _end < other._end;
-    }
-
     DatasetId dataset_id() const;
     Length length() const;
     Position start() const;
@@ -67,6 +59,7 @@ namespace epidb {
     virtual Score value(const size_t pos) const;
     virtual bool has_stats() const;
     virtual const AbstractRegion &ref() const;
+    virtual RegionPtr clone() const = 0;
   };
 
 
@@ -78,7 +71,11 @@ namespace epidb {
   public:
     SimpleRegion(Position s, Position e, DatasetId _id):
       AbstractRegion(s, e, _id) {}
+
+    virtual RegionPtr clone() const;
   };
+
+
 
 
   // -----------------------------------
@@ -98,6 +95,7 @@ namespace epidb {
     virtual void insert(const int value);
     virtual const std::string  &get_string(const size_t pos) const;
     virtual Score value(const size_t pos) const;
+    virtual RegionPtr clone() const;
   };
 
 
@@ -114,6 +112,7 @@ namespace epidb {
       _value(value) {}
 
     virtual Score value(const size_t pos) const;
+    virtual RegionPtr clone() const;
   };
 
 
@@ -149,10 +148,9 @@ namespace epidb {
     Score var() const;
     Score sd() const;
     Score count() const;
+    virtual RegionPtr clone() const;
   };
 
-
-  typedef std::unique_ptr<AbstractRegion> RegionPtr;
   typedef std::vector<RegionPtr> Regions;
 
   Regions build_regions();
@@ -165,6 +163,22 @@ namespace epidb {
 
   typedef std::pair<std::string, Regions> ChromosomeRegions;
   typedef std::vector<ChromosomeRegions> ChromosomeRegionsList;
+
+  // The value returned indicates whether the element passed as first argument is considered to go before the second in the specific strict weak ordering it defines.
+  static struct {
+    bool operator()(const RegionPtr &lhs, const RegionPtr &rhs)
+    {
+      if (lhs->start() < rhs->start()) {
+        return true;
+      }
+
+      if (rhs->start() < lhs->start()) {
+        return false;
+      }
+
+      return lhs->end() < rhs->end();
+    }
+  } RegionPtrComparer;
 
 } // namespace epidb
 

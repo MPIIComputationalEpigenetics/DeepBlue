@@ -266,7 +266,7 @@ namespace epidb {
         }
 
         // TODO: Optimize here!
-        std::sort(regions.begin(), regions.end());
+        std::sort(regions.begin(), regions.end(), RegionPtrComparer);
 
         c.done();
         return true;

@@ -57,7 +57,7 @@ ifeq ($(host),production)
  LDFLAGS   = -pthread
  MONGOLIBS = /opt/mongodb/install/mongo-driver/lib/libmongoclient.a
  BOOST_DIR = /opt/mongodb/boost/lib
- DEFCXXFLAGS = -std=c++11 -Wall -O3 -ffast-math -march=native -Ofast -I/opt/mongodb/install/mongo-driver/include/ -I$(MINILZO) -I$(URDL) -I$(CPPFORMAT) -I$(STRTK) -I$(LUA) -DURDL_HEADER_ONLY=1 -DURDL_DISABLE_SSL=1
+ DEFCXXFLAGS = -std=c++11 -Wall -O3 -ffast-math -march=native -Ofast -I/opt/mongodb/install/mongo-driver/include/ -I$(MINILZO) -I$(URDL) -I$(CPPFORMAT) -I$(STRTK) -I$(LUA) -DURDLadd_ex_HEADER_ONLY=1 -DURDL_DISABLE_SSL=1
  BOOSTLIBS = $(BOOST_DIR)/libboost_filesystem.a $(BOOST_DIR)/libboost_thread.a $(BOOST_DIR)/libboost_system.a $(BOOST_DIR)/libboost_regex.a $(BOOST_DIR)/libboost_log.a  $(BOOST_DIR)/libboost_timer.a  $(BOOST_DIR)/libboost_chrono.a $(BOOST_DIR)/libboost_program_options.a -lrt
  THIRDLIBS = ../third_party/libexpat_linux.a
 endif
@@ -66,10 +66,10 @@ endif
 # Felipe Albrecht's mac
 ifeq ($(host),macosx)
  CXX = clang++
- #
- DEFCXXFLAGS = -O3 -Ofast -ffast-math -march=native -std=c++11 -stdlib=libc++ -Werror -Wall -Wextra  -Weffc++ -Wno-unused-parameter -Wno-ignored-qualifiers -Wno-deprecated-declarations -I/opt/boost-new-new/include/ -I/Users/albrecht/mpi/DeepBlue/server/third_party/drivers/macosx_new/include -I$(CPPFORMAT) -I$(STRTK) -I$(MINILZO) -I$(URDL) -I$(LUA) -DBOOST_LOG_DYN_LINK -DURDL_HEADER_ONLY=1 -DURDL_DISABLE_SSL=1
+ # -g -O3 -Ofast -ffast-math -march=native
+ DEFCXXFLAGS = -g -std=c++11 -stdlib=libc++ -Werror -Wall -Wextra  -Weffc++ -Wno-unused-parameter -Wno-ignored-qualifiers -Wno-deprecated-declarations -I/opt/boost-new-new/include/ -I/Users/albrecht/mpi/DeepBlue/server/third_party/drivers/macosx_new/include -I$(CPPFORMAT) -I$(STRTK) -I$(MINILZO) -I$(URDL) -I$(LUA) -DBOOST_LOG_DYN_LINK -DURDL_HEADER_ONLY=1 -DURDL_DISABLE_SSL=1
  BOOST_DIR = /opt/boost-new-new/lib
- LD	= clang++  -O3 -Ofast -ffast-math -march=native -DBOOST_LOG_DYN_LINK -pagezero_size 10000 -image_base 100000000  #LuaJit options
+ LD	= clang++ -g -DBOOST_LOG_DYN_LINK -pagezero_size 10000 -image_base 100000000  #LuaJit options
  LDFLAGS =
  MONGOLIBS =  -L/Users/albrecht/mpi/DeepBlue/server/third_party/drivers/macosx_new/lib -lmongoclient
  BOOSTLIBS = -L$(BOOST_DIR) -lboost_log_setup -lboost_log -lboost_filesystem -lboost_thread -lboost_system -lboost_regex -lboost_timer -lboost_chrono -lboost_program_options

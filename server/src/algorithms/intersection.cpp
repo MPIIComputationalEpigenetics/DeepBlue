@@ -72,20 +72,17 @@ namespace epidb {
         Regions chr_intersections = build_regions();
         // find all overlaps of regions from set A in the tree
         for (auto &region_a : chr_regions_a) {
-          std::vector<Interval<RegionPtr> > overlaps;
+          std::vector<RegionPtr> overlaps;
           tree.findOverlapping(region_a->start(), region_a->end(), overlaps);
 
           // add overlaps to the total of intersections
           chr_intersections.reserve(intersections.size() + overlaps.size());
 
           std::vector<Interval<RegionPtr> >::const_iterator ocit;
-          for (auto ocit = overlaps.begin(); ocit != overlaps.end(); ++ocit) {
-            RegionPtr region = std::move(ocit->value);
-            // change the region to only the actually intersecting part
-            region->set_start(region_a->start() > region->start() ? region_a->start() : region->start());
-            region->set_end(region_a->end() > region->end() ? region->end() : region_a->end());
-
-            chr_intersections.push_back(std::move(region));
+          for (auto &regions_b :  overlaps) {
+            regions_b->set_start(region_a->start() > regions_b->start() ? region_a->start() : regions_b->start());
+            regions_b->set_end(region_a->end() > regions_b->end() ? regions_b->end() : region_a->end());
+            chr_intersections.push_back(std::move(regions_b));
           }
         }
         // add found intersections to query result

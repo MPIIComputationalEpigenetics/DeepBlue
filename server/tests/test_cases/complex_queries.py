@@ -19,6 +19,9 @@ class TestComplexQueries(helpers.TestCase):
     res, qid_3 = epidb.merge_queries(qid_1, qid_2, self.admin_key)
     self.assertSuccess(res, qid_3)
 
+    res, regions = epidb.get_regions(qid_3, "CHROMOSOME,START,END", self.admin_key)
+    self.assertSuccess(res, regions)
+
     res, qid_4 = epidb.select_regions("hg19_chr1_3", "hg19", None, None, None,
                                       None, None, None, None, self.admin_key)
     self.assertSuccess(res, qid_4)

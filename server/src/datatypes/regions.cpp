@@ -7,6 +7,7 @@
 //
 
 #include <limits>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -103,6 +104,15 @@ namespace epidb {
   }
 
   // -----------------------------------
+  // SimpleRegion
+  // -----------------------------------
+  RegionPtr SimpleRegion::clone() const
+  {
+    std::cerr << "clone SimpletRegion" << std::endl;
+    return  RegionPtr(new SimpleRegion(*this));
+  }
+
+  // -----------------------------------
   // BedRegion
   // -----------------------------------
 
@@ -143,6 +153,12 @@ namespace epidb {
     return _string_data[pos];
   }
 
+  RegionPtr BedRegion::clone() const
+  {
+    std::cerr << "clone BedRegion" << std::endl;
+    return RegionPtr(new BedRegion(*this));
+  }
+
 
   // -----------------------------------
   // WigRegion
@@ -153,6 +169,12 @@ namespace epidb {
       return std::numeric_limits<Score>::min();
     }
     return _value;
+  }
+
+  RegionPtr WigRegion::clone() const
+  {
+    std::cerr << "clone WigRegion" << std::endl;
+    return RegionPtr(new WigRegion(*this));
   }
 
   // -----------------------------------
@@ -198,6 +220,11 @@ namespace epidb {
     return _count;
   }
 
+  RegionPtr AggregateRegion::clone() const
+  {
+    std::cerr << "clone BedRegion" << std::endl;
+    return RegionPtr(new AggregateRegion(*this));
+  }
 
   // ------------------------
   // Builders
