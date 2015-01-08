@@ -188,7 +188,7 @@ namespace epidb {
             sb.append(std::move(utils::integer_to_string(region->end())));
           } else if (dba::Metafield::is_meta(column->name())) {
             std::string result;
-            if (!metafield.process(column->name(), chromosome, region->ref(), result, msg)) {
+            if (!metafield.process(column->name(), chromosome, region.get(), result, msg)) {
               return false;
             }
             if (result.empty()) {
@@ -199,12 +199,14 @@ namespace epidb {
           } else {
             if (column->type() == datatypes::COLUMN_CALCULATED) {
               std::string result;
-              if (!column->execute(chromosome, region->ref(), metafield, result, msg)) {
+              if (!column->execute(chromosome, region.get(), metafield, result, msg)) {
                 return false;
               }
               sb.append(std::move(result));
             } else if (column->type() == datatypes::COLUMN_INTEGER) {
+              std::cerr << "a--"<< std::endl;
               const Score &v = region->value(column->pos());
+              std::cerr << "--b"<< std::endl;
               if (v == std::numeric_limits<Score>::min()) {
                 sb.append(column->default_value());
               } else {

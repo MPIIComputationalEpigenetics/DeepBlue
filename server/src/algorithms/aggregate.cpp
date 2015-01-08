@@ -49,7 +49,7 @@ namespace epidb {
           if ((*it_data)->start() >= (*it_ranges)->start() && (*it_data)->end() <= (*it_ranges)->end()) {
             if (field[0] == '@') {
               std::string value;
-              if (!metafield.process(field, chrom, (*it_data)->ref(), value, msg)) {
+              if (!metafield.process(field, chrom, it_data->get(), value, msg)) {
                 return false;
               }
               double v;

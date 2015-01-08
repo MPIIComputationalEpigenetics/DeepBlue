@@ -58,7 +58,6 @@ namespace epidb {
     virtual const std::string  &get_string(const size_t pos) const;
     virtual Score value(const size_t pos) const;
     virtual bool has_stats() const;
-    virtual const AbstractRegion &ref() const;
     virtual RegionPtr clone() const = 0;
   };
 
@@ -109,7 +108,7 @@ namespace epidb {
   public:
     WigRegion(Position s, Position e, DatasetId _id, Score value):
       AbstractRegion(s, e, _id),
-      _value(value) {}
+      _value(value) { }
 
     virtual Score value(const size_t pos) const;
     virtual RegionPtr clone() const;
@@ -164,8 +163,6 @@ namespace epidb {
   typedef std::pair<std::string, Regions> ChromosomeRegions;
   typedef std::vector<ChromosomeRegions> ChromosomeRegionsList;
 
-
-  SimpleRegion DUMMY_REGION();
 
   // The value returned indicates whether the element passed as first argument is considered to go before the second in the specific strict weak ordering it defines.
   static struct {

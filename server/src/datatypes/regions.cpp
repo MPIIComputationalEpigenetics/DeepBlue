@@ -90,17 +90,13 @@ namespace epidb {
 
   Score AbstractRegion::value(const size_t pos) const
   {
+    std::cerr << "nao era pra entrar aqui" << std::endl;
     return std::numeric_limits<Score>::min();
   }
 
   const std::string &AbstractRegion::get_string(const size_t pos) const
   {
     return empty_string;
-  }
-
-  const AbstractRegion &AbstractRegion::ref() const
-  {
-    return *this;
   }
 
   // -----------------------------------
@@ -173,7 +169,6 @@ namespace epidb {
 
   RegionPtr WigRegion::clone() const
   {
-    std::cerr << "clone WigRegion" << std::endl;
     return RegionPtr(new WigRegion(*this));
   }
 
@@ -229,11 +224,6 @@ namespace epidb {
   // ------------------------
   // Builders
   // ------------------------
-
-  SimpleRegion DUMMY_REGION()
-  {
-    return SimpleRegion(0, 0, 0);
-  }
 
   RegionPtr build_simple_region(Position s, Position e, DatasetId _id)
   {

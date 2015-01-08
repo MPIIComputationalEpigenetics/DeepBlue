@@ -42,9 +42,8 @@ namespace epidb {
 
       std::cerr << "3" << std::endl;
       for (auto it = sorted.begin() + 1; it != sorted.end(); ++it) {
-        const AbstractRegion& last = results[results.size()-1]->ref();
-        std::cerr << last.start() << " " << last.end() << std::endl;
-        if ( (*it)->start() != last.start() || (*it)->end() != last.end() || (*it)->dataset_id() != last.dataset_id()) {
+        const AbstractRegion* last = results[results.size()-1].get();
+        if ( (*it)->start() != last->start() || (*it)->end() != last->end() || (*it)->dataset_id() != last->dataset_id()) {
           results.push_back(std::move(*it));
         }
       }

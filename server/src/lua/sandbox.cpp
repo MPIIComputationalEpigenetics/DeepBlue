@@ -38,7 +38,7 @@ namespace epidb {
 
     Sandbox::Sandbox() :
       current_chromosome(EMPTY_CHROMOSOME),
-      current_region(DUMMY_REGION()),
+      current_region_ptr(nullptr),
       current_metafield(EMPTY_METAFIELD)
     { }
 
@@ -76,10 +76,11 @@ namespace epidb {
       return true;
     }
 
-    void Sandbox::set_current_context(const std::string &chromosome, const AbstractRegion &region, dba::Metafield &metafield) const
+    void Sandbox::set_current_context(const std::string &chromosome, const AbstractRegion * region, dba::Metafield &metafield)
     {
       current_chromosome = chromosome;
-      current_region = region;
+      current_region_ptr = region;
+      current_metafield = metafield;
     }
 
     bool Sandbox::execute_row_code(std::string &value,  std::string &msg) const
@@ -127,7 +128,7 @@ namespace epidb {
       std::string msg;
       if (dba::Metafield::is_meta(field_name)) {
         std::string result;
-        if (!current_metafield.process(field_name, current_chromosome, current_region, result, msg)) {
+        if (!current_metafield.process(field_name, current_chromosome, current_region_ptr, result, msg)) {
           lua_pushstring(lua_state, msg.c_str());
           return 1;
         }
@@ -147,14 +148,14 @@ namespace epidb {
         lua_pushstring(lua_state, current_chromosome.c_str());
         return 1;
       } else if (field_name == "START") {
-        lua_pushnumber(lua_state, current_region.start());
+        lua_pushnumber(lua_state, current_region_ptr->start());
         return 1;
       } else if (field_name == "END") {
-        lua_pushnumber(lua_state, current_region.end());
+        lua_pushnumber(lua_state, current_region_ptr->end());
         return 1;
       }
 
-      DatasetId dataset_id = current_region.dataset_id();
+      DatasetId dataset_id = current_region_ptr->dataset_id();
       datatypes::COLUMN_TYPES column_type = datatypes::COLUMN_ERR;
       size_t pos = dba::experiments::FIELD_NOT_FOUND;
 
@@ -164,6 +165,8 @@ namespace epidb {
         return 1;
       }
 
+      std::cerr << "field " << field_name << " " << pos << " " << column_type << std::endl;
+
       // TODO: better error handling
       if (pos == dba::experiments::FIELD_NOT_FOUND) {
         lua_pushstring(lua_state, "");
@@ -171,14 +174,18 @@ namespace epidb {
       }
 
       if (column_type == datatypes::COLUMN_STRING || column_type == datatypes::COLUMN_CATEGORY) {
-        std::string content = current_region.get_string(pos);
+        std::string content = current_region_ptr->get_string(pos);
         if (content.length() > 0) {
           lua_pushstring(lua_state, content.c_str());
           return 1;
         }
 
       } else if (column_type == datatypes::COLUMN_INTEGER || column_type == datatypes::COLUMN_DOUBLE || column_type == datatypes::COLUMN_RANGE) {
-        Score value = current_region.value(pos);
+        std::cerr << typeid(current_region_ptr).name() << std::endl;
+        std::cerr << current_region_ptr->start() << std::endl;
+        std::cerr << current_region_ptr->end() << std::endl;
+        Score value = current_region_ptr->value(pos);
+        std::cerr << "value " << value << std::endl;
         if (value != std::numeric_limits<Score>::min()) {
           lua_pushnumber(lua_state, value);
           return 1;

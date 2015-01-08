@@ -26,7 +26,7 @@ namespace epidb {
       lua_State *L;
       std::string error_msg;
       std::string &current_chromosome;
-      AbstractRegion& current_region;
+      const AbstractRegion *current_region_ptr;
       dba::Metafield &current_metafield;
 
     public:
@@ -37,7 +37,7 @@ namespace epidb {
       ~Sandbox();
 
       bool store_row_code(const std::string &code, std::string &msg);
-      void set_current_context(const std::string &chromosome, const AbstractRegion& region, dba::Metafield &metafield) const;
+      void set_current_context(const std::string &chromosome, const AbstractRegion * region, dba::Metafield &metafield);
       bool execute_row_code(std::string &value, std::string &msg) const;
 
       static int call_field_content(lua_State *L);

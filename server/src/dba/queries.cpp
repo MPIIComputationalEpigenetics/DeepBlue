@@ -537,14 +537,14 @@ namespace epidb {
       }
 
 
-      bool filter_region(const AbstractRegion &region_ref, const std::string &field, const int &pos,
+      bool filter_region(const AbstractRegion *region_ref, const std::string &field, const int &pos,
                          Metafield &metafield, const std::string &chrom, FilterBuilder::FilterPtr filter)
       {
         if (field.compare("START") == 0) {
-          return filter->is(region_ref.start());
+          return filter->is(region_ref->start());
         }
         if (field.compare("END") == 0) {
-          return filter->is(region_ref.end());
+          return filter->is(region_ref->end());
         }
 
         // TODO: optimize for "@AGG." values
@@ -557,7 +557,7 @@ namespace epidb {
           }
           return filter->is(value);
         } else {
-          return filter->is(region_ref.value(pos));
+          return filter->is(region_ref->value(pos));
         }
       }
 
@@ -624,7 +624,7 @@ namespace epidb {
             total++;
 
             // TODO: use column_type for better filtering. i.e. type conversion
-            if (filter_region(region->ref(), field, pos, metafield, chromosome, filter)) {
+            if (filter_region(region.get(), field, pos, metafield, chromosome, filter)) {
               saved.push_back(std::move(region));
               keep++;
             } else {

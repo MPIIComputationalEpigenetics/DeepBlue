@@ -145,6 +145,12 @@ namespace epidb {
       return users;
     }
 
+    const std::string &Collections::WEB_ACCESS()
+    {
+      static std::string users("web_access");
+      return users;
+    }
+
     const std::string &Collections::TEXT_SEARCH()
     {
       static std::string tex_search("text_search");
