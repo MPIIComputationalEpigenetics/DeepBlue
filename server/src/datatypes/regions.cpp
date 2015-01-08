@@ -229,6 +229,12 @@ namespace epidb {
   // ------------------------
   // Builders
   // ------------------------
+
+  SimpleRegion DUMMY_REGION()
+  {
+    return SimpleRegion(0, 0, 0);
+  }
+
   RegionPtr build_simple_region(Position s, Position e, DatasetId _id)
   {
     return std::unique_ptr<SimpleRegion>(new SimpleRegion(s, e, _id));

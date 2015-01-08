@@ -27,7 +27,7 @@
 namespace epidb {
   namespace lua {
 
-    static AbstractRegion EMPTY_REGION;
+
     static std::string EMPTY_CHROMOSOME;
     static dba::Metafield EMPTY_METAFIELD;
 
@@ -38,7 +38,7 @@ namespace epidb {
 
     Sandbox::Sandbox() :
       current_chromosome(EMPTY_CHROMOSOME),
-      current_region(EMPTY_REGION),
+      current_region(DUMMY_REGION()),
       current_metafield(EMPTY_METAFIELD)
     { }
 
@@ -76,13 +76,13 @@ namespace epidb {
       return true;
     }
 
-    void Sandbox::set_current_context(const std::string &chromosome, const AbstractRegion& region, dba::Metafield &metafield)
+    void Sandbox::set_current_context(const std::string &chromosome, const AbstractRegion &region, dba::Metafield &metafield) const
     {
       current_chromosome = chromosome;
       current_region = region;
     }
 
-    bool Sandbox::execute_row_code(std::string &value,  std::string &msg)
+    bool Sandbox::execute_row_code(std::string &value,  std::string &msg) const
     {
       lua_sethook(L, &Sandbox::MaximumInstructionsReached, LUA_MASKCOUNT, 1000);
       lua_getglobal(L, "row_value");
@@ -115,6 +115,7 @@ namespace epidb {
 
     int Sandbox::field_content(lua_State *lua_state)
     {
+      std::cerr << "field_content" << std::endl;
       int n = lua_gettop(lua_state);
       if (n != 1) {
         lua_pushstring(lua_state, "invalid number of arguments for the content() function");
