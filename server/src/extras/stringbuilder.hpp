@@ -6,24 +6,22 @@
 //  Copyright (c) 2013,2014 Max Planck Institute for Computer Science. All rights reserved.
 //
 
-// Based on http://www.codeproject.com/Articles/647856/Performance-Improvement-with-the-StringBuilde
-
 #ifndef EPIDB_STRINGBUILDER_HPP_
 #define EPIDB_STRINGBUILDER_HPP_
 
-#include <fstream>
+#include <vector>
 
 namespace epidb {
   class StringBuilder {
-    const std::string tempstr;
-    std::ofstream ofs;
+  private:
+    using Buffer = std::vector<std::string>;
 
-    StringBuilder(const StringBuilder &);
-    StringBuilder &operator = (const StringBuilder &);
-
+    Buffer buffer;
+    size_t total_size;
   public:
     StringBuilder();
-    ~StringBuilder();
+    StringBuilder(const StringBuilder &) = delete;
+    StringBuilder & operator = (const StringBuilder &) = delete;
 
     void append(const std::string &src);
     void append(std::string &&src);

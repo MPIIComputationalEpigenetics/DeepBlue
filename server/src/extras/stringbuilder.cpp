@@ -15,59 +15,46 @@
 #include <boost/filesystem.hpp>
 
 namespace epidb {
-  StringBuilder::StringBuilder():
-    tempstr(boost::filesystem::temp_directory_path().string() + boost::filesystem::unique_path().native())
-  {
-    ofs.open(tempstr.c_str(), std::ofstream::out);
-  }
-
-  StringBuilder::~StringBuilder()
-  {
-    if (ofs.is_open()) {
-      ofs.close();
-    }
-
-    if (boost::filesystem::exists(tempstr.c_str())) {
-      boost::filesystem::remove(tempstr.c_str());
-    }
-  }
+  StringBuilder::StringBuilder() :
+    total_size(0)
+  { }
 
   void StringBuilder::append(const std::string &src)
   {
-    ofs << src;
+    buffer.emplace_back(src);
+    total_size += src.size();
   }
 
   void StringBuilder::append(std::string &&src)
   {
-    ofs << src;
+    buffer.emplace_back(std::move(src));
+    total_size += src.size();
   }
 
   void StringBuilder::tab()
   {
     static std::string tab("\t");
-    ofs << tab;
+    buffer.emplace_back(tab);
+    total_size++;
   }
 
   void StringBuilder::endLine()
   {
     static std::string new_line("\n");
-    ofs << new_line;
+    buffer.emplace_back(new_line);
+    total_size++;
   }
 
   std::string StringBuilder::to_string()
   {
-    if (ofs.is_open()) {
-      ofs.close();
+    std::string result;
+    result.reserve(total_size + 1);
+
+    for (auto iter = buffer.begin(); iter != buffer.end(); ++iter) {
+      result += *iter;
+      std::string().swap(*iter);
     }
 
-    std::ifstream file;
-    file.open(tempstr.c_str());
-    file.seekg(0, std::ios::end);
-    size_t size = file.tellg();
-    std::string buffer(size, ' ');
-    file.seekg(0);
-    file.read(&buffer[0], size);
-
-    return buffer;
+    return result;
   }
 }

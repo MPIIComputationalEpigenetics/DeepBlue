@@ -181,11 +181,11 @@ namespace epidb {
 
           // Change to use column->pos()
           } else if (column->name() == "START") {
-            sb.append(std::move(utils::integer_to_string(region->start())));
+            sb.append(utils::integer_to_string(region->start()));
 
           // Change to use column->pos()
           } else if (column->name() == "END") {
-            sb.append(std::move(utils::integer_to_string(region->end())));
+            sb.append(utils::integer_to_string(region->end()));
           } else if (dba::Metafield::is_meta(column->name())) {
             std::string result;
             if (!metafield.process(column->name(), chromosome, region.get(), result, msg)) {
@@ -210,14 +210,14 @@ namespace epidb {
               if (v == std::numeric_limits<Score>::min()) {
                 sb.append(column->default_value());
               } else {
-                sb.append(std::move(utils::integer_to_string((int)v)));
+                sb.append(utils::integer_to_string((int)v));
               }
             } else if ( ( column->type() == datatypes::COLUMN_DOUBLE) ||  (column->type() == datatypes::COLUMN_RANGE)) {
               const Score &v = region->value(column->pos());
               if (v == std::numeric_limits<Score>::min()) {
                 sb.append(column->default_value());
               } else {
-                sb.append(std::move(utils::double_to_string(v)));
+                sb.append(utils::double_to_string(v));
               }
             } else {
               const std::string &o = region->get_string(column->pos());
