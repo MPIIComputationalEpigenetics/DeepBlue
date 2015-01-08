@@ -26,12 +26,11 @@ class TestExperiments(helpers.TestCase):
 
 
     (s, regions) = epidb.get_regions(qid1, "CHROMOSOME,START,END,VALUE, calculated", self.admin_key)
-    print regions
     r =regions.split("\n")[0].split("\t")[4]
     self.assertEqual(r, 'chr1 - 0 - 10 - 8.1234569549561')
 
 
-  def __test_calculated_math(self):
+  def test_calculated_math(self):
     epidb = EpidbClient()
     self.init_base(epidb)
     sample_id = self.sample_ids[0]
@@ -53,7 +52,7 @@ class TestExperiments(helpers.TestCase):
     self.assertEqual(r, '-81.234570')
 
 
-  def __test_calculated_metafield(self):
+  def test_calculated_metafield(self):
     epidb = EpidbClient()
     self.init_base(epidb)
     sample_id = self.sample_ids[0]
@@ -74,7 +73,7 @@ class TestExperiments(helpers.TestCase):
     r =regions.split("\n")[0].split("\t")[4]
     self.assertEqual(r, 'EM and Name: - Methylation - test_exp1')
 
-  def __test_wrong_column_creation(self):
+  def test_wrong_column_creation(self):
     epidb = EpidbClient()
     self.init_base(epidb)
     sample_id = self.sample_ids[0]
@@ -93,7 +92,7 @@ class TestExperiments(helpers.TestCase):
     self.assertEqual(res[1], '[string "function row_value()..."]:2: \'<name>\' expected near \'-\'')
 
 
-  def __test_calculated_get_region(self):
+  def test_calculated_get_region(self):
     epidb = EpidbClient()
     self.init_base(epidb)
     sample_id = self.sample_ids[0]
@@ -116,7 +115,7 @@ class TestExperiments(helpers.TestCase):
     self.assertEqual(r1, '2.094756')
     self.assertEqual(r2, 'it is methylation!')
 
-  def __test_error_calculated_get_region(self):
+  def test_error_calculated_get_region(self):
     epidb = EpidbClient()
     self.init_base(epidb)
     sample_id = self.sample_ids[0]
@@ -134,7 +133,7 @@ class TestExperiments(helpers.TestCase):
     self.assertFailure(s, regions_1)
     self.assertEqual(regions_1, '[string "function row_value()..."]:2: attempt to call global \'log\' (a nil value)')
 
-  def __test_error_maximum_number_of_instructions(self):
+  def test_error_maximum_number_of_instructions(self):
     epidb = EpidbClient()
     self.init_base(epidb)
     sample_id = self.sample_ids[0]
