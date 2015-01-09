@@ -22,7 +22,7 @@ namespace epidb {
     size_t total_size;
 
     std::string block;
-    static constexpr size_t MAX_BLOCK_SIZE = 50;
+    static constexpr size_t MAX_BLOCK_SIZE = 4096;
 
   public:
     StringBuilder();
