@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
   ("threads,T", po::value<size_t>(&threads)->default_value(10), "Number of concurrent requests")
   ("mongodb,M", po::value<std::string>(&mongodb_server)->default_value("127.0.0.1:27017"), "MongoDB address and port")
   ("database_name,D", po::value<std::string>(&database_name)->default_value("epidb"), "Database name")
-  ("nosharding,X", "Do not use sharding in the MongoDB")
+  ("sharding,S", "Use DeepBlue with sharding in the MongoDB")
   ;
 
   po::variables_map vm;
@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
   EPIDB_LOG("Executing DeepBlue at " << address << ":" << port << " with " << threads << " threads.");
   EPIDB_LOG("Connecting to MongoDB server " << mongodb_server << " and using database " << database_name << ".")
 
-  epidb::dba::config::set_sharding(!vm.count("nosharding"));
+  epidb::dba::config::set_sharding(vm.count("sharding"));
   epidb::dba::config::set_mongodb_server(mongodb_server);
   epidb::dba::config::set_database_name(database_name);
 
