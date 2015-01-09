@@ -204,9 +204,7 @@ namespace epidb {
               }
               sb.append(std::move(result));
             } else if (column->type() == datatypes::COLUMN_INTEGER) {
-              std::cerr << "a--"<< std::endl;
               const Score &v = region->value(column->pos());
-              std::cerr << "--b"<< std::endl;
               if (v == std::numeric_limits<Score>::min()) {
                 sb.append(column->default_value());
               } else {
