@@ -197,22 +197,13 @@ namespace epidb {
       // Set indexes
       EPIDB_LOG_DBG("Creating index for " << collection);
       mongo::BSONObjBuilder start_end_index;
+      start_end_index.append(KeyMapper::DATASET(), 1);
       start_end_index.append(KeyMapper::START(), 1);
       start_end_index.append(KeyMapper::END(), 1);
       c->ensureIndex(collection, start_end_index.obj());
       if (!c->getLastError().empty()) {
         msg = c->getLastError();
         EPIDB_LOG_ERR("Indexing on START and END at '" << collection << "' error: " << msg);
-        c.done();
-        return false;
-      }
-
-      mongo::BSONObjBuilder dataset_id_index;
-      dataset_id_index.append(KeyMapper::DATASET(), "hashed");
-      c->ensureIndex(collection, dataset_id_index.obj());
-      if (!c->getLastError().empty()) {
-        msg = c->getLastError();
-        EPIDB_LOG_ERR("Indexing on DATASET '" << collection << "' error: " << msg);
         c.done();
         return false;
       }
