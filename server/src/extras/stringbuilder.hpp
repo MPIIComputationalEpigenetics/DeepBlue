@@ -9,6 +9,7 @@
 #ifndef EPIDB_STRINGBUILDER_HPP_
 #define EPIDB_STRINGBUILDER_HPP_
 
+#include <string>
 #include <vector>
 
 namespace epidb {
@@ -16,8 +17,13 @@ namespace epidb {
   private:
     using Buffer = std::vector<std::string>;
 
+
     Buffer buffer;
     size_t total_size;
+
+    std::string block;
+    static constexpr size_t MAX_BLOCK_SIZE = 50;
+
   public:
     StringBuilder();
     StringBuilder(const StringBuilder &) = delete;

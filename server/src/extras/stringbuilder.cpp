@@ -17,36 +17,50 @@
 namespace epidb {
   StringBuilder::StringBuilder() :
     total_size(0)
-  { }
+  {
+    block.reserve(MAX_BLOCK_SIZE);
+  }
 
   void StringBuilder::append(const std::string &src)
   {
-    buffer.emplace_back(src);
+    if (block.size() + src.size() > MAX_BLOCK_SIZE) {
+      buffer.emplace_back(std::move(block));
+      block.clear();
+      block.reserve(MAX_BLOCK_SIZE);
+    }
+
+    block += src;
     total_size += src.size();
   }
 
   void StringBuilder::append(std::string &&src)
   {
-    buffer.emplace_back(std::move(src));
+    if (block.size() + src.size() > MAX_BLOCK_SIZE) {
+      buffer.emplace_back(std::move(block));
+      block.clear();
+      block.reserve(MAX_BLOCK_SIZE);
+    }
+
+    block += src;
     total_size += src.size();
   }
 
   void StringBuilder::tab()
   {
     static std::string tab("\t");
-    buffer.emplace_back(tab);
-    total_size++;
+    append(tab);
   }
 
   void StringBuilder::endLine()
   {
     static std::string new_line("\n");
-    buffer.emplace_back(new_line);
-    total_size++;
+    append(new_line);
   }
 
   std::string StringBuilder::to_string()
   {
+    buffer.emplace_back(block);
+
     std::string result;
     result.reserve(total_size + 1);
 
