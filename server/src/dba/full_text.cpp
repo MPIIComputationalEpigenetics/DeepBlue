@@ -72,15 +72,20 @@ namespace epidb {
         for (mongo::BSONObj::iterator it = data.begin(); it.more(); ) {
           mongo::BSONElement e = it.next();
           // don't write the _id field
-          if (std::string(e.fieldName()) == "_id") {
+          std::string field_name = std::string(e.fieldName());
+          if (field_name == "_id") {
             continue;
           }
+
+          if (field_name == "D") {
+            continue;
+          }
+
           if (e.isSimpleType()) {
             create_text_search_builder.append(e.fieldName(), e.str());
             continue;
           }
 
-          std::string field_name = std::string(e.fieldName());
           if (field_name == "extra_metadata" || field_name == "sample_info") {
             for (mongo::BSONObj::iterator itt = e.Obj().begin(); itt.more(); ) {
               mongo::BSONElement em = itt.next();
