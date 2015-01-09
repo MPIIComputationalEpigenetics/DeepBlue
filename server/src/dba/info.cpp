@@ -167,6 +167,9 @@ namespace epidb {
 
         for (mongo::BSONObj::iterator it = result.begin(); it.more(); ) {
           mongo::BSONElement e = it.next();
+          if (std::string(e.fieldName()) == "D") {
+            continue;
+          }
           if (std::string(e.fieldName()) == "extra_metadata") {
             mongo::BSONObj::iterator itt = e.Obj().begin();
             while (itt.more()) {
@@ -218,6 +221,9 @@ namespace epidb {
 
         for (mongo::BSONObj::iterator it = result.begin(); it.more(); ) {
           mongo::BSONElement e = it.next();
+          if (std::string(e.fieldName()) == "D") {
+            continue;
+          }
           if (std::string(e.fieldName()) == "sample_info") {
             mongo::BSONObj::iterator itt = e.Obj().begin();
             while (itt.more()) {
@@ -258,8 +264,8 @@ namespace epidb {
           } else {
             std::string field_name = e.fieldName();
             if (full || (
-                field_name.compare(0, 5, "norm_") != 0 &&
-                field_name.compare(0, 2, "__") != 0)) {
+                  field_name.compare(0, 5, "norm_") != 0 &&
+                  field_name.compare(0, 2, "__") != 0)) {
               metadata[e.fieldName()] = utils::bson_to_string(e);
             }
           }
