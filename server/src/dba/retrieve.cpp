@@ -115,7 +115,7 @@ namespace epidb {
                 if ((starts[i] < _query_start) || (starts[i] + span > _query_end)) {
                   continue;
                 }
-                RegionPtr region = build_wig_region(start + (i * step), start + (i * step) + span, dataset_id, scores[i]);
+                RegionPtr region = build_wig_region(starts[i], starts[i] + span, dataset_id, scores[i]);
                 _regions.push_back(std::move(region));
                 _count++;
               }
@@ -134,7 +134,7 @@ namespace epidb {
                 if ((starts[i] < _query_start) || (ends[i] > _query_end)) {
                   continue;
                 }
-                RegionPtr region = build_wig_region(start + (i * step), start + (i * step) + span, dataset_id, scores[i]);
+                RegionPtr region = build_wig_region(starts[i], ends[i], dataset_id, scores[i]);
                 _regions.push_back(std::move(region));
                 _count++;
               }
@@ -177,7 +177,7 @@ namespace epidb {
                 while ( i.more() ) {
                   const mongo::BSONElement &e = i.next();
                   switch (e.type()) {
-                  case mongo::String : region->insert(std::move(e.str())); break;
+                  case mongo::String : region->insert(e.str()); break;
                   case mongo::NumberDouble : region->insert((float) e._numberDouble()); break;
                   case mongo::NumberInt : region->insert(e._numberInt()); break;
                   default: region->insert(std::move(e.toString(false)));
@@ -211,7 +211,7 @@ namespace epidb {
                 while ( i.more() ) {
                   const mongo::BSONElement &e = i.next();
                   switch (e.type()) {
-                  case mongo::String : region->insert(std::move(e.str())); break;
+                  case mongo::String : region->insert(e.str()); break;
                   case mongo::NumberDouble : region->insert((float) e._numberDouble()); break;
                   case mongo::NumberInt : region->insert(e._numberInt()); break;
                   default: region->insert(std::move(e.toString(false)));
@@ -253,9 +253,9 @@ namespace epidb {
         int queryOptions = (int)( mongo::QueryOption_NoCursorTimeout | mongo::QueryOption_SlaveOk );
 
         unsigned long long count = c->count(collection, regions_query);
-        std::cerr << "Will be stored " << count << "regions" << std::endl;
+        std::cerr << "Will be stored " << count << " documents" << std::endl;
 
-        std::cerr << "alocating memory: " << count * sizeof(RegionPtr) << std::endl;
+        std::cerr << "Allocating pointer array memory: " << count * sizeof(RegionPtr) << std::endl;
         regions.reserve(count);
         std::cerr << "Memory allocated: " << count * sizeof(RegionPtr) << std::endl;
 
