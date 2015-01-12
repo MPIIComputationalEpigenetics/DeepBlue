@@ -17,7 +17,6 @@
 namespace epidb {
   namespace dba {
     bool clone_dataset(const std::string &dataset_id, const std::string &name, const std::string &norm_name,
-                       const std::string &genome, const std::string &norm_genome,
                        const std::string &epigenetic_mark, const std::string &norm_epigenetic_mark,
                        const std::string &sample_id,
                        const std::string &technique, const std::string &norm_technique,

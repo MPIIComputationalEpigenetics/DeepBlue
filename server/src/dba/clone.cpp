@@ -15,7 +15,10 @@
 #include "../parser/parser_factory.hpp"
 #include "../extras/utils.hpp"
 
+#include "../datatypes/column_types_def.hpp"
 #include "../datatypes/metadata.hpp"
+
+#include "../dba/column_types.hpp"
 
 #include "annotations.hpp"
 #include "collections.hpp"
@@ -31,16 +34,77 @@
 namespace epidb {
   namespace dba {
 
+    bool check_imutable_columns(const std::string &original_name, const std::string &clone_name, std::string &msg)
+    {
+      if ((original_name == "CHROMOSOME" || original_name == "START" || original_name == "END") && (original_name != clone_name)) {
+          msg = "Column " + original_name + " can be renamed. Columns CHROMOSOME,START, and END are immutable.";
+          return false;
+      }
+      return true;
+    }
+
+    bool check_columns(const std::vector<mongo::BSONElement> &original_columns, const std::vector<mongo::BSONElement> &clone_columns, std::string &msg)
+    {
+      size_t original_columns_size = original_columns.size();
+      size_t clone_columns_size = clone_columns.size();
+
+      std::cerr << original_columns_size << std::endl;
+      std::cerr << clone_columns_size << std::endl;
+
+      std::cerr << original_columns[0].Obj().toString() << std::endl;
+      std::cerr << clone_columns[0].Obj().toString() << std::endl;
+
+      for (size_t pos = 0; pos < clone_columns_size; pos++) {
+        mongo::BSONObj clone_column_bson = clone_columns[pos].Obj();
+
+        if (pos < original_columns_size) {
+          std::cerr << original_columns[pos].Obj().toString() << std::endl;
+          std::cerr << clone_columns[pos].Obj().toString() << std::endl;
+
+          mongo::BSONObj original_column_bson = original_columns[pos].Obj();
+
+          columns::ColumnTypePtr original_column;
+          if (!columns::column_type_bsonobj_to_class(original_column_bson, original_column, msg)) {
+            return false;
+          }
+
+          columns::ColumnTypePtr clone_column;
+          if (!columns::column_type_bsonobj_to_class(clone_column_bson, clone_column, msg)) {
+            return false;
+          }
+
+          std::cerr << original_column->name() << std::endl;
+          std::cerr << clone_column->name() << std::endl;
+
+          if (!check_imutable_columns(original_column->name(), clone_column->name(), msg)) {
+            return false;
+          }
+
+        } else {
+          columns::ColumnTypePtr extra_column;
+          if (!columns::column_type_bsonobj_to_class(clone_column_bson, extra_column, msg)) {
+            return false;
+          }
+
+          if (extra_column->type() != datatypes::COLUMN_CALCULATED) {
+            msg = "Column " + extra_column->name() + " should be calculated. It is not possible to include new columns into cloned experiment/annotation that are not calculated.";
+            return false;
+          }
+        }
+      }
+
+      return true;
+    }
+
     bool clone_dataset(const std::string &dataset_id,
                        const std::string &clone_name, const std::string &norm_clone_name,
-                       const std::string &genome, const std::string &norm_genome,
                        const std::string &epigenetic_mark, const std::string &norm_epigenetic_mark,
                        const std::string &sample_id,
                        const std::string &technique, const std::string &norm_technique,
                        const std::string &project, const std::string &norm_project,
                        const std::string &description, const std::string &norm_description,
                        const parser::FileFormat &format, const datatypes::Metadata &extra_metadata,
-                       const std::string user_key, const std::string& ip,
+                       const std::string user_key, const std::string &ip,
                        std::string &_id, std::string &msg)
     {
       mongo::ScopedDbConnection c(config::get_mongodb_server());
@@ -64,15 +128,8 @@ namespace epidb {
         return false;
       }
 
-      std::string clone_genome;
-      std::string clone_norm_genome;
-      if (genome.empty()) {
-        clone_genome = original["genome"].str();
-        clone_norm_genome = original["norm_genome"].str();
-      } else {
-        clone_genome = genome;
-        clone_norm_genome = norm_genome;
-      }
+      std::string clone_genome = original["genome"].str();
+      std::string clone_norm_genome = original["norm_genome"].str();
 
       std::string clone_epigenetic_mark;
       std::string clone_norm_epigenetic_mark;
@@ -132,37 +189,18 @@ namespace epidb {
         return false;
       }
 
-
-      mongo::BSONArray clone_format_array;
-      mongo::BSONArray original_columns_array;
-      std::vector< mongo::BSONElement > columns = original["columns"].Array();
-      mongo::BSONArrayBuilder ab;
-      for (std::vector< mongo::BSONElement >::iterator it = columns.begin(); it < columns.end(); it++) {
-        ab.append(*it);
-      }
-      original_columns_array = ab.arr();
-
       // Check format
       if (format != original_file_format) {
-        clone_format_array = format.to_bson();
-        std::vector< mongo::BSONElement > original_columns = original["columns"].Array();
-        mongo::BSONObjIterator clone_columns_it = clone_format_array.begin();
-        while (clone_columns_it.more()) {
-          mongo::BSONObj clone_column = clone_columns_it.next().Obj();
-          bool found = false;
-          for (std::vector< mongo::BSONElement>::iterator original_it = original_columns.begin();
-               original_it != original_columns.end();
-               original_it++) {
+        std::vector<mongo::BSONElement> original_columns_vector = original["columns"].Array();
+        std::vector<mongo::BSONElement> clone_columns_vector;
+        mongo::BSONArray clone_format_bson = format.to_bson();
+        clone_format_bson.elems(clone_columns_vector);
 
-            if (clone_column["name"] == original_it->Obj()["name"]) {
-              found = true;
-            }
-          }
-          if (!found) {
-            msg = "Column " + clone_column["name"].str() +  " not found in the original dataset";
-            c.done();
-            return false;
-          }
+        std::cerr << original_columns_vector[0].Obj().toString() << std::endl;
+        std::cerr << clone_columns_vector[0].Obj().toString() << std::endl;
+
+        if (!check_columns(original_columns_vector, clone_columns_vector, msg)) {
+          return false;
         }
       }
 
@@ -179,34 +217,22 @@ namespace epidb {
 
 
       if (dataset_id[0] == 'a') {
-        int a_id;
-        if (!helpers::get_counter("annotations", a_id, msg))  {
-          c.done();
-          return false;
-        }
-        _id = "a" + utils::integer_to_string(a_id);
         if (!annotations::build_metadata(clone_name, norm_clone_name, clone_genome, clone_norm_genome,
-                                   clone_description, clone_norm_description, extra_metadata,
-                                   user_key, ip, format,
-                                   internal_dataset_id, _id, cloned_metadata, msg)) {
+                                         clone_description, clone_norm_description, extra_metadata,
+                                         user_key, ip, format,
+                                         internal_dataset_id, _id, cloned_metadata, msg)) {
           return false;
         }
 
       } else {
-        int e_id;
-        if (!helpers::get_counter("experiments", e_id, msg))  {
-          c.done();
-          return false;
-        }
-        _id = "e" + utils::integer_to_string(e_id);
         if (!experiments::build_metadata(clone_name, norm_clone_name, clone_genome, clone_norm_genome,
-                                       clone_epigenetic_mark, clone_norm_epigenetic_mark,
-                                       clone_sample_id, clone_technique, clone_norm_technique,
-                                       clone_project, clone_norm_project,
-                                       clone_description, clone_norm_description,
-                                       extra_metadata, user_key, ip,
-                                       format, internal_dataset_id,
-                                       _id, cloned_metadata, msg)) {
+                                         clone_epigenetic_mark, clone_norm_epigenetic_mark,
+                                         clone_sample_id, clone_technique, clone_norm_technique,
+                                         clone_project, clone_norm_project,
+                                         clone_description, clone_norm_description,
+                                         extra_metadata, user_key, ip,
+                                         format, internal_dataset_id,
+                                         _id, cloned_metadata, msg)) {
           return false;
         }
       }
