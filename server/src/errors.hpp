@@ -35,9 +35,11 @@ namespace epidb {
 
   extern Error ERR_DUPLICATED_EPIGENETIC_MARK_NAME;
 
-  extern Error ERR_DUPLICATE_PROJECT_NAME;
+  extern Error ERR_DUPLICATED_PROJECT_NAME;
 
-  extern Error ERR_DUPLICATE_GENOME_NAME;
+  extern Error ERR_DUPLICATED_GENOME_NAME;
+
+  extern Error ERR_DUPLICATED_TECHNIQUE_NAME;
 
   extern Error ERR_DATASET_NOT_FOUND;
 

@@ -88,6 +88,8 @@ namespace epidb {
 
     bool is_valid_epigenetic_mark(const std::string &name, const std::string &norm_name, std::string &msg);
 
+    bool is_valid_technique_name(const std::string &name, const std::string &norm_name, std::string &msg);
+
     bool is_project_valid(const std::string &name, const std::string &norm_name, std::string &msg);
 
     bool is_valid_genome(const std::string &genome, const std::string &norm_genome, std::string &msg);

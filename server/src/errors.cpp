@@ -98,9 +98,11 @@ namespace epidb {
 
   Error ERR_DUPLICATED_EPIGENETIC_MARK_NAME("105001", "Duplicated Epigenetic Mark Name '%s'." );
 
-  Error ERR_DUPLICATE_PROJECT_NAME("107001", "Duplicated Project Name '%s'.");
+  Error ERR_DUPLICATED_PROJECT_NAME("107001", "Duplicated Project Name '%s'.");
 
-  Error ERR_DUPLICATE_GENOME_NAME("111101", "Duplicated Genome Name '%s'.");
+  Error ERR_DUPLICATED_GENOME_NAME("111001", "Duplicated Genome Name '%s'.");
+
+  Error ERR_DUPLICATED_TECHNIQUE_NAME("106001", "Duplicated Genome Name '%s'.");
 
   Error ERR_DATASET_NOT_FOUND("350000", "Dataset '%ld' not found.");
 

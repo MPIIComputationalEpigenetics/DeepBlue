@@ -706,6 +706,21 @@ namespace epidb {
       return true;
     }
 
+    bool is_valid_technique_name(const std::string &name, const std::string &norm_name, std::string &msg)
+    {
+      bool exists = true;
+      if (!helpers::check_exist(Collections::TECHNIQUES(), "norm_name", norm_name, exists, msg)) {
+        return false;
+      }
+      if (exists) {
+        std::string s = Error::m(ERR_DUPLICATED_TECHNIQUE_NAME, name.c_str());
+        EPIDB_LOG_TRACE(s);
+        msg = s;
+        return false;
+      }
+      return true;
+    }
+
     bool is_valid_epigenetic_mark(const std::string &name, const std::string &norm_name, std::string &msg)
     {
       bool exists = true;
@@ -728,7 +743,7 @@ namespace epidb {
         return false;
       }
       if (exists) {
-        std::string s = Error::m(ERR_DUPLICATE_PROJECT_NAME, name.c_str());
+        std::string s = Error::m(ERR_DUPLICATED_PROJECT_NAME, name.c_str());
         EPIDB_LOG_TRACE(s);
         msg = s;
         return false;
@@ -743,7 +758,7 @@ namespace epidb {
         return false;
       }
       if (exists) {
-        std::string s = Error::m(ERR_DUPLICATE_GENOME_NAME, genome.c_str());
+        std::string s = Error::m(ERR_DUPLICATED_GENOME_NAME, genome.c_str());
         EPIDB_LOG_TRACE(s);
         msg = s;
         return false;

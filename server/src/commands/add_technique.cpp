@@ -70,7 +70,7 @@ namespace epidb {
         }
 
         std::string norm_name = utils::normalize_name(name);
-        if (!dba::is_valid_biosource_name(name, norm_name, msg)) {
+        if (!dba::is_valid_technique_name(name, norm_name, msg)) {
           result.add_error(msg);
           return false;
         }
