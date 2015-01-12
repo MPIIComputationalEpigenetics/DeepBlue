@@ -1,6 +1,6 @@
 include Makefile.inc
 
-LIB_DIRS	= httpd engine dba parser extras algorithms lua datatypes
+LIB_DIRS	= httpd engine dba parser extras external algorithms lua datatypes
 
 EXE	= server
 
