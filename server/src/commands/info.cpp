@@ -16,8 +16,6 @@
 
 #include "../engine/commands.hpp"
 
-#include <ctime>
-
 namespace epidb {
   namespace command {
 
