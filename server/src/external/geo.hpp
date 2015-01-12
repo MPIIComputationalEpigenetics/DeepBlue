@@ -9,7 +9,7 @@
 #ifndef EPIDB_EXTERNA_GEO_HPP
 #define EPIDB_EXTERNA_GEO_HPP
 
-#import "../datatypes/metadata.hpp"
+#include "../datatypes/metadata.hpp"
 
 namespace epidb {
   namespace external {
