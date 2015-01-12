@@ -405,7 +405,20 @@ namespace epidb {
       case mongo::Object: {
         return e.Obj().toString();
       }
-
+      case mongo::Array: {
+        std::string s = "";
+        std::vector<mongo::BSONElement>  ee = e.Array();
+        bool first = true;
+        for (auto element: ee) {
+          if (!first) {
+            s += ",";
+          } else {
+            first = false;
+          }
+          s += bson_to_string(element);
+        }
+        return s;
+      }
       default: {
         return "[type " + integer_to_string(e.type()) + " not implemented to string conversion]";
       }

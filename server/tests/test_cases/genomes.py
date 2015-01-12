@@ -5,7 +5,7 @@ from client import EpidbClient
 
 class TestGenomeCommands(helpers.TestCase):
 
-  
+
   def test_genome_hg19(self):
     epidb = EpidbClient()
     self.init(epidb)
@@ -43,7 +43,7 @@ class TestGenomeCommands(helpers.TestCase):
     (r, chroms) = epidb.chromosomes("hg18", self.admin_key)
     expected = [['chr1', 247249719], ['chr10', 135374737], ['chr10_random', 113275], ['chr11', 134452384], ['chr11_random', 215294], ['chr12', 132349534], ['chr13', 114142980], ['chr13_random', 186858], ['chr14', 106368585], ['chr15', 100338915], ['chr15_random', 784346], ['chr16', 88827254], ['chr16_random', 105485], ['chr17', 78774742], ['chr17_random', 2617613], ['chr18', 76117153], ['chr18_random', 4262], ['chr19', 63811651], ['chr19_random', 301858], ['chr1_random', 1663265], ['chr2', 242951149], ['chr20', 62435964], ['chr21', 46944323], ['chr21_random', 1679693], ['chr22', 49691432], ['chr22_h2_hap1', 63661], ['chr22_random', 257318], ['chr2_random', 185571], ['chr3', 199501827], ['chr3_random', 749256], ['chr4', 191273063], ['chr4_random', 842648], ['chr5', 180857866], ['chr5_h2_hap1', 1794870], ['chr5_random', 143687], ['chr6', 170899992], ['chr6_cox_hap1', 4731698], ['chr6_qbl_hap2', 4565931], ['chr6_random', 1875562], ['chr7', 158821424], ['chr7_random', 549659], ['chr8', 146274826], ['chr8_random', 943810], ['chr9', 140273252], ['chr9_random', 1146434], ['chrM', 16571], ['chrX', 154913754], ['chrX_random', 1719168], ['chrY', 57772954]]
 
-    self.assertEqual(chroms, expected)    
+    self.assertEqual(chroms, expected)
 
     mm9_genome_info = None
     with open("data/genomes/mm9", 'r') as f:
@@ -52,7 +52,7 @@ class TestGenomeCommands(helpers.TestCase):
     self.assertSuccess(res)
     (r, chroms) = epidb.chromosomes("mm9", self.admin_key)
     expected = [['chr1', 197195432], ['chr10', 129993255], ['chr11', 121843856], ['chr12', 121257530], ['chr13', 120284312], ['chr13_random', 400311], ['chr14', 125194864], ['chr15', 103494974], ['chr16', 98319150], ['chr16_random', 3994], ['chr17', 95272651], ['chr17_random', 628739], ['chr18', 90772031], ['chr19', 61342430], ['chr1_random', 1231697], ['chr2', 181748087], ['chr3', 159599783], ['chr3_random', 41899], ['chr4', 155630120], ['chr4_random', 160594], ['chr5', 152537259], ['chr5_random', 357350], ['chr6', 149517037], ['chr7', 152524553], ['chr7_random', 362490], ['chr8', 131738871], ['chr8_random', 849593], ['chr9', 124076172], ['chr9_random', 449403], ['chrM', 16299], ['chrUn_random', 5900358], ['chrX', 166650296], ['chrX_random', 1785075], ['chrY', 15902555], ['chrY_random', 58682461]]
-    self.assertEqual(chroms, expected)    
+    self.assertEqual(chroms, expected)
 
   def test_genome_empty(self):
     epidb = EpidbClient()
@@ -77,6 +77,23 @@ class TestGenomeCommands(helpers.TestCase):
     genome_names = [x[1] for x in genomes]
     self.assertTrue("hg18" in genome_names)
     self.assertTrue("mm9" in genome_names)
+
+  def test_genome_info(self):
+    epidb = EpidbClient()
+    self.init(epidb)
+
+    hg18_genome_info = None
+    with open("data/genomes/hg18", 'r') as f:
+        hg18_genome_info = f.read().replace(",", "")
+
+    res = epidb.add_genome("hg18", "Human genome 18", hg18_genome_info, self.admin_key)
+    self.assertSuccess(res)
+
+    info = [{'chromosomes': '{ name: "chr1", size: 247249719 },{ name: "chr1_random", size: 1663265 },{ name: "chr10", size: 135374737 },{ name: "chr10_random", size: 113275 },{ name: "chr11", size: 134452384 },{ name: "chr11_random", size: 215294 },{ name: "chr12", size: 132349534 },{ name: "chr13", size: 114142980 },{ name: "chr13_random", size: 186858 },{ name: "chr14", size: 106368585 },{ name: "chr15", size: 100338915 },{ name: "chr15_random", size: 784346 },{ name: "chr16", size: 88827254 },{ name: "chr16_random", size: 105485 },{ name: "chr17", size: 78774742 },{ name: "chr17_random", size: 2617613 },{ name: "chr18", size: 76117153 },{ name: "chr18_random", size: 4262 },{ name: "chr19", size: 63811651 },{ name: "chr19_random", size: 301858 },{ name: "chr2", size: 242951149 },{ name: "chr2_random", size: 185571 },{ name: "chr20", size: 62435964 },{ name: "chr21", size: 46944323 },{ name: "chr21_random", size: 1679693 },{ name: "chr22", size: 49691432 },{ name: "chr22_random", size: 257318 },{ name: "chr22_h2_hap1", size: 63661 },{ name: "chr3", size: 199501827 },{ name: "chr3_random", size: 749256 },{ name: "chr4", size: 191273063 },{ name: "chr4_random", size: 842648 },{ name: "chr5", size: 180857866 },{ name: "chr5_random", size: 143687 },{ name: "chr5_h2_hap1", size: 1794870 },{ name: "chr6", size: 170899992 },{ name: "chr6_random", size: 1875562 },{ name: "chr6_cox_hap1", size: 4731698 },{ name: "chr6_qbl_hap2", size: 4565931 },{ name: "chr7", size: 158821424 },{ name: "chr7_random", size: 549659 },{ name: "chr8", size: 146274826 },{ name: "chr8_random", size: 943810 },{ name: "chr9", size: 140273252 },{ name: "chr9_random", size: 1146434 },{ name: "chrM", size: 16571 },{ name: "chrX", size: 154913754 },{ name: "chrX_random", size: 1719168 },{ name: "chrY", size: 57772954 }', 'description': 'Human genome 18', 'user': 'test_admin', '_id': 'g1', 'type': 'genome', 'name': 'hg18'}]
+
+    s, info_answer = epidb.info("g1", self.admin_key)
+
+    self.assertEqual(info_answer, info)
 
   def test_genome_duplicate(self):
     epidb = EpidbClient()
