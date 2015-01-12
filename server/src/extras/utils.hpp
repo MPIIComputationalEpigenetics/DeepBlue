@@ -105,6 +105,10 @@ namespace epidb {
 
     std::string integer_to_string(const int d);
 
+    std::string size_t_to_string(const size_t t);
+
+    std::string long_to_string(const long t);
+
     bool is_number(const std::string &s);
 
     bool valid_input_string(const std::string &in);

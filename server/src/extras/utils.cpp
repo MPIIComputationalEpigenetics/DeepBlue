@@ -253,6 +253,11 @@ namespace epidb {
       return fmt::format("{:-.4f}", d);
     }
 
+    std::string size_t_to_string(const size_t t)
+    {
+      return fmt::FormatInt(t).str();
+    }
+
     std::string integer_to_string(const int t)
     {
       return fmt::FormatInt(t).str();

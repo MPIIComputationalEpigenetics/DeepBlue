@@ -115,7 +115,9 @@ namespace epidb {
         boost::asio::async_write(socket_, reply_.to_buffers(),
                                  strand_.wrap(
                                    boost::bind(&Connection::handle_write, shared_from_this(),
-                                               boost::asio::placeholders::error)));
+                                               boost::asio::placeholders::error,
+                                               boost::asio::placeholders::bytes_transferred)));
+
       } else {
 
         boost::asio::async_read(
@@ -127,10 +129,13 @@ namespace epidb {
       }
     }
 
-    void Connection::handle_write(const boost::system::error_code &e)
+    void Connection::handle_write(const boost::system::error_code &e, size_t bytes_transferred)
     {
-      //PROFINY_SCOPE
+      std::cerr <<  bytes_transferred << std::endl;
+
+      EPIDB_LOG(e.category().name() << ":" << e.message() << " - Sent " << bytes_transferred << " bytes.");
       if (!e) {
+
         // Initiate graceful connection closure.
         boost::system::error_code ignored_ec;
         socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ignored_ec);

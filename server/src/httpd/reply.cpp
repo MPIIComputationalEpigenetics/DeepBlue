@@ -256,6 +256,9 @@ namespace epidb {
       Reply rep;
       rep.type = status;
 
+      std::cerr << content.size() << std::endl;
+      std::cerr << utils::size_t_to_string(content.size()) << std::endl;
+
       if (status != ok && content.length() == 0) {
         rep.content = stock_replies::to_string(status);
       } else {
@@ -267,7 +270,7 @@ namespace epidb {
       rep.headers[1].name = "Access-Control-Allow-Origin";
       rep.headers[1].value = "*";
       rep.headers[2].name = "Content-Length";
-      rep.headers[2].value = utils::integer_to_string(rep.content.size());
+      rep.headers[2].value = utils::size_t_to_string(rep.content.size());
 
       return rep;
     }
