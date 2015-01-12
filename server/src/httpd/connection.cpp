@@ -131,12 +131,9 @@ namespace epidb {
 
     void Connection::handle_write(const boost::system::error_code &e, size_t bytes_transferred)
     {
-      std::cerr <<  bytes_transferred << std::endl;
-
-      EPIDB_LOG(e.category().name() << ":" << e.message() << " - Sent " << bytes_transferred << " bytes.");
-      if (!e) {
-
-        // Initiate graceful connection closure.
+      if (e) {
+        EPIDB_LOG(e.category().name() << ":" << e.message() << " - Sent " << bytes_transferred << " bytes.");
+      } else {
         boost::system::error_code ignored_ec;
         socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ignored_ec);
       }
