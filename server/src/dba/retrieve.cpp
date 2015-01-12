@@ -70,8 +70,6 @@ namespace epidb {
             Length span = region_bson[KeyMapper::WIG_SPAN()].numberInt();
             Length size = region_bson[KeyMapper::FEATURES()].numberInt();
 
-            _regions.reserve(_regions.size() + size);
-
             int db_data_size;
             const char *data;
             lzo_bytep decompressed_data;
@@ -250,14 +248,20 @@ namespace epidb {
           start = std::numeric_limits<Position>::min();
         }
 
-        RegionProcess rp(regions, start, end);
 
         mongo::Query query = mongo::Query(regions_query).sort(KeyMapper::START());
         int queryOptions = (int)( mongo::QueryOption_NoCursorTimeout | mongo::QueryOption_SlaveOk );
 
+        unsigned long long count = c->count(collection, regions_query);
+        std::cerr << "Will be stored " << count << "regions" << std::endl;
+
+        std::cerr << "alocating memory: " << count * sizeof(RegionPtr) << std::endl;
+        regions.reserve(count);
+        std::cerr << "Memory allocated: " << count * sizeof(RegionPtr) << std::endl;
+
         std::auto_ptr<mongo::DBClientCursor> cursor( c->query(collection, query, 0, 0, NULL, queryOptions) );
         cursor->setBatchSize(BULK_SIZE);
-
+        RegionProcess rp(regions, start, end);
         while ( cursor->more() ) {
           while (cursor->moreInCurrentBatch()) {
             mongo::BSONObj o = cursor->nextSafe();
