@@ -8,11 +8,9 @@
 
 #include <string>
 #include <iostream>
-#include <ostream>
+#include <sstream>
 
 #include <urdl/istream.hpp>
-
-#include "../extras/stringbuilder.hpp"
 
 namespace epidb {
   namespace external {
@@ -28,14 +26,13 @@ namespace epidb {
           return false;
         }
 
-        StringBuilder<char> sb;
+        std::stringstream ss;
         std::string line;
         while (std::getline(is, line)) {
-          sb.append(std::move(line));
-          sb.endLine();
+          ss << line << std::endl;
         }
 
-        content = sb.ToString();
+        content = ss.str();
 
         return true;
       }
