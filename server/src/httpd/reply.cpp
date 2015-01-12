@@ -251,7 +251,7 @@ namespace epidb {
     } // namespace stock_replies
 
     // TODO: get Access-Control-Allow-Origin from a configuration/option
-    Reply Reply::stock_reply(Reply::ReplyType status, const std::string content)
+    Reply Reply::stock_reply(Reply::ReplyType status, std::string&& content)
     {
       Reply rep;
       rep.type = status;
@@ -259,7 +259,7 @@ namespace epidb {
       if (status != ok && content.length() == 0) {
         rep.content = stock_replies::to_string(status);
       } else {
-        rep.content = content;
+        rep.content = std::move(content);
       }
       rep.headers.resize(3);
       rep.headers[0].name = "content-type";

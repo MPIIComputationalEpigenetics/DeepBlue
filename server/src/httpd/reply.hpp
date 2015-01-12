@@ -61,7 +61,7 @@ namespace epidb {
       std::vector<boost::asio::const_buffer> to_buffers();
 
       /// Get a stock reply.
-      static Reply stock_reply(Reply::ReplyType status, const std::string content);
+      static Reply stock_reply(Reply::ReplyType status, std::string&& content);
 
       static Reply options_reply();
     };

@@ -54,9 +54,9 @@ namespace epidb {
         std::string message = process_content(req, content, error);
 
         if (error) {
-          reply = Reply::stock_reply(Reply::bad_request, message);
+          reply = Reply::stock_reply(Reply::bad_request, std::move(message));
         } else {
-          reply = Reply::stock_reply(Reply::ok, message);
+          reply = Reply::stock_reply(Reply::ok, std::move(message));
         }
       }
       return reply;
@@ -94,7 +94,7 @@ namespace epidb {
 
       if (!xmlrpc_request) {
         EPIDB_LOG("[3] request from " << request.ip << ": parsing error.");
-        return XmlrpcResponse::error_response("[3] Error rarsing the request data.");
+        return XmlrpcResponse::error_response("[3] Error parsing the request data.");
       }
 
       xmlrpc_request->set_ip(request.ip);
