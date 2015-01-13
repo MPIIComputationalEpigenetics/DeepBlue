@@ -188,7 +188,7 @@ namespace epidb {
 
         mongo::BSONObjBuilder builder;
         builder.appendElements(super);
-        builder.append("column_type", "range");
+        builder.append("column_type", "category");
         mongo::BSONArray arr = helpers::build_array(_content);
         builder.append("values", arr);
 
@@ -512,6 +512,7 @@ namespace epidb {
 
       bool column_type_bsonobj_to_class(const mongo::BSONObj &obj, ColumnTypePtr &column_type, std::string &msg)
       {
+        std::cerr << obj.toString() << std::endl;
         const std::string name = obj["name"].String();
         const std::string type = obj["column_type"].String();
         int pos = -1;
@@ -643,7 +644,8 @@ namespace epidb {
           break;
         }
 
-        case datatypes::COLUMN_ERR: {
+        case datatypes::COLUMN_ERR:
+        case datatypes::__COLUMN_TYPES_NR_ITEMS__: {
           msg = "Invalid column id: " + id;
           return false;
         }
