@@ -259,8 +259,6 @@ namespace epidb {
         }
 
         std::cerr << "Will be stored " << count << " documents" << std::endl;
-
-        std::cerr << "Allocating pointer array memory: " << count * sizeof(RegionPtr) << std::endl;
         regions.reserve(count);
         std::cerr << "Memory allocated: " << count * sizeof(RegionPtr) << std::endl;
 
