@@ -19,9 +19,13 @@ namespace epidb {
       COLUMN_CATEGORY,
       COLUMN_CALCULATED,
       COLUMN_ERR,
+      __COLUMN_TYPES_NR_ITEMS__
     };
 
+    std::string column_type_to_name(const COLUMN_TYPES type);
     COLUMN_TYPES column_type_name_to_type(const std::string& name);
+
+    bool column_type_is_compatible(COLUMN_TYPES original, COLUMN_TYPES clone);
   }
 }
 
