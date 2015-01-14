@@ -151,7 +151,8 @@ namespace epidb {
         }
       }
 
-      std::string command = op.substr(0, op.find('('));
+      static const std::string open_parenthesis("(");
+      std::string command = op.substr(0, op.find(open_parenthesis));
       std::map<std::string, Function>::iterator it;
       it = functions.find(command);
       if (it != functions.end()) {
