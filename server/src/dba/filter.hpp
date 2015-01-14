@@ -271,8 +271,8 @@ namespace epidb {
           msg = "The given value for " + type + " is empty.";
           return false;
         }
-
-        if (s.find('$') != std::string::npos) {
+        static const std::string invalid_start("$");
+        if (s.find(invalid_start) != std::string::npos) {
           msg = "The given value(" + s + ") for " + type + " is invalid. Please, do not use '$'";
           return false;
         }
