@@ -786,125 +786,126 @@ namespace epidb {
         mongo::ScopedDbConnection c(config::get_mongodb_server());
         cursor = c->query(helpers::collection_name(Collections::EXPERIMENTS()), o);
 
+        bool found = false;
         while (cursor->more()) {
           mongo::BSONObj experiment = cursor->next();
-          if (experiment.hasField("columns")) {
-            int s_count = 0;
-            int n_count = 0;
 
-            std::vector<mongo::BSONElement> tmp_columns = experiment["columns"].Array();
-            BOOST_FOREACH(const mongo::BSONElement & e, tmp_columns) {
-              mongo::BSONObj column = e.Obj();
-              const std::string &column_type = column["column_type"].str();
-              const std::string &column_name = column["name"].str();
+          int s_count = 0;
+          int n_count = 0;
 
-              int pos = -1;
+          std::vector<mongo::BSONElement> tmp_columns = experiment["columns"].Array();
+          BOOST_FOREACH(const mongo::BSONElement & e, tmp_columns) {
+            mongo::BSONObj column = e.Obj();
+            const std::string &column_type = column["column_type"].str();
+            const std::string &column_name = column["name"].str();
 
-              mongo::BSONObjBuilder bob;
-              bob.appendElements(column);
+            int pos = -1;
 
-              if (column_name != "CHROMOSOME" && column_name != "START" &&  column_name != "END") {
-                if (column_type == "string") {
-                  pos = s_count++;
-                } else if (column_type == "integer") {
-                  pos = n_count++;
-                } else if (column_type == "double") {
-                  pos = n_count++;
-                } else if (column_type == "range") {
-                  pos = n_count++;
-                } else if (column_type == "category") {
-                  pos = s_count++;
-                } else if (column_type == "calculated") {
-                  msg = "Calculated field does not have data";
-                  return false;
-                } else {
-                  msg = "Unknown column type: " + column_type;
-                  return false;
-                }
-                bob.append("pos", pos);
+            mongo::BSONObjBuilder bob;
+            bob.appendElements(column);
+
+            if (column_name != "CHROMOSOME" && column_name != "START" &&  column_name != "END") {
+              if (column_type == "string") {
+                pos = s_count++;
+              } else if (column_type == "integer") {
+                pos = n_count++;
+              } else if (column_type == "double") {
+                pos = n_count++;
+              } else if (column_type == "range") {
+                pos = n_count++;
+              } else if (column_type == "category") {
+                pos = s_count++;
+              } else if (column_type == "calculated") {
+                msg = "Calculated field does not have data";
+                return false;
+              } else {
+                msg = "Unknown column type: " + column_type;
+                return false;
               }
-
-              mongo::BSONObj o = bob.obj();
-              columns.push_back(o);
+              bob.append("pos", pos);
             }
-            c.done();
-            return true;
-          } else {
-            c.done();
-            return false;
+
+            mongo::BSONObj o = bob.obj();
+            std::cerr << " --- " << std::endl;
+            std::cerr << o.toString() << std::endl;
+            std::cerr << " --- " << std::endl;
+            columns.push_back(o);
           }
+          found = true;
+        }
+
+        if (found) {
+          c.done();
+          return true;
         }
 
         cursor = c->query(helpers::collection_name(Collections::ANNOTATIONS()), o);
         while (cursor->more()) {
+          found = true;
           mongo::BSONObj annotation = cursor->next().getOwned();
-          if (annotation.hasField("columns")) {
-            int s_count = 0;
-            int n_count = 0;
-            std::vector<mongo::BSONElement> tmp_columns = annotation["columns"].Array();
-            BOOST_FOREACH(const mongo::BSONElement & e, tmp_columns) {
-              mongo::BSONObj column = e.Obj();
-              const std::string &column_type = column["column_type"].str();
-              const std::string &column_name = column["name"].str();
+          int s_count = 0;
+          int n_count = 0;
+          std::vector<mongo::BSONElement> tmp_columns = annotation["columns"].Array();
+          BOOST_FOREACH(const mongo::BSONElement & e, tmp_columns) {
+            mongo::BSONObj column = e.Obj();
+            const std::string &column_type = column["column_type"].str();
+            const std::string &column_name = column["name"].str();
 
-              int pos = -1;
+            int pos = -1;
 
-              mongo::BSONObjBuilder bob;
-              bob.appendElements(column);
+            mongo::BSONObjBuilder bob;
+            bob.appendElements(column);
 
-              if (column_name != "CHROMOSOME" && column_name != "START" &&  column_name != "END") {
-                if (column_type == "string") {
-                  pos = s_count++;
-                } else if (column_type == "integer") {
-                  pos = n_count++;
-                } else if (column_type == "double") {
-                  pos = n_count++;
-                } else if (column_type == "range") {
-                  pos = n_count++;
-                } else if (column_type == "category") {
-                  pos = s_count++;
-                } else if (column_type == "calculated") {
-                  msg = "Calculated field does not have data";
-                  return false;
-                } else {
-                  msg = "Unknown column type: " + column_type;
-                  return false;
-                }
-                bob.append("pos", pos);
+            if (column_name != "CHROMOSOME" && column_name != "START" &&  column_name != "END") {
+              if (column_type == "string") {
+                pos = s_count++;
+              } else if (column_type == "integer") {
+                pos = n_count++;
+              } else if (column_type == "double") {
+                pos = n_count++;
+              } else if (column_type == "range") {
+                pos = n_count++;
+              } else if (column_type == "category") {
+                pos = s_count++;
+              } else if (column_type == "calculated") {
+                msg = "Calculated field does not have data";
+                return false;
+              } else {
+                msg = "Unknown column type: " + column_type;
+                return false;
               }
-
-              columns.push_back(bob.obj());
+              bob.append("pos", pos);
             }
-            c.done();
-            return true;
-          } else {
-            std::cerr <<  "Annotation dataset" << dataset_id << " does not have columns!!" << std::endl;
-            msg = "blah 2";
-            c.done();
-            return false;
+            columns.push_back(bob.obj());
           }
+          c.done();
+          return true;
+        }
+
+        if (found) {
+          c.done();
+          return true;
         }
 
         cursor = c->query(helpers::collection_name(Collections::TILINGS()), o);
         while (cursor->more()) {
           mongo::BSONObj tiling = cursor->next().getOwned();
-          if (tiling.hasField("columns")) {
-            std::vector<mongo::BSONElement> tmp_columns = tiling["columns"].Array();
-            BOOST_FOREACH(const mongo::BSONElement & e, tmp_columns) {
-              columns.push_back(e.Obj().getOwned());
-            }
-            c.done();
-            return true;
-          } else {
-            std::cerr << "Tiling dataset" << dataset_id << " does not have columns!!" << std::endl;
-            msg = "blah ";
-            c.done();
-            return false;
+          std::vector<mongo::BSONElement> tmp_columns = tiling["columns"].Array();
+          BOOST_FOREACH(const mongo::BSONElement & e, tmp_columns) {
+            columns.push_back(e.Obj().getOwned());
           }
+          c.done();
+          return true;
         }
+
         c.done();
-        msg = Error::m(ERR_DATASET_NOT_FOUND, dataset_id);
-        return false;
+
+        if (found) {
+          return true;
+        } else {
+          msg = Error::m(ERR_DATASET_NOT_FOUND, dataset_id);
+          return false;
+        }
       }
     }
   }
