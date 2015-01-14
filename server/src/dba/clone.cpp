@@ -37,22 +37,26 @@ namespace epidb {
     bool check_imutable_columns(const std::string &original_name, const std::string &clone_name, std::string &msg)
     {
       if ((original_name == "CHROMOSOME" || original_name == "START" || original_name == "END") && (original_name != clone_name)) {
-          msg = "Column " + original_name + " can be renamed. Columns CHROMOSOME,START, and END are immutable.";
-          return false;
+        msg = "Column " + original_name + " can not be renamed. Columns CHROMOSOME,START, and END are immutable.";
+        return false;
       }
       return true;
     }
+
+    bool check_compatible_type(const columns::ColumnTypePtr &original, const columns::ColumnTypePtr clone, std::string &msg)
+    {
+      if (!datatypes::column_type_is_compatible(original->type(), clone->type())) {
+        msg = "The column '" + clone->name() + "' (type: " + datatypes::column_type_to_name(clone->type()) + ") is incompatible with the original column '" + original->name() + "' (type: " + datatypes::column_type_to_name(original->type()) + ")";
+        return false;
+      }
+      return true;
+    }
+
 
     bool check_columns(const std::vector<mongo::BSONElement> &original_columns, const std::vector<mongo::BSONElement> &clone_columns, std::string &msg)
     {
       size_t original_columns_size = original_columns.size();
       size_t clone_columns_size = clone_columns.size();
-
-      std::cerr << original_columns_size << std::endl;
-      std::cerr << clone_columns_size << std::endl;
-
-      std::cerr << original_columns[0].Obj().toString() << std::endl;
-      std::cerr << clone_columns[0].Obj().toString() << std::endl;
 
       for (size_t pos = 0; pos < clone_columns_size; pos++) {
         mongo::BSONObj clone_column_bson = clone_columns[pos].Obj();
@@ -69,6 +73,7 @@ namespace epidb {
           }
 
           columns::ColumnTypePtr clone_column;
+          std::cerr << " Here: " << clone_column_bson.toString() << std::endl;
           if (!columns::column_type_bsonobj_to_class(clone_column_bson, clone_column, msg)) {
             return false;
           }
@@ -77,6 +82,10 @@ namespace epidb {
           std::cerr << clone_column->name() << std::endl;
 
           if (!check_imutable_columns(original_column->name(), clone_column->name(), msg)) {
+            return false;
+          }
+
+          if (!check_compatible_type(original_column, clone_column, msg)) {
             return false;
           }
 
@@ -103,7 +112,7 @@ namespace epidb {
                        const std::string &technique, const std::string &norm_technique,
                        const std::string &project, const std::string &norm_project,
                        const std::string &description, const std::string &norm_description,
-                       const parser::FileFormat &format, const datatypes::Metadata &extra_metadata,
+                       const std::string &format, const datatypes::Metadata &extra_metadata,
                        const std::string user_key, const std::string &ip,
                        std::string &_id, std::string &msg)
     {
@@ -182,6 +191,8 @@ namespace epidb {
       }
 
       // Check if the format and columns should be replaced
+      parser::FileFormat clone_format;
+
       std::string original_format = original["format"].str();
       parser::FileFormat original_file_format;
       if (!parser::FileFormatBuilder::build(original_format, original_file_format, msg)) {
@@ -189,18 +200,40 @@ namespace epidb {
         return false;
       }
 
-      // Check format
-      if (format != original_file_format) {
-        std::vector<mongo::BSONElement> original_columns_vector = original["columns"].Array();
-        std::vector<mongo::BSONElement> clone_columns_vector;
-        mongo::BSONArray clone_format_bson = format.to_bson();
-        clone_format_bson.elems(clone_columns_vector);
+      if (format.empty()) {
+        clone_format = original_file_format;
+      } else {
+        // Check format
 
-        std::cerr << original_columns_vector[0].Obj().toString() << std::endl;
-        std::cerr << clone_columns_vector[0].Obj().toString() << std::endl;
-
-        if (!check_columns(original_columns_vector, clone_columns_vector, msg)) {
+        if (!parser::FileFormatBuilder::build(format, clone_format, msg)) {
+          c.done();
           return false;
+        }
+
+        std::cerr << clone_format.format() << std::endl;
+        std::cerr << original_file_format.format() << std::endl;
+        if (clone_format.format() != original_file_format.format()) {
+
+          std::cerr << " -- " << std::endl;
+          std::cerr << clone_format.size() << std::endl;
+          std::cerr << original_file_format.size() << std::endl;
+          std::cerr << " -- " << std::endl;
+
+          if (clone_format.size() < original_file_format.size()) {
+            msg = "Your new format has less columns than the original format (" + original_format + ")";
+            c.done();
+            return false;
+          }
+
+          std::vector<mongo::BSONElement> original_columns_vector = original["columns"].Array();
+          std::vector<mongo::BSONElement> clone_columns_vector;
+          mongo::BSONArray clone_format_bson = clone_format.to_bson();
+          clone_format_bson.elems(clone_columns_vector);
+
+          if (!check_columns(original_columns_vector, clone_columns_vector, msg)) {
+            c.done();
+            return false;
+          }
         }
       }
 
@@ -217,22 +250,22 @@ namespace epidb {
 
 
       if (dataset_id[0] == 'a') {
-        if (!annotations::build_metadata(clone_name, norm_clone_name, clone_genome, clone_norm_genome,
-                                         clone_description, clone_norm_description, extra_metadata,
-                                         user_key, ip, format,
-                                         internal_dataset_id, _id, cloned_metadata, msg)) {
+        if (!annotations::build_metadata_with_dataset(clone_name, norm_clone_name, clone_genome, clone_norm_genome,
+            clone_description, clone_norm_description, extra_metadata,
+            user_key, ip, clone_format,
+            internal_dataset_id, _id, cloned_metadata, msg)) {
           return false;
         }
 
       } else {
-        if (!experiments::build_metadata(clone_name, norm_clone_name, clone_genome, clone_norm_genome,
-                                         clone_epigenetic_mark, clone_norm_epigenetic_mark,
-                                         clone_sample_id, clone_technique, clone_norm_technique,
-                                         clone_project, clone_norm_project,
-                                         clone_description, clone_norm_description,
-                                         extra_metadata, user_key, ip,
-                                         format, internal_dataset_id,
-                                         _id, cloned_metadata, msg)) {
+        if (!experiments::build_metadata_with_dataset(clone_name, norm_clone_name, clone_genome, clone_norm_genome,
+            clone_epigenetic_mark, clone_norm_epigenetic_mark,
+            clone_sample_id, clone_technique, clone_norm_technique,
+            clone_project, clone_norm_project,
+            clone_description, clone_norm_description,
+            extra_metadata, user_key, ip,
+            clone_format, internal_dataset_id,
+            _id, cloned_metadata, msg)) {
           return false;
         }
       }
