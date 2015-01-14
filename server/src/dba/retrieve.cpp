@@ -253,6 +253,11 @@ namespace epidb {
         int queryOptions = (int)( mongo::QueryOption_NoCursorTimeout | mongo::QueryOption_SlaveOk );
 
         unsigned long long count = c->count(collection, regions_query);
+        if (count == 0) {
+          c.done();
+          return true;
+        }
+
         std::cerr << "Will be stored " << count << " documents" << std::endl;
 
         std::cerr << "Allocating pointer array memory: " << count * sizeof(RegionPtr) << std::endl;
@@ -269,7 +274,6 @@ namespace epidb {
           }
         }
 
-        // TODO: Optimize here!
         std::sort(regions.begin(), regions.end(), RegionPtrComparer);
 
         c.done();
