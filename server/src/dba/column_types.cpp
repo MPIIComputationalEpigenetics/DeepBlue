@@ -200,7 +200,6 @@ namespace epidb {
       {
         lua::Sandbox::LuaPtr lua = _content.second;
         lua->set_current_context(chromosome, region, metafield);
-        std::cerr << "aqui: " << region->value(0) << std::endl;
         return lua->execute_row_code(result, msg);
       }
 
@@ -512,7 +511,6 @@ namespace epidb {
 
       bool column_type_bsonobj_to_class(const mongo::BSONObj &obj, ColumnTypePtr &column_type, std::string &msg)
       {
-        std::cerr << obj.toString() << std::endl;
         const std::string name = obj["name"].String();
         const std::string type = obj["column_type"].String();
         int pos = -1;
