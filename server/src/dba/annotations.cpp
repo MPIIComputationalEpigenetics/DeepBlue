@@ -9,6 +9,7 @@
 
 #include <string>
 
+#include "annotations.hpp"
 #include "helpers.hpp"
 
 #include "../datatypes/metadata.hpp"
@@ -18,6 +19,7 @@
 namespace epidb {
   namespace dba {
     namespace annotations {
+
       bool build_metadata(const std::string &name, const std::string &norm_name,
                           const std::string &genome, const std::string &norm_genome,
                           const std::string &description, const std::string &norm_description,
@@ -29,15 +31,42 @@ namespace epidb {
                           mongo::BSONObj &annotation_metadata,
                           std::string &msg)
       {
+        if (!helpers::get_counter("datasets", dataset_id, msg))  {
+          return false;
+        }
+
+        if (!build_metadata_with_dataset(name, norm_name, genome, norm_genome,
+                                         description, norm_description,
+                                         extra_metadata,
+                                         user_key, ip,
+                                         format,
+                                         dataset_id,
+                                         annotation_id,
+                                         annotation_metadata,
+                                         msg)) {
+          return false;
+        }
+
+        return true;
+      }
+
+
+      bool build_metadata_with_dataset(const std::string &name, const std::string &norm_name,
+                                       const std::string &genome, const std::string &norm_genome,
+                                       const std::string &description, const std::string &norm_description,
+                                       const datatypes::Metadata &extra_metadata,
+                                       const std::string &user_key, const std::string &ip,
+                                       const parser::FileFormat &format,
+                                       const int dataset_id,
+                                       std::string &annotation_id,
+                                       mongo::BSONObj &annotation_metadata,
+                                       std::string &msg)
+      {
         int a_id;
         if (!helpers::get_counter("annotations", a_id, msg))  {
           return false;
         }
         annotation_id = "a" + utils::integer_to_string(a_id);
-
-        if (!helpers::get_counter("datasets", dataset_id, msg))  {
-          return false;
-        }
 
         mongo::BSONObjBuilder annotation_data_builder;
         annotation_data_builder.append("_id", annotation_id);

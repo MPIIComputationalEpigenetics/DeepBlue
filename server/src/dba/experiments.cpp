@@ -15,6 +15,7 @@
 #include "../datatypes/regions.hpp"
 
 #include "collections.hpp"
+#include "experiments.hpp"
 #include "info.hpp"
 #include "helpers.hpp"
 #include "queries.hpp"
@@ -93,28 +94,62 @@ namespace epidb {
       }
 
       bool build_metadata(const std::string &name, const std::string &norm_name,
-                                     const std::string &genome, const std::string &norm_genome,
-                                     const std::string &epigenetic_mark, const std::string &norm_epigenetic_mark,
-                                     const std::string &sample_id, const std::string &technique, const std::string &norm_technique,
-                                     const std::string &project, const std::string &norm_project,
-                                     const std::string &description, const std::string &norm_description,
-                                     const datatypes::Metadata &extra_metadata,
-                                     const std::string &user_key, const std::string &ip,
-                                     const parser::FileFormat &format,
-                                     int &dataset_id,
-                                     std::string &experiment_id,
-                                     mongo::BSONObj &experiment_metadata,
-                                     std::string &msg)
+                          const std::string &genome, const std::string &norm_genome,
+                          const std::string &epigenetic_mark, const std::string &norm_epigenetic_mark,
+                          const std::string &sample_id, const std::string &technique, const std::string &norm_technique,
+                          const std::string &project, const std::string &norm_project,
+                          const std::string &description, const std::string &norm_description,
+                          const datatypes::Metadata &extra_metadata,
+                          const std::string &user_key, const std::string &ip,
+                          const parser::FileFormat &format,
+                          int &dataset_id,
+                          std::string &experiment_id,
+                          mongo::BSONObj &experiment_metadata,
+                          std::string &msg)
+      {
+        if (!helpers::get_counter("datasets", dataset_id, msg))  {
+          return false;
+        }
+
+        if (!build_metadata_with_dataset(name, norm_name,
+                                         genome, norm_genome,
+                                         epigenetic_mark, norm_epigenetic_mark,
+                                         sample_id, technique, norm_technique,
+                                         project, norm_project,
+                                         description, norm_description,
+                                         extra_metadata,
+                                         user_key, ip,
+                                         format,
+                                         dataset_id,
+                                         experiment_id,
+                                         experiment_metadata,
+                                         msg)) {
+          return false;
+        }
+
+        return true;
+      }
+
+
+      bool build_metadata_with_dataset(const std::string &name, const std::string &norm_name,
+                                       const std::string &genome, const std::string &norm_genome,
+                                       const std::string &epigenetic_mark, const std::string &norm_epigenetic_mark,
+                                       const std::string &sample_id, const std::string &technique, const std::string &norm_technique,
+                                       const std::string &project, const std::string &norm_project,
+                                       const std::string &description, const std::string &norm_description,
+                                       const datatypes::Metadata &extra_metadata,
+                                       const std::string &user_key, const std::string &ip,
+                                       const parser::FileFormat &format,
+                                       const int dataset_id,
+                                       std::string &experiment_id,
+                                       mongo::BSONObj &experiment_metadata,
+                                       std::string &msg)
       {
         int e_id;
         if (!helpers::get_counter("experiments", e_id, msg))  {
           return false;
         }
         experiment_id = "e" + utils::integer_to_string(e_id);
-
-        if (!helpers::get_counter("datasets", dataset_id, msg))  {
-          return false;
-        }
 
         mongo::BSONObjBuilder experiment_data_builder;
         experiment_data_builder.append("_id", experiment_id);
