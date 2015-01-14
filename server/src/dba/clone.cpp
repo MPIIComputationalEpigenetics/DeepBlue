@@ -62,9 +62,6 @@ namespace epidb {
         mongo::BSONObj clone_column_bson = clone_columns[pos].Obj();
 
         if (pos < original_columns_size) {
-          std::cerr << original_columns[pos].Obj().toString() << std::endl;
-          std::cerr << clone_columns[pos].Obj().toString() << std::endl;
-
           mongo::BSONObj original_column_bson = original_columns[pos].Obj();
 
           columns::ColumnTypePtr original_column;
@@ -73,13 +70,9 @@ namespace epidb {
           }
 
           columns::ColumnTypePtr clone_column;
-          std::cerr << " Here: " << clone_column_bson.toString() << std::endl;
           if (!columns::column_type_bsonobj_to_class(clone_column_bson, clone_column, msg)) {
             return false;
           }
-
-          std::cerr << original_column->name() << std::endl;
-          std::cerr << clone_column->name() << std::endl;
 
           if (!check_imutable_columns(original_column->name(), clone_column->name(), msg)) {
             return false;
@@ -210,14 +203,7 @@ namespace epidb {
           return false;
         }
 
-        std::cerr << clone_format.format() << std::endl;
-        std::cerr << original_file_format.format() << std::endl;
         if (clone_format.format() != original_file_format.format()) {
-
-          std::cerr << " -- " << std::endl;
-          std::cerr << clone_format.size() << std::endl;
-          std::cerr << original_file_format.size() << std::endl;
-          std::cerr << " -- " << std::endl;
 
           if (clone_format.size() < original_file_format.size()) {
             msg = "Your new format has less columns than the original format (" + original_format + ")";
