@@ -425,4 +425,4 @@ class TestSearch(helpers.TestCase):
 
     (s, ss) = epidb.search("STRAND", "column_types", self.admin_key)
     (s, info) = epidb.info(ss[0][0], self.admin_key)
-    self.assertEqual(info[0], {'_id': 'ct10', 'type': 'column_type', 'description': 'description', 'default_value': '.', 'name': 'STRAND', 'column_type': 'category', 'values': '+,-'})
+    self.assertEqual(info[0], {'_id': 'ct10', 'type': 'column_type', 'description': 'description', 'default_value': '.', 'name': 'STRAND', 'column_type': 'category', 'items': '+,-'})
