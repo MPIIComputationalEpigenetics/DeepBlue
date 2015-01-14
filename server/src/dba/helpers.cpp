@@ -230,11 +230,6 @@ namespace epidb {
         const std::string collection = collection_name(where);
 
         unsigned long long count = c->count(collection, BSON(field << content));
-        if (!c->getLastError().empty()) {
-          msg = c->getLastError();
-          c.done();
-          return false;
-        }
 
         r = count > 0;
         c.done();
