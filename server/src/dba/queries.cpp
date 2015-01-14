@@ -826,9 +826,6 @@ namespace epidb {
             }
 
             mongo::BSONObj o = bob.obj();
-            std::cerr << " --- " << std::endl;
-            std::cerr << o.toString() << std::endl;
-            std::cerr << " --- " << std::endl;
             columns.push_back(o);
           }
           found = true;
