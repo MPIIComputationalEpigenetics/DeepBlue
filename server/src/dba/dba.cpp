@@ -196,8 +196,20 @@ namespace epidb {
 
       // Set indexes
       EPIDB_LOG_DBG("Creating index for " << collection);
+      mongo::BSONObjBuilder dataset_start_end_index;
+      dataset_start_end_index.append(KeyMapper::DATASET(), 1);
+      dataset_start_end_index.append(KeyMapper::START(), 1);
+      dataset_start_end_index.append(KeyMapper::END(), 1);
+      c->ensureIndex(collection, dataset_start_end_index.obj());
+      if (!c->getLastError().empty()) {
+        msg = c->getLastError();
+        EPIDB_LOG_ERR("Indexing on DATASET, START and END at '" << collection << "' error: " << msg);
+        c.done();
+        return false;
+      }
+
+      EPIDB_LOG_DBG("Creating index for " << collection);
       mongo::BSONObjBuilder start_end_index;
-      start_end_index.append(KeyMapper::DATASET(), 1);
       start_end_index.append(KeyMapper::START(), 1);
       start_end_index.append(KeyMapper::END(), 1);
       c->ensureIndex(collection, start_end_index.obj());
