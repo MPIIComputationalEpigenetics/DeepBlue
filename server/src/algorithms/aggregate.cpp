@@ -32,7 +32,6 @@ namespace epidb {
                            dba::Metafield &metafield, Regions &chr_regions, std::string &msg)
     {
       chr_regions = build_regions();
-      auto it_data = data.begin();
       auto it_ranges = ranges.begin();
 
       Regions agg_regions;
@@ -43,10 +42,9 @@ namespace epidb {
 
       while (it_ranges != ranges.end()) {
         Accumulator acc;
-        while (it_data != data.end() &&
-               (*it_data)->start() >= (*it_ranges)->start() && (*it_data)->start() <= (*it_ranges)->end()) {
-
-          if ((*it_data)->start() >= (*it_ranges)->start() && (*it_data)->end() <= (*it_ranges)->end()) {
+        auto it_data = data.begin();
+        while (it_data != data.end()) {
+          if (((*it_ranges)->start() <= (*it_data)->end()) && ((*it_ranges)->end() >= (*it_data)->end())) {
             if (field[0] == '@') {
               std::string value;
               if (!metafield.process(field, chrom, it_data->get(), value, msg)) {
@@ -57,9 +55,8 @@ namespace epidb {
               utils::string_to_double(value, v);
               acc.push(v);
             } else {
-              RegionPtr region = std::move(*it_data);
-              if (dataset_id != region->dataset_id()) {
-                dataset_id = region->dataset_id();
+              if (dataset_id != (*it_data)->dataset_id()) {
+                dataset_id = (*it_data)->dataset_id();
                 if (!dba::experiments::get_field_pos(dataset_id, field, pos, column_type, msg)) {
                   return false;
                 }
@@ -81,30 +78,13 @@ namespace epidb {
     bool aggregate(ChromosomeRegionsList &data, ChromosomeRegionsList &ranges, const std::string &field,
                    ChromosomeRegionsList &regions, std::string &msg)
     {
-      //-- move to queries.cpp --//
-      std::string field_value;
-      if (field[0] != '@') {
-        std::string short_field;
-        std::string err;
-        if (!dba::KeyMapper::to_short(field, short_field, err)) {
-          EPIDB_LOG_ERR(err);
-          return false;
-        }
-        field_value = short_field;
-      } else {
-        field_value = field;
-      }
-      //--- move to queries.cpp --//
-
-
       // TODO :optimize it for finding the ChromosomeRegionsList data not in O(N) time
-
       dba::Metafield metafield;
       for (auto &range : ranges) {
         for (auto &datum : data) {
           Regions chr_regions;
           if (range.first == datum.first) {
-            if (!aggregate_regions(range.first, datum.second, range.second, field_value, metafield, chr_regions, msg)) {
+            if (!aggregate_regions(range.first, datum.second, range.second, field, metafield, chr_regions, msg)) {
               return false;
             }
             std::pair<std::string, Regions> r(range.first, std::move(chr_regions));
