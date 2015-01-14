@@ -190,7 +190,7 @@ namespace epidb {
         builder.appendElements(super);
         builder.append("column_type", "category");
         mongo::BSONArray arr = helpers::build_array(_content);
-        builder.append("values", arr);
+        builder.append("items", arr);
 
         return builder.obj();
       }
@@ -633,7 +633,7 @@ namespace epidb {
         case datatypes::COLUMN_CATEGORY: {
           res["column_type"] = "category";
           ColumnType<Category> *column = static_cast<ColumnType<Category> *>(column_type.get());
-          res["values"] = utils::vector_to_string(column->content());
+          res["items"] = utils::vector_to_string(column->content());
           break;
         }
 
