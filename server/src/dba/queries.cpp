@@ -130,7 +130,7 @@ namespace epidb {
           return false;
         }
 
-        std::cerr << "leave retrieve_query" << std::endl;
+        std::cerr << "leave retrieve_query (" << type << ")" << std::endl;
         return true;
       }
 
@@ -420,7 +420,6 @@ namespace epidb {
           genome_regions.push_back(std::move(reg));
         }
 
-        std::cerr << "pegou as regioes" << std::endl;
         // merge region data of all genomes
         std::vector<ChromosomeRegionsList>::iterator rit = genome_regions.begin();
         ChromosomeRegionsList &last = *rit;
@@ -473,7 +472,7 @@ namespace epidb {
           last = algorithms::merge_chromosome_regions(last, *rit);
         }
 
-        std::cerr << "saiu do merge_chromosome_regions" << std::endl;
+        std::cerr << "leave merge_chromosome_regions" << std::endl;
         regions = std::move(last);
 
         return true;
@@ -537,13 +536,12 @@ namespace epidb {
       }
 
 
-      bool filter_region(const AbstractRegion *region_ref, const std::string &field, const int &pos,
-                         Metafield &metafield, const std::string &chrom, FilterBuilder::FilterPtr filter)
+      bool filter_region(const AbstractRegion *region_ref, const std::string& field, const dba::columns::ColumnTypePtr column, Metafield &metafield, const std::string &chrom, FilterBuilder::FilterPtr filter)
       {
-        if (field.compare("START") == 0) {
+        if (field == "START") {
           return filter->is(region_ref->start());
         }
-        if (field.compare("END") == 0) {
+        if (field == "END") {
           return filter->is(region_ref->end());
         }
 
@@ -557,7 +555,11 @@ namespace epidb {
           }
           return filter->is(value);
         } else {
-          return filter->is(region_ref->value(pos));
+          Score score = region_ref->value(column->pos());
+          if (score == std::numeric_limits<Score>::min()) {
+            utils::string_to_score(column->default_value(), score);
+          }
+          return filter->is(score);
         }
       }
 
@@ -600,8 +602,7 @@ namespace epidb {
 
         std::string err;
         DatasetId dataset_id = -1;
-        size_t pos;
-        datatypes::COLUMN_TYPES column_type;
+        dba::columns::ColumnTypePtr column;
 
         size_t total = 0;
         size_t removed = 0;
@@ -615,7 +616,7 @@ namespace epidb {
             if (!dba::Metafield::is_meta(field)) {
               if (region->dataset_id() != dataset_id) {
                 dataset_id = region->dataset_id();
-                if (!dba::experiments::get_field_pos(dataset_id, field, pos, column_type, msg)) {
+                if (!dba::experiments::get_field_pos(dataset_id, field, column, msg)) {
                   return false;
                 }
               }
@@ -624,7 +625,7 @@ namespace epidb {
             total++;
 
             // TODO: use column_type for better filtering. i.e. type conversion
-            if (filter_region(region.get(), field, pos, metafield, chromosome, filter)) {
+            if (filter_region(region.get(), field, column, metafield, chromosome, filter)) {
               saved.push_back(std::move(region));
               keep++;
             } else {
@@ -635,6 +636,7 @@ namespace epidb {
           filtered_regions.push_back(std::move(chr_region));
         }
 
+        std::cerr << "leave retrieve_filter_query" << std::endl;
         return true;
       }
 

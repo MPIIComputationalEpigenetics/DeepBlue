@@ -258,10 +258,7 @@ namespace epidb {
           return true;
         }
 
-        std::cerr << "Will be stored " << count << " documents" << std::endl;
         regions.reserve(count);
-        std::cerr << "Memory allocated: " << count * sizeof(RegionPtr) << std::endl;
-
         std::auto_ptr<mongo::DBClientCursor> cursor( c->query(collection, query, 0, 0, NULL, queryOptions) );
         cursor->setBatchSize(BULK_SIZE);
         RegionProcess rp(regions, start, end);

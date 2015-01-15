@@ -36,9 +36,8 @@ namespace epidb {
 
       Regions agg_regions;
 
-      size_t pos = 0;
       DatasetId dataset_id = -1;
-      datatypes::COLUMN_TYPES column_type;
+      dba::columns::ColumnTypePtr column;
 
       while (it_ranges != ranges.end()) {
         Accumulator acc;
@@ -50,18 +49,22 @@ namespace epidb {
               if (!metafield.process(field, chrom, it_data->get(), value, msg)) {
                 return false;
               }
-              double v;
+              Score s;
               // TODO: the meta.process should return the double value directly
-              utils::string_to_double(value, v);
-              acc.push(v);
+              utils::string_to_score(value, s);
+              acc.push(s);
             } else {
               if (dataset_id != (*it_data)->dataset_id()) {
                 dataset_id = (*it_data)->dataset_id();
-                if (!dba::experiments::get_field_pos(dataset_id, field, pos, column_type, msg)) {
+                if (!dba::experiments::get_field_pos(dataset_id, field, column, msg)) {
                   return false;
                 }
               }
-              acc.push((*it_data)->value(pos));
+              Score score = (*it_data)->value(column->pos());
+              if (score == std::numeric_limits<Score>::min()) {
+                utils::string_to_score(column->default_value(), score);
+              }
+              acc.push(score);
             }
           }
           it_data++;

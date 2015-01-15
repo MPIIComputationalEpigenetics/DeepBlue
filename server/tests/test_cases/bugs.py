@@ -289,3 +289,29 @@ chrX 100000"""
     (res, s) = epidb.search("AAA", None, self.admin_key)
     self.assertSuccess(res, s)
     self.assertEquals(s, expected)
+
+  def test_biosource_true_hierarchy(self):
+    epidb = EpidbClient()
+    self.init_base(epidb)
+    sample_id = self.sample_ids[0]
+
+    (s, m) = epidb.create_column_type_simple("SCORE", "", "0", "double", self.admin_key)
+    self.assertSuccess(s,m)
+
+    data = "chr1\t100\t110\t1\nchr1\t200\t400\t0\nchr1\t400\t500\t1\nchr1\t200\t400\t0\n"
+    format = "CHROMOSOME,START,END,SCORE"
+
+    (res, a_1) = epidb.add_experiment("test", "hg19", "H3K4me3", sample_id, "tech1", "ENCODE", "wgEncodeBroadHistoneH1hescH3k27me3StdPk.bed from ENCODE",  data, format, None, self.admin_key)
+
+    self.assertSuccess(res, a_1)
+
+    (s, q) = epidb.select_regions("test", "hg19", None, None, None, None, "chr1", None, None, self.admin_key)
+
+    (s, tl) = epidb.tiling_regions(150000000, "hg19", "chr1", self.admin_key)
+
+    res, qid_4 = epidb.aggregate(q, tl, "SCORE", self.admin_key)
+    s, rs = epidb.get_regions(qid_4, "CHROMOSOME,START,END,@AGG.MIN,@AGG.MAX,@AGG.MEAN,@AGG.COUNT", self.admin_key)
+    self.assertSuccess(s, rs)
+
+    self.assertEquals(rs, "chr1\t0\t150000000\t0.0000\t1.0000\t0.5000\t4")
+

@@ -215,7 +215,7 @@ namespace epidb {
               if (v == std::numeric_limits<Score>::min()) {
                 sb.append(column->default_value());
               } else {
-                sb.append(utils::double_to_string(v));
+                sb.append(utils::score_to_string(v));
               }
             } else {
               const std::string &o = region->get_string(column->pos());

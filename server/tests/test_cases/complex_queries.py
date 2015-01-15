@@ -86,6 +86,7 @@ class TestComplexQueries(helpers.TestCase):
     self.assertSuccess(res, qid_5_1)
     res, count = epidb.count_regions(qid_5_1, self.admin_key)
     self.assertSuccess(res, count)
+    self.assertEqual(count, 16009)
 
     res, qid_6_1 = epidb.filter_regions(qid_5_1, "END",  "<", "2200000", "number", self.admin_key)
     self.assertSuccess(res, qid_6_1)

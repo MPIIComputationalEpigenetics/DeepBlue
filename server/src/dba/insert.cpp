@@ -97,21 +97,21 @@ namespace epidb {
           }
           builder.append(name, (int) l);
         } else if (column_type->type() == datatypes::COLUMN_DOUBLE) {
-          double d;
-          if (!utils::string_to_double(token, d)) {
+          Score s;
+          if (!utils::string_to_score(token, s)) {
             msg = "The field '" + field_name + "' is a double, but the value '" + token + "' is not a valid double.";
             return false;
           }
-          builder.append(name, d);
+          builder.append(name, s);
         } else if (column_type->type() == datatypes::COLUMN_CATEGORY) {
           builder.append(name, token);
         } else if (column_type->type() == datatypes::COLUMN_RANGE) {
-          double d;
-          if (!utils::string_to_double(token, d)) {
+          Score s;
+          if (!utils::string_to_score(token, s)) {
             msg = "The field '" + field_name + "' is a double, but the value '" + token + "' is not a valid integer.";
             return false;
           }
-          builder.append(name, d);
+          builder.append(name, s);
         } else {
           std::string err = "Invalid column type: " + column_type->str();
           EPIDB_LOG_ERR(err);

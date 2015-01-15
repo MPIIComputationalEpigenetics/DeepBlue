@@ -11,32 +11,35 @@
 
 #include <string>
 
+#include "../types.hpp"
+
 namespace epidb {
   namespace algorithms {
 
     class Accumulator {
     private:
-      std::vector<double> values;
+      std::vector<Score> values;
       bool _calculated;
-      double _min;
-      double _max;
-      double _median;
-      double _mean;
-      double _var;
-      double _sd;
+      Score _min;
+      Score _max;
+      Score _median;
+      Score _mean;
+      Score _var;
+      Score _sd;
+
+      void calculate();
 
     public:
       Accumulator();
-      void push(double value);
-      double min();
-      double max();
-      double mean();
-      double var();
-      double sd();
-      double median();
-      double count();
+      void push(Score value);
+      Score min();
+      Score max();
+      Score mean();
+      Score var();
+      Score sd();
+      Score median();
+      Score count();
       const std::string string(std::string sep);
-      void calculate();
     };
   }
 }

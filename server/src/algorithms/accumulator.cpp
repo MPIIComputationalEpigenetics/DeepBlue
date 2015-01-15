@@ -12,7 +12,10 @@
 #include <vector>
 
 #include "accumulator.hpp"
+
 #include "../extras/utils.hpp"
+
+#include "../types.hpp"
 
 namespace epidb {
   namespace algorithms {
@@ -24,56 +27,56 @@ namespace epidb {
       _var(0.0),
       _sd(0.0) {}
 
-    void Accumulator::push(double value)
+    void Accumulator::push(Score value)
     {
       values.push_back(value);
       _calculated = false;
     }
 
-    double Accumulator::min()
+    Score Accumulator::min()
     {
       calculate();
       return _min;
     }
 
-    double Accumulator::max()
+    Score Accumulator::max()
     {
       calculate();
       return _max;
     }
 
-    double Accumulator::mean()
+    Score Accumulator::mean()
     {
       calculate();
       return _mean;
     }
 
-    double Accumulator::var()
+    Score Accumulator::var()
     {
       calculate();
       return _var;
     }
 
-    double Accumulator::sd()
+    Score Accumulator::sd()
     {
       calculate();
       return _sd;
     }
 
-    double Accumulator::median()
+    Score Accumulator::median()
     {
       calculate();
       return _median;
     }
 
-    double Accumulator::count()
+    Score Accumulator::count()
     {
       return values.size();
     }
 
     void Accumulator::calculate()
     {
-      std::vector<double> calculated_values = values;
+      std::vector<Score> calculated_values = values;
 
       if (_calculated || values.empty()) {
         return;
@@ -85,13 +88,13 @@ namespace epidb {
       _max = calculated_values[calculated_values.size() - 1];
       _median = calculated_values[calculated_values.size() / 2];
 
-      double sum = std::accumulate(calculated_values.begin(), calculated_values.end(), 0.0);
+      Score sum = std::accumulate(calculated_values.begin(), calculated_values.end(), 0.0);
       _mean = sum / calculated_values.size();
 
-      std::vector<double> diff(calculated_values.size());
+      std::vector<Score> diff(calculated_values.size());
       std::transform(calculated_values.begin(), calculated_values.end(), diff.begin(),
-                     std::bind2nd(std::minus<double>(), _mean));
-      double sq_sum = std::inner_product(diff.begin(), diff.end(), diff.begin(), 0.0);
+                     std::bind2nd(std::minus<Score>(), _mean));
+      Score sq_sum = std::inner_product(diff.begin(), diff.end(), diff.begin(), 0.0);
       _var = sq_sum / calculated_values.size();
       _sd = std::sqrt(_var);
 

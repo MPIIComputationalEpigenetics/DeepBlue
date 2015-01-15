@@ -273,8 +273,8 @@ namespace epidb {
 
         if (actual_track->type() == FIXED_STEP)
         {
-          double value;
-          if (!utils::string_to_double(line, value)) {
+          Score value;
+          if (!utils::string_to_score(line, value)) {
             msg = "The feature value " + line + " at the line " + line_str() + " is not a valid number";
             return false;
           }

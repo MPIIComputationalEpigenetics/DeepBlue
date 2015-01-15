@@ -21,10 +21,11 @@
 namespace epidb {
   namespace dba {
     namespace experiments {
-      extern size_t FIELD_NOT_FOUND;
       bool by_name(const std::string &name, mongo::BSONObj &experiment, std::string &msg);
-      bool get_field_pos(const DatasetId &dataset_id, const std::string &column_name, size_t &pos, datatypes::COLUMN_TYPES &type, std::string &msg);
-      bool get_field_pos(const std::string &experiment_name, const std::string &column_name, size_t &pos, datatypes::COLUMN_TYPES &type, std::string &msg);
+
+      bool get_field_pos(const DatasetId &dataset_id, const std::string &column_name, columns::ColumnTypePtr& column_type, std::string &msg);
+
+      bool get_field_pos(const std::string &experiment_name, const std::string &column_name, columns::ColumnTypePtr& column_type,  std::string &msg);
 
       bool build_metadata(const std::string &name, const std::string &norm_name,
                           const std::string &genome, const std::string &norm_genome,

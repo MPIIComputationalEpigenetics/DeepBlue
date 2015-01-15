@@ -307,7 +307,7 @@ namespace epidb {
     {
       if (region_ref->has_stats()) {
         const AggregateRegion *aggregate_region = static_cast<const AggregateRegion *>(region_ref);
-        result = utils::double_to_string(aggregate_region->min());
+        result = utils::score_to_string(aggregate_region->min());
       } else {
         result = "";
       }
@@ -319,7 +319,7 @@ namespace epidb {
     {
       if (region_ref->has_stats()) {
         const AggregateRegion *aggregate_region = static_cast<const AggregateRegion *>(region_ref);
-        result = utils::double_to_string(aggregate_region->max());
+        result = utils::score_to_string(aggregate_region->max());
       } else {
         result = "";
       }
@@ -331,7 +331,7 @@ namespace epidb {
     {
       if (region_ref->has_stats()) {
         const AggregateRegion *aggregate_region = static_cast<const AggregateRegion *>(region_ref);
-        result = utils::double_to_string(aggregate_region->median());
+        result = utils::score_to_string(aggregate_region->median());
       } else {
         result = "";
       }
@@ -343,7 +343,7 @@ namespace epidb {
     {
       if (region_ref->has_stats()) {
         const AggregateRegion *aggregate_region = static_cast<const AggregateRegion *>(region_ref);
-        result = utils::double_to_string(aggregate_region->mean());
+        result = utils::score_to_string(aggregate_region->mean());
       } else {
         result = "";
       }
@@ -356,7 +356,7 @@ namespace epidb {
     {
       if (region_ref->has_stats()) {
         const AggregateRegion *aggregate_region = static_cast<const AggregateRegion *>(region_ref);
-        result = utils::double_to_string(aggregate_region->var());
+        result = utils::score_to_string(aggregate_region->var());
       } else {
         result = "";
       }
@@ -368,7 +368,7 @@ namespace epidb {
     {
       if (region_ref->has_stats()) {
         const AggregateRegion *aggregate_region = static_cast<const AggregateRegion *>(region_ref);
-        result = utils::double_to_string(aggregate_region->sd());
+        result = utils::score_to_string(aggregate_region->sd());
       } else {
         result = "";
       }

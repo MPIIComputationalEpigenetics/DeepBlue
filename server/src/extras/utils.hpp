@@ -91,8 +91,6 @@ namespace epidb {
 
     bool string_to_long(const std::string &s, size_t &i);
 
-    bool string_to_double(const std::string &s, double &d);
-
     bool string_to_float(const std::string &s, float &d);
 
     bool string_to_position(const std::string &s, Position &p);
@@ -101,7 +99,7 @@ namespace epidb {
 
     bool string_to_score(const std::string &s, Score &c);
 
-    std::string double_to_string(const double d);
+    std::string score_to_string(const Score s);
 
     std::string integer_to_string(const int d);
 

@@ -90,7 +90,6 @@ namespace epidb {
 
   Score AbstractRegion::value(const size_t pos) const
   {
-    std::cerr << "nao era pra entrar aqui" << std::endl;
     return std::numeric_limits<Score>::min();
   }
 
@@ -151,7 +150,6 @@ namespace epidb {
 
   RegionPtr BedRegion::clone() const
   {
-    std::cerr << "clone BedRegion" << std::endl;
     return RegionPtr(new BedRegion(*this));
   }
 
@@ -217,7 +215,6 @@ namespace epidb {
 
   RegionPtr AggregateRegion::clone() const
   {
-    std::cerr << "clone BedRegion" << std::endl;
     return RegionPtr(new AggregateRegion(*this));
   }
 

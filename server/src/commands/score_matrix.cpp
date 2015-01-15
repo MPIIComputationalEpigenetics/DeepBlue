@@ -12,12 +12,12 @@
 
 #include "../algorithms/accumulator.hpp"
 
-#include "../datatypes/column_types_def.hpp"
 #include "../datatypes/regions.hpp"
 
+#include "../dba/column_types.hpp"
+#include "../dba/experiments.hpp"
 #include "../dba/helpers.hpp"
 #include "../dba/queries.hpp"
-#include "../dba/experiments.hpp"
 
 #include "../engine/commands.hpp"
 #include "../extras/serialize.hpp"
@@ -107,7 +107,7 @@ namespace epidb {
         std::string norm_genome;
 
         // Change names to norm_names and columns
-        std::vector<std::pair<std::string, int>> norm_experiments_formats;
+        std::vector<std::pair<std::string, dba::columns::ColumnTypePtr>> norm_experiments_formats;
         for (auto &experiment_input : experiments_formats) {
           mongo::BSONObj experiment;
           const std::string &experiment_name = experiment_input.first;
@@ -117,24 +117,19 @@ namespace epidb {
           }
           std::string norm_name = experiment["norm_name"].String();
           DatasetId dataset_id = experiment[dba::KeyMapper::DATASET()].Int();
-          size_t pos;
-          datatypes::COLUMN_TYPES type;
+          dba::columns::ColumnTypePtr column;
 
-          if (!dba::experiments::get_field_pos(dataset_id, experiment_input.second, pos, type, msg)) {
+          if (!dba::experiments::get_field_pos(dataset_id, experiment_input.second, column, msg)) {
             result.add_error(msg);
             return false;
           }
 
-          if (type != datatypes::COLUMN_INTEGER || type != datatypes::COLUMN_DOUBLE || type == datatypes::COLUMN_RANGE) {
+          if (column->type() != datatypes::COLUMN_INTEGER || column->type() != datatypes::COLUMN_DOUBLE || column->type() == datatypes::COLUMN_RANGE) {
             msg = "The column " + experiment_input.second + "in the experiment " + experiment_name + " does not contain numerical values.";
             return false;
           }
 
-          if (pos == dba::experiments::FIELD_NOT_FOUND) {
-            msg = "Column " + experiment_input.second + " does not exist in the experiment " + experiment_name;
-          }
-
-          std::pair<std::string, int> p(norm_name, pos);
+          std::pair<std::string, dba::columns::ColumnTypePtr> p(norm_name, column);
           norm_experiments_formats.push_back(p);
 
           // TODO: check if are all from the same genome
@@ -161,7 +156,7 @@ namespace epidb {
               }
               algorithms::Accumulator acc;
               for (auto &experiment_region : regions) {
-                acc.push(experiment_region->value(experiment_format.second));
+                acc.push(experiment_region->value(experiment_format.second->pos()));
               }
               experiments_accs.push_back(acc);
             }

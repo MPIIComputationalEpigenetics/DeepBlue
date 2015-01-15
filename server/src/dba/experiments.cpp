@@ -24,27 +24,24 @@ namespace epidb {
   namespace dba {
     namespace experiments {
 
-      size_t FIELD_NOT_FOUND = std::numeric_limits<size_t>::max();
-
       bool by_name(const std::string &name, mongo::BSONObj &experiment, std::string &msg)
       {
         const std::string norm_name = utils::normalize_name(name);
         return helpers::get_one(Collections::EXPERIMENTS(), BSON("norm_name" << norm_name), experiment, msg);
       }
 
-      bool get_field_pos(const DatasetId &dataset_id, const std::string &column_name, size_t &pos, datatypes::COLUMN_TYPES &type, std::string &msg)
+      bool get_field_pos(const DatasetId &dataset_id, const std::string &column_name, columns::ColumnTypePtr &column_type, std::string &msg)
       {
-        pos = FIELD_NOT_FOUND;
-        type = datatypes::COLUMN_ERR;
-
         if (column_name == "CHROMOSOME") {
-          type = datatypes::COLUMN_STRING;
-          return true;
+          return dba::columns::load_column_type("CHROMOSOME", column_type, msg);
         }
 
-        if (column_name == "START" || column_name == "END") {
-          type = datatypes::COLUMN_INTEGER;
-          return true;
+        if (column_name == "START") {
+          return dba::columns::load_column_type("START", column_type, msg);
+        }
+
+        if (column_name == "END") {
+          return dba::columns::load_column_type("END", column_type, msg);
         }
 
         // TODO: cache experiment_columns
@@ -55,25 +52,19 @@ namespace epidb {
 
         for (auto column : experiment_columns) {
           if (column["name"].String() == column_name) {
-            pos = column["pos"].Int();
-            const std::string &type_name = column["column_type"].str();
-            type = datatypes::column_type_name_to_type(type_name);
-            break;
+            if (!column_type_bsonobj_to_class(column, column_type, msg)) {
+              return false;
+            }
+            return true;
           }
         }
 
-        if (pos == FIELD_NOT_FOUND) {
-          msg = "Invalid column name " + column_name;
-          return false;
-        }
-
-        return true;
+        msg = "Invalid column name " + column_name;
+        return false;
       }
 
-      bool get_field_pos(const std::string &experiment_name, const std::string &column_name, size_t &pos, datatypes::COLUMN_TYPES &type, std::string &msg)
+      bool get_field_pos(const std::string &experiment_name, const std::string &column_name, columns::ColumnTypePtr &column_type,  std::string &msg)
       {
-        pos = FIELD_NOT_FOUND;
-
         // TODO: cache experiment
         mongo::BSONObj experiment;
         if (!experiments::by_name(experiment_name, experiment, msg)) {
@@ -81,12 +72,7 @@ namespace epidb {
         }
         DatasetId dataset_id = experiment[dba::KeyMapper::DATASET()].Int();
 
-        if (!get_field_pos(dataset_id, column_name, pos, type, msg)) {
-          return false;
-        }
-
-        if (pos == FIELD_NOT_FOUND) {
-          msg = "Invalid column name " + column_name + " for the experiment " + experiment_name;
+        if (!get_field_pos(dataset_id, column_name, column_type, msg)) {
           return false;
         }
 

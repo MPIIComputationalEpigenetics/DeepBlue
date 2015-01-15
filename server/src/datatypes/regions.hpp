@@ -82,7 +82,7 @@ namespace epidb {
   // -----------------------------------
   class BedRegion : public AbstractRegion {
     std::vector<std::string> _string_data;
-    std::vector<float> _numeric_data;
+    std::vector<float> _numeric_data; // TODO: change to Score
 
   public:
     BedRegion(Position s, Position e, DatasetId _id):

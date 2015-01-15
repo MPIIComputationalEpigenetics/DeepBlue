@@ -30,7 +30,7 @@ namespace epidb {
     namespace columns {
 
       typedef std::pair<std::string, lua::Sandbox::LuaPtr> Code;
-      typedef std::pair<double, double> Range;
+      typedef std::pair<Score, Score> Range;
       typedef std::vector<std::string> Category;
 
       class AbstractColumnType {
@@ -166,13 +166,13 @@ namespace epidb {
       const mongo::BSONObj ColumnType<long long>::BSONObj() const;
 
       template<>
-      bool ColumnType<double>::check(const std::string &verify) const;
+      bool ColumnType<Score>::check(const std::string &verify) const;
 
       template<>
-      const std::string ColumnType<double>::str() const;
+      const std::string ColumnType<Score>::str() const;
 
       template<>
-      const mongo::BSONObj ColumnType<double>::BSONObj() const;
+      const mongo::BSONObj ColumnType<Score>::BSONObj() const;
 
       template<>
       bool ColumnType<std::string>::check(const std::string &verify) const;
@@ -236,7 +236,7 @@ namespace epidb {
       bool create_column_type_range(const std::string &name, const std::string &norm_name,
                                     const std::string &description, const std::string &norm_description,
                                     const std::string &default_value,
-                                    const double minimum, const double maximum,
+                                    const Score minimum, const Score maximum,
                                     const std::string &user_key,
                                     std::string &id, std::string &msg);
 

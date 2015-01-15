@@ -227,7 +227,7 @@ namespace epidb {
     {}
 
     SimpleParameter::SimpleParameter(const double d) :
-      type_(DOUBLE), value_(utils::double_to_string(d))
+      type_(DOUBLE), value_(utils::score_to_string(d))
     {}
 
     Type SimpleParameter::type() const
@@ -531,7 +531,7 @@ namespace epidb {
 
     void Parameters::add_double(double d)
     {
-      std::string value = utils::double_to_string(d);
+      std::string value = utils::score_to_string(d);
       params_.push_back(ParameterPtr(new SimpleParameter(DOUBLE, value)));
     }
 

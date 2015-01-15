@@ -65,26 +65,26 @@ namespace epidb {
       }
 
       template <>
-      bool ColumnType<double>::check(const std::string &verify) const
+      bool ColumnType<Score>::check(const std::string &verify) const
       {
-        double d;
-        return utils::string_to_double(verify, d);
+        Score d;
+        return utils::string_to_score(verify, d);
       }
 
       template<>
-      const std::string ColumnType<double>::str() const
+      const std::string ColumnType<Score>::str() const
       {
         return AbstractColumnType::str() + " type: 'double'";
       }
 
       template<>
-      datatypes::COLUMN_TYPES ColumnType<double>::type() const
+      datatypes::COLUMN_TYPES ColumnType<Score>::type() const
       {
         return datatypes::COLUMN_DOUBLE;
       }
 
       template<>
-      const mongo::BSONObj ColumnType<double>::BSONObj() const
+      const mongo::BSONObj ColumnType<Score>::BSONObj() const
       {
         mongo::BSONObj super = AbstractColumnType::BSONObj();
 
@@ -128,8 +128,8 @@ namespace epidb {
       template<>
       bool ColumnType<Range>::check(const std::string &verify) const
       {
-        double d;
-        if (!utils::string_to_double(verify, d)) {
+        Score d;
+        if (!utils::string_to_score(verify, d)) {
           return false;
         }
         return d >= _content.first && d <= _content.second;
@@ -139,8 +139,8 @@ namespace epidb {
       const std::string ColumnType<Range>::str() const
       {
         return AbstractColumnType::str() + " type: 'range' : "  +
-               utils::double_to_string(_content.first) + "," +
-               utils::double_to_string(_content.second);
+               utils::score_to_string(_content.first) + "," +
+               utils::score_to_string(_content.second);
       }
 
       template<>
@@ -248,7 +248,7 @@ namespace epidb {
           return true;
 
         case datatypes::COLUMN_DOUBLE:
-          column_type = boost::shared_ptr<ColumnType<double> >(new ColumnType<double>(name, 0.0, default_value, -1));
+          column_type = boost::shared_ptr<ColumnType<Score> >(new ColumnType<Score>(name, 0.0, default_value, -1));
           return true;
 
         case datatypes::COLUMN_RANGE:
@@ -275,7 +275,7 @@ namespace epidb {
           column_type = boost::shared_ptr<ColumnType<long long> >(new ColumnType<long long>(name, 0, default_value, -1));
           return true;
         } else if (type_l == "double") {
-          column_type = boost::shared_ptr<ColumnType<double> >(new ColumnType<double>(name, 0.0, default_value, -1));
+          column_type = boost::shared_ptr<ColumnType<Score> >(new ColumnType<Score>(name, 0.0, default_value, -1));
           return true;
         } else {
           msg = "Invalid column type '" + type_l + "'";
@@ -457,7 +457,7 @@ namespace epidb {
       bool create_column_type_range(const std::string &name, const std::string &norm_name,
                                     const std::string &description, const std::string &norm_description,
                                     const std::string &default_value,
-                                    const double minimum, const double maximum,
+                                    const Score minimum, const Score maximum,
                                     const std::string &user_key,
                                     std::string &column_type_id, std::string &msg)
       {
@@ -530,7 +530,7 @@ namespace epidb {
         } else if (type == "integer") {
           column_type = boost::shared_ptr<ColumnType<long long > >(new ColumnType<long long>(name, 0, default_value, pos));
         } else if (type == "double") {
-          column_type = boost::shared_ptr<ColumnType<double > >(new ColumnType<double>(name, 0.0, default_value, pos));
+          column_type = boost::shared_ptr<ColumnType<Score > >(new ColumnType<Score>(name, 0.0, default_value, pos));
         } else if (type == "category") {
           Category category;
           std::vector<mongo::BSONElement> e = obj["items"].Array();
@@ -539,8 +539,8 @@ namespace epidb {
           }
           column_type = boost::shared_ptr<ColumnType<Category > >(new ColumnType<Category>(name, category, default_value, pos));
         } else if (type == "range") {
-          double minimum = obj["minimum"].Double();
-          double maximum = obj["maximum"].Double();
+          Score minimum = obj["minimum"].Double();
+          Score maximum = obj["maximum"].Double();
           Range range(minimum, maximum);
           column_type = boost::shared_ptr<ColumnType<Range > >(new ColumnType<Range>(name, range, default_value, pos));
         } else if (type == "calculated") {

@@ -76,7 +76,7 @@ namespace epidb {
       return true;
     }
 
-    void Sandbox::set_current_context(const std::string &chromosome, const AbstractRegion * region, dba::Metafield &metafield)
+    void Sandbox::set_current_context(const std::string &chromosome, const AbstractRegion *region, dba::Metafield &metafield)
     {
       current_chromosome = chromosome;
       current_region_ptr = region;
@@ -116,7 +116,6 @@ namespace epidb {
 
     int Sandbox::field_content(lua_State *lua_state)
     {
-      std::cerr << "field_content" << std::endl;
       int n = lua_gettop(lua_state);
       if (n != 1) {
         lua_pushstring(lua_state, "invalid number of arguments for the content() function");
@@ -137,9 +136,9 @@ namespace epidb {
           lua_pushstring(lua_state, result.c_str());
           return 1;
         } else {
-          double d;
-          utils::string_to_double(result, d);
-          lua_pushnumber(lua_state, d);
+          Score s;
+          utils::string_to_score(result, s);
+          lua_pushnumber(lua_state, s);
           return 1;
         }
       }
@@ -156,36 +155,29 @@ namespace epidb {
       }
 
       DatasetId dataset_id = current_region_ptr->dataset_id();
-      datatypes::COLUMN_TYPES column_type = datatypes::COLUMN_ERR;
-      size_t pos = dba::experiments::FIELD_NOT_FOUND;
+      dba::columns::ColumnTypePtr column;
 
       // TODO: better error handling
-      if (!dba::experiments::get_field_pos(dataset_id, field_name, pos, column_type, msg)) {
+      if (!dba::experiments::get_field_pos(dataset_id, field_name, column, msg)) {
         lua_pushstring(lua_state, "");
         return 1;
       }
 
-      std::cerr << "field " << field_name << " " << pos << " " << column_type << std::endl;
-
-      // TODO: better error handling
-      if (pos == dba::experiments::FIELD_NOT_FOUND) {
-        lua_pushstring(lua_state, "");
-        return 1;
-      }
-
-      if (column_type == datatypes::COLUMN_STRING || column_type == datatypes::COLUMN_CATEGORY) {
-        std::string content = current_region_ptr->get_string(pos);
+      if (column->type() == datatypes::COLUMN_STRING || column->type() == datatypes::COLUMN_CATEGORY) {
+        std::string content = current_region_ptr->get_string(column->pos());
+        if (content.empty()) {
+          content = column->default_value();
+        }
         if (content.length() > 0) {
           lua_pushstring(lua_state, content.c_str());
           return 1;
         }
 
-      } else if (column_type == datatypes::COLUMN_INTEGER || column_type == datatypes::COLUMN_DOUBLE || column_type == datatypes::COLUMN_RANGE) {
-        std::cerr << typeid(current_region_ptr).name() << std::endl;
-        std::cerr << current_region_ptr->start() << std::endl;
-        std::cerr << current_region_ptr->end() << std::endl;
-        Score value = current_region_ptr->value(pos);
-        std::cerr << "value " << value << std::endl;
+      } else if (column->type() == datatypes::COLUMN_INTEGER || column->type() == datatypes::COLUMN_DOUBLE || column->type() == datatypes::COLUMN_RANGE) {
+        Score value = current_region_ptr->value(column->pos());
+        if (value == std::numeric_limits<Score>::min()) {
+          utils::string_to_score(column->default_value(), value);
+        }
         if (value != std::numeric_limits<Score>::min()) {
           lua_pushnumber(lua_state, value);
           return 1;

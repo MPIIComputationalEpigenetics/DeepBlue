@@ -70,11 +70,11 @@ namespace epidb {
         if (check(STRING) && value == s_value) {
           return true;
         } else if (check(NUMBER)) {
-          double d;
-          if (!utils::string_to_double(value, d)) {
+          Score s;
+          if (!utils::string_to_score(value, s)) {
             return false;
           }
-          return std::fabs(d - n_value) < std::numeric_limits<double>::epsilon();
+          return std::fabs(s - n_value) < std::numeric_limits<double>::epsilon();
         }
         return false;
       }
@@ -98,11 +98,11 @@ namespace epidb {
         if (check(STRING) && value == s_value) {
           return true;
         } else if (check(NUMBER)) {
-          double d;
-          if (!utils::string_to_double(value, d)) {
+          Score s;
+          if (!utils::string_to_score(value, s)) {
             return false;
           }
-          return std::fabs(d - n_value) > std::numeric_limits<double>::epsilon();
+          return std::fabs(s - n_value) > std::numeric_limits<double>::epsilon();
         }
         return false;
       }
@@ -126,11 +126,11 @@ namespace epidb {
         if (!check(NUMBER)) {
           return false;
         }
-        double d;
-        if (!utils::string_to_double(value, d)) {
+        Score s;
+        if (!utils::string_to_score(value, s)) {
           return false;
         }
-        return d > n_value;
+        return s > n_value;
       }
 
       bool is(const double value)
@@ -152,11 +152,11 @@ namespace epidb {
         if (!check(NUMBER)) {
           return false;
         }
-        double d;
-        if (!utils::string_to_double(value, d)) {
+        Score s;
+        if (!utils::string_to_score(value, s)) {
           return false;
         }
-        return d >= n_value;
+        return s >= n_value;
       }
 
       bool is(const double value)
@@ -178,11 +178,11 @@ namespace epidb {
         if (!check(NUMBER)) {
           return false;
         }
-        double d;
-        if (!utils::string_to_double(value, d)) {
+        Score s;
+        if (!utils::string_to_score(value, s)) {
           return false;
         }
-        return d < n_value;
+        return s < n_value;
       }
 
       bool is(const double value)
@@ -204,11 +204,11 @@ namespace epidb {
         if (!check(NUMBER)) {
           return false;
         }
-        double d;
-        if (!utils::string_to_double(value, d)) {
+        Score s;
+        if (!utils::string_to_score(value, s)) {
           return false;
         }
-        return d <= n_value;
+        return s <= n_value;
       }
 
       bool is(const double value)

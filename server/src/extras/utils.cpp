@@ -128,7 +128,7 @@ namespace epidb {
         p += 1;
       }
 
-      r = 0.0;
+      r = std::numeric_limits<T>::min();
       int c = 0; // counter to check how many numbers we got!
 
       // Get the sign!
@@ -233,11 +233,6 @@ namespace epidb {
       return true;
     }
 
-    bool string_to_double(const std::string &s_, double &d)
-    {
-      return string_to_floating_point<double>(d, s_.c_str());
-    }
-
     bool string_to_float(const std::string &s_, float &d)
     {
       return string_to_floating_point<float>(d, s_.c_str());
@@ -248,9 +243,9 @@ namespace epidb {
       return string_to_floating_point<Score>(c, s_.c_str());
     }
 
-    std::string double_to_string(const double d)
+    std::string score_to_string(const Score s)
     {
-      return fmt::format("{:-.4f}", d);
+      return fmt::format("{:-.4f}", s);
     }
 
     std::string size_t_to_string(const size_t t)
@@ -387,7 +382,7 @@ namespace epidb {
         return std::string(buffer);
       }
       case mongo::NumberDouble: {
-        return double_to_string(e.Double());
+        return score_to_string(e.Double());
       }
       case mongo::NumberLong: {
         return long_to_string(e.Long());
