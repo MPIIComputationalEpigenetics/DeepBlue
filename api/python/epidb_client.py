@@ -89,22 +89,19 @@ class EpidbClient:
         return self.server.list_similar_epigenetic_marks(term_name, user_key)
 
   ## Column types
-    def create_column_type_simple(self, name, description, ignore_if,
+    def create_column_type_simple(self, name, description,
                                   type_, user_key):
         return self.server.create_column_type_simple(name, description,
-                                                     ignore_if,
                                                      type_, user_key)
 
     def create_column_type_range(self, name, description,
-                                 ignore_if, minimu, maximum, user_key):
+                                 minimum, maximum, user_key):
         return self.server.create_column_type_range(name, description,
-                                                    ignore_if,
-                                                    minimu, maximum, user_key)
+                                                    minimum, maximum, user_key)
 
     def create_column_type_category(self, name, description,
-                                    ignore_if, items, user_key):
+                                    items, user_key):
         return self.server.create_column_type_category(name, description,
-                                                       ignore_if,
                                                        items, user_key)
 
     def create_column_type_calculated(self, name, description, code,

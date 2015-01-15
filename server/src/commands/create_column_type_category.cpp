@@ -31,11 +31,10 @@ namespace epidb {
         Parameter p[] = {
           Parameter("name", serialize::STRING, "column type name"),
           Parameter("description", serialize::STRING, "description of the column type"),
-          Parameter("default_value", serialize::STRING, "value used when the column value is missing"),
           Parameter("items", serialize::STRING, "items that are accepted for this category set", true),
           parameters::UserKey
         };
-        Parameters params(&p[0], &p[0] + 5);
+        Parameters params(&p[0], &p[0] + 4);
         return params;
       }
 
@@ -58,10 +57,9 @@ namespace epidb {
 
         const std::string name = parameters[0]->as_string();
         const std::string description = parameters[1]->as_string();
-        const std::string default_value = parameters[2]->as_string();
-        const std::string user_key = parameters[4]->as_string();
+        const std::string user_key = parameters[3]->as_string();
 
-        parameters[3]->children(items);
+        parameters[2]->children(items);
         std::vector<std::string> items_s;
         for (std::vector<serialize::ParameterPtr>::iterator it = items.begin(); it != items.end(); ++it) {
           items_s.push_back((**it).as_string());
@@ -87,8 +85,7 @@ namespace epidb {
         std::string norm_description = utils::normalize_name(description);
 
         std::string id;
-        bool ret = dba::columns::create_column_type_category(name, norm_name, description, norm_description,
-                   default_value, items_s, user_key, id, msg);
+        bool ret = dba::columns::create_column_type_category(name, norm_name, description, norm_description, items_s, user_key, id, msg);
 
         if (!ret) {
           result.add_error(msg);

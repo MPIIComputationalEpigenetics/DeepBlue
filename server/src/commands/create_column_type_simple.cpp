@@ -31,11 +31,10 @@ namespace epidb {
         Parameter p[] = {
           Parameter("name", serialize::STRING, "column type name"),
           Parameter("description", serialize::STRING, "description of the column type"),
-          Parameter("default_value", serialize::STRING, "value used when the column value is missing"),
           Parameter("type", serialize::STRING, "type of the column type"),
           parameters::UserKey
         };
-        Parameters params(&p[0], &p[0] + 5);
+        Parameters params(&p[0], &p[0] + 4);
         return params;
       }
 
@@ -56,9 +55,8 @@ namespace epidb {
       {
         const std::string name = parameters[0]->as_string();
         const std::string description = parameters[1]->as_string();
-        const std::string default_value = parameters[2]->as_string();
-        const std::string type = parameters[3]->as_string();
-        const std::string user_key = parameters[4]->as_string();
+        const std::string type = parameters[2]->as_string();
+        const std::string user_key = parameters[3]->as_string();
 
         std::string msg;
         if (!Command::checks(user_key, msg)) {
@@ -75,8 +73,7 @@ namespace epidb {
         std::string norm_description = utils::normalize_name(description);
 
         std::string id;
-        bool ret = dba::columns::create_column_type_simple(name, norm_name, description, norm_description,
-                   default_value, type, user_key, id, msg);
+        bool ret = dba::columns::create_column_type_simple(name, norm_name, description, norm_description, type, user_key, id, msg);
 
         if (!ret) {
           result.add_error(msg);

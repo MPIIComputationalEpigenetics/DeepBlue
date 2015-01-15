@@ -145,6 +145,9 @@ class TestSelectRegions(helpers.TestCase):
 
     self.insert_experiment(epidb, "hg19_chr1_1")
 
+    (s, m) = epidb.create_column_type_simple("foobar", "", "string", self.admin_key)
+    self.assertSuccess(s, m)
+
     full_experiment_regions = helpers.get_result("full_experiment_regions")
 
     res, qid = epidb.select_regions("hg19_chr1_1", "hg19", None, None, None,
@@ -164,8 +167,14 @@ class TestSelectRegions(helpers.TestCase):
     # leave out chromosome entirely
     regions_wo_chr = helpers.get_result("full_experiment_regions_wo_chr")
 
+    # Creating another column, named NAME, that in the experiment is name.
+    # This column should return empty.
+    (s, m) = epidb.create_column_type_simple("NAME", "", "string", self.admin_key)
+    self.assertSuccess(s, m)
+
     fmt = "START,END,NAME,score,strand,signalValue,pValue,qValue,peak"
     res, regions = epidb.get_regions(qid, fmt, self.admin_key)
+
     self.assertSuccess(res, regions)
     self.assertEqual(regions, regions_wo_chr)
 

@@ -11,21 +11,21 @@ class TestBugs(helpers.TestCase):
     585\t1080\t161\t1\t0\tchr19_gl000208_random\t0\t719\t-91970\t-\tALR/Alpha\tSatellite\tcentr\t-41\t719\t1\t4"""
 
     rmsk = [
-  "swScore:Integer:0",
-  "milliDiv:Integer:0",
-  "milliDel:Integer:0",
-  "milliIns:Integer:0",
+  "swScore:Integer",
+  "milliDiv:Integer",
+  "milliDel:Integer",
+  "milliIns:Integer",
   "chromosome:String",
-  "start:Integer:0",
-  "end:Integer:0",
-  "genoLeft:Integer:0",
+  "start:Integer",
+  "end:Integer",
+  "genoLeft:Integer",
   "strand:String",
   "repName:String",
   "repClass:String",
   "repFamily:String",
-  "repStart:Integer:0",
-  "repEnd:Integer:0",
-  "repLeft:Integer:0",
+  "repStart:Integer",
+  "repEnd:Integer",
+  "repLeft:Integer",
   "id:String"
 ]
     format = ",".join(rmsk)
@@ -40,21 +40,21 @@ class TestBugs(helpers.TestCase):
     self.assertEquals(a, "CHROMOSOME field was not informed in the format.")
 
     rmsk2 = [
-  "swScore:Integer:0",
-  "milliDiv:Integer:0",
-  "milliDel:Integer:0",
-  "milliIns:Integer:0",
+  "swScore:Integer",
+  "milliDiv:Integer",
+  "milliDel:Integer",
+  "milliIns:Integer",
   "CHROMOSOME:String",
   "START:Integer",
   "END:Integer",
-  "genoLeft:Integer:0",
+  "genoLeft:Integer",
   "strand:String",
   "repName:String",
   "repClass:String",
   "repFamily:String",
-  "repStart:Integer:0",
-  "repEnd:Integer:0",
-  "repLeft:Integer:0",
+  "repStart:Integer",
+  "repEnd:Integer",
+  "repLeft:Integer",
   "id:String"
 ]
     format2 = ",".join(rmsk2)
@@ -90,9 +90,9 @@ class TestBugs(helpers.TestCase):
       "START",
       "END",
       "name:String",
-      "length:Integer:0",
-      "cpgNum:Integer:0",
-      "gcNum:Integer:0",
+      "length:Integer",
+      "cpgNum:Integer",
+      "gcNum:Integer",
       "perCpg:Double",
       "perGc:Double",
       "obsExp:Double"
@@ -295,7 +295,7 @@ chrX 100000"""
     self.init_base(epidb)
     sample_id = self.sample_ids[0]
 
-    (s, m) = epidb.create_column_type_simple("SCORE", "", "0", "double", self.admin_key)
+    (s, m) = epidb.create_column_type_simple("SCORE", "", "double", self.admin_key)
     self.assertSuccess(s,m)
 
     data = "chr1\t100\t110\t1\nchr1\t200\t400\t0\nchr1\t400\t500\t1\nchr1\t200\t400\t0\n"

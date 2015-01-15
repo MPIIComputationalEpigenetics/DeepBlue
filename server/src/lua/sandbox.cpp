@@ -165,9 +165,6 @@ namespace epidb {
 
       if (column->type() == datatypes::COLUMN_STRING || column->type() == datatypes::COLUMN_CATEGORY) {
         std::string content = current_region_ptr->get_string(column->pos());
-        if (content.empty()) {
-          content = column->default_value();
-        }
         if (content.length() > 0) {
           lua_pushstring(lua_state, content.c_str());
           return 1;
@@ -175,9 +172,6 @@ namespace epidb {
 
       } else if (column->type() == datatypes::COLUMN_INTEGER || column->type() == datatypes::COLUMN_DOUBLE || column->type() == datatypes::COLUMN_RANGE) {
         Score value = current_region_ptr->value(column->pos());
-        if (value == std::numeric_limits<Score>::min()) {
-          utils::string_to_score(column->default_value(), value);
-        }
         if (value != std::numeric_limits<Score>::min()) {
           lua_pushnumber(lua_state, value);
           return 1;

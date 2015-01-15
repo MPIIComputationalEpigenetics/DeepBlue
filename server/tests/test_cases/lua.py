@@ -128,10 +128,16 @@ class TestExperiments(helpers.TestCase):
     res, qid1 = epidb.select_regions("test_exp1", "hg19", None, None, None, None, None, None, None, self.admin_key)
     self.assertSuccess(res, qid1)
 
-    # missing math. before log
+    # missing column definition
     (s, regions_1) = epidb.get_regions(qid1, "CHROMOSOME,START,END,VALUE,@CALCULATED(return log(value_of('VALUE'))), calculated,@CALCULATED(em = value_of('@EPIGENETIC_MARK') if em == 'Methylation' then return 'it is methylation!' else return 'it is not methylation' end)", self.admin_key)
     self.assertFailure(s, regions_1)
+    self.assertEqual(regions_1, "Unable to find the column 'calculated' in the dataset format or in the DeepBlue columns.")
+
+    # missing math. before log
+    (s, regions_1) = epidb.get_regions(qid1, "CHROMOSOME,START,END,VALUE,@CALCULATED(return log(value_of('VALUE'))), @CALCULATED(em = value_of('@EPIGENETIC_MARK') if em == 'Methylation' then return 'it is methylation!' else return 'it is not methylation' end)", self.admin_key)
+    self.assertFailure(s, regions_1)
     self.assertEqual(regions_1, '[string "function row_value()..."]:2: attempt to call global \'log\' (a nil value)')
+
 
   def test_error_maximum_number_of_instructions(self):
     epidb = EpidbClient()

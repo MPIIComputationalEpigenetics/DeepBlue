@@ -18,9 +18,9 @@ class TestAggregateCommand(helpers.TestCase):
       "START",
       "END",
       "name:String",
-      "length:Integer:0",
-      "cpgNum:Integer:0",
-      "gcNum:Integer:0",
+      "length:Integer",
+      "cpgNum:Integer",
+      "gcNum:Integer",
       "perCpg:Double",
       "perGc:Double",
       "obsExp:Double"
@@ -62,22 +62,22 @@ class TestAggregateCommand(helpers.TestCase):
     sample_id = self.sample_ids[0]
 
     # Insert experiment
-    (s, m) = epidb.create_column_type_simple("NAME", "", "", "string", self.admin_key)
+    (s, m) = epidb.create_column_type_simple("NAME", "", "string", self.admin_key)
     self.assertSuccess(s,m)
 
-    (s, m) = epidb.create_column_type_simple("SCORE", "", "0", "double", self.admin_key)
+    (s, m) = epidb.create_column_type_simple("SCORE", "", "double", self.admin_key)
     self.assertSuccess(s,m)
 
-    (s, m) = epidb.create_column_type_simple("strand", "", "", "string", self.admin_key)
+    (s, m) = epidb.create_column_type_simple("strand", "", "string", self.admin_key)
     self.assertSuccess(s,m)
 
-    (s, m) = epidb.create_column_type_simple("SIGNAL_VALUE", "", "0", "double", self.admin_key)
+    (s, m) = epidb.create_column_type_simple("SIGNAL_VALUE", "", "double", self.admin_key)
     self.assertSuccess(s,m)
 
-    (s, m) = epidb.create_column_type_simple("P_VALUE", "", "0", "double", self.admin_key)
+    (s, m) = epidb.create_column_type_simple("P_VALUE", "", "double", self.admin_key)
     self.assertSuccess(s,m)
 
-    (s, m) = epidb.create_column_type_simple("Q_VALUE", "", "0", "double", self.admin_key)
+    (s, m) = epidb.create_column_type_simple("Q_VALUE", "", "double", self.admin_key)
     self.assertSuccess(s,m)
 
     self.insert_experiment(epidb, "hg19_chr1_1", sample_id)
@@ -106,9 +106,9 @@ class TestAggregateCommand(helpers.TestCase):
       "START",
       "END",
       "name:String",
-      "length:Integer:0",
-      "cpgNum:Integer:0",
-      "gcNum:Integer:0",
+      "length:Integer",
+      "cpgNum:Integer",
+      "gcNum:Integer",
       "perCpg:Double",
       "perGc:Double",
       "obsExp:Double"
@@ -143,22 +143,22 @@ class TestAggregateCommand(helpers.TestCase):
     sample_id = self.sample_ids[0]
 
     # Insert experiment
-    (s, m) = epidb.create_column_type_simple("NAME", "", "", "string", self.admin_key)
+    (s, m) = epidb.create_column_type_simple("NAME", "", "string", self.admin_key)
     self.assertSuccess(s,m)
 
-    (s, m) = epidb.create_column_type_simple("SCORE", "", "0", "double", self.admin_key)
+    (s, m) = epidb.create_column_type_simple("SCORE", "", "double", self.admin_key)
     self.assertSuccess(s,m)
 
-    (s, m) = epidb.create_column_type_simple("strand", "", "", "string", self.admin_key)
+    (s, m) = epidb.create_column_type_simple("strand", "", "string", self.admin_key)
     self.assertSuccess(s,m)
 
-    (s, m) = epidb.create_column_type_simple("SIGNAL_VALUE", "", "0", "double", self.admin_key)
+    (s, m) = epidb.create_column_type_simple("SIGNAL_VALUE", "", "double", self.admin_key)
     self.assertSuccess(s,m)
 
-    (s, m) = epidb.create_column_type_simple("P_VALUE", "", "0", "double", self.admin_key)
+    (s, m) = epidb.create_column_type_simple("P_VALUE", "", "double", self.admin_key)
     self.assertSuccess(s,m)
 
-    (s, m) = epidb.create_column_type_simple("Q_VALUE", "", "0", "double", self.admin_key)
+    (s, m) = epidb.create_column_type_simple("Q_VALUE", "", "double", self.admin_key)
     self.assertSuccess(s,m)
 
     self.insert_experiment(epidb, "hg19_chr1_1", sample_id)
@@ -187,9 +187,9 @@ class TestAggregateCommand(helpers.TestCase):
       "START",
       "END",
       "name:String",
-      "length:Integer:0",
-      "cpgNum:Integer:0",
-      "gcNum:Integer:0",
+      "length:Integer",
+      "cpgNum:Integer",
+      "gcNum:Integer",
       "perCpg:Double",
       "perGc:Double",
       "obsExp:Double"

@@ -78,10 +78,6 @@ namespace epidb {
         }
         std::string token = bed_line.tokens[i++];
 
-        if (column_type->ignore(token)) {
-          continue;
-        }
-
         if (!column_type->check(token)) {
           msg = "Invalid value '" + token + "' for column " + field_name;
           return false;

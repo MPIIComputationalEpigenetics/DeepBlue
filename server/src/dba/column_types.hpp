@@ -37,21 +37,18 @@ namespace epidb {
 
       protected:
         std::string _name;
-        std::string _default_value;
         int _pos;
 
-        AbstractColumnType(const std::string n, const std::string i) :
+        AbstractColumnType(const std::string n) :
           _name(n),
-          _default_value(i),
           _pos(-1)
         {
 
 
         }
 
-        AbstractColumnType(const std::string n, const std::string i, int pos) :
+        AbstractColumnType(const std::string n, int pos) :
           _name(n),
-          _default_value(i),
           _pos(pos)
         { }
 
@@ -61,11 +58,6 @@ namespace epidb {
         const std::string name()
         {
           return _name;
-        }
-
-        const std::string default_value()
-        {
-          return _default_value;
         }
 
         int pos() const
@@ -78,11 +70,6 @@ namespace epidb {
           return false;
         }
 
-        bool ignore(const std::string &verify) const
-        {
-          return (_default_value == "*" || _default_value == verify);
-        }
-
         virtual bool execute(const std::string &chromosome,  const AbstractRegion *region, dba::Metafield &metafield, std::string &result, std::string &msg)
         {
           msg = "Execute method not implemented for this class: " + str();
@@ -91,14 +78,13 @@ namespace epidb {
 
         virtual const std::string str() const
         {
-          return "column type name: '" + _name + "' default: '" + _default_value + "'";
+          return "column type name: '" + _name + "'";
         }
 
         virtual const mongo::BSONObj BSONObj() const
         {
           mongo::BSONObjBuilder builder;
           builder.append("name", _name);
-          builder.append("default_value", _default_value);
 
           return builder.obj();
         }
@@ -114,8 +100,8 @@ namespace epidb {
         Type _content;
 
       public:
-        ColumnType(const std::string &n, const Type c, const std::string &i, int pos) :
-          AbstractColumnType(n, i, pos),
+        ColumnType(const std::string &n, const Type c, int pos) :
+          AbstractColumnType(n, pos),
           _content(c)
         {}
 
@@ -209,10 +195,9 @@ namespace epidb {
 
       bool list_column_types(const std::string &user_key, std::vector<utils::IdName> &content, std::string  &msg);
 
-      bool column_type_simple(const std::string &name, datatypes::COLUMN_TYPES type, const std::string &default_value, ColumnTypePtr &column_type, std::string &msg);
+      bool column_type_simple(const std::string &name, datatypes::COLUMN_TYPES type, ColumnTypePtr &column_type, std::string &msg);
 
-      bool column_type_simple(const std::string &name, const std::string &type, const std::string &default_value,
-                              ColumnTypePtr &column_type, std::string &msg);
+      bool column_type_simple(const std::string &name, const std::string &type, ColumnTypePtr &column_type, std::string &msg);
 
       bool load_column_type(const std::string &name, mongo::BSONObj &obj_column_type, std::string &msg);
 
@@ -223,19 +208,16 @@ namespace epidb {
 
       bool create_column_type_simple(const std::string &name, const std::string &norm_name,
                                      const std::string &description, const std::string &norm_description,
-                                     const std::string &default_value, const std::string &type,
-                                     const std::string &user_key,
+                                     const std::string &type, const std::string &user_key,
                                      std::string &id, std::string &msg);
 
       bool create_column_type_category(const std::string &name, const std::string &norm_name,
                                        const std::string &description, const std::string &norm_description,
-                                       const std::string &default_value, const std::vector<std::string> &items,
-                                       const std::string &user_key,
+                                       const std::vector<std::string> &items, const std::string &user_key,
                                        std::string &id, std::string &msg);
 
       bool create_column_type_range(const std::string &name, const std::string &norm_name,
                                     const std::string &description, const std::string &norm_description,
-                                    const std::string &default_value,
                                     const Score minimum, const Score maximum,
                                     const std::string &user_key,
                                     std::string &id, std::string &msg);

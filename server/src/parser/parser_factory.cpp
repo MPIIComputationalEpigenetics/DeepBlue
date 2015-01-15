@@ -9,7 +9,6 @@
 #include <sstream>
 #include <string>
 
-#include <boost/foreach.hpp>
 #include <boost/algorithm/string.hpp>
 
 #include "../dba/metafield.hpp"
@@ -263,7 +262,7 @@ namespace epidb {
       return ab.arr();
     }
 
-    bool FileFormatBuilder::build_for_outout(const std::string &format, const std::vector<mongo::BSONObj>& experiment_columns, FileFormat &file_format, std::string &msg )
+    bool FileFormatBuilder::build_for_outout(const std::string &format, const std::vector<mongo::BSONObj> &experiment_columns, FileFormat &file_format, std::string &msg )
     {
       if (format.empty()) {
         file_format = FileFormat::default_format();
@@ -275,81 +274,48 @@ namespace epidb {
       std::vector<std::string> fields_string;
       boost::split(fields_string, format, boost::is_any_of(","));
 
-      BOOST_FOREACH(const std::string & field_string, fields_string) {
+      BOOST_FOREACH(std::string & field_string, fields_string) {
+
+        boost::trim(field_string);
+
         if (field_string.empty()) {
           msg = "Column name is empty";
           return false;
         }
-        std::vector<std::string> field_info;
-        boost::split(field_info, field_string, boost::is_any_of(":"));
 
-        size_t s = field_info.size();
-        if (s == 1) {
-          dba::columns::ColumnTypePtr column_type;
-          bool found = false;
+        dba::columns::ColumnTypePtr column_type;
+        bool found = false;
 
-          // Look into experiment columns
-          BOOST_FOREACH(const mongo::BSONObj & column, experiment_columns) {
-            if (found) {
-              break;
-            }
-            if (column["name"].str() == field_info[0]) {
-              if (!dba::columns::column_type_bsonobj_to_class(column, column_type, msg)) {
-                return false;
-              } else {
-                found = true;
-              }
-            }
-          }
-
-          // Check if it is metafield
-          if (dba::Metafield::is_meta(field_string)) {
-            if (!build_metafield_column(field_info[0], column_type, msg)) {
-              return false;
-            }
-            found = true;
-          }
-          // Load from database
-          if (!found && dba::columns::load_column_type(field_info[0], column_type, msg)) {
-            found = true;
-          }
-
-          // Create own column
-          // TODO: remove ?
-          if (!found && dba::columns::column_type_simple(field_info[0], "string", "", column_type, msg)) {
-            found = true;
-          }
-
+        // Look into experiment columns
+        BOOST_FOREACH(const mongo::BSONObj & column, experiment_columns) {
           if (found) {
-            file_format.add(column_type);
-          } else {
-            msg = "Unable to build column " + field_info[0];
-            return false;
+            break;
           }
-
-        } else if (s == 2) {
-          // TODO: remove ?
-          dba::columns::ColumnTypePtr column_type;
-
-          // Check if it is metafield and has default value
-          if (dba::Metafield::is_meta(field_string)) {
-            if (!build_metafield_column(field_info[0], field_info[1], column_type, msg)) {
+          if (column["name"].str() == field_string) {
+            if (!dba::columns::column_type_bsonobj_to_class(column, column_type, msg)) {
               return false;
+            } else {
+              found = true;
             }
-          } else {
-            msg = "Invalid column " + field_info[0] + ". Please inform the column type inside the column definition: '" + field_info[0] + ":(integer|double|string):" + field_info[1] + "'";
+          }
+        }
+
+        // Check if it is metafield
+        if (dba::Metafield::is_meta(field_string)) {
+          if (!build_metafield_column(field_string, column_type, msg)) {
             return false;
           }
-          file_format.add(column_type);
-        } else if (s >= 3) {
-          // TODO: remove ?
-          dba::columns::ColumnTypePtr column_type;
-          if (!dba::columns::column_type_simple(field_info[0], field_info[1], field_info[2], column_type, msg)) {
-            return false;
-          }
+          found = true;
+        }
+        // Load from database
+        if (!found && dba::columns::load_column_type(field_string, column_type, msg)) {
+          found = true;
+        }
+
+        if (found) {
           file_format.add(column_type);
         } else {
-          msg = "File Format Error: Invalid field '" + field_string + "'";
+          msg = "Unable to find the column '" + field_string + "' in the dataset format or in the DeepBlue columns.";
           return false;
         }
       }
@@ -384,13 +350,7 @@ namespace epidb {
           file_format.add(column_type);
         } else if (s == 2) {
           dba::columns::ColumnTypePtr column_type;
-          if (!dba::columns::column_type_simple(field_info[0], field_info[1], "", column_type, msg)) {
-            return false;
-          }
-          file_format.add(column_type);
-        } else if (s >= 3) {
-          dba::columns::ColumnTypePtr column_type;
-          if (!dba::columns::column_type_simple(field_info[0], field_info[1], field_info[2], column_type, msg)) {
+          if (!dba::columns::column_type_simple(field_info[0], field_info[1], column_type, msg)) {
             return false;
           }
           file_format.add(column_type);
@@ -402,18 +362,13 @@ namespace epidb {
       return true;
     }
 
-    bool FileFormatBuilder::build_metafield_column(const std::string &op, dba::columns::ColumnTypePtr &column_type, std::string &msg)
-    {
-      return build_metafield_column(op, "", column_type, msg);
-    }
-
-    bool FileFormatBuilder::build_metafield_column(const std::string &op, const std::string &default_value,
+    bool FileFormatBuilder::build_metafield_column(const std::string &op,
         dba::columns::ColumnTypePtr &column_type, std::string &msg)
     {
       static const std::string open_parenthesis("(");
       std::string command = op.substr(0, op.find(open_parenthesis));
       std::string type = dba::Metafield::command_type(command);
-      return dba::columns::column_type_simple(op, type, default_value, column_type, msg);
+      return dba::columns::column_type_simple(op, type, column_type, msg);
     }
   }
 }

@@ -555,11 +555,7 @@ namespace epidb {
           }
           return filter->is(value);
         } else {
-          Score score = region_ref->value(column->pos());
-          if (score == std::numeric_limits<Score>::min()) {
-            utils::string_to_score(column->default_value(), score);
-          }
-          return filter->is(score);
+          return filter->is(region_ref->value(column->pos()));
         }
       }
 

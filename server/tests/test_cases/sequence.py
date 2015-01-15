@@ -18,7 +18,7 @@ class TestSequence(helpers.TestCase):
     res, qid = epidb.select_regions("hg19_big_1", "hg19", None, None, None, None, "chr19", 574556, 1000514, self.admin_key)
     self.assertSuccess(res, qid)
 
-    fmt = "CHROMOSOME,START,END,@NAME:none,@LENGTH,@EPIGENETIC_MARK,@PROJECT,@BIOSOURCE,@SAMPLE_ID,@SEQUENCE:(not found)"
+    fmt = "CHROMOSOME,START,END,@NAME,@LENGTH,@EPIGENETIC_MARK,@PROJECT,@BIOSOURCE,@SAMPLE_ID,@SEQUENCE"
     res, regions = epidb.get_regions(qid, fmt, self.admin_key)
 
     self.assertSuccess(res, regions)
@@ -37,7 +37,7 @@ class TestSequence(helpers.TestCase):
     res, qid = epidb.tiling_regions(10000, "hg19", "chr19", self.admin_key)
     self.assertSuccess(res, qid)
 
-    fmt = "CHROMOSOME,START,END,@NAME:none,@LENGTH,@EPIGENETIC_MARK,@PROJECT,@BIOSOURCE,@SAMPLE_ID,@SEQUENCE:(not found)"
+    fmt = "CHROMOSOME,START,END,@NAME,@LENGTH,@EPIGENETIC_MARK,@PROJECT,@BIOSOURCE,@SAMPLE_ID,@SEQUENCE"
     res, regions = epidb.get_regions(qid, fmt, self.admin_key)
 
     self.assertSuccess(res, regions)
@@ -101,15 +101,16 @@ class TestSequence(helpers.TestCase):
     self.insert_experiment(epidb, "hg19_small")
     res, qid = epidb.select_regions("hg19_small", "hg19", None, None, None, None, "chrM", None, None, self.admin_key)
     self.assertSuccess(res, qid)
-    fmt = "CHROMOSOME,START,END,@NAME:none,@SEQUENCE:(not found),@LENGTH,@EPIGENETIC_MARK,@PROJECT,@BIOSOURCE,@SAMPLE_ID"
+    fmt = "CHROMOSOME,START,END,@NAME,@SEQUENCE,@LENGTH,@EPIGENETIC_MARK,@PROJECT,@BIOSOURCE,@SAMPLE_ID"
+
     res, regions = epidb.get_regions(qid, fmt, self.admin_key)
     self.assertSuccess(res, regions)
-    expected = """chrM\t0\t1\thg19_small\t(not found)\t1\tH3K4me3\tENCODE\tK562\ts1
-chrM\t1\t2\thg19_small\t(not found)\t1\tH3K4me3\tENCODE\tK562\ts1
-chrM\t2\t4\thg19_small\t(not found)\t2\tH3K4me3\tENCODE\tK562\ts1
-chrM\t4\t8\thg19_small\t(not found)\t4\tH3K4me3\tENCODE\tK562\ts1
-chrM\t8\t16\thg19_small\t(not found)\t8\tH3K4me3\tENCODE\tK562\ts1
-chrM\t16\t32\thg19_small\t(not found)\t16\tH3K4me3\tENCODE\tK562\ts1"""
+    expected = """chrM\t0\t1\thg19_small\t\t1\tH3K4me3\tENCODE\tK562\ts1
+chrM\t1\t2\thg19_small\t\t1\tH3K4me3\tENCODE\tK562\ts1
+chrM\t2\t4\thg19_small\t\t2\tH3K4me3\tENCODE\tK562\ts1
+chrM\t4\t8\thg19_small\t\t4\tH3K4me3\tENCODE\tK562\ts1
+chrM\t8\t16\thg19_small\t\t8\tH3K4me3\tENCODE\tK562\ts1
+chrM\t16\t32\thg19_small\t\t16\tH3K4me3\tENCODE\tK562\ts1"""
 
     self.assertEquals(regions, expected)
 
@@ -143,7 +144,7 @@ chrM\t2340\t2377"""
     (s, sid) = epidb.select_annotations(ann_name, "hg19", None, None, None, self.admin_key)
     self.assertSuccess(s, sid)
 
-    fmt = "CHROMOSOME,START,END,@NAME:none,@SEQUENCE:(not found),@LENGTH"
+    fmt = "CHROMOSOME,START,END,@NAME,@SEQUENCE,@LENGTH"
     (s, regions) = epidb.get_regions(sid, fmt, self.admin_key)
 
     expected = """chrM\t1\t30\tInteresting Regions at chrM\tATCACAGGTCTATCACCCTATTAACCACT\t29

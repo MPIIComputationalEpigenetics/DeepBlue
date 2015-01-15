@@ -61,9 +61,6 @@ namespace epidb {
                 }
               }
               Score score = (*it_data)->value(column->pos());
-              if (score == std::numeric_limits<Score>::min()) {
-                utils::string_to_score(column->default_value(), score);
-              }
               acc.push(score);
             }
           }

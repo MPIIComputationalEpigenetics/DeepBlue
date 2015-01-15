@@ -49,9 +49,9 @@ class TestAnnotationCommands(helpers.TestCase):
       "START",
       "END",
       "name:String",
-      "length:Integer:0",
-      "cpgNum:Integer:0",
-      "gcNum:Integer:0",
+      "length:Integer",
+      "cpgNum:Integer",
+      "gcNum:Integer",
       "perCpg:Double",
       "perGc:Double",
       "obsExp:Double"

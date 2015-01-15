@@ -4,7 +4,7 @@ from client import EpidbClient
 
 class TestPattern(helpers.TestCase):
 
-  def test_pattern_chromosome(self):
+  def _test_pattern_chromosome(self):
     epidb = EpidbClient()
     self.init_base(epidb)
 
@@ -102,7 +102,7 @@ class TestPattern(helpers.TestCase):
 
     d = "chr19\t1\t59128983"
     res, qid = epidb.select_annotations("Chromosomes size for hg19_only_chr19", "hg19_only_chr19", None, None, None, self.admin_key)
-    fmt = "CHROMOSOME,START,END,@NAME:none,@LENGTH,@COUNT.NON-OVERLAP(TATA),@COUNT.NON-OVERLAP(GAGA),@COUNT.NON-OVERLAP((TATA|GAGA))"
+    fmt = "CHROMOSOME,START,END,@NAME,@LENGTH,@COUNT.NON-OVERLAP(TATA),@COUNT.NON-OVERLAP(GAGA),@COUNT.NON-OVERLAP((TATA|GAGA))"
     res, regions = epidb.get_regions(qid, fmt, self.admin_key)
     self.assertSuccess(res, regions)
 

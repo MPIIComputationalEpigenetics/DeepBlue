@@ -21,7 +21,7 @@ ANNOTATIONS = {
   "Cpg Islands All Fields": {
     "data_file": "data/cpgIslandAllFields.txt",
     "description": "CpG islands are associated ... (all fields)",
-    "format": "CHROMOSOME,START,END,name:String,length:Integer:0,cpgNum:Integer:0,gcNum:Integer:0,perCpg:Double,perGc:Double,obsExp:Double",
+    "format": "CHROMOSOME,START,END,name:String,length:Integer,cpgNum:Integer,gcNum:Integer,perCpg:Double,perGc:Double,obsExp:Double",
     "metadata": {"url":"genome.ucsc.edu/cgi-bin/hgTables?db=hg19&hgta_group=regulation&hgta_track=cpgIslandExt&hgta_table=cpgIslandExt&hgta_doSchema=describe+table+schema"},
     "genome": "hg19"
   }
@@ -118,13 +118,13 @@ EXPERIMENTS = {
       "CHROMOSOME",
       "START",
       "END",
-      "name:String:.",
-      "score:Integer:0",
-      "strand:String:.",
-      "signalValue:Double:-1",
-      "pValue:Double:-1",
-      "qValue:Double:-1",
-      "peak:Integer:-1"
+      "name:String",
+      "score:Integer",
+      "strand:String",
+      "signalValue:Double",
+      "pValue:Double",
+      "qValue:Double",
+      "peak:Integer"
     ])
   },
 
@@ -139,13 +139,13 @@ EXPERIMENTS = {
       "CHROMOSOME",
       "START",
       "END",
-      "name:String:.",
-      "score:Integer:0",
-      "strand:String:.",
-      "signalValue:Double:-1",
-      "pValue:Double:-1",
-      "qValue:Double:-1",
-      "peak:Integer:-1"
+      "name:String",
+      "score:Integer",
+      "strand:String",
+      "signalValue:Double",
+      "pValue:Double",
+      "qValue:Double",
+      "peak:Integer"
     ])
   },
 
@@ -160,13 +160,13 @@ EXPERIMENTS = {
       "CHROMOSOME",
       "START",
       "END",
-      "name:String:.",
-      "score:Integer:0",
-      "strand:String:.",
-      "signalValue:Double:-1",
-      "pValue:Double:-1",
-      "qValue:Double:-1",
-      "peak:Integer:-1"
+      "name:String",
+      "score:Integer",
+      "strand:String",
+      "signalValue:Double",
+      "pValue:Double",
+      "qValue:Double",
+      "peak:Integer"
     ])
   },
 
@@ -181,12 +181,12 @@ EXPERIMENTS = {
       "CHROMOSOME",
       "START",
       "END",
-      "name:String:.",
-      "score:Integer:0",
-      "strand:String:.",
-      "pValue:Double:-1",
-      "qValue:Double:-1",
-      "peak:Integer:-1"
+      "name:String",
+      "score:Integer",
+      "strand:String",
+      "pValue:Double",
+      "qValue:Double",
+      "peak:Integer"
     ])
   },
 
@@ -201,12 +201,12 @@ EXPERIMENTS = {
       "CHROMOSOME",
       "START",
       "END",
-      "name:String:.",
-      "score:Integer:0",
-      "strand:String:.",
-      "pValue:Double:-1",
-      "qValue:Double:-1",
-      "peak:Integer:-1"
+      "name:String",
+      "score:Integer",
+      "strand:String",
+      "pValue:Double",
+      "qValue:Double",
+      "peak:Integer"
     ])
   },
 
@@ -221,12 +221,12 @@ EXPERIMENTS = {
       "CHROMOSOME",
       "START",
       "END",
-      "name:String:.",
-      "score:Integer:0",
-      "strand:String:.",
-      "pValue:Double:-1",
-      "qValue:Double:-1",
-      "peak:Integer:-1"
+      "name:String",
+      "score:Integer",
+      "strand:String",
+      "pValue:Double",
+      "qValue:Double",
+      "peak:Integer"
     ])
   },
 

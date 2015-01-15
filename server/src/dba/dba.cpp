@@ -131,28 +131,24 @@ namespace epidb {
       if (!dba::columns::create_column_type_simple("CHROMOSOME", utils::normalize_name("CHROMOSOME"),
           "Chromosome name column" ,
           "This column should be used to store the Chromosome value in all experiments and annotations",
-          "",
           "string",  key, column_id, msg)) {
         return false;
       }
       if (!dba::columns::create_column_type_simple("START", utils::normalize_name("START"),
           "Region Start column" ,
           "This column should be used to store the Region Start position all experiments and annotations",
-          "",
           "integer",  key, column_id, msg)) {
         return false;
       }
       if (!dba::columns::create_column_type_simple("END", utils::normalize_name("END"),
           "Region End column" ,
           "This column should be used to store the Region End position all experiments and annotations",
-          "",
           "integer",  key, column_id, msg)) {
         return false;
       }
       if (!dba::columns::create_column_type_simple("VALUE", utils::normalize_name("VALUE"),
           "Region Value" ,
           "This column should be used to store the Wig Files Region Values",
-          "",
           "double",  key, column_id, msg)) {
         return false;
       }
