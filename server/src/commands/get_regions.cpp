@@ -191,9 +191,7 @@ namespace epidb {
             if (!metafield.process(column->name(), chromosome, region.get(), result, msg)) {
               return false;
             }
-            if (result.empty()) {
-              //sb.append(column->default_value());
-            } else {
+            if (!result.empty()) {
               sb.append(std::move(result));
             }
           } else {
@@ -205,23 +203,17 @@ namespace epidb {
               sb.append(std::move(result));
             } else if (column->type() == datatypes::COLUMN_INTEGER) {
               const Score &v = region->value(column->pos());
-              if (v == std::numeric_limits<Score>::min()) {
-                //sb.append(column->default_value());
-              } else {
+              if (v != std::numeric_limits<Score>::min()) {
                 sb.append(utils::integer_to_string((int)v));
               }
             } else if ( ( column->type() == datatypes::COLUMN_DOUBLE) ||  (column->type() == datatypes::COLUMN_RANGE)) {
               const Score &v = region->value(column->pos());
-              if (v == std::numeric_limits<Score>::min()) {
-                //sb.append(column->default_value());
-              } else {
+              if (v != std::numeric_limits<Score>::min()) {
                 sb.append(utils::score_to_string(v));
               }
             } else {
               const std::string &o = region->get_string(column->pos());
-              if (o.empty()) {
-                //sb.append(column->default_value());
-              } else {
+              if (!o.empty()) {
                 sb.append(o);
               }
             }
