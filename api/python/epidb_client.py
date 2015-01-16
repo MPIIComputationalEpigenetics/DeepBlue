@@ -75,6 +75,9 @@ class EpidbClient:
     def add_sample(self, biosource_name, fields, user_key):
         return self.server.add_sample(biosource_name, fields, user_key)
 
+    def add_sample_from_gsm(self, biosource, gsm_id, user_key):
+      return self.server.add_sample_from_gsm(biosource, gsm_id, user_key):
+
     def list_samples(self, biosource, metadata, user_key):
         return self.server.list_samples(biosource, metadata, user_key)
 
@@ -233,6 +236,9 @@ class EpidbClient:
 
     def get_regions(self, query_id, format, user_key):
         return self.server.get_regions(query_id, format, user_key)
+
+    def score_matrix(self, experiments, operation, regions_id, user_key):
+        return self.server.score_matrix(experiments, operation, regions_id, user_key)
 
 ## Admin Operations
 
