@@ -197,9 +197,7 @@ namespace epidb {
                  accs_it != experiments_accs.end(); accs_it++) {
 
               std::string value = accs_it->string("|");
-              if (value.empty()) {
-                ss << "NA" << "\t";
-              } else {
+              if (!value.empty()) {
                 ss << accs_it->string("|") << "\t";
               }
             }
