@@ -96,6 +96,8 @@ namespace epidb {
         std::string type = query["type"].str();
         mongo::BSONObj args = query["args"].Obj();
 
+        std::cerr << "retrieve_query (" << type << ")" << std::endl;
+
         if (type == "experiment_select") {
           if (!retrieve_experiment_select_query(user_key, query, regions, msg)) {
             return false;
@@ -471,10 +473,9 @@ namespace epidb {
         for (; rit != genome_regions.end(); ++rit) {
           last = algorithms::merge_chromosome_regions(last, *rit);
         }
-
-        std::cerr << "leave merge_chromosome_regions" << std::endl;
         regions = std::move(last);
 
+        std::cerr << "leave retrieve_annotation_select_query" << std::endl;
         return true;
       }
 
