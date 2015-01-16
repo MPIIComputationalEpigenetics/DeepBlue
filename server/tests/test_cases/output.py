@@ -36,7 +36,7 @@ class TestOutput(helpers.TestCase):
     self.assertEqual(10, count)
 
     res, regions = epidb.get_regions(qid_1, "chr:start:end:name:length:cpgNum:gcNum:perCpg:perGc:obsExp", self.admin_key)
-    self.assertEquals("Unable to find the column 'chr:start:end:name:length:cpgNum:gcNum:perCpg:perGc:obsExp' in the dataset format or in the DeepBlue columns.", regions)
+    self.assertEquals("123000:Unable to find the column 'chr:start:end:name:length:cpgNum:gcNum:perCpg:perGc:obsExp' in the dataset format or in the DeepBlue columns.", regions)
 
     res, regions = epidb.get_regions(qid_1, "CHROMOSOME,START,END,name,length,cpgNum,gcNum,perCpg,perGc,obsExp", self.admin_key)
 

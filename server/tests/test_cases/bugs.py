@@ -37,7 +37,7 @@ class TestBugs(helpers.TestCase):
 
     self.assertFailure(r, a)
 
-    self.assertEquals(a, "CHROMOSOME field was not informed in the format.")
+    self.assertEquals(a, "120002:The CHROMOSOME is missing in the format. Please, inform the CHROMOSOME column in the Format.")
 
     rmsk2 = [
   "swScore:Integer",

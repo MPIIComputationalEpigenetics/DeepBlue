@@ -14,6 +14,8 @@
 #include "../extras/utils.hpp"
 #include "../extras/serialize.hpp"
 
+#include "../errors.hpp"
+
 namespace epidb {
   namespace command {
 
@@ -63,7 +65,7 @@ namespace epidb {
         }
 
         if (genomes.size() == 0) {
-          result.add_error("Genome was not informed.");
+          result.add_error(Error::m(ERR_USER_GENOME_MISSING));
           return false;
         }
 

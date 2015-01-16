@@ -38,6 +38,10 @@
  * 10 -
  * 11 - Genome
  * 12 - ..
+ * 20 - Chromosome
+ * 21 - Start
+ * 22 - End
+ * 23 - Column Name
  * 50 - Dataset
  * 66 - Internal
  */
@@ -45,6 +49,7 @@
 /** Error :
  * 000 - Invalid/Non-Existent
  * 001 - Duplicated
+ * 002 - Missing
  *
  * 400 - Synonym already exists
  *
@@ -83,6 +88,23 @@ namespace epidb {
     return ss.str();
   }
 
+  Error ERR_USER_USER_MISSING("100002", "The User is missing. Please, specify the User.");
+  Error ERR_USER_EXPERIMENT_MISSING("101002", "The Experiment is missing. Please, specify the Experiment.");
+  Error ERR_USER_ANNOTATION_MISSING("102002", "The Annotation is missing. Please, specify the Annotation.");
+  Error ERR_USER_SAMPLE_MISSING("103002", "The Sample is missing. Please, specify the Sample.");
+  Error ERR_USER_BIOSOURCE_MISSING("104002", "The BioSource is missing. Please, specify the BioSource.");
+  Error ERR_USER_EPIGNETIC_MARK_MISSING("105002", "The Epigenetic Mark is missing. Please, specify the Epigenetic Mark.");
+  Error ERR_USER_TECHNIQUE_MISSING("106002", "The Technique is missing. Please, specify the Technique.");
+  Error ERR_USER_PROJECT_MISSING("107002", "The Project is missing. Please, specify the Project.");
+  Error ERR_USER_DATA_MISSING("108002", "The Data is missing. Please, specify the Data.");
+  Error ERR_USER_FORMAT_MISSING("109002", "The Format is missing. Please, specify the Format.");
+  Error ERR_USER_GENOME_MISSING("111002", "The Genome is missing. Please, specify the Genome.");
+
+  Error ERR_FORMAT_CHROMOSOME_MISSING("120002", "The CHROMOSOME is missing in the format. Please, inform the CHROMOSOME column in the Format.");
+  Error ERR_FORMAT_START_MISSING("121002", "The START is missing in the format. Please, inform the START column in the Format.");
+  Error ERR_FORMAT_END_MISSING("122002", "The END is missing in the format. Please, inform the END column in the Format.");
+  Error ERR_FORMAT_COLUMN_NAME_MISSING("123002", "The Column Name is missing in the format. Please, inform the column name in the Format.");
+
 
   Error ERR_INVALID_USER_KEY("100000", "Invalid User Key.");
 
@@ -103,6 +125,8 @@ namespace epidb {
   Error ERR_DUPLICATED_GENOME_NAME("111001", "Duplicated Genome Name '%s'.");
 
   Error ERR_DUPLICATED_TECHNIQUE_NAME("106001", "Duplicated Genome Name '%s'.");
+
+  Error ERR_INVALID_COLUMN_NAME("123000", "Unable to find the column '%s' in the dataset format or in the DeepBlue columns.");
 
   Error ERR_DATASET_NOT_FOUND("350000", "Dataset '%ld' not found.");
 

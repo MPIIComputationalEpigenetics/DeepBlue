@@ -125,7 +125,7 @@ class TestColumnTypes(helpers.TestCase):
     res = epidb.add_experiment("test_exp1", "hg19", "Methylation", sample_id, "tech1",
                                "ENCODE", "desc1", "", format, None, self.admin_key)
     self.assertFailure(res)
-    self.assertEqual(res[1], "CHROMOSOME field was not informed in the format.")
+    self.assertEqual(res[1], "120002:The CHROMOSOME is missing in the format. Please, inform the CHROMOSOME column in the Format.")
 
 
   def test_range_fail(self):

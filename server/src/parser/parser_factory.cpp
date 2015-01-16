@@ -16,6 +16,7 @@
 
 #include "parser_factory.hpp"
 
+#include "../errors.hpp"
 #include "../log.hpp"
 
 
@@ -65,15 +66,15 @@ namespace epidb {
     bool Parser::check_format(std::string &msg)
     {
       if (chromosome_pos == -1) {
-        msg = "CHROMOSOME field was not informed in the format.";
+        msg = Error::m(ERR_FORMAT_CHROMOSOME_MISSING);
         return false;
       }
       if (start_pos == -1) {
-        msg = "START field was not informed in the format.";
+        msg = Error::m(ERR_FORMAT_START_MISSING);
         return false;
       }
       if (end_pos == -1) {
-        msg = "END field was not informed in the format.";
+        msg = Error::m(ERR_FORMAT_END_MISSING);
         return false;
       }
 
@@ -279,7 +280,7 @@ namespace epidb {
         boost::trim(field_string);
 
         if (field_string.empty()) {
-          msg = "Column name is empty";
+          msg = Error::m(ERR_FORMAT_COLUMN_NAME_MISSING);
           return false;
         }
 
@@ -315,7 +316,7 @@ namespace epidb {
         if (found) {
           file_format.add(column_type);
         } else {
-          msg = "Unable to find the column '" + field_string + "' in the dataset format or in the DeepBlue columns.";
+          msg = Error::m(ERR_INVALID_COLUMN_NAME, field_string.c_str());
           return false;
         }
       }

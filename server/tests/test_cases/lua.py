@@ -131,7 +131,7 @@ class TestExperiments(helpers.TestCase):
     # missing column definition
     (s, regions_1) = epidb.get_regions(qid1, "CHROMOSOME,START,END,VALUE,@CALCULATED(return log(value_of('VALUE'))), calculated,@CALCULATED(em = value_of('@EPIGENETIC_MARK') if em == 'Methylation' then return 'it is methylation!' else return 'it is not methylation' end)", self.admin_key)
     self.assertFailure(s, regions_1)
-    self.assertEqual(regions_1, "Unable to find the column 'calculated' in the dataset format or in the DeepBlue columns.")
+    self.assertEqual(regions_1, "123000:Unable to find the column 'calculated' in the dataset format or in the DeepBlue columns.")
 
     # missing math. before log
     (s, regions_1) = epidb.get_regions(qid1, "CHROMOSOME,START,END,VALUE,@CALCULATED(return log(value_of('VALUE'))), @CALCULATED(em = value_of('@EPIGENETIC_MARK') if em == 'Methylation' then return 'it is methylation!' else return 'it is not methylation' end)", self.admin_key)
