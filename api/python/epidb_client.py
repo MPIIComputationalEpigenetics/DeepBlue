@@ -76,7 +76,7 @@ class EpidbClient:
         return self.server.add_sample(biosource_name, fields, user_key)
 
     def add_sample_from_gsm(self, biosource, gsm_id, user_key):
-      return self.server.add_sample_from_gsm(biosource, gsm_id, user_key):
+      return self.server.add_sample_from_gsm(biosource, gsm_id, user_key)
 
     def list_samples(self, biosource, metadata, user_key):
         return self.server.list_samples(biosource, metadata, user_key)
