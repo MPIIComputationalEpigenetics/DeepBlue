@@ -14,6 +14,8 @@
 #include "../datatypes/column_types_def.hpp"
 #include "../datatypes/regions.hpp"
 
+#include "../errors.hpp"
+
 #include "collections.hpp"
 #include "experiments.hpp"
 #include "info.hpp"
@@ -27,7 +29,11 @@ namespace epidb {
       bool by_name(const std::string &name, mongo::BSONObj &experiment, std::string &msg)
       {
         const std::string norm_name = utils::normalize_name(name);
-        return helpers::get_one(Collections::EXPERIMENTS(), BSON("norm_name" << norm_name), experiment, msg);
+        if (!helpers::get_one(Collections::EXPERIMENTS(), BSON("norm_name" << norm_name), experiment, msg)) {
+          msg = Error::m(ERR_INVALID_EXPERIMENT_NAME, name.c_str());
+          return false;
+        }
+        return true;
       }
 
       bool get_field_pos(const DatasetId &dataset_id, const std::string &column_name, columns::ColumnTypePtr &column_type, std::string &msg)

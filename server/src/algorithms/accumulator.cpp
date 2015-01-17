@@ -108,5 +108,37 @@ namespace epidb {
       }
       return utils::vector_to_string(values, sep);
     }
+
+    GetDataPtr get_function_data(const std::string& function_name) {
+      if (function_name == "min") {
+        return &Accumulator::min;
+      }
+
+      if (function_name == "max") {
+        return &Accumulator::max;
+      }
+
+      if (function_name == "mean") {
+        return &Accumulator::mean;
+      }
+
+      if (function_name == "var") {
+        return &Accumulator::var;
+      }
+
+      if (function_name == "sd") {
+        return &Accumulator::sd;
+      }
+
+      if (function_name == "median") {
+        return &Accumulator::median;
+      }
+
+      if (function_name == "count") {
+        return &Accumulator::count;
+      }
+
+      return nullptr;
+    }
   }
 }

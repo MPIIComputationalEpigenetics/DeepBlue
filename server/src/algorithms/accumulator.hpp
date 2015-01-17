@@ -41,6 +41,9 @@ namespace epidb {
       Score count();
       const std::string string(std::string sep);
     };
+
+    typedef Score (Accumulator::*GetDataPtr)();
+    GetDataPtr get_function_data(const std::string& function_name);
   }
 }
 

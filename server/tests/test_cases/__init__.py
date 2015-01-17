@@ -25,6 +25,7 @@ import patterns
 import projects
 import remove
 import samples
+import score_matrix
 import search
 import select_regions
 import sequence

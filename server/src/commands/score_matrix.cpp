@@ -79,7 +79,7 @@ namespace epidb {
           return false;
         }
         if (!ok) {
-          result.add_error("Invalid query id.");
+          result.add_error(Error::m(ERR_INVALID_QUERY_ID, regions_query_id.c_str()));
           return false;
         }
 
@@ -100,6 +100,12 @@ namespace epidb {
         ChromosomeRegionsList range_regions;
         if (!dba::query::retrieve_query(user_key, regions_query_id, range_regions, msg)) {
           result.add_error(msg);
+          return false;
+        }
+
+        algorithms::GetDataPtr data_ptr = algorithms::get_function_data(aggregation_function);
+        if (!data_ptr && aggregation_function != "acc") {
+          result.add_error("Aggregation function " + aggregation_function + " is invalid.");
           return false;
         }
 
@@ -198,7 +204,11 @@ namespace epidb {
 
               std::string value = accs_it->string("|");
               if (!value.empty()) {
-                ss << accs_it->string("|") << "\t";
+                if (data_ptr) {
+                  ss << ((*accs_it).*data_ptr)() << "\t";
+                } else {
+                  ss << accs_it->string("|") << "\t";
+                }
               }
             }
             ss << std::endl;

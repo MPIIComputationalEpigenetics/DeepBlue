@@ -35,7 +35,7 @@
  * 07 - Project
  * 08 - Data
  * 09 - Format
- * 10 -
+ * 10 - Query
  * 11 - Genome
  * 12 - ..
  * 20 - Chromosome
@@ -126,6 +126,8 @@ namespace epidb {
 
   Error ERR_DUPLICATED_TECHNIQUE_NAME("106001", "Duplicated Genome Name '%s'.");
 
+  Error ERR_INVALID_EXPERIMENT_NAME("101000", "Unable to find the experiment '%s'.");
+  Error ERR_INVALID_QUERY_ID("110000", "Unable to find the query ID '%s'.");
   Error ERR_INVALID_COLUMN_NAME("123000", "Unable to find the column '%s' in the dataset format or in the DeepBlue columns.");
 
   Error ERR_DATASET_NOT_FOUND("350000", "Dataset '%ld' not found.");
