@@ -9,6 +9,7 @@
 #include "../engine/commands.hpp"
 
 #include "../dba/controlled_vocabulary.hpp"
+#include "../dba/data.hpp"
 #include "../dba/dba.hpp"
 #include "../dba/list.hpp"
 
@@ -78,12 +79,6 @@ namespace epidb {
           return false;
         }
 
-        if (!existing_ids.empty()) {
-          msg = "The ID " + gsm_id + " was already imported under the sample " + existing_ids[0];
-          result.add_error(msg);
-          return false;
-        }
-
 
         // TODO Move to a helper function: get_biosource_root
         bool is_biosource(false);
@@ -117,6 +112,22 @@ namespace epidb {
         } else {
           sample_biosource_name = biosource_name;
           norm_sample_biosource_name = norm_biosource_name;
+        }
+
+        if (!existing_ids.empty()) {
+          mongo::BSONObj existing_sample;
+          if (!dba::data::sample(existing_ids[0], existing_sample, msg)) {
+            result.add_error(msg);
+            return false;
+          }
+          std::string existing_sample_biosource = existing_sample["norm_biosource_name"].str();
+          if (norm_biosource_name == existing_sample_biosource) {
+            result.add_string(existing_ids[0]);
+          } else {
+            result.add_error("GSM ID '" + gsm_id + "' was already imported with the BioSource '" + biosource_name +"'");
+            return false;
+          }
+          return true;
         }
 
         datatypes::Metadata metadata;
