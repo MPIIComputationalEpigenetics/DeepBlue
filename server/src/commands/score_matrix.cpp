@@ -199,15 +199,22 @@ namespace epidb {
             ss << region->start() << "\t";
             ss << region->end() << "\t";
 
+            bool first = true;
             for (std::vector<algorithms::Accumulator>::iterator accs_it = experiments_accs.begin();
                  accs_it != experiments_accs.end(); accs_it++) {
+
+              if (!first) {
+                ss << "\t";
+              } else {
+                first = false;
+              }
 
               std::string value = accs_it->string("|");
               if (!value.empty()) {
                 if (data_ptr) {
-                  ss << ((*accs_it).*data_ptr)() << "\t";
+                  ss << ((*accs_it).*data_ptr)();
                 } else {
-                  ss << accs_it->string("|") << "\t";
+                  ss << accs_it->string("|");
                 }
               }
             }
