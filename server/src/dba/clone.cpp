@@ -237,7 +237,7 @@ namespace epidb {
 
       if (dataset_id[0] == 'a') {
         if (!annotations::build_metadata_with_dataset(clone_name, norm_clone_name, clone_genome, clone_norm_genome,
-            clone_description, clone_norm_description, extra_metadata,
+            clone_description, clone_norm_description, extra_metadata_obj,
             user_key, ip, clone_format,
             internal_dataset_id, _id, cloned_metadata, msg)) {
           return false;
@@ -249,7 +249,7 @@ namespace epidb {
             clone_sample_id, clone_technique, clone_norm_technique,
             clone_project, clone_norm_project,
             clone_description, clone_norm_description,
-            extra_metadata, user_key, ip,
+            extra_metadata_obj, user_key, ip,
             clone_format, internal_dataset_id,
             _id, cloned_metadata, msg)) {
           return false;

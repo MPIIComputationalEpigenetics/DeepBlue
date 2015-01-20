@@ -6,8 +6,9 @@
 //  Copyright (c) 2014 Max Planck Institute for Computer Science. All rights reserved.
 //
 
-
 #include <string>
+
+#include <mongo/bson/bson.h>
 
 #include "helpers.hpp"
 
@@ -21,7 +22,7 @@ namespace epidb {
       bool build_metadata(const std::string &name, const std::string &norm_name,
                           const std::string &genome, const std::string &norm_genome,
                           const std::string &description, const std::string &norm_description,
-                          const datatypes::Metadata &extra_metadata,
+                          const mongo::BSONObj &extra_metadata_obj,
                           const std::string &user_key, const std::string &ip,
                           const parser::FileFormat &format,
                           int &dataset_id,
@@ -32,7 +33,7 @@ namespace epidb {
       bool build_metadata_with_dataset(const std::string &name, const std::string &norm_name,
                                        const std::string &genome, const std::string &norm_genome,
                                        const std::string &description, const std::string &norm_description,
-                                       const datatypes::Metadata &extra_metadata,
+                                       const mongo::BSONObj &extra_metadata_obj,
                                        const std::string &user_key, const std::string &ip,
                                        const parser::FileFormat &format,
                                        const int dataset_id,

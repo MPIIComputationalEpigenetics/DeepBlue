@@ -302,9 +302,10 @@ namespace epidb {
                            std::string &experiment_id, std::string &msg)
     {
       mongo::BSONObj experiment_metadata;
+      mongo::BSONObj extra_metadata_obj = datatypes::extra_metadata_to_bson(extra_metadata);
       int dataset_id;
       if (!experiments::build_metadata(name, norm_name, genome, norm_genome, epigenetic_mark, norm_epigenetic_mark,
-                                       sample_id, technique, norm_technique, project, norm_project, description, norm_description, extra_metadata,
+                                       sample_id, technique, norm_technique, project, norm_project, description, norm_description, extra_metadata_obj,
                                        user_key, ip, parser::FileFormat::wig_format(), dataset_id,  experiment_id, experiment_metadata, msg)) {
         return false;
       }
@@ -459,11 +460,12 @@ namespace epidb {
                            std::string &experiment_id, std::string &msg)
     {
       mongo::BSONObj experiment_metadata;
+      mongo::BSONObj extra_metadata_obj = datatypes::extra_metadata_to_bson(extra_metadata);
       int dataset_id;
       if (!experiments::build_metadata(name, norm_name, genome, norm_genome,
                                        epigenetic_mark, norm_epigenetic_mark,
                                        sample_id, technique, norm_technique, project, norm_project,
-                                       description, norm_description, extra_metadata,
+                                       description, norm_description, extra_metadata_obj,
                                        user_key, ip, format,
                                        dataset_id,  experiment_id, experiment_metadata, msg)) {
         return false;
@@ -572,8 +574,9 @@ namespace epidb {
     {
       int dataset_id;
       mongo::BSONObj annotation_metadata;
+      mongo::BSONObj extra_metadata_obj = datatypes::extra_metadata_to_bson(extra_metadata);
       if (!annotations::build_metadata(name, norm_name, genome, norm_genome,
-                                       description, norm_description, extra_metadata,
+                                       description, norm_description, extra_metadata_obj,
                                        user_key, ip, format,
                                        dataset_id, annotation_id, annotation_metadata, msg)) {
         return false;
@@ -681,8 +684,9 @@ namespace epidb {
     {
       int dataset_id;
       mongo::BSONObj annotation_metadata;
+      mongo::BSONObj extra_metadata_obj = datatypes::extra_metadata_to_bson(extra_metadata);
       if (!annotations::build_metadata(name, norm_name, genome, norm_genome,
-                                       description, norm_description, extra_metadata,
+                                       description, norm_description, extra_metadata_obj,
                                        user_key, ip, format,
                                        dataset_id, annotation_id, annotation_metadata, msg)) {
         return false;
@@ -743,7 +747,7 @@ namespace epidb {
 
         std::string collection = helpers::region_collection_name(genome, internal_chromosome);
 
-        for (auto & region : chromosome_regions.second) {
+        for (auto &region : chromosome_regions.second) {
           mongo::BSONObjBuilder region_builder;
 
           if (region->start() > chromosome_size || region->end() > chromosome_size) {

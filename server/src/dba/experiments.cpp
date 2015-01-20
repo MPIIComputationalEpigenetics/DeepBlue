@@ -91,7 +91,7 @@ namespace epidb {
                           const std::string &sample_id, const std::string &technique, const std::string &norm_technique,
                           const std::string &project, const std::string &norm_project,
                           const std::string &description, const std::string &norm_description,
-                          const datatypes::Metadata &extra_metadata,
+                          const mongo::BSONObj &extra_metadata_obj,
                           const std::string &user_key, const std::string &ip,
                           const parser::FileFormat &format,
                           int &dataset_id,
@@ -109,7 +109,7 @@ namespace epidb {
                                          sample_id, technique, norm_technique,
                                          project, norm_project,
                                          description, norm_description,
-                                         extra_metadata,
+                                         extra_metadata_obj,
                                          user_key, ip,
                                          format,
                                          dataset_id,
@@ -129,7 +129,7 @@ namespace epidb {
                                        const std::string &sample_id, const std::string &technique, const std::string &norm_technique,
                                        const std::string &project, const std::string &norm_project,
                                        const std::string &description, const std::string &norm_description,
-                                       const datatypes::Metadata &extra_metadata,
+                                       const mongo::BSONObj &extra_metadata_obj,
                                        const std::string &user_key, const std::string &ip,
                                        const parser::FileFormat &format,
                                        const int dataset_id,
@@ -163,7 +163,6 @@ namespace epidb {
 
         experiment_data_builder.append("columns", format.to_bson());
 
-        mongo::BSONObj extra_metadata_obj = datatypes::extra_metadata_to_bson(extra_metadata);
         experiment_data_builder.append("extra_metadata", extra_metadata_obj);
 
         std::map<std::string, std::string> sample_data;

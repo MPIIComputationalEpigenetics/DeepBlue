@@ -11,6 +11,8 @@
 
 #include <string>
 
+#include <mongo/bson/bson.h>
+
 #include "../datatypes/column_types_def.hpp"
 #include "../datatypes/metadata.hpp"
 
@@ -33,7 +35,7 @@ namespace epidb {
                           const std::string &sample_id, const std::string &technique, const std::string &norm_technique,
                           const std::string &project, const std::string &norm_project,
                           const std::string &description, const std::string &norm_description,
-                          const datatypes::Metadata &extra_metadata,
+                          const mongo::BSONObj &extra_metadata_obj,
                           const std::string &user_key, const std::string &ip,
                           const parser::FileFormat &format,
                           int &dataset_id,
@@ -47,7 +49,7 @@ namespace epidb {
                                        const std::string &sample_id, const std::string &technique, const std::string &norm_technique,
                                        const std::string &project, const std::string &norm_project,
                                        const std::string &description, const std::string &norm_description,
-                                       const datatypes::Metadata &extra_metadata,
+                                       const mongo::BSONObj &extra_metadata_obj,
                                        const std::string &user_key, const std::string &ip,
                                        const parser::FileFormat &format,
                                        const int dataset_id,

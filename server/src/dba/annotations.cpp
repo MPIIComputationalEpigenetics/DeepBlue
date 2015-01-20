@@ -9,6 +9,8 @@
 
 #include <string>
 
+#include <mongo/bson/bson.h>
+
 #include "annotations.hpp"
 #include "helpers.hpp"
 
@@ -23,7 +25,7 @@ namespace epidb {
       bool build_metadata(const std::string &name, const std::string &norm_name,
                           const std::string &genome, const std::string &norm_genome,
                           const std::string &description, const std::string &norm_description,
-                          const datatypes::Metadata &extra_metadata,
+                          const mongo::BSONObj &extra_metadata_obj,
                           const std::string &user_key, const std::string &ip,
                           const parser::FileFormat &format,
                           int &dataset_id,
@@ -37,7 +39,7 @@ namespace epidb {
 
         if (!build_metadata_with_dataset(name, norm_name, genome, norm_genome,
                                          description, norm_description,
-                                         extra_metadata,
+                                         extra_metadata_obj,
                                          user_key, ip,
                                          format,
                                          dataset_id,
@@ -54,7 +56,7 @@ namespace epidb {
       bool build_metadata_with_dataset(const std::string &name, const std::string &norm_name,
                                        const std::string &genome, const std::string &norm_genome,
                                        const std::string &description, const std::string &norm_description,
-                                       const datatypes::Metadata &extra_metadata,
+                                       const mongo::BSONObj &extra_metadata_obj,
                                        const std::string &user_key, const std::string &ip,
                                        const parser::FileFormat &format,
                                        const int dataset_id,
@@ -81,7 +83,6 @@ namespace epidb {
 
         annotation_data_builder.append("columns", format.to_bson());
 
-        mongo::BSONObj extra_metadata_obj = datatypes::extra_metadata_to_bson(extra_metadata);
         annotation_data_builder.append("extra_metadata", extra_metadata_obj);
 
         annotation_metadata = annotation_data_builder.obj();
