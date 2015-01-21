@@ -41,7 +41,7 @@ namespace epidb {
       static Parameters results_()
       {
         Parameter p[] = {
-          Parameter("information", serialize::LIST, "List of Maps containing the objects information", true)
+          Parameter("information", serialize::LIST, "List of Maps, where each map contains the info of an object.", true)
         };
         Parameters results(&p[0], &p[0] + 1);
         return results;
