@@ -3,7 +3,7 @@ include ../Makefile.inc
 CXXFLAGS	= $(DEFCXXFLAGS) -I..
 
 OBJLIBS	= ../libengine.a
-OBJS	= engine.o commands.o
+OBJS	= commands.o engine.o queue_processer.o
 
 all : $(OBJLIBS)
 

@@ -13,20 +13,23 @@
 
 #include "commands.hpp"
 
+#include "../mdbq/hub.hpp"
+
 #include "../log.hpp"
 
 namespace epidb {
   class Engine : private boost::noncopyable {
   private:
-    Engine()
-    {
-      EPIDB_LOG("Creating Engine");
-    }
+    mdbq::Hub _hub;
+
+    Engine();
     Engine(Engine const &);
     void operator=(Engine const &);
 
+    bool queue(const mongo::BSONObj &job, unsigned int timeout, std::string &request_id, std::string &msg);
+
   public:
-    const static Engine &instance()
+    static Engine &instance()
     {
       static Engine instance;
       return instance;
@@ -34,6 +37,8 @@ namespace epidb {
 
     bool execute(const std::string &name, const std::string &ip, unsigned long long id,
                  serialize::Parameters &parameters, serialize::Parameters &result) const;
+
+    bool queue_count_regions(const std::string &query_id, const std::string &user_key, std::string &request_id, std::string &msg);
   };
 }
 

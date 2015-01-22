@@ -28,7 +28,6 @@
 #include "extras/compress.hpp"
 #include "httpd/server.hpp"
 
-
 #include "parser/wig.hpp"
 
 int main(int argc, char *argv[])

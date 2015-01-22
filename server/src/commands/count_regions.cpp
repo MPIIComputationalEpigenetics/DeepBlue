@@ -15,6 +15,7 @@
 #include "../extras/serialize.hpp"
 
 #include "../engine/commands.hpp"
+#include "../engine/engine.hpp"
 
 #include "../errors.hpp"
 
@@ -73,6 +74,13 @@ namespace epidb {
           return false;
         }
 
+        std::string request_id;
+        if (!epidb::Engine::instance().queue_count_regions(query_id, user_key, request_id, msg)) {
+          return false;
+        }
+
+        return true;
+        /*
         size_t size = 0;
         if (!dba::query::count_regions(user_key, query_id, size, msg)) {
           result.add_error(msg);
@@ -82,6 +90,7 @@ namespace epidb {
         result.add_int(size);
 
         return true;
+                */
       }
     } countRegionsCommand;
   }
