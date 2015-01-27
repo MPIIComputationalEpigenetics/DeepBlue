@@ -62,6 +62,7 @@ namespace mdbq {
       }
     }
   };
+
   Client::Client(const std::string &url, const std::string &prefix)
     : m_jobcol(prefix + ".jobs")
     , m_logcol(prefix + ".log")
@@ -75,6 +76,7 @@ namespace mdbq {
     m_db = prefix;
     m_ptr->m_fs.reset(new mongo::GridFS(m_ptr->m_con, m_db, "fs"));
   }
+
   Client::Client(const std::string &url, const std::string &prefix, const mongo::BSONObj &query)
     : m_jobcol(prefix + ".jobs")
     , m_logcol(prefix + ".log")
@@ -89,6 +91,7 @@ namespace mdbq {
     m_db = prefix;
     m_ptr->m_fs.reset(new mongo::GridFS(m_ptr->m_con, m_db, "fs"));
   }
+
   bool Client::get_next_task(mongo::BSONObj &o)
   {
     if (!m_ptr->m_current_task.isEmpty()) {
@@ -140,11 +143,12 @@ namespace mdbq {
     m_ptr->m_log.clear();
     return true;
   }
+
   bool Client::get_best_task(mongo::BSONObj &task)
   {
     mongo::BSONObjBuilder queryb;
     // select finished task
-    queryb.append("state", TS_OK);
+    queryb.append("state", TS_DONE);
     if (! m_ptr->m_task_selector.isEmpty())
       queryb.appendElements(m_ptr->m_task_selector);
 
@@ -160,6 +164,7 @@ namespace mdbq {
     task = cursor->nextSafe().copy();
     return true;
   }
+
   void Client::finish(const mongo::BSONObj &result, bool ok)
   {
     const mongo::BSONObj &ct = m_ptr->m_current_task;
@@ -171,16 +176,16 @@ namespace mdbq {
 
     boost::posix_time::ptime finish_time = universal_date_time();
     int version = ct["version"].Int();
-    if (ok)
+    if (ok) {
       m_ptr->m_con.update(m_jobcol,
                           QUERY("_id" << ct["_id"] <<
                                 "version" << version),
                           BSON("$set" << BSON(
-                                 "state" << TS_OK <<
+                                 "state" << TS_DONE <<
                                  "version" << version + 1 <<
                                  "finish_time" << to_mongo_date(finish_time) <<
                                  "result" << result)));
-    else
+    } else {
       m_ptr->m_con.update(m_jobcol,
                           QUERY("_id" << ct["_id"] <<
                                 "version" << version),
@@ -190,9 +195,11 @@ namespace mdbq {
                                  "failure_time" << to_mongo_date(finish_time) <<
                                  "result.status" << "fail" <<
                                  "error" << result)));
+    }
     CHECK_DB_ERR(m_ptr->m_con);
     m_ptr->m_current_task = mongo::BSONObj(); // empty, call get_next_task.
   }
+
   void Client::reg(boost::asio::io_service &io_service, float interval)
   {
     m_ptr->m_interval = interval;
@@ -207,6 +214,7 @@ namespace mdbq {
     std::cerr << "MDBQC: WARNING: got a task, but no handler defined!" << std::endl;
     finish(BSON("error" << true));
   }
+
   Client::~Client() { }
   void Client::log(int level, const mongo::BSONObj &msg)
   {
@@ -223,6 +231,7 @@ namespace mdbq {
                              "timestamp" << to_mongo_date(now) <<
                              "msg" << msg));
   }
+
   void Client::log(int level, const char *ptr, size_t len, const mongo::BSONObj &msg)
   {
     mongo::BSONObj &ct = m_ptr->m_current_task;
@@ -258,6 +267,7 @@ namespace mdbq {
                              "msg" << msg
                            ));
   }
+
   void Client::checkpoint(bool check_for_timeout)
   {
     const mongo::BSONObj &ct = m_ptr->m_current_task;

@@ -15,6 +15,7 @@
 #include "../log.hpp"
 
 #include "../dba/config.hpp"
+#include "../dba/queries.hpp"
 
 #include "../version.hpp"
 
@@ -49,19 +50,70 @@ namespace epidb {
     return command->run(ip, parameters, result);
   }
 
-  bool Engine::queue(const mongo::BSONObj &job, unsigned int timeout, std::string& id, std::string &msg)
+  bool Engine::queue(const mongo::BSONObj &job, unsigned int timeout, std::string &id, std::string &msg)
   {
-    if (!_hub.insert_job(job, timeout, Version::version(), id, msg)) {
+    if (!_hub.insert_job(job, timeout, Version::version_value(), id, msg)) {
       return false;
     }
     return true;
   }
 
-  bool Engine::queue_count_regions(const std::string &query_id, const std::string &user_key, std::string& id, std::string &msg)
+  bool Engine::queue_count_regions(const std::string &query_id, const std::string &user_key, std::string &id, std::string &msg)
   {
     if (!queue(BSON("command" << "count_regions" << "query_id" << query_id << "user_key" << user_key), 60 * 60, id, msg)) {
       return false;
     }
+    return true;
+  }
+
+
+  mongo::BSONObj Engine::process(const mongo::BSONObj &job)
+  {
+    std::cerr << job.toString() << std::endl;
+    std::string command = job["command"].str();
+
+    if (command == "count_regions") {
+      return process_count(job["query_id"].str(), job["user_key"].str());
+    } else {
+      mongo::BSONObjBuilder bob;
+      bob.append("success", false);
+      bob.append("error", "Invalid command" + command);
+      return bob.obj();
+    }
+  }
+
+  mongo::BSONObj Engine::process_count(const std::string &query_id, const std::string &user_key)
+  {
+    std::string msg;
+    mongo::BSONObjBuilder bob;
+    size_t count = 0;
+
+    if (!dba::query::count_regions(query_id, user_key, count, msg)) {
+      bob.append("success", false);
+      bob.append("error", msg);
+      return bob.obj();
+    }
+
+    bob.append("success", true);
+    bob.append("count", (long long) count);
+
+    return bob.obj();
+  }
+
+  bool Engine::request_status(const std::string &request_id, const std::string &user_key, request::Status &request_status, std::string &msg)
+  {
+    std::cerr << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" << std::endl;
+    mongo::BSONObj o = _hub.get_job(request_id, user_key);
+    if (o.isEmpty()) {
+      msg = "Request ID " + request_id + " not found.";
+      return false;
+    }
+
+    request_status.state = mdbq::Hub::state_name(o);
+    request_status.message = mdbq::Hub::state_message(o);
+
+    std::cerr << o.toString() << std::endl;
+    std::cerr << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" << std::endl;
     return true;
   }
 }

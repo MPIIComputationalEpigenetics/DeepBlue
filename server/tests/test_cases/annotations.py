@@ -34,13 +34,20 @@ class TestAnnotationCommands(helpers.TestCase):
 
     res, count = epidb.count_regions(qid, self.admin_key)
     self.assertSuccess(res, count)
+
+    print epidb.get_request_status(count, self.admin_key)
+
+    import time
+    time.sleep(2)
+    print epidb.get_request_status(count, self.admin_key)
+
     self.assertEqual(size, count)
 
     res, regions = epidb.get_regions(qid, "CHROMOSOME,START,END", self.admin_key)
     self.assertSuccess(res, regions)
     self.assertEqual(regions, file_data)
 
-  def test_annotation_full_cpg_islands(self):
+  def __test_annotation_full_cpg_islands(self):
     epidb = EpidbClient()
     self.init_base(epidb)
 

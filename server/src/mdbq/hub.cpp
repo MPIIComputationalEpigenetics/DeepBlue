@@ -18,6 +18,8 @@
 #include "../log.hpp"
 
 #include "../dba/helpers.hpp"
+#include "../extras/utils.hpp"
+
 
 #define CHECK_DB_ERR_LOG(CON)\
   {\
@@ -80,6 +82,7 @@ namespace mdbq {
                   << std::endl;
       }
     }
+
     void update_check(Hub *c, const boost::system::error_code &error)
     {
       // search for jobs which have failed and reschedule them
@@ -132,19 +135,31 @@ namespace mdbq {
     m_ptr->m_prefix = prefix;
   }
 
-  bool Hub::insert_job(const mongo::BSONObj &job, unsigned int timeout, const std::string &version, std::string &id, std::string &msg)
+  bool Hub::insert_job(const mongo::BSONObj &job, unsigned int timeout, const int version_value, std::string &id, std::string &msg)
   {
     int r_id;
     if (!epidb::dba::helpers::get_counter("request", r_id, msg))  {
       return false;
     }
+
+    if (!epidb::dba::helpers::get_counter("request", r_id, msg))  {
+      return false;
+    }
+
+    if (!epidb::dba::helpers::get_counter("request", r_id, msg))  {
+      return false;
+    }
+
     id = "r" + epidb::utils::integer_to_string(r_id);
+
+    std::cerr << job.toString() << std::endl;
+    std::cerr << id << std::endl;
 
     boost::posix_time::ptime ctime = universal_date_time();
     m_ptr->m_con.insert(m_prefix + ".jobs",
                         BSON( "_id" << id
                               << "timeout"     << timeout
-                              << "version"     << version
+                              << "version"     << version_value
                               << "create_time" << to_mongo_date(ctime)
                               << "finish_time" << mongo::Undefined
                               << "book_time"   << mongo::Undefined
@@ -160,26 +175,31 @@ namespace mdbq {
 
     return true;
   }
+
   size_t Hub::get_n_open()
   {
     return m_ptr->m_con.count(m_prefix + ".jobs",
                               BSON( "state" << TS_NEW));
   }
+
   size_t Hub::get_n_assigned()
   {
     return m_ptr->m_con.count(m_prefix + ".jobs",
                               BSON( "state" << TS_RUNNING));
   }
+
   size_t Hub::get_n_ok()
   {
     return m_ptr->m_con.count(m_prefix + ".jobs",
-                              BSON( "state" << TS_OK));
+                              BSON( "state" << TS_DONE));
   }
+
   size_t Hub::get_n_failed()
   {
     return m_ptr->m_con.count(m_prefix + ".jobs",
                               BSON( "state" << TS_FAILED));
   }
+
   void Hub::clear_all()
   {
     m_ptr->m_con.dropCollection(m_prefix + ".jobs");
@@ -190,6 +210,7 @@ namespace mdbq {
     // this is from https://jira.mongodb.org/browse/SERVER-5323
     m_ptr->m_con.ensureIndex(m_prefix + ".fs.chunks", BSON("files_id" << 1 << "n" << 1));
   }
+
   void Hub::got_new_results()
   {
     std::cout << "New results available!" << std::endl;
@@ -202,10 +223,42 @@ namespace mdbq {
     m_ptr->m_timer->async_wait(boost::bind(&HubImpl::update_check, m_ptr.get(), this, boost::asio::placeholders::error));
   }
 
+  mongo::BSONObj Hub::get_job(const std::string &id, const std::string &user_key)
+  {
+    return m_ptr->m_con.findOne(m_prefix + ".jobs", QUERY("_id" << id << "misc.user_key" << user_key)) ;
+  }
+
   mongo::BSONObj Hub::get_newest_finished()
   {
     return m_ptr->m_con.findOne(m_prefix + ".jobs",
-                                QUERY("state" << TS_OK).sort("finish_time"));
+                                QUERY("state" << TS_DONE).sort("finish_time"));
   }
+
+  std::string Hub::state_name(mongo::BSONObj& o)
+  {
+    int state = o["state"].Int();
+
+    switch (state) {
+    case TS_NEW: return "new";
+    case TS_RUNNING: return "running";
+    case TS_DONE: return "done";
+    case TS_FAILED: return "failed";
+    default : return "Invalid State: " + epidb::utils::integer_to_string(state);
+    }
+  }
+
+  std::string Hub::state_message(mongo::BSONObj& o)
+  {
+    int state = o["state"].Int();
+
+    switch (state) {
+    case TS_NEW: return "";
+    case TS_RUNNING: return "";
+    case TS_DONE: return "";
+    case TS_FAILED: return "**failed message**"; // TODO: implement here
+    default : return "Invalid State: " + epidb::utils::integer_to_string(state);
+    }
+  }
+
 }
 

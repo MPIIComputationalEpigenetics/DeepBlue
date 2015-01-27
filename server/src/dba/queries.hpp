@@ -37,7 +37,7 @@ namespace epidb {
       bool retrieve_experiment_select_query(const std::string &user_key, const mongo::BSONObj &query,
                                             ChromosomeRegionsList &regions, std::string &msg);
 
-      bool count_regions(const std::string &user_key, const std::string &query_id,
+      bool count_regions(const std::string &query_id, const std::string &user_key,
                          size_t &count, std::string &msg);
 
       const mongo::BSONObj build_query(const mongo::BSONObj &args);

@@ -25,6 +25,7 @@
 #include "log.hpp"
 #include "version.hpp"
 #include "dba/config.hpp"
+#include "engine/queue_processer.hpp"
 #include "extras/compress.hpp"
 #include "httpd/server.hpp"
 
@@ -91,6 +92,9 @@ int main(int argc, char *argv[])
     EPIDB_LOG_ERR("Problem initializing LZO compression algorithm.");
     return 1;
   }
+
+  epidb::engine::queue_processer_run(4);
+
   epidb::httpd::server s(address, port, threads);
   s.run();
 

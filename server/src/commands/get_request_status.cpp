@@ -1,9 +1,9 @@
 //
-//  count_regions.cpp
+//  get_request_status.cpp
 //  epidb
 //
-//  Created by Felipe Albrecht on 29.08.13.
-//  Copyright (c) 2013,2014 Max Planck Institute for Computer Science. All rights reserved.
+//  Created by Felipe Albrecht on 27.01.15.
+//  Copyright (c) 2013,2014,2015 Max Planck Institute for Computer Science. All rights reserved.
 //
 
 #include <sstream>
@@ -16,24 +16,25 @@
 
 #include "../engine/commands.hpp"
 #include "../engine/engine.hpp"
+#include "../engine/request_status.hpp"
 
 #include "../errors.hpp"
 
 namespace epidb {
   namespace command {
 
-    class CountRegionsCommand: public Command {
+    class GetRequestStatusCommand: public Command {
 
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::OPERATIONS, "Counts the number of regions in the result of the given query.");
+        return CommandDescription(categories::REQUESTS, "Get the status of the given request.");
       }
 
       static  Parameters parameters_()
       {
         Parameter p[] = {
-          Parameter("query_id", serialize::STRING, "id of the counted query"),
+          Parameter("request_id", serialize::STRING, "ID of the request"),
           parameters::UserKey
         };
         Parameters params(&p[0], &p[0] + 2);
@@ -43,14 +44,15 @@ namespace epidb {
       static Parameters results_()
       {
         Parameter p[] = {
-          Parameter("size", serialize::INTEGER, "number of regions")
+          Parameter("status", serialize::STRING, "request_status: waiting,running,done,error"),
+          Parameter("msg", serialize::STRING, "message: can be empty, an error message or actual status.")
         };
-        Parameters results(&p[0], &p[0] + 1);
+        Parameters results(&p[0], &p[0] + 2);
         return results;
       }
 
     public:
-      CountRegionsCommand() : Command("count_regions", parameters_(), results_(), desc_()) {}
+      GetRequestStatusCommand() : Command("get_request_status", parameters_(), results_(), desc_()) {}
 
       virtual bool run(const std::string &ip,
                        const serialize::Parameters &parameters, serialize::Parameters &result) const
@@ -64,25 +66,17 @@ namespace epidb {
           return false;
         }
 
-        bool ok = false;
-        if (!dba::check_query(user_key, query_id, ok, msg)) {
-          result.add_error(msg);
-          return false;
-        }
-        if (!ok) {
-          result.add_error("Invalid query id: '" + query_id + "'");
-          return false;
-        }
-
-        std::string request_id;
-        if (!epidb::Engine::instance().queue_count_regions(query_id, user_key, request_id, msg)) {
+        request::Status request_status;
+        if (!epidb::Engine::instance().request_status(query_id, user_key, request_status, msg)) {
           result.add_error(msg);
           return false;
         }
 
-        result.add_string(request_id);
+        result.add_string(request_status.state);
+        result.add_string(request_status.message);
+
         return true;
       }
-    } countRegionsCommand;
+    } getRequestStatusCommand;
   }
 }

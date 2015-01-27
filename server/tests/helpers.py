@@ -130,6 +130,7 @@ class TestCase(unittest.TestCase):
   def setUp(self):
     mongo = MongoClient("localhost", 27017)
     mongo.drop_database("tests_suite")
+    mongo.drop_database("tests_suite_queue")
 
   def tearDown(self):
     pass

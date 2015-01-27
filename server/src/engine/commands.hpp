@@ -52,6 +52,7 @@ namespace epidb {
     static const CommandCategory GENOMES("Genomes", "Inserting and listing genomes");
     static const CommandCategory HELP("Help", "Help information about DeepBlue usage");
     static const CommandCategory OPERATIONS("Regions Operations", "Operating on the data regions");
+    static const CommandCategory REQUESTS("Requests", "Requests status information and results");
     static const CommandCategory PROJECTS("Projects", "Inserting and listing projects");
     static const CommandCategory SAMPLES("Samples", "Inserting and listing samples");
     static const CommandCategory STATUS("Status", "Checking DeepBlue status");

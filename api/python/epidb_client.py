@@ -240,6 +240,10 @@ class EpidbClient:
     def score_matrix(self, experiments, operation, regions_id, user_key):
         return self.server.score_matrix(experiments, operation, regions_id, user_key)
 
+## Requests
+    def get_request_status(self, query_id, user_key):
+        return self.server.get_request_status(query_id, user_key)
+
 ## Admin Operations
 
     def init_system(self, name, email, institution):

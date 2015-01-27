@@ -28,6 +28,10 @@ namespace epidb {
     static const size_t minor_version;
     static const size_t fix_version;
 
+    static int version_value() {
+      return (major_version * 100 * 100) + (minor_version * 100) + (fix_version);
+    }
+
     static const std::string version() {
       static std::string _version_cache;
 

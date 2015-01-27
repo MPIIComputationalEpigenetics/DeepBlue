@@ -50,7 +50,11 @@ namespace mdbq {
      * @param timeout the timeout in seconds
      * @param version the DeepBlue version when the job was inserted
      */
-    bool insert_job(const mongo::BSONObj &job, unsigned int timeout, const std::string &version, std::string &id, std::string &msg);
+    bool insert_job(const mongo::BSONObj &job, unsigned int timeout, const int version_value, std::string &id, std::string &msg);
+
+
+    mongo::BSONObj get_job(const std::string& id, const std::string& user_key);
+
 
     /**
      * get newest finished job (primarily for testing)
@@ -92,6 +96,9 @@ namespace mdbq {
 
     virtual void got_new_results();
 
+    static std::string state_name(mongo::BSONObj& o);
+
+    static std::string state_message(mongo::BSONObj& o);
   };
 }
 #endif /* __MDBQ_HUB_HPP__ */

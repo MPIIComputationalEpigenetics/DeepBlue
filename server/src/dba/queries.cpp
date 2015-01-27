@@ -192,7 +192,7 @@ namespace epidb {
       }
 
 
-      bool count_regions(const std::string &user_key, const std::string &query_id,
+      bool count_regions(const std::string &query_id, const std::string &user_key,
                          size_t &count, std::string &msg)
       {
         std::cerr << "count_regions" << std::endl;
