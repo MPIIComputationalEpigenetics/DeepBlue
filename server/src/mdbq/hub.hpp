@@ -99,6 +99,8 @@ namespace mdbq {
     static std::string state_name(mongo::BSONObj& o);
 
     static std::string state_message(mongo::BSONObj& o);
+
+    static bool is_done(mongo::BSONObj& o);
   };
 }
 #endif /* __MDBQ_HUB_HPP__ */

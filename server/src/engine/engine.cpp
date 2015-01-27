@@ -89,12 +89,10 @@ namespace epidb {
     size_t count = 0;
 
     if (!dba::query::count_regions(query_id, user_key, count, msg)) {
-      bob.append("success", false);
       bob.append("error", msg);
       return bob.obj();
     }
 
-    bob.append("success", true);
     bob.append("count", (long long) count);
 
     return bob.obj();
@@ -102,7 +100,6 @@ namespace epidb {
 
   bool Engine::request_status(const std::string &request_id, const std::string &user_key, request::Status &request_status, std::string &msg)
   {
-    std::cerr << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" << std::endl;
     mongo::BSONObj o = _hub.get_job(request_id, user_key);
     if (o.isEmpty()) {
       msg = "Request ID " + request_id + " not found.";
@@ -111,9 +108,26 @@ namespace epidb {
 
     request_status.state = mdbq::Hub::state_name(o);
     request_status.message = mdbq::Hub::state_message(o);
+    return true;
+  }
 
-    std::cerr << o.toString() << std::endl;
-    std::cerr << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" << std::endl;
+  bool Engine::request_data(const std::string &request_id, const std::string &user_key, request::Data &data, std::string &msg)
+  {
+    mongo::BSONObj o = _hub.get_job(request_id, user_key);
+    if (o.isEmpty()) {
+      msg = "Request ID " + request_id + " not found.";
+      return false;
+    }
+
+    if (!mdbq::Hub::is_done(o)) {
+      msg = "Request ID " + request_id + " was not finished. Please, check its status.";
+      return false;
+    }
+
+    mongo::BSONObj result = o["result"].Obj();
+
+    data.load_from_bson(result);
+
     return true;
   }
 }

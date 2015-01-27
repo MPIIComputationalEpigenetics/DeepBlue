@@ -115,7 +115,6 @@ namespace mdbq {
             "update" << BSON("$set" <<
                              BSON("book_time" << to_mongo_date(now)
                                   << "state" << TS_RUNNING
-                                  << "result.status" << "running"
                                   << "refresh_time" << to_mongo_date(now)
                                   << "owner" << hostname_pid)));
 
@@ -141,27 +140,6 @@ namespace mdbq {
 
     // start logging
     m_ptr->m_log.clear();
-    return true;
-  }
-
-  bool Client::get_best_task(mongo::BSONObj &task)
-  {
-    mongo::BSONObjBuilder queryb;
-    // select finished task
-    queryb.append("state", TS_DONE);
-    if (! m_ptr->m_task_selector.isEmpty())
-      queryb.appendElements(m_ptr->m_task_selector);
-
-    // order by loss (ascending) and take first result
-    std::auto_ptr<mongo::DBClientCursor> cursor = m_ptr->m_con.query(m_db + ".jobs",
-        mongo::Query(queryb.obj()).sort("result.loss", 1), 1);
-
-    if (!cursor->more()) {
-      // no task found
-      return false;
-    }
-
-    task = cursor->nextSafe().copy();
     return true;
   }
 
@@ -193,7 +171,6 @@ namespace mdbq {
                                  "state" << TS_FAILED <<
                                  "version" << version + 1 <<
                                  "failure_time" << to_mongo_date(finish_time) <<
-                                 "result.status" << "fail" <<
                                  "error" << result)));
     }
     CHECK_DB_ERR(m_ptr->m_con);

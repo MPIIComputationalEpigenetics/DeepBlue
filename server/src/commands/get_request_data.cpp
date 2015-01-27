@@ -1,5 +1,5 @@
 //
-//  get_request_status.cpp
+//  get_request_data.cpp
 //  epidb
 //
 //  Created by Felipe Albrecht on 27.01.15.
@@ -23,7 +23,7 @@
 namespace epidb {
   namespace command {
 
-    class GetRequestStatusCommand: public Command {
+    class GetRequestDataCommand: public Command {
 
     private:
       static CommandDescription desc_()
@@ -44,15 +44,14 @@ namespace epidb {
       static Parameters results_()
       {
         Parameter p[] = {
-          Parameter("status", serialize::STRING, "request_status: waiting,running,done,error"),
-          Parameter("msg", serialize::STRING, "message: can be empty, an error message or actual status.")
+          Parameter("information", serialize::MAP, "Maps containing the request data", true)
         };
         Parameters results(&p[0], &p[0] + 2);
         return results;
       }
 
     public:
-      GetRequestStatusCommand() : Command("get_request_status", parameters_(), results_(), desc_()) {}
+      GetRequestDataCommand() : Command("get_request_data", parameters_(), results_(), desc_()) {}
 
       virtual bool run(const std::string &ip,
                        const serialize::Parameters &parameters, serialize::Parameters &result) const
@@ -66,17 +65,33 @@ namespace epidb {
           return false;
         }
 
-        request::Status request_status;
-        if (!epidb::Engine::instance().request_status(query_id, user_key, request_status, msg)) {
+        request::Data data;
+        if (!epidb::Engine::instance().request_data(query_id, user_key, data, msg)) {
           result.add_error(msg);
           return false;
         }
 
-        result.add_string(request_status.state);
-        result.add_string(request_status.message);
+        serialize::ParameterPtr map(new serialize::MapParameter());
+
+        for (auto ss : data.strings) {
+          serialize::ParameterPtr p(new serialize::SimpleParameter(ss.second));
+          map->add_child(ss.first, p);
+        }
+
+        for (auto is : data.integers) {
+          serialize::ParameterPtr p(new serialize::SimpleParameter(is.second));
+          map->add_child(is.first, p);
+        }
+
+        for (auto fs : data.floats) {
+          serialize::ParameterPtr p(new serialize::SimpleParameter(fs.second));
+          map->add_child(fs.first, p);
+        }
+
+        result.add_param(map);
 
         return true;
       }
-    } getRequestStatusCommand;
+    } getRequestDataCommand;
   }
 }

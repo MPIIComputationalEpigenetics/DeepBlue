@@ -306,3 +306,19 @@ class TestCase(unittest.TestCase):
     for exp in data.EXPERIMENTS:
       if not "big" in exp:
         self.insert_experiment(epidb, exp)
+
+
+  def count_request(self, req):
+    epidb = EpidbClient()
+    sleep = 0.1
+    (s, ss) = epidb.get_request_status(req, self.admin_key)
+    while (ss[0] != "done") :
+      time.sleep(sleep)
+      (s, ss) = epidb.get_request_status(req, self.admin_key)
+      sleep += sleep
+
+    (s, data) = epidb.get_request_data(req, self.admin_key)
+
+    self.assertSuccess(s, data)
+
+    return data["count"]

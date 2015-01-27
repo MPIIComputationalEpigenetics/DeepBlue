@@ -167,7 +167,6 @@ namespace mdbq {
                               << "misc"        << job
                               << "nfailed"     << (int)0
                               << "state"       << TS_NEW
-                              << "result"      << BSON("status" << "new")
                               << "version"     << (int)0
                             )
                        );
@@ -234,7 +233,7 @@ namespace mdbq {
                                 QUERY("state" << TS_DONE).sort("finish_time"));
   }
 
-  std::string Hub::state_name(mongo::BSONObj& o)
+  std::string Hub::state_name(mongo::BSONObj &o)
   {
     int state = o["state"].Int();
 
@@ -247,7 +246,7 @@ namespace mdbq {
     }
   }
 
-  std::string Hub::state_message(mongo::BSONObj& o)
+  std::string Hub::state_message(mongo::BSONObj &o)
   {
     int state = o["state"].Int();
 
@@ -260,5 +259,8 @@ namespace mdbq {
     }
   }
 
+  bool Hub::is_done(mongo::BSONObj &o)
+  {
+    return o["state"].Int() == TS_DONE;
+  }
 }
-
