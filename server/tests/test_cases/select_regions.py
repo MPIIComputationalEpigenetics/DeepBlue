@@ -36,8 +36,9 @@ class TestSelectRegions(helpers.TestCase):
       res, qid = epidb.select_regions(*args)
       self.assertSuccess(res, qid)
 
-      res, count = epidb.count_regions(qid, self.admin_key)
-      self.assertSuccess(res, count)
+      res, req = epidb.count_regions(qid, self.admin_key)
+      self.assertSuccess(res, req)
+      count = self.count_request(req)
       self.assertEqual(count, region_count)
 
       res, regions = epidb.get_regions(qid, format, self.admin_key)
