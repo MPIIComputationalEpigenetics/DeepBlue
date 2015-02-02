@@ -11,13 +11,12 @@
 #include <boost/foreach.hpp>
 
 #include <mongo/bson/bson.h>
-#include <mongo/client/dbclient.h>
 
 #include "../extras/utils.hpp"
 
 #include "controlled_vocabulary.hpp"
-#include "config.hpp"
 #include "collections.hpp"
+#include "connection.hpp"
 #include "helpers.hpp"
 #include "full_text.hpp"
 
@@ -45,7 +44,7 @@ namespace epidb {
 
         syns.push_back(id_name_biosource);
 
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
+        Connection c;
 
         mongo::BSONObjBuilder syn_query_builder;
         syn_query_builder.append("norm_name", norm_biosource_name);
@@ -89,7 +88,7 @@ namespace epidb {
                                        const std::string &user_key,
                                        std::vector<utils::IdName> &syns, std::string &msg)
       {
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
+        Connection c;
 
         mongo::BSONObjBuilder syn_query_builder;
         syn_query_builder.append("norm_synonym", norm_synonym);
@@ -162,7 +161,7 @@ namespace epidb {
       bool get_synonym_root(const std::string &synonym, const std::string &norm_synonym,
                             std::string &biosource_name, std::string &norm_biosource_name, std::string &msg)
       {
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
+        Connection c;
 
         mongo::BSONObjBuilder syn_query_builder;
         syn_query_builder.append("norm_synonym", norm_synonym);
@@ -205,11 +204,11 @@ namespace epidb {
         }
 
         std::string norm_synonym = utils::normalize_name(synonym);
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
+        Connection c;
 
         mongo::BSONObjBuilder index_name;
         index_name.append("name", 1);
-        c->ensureIndex(helpers::collection_name(Collections::BIOSOURCE_SYNONYMS()), index_name.obj());
+        c->createIndex(helpers::collection_name(Collections::BIOSOURCE_SYNONYMS()), index_name.obj());
         if (!c->getLastError().empty()) {
           msg = c->getLastError();
           c.done();
@@ -218,7 +217,7 @@ namespace epidb {
 
         mongo::BSONObjBuilder index_norm_name;
         index_norm_name.append("norm_name", 1);
-        c->ensureIndex(helpers::collection_name(Collections::BIOSOURCE_SYNONYMS()), index_norm_name.obj());
+        c->createIndex(helpers::collection_name(Collections::BIOSOURCE_SYNONYMS()), index_norm_name.obj());
         if (!c->getLastError().empty()) {
           msg = c->getLastError();
           c.done();
@@ -227,7 +226,7 @@ namespace epidb {
 
         mongo::BSONObjBuilder index_syn;
         index_syn.append("synonym", 1);
-        c->ensureIndex(helpers::collection_name(Collections::BIOSOURCE_SYNONYMS()), index_syn.obj());
+        c->createIndex(helpers::collection_name(Collections::BIOSOURCE_SYNONYMS()), index_syn.obj());
         if (!c->getLastError().empty()) {
           msg = c->getLastError();
           c.done();
@@ -260,7 +259,7 @@ namespace epidb {
 
         mongo::BSONObjBuilder index_syn_names;
         index_syn_names.append("norm_synonym", 1);
-        c->ensureIndex(helpers::collection_name(Collections::BIOSOURCE_SYNONYM_NAMES()), index_syn_names.obj(), true);
+        c->createIndex(helpers::collection_name(Collections::BIOSOURCE_SYNONYM_NAMES()), index_syn_names.obj());
         if (!c->getLastError().empty()) {
           msg = c->getLastError();
           c.done();
@@ -314,7 +313,7 @@ namespace epidb {
           return true;
         }
 
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
+        Connection c;
 
         mongo::BSONObjBuilder syn_query_builder;
         syn_query_builder.append("norm_biosource_name", norm_s1);
@@ -426,7 +425,7 @@ namespace epidb {
           return false;
         }
 
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
+        Connection c;
 
         mongo::BSONObjBuilder query_builder;
         query_builder.append("norm_biosource_name", norm_more_embracing_root);
@@ -444,7 +443,7 @@ namespace epidb {
 
         mongo::BSONObjBuilder index_name;
         index_name.append("norm_biosource_name", 1);
-        c->ensureIndex(helpers::collection_name(Collections::BIOSOURCE_EMBRACING()), index_name.obj());
+        c->createIndex(helpers::collection_name(Collections::BIOSOURCE_EMBRACING()), index_name.obj());
         if (!c->getLastError().empty()) {
           msg = c->getLastError();
           c.done();
@@ -468,7 +467,7 @@ namespace epidb {
       {
         norm_names.push_back(norm_s1);
 
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
+        Connection c;
 
         mongo::BSONObjBuilder query_builder;
         query_builder.append("norm_biosource_name", norm_s1);
@@ -524,7 +523,7 @@ namespace epidb {
       bool __get_upper_connected(const std::string &norm_s1,
                                  std::vector<std::string> &norm_uppers, std::string &msg)
       {
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
+        Connection c;
 
         mongo::BSONObjBuilder query_builder;
         query_builder.append("subs", norm_s1);
@@ -568,7 +567,7 @@ namespace epidb {
 
       bool remove_biosouce(const std::string &id, const std::string &biosource_name , const std::string &norm_biosource_name, std::string &msg)
       {
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
+        Connection c;
 
         // Start deleting the data
         // delete from full text search

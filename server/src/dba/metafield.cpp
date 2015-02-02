@@ -13,10 +13,9 @@
 #include <boost/ref.hpp>
 
 #include <mongo/bson/bson.h>
-#include <mongo/client/dbclient.h>
 
-#include "config.hpp"
 #include "collections.hpp"
+#include "connection.hpp"
 #include "helpers.hpp"
 #include "key_mapper.hpp"
 #include "metafield.hpp"
@@ -102,7 +101,7 @@ namespace epidb {
         return true;
       }
 
-      mongo::ScopedDbConnection c(config::get_mongodb_server());
+      Connection c;
 
       std::auto_ptr<mongo::DBClientCursor> data_cursor;
       data_cursor = c->query(helpers::collection_name(Collections::EXPERIMENTS()),

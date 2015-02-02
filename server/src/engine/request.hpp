@@ -27,6 +27,7 @@ namespace epidb {
       std::vector<StringDataPair> strings;
       std::vector<IntegerDataPair> integers;
       std::vector<FloatDataPair> floats;
+      std::unique_ptr<std::string> data;
 
       void append(const std::string key, const std::string value)
       {
@@ -48,29 +49,35 @@ namespace epidb {
         for (mongo::BSONObj::iterator it = o.begin(); it.more(); ) {
           mongo::BSONElement e = it.next();
           std::cerr << e.toString() << std::endl;
+
+          std::string fieldname = e.fieldName();
+
+          if (!fieldname.compare(0, 2, "__")) {
+            continue;
+          }
+
           switch ( e.type() ) {
 
           case mongo::NumberDouble: {
-            append(e.fieldName(), (float) e.Double());
+            append(fieldname, (float) e.Double());
             break;
           }
           case mongo::NumberLong: {
-            append(e.fieldName(), (long long) e.Long());
+            append(fieldname, (long long) e.Long());
             break;
           }
           case mongo::NumberInt: {
-            append(e.fieldName(), (long long) e.Int());
+            append(fieldname, (long long) e.Int());
             break;
           }
 
           default: {
-            append(e.fieldName(), utils::bson_to_string(e));
+            append(fieldname, utils::bson_to_string(e));
           }
 
           }
         }
       }
-
     } Data;
   }
 }

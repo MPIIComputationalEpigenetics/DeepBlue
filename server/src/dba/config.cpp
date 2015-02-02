@@ -6,14 +6,13 @@
 //  Copyright (c) 2013,2014 Max Planck Institute for Computer Science. All rights reserved.
 //
 
-#include <iostream>
 #include <string>
 #include <vector>
 
 #include <mongo/bson/bson.h>
-#include <mongo/client/dbclient.h>
 
 #include "config.hpp"
+#include "connection.hpp"
 
 #include "dba.hpp"
 
@@ -26,17 +25,39 @@ namespace epidb {
     namespace config {
 
       std::vector<std::string> shards;
-
-      static std::string mongodb_server("localhost:27017");
-      static std::string database_name("epidb");
+      std::string mongodb_server;
+      std::string database_name;
+      mongo::ConnectionString mongodb_server_connection;
 
       void set_mongodb_server(const std::string &server)
       {
-        mongodb_server = server;
+        std::cerr << "server: '" << server << "'" << std::endl;
+        static std::string MONGODB_ADDR("mongodb://");
+        static size_t SIZE = MONGODB_ADDR.size();
+
+        if ((server.size() < SIZE) ||
+            server.compare(0, SIZE, MONGODB_ADDR)) {
+          mongodb_server = MONGODB_ADDR + server;
+        } else {
+          mongodb_server = server;
+        }
+        std::cerr << "mongodb_server: '" << mongodb_server << "'" << std::endl;
+
+        std::string errMessage;
+        mongodb_server_connection = mongo::ConnectionString::parse(mongodb_server, errMessage);
+
+        std::cerr << "errMessage: " << errMessage << std::endl;
+      }
+
+      const mongo::ConnectionString get_mongodb_server_connection()
+      {
+        //std::cerr <<  mongodb_server_connection << std::endl;
+        return mongodb_server_connection;
       }
 
       const std::string get_mongodb_server()
       {
+        //std::cerr <<  mongodb_server << std::endl;
         return mongodb_server;
       }
 
@@ -88,7 +109,7 @@ namespace epidb {
 
       bool set_shards_tags()
       {
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
+        Connection c;
 
         bool b(false);
 
@@ -127,7 +148,6 @@ namespace epidb {
       {
         return shards;
       }
-
     }
   }
 }

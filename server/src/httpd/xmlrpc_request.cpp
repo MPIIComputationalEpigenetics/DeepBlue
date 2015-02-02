@@ -10,8 +10,6 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/foreach.hpp>
 
-#include <mongo/client/dbclient.h>
-
 #include "xmlrpc_request.hpp"
 
 #include "../engine/engine.hpp"

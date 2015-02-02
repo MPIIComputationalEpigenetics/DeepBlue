@@ -322,3 +322,26 @@ class TestCase(unittest.TestCase):
     self.assertSuccess(s, data)
 
     return data["count"]
+
+  def __get_regions_request(self, req):
+    epidb = EpidbClient()
+    sleep = 0.1
+    (s, ss) = epidb.get_request_status(req, self.admin_key)
+    while (ss[0] != "done") :
+      time.sleep(sleep)
+      (s, ss) = epidb.get_request_status(req, self.admin_key)
+      sleep += sleep
+
+    (s, data) = epidb.get_request_data(req, self.admin_key)
+
+    return (s, data)
+
+  def get_regions_request(self, req):
+    (s, data) = self.__get_regions_request(req)
+    self.assertSuccess(s, data)
+    return data.get("data", "")
+
+  def get_regions_request_error(self, req):
+    (s, data) = self.__get_regions_request(req)
+    self.assertFailure(s, data)
+    return data

@@ -20,6 +20,11 @@ namespace boost {
     class io_service;
   }
 }
+
+namespace epidb {
+    class StringBuilder;
+}
+
 namespace mdbq {
   struct HubImpl;
 
@@ -35,6 +40,9 @@ namespace mdbq {
 
     /// database plus queue prefix (db.queue)
     const std::string m_prefix;
+
+    bool get_file_info(const std::string &filename, mongo::OID& oid, size_t &chunk_size, size_t &file_size, std::string &msg);
+
   public:
     /**
      * ctor.
@@ -86,6 +94,8 @@ namespace mdbq {
      * clear the whole job queue
      */
     void clear_all();
+
+    bool get_result(const std::string &filename, epidb::StringBuilder &sb, std::string &msg);
 
     /**
      * register with the main loop

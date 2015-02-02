@@ -21,25 +21,22 @@
 #include "common.hpp"
 #include "date_time.hpp"
 
-#ifdef NDEBUG
-#  define CHECK_DB_ERR(CON)
-#else
-#  define CHECK_DB_ERR(CON)\
+#include "dba/connection.hpp"
+
+#define CHECK_DB_ERR(CON)\
   {\
-    std::string e = (CON).getLastError();\
+    std::string e = (CON)->getLastError();\
     if(!e.empty()){\
-      throw std::runtime_error("MDBQC: error_code!=0, failing: " + e + "\n" + (CON).getLastErrorDetailed().toString() );\
+      throw std::runtime_error("MDBQC: error_code!=0, failing: " + e + "\n" + (CON)->getLastErrorDetailed().toString() );\
     }\
   }
-#endif
 
 namespace mdbq {
 
   struct ClientImpl {
-    mongo::DBClientConnection m_con;
+    epidb::dba::Connection    m_con;
     mongo::BSONObj            m_current_task;
     mongo::BSONObj            m_task_selector;
-    std::auto_ptr<mongo::GridFS>             m_fs;
     boost::posix_time::ptime  m_current_task_timeout_time;
     long long int             m_running_nr;
     //std::auto_ptr<mongo::BSONArrayBuilder>   m_log;
@@ -70,11 +67,9 @@ namespace mdbq {
     , m_verbose(false)
   {
     m_ptr.reset(new ClientImpl());
-    m_ptr->m_con.connect(url);
     CHECK_DB_ERR(m_ptr->m_con);
 
     m_db = prefix;
-    m_ptr->m_fs.reset(new mongo::GridFS(m_ptr->m_con, m_db, "fs"));
   }
 
   Client::Client(const std::string &url, const std::string &prefix, const mongo::BSONObj &query)
@@ -84,12 +79,10 @@ namespace mdbq {
     , m_verbose(false)
   {
     m_ptr.reset(new ClientImpl());
-    m_ptr->m_con.connect(url);
     m_ptr->m_task_selector = query;
     CHECK_DB_ERR(m_ptr->m_con);
 
     m_db = prefix;
-    m_ptr->m_fs.reset(new mongo::GridFS(m_ptr->m_con, m_db, "fs"));
   }
 
   bool Client::get_next_task(mongo::BSONObj &o)
@@ -118,7 +111,7 @@ namespace mdbq {
                                   << "refresh_time" << to_mongo_date(now)
                                   << "owner" << hostname_pid)));
 
-    m_ptr->m_con.runCommand(m_db, cmd, res);
+    m_ptr->m_con->runCommand(m_db, cmd, res);
     CHECK_DB_ERR(m_ptr->m_con);
 
     if (!res["value"].isABSONObj()) {
@@ -155,18 +148,18 @@ namespace mdbq {
     boost::posix_time::ptime finish_time = universal_date_time();
     int version = ct["version"].Int();
     if (ok) {
-      m_ptr->m_con.update(m_jobcol,
-                          QUERY("_id" << ct["_id"] <<
-                                "version" << version),
+      m_ptr->m_con->update(m_jobcol,
+                          BSON("_id" << ct["_id"] <<
+                               "version" << version),
                           BSON("$set" << BSON(
                                  "state" << TS_DONE <<
                                  "version" << version + 1 <<
                                  "finish_time" << to_mongo_date(finish_time) <<
                                  "result" << result)));
     } else {
-      m_ptr->m_con.update(m_jobcol,
-                          QUERY("_id" << ct["_id"] <<
-                                "version" << version),
+      m_ptr->m_con->update(m_jobcol,
+                          BSON("_id" << ct["_id"] <<
+                               "version" << version),
                           BSON("$set" << BSON(
                                  "state" << TS_FAILED <<
                                  "version" << version + 1 <<
@@ -193,56 +186,28 @@ namespace mdbq {
   }
 
   Client::~Client() { }
-  void Client::log(int level, const mongo::BSONObj &msg)
-  {
-    const mongo::BSONObj &ct = m_ptr->m_current_task;
-    if (ct.isEmpty()) {
-      throw std::runtime_error("MDBQC: get a task first before you log something about it!");
-    }
-    boost::posix_time::ptime now = universal_date_time();
-    m_ptr->m_log.push_back(BSON(
-                             mongo::GENOID <<
-                             "taskid" << ct["_id"] <<
-                             "level" << level <<
-                             "nr" << m_ptr->m_running_nr++ <<
-                             "timestamp" << to_mongo_date(now) <<
-                             "msg" << msg));
-  }
 
-  void Client::log(int level, const char *ptr, size_t len, const mongo::BSONObj &msg)
+  std::string Client::store_result(const char *ptr, size_t len)
   {
     mongo::BSONObj &ct = m_ptr->m_current_task;
     if (ct.isEmpty()) {
-      throw std::runtime_error("MDBQC: get a task first before you log something about it!");
+      throw std::runtime_error("MDBQC: get a task first before you store something about it!");
     }
 
-    unsigned seed1 = std::chrono::system_clock::now().time_since_epoch().count();
-    std::mt19937 gen(seed1);
+    std::string filename = ct["_id"].str();
 
-    mongo::BSONObj ret = m_ptr->m_fs->storeFile(ptr, len, boost::lexical_cast<std::string>(gen()));
-    CHECK_DB_ERR(m_ptr->m_con);
-    {
-      mongo::BSONObjBuilder bob;
-      bob.appendElements(ret);
-      bob.appendElements(msg);
-      m_ptr->m_con.update(m_fscol + ".files",
-                          BSON("filename" << ret.getField("filename")),
-                          bob.obj(), false, false);
-      CHECK_DB_ERR(m_ptr->m_con);
-    }
+    mongo::GridFS gridfs((*m_ptr).m_con.conn(), m_db, "fs");
+    mongo::BSONObj ret = gridfs.storeFile(ptr, len, filename);
 
     mongo::BSONObjBuilder bob;
-    bob.appendElements(msg);
-    bob.append("filename", ret["filename"].String());
-    m_ptr->m_log.push_back(BSON(
-                             mongo::GENOID <<
-                             "taskid" << ct["_id"] <<
-                             "level" << level <<
-                             "nr" << m_ptr->m_running_nr++ <<
-                             "timestamp" << to_mongo_date(universal_date_time()) <<
-                             "filename" << ret["filename"].String() <<
-                             "msg" << msg
-                           ));
+    bob.appendElements(ret);
+    m_ptr->m_con->update(m_fscol + ".files",
+                        BSON("filename" << ret.getField("filename")),
+                        bob.obj(), false, false);
+
+    CHECK_DB_ERR(m_ptr->m_con);
+
+    return filename;
   }
 
   void Client::checkpoint(bool check_for_timeout)
@@ -260,11 +225,11 @@ namespace mdbq {
         std::string hostname_pid = (boost::format("%s:%d") % &hostname[0] % getpid()).str();
 
         // set to failed in DB
-        m_ptr->m_con.update(m_jobcol,
-                            QUERY("_id" << ct["_id"] <<
-                                  // do not overwrite job that has been taken by someone else!
-                                  // this may happen due to timeouts and rescheduling.
-                                  "owner" << hostname_pid),
+        m_ptr->m_con->update(m_jobcol,
+                            BSON("_id" << ct["_id"] <<
+                                 // do not overwrite job that has been taken by someone else!
+                                 // this may happen due to timeouts and rescheduling.
+                                 "owner" << hostname_pid),
                             BSON("$set" <<
                                  BSON("state" << TS_FAILED <<
                                       "error" << "timeout")));
@@ -279,13 +244,13 @@ namespace mdbq {
     }
 
     boost::posix_time::ptime now = universal_date_time();
-    m_ptr->m_con.update(m_jobcol,
-                        QUERY("_id" << ct["_id"]),
+    m_ptr->m_con->update(m_jobcol,
+                        BSON("_id" << ct["_id"]),
                         BSON( "$set" << BSON("refresh_time" << to_mongo_date(now))));
     CHECK_DB_ERR(m_ptr->m_con);
 
     if (m_ptr->m_log.size()) {
-      m_ptr->m_con.insert(m_logcol, m_ptr->m_log);
+      m_ptr->m_con->insert(m_logcol, m_ptr->m_log);
       m_ptr->m_log.clear();
       CHECK_DB_ERR(m_ptr->m_con);
     }
@@ -295,8 +260,8 @@ namespace mdbq {
   Client::get_log(const mongo::BSONObj &task)
   {
     std::auto_ptr<mongo::DBClientCursor> p =
-      m_ptr->m_con.query( m_logcol,
-                          QUERY("taskid" << task["_id"]).sort("nr"));
+      m_ptr->m_con->query( m_logcol,
+                          mongo::Query(BSON("taskid" << task["_id"])).sort("nr"));
     CHECK_DB_ERR(m_ptr->m_con);
     std::vector<mongo::BSONObj> log;
     while (p->more()) {

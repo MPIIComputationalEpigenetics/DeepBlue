@@ -31,8 +31,9 @@ class TestOutput(helpers.TestCase):
     self.assertSuccess(res, qid_1)
     self.assertEqual(qid_1, 'q1')
 
-    res, count = epidb.count_regions(qid_1, self.admin_key)
-    self.assertSuccess(res, count)
+    res, req = epidb.count_regions(qid_1, self.admin_key)
+    self.assertSuccess(res, req)
+    count = self.count_request(req)
     self.assertEqual(10, count)
 
     res, regions = epidb.get_regions(qid_1, "chr:start:end:name:length:cpgNum:gcNum:perCpg:perGc:obsExp", self.admin_key)

@@ -5,7 +5,7 @@ from client import EpidbClient
 
 class TestSelectRegions(helpers.TestCase):
 
-  def test_select_full_experiment(self, format=None):
+  def _test_select_full_experiment(self, format=None):
     epidb = EpidbClient()
     self.init_base()
 
@@ -41,11 +41,12 @@ class TestSelectRegions(helpers.TestCase):
       count = self.count_request(req)
       self.assertEqual(count, region_count)
 
-      res, regions = epidb.get_regions(qid, format, self.admin_key)
-      self.assertSuccess(res, regions)
+      res, req = epidb.get_regions(qid, format, self.admin_key)
+      self.assertSuccess(res, req)
+      regions = self.get_regions_request(req)
       self.assertEqual(regions, full_experiment_regions)
 
-  def test_minimum_parameters(self):
+  def _test_minimum_parameters(self):
     # select_regions needs at least one of
     # experiment name, epigenetic_mark, sample, technique or project
     epidb = EpidbClient()
@@ -77,11 +78,12 @@ class TestSelectRegions(helpers.TestCase):
       res, qid = epidb.select_regions(*args)
       self.assertSuccess(res, qid)
 
-      res, regions = epidb.get_regions(qid, format, self.admin_key)
-      self.assertSuccess(res, regions)
+      res, req = epidb.get_regions(qid, format, self.admin_key)
+      self.assertSuccess(res, req)
+      regions = self.get_regions_request(req)
       self.assertEqual(regions, expected_regions)
 
-  def test_retrieve_with_defaults(self):
+  def _test_retrieve_with_defaults(self):
     epidb = EpidbClient()
     self.init_base()
 
@@ -94,11 +96,12 @@ class TestSelectRegions(helpers.TestCase):
     res, qid = epidb.select_regions("hg19_chr1_1", "hg19", None, None, None, None, None, None, None, self.admin_key)
     self.assertSuccess(res, qid)
 
-    res, regions = epidb.get_regions(qid, format, self.admin_key)
-    self.assertSuccess(res, regions)
+    res, req = epidb.get_regions(qid, format, self.admin_key)
+    self.assertSuccess(res, req)
+    regions = self.get_regions_request(req)
     self.assertEqual(regions, expected_regions)
 
-  def test_experiment_name_metacolumn(self):
+  def _test_experiment_name_metacolumn(self):
     epidb = EpidbClient()
     self.init_base()
 
@@ -111,11 +114,12 @@ class TestSelectRegions(helpers.TestCase):
     res, qid = epidb.select_regions("hg19_chr1_1", "hg19", None, None, None, None, None, None, None, self.admin_key)
     self.assertSuccess(res, qid)
 
-    res, regions = epidb.get_regions(qid, format, self.admin_key)
-    self.assertSuccess(res, regions)
+    res, req = epidb.get_regions(qid, format, self.admin_key)
+    self.assertSuccess(res, req)
+    regions = self.get_regions_request(req)
     self.assertEqual(regions, expected_regions)
 
-  def test_experiment_name_metacolumn2(self):
+  def _test_experiment_name_metacolumn2(self):
     epidb = EpidbClient()
     self.init_base()
 
@@ -131,13 +135,14 @@ class TestSelectRegions(helpers.TestCase):
     self.assertSuccess(res, qid3)
 
     expected = helpers.get_result("experiment_name_multiple_experiments")
-    res, regions = epidb.get_regions(qid3, "CHROMOSOME,START,END,@NAME", self.admin_key)
-    self.assertSuccess(res, regions)
+    res, req = epidb.get_regions(qid3, "CHROMOSOME,START,END,@NAME", self.admin_key)
+    self.assertSuccess(res, req)
+    regions = self.get_regions_request(req)
     l_regions = regions.split("\n")
     l_expected = expected.split("\n")
     self.assertEqual(set(l_regions), set(l_expected))
 
-  def test_chromosome_explicit(self):
+  def _test_chromosome_explicit(self):
     # regression test: chromosome was put in the first column no matter
     # what the format string specified
 
@@ -156,13 +161,15 @@ class TestSelectRegions(helpers.TestCase):
     self.assertSuccess(res, qid)
 
     fmt = "foobar,START,END,name,score,strand,signalValue,pValue,qValue,peak"
-    res, regions = epidb.get_regions(qid, fmt, self.admin_key)
-    self.assertSuccess(res, regions)
+    res, req = epidb.get_regions(qid, fmt, self.admin_key)
+    self.assertSuccess(res, req)
+    regions = self.get_regions_request(req)
     self.assertNotEqual(regions, full_experiment_regions)
 
     fmt = "START,START,END,name,score,strand,signalValue,pValue,qValue,peak"
-    res, regions = epidb.get_regions(qid, fmt, self.admin_key)
-    self.assertSuccess(res, regions)
+    res, req = epidb.get_regions(qid, fmt, self.admin_key)
+    self.assertSuccess(res, req)
+    regions = self.get_regions_request(req)
     self.assertNotEqual(regions, full_experiment_regions)
 
     # leave out chromosome entirely
@@ -174,12 +181,13 @@ class TestSelectRegions(helpers.TestCase):
     self.assertSuccess(s, m)
 
     fmt = "START,END,NAME,score,strand,signalValue,pValue,qValue,peak"
-    res, regions = epidb.get_regions(qid, fmt, self.admin_key)
+    res, req = epidb.get_regions(qid, fmt, self.admin_key)
+    regions = self.get_regions_request(req)
 
     self.assertSuccess(res, regions)
     self.assertEqual(regions, regions_wo_chr)
 
-  def test_malformed_format(self):
+  def _test_malformed_format(self):
     epidb = EpidbClient()
     self.init_base()
 
@@ -201,10 +209,10 @@ class TestSelectRegions(helpers.TestCase):
     self.assertSuccess(res, qid)
 
     for fmt in bad_formats:
-      res = epidb.get_regions(qid, fmt, self.admin_key)
-      self.assertFailure(res)
+      res, req = epidb.get_regions(qid, fmt, self.admin_key)
+      regions = self.get_regions_request_error(req)
 
-  def test_genome_required(self):
+  def _test_genome_required(self):
     epidb = EpidbClient()
     self.init(epidb)
 
@@ -234,10 +242,11 @@ class TestSelectRegions(helpers.TestCase):
       args = args + (self.admin_key,)
 
       res, msg = epidb.select_regions(*args)
-      (res, regions) = epidb.get_regions(msg, "", self.admin_key)
+      (res, req) = epidb.get_regions(msg, "", self.admin_key)
+      regions = self.get_regions_request(req)
       self.assertEqual(0, len(regions))
 
-  def test_argument_normalization(self):
+  def _test_argument_normalization(self):
     epidb = EpidbClient()
     self.init_base()
 
@@ -252,8 +261,9 @@ class TestSelectRegions(helpers.TestCase):
                                     "ENCode ", "chr1", 713240, 876330, self.admin_key)
     self.assertSuccess(res, qid)
 
-    res, regions = epidb.get_regions(qid, format, self.admin_key)
-    self.assertSuccess(res, regions)
+    res, req = epidb.get_regions(qid, format, self.admin_key)
+    self.assertSuccess(res, req)
+    regions = self.get_regions_request(req)
     self.assertEqual(regions, full_experiment_regions)
 
   def test_select_range(self):
@@ -271,11 +281,12 @@ class TestSelectRegions(helpers.TestCase):
                                     760000, 875000, self.admin_key)
     self.assertSuccess(res, qid)
 
-    res, regions = epidb.get_regions(qid, format, self.admin_key)
-    self.assertSuccess(res, regions)
+    res, req = epidb.get_regions(qid, format, self.admin_key)
+    self.assertSuccess(res, req)
+    regions = self.get_regions_request(req)
     self.assertEqual(regions, range_regions)
 
-  def test_multiple_experiments(self):
+  def _test_multiple_experiments(self):
     epidb = EpidbClient()
     self.init_base()
 
@@ -291,12 +302,13 @@ class TestSelectRegions(helpers.TestCase):
                                     None, None, self.admin_key)
     self.assertSuccess(res, qid)
 
-    res, regions = epidb.get_regions(qid, format, self.admin_key)
-    self.assertSuccess(res, regions)
+    res, req = epidb.get_regions(qid, format, self.admin_key)
+    self.assertSuccess(res, req)
+    regions = self.get_regions_request(req)
 
     self.assertEqual(regions, multiple_experiments_regions)
 
-  def test_multiple_genomes(self):
+  def _test_multiple_genomes(self):
     epidb = EpidbClient()
     self.init_base()
 
@@ -316,12 +328,13 @@ class TestSelectRegions(helpers.TestCase):
                                       None, None, None, None, None, None, self.admin_key)
       self.assertSuccess(res, qid)
 
-      res, regions = epidb.get_regions(qid, format, self.admin_key)
-      self.assertSuccess(res, regions)
+      res, req = epidb.get_regions(qid, format, self.admin_key)
+      self.assertSuccess(res, req)
+      regions = self.get_regions_request(req)
 
       self.assertEqual(regions, multiple_genomes_regions)
 
-  def test_multiple_genomes_2(self):
+  def _test_multiple_genomes_2(self):
     epidb = EpidbClient()
     self.init_base()
 
@@ -344,8 +357,9 @@ class TestSelectRegions(helpers.TestCase):
       res, qid = epidb.select_regions(experiments, ["hg18", "hg19"], None, None, None, None, None,
                                       None, None, self.admin_key)
       self.assertSuccess(res, qid)
-      res, regions = epidb.get_regions(qid, format, self.admin_key)
-      self.assertSuccess(res, regions)
+      res, req = epidb.get_regions(qid, format, self.admin_key)
+      self.assertSuccess(res, req)
+      regions = self.get_regions_request(req)
 
       regions_expected = helpers.get_result(result_regions)
       self.assertEqual(regions, regions_expected)

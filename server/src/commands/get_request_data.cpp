@@ -46,7 +46,7 @@ namespace epidb {
         Parameter p[] = {
           Parameter("information", serialize::MAP, "Maps containing the request data", true)
         };
-        Parameters results(&p[0], &p[0] + 2);
+        Parameters results(&p[0], &p[0] + 1);
         return results;
       }
 
@@ -65,27 +65,33 @@ namespace epidb {
           return false;
         }
 
+        StringBuilder sb;
         request::Data data;
-        if (!epidb::Engine::instance().request_data(query_id, user_key, data, msg)) {
+        if (!epidb::Engine::instance().request_data(query_id, user_key, data, sb, msg)) {
           result.add_error(msg);
           return false;
         }
 
         serialize::ParameterPtr map(new serialize::MapParameter());
 
-        for (auto ss : data.strings) {
-          serialize::ParameterPtr p(new serialize::SimpleParameter(ss.second));
-          map->add_child(ss.first, p);
-        }
+        if (sb.empty()) {
+          for (auto &ss : data.strings) {
+            serialize::ParameterPtr p(new serialize::SimpleParameter(ss.second));
+            map->add_child(ss.first, std::move(p));
+          }
 
-        for (auto is : data.integers) {
-          serialize::ParameterPtr p(new serialize::SimpleParameter(is.second));
-          map->add_child(is.first, p);
-        }
+          for (auto is : data.integers) {
+            serialize::ParameterPtr p(new serialize::SimpleParameter(is.second));
+            map->add_child(is.first, p);
+          }
 
-        for (auto fs : data.floats) {
-          serialize::ParameterPtr p(new serialize::SimpleParameter(fs.second));
-          map->add_child(fs.first, p);
+          for (auto fs : data.floats) {
+            serialize::ParameterPtr p(new serialize::SimpleParameter(fs.second));
+            map->add_child(fs.first, p);
+          }
+        } else {
+          serialize::ParameterPtr p(new serialize::SimpleParameter(sb));
+          map->add_child("data", p);
         }
 
         result.add_param(map);

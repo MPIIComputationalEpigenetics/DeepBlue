@@ -29,8 +29,6 @@ namespace epidb {
 
     bool queue(const mongo::BSONObj &job, unsigned int timeout, std::string &request_id, std::string &msg);
 
-    mongo::BSONObj process_count(const std::string &request_id, const std::string &user_key);
-
   public:
     static Engine &instance()
     {
@@ -38,16 +36,18 @@ namespace epidb {
       return instance;
     }
 
+    bool init();
+
     bool execute(const std::string &name, const std::string &ip, unsigned long long id,
                  serialize::Parameters &parameters, serialize::Parameters &result) const;
 
     bool request_status(const std::string &request_id, const std::string &user_key, request::Status &status, std::string &msg);
 
-    bool request_data(const std::string &request_id, const std::string &user_key, request::Data &data, std::string &msg);
+    bool request_data(const std::string &request_id, const std::string &user_key, request::Data &data, StringBuilder& sb, std::string &msg);
 
     bool queue_count_regions(const std::string &query_id, const std::string &user_key, std::string &request_id, std::string &msg);
 
-    mongo::BSONObj process(const mongo::BSONObj &job);
+    bool queue_get_regions(const std::string &query_id, const std::string &output_format, const std::string &user_key, std::string &id, std::string &msg);
   };
 }
 

@@ -23,7 +23,9 @@ class TestBedgraphFiles(helpers.TestCase):
 
     (s, q) = epidb.select_regions(files, "hg19", None, None, None, None, None, None, None, self.admin_key)
 
-    (s, count) = epidb.count_regions(q, self.admin_key)
+    (s, req) = epidb.count_regions(q, self.admin_key)
+    self.assertSuccess(s, req)
+    count = self.count_request(req)
 
     # 3997106 // grep -v # *.bg | grep -v browser | grep -v track | wc -l
     self.assertEqual(3997106, count)

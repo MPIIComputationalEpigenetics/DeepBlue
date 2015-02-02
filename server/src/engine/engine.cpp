@@ -12,11 +12,15 @@
 
 #include "commands.hpp"
 #include "engine.hpp"
-#include "../log.hpp"
 
 #include "../dba/config.hpp"
 #include "../dba/queries.hpp"
 
+#include "../extras/stringbuilder.hpp"
+
+#include "../processing/processing.hpp"
+
+#include "../log.hpp"
 #include "../version.hpp"
 
 namespace epidb {
@@ -26,6 +30,14 @@ namespace epidb {
   {
     EPIDB_LOG("Creating Engine");
   }
+
+  bool Engine::init()
+  {
+    _hub.clear_all();
+
+    return true;
+  }
+
   bool Engine::execute(const std::string &name, const std::string &ip, unsigned long long id,
                        serialize::Parameters &parameters, serialize::Parameters &result) const
   {
@@ -66,36 +78,12 @@ namespace epidb {
     return true;
   }
 
-
-  mongo::BSONObj Engine::process(const mongo::BSONObj &job)
+  bool Engine::queue_get_regions(const std::string &query_id, const std::string &output_format, const std::string &user_key, std::string &id, std::string &msg)
   {
-    std::cerr << job.toString() << std::endl;
-    std::string command = job["command"].str();
-
-    if (command == "count_regions") {
-      return process_count(job["query_id"].str(), job["user_key"].str());
-    } else {
-      mongo::BSONObjBuilder bob;
-      bob.append("success", false);
-      bob.append("error", "Invalid command" + command);
-      return bob.obj();
+    if (!queue(BSON("command" << "get_regions" << "query_id" << query_id << "format" << output_format << "user_key" << user_key), 60 * 60, id, msg)) {
+      return false;
     }
-  }
-
-  mongo::BSONObj Engine::process_count(const std::string &query_id, const std::string &user_key)
-  {
-    std::string msg;
-    mongo::BSONObjBuilder bob;
-    size_t count = 0;
-
-    if (!dba::query::count_regions(query_id, user_key, count, msg)) {
-      bob.append("error", msg);
-      return bob.obj();
-    }
-
-    bob.append("count", (long long) count);
-
-    return bob.obj();
+    return true;
   }
 
   bool Engine::request_status(const std::string &request_id, const std::string &user_key, request::Status &request_status, std::string &msg)
@@ -111,7 +99,8 @@ namespace epidb {
     return true;
   }
 
-  bool Engine::request_data(const std::string &request_id, const std::string &user_key, request::Data &data, std::string &msg)
+
+  bool Engine::request_data(const std::string &request_id, const std::string &user_key, request::Data &data, StringBuilder &sb, std::string &msg)
   {
     mongo::BSONObj o = _hub.get_job(request_id, user_key);
     if (o.isEmpty()) {
@@ -126,7 +115,19 @@ namespace epidb {
 
     mongo::BSONObj result = o["result"].Obj();
 
-    data.load_from_bson(result);
+    if (result.hasField("__error__")) {
+      msg = result["__error__"].str();
+      return false;
+    }
+
+    if (result.hasField("__file__")) {
+      std::string filename = result["__file__"].str();
+      if (!_hub.get_result(filename, sb, msg)) {
+        return false;
+      }
+    } else {
+      data.load_from_bson(result);
+    }
 
     return true;
   }

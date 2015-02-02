@@ -17,7 +17,6 @@ namespace epidb {
   private:
     using Buffer = std::vector<std::string>;
 
-
     Buffer buffer;
     size_t total_size;
 
@@ -34,6 +33,8 @@ namespace epidb {
     void tab();
     void endLine();
     std::string to_string();
+
+    bool empty();
   };
 }
 

@@ -24,9 +24,11 @@ namespace epidb {
   void StringBuilder::append(const std::string &src)
   {
     if (block.size() + src.size() > MAX_BLOCK_SIZE) {
-      buffer.emplace_back(std::move(block));
-      block.clear();
-      block.reserve(MAX_BLOCK_SIZE);
+      if (!block.empty()) {
+        buffer.emplace_back(std::move(block));
+        block.clear();
+        block.reserve(MAX_BLOCK_SIZE);
+      }
     }
 
     block += src;
@@ -36,9 +38,11 @@ namespace epidb {
   void StringBuilder::append(std::string &&src)
   {
     if (block.size() + src.size() > MAX_BLOCK_SIZE) {
-      buffer.emplace_back(std::move(block));
-      block.clear();
-      block.reserve(MAX_BLOCK_SIZE);
+      if (!block.empty()) {
+        buffer.emplace_back(std::move(block));
+        block.clear();
+        block.reserve(MAX_BLOCK_SIZE);
+      }
     }
 
     block += src;
@@ -70,5 +74,10 @@ namespace epidb {
     }
 
     return result;
+  }
+
+  bool StringBuilder::empty()
+  {
+    return total_size == 0;
   }
 }

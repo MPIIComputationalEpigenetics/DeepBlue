@@ -41,6 +41,7 @@ namespace mdbq {
     std::string m_fscol;
     std::string m_db;
     bool m_verbose;
+
   public:
     /**
      * construct client w/o task preferences.
@@ -78,22 +79,6 @@ namespace mdbq {
     void reg(boost::asio::io_service &io_service, float interval);
 
     /**
-     * log a bson obj in the logs database.
-     * @param level a log level
-     * @param msg what to log
-     */
-    void log(int level, const mongo::BSONObj &msg);
-
-    /**
-     * log a file to gridfs, /refer/ to it in job log.
-     * @param level a log level
-     * @param ptr a pointer to the data to be logged
-     * @param len number of bytes starting at \c ptr
-     * @param msg meta-data associated with the data
-     */
-    void log(int level, const char *ptr, size_t len, const mongo::BSONObj &msg);
-
-    /**
      * get the log of a task (mainly for testing)
      */
     std::vector<mongo::BSONObj> get_log(const mongo::BSONObj &task);
@@ -111,6 +96,14 @@ namespace mdbq {
      * @param task the task description.
      */
     virtual void handle_task(const mongo::BSONObj &task);
+
+
+    /**
+     *
+     *
+     *
+     */
+    std::string store_result(const char *ptr, size_t len);
 
     /**
      * Destroy client.

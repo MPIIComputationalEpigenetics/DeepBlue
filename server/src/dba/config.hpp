@@ -12,14 +12,27 @@
 #include <string>
 #include <vector>
 
+namespace mongo {
+  class ConnectionString;
+}
+
 namespace epidb {
   namespace dba {
 
     namespace config {
-      bool set_shards_tags();
+
+      extern std::string mongodb_server;
+      extern mongo::ConnectionString mongodb_server_connection;
+      extern std::string database_name;
+
       extern std::vector<std::string> shards;
+
+      bool set_shards_tags();
+
       void set_mongodb_server(const std::string &server);
       const std::string get_mongodb_server();
+      const mongo::ConnectionString get_mongodb_server_connection();
+
       bool sharding();
       void set_sharding(bool sharding);
       std::vector<std::string> get_shards_names();

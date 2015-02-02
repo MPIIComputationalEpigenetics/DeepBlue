@@ -218,6 +218,12 @@ namespace epidb {
       type_(STRING), value_(utils::sanitize(s))
     {}
 
+    SimpleParameter::SimpleParameter(StringBuilder &sb) :
+      // TODO: In fact, read the file content only when build the xml response.
+      type_(STRING), value_(sb.to_string())
+    {}
+
+
     SimpleParameter::SimpleParameter(const bool b) :
       type_(BOOLEAN), value_(b ? "1" : "0")
     {}

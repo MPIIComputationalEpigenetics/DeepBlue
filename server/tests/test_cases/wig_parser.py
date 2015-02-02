@@ -26,8 +26,9 @@ class TestWigFiles(helpers.TestCase):
     (s, r) = epidb.select_regions(files, "hg19", None, None, None, None, None, None, None, self.admin_key)
     (s, rs) = epidb.get_regions(r, "CHROMOSOME, START, END, VALUE", self.admin_key)
 
-    (s, c) = epidb.count_regions(r, self.admin_key)
-    self.assertEqual(5667, c)
+    (s, req) = epidb.count_regions(r, self.admin_key)
+    count = self.count_request(req)
+    self.assertEqual(5667, count)
 
   def test_wig_files_pass(self):
     epidb = EpidbClient()

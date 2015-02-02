@@ -12,7 +12,6 @@
 #include <boost/foreach.hpp>
 
 #include <mongo/bson/bson.h>
-#include <mongo/client/dbclient.h>
 
 #include "../errors.hpp"
 #include "../log.hpp"
@@ -29,7 +28,7 @@
 #include "../extras/utils.hpp"
 
 #include "collections.hpp"
-#include "config.hpp"
+#include "connection.hpp"
 #include "dba.hpp"
 #include "filter.hpp"
 #include "genomes.hpp"
@@ -67,7 +66,7 @@ namespace epidb {
         stored_query_builder.append("type", type);
         stored_query_builder.append("args", args);
 
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
+        Connection c;
 
         c->insert(helpers::collection_name(Collections::QUERIES()), stored_query_builder.obj());
         if (!c->getLastError().empty()) {
@@ -161,7 +160,7 @@ namespace epidb {
         mongo::BSONObj o = experiments_query_builder.obj();
         std::auto_ptr<mongo::DBClientCursor> cursor;
 
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
+        Connection c;
         cursor = c->query(helpers::collection_name(Collections::EXPERIMENTS()), o);
         while (cursor->more()) {
           mongo::BSONObj experiment = cursor->next();
@@ -282,7 +281,7 @@ namespace epidb {
       bool build_experiment_query(const int start, const int end, const std::string &experiment_name,
                                   const std::string &user_key,  mongo::BSONObj &regions_query, std::string &msg)
       {
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
+        Connection c;
         std::string norm_name = utils::normalize_name(experiment_name);
         std::auto_ptr<mongo::DBClientCursor> cursor =
           c->query(helpers::collection_name(Collections::EXPERIMENTS()), BSON("norm_name" << norm_name));
@@ -315,7 +314,7 @@ namespace epidb {
 
         if (args["has_filter"].Bool()) {
           const mongo::BSONObj query = build_query(args);
-          mongo::ScopedDbConnection c(config::get_mongodb_server());
+          Connection c;
           std::auto_ptr<mongo::DBClientCursor> cursor = c->query(helpers::collection_name(Collections::EXPERIMENTS()), query);
           while (cursor->more()) {
             mongo::BSONObj p = cursor->next();
@@ -362,7 +361,7 @@ namespace epidb {
         }
         annotations_query_builder.append("upload_info.done", true);
 
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
+        Connection c;
         mongo::BSONObj annotation_query = annotations_query_builder.obj();
         std::auto_ptr<mongo::DBClientCursor> cursor = c->query(helpers::collection_name(Collections::ANNOTATIONS()), annotation_query);
         while (cursor->more()) {
@@ -641,13 +640,13 @@ namespace epidb {
                       DatasetId &dataset_id, std::string &msg)
       {
 
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
+        Connection c;
 
         std::string norm_genome = utils::normalize_name(genome);
 
         std::auto_ptr<mongo::DBClientCursor> data_cursor =
           c->query(helpers::collection_name(Collections::TILINGS()),
-                   QUERY("norm_genome" << norm_genome << "tiling_size" << (int) tiling_size), 0, 1);
+                   BSON("norm_genome" << norm_genome << "tiling_size" << (int) tiling_size), 0, 1);
 
         if (!c->getLastError().empty()) {
           msg = c->getLastError();
@@ -782,7 +781,7 @@ namespace epidb {
         mongo::BSONObj o = experiments_query_builder.obj();
         std::auto_ptr<mongo::DBClientCursor> cursor;
 
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
+        Connection c;
         cursor = c->query(helpers::collection_name(Collections::EXPERIMENTS()), o);
 
         bool found = false;

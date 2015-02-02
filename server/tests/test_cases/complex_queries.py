@@ -29,8 +29,9 @@ class TestComplexQueries(helpers.TestCase):
     res, qid_5 = epidb.intersection(qid_3, qid_4, self.admin_key)
     self.assertSuccess(res, qid_5)
 
-    res, regions = epidb.get_regions(qid_5, "CHROMOSOME,START,END", self.admin_key)
-    self.assertSuccess(res, regions)
+    res, req = epidb.get_regions(qid_5, "CHROMOSOME,START,END", self.admin_key)
+    self.assertSuccess(res, req)
+    regions = self.get_regions_request(req)
 
     expected_regions = helpers.get_result("complex1")
     self.assertEqual(regions, expected_regions)

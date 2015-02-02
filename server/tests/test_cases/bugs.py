@@ -318,8 +318,10 @@ chrX 100000"""
     (s, tl) = epidb.tiling_regions(150000000, "hg19", "chr1", self.admin_key)
 
     res, qid_4 = epidb.aggregate(q, tl, "SCORE", self.admin_key)
-    s, rs = epidb.get_regions(qid_4, "CHROMOSOME,START,END,@AGG.MIN,@AGG.MAX,@AGG.MEAN,@AGG.COUNT", self.admin_key)
-    self.assertSuccess(s, rs)
+    s, req = epidb.get_regions(qid_4, "CHROMOSOME,START,END,@AGG.MIN,@AGG.MAX,@AGG.MEAN,@AGG.COUNT", self.admin_key)
+    self.assertSuccess(s, req)
+
+    rs = self.get_regions_request(req)
 
     self.assertEquals(rs, "chr1\t0\t150000000\t0.0000\t1.0000\t0.5000\t4")
 

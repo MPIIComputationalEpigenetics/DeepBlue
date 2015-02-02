@@ -88,6 +88,7 @@ namespace epidb {
       SimpleParameter(const Type& type);
       SimpleParameter(const Type& type, const std::string& value);
       SimpleParameter(const std::string& s);
+      SimpleParameter(StringBuilder &sb);
       SimpleParameter(const bool b);
       SimpleParameter(const long long i);
       SimpleParameter(const double d);
