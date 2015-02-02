@@ -27,17 +27,14 @@
 #include <cmath>
 #include <limits>
 
+#include "mongo/base/data_cursor.h"
 #include "mongo/base/parse_number.h"
-#include "mongo/bson/bsonelement.h"
-#include "mongo/bson/bsonobj.h"
-#include "mongo/bson/bsonmisc.h"
-#include "mongo/bson/bson_builder_base.h"
 #include "mongo/bson/bson_field.h"
+#include "mongo/bson/bsonelement.h"
+#include "mongo/bson/bsonmisc.h"
+#include "mongo/bson/bsonobj.h"
+#include "mongo/bson/timestamp.h"
 #include "mongo/client/export_macros.h"
-
-#if defined(_DEBUG) && defined(MONGO_EXPOSE_MACROS)
-#include "mongo/util/log.h"
-#endif
 
 namespace mongo {
 
@@ -49,27 +46,54 @@ namespace mongo {
     /** Utility for creating a BSONObj.
         See also the BSON() and BSON_ARRAY() macros.
     */
-    class MONGO_CLIENT_API BSONObjBuilder : public BSONBuilderBase, private boost::noncopyable {
+    class MONGO_CLIENT_API BSONObjBuilder : boost::noncopyable {
     public:
         /** @param initsize this is just a hint as to the final size of the object */
-        BSONObjBuilder(int initsize=512) : _b(_buf), _buf(initsize + sizeof(unsigned)), _offset( sizeof(unsigned) ), _s( this ) , _tracker(0) , _doneCalled(false) {
-            _b.appendNum((unsigned)0); // ref-count
-            _b.skip(4); /*leave room for size field and ref-count*/
+        BSONObjBuilder(int initsize=512)
+            : _b(_buf)
+            , _buf(sizeof(BSONObj::Holder) + initsize)
+            , _offset(sizeof(BSONObj::Holder))
+            , _s(this)
+            , _tracker(0)
+            , _doneCalled(false) {
+            // Reserve space for a holder object at the beginning of the buffer, followed by
+            // space for the object length. The length is filled in by _done.
+            _b.skip(sizeof(BSONObj::Holder));
+            _b.skip(sizeof(int));
         }
 
         /** @param baseBuilder construct a BSONObjBuilder using an existing BufBuilder
          *  This is for more efficient adding of subobjects/arrays. See docs for subobjStart for example.
          */
-        BSONObjBuilder( BufBuilder &baseBuilder ) : _b( baseBuilder ), _buf( 0 ), _offset( baseBuilder.len() ), _s( this ) , _tracker(0) , _doneCalled(false) {
-            _b.skip( 4 );
+        BSONObjBuilder(BufBuilder &baseBuilder)
+            : _b(baseBuilder)
+            , _buf(0)
+            , _offset(baseBuilder.len())
+            , _s(this)
+            , _tracker(0)
+            , _doneCalled(false) {
+            // Reserve space for the object length, which is filled in by _done. We don't need a holder
+            // since we are a sub-builder, and some parent builder has already made the reservation.
+            _b.skip(sizeof(int));
         }
 
-        BSONObjBuilder( const BSONSizeTracker & tracker ) : _b(_buf) , _buf(tracker.getSize() + sizeof(unsigned) ), _offset( sizeof(unsigned) ), _s( this ) , _tracker( (BSONSizeTracker*)(&tracker) ) , _doneCalled(false) {
-            _b.appendNum((unsigned)0); // ref-count
-            _b.skip(4);
+        BSONObjBuilder( const BSONSizeTracker & tracker )
+            : _b(_buf)
+            , _buf(sizeof(BSONObj::Holder) + tracker.getSize())
+            , _offset(sizeof(BSONObj::Holder))
+            , _s(this)
+            , _tracker(const_cast<BSONSizeTracker*>(&tracker))
+            , _doneCalled(false) {
+            // See the comments in the first constructor for details.
+            _b.skip(sizeof(BSONObj::Holder));
+            _b.skip(sizeof(int));
         }
 
         ~BSONObjBuilder() {
+            // If 'done' has not already been called, and we have a reference to an owning
+            // BufBuilder but do not own it ourselves, then we must call _done to write in the
+            // length. Otherwise, we own this memory and its lifetime ends with us, therefore
+            // we can elide the write.
             if ( !_doneCalled && _b.buf() && _buf.getSize() == 0 ) {
                 _done();
             }
@@ -109,7 +133,7 @@ namespace mongo {
         BSONObjBuilder& appendObject(const StringData& fieldName, const char * objdata , int size = 0 ) {
             verify( objdata );
             if ( size == 0 ) {
-                size = *((int*)objdata);
+                size = ConstDataView(objdata).readLE<int>();
             }
 
             verify( size > 4 && size < 100000000 );
@@ -271,14 +295,14 @@ namespace mongo {
             _b.appendNum((char) jstOID);
             _b.appendStr(fieldName);
             if ( oid )
-                _b.appendBuf( (void *) oid, 12 );
+                _b.appendBuf( oid->view().view(), OID::kOIDSize );
             else {
                 OID tmp;
                 if ( generateIfBlank )
                     tmp.init();
                 else
                     tmp.clear();
-                _b.appendBuf( (void *) &tmp, 12 );
+                _b.appendBuf( tmp.view().view(), OID::kOIDSize );
             }
             return *this;
         }
@@ -291,7 +315,7 @@ namespace mongo {
         BSONObjBuilder& append( const StringData& fieldName, OID oid ) {
             _b.appendNum((char) jstOID);
             _b.appendStr(fieldName);
-            _b.appendBuf( (void *) &oid, 12 );
+            _b.appendBuf( oid.view().view(), OID::kOIDSize );
             return *this;
         }
 
@@ -317,20 +341,7 @@ namespace mongo {
             @param dt a Java-style 64 bit date value, that is
             the number of milliseconds since January 1, 1970, 00:00:00 GMT
         */
-        BSONObjBuilder& appendDate(const StringData& fieldName, Date_t dt) {
-            /* easy to pass a time_t to this and get a bad result.  thus this warning. */
-#if defined(_DEBUG) && defined(MONGO_EXPOSE_MACROS)
-            if( dt > 0 && dt <= 0xffffffff ) {
-                static int n;
-                if( n++ == 0 )
-                    log() << "DEV WARNING appendDate() called with a tiny (but nonzero) date" << std::endl;
-            }
-#endif
-            _b.appendNum((char) Date);
-            _b.appendStr(fieldName);
-            _b.appendNum(dt);
-            return *this;
-        }
+        BSONObjBuilder& appendDate(const StringData& fieldName, Date_t dt);
         BSONObjBuilder& append(const StringData& fieldName, Date_t dt) {
             return appendDate(fieldName, dt);
         }
@@ -426,40 +437,23 @@ namespace mongo {
             return *this;
         }
 
-        // Append a Timestamp field -- will be updated to next OpTime on db insert.
-        BSONObjBuilder& appendTimestamp( const StringData& fieldName ) {
+        /** Append a Timestamp element to the object */
+        BSONObjBuilder& appendTimestamp( const StringData& fieldName , const Timestamp_t& ts = Timestamp_t() ) {
             _b.appendNum( (char) Timestamp );
             _b.appendStr( fieldName );
-            _b.appendNum( (unsigned long long) 0 );
+
+            char buf[2 * sizeof(uint32_t)];
+            DataCursor cur(buf);
+            cur.writeLEAndAdvance<>(ts.increment());
+            cur.writeLEAndAdvance<>(ts.seconds());
+
+            _b.appendBuf(buf, sizeof(buf));
             return *this;
         }
 
-        /**
-         * To store an OpTime in BSON, use this function.
-         * This captures both the secs and inc fields.
-         */
-        BSONObjBuilder& append(const StringData& fieldName, OpTime optime);
-
-        /**
-         * Alternative way to store an OpTime in BSON. Pass the OpTime as a Date, as follows:
-         *
-         *     builder.appendTimestamp("field", optime.asDate());
-         *
-         * This captures both the secs and inc fields.
-         */
-        BSONObjBuilder& appendTimestamp( const StringData& fieldName , unsigned long long val ) {
-            _b.appendNum( (char) Timestamp );
-            _b.appendStr( fieldName );
-            _b.appendNum( val );
-            return *this;
+        BSONObjBuilder& append( const StringData& fieldName, const Timestamp_t& ts ) {
+            return appendTimestamp(fieldName, ts);
         }
-
-        /**
-        Timestamps are a special BSON datatype that is used internally for replication.
-        Append a timestamp element to the object being ebuilt.
-        @param time - in millis (but stored in seconds)
-        */
-        BSONObjBuilder& appendTimestamp( const StringData& fieldName , unsigned long long time , unsigned int inc );
 
         /*
         Append an element of the deprecated DBRef type.
@@ -470,7 +464,7 @@ namespace mongo {
             _b.appendStr( fieldName );
             _b.appendNum( (int) ns.size() + 1 );
             _b.appendStr( ns );
-            _b.appendBuf( (void *) &oid, 12 );
+            _b.appendBuf( oid.view().view(), OID::kOIDSize );
             return *this;
         }
 
@@ -571,12 +565,11 @@ namespace mongo {
          * @return owned BSONObj
         */
         BSONObj obj() {
-            bool own = owned();
-            massert( 10335 , "builder does not own memory", own );
+            massert( 10335 , "builder does not own memory", owned() );
             doneFast();
-            BSONObj::Holder* h = (BSONObj::Holder*)_b.buf();
-            decouple(); // sets _b.buf() to NULL
-            return BSONObj(h);
+            char* buf = _b.buf();
+            decouple();
+            return BSONObj::takeOwnership(buf);
         }
 
         /** Fetch the object we have built.
@@ -621,7 +614,7 @@ namespace mongo {
 
         void appendKeys( const BSONObj& keyPattern , const BSONObj& values );
 
-        static std::string numStr( int i ) {
+        static std::string MONGO_CLIENT_FUNC numStr( int i ) {
             if (i>=0 && i<100 && numStrsReady)
                 return numStrs[i];
             StringBuilder o;
@@ -685,7 +678,7 @@ namespace mongo {
             _b.appendNum((char) EOO);
             char *data = _b.buf() + _offset;
             int size = _b.len() - _offset;
-            *((int*)data) = size;
+            DataView(data).writeLE(size);
             if ( _tracker )
                 _tracker->got( size );
             return data;
@@ -699,10 +692,10 @@ namespace mongo {
         bool _doneCalled;
 
         static const std::string numStrs[100]; // cache of 0 to 99 inclusive
-        static bool numStrsReady; // for static init safety. see comments in db/jsobj.cpp
+        static bool numStrsReady; // for static init safety.
     };
 
-    class BSONArrayBuilder : public BSONBuilderBase, private boost::noncopyable {
+    class BSONArrayBuilder : boost::noncopyable {
     public:
         BSONArrayBuilder() : _i(0), _b() {}
         BSONArrayBuilder( BufBuilder &_b ) : _i(0), _b(_b) {}
@@ -748,31 +741,6 @@ namespace mongo {
 
         void doneFast() { _b.doneFast(); }
 
-        BSONArrayBuilder& append(const StringData& name, int n) {
-            fill( name );
-            append( n );
-            return *this;
-        }
-
-        BSONArrayBuilder& append(const StringData& name, long long n) {
-            fill( name );
-            append( n );
-            return *this;
-        }
-
-        BSONArrayBuilder& append(const StringData& name, double n) {
-            fill( name );
-            append( n );
-            return *this;
-        }
-
-        template <typename T>
-        BSONArrayBuilder& append(const StringData& name, const T& x) {
-            fill( name );
-            append( x );
-            return *this;
-        }
-
         template < class T >
         BSONArrayBuilder& append( const std::list< T >& vals );
 
@@ -783,52 +751,38 @@ namespace mongo {
         BufBuilder &subobjStart() { return _b.subobjStart( num() ); }
         BufBuilder &subarrayStart() { return _b.subarrayStart( num() ); }
 
-        // These fill missing entries up to pos. if pos is < next pos is ignored
-        BufBuilder &subobjStart(int pos) {
-            fill(pos);
-            return _b.subobjStart( num() );
-        }
-        BufBuilder &subarrayStart(int pos) {
-            fill(pos);
-            return _b.subarrayStart( num() );
-        }
-
-        // These should only be used where you really need interface compatability with BSONObjBuilder
-        // Currently they are only used by update.cpp and it should probably stay that way
-        BufBuilder &subobjStart( const StringData& name ) {
-            fill( name );
-            return _b.subobjStart( num() );
-        }
-
-        BufBuilder &subarrayStart( const StringData& name ) {
-            fill( name );
-            return _b.subarrayStart( num() );
-        }
-
-        BSONArrayBuilder& appendArray( const StringData& name, const BSONObj& subObj ) {
-            fill( name );
-            _b.appendArray( num(), subObj );
+        BSONArrayBuilder& appendRegex(const StringData& regex, const StringData& options = "") {
+            _b.appendRegex(num(), regex, options);
             return *this;
         }
 
-        BSONArrayBuilder& appendAs( const BSONElement &e, const StringData& name) {
-            fill( name );
-            append( e );
+        BSONArrayBuilder& appendBinData(int len, BinDataType type, const void* data) {
+            _b.appendBinData(num(), len, type, data);
             return *this;
         }
 
-        BSONArrayBuilder& appendTimestamp(unsigned int sec, unsigned int inc) {
-            _b.appendTimestamp(num(), sec, inc);
+        BSONArrayBuilder& appendCode(const StringData& code) {
+            _b.appendCode(num(), code);
             return *this;
         }
 
-        BSONArrayBuilder& appendTimestamp(unsigned long long ts) {
-            _b.appendTimestamp(num(), ts);
+        BSONArrayBuilder& appendCodeWScope(const StringData& code, const BSONObj& scope) {
+            _b.appendCodeWScope(num(), code, scope);
             return *this;
         }
 
-        BSONArrayBuilder& append(const StringData& s) {
-            _b.append(num(), s);
+        BSONArrayBuilder& appendTimeT(time_t dt) {
+            _b.appendTimeT(num(), dt);
+            return *this;
+        }
+
+        BSONArrayBuilder& appendDate(Date_t dt) {
+            _b.appendDate(num(), dt);
+            return *this;
+        }
+
+        BSONArrayBuilder& appendBool(bool val) {
+            _b.appendBool(num(), val);
             return *this;
         }
 
@@ -842,29 +796,6 @@ namespace mongo {
         BufBuilder& bb() { return _b.bb(); }
 
     private:
-        // These two are undefined privates to prevent their accidental
-        // use as we don't support unsigned ints in BSON
-        BSONObjBuilder& append(const StringData& fieldName, unsigned int val);
-        BSONObjBuilder& append(const StringData& fieldName, unsigned long long val);
-
-        void fill( const StringData& name ) {
-            long int n;
-            Status status = parseNumberFromStringWithBase( name, 10, &n );
-            uassert( 13048,
-                     (string)"can't append to array using string field name: " + name.toString(),
-                     status.isOK() );
-            fill(n);
-        }
-
-        void fill (int upTo){
-            // if this is changed make sure to update error message and jstests/set7.js
-            const int maxElems = 1500000;
-            BOOST_STATIC_ASSERT(maxElems < (BSONObjMaxUserSize/10));
-            uassert(15891, "can't backfill array to larger than 1,500,000 elements", upTo <= maxElems);
-
-            while( _i < upTo )
-                appendNull();
-        }
 
         std::string num() { return _b.numStr(_i++); }
         int _i;
@@ -928,6 +859,12 @@ namespace mongo {
         return _appendArrayIt< std::set< T > >( *this, vals );
     }
 
+    template<typename T>
+    inline BSONFieldValue<BSONObj> BSONField<T>::query( const char * q , const T& t ) const {
+        BSONObjBuilder b;
+        b.append( q , t );
+        return BSONFieldValue<BSONObj>( _name , b.obj() );
+    }
 
     // $or helper: OR(BSON("x" << GT << 7), BSON("y" << LT 6));
     inline BSONObj OR(const BSONObj& a, const BSONObj& b)
