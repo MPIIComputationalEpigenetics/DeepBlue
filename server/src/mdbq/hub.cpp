@@ -145,18 +145,7 @@ namespace mdbq {
       return false;
     }
 
-    if (!epidb::dba::helpers::get_counter("request", r_id, msg))  {
-      return false;
-    }
-
-    if (!epidb::dba::helpers::get_counter("request", r_id, msg))  {
-      return false;
-    }
-
     id = "r" + epidb::utils::integer_to_string(r_id);
-
-    std::cerr << job.toString() << std::endl;
-    std::cerr << id << std::endl;
 
     boost::posix_time::ptime ctime = universal_date_time();
     m_ptr->m_con->insert(m_prefix + ".jobs",
@@ -269,7 +258,6 @@ namespace mdbq {
 
   bool Hub::get_file_info(const std::string &filename, mongo::OID &oid, size_t &chunk_size, size_t &file_size, std::string &msg)
   {
-    std::cerr << m_ptr->m_prefix << std::endl;
     std::auto_ptr<mongo::DBClientCursor> data_cursor = m_ptr->m_con->query(m_ptr->m_prefix + ".fs.files", mongo::Query(BSON("filename" << filename)));
 
     if (data_cursor->more()) {

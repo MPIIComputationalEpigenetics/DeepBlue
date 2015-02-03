@@ -28,6 +28,7 @@ namespace epidb {
       mongo::BSONObj process(const mongo::BSONObj &job);
       mongo::BSONObj process_count(const std::string &request_id, const std::string &user_key);
       mongo::BSONObj process_get_regions(const std::string &query_id, const std::string &format, const std::string &user_key);
+      mongo::BSONObj process_score_matrix(const mongo::BSONObj &experiments_formats, const std::string &aggregation_function, const std::string &regions_query_id, const std::string &user_key);
     };
   }
 }

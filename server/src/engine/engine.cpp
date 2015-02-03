@@ -86,6 +86,21 @@ namespace epidb {
     return true;
   }
 
+  bool Engine::queue_score_matrix(const std::vector<std::pair<std::string, std::string>> &experiments_formats, const std::string &aggregation_function, const std::string &regions_query_id, const std::string &user_key, std::string &id, std::string &msg)
+  {
+    mongo::BSONObjBuilder bob_formats;
+
+    for (auto &exp_format : experiments_formats) {
+      bob_formats.appendElements(BSON(exp_format.first << exp_format.second));
+    }
+
+    if (!queue(BSON("command" << "score_matrix" << "experiments_formats" << bob_formats.obj() << "aggregation_function" << aggregation_function << "regions_query_id" << regions_query_id << "user_key" << user_key), 60 * 60, id, msg)) {
+      return false;
+    }
+
+    return true;
+  }
+
   bool Engine::request_status(const std::string &request_id, const std::string &user_key, request::Status &request_status, std::string &msg)
   {
     mongo::BSONObj o = _hub.get_job(request_id, user_key);

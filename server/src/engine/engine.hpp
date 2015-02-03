@@ -43,11 +43,13 @@ namespace epidb {
 
     bool request_status(const std::string &request_id, const std::string &user_key, request::Status &status, std::string &msg);
 
-    bool request_data(const std::string &request_id, const std::string &user_key, request::Data &data, StringBuilder& sb, std::string &msg);
+    bool request_data(const std::string &request_id, const std::string &user_key, request::Data &data, StringBuilder &sb, std::string &msg);
 
     bool queue_count_regions(const std::string &query_id, const std::string &user_key, std::string &request_id, std::string &msg);
 
     bool queue_get_regions(const std::string &query_id, const std::string &output_format, const std::string &user_key, std::string &id, std::string &msg);
+
+    bool queue_score_matrix(const std::vector<std::pair<std::string, std::string>> &experiments_formats, const std::string &aggregation_function, const std::string &regions_query_id, const std::string &user_key, std::string &request_id, std::string &msg);
   };
 }
 

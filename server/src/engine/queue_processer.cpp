@@ -55,10 +55,12 @@ namespace epidb {
         return process_count(job["query_id"].str(), job["user_key"].str());
       } if (command == "get_regions") {
         return process_get_regions(job["query_id"].str(), job["format"].str(), job["user_key"].str());
+      } if (command == "score_matrix") {
+        return process_score_matrix(job["experiments_formats"].Obj(), job["aggregation_function"].str(), job["regions_query_id"].str(), job["user_key"].str());
       } else {
         mongo::BSONObjBuilder bob;
         bob.append("success", false);
-        bob.append("__error__", "Invalid command" + command);
+        bob.append("__error__", "Invalid command " + command);
         return bob.obj();
       }
     }
@@ -94,6 +96,35 @@ namespace epidb {
       std::string result = sb.to_string();
       std::string filename = store_result(result.c_str(), result.length());
 
+      bob.append("__file__", filename);
+
+      return bob.obj();
+    }
+
+    mongo::BSONObj QueueHandler::process_score_matrix(const mongo::BSONObj &experiments_formats_bson, const std::string &aggregation_function, const std::string &regions_query_id, const std::string &user_key)
+    {
+      std::string msg;
+      StringBuilder sb;
+      mongo::BSONObjBuilder bob;
+
+      std::vector<std::pair<std::string, std::string>> experiments_formats;
+
+      for ( mongo::BSONObj::iterator i = experiments_formats_bson.begin(); i.more(); ) {
+        mongo::BSONElement e = i.next();
+
+        std::string experiment_name = e.fieldName();
+        std::string columns_name = e.str();
+
+        experiments_formats.emplace_back(experiment_name, columns_name);
+      }
+
+      std::string matrix;
+      if (!processing::score_matrix(experiments_formats, aggregation_function, regions_query_id, user_key, matrix, msg)) {
+        bob.append("__error__", msg);
+        return bob.obj();
+      }
+
+      std::string filename = store_result(matrix.c_str(), matrix.length());
       bob.append("__file__", filename);
 
       return bob.obj();

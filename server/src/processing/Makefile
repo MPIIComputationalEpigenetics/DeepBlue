@@ -3,7 +3,7 @@ include ../Makefile.inc
 CXXFLAGS	= $(DEFCXXFLAGS) -I..
 
 OBJLIBS	= ../libprocessing.a
-OBJS	= count_regions.o get_regions.o
+OBJS	= count_regions.o get_regions.o score_matrix.o
 
 all : $(OBJLIBS)
 
