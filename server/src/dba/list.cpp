@@ -14,7 +14,6 @@
 #include <mongo/bson/bson.h>
 
 #include "collections.hpp"
-#include "connection.hpp"
 #include "column_types.hpp"
 #include "config.hpp"
 #include "dba.hpp"
@@ -22,7 +21,11 @@
 #include "list.hpp"
 
 #include "../algorithms/levenshtein.hpp"
+
+#include "../connection/connection.hpp"
+
 #include "../datatypes/metadata.hpp"
+
 #include "../extras/utils.hpp"
 
 namespace epidb {

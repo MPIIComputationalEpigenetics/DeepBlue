@@ -10,9 +10,10 @@
 
 #include <mongo/bson/bson.h>
 
+#include "../connection/connection.hpp"
+
 #include "config.hpp"
 #include "collections.hpp"
-#include "connection.hpp"
 #include "helpers.hpp"
 #include "full_text.hpp"
 

@@ -22,11 +22,12 @@
 #include <mongo/bson/bson.h>
 
 #include "collections.hpp"
-#include "connection.hpp"
 #include "config.hpp"
 #include "helpers.hpp"
 #include "key_mapper.hpp"
 #include "queries.hpp"
+
+#include "../connection/connection.hpp"
 
 #include "../datatypes/regions.hpp"
 

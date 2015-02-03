@@ -20,7 +20,8 @@
 
 #include "../log.hpp"
 
-#include "../dba/connection.hpp"
+#include "../connection/connection.hpp"
+
 #include "../dba/helpers.hpp"
 #include "../extras/utils.hpp"
 
@@ -45,7 +46,7 @@
 
 namespace mdbq {
   struct HubImpl {
-    epidb::dba::Connection m_con;
+    epidb::Connection m_con;
 
     unsigned int m_interval;
     std::string  m_prefix;

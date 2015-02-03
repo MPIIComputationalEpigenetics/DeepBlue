@@ -14,6 +14,8 @@
 
 #include <mongo/bson/bson.h>
 
+#include "../connection/connection.hpp"
+
 #include "../datatypes/column_types_def.hpp"
 
 #include "../extras/utils.hpp"
@@ -21,7 +23,6 @@
 #include "../lua/sandbox.hpp"
 
 #include "collections.hpp"
-#include "connection.hpp"
 #include "dba.hpp"
 #include "full_text.hpp"
 #include "helpers.hpp"

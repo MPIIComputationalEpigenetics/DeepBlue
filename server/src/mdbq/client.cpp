@@ -21,7 +21,7 @@
 #include "common.hpp"
 #include "date_time.hpp"
 
-#include "dba/connection.hpp"
+#include "../connection/connection.hpp"
 
 #define CHECK_DB_ERR(CON)\
   {\
@@ -34,7 +34,7 @@
 namespace mdbq {
 
   struct ClientImpl {
-    epidb::dba::Connection    m_con;
+    epidb::Connection    m_con;
     mongo::BSONObj            m_current_task;
     mongo::BSONObj            m_task_selector;
     boost::posix_time::ptime  m_current_task_timeout_time;

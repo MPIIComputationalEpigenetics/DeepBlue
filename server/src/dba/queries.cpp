@@ -20,6 +20,8 @@
 #include "../algorithms/intersection.hpp"
 #include "../algorithms/merge.hpp"
 
+#include "../connection/connection.hpp"
+
 #include "../datatypes/column_types_def.hpp"
 #include "../datatypes/regions.hpp"
 
@@ -28,7 +30,6 @@
 #include "../extras/utils.hpp"
 
 #include "collections.hpp"
-#include "connection.hpp"
 #include "dba.hpp"
 #include "filter.hpp"
 #include "genomes.hpp"

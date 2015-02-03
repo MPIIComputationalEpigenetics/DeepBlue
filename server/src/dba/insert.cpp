@@ -19,6 +19,8 @@
 
 #include <mongo/bson/bson.h>
 
+#include "../connection/connection.hpp"
+
 #include "../datatypes/column_types_def.hpp"
 #include "../datatypes/regions.hpp"
 
@@ -32,7 +34,6 @@
 #include "annotations.hpp"
 #include "dba.hpp"
 #include "collections.hpp"
-#include "connection.hpp"
 #include "experiments.hpp"
 #include "full_text.hpp"
 #include "genomes.hpp"

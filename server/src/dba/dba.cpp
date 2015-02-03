@@ -20,6 +20,8 @@
 
 #include "../algorithms/patterns.hpp"
 
+#include "../connection/connection.hpp"
+
 #include "../datatypes/metadata.hpp"
 #include "../datatypes/regions.hpp"
 
@@ -32,7 +34,6 @@
 #include "users.hpp"
 #include "config.hpp"
 #include "collections.hpp"
-#include "connection.hpp"
 #include "controlled_vocabulary.hpp"
 #include "full_text.hpp"
 #include "genomes.hpp"

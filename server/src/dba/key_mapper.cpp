@@ -15,7 +15,8 @@
 #include "helpers.hpp"
 #include "key_mapper.hpp"
 #include "collections.hpp"
-#include "connection.hpp"
+
+#include "../connection/connection.hpp"
 
 #include "../log.hpp"
 

@@ -11,8 +11,9 @@
 
 #include <mongo/bson/bson.h>
 
+#include "../connection/connection.hpp"
+
 #include "config.hpp"
-#include "connection.hpp"
 
 #include "dba.hpp"
 

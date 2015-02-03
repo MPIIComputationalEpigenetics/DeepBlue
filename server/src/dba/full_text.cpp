@@ -18,11 +18,12 @@
 
 #include <mongo/bson/bson.h>
 
+#include "../connection/connection.hpp"
+
 #include "../extras/utils.hpp"
 
 #include "collections.hpp"
 #include "config.hpp"
-#include "connection.hpp"
 #include "helpers.hpp"
 #include "full_text.hpp"
 

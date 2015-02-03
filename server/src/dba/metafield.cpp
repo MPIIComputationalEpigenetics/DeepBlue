@@ -15,12 +15,13 @@
 #include <mongo/bson/bson.h>
 
 #include "collections.hpp"
-#include "connection.hpp"
 #include "helpers.hpp"
 #include "key_mapper.hpp"
 #include "metafield.hpp"
 #include "queries.hpp"
 #include "retrieve.hpp"
+
+#include "../connection/connection.hpp"
 
 #include "../lua/sandbox.hpp"
 

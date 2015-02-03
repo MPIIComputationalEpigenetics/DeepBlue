@@ -12,11 +12,12 @@
 
 #include <mongo/bson/bson.h>
 
+#include "../connection/connection.hpp"
+
 #include "../extras/utils.hpp"
 
 #include "controlled_vocabulary.hpp"
 #include "collections.hpp"
-#include "connection.hpp"
 #include "helpers.hpp"
 #include "full_text.hpp"
 
