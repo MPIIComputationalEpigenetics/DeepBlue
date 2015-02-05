@@ -101,6 +101,16 @@ namespace epidb {
     return true;
   }
 
+
+  bool Engine::queue_get_experiments_by_query(const std::string &query_id, const std::string &user_key, std::string &request_id, std::string &msg)
+  {
+    if (!queue(BSON("command" << "get_experiments_by_query" << "query_id" << query_id << "user_key" << user_key), 60 * 60, request_id, msg)) {
+      return false;
+    }
+    return true;
+  }
+
+
   bool Engine::request_status(const std::string &request_id, const std::string &user_key, request::Status &request_status, std::string &msg)
   {
     mongo::BSONObj o = _hub.get_job(request_id, user_key);
@@ -135,14 +145,19 @@ namespace epidb {
       return false;
     }
 
+    if (result.hasField("__id_names__")) {
+      std::cerr << "id_names" << std::endl;
+      mongo::BSONObj id_names = result["__id_names__"].Obj();
+      std::cerr << id_names.toString() << std::endl;
+      data.set_id_names(utils::bson_to_id_name(id_names));
+    }
+
     if (result.hasField("__file__")) {
       std::string filename = result["__file__"].str();
-      if (!_hub.get_result(filename, sb, msg)) {
-        return false;
-      }
-    } else {
-      data.load_from_bson(result);
+      return _hub.get_result(filename, sb, msg);
     }
+
+    data.load_from_bson(result);
 
     return true;
   }

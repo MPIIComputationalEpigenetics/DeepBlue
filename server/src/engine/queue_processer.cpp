@@ -19,6 +19,8 @@
 
 #include "../processing/processing.hpp"
 
+#include "../extras/utils.hpp"
+
 #include "queue_processer.hpp"
 
 namespace epidb {
@@ -32,7 +34,6 @@ namespace epidb {
     {
       try {
         mongo::BSONObj result = process(o);
-        std::cerr << result.toString() << std::endl;
         finish(result, true);
       } catch (mdbq::timeout_exception) {
         /* do nothing */
@@ -48,7 +49,6 @@ namespace epidb {
 
     mongo::BSONObj QueueHandler::process(const mongo::BSONObj &job)
     {
-      std::cerr << job.toString() << std::endl;
       std::string command = job["command"].str();
 
       if (command == "count_regions") {
@@ -57,6 +57,8 @@ namespace epidb {
         return process_get_regions(job["query_id"].str(), job["format"].str(), job["user_key"].str());
       } if (command == "score_matrix") {
         return process_score_matrix(job["experiments_formats"].Obj(), job["aggregation_function"].str(), job["regions_query_id"].str(), job["user_key"].str());
+      } if (command == "get_experiments_by_query") {
+        return process_get_experiments_by_query(job["query_id"].str(), job["user_key"].str());
       } else {
         mongo::BSONObjBuilder bob;
         bob.append("success", false);
@@ -126,6 +128,29 @@ namespace epidb {
 
       std::string filename = store_result(matrix.c_str(), matrix.length());
       bob.append("__file__", filename);
+
+      return bob.obj();
+    }
+
+    mongo::BSONObj QueueHandler::process_get_experiments_by_query(const std::string &query_id, const std::string &user_key)
+    {
+      std::string msg;
+      mongo::BSONObjBuilder bob;
+      std::vector<utils::IdName> experiments;
+      if (!processing::get_experiments_by_query(query_id, user_key, experiments, msg)) {
+        bob.append("__error__", msg);
+        return bob.obj();
+      }
+
+      std::cerr << experiments.size() << std::endl;
+
+      mongo::BSONObjBuilder experiments_ids_bob;
+      for (auto &exp_format : experiments) {
+        std::cerr << exp_format.id << std::endl;
+        experiments_ids_bob.appendElements(BSON(exp_format.id << exp_format.name));
+      }
+
+      bob.append("__id_names__", experiments_ids_bob.obj());
 
       return bob.obj();
     }

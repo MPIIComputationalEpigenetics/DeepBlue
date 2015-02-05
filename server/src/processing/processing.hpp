@@ -11,6 +11,8 @@
 
 #include <string>
 
+#include "../extras/utils.hpp"
+
 namespace epidb {
 
   class StringBuilder;
@@ -21,6 +23,8 @@ namespace epidb {
     bool get_regions(const std::string &query_id, const std::string &format, const std::string &user_key, StringBuilder &sb, std::string &msg);
 
     bool score_matrix(const std::vector<std::pair<std::string, std::string>> &experiments_formats, const std::string &aggregation_function, const std::string &regions_query_id, const std::string &user_key, std::string &matrix, std::string &msg);
+
+    bool get_experiments_by_query(const std::string &query_id, const std::string &user_key, std::vector<utils::IdName>& experiments, std::string &msg);
   }
 }
 

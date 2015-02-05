@@ -35,6 +35,8 @@ namespace epidb {
 
     std::ostream &operator<<(std::ostream &os, const IdName &o);
 
+    std::vector<IdName> bson_to_id_name(const mongo::BSONObj &o);
+
     class IdNameCount {
     public:
       IdNameCount() :

@@ -6,15 +6,9 @@
 //  Copyright (c) 2015 Max Planck Institute for Computer Science. All rights reserved.
 //
 
-#include "../datatypes/column_types_def.hpp"
-#include "../datatypes/regions.hpp"
+#include <string>
 
-#include "../dba/dba.hpp"
 #include "../dba/queries.hpp"
-
-#include "../extras/utils.hpp"
-
-#include "../log.hpp"
 
 namespace epidb {
   namespace processing {

@@ -168,6 +168,7 @@ namespace epidb {
           std::string exp_id = experiment["_id"].str();
           std::string exp_name = experiment["name"].str();
           utils::IdName p(exp_id, exp_name);
+          std::cerr << exp_name << std::endl;
           experiments_name.push_back(p);
         }
         cursor = c->query(helpers::collection_name(Collections::ANNOTATIONS()), o);

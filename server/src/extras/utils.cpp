@@ -36,6 +36,18 @@ namespace epidb {
       return os;
     }
 
+    std::vector<IdName> bson_to_id_name(const mongo::BSONObj &o)
+    {
+      std::vector<IdName> v;
+      for (mongo::BSONObj::iterator it = o.begin(); it.more(); ) {
+        mongo::BSONElement e = it.next();
+        std::string id = e.fieldName();
+        std::string name = e.str();
+        v.emplace_back(id, name);
+      }
+      return v;
+    }
+
     std::ostream &operator<<(std::ostream &os, const IdNameCount &o)
     {
       os << "[" << o.id << "," << o.name << "," << o.count << "]";
@@ -404,7 +416,7 @@ namespace epidb {
         std::string s = "";
         std::vector<mongo::BSONElement>  ee = e.Array();
         bool first = true;
-        for (auto element: ee) {
+        for (auto element : ee) {
           if (!first) {
             s += ",";
           } else {

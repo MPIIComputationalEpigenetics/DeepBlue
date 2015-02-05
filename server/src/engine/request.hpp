@@ -11,6 +11,8 @@
 
 #include <vector>
 
+#include "../extras/utils.hpp"
+
 namespace epidb {
   namespace request {
 
@@ -24,10 +26,15 @@ namespace epidb {
     } Status;
 
     typedef struct Data {
+      std::vector<utils::IdName> id_names;
       std::vector<StringDataPair> strings;
       std::vector<IntegerDataPair> integers;
       std::vector<FloatDataPair> floats;
-      std::unique_ptr<std::string> data;
+
+      void set_id_names(std::vector<utils::IdName> &&_id_names)
+      {
+        id_names = _id_names;
+      }
 
       void append(const std::string key, const std::string value)
       {

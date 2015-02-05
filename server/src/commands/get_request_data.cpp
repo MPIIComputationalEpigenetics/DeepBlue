@@ -89,6 +89,12 @@ namespace epidb {
             serialize::ParameterPtr p(new serialize::SimpleParameter(fs.second));
             map->add_child(fs.first, p);
           }
+
+          if (!data.id_names.empty()) {
+            std::cerr << "load into request answer" << std::endl;
+            set_id_names_return(data.id_names, result);
+          }
+
         } else {
           serialize::ParameterPtr p(new serialize::SimpleParameter(sb));
           map->add_child("data", p);
