@@ -117,8 +117,8 @@ namespace epidb {
 
       bool column_type(const std::string &id, mongo::BSONObj &result, std::string &msg)
       {
-        if (!helpers::get_one(Collections::COLUMN_TYPES(), mongo::Query(BSON("_id" << id)),  result, msg)) {
-          return false;
+        if (helpers::get_one(Collections::COLUMN_TYPES(), mongo::Query(BSON("_id" << id)),  result, msg)) {
+          return true;
         } else {
           msg = "Column type ID " + id + " not found";
           return false;

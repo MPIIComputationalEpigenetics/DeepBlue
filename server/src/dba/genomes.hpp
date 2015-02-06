@@ -10,6 +10,7 @@
 #define EPIDB_DBA_GENOMES_HPP
 
 #include <sstream>
+#include <unordered_map>
 
 #include <mongo/bson/bson.h>
 
@@ -18,7 +19,9 @@ namespace epidb {
     namespace genomes {
 
       typedef std::pair<std::string, size_t> ChromosomeData;
-      typedef std::map<std::string, size_t> GenomeData;
+      typedef std::unordered_map<std::string, size_t> GenomeData;
+      typedef std::unordered_map<std::string, std::string> NamesPairs;
+
 
       struct ChromosomeInfo {
         std::string name;
@@ -38,10 +41,11 @@ namespace epidb {
       private:
         std::string name_;
         GenomeData data_;
+        NamesPairs names_pair_;
 
       public:
-        GenomeInfo(const std::string &name, GenomeData data)
-          : name_(name), data_(data)
+        GenomeInfo(const std::string &name, GenomeData data, NamesPairs names_pair)
+          : name_(name), data_(data), names_pair_(names_pair)
         {}
 
         bool internal_chromosome(const std::string &chromosome, std::string &intern_chromosome, std::string &msg);

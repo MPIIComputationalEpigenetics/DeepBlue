@@ -7,10 +7,10 @@ class TestBugs(helpers.TestCase):
 
   # Bug: Error when insert repeat_masker annotation - 67203100
   def test_no_start_position(self):
-    file_content = """1036\t1146\t43\t0\t18\tchr19\t59118819\t1000\t-10000\t+\t(TTAGGG)n\tSimple_repeat\tSimple_repeat\t5\t165\t0\t1
-    585\t1080\t161\t1\t0\tchr19_gl000208_random\t0\t719\t-91970\t-\tALR/Alpha\tSatellite\tcentr\t-41\t719\t1\t4"""
+    file_content = """1036\t1146\t43\t0\t18\tchr19\t59118819\t1000\t-10000\t+\t(TTAGGG)n\tSimple_repeat\tSimple_repeat\t5\t165\t0\t1\n585\t1080\t161\t1\t0\tchr19_gl000208_random\t0\t719\t-91970\t-\tALR/Alpha\tSatellite\tcentr\t-41\t719\t1\t4"""
 
     rmsk = [
+  "bin:string",
   "swScore:Integer",
   "milliDiv:Integer",
   "milliDel:Integer",
@@ -40,6 +40,7 @@ class TestBugs(helpers.TestCase):
     self.assertEquals(a, "120002:The CHROMOSOME is missing in the format. Please, inform the CHROMOSOME column in the Format.")
 
     rmsk2 = [
+  "bin:string",
   "swScore:Integer",
   "milliDiv:Integer",
   "milliDel:Integer",

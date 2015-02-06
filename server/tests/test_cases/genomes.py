@@ -6,7 +6,7 @@ from client import EpidbClient
 class TestGenomeCommands(helpers.TestCase):
 
 
-  def test_genome_hg19(self):
+  def _test_genome_hg19(self):
     epidb = EpidbClient()
     self.init(epidb)
 
@@ -21,7 +21,7 @@ class TestGenomeCommands(helpers.TestCase):
     self.assertEqual(len(genomes), 1)
     self.assertEqual(genomes[0][1], "hg19")
 
-  def test_chromosomes(self):
+  def _test_chromosomes(self):
     epidb = EpidbClient()
     self.init(epidb)
 
@@ -54,7 +54,7 @@ class TestGenomeCommands(helpers.TestCase):
     expected = [['chr1', 197195432], ['chr10', 129993255], ['chr11', 121843856], ['chr12', 121257530], ['chr13', 120284312], ['chr13_random', 400311], ['chr14', 125194864], ['chr15', 103494974], ['chr16', 98319150], ['chr16_random', 3994], ['chr17', 95272651], ['chr17_random', 628739], ['chr18', 90772031], ['chr19', 61342430], ['chr1_random', 1231697], ['chr2', 181748087], ['chr3', 159599783], ['chr3_random', 41899], ['chr4', 155630120], ['chr4_random', 160594], ['chr5', 152537259], ['chr5_random', 357350], ['chr6', 149517037], ['chr7', 152524553], ['chr7_random', 362490], ['chr8', 131738871], ['chr8_random', 849593], ['chr9', 124076172], ['chr9_random', 449403], ['chrM', 16299], ['chrUn_random', 5900358], ['chrX', 166650296], ['chrX_random', 1785075], ['chrY', 15902555], ['chrY_random', 58682461]]
     self.assertEqual(chroms, expected)
 
-  def test_genome_empty(self):
+  def _test_genome_empty(self):
     epidb = EpidbClient()
     self.init(epidb)
 
@@ -78,7 +78,7 @@ class TestGenomeCommands(helpers.TestCase):
     self.assertTrue("hg18" in genome_names)
     self.assertTrue("mm9" in genome_names)
 
-  def test_genome_info(self):
+  def _test_genome_info(self):
     epidb = EpidbClient()
     self.init(epidb)
 
@@ -95,7 +95,7 @@ class TestGenomeCommands(helpers.TestCase):
 
     self.assertEqual(info_answer, info)
 
-  def test_genome_duplicate(self):
+  def _test_genome_duplicate(self):
     epidb = EpidbClient()
     self.init(epidb)
 
@@ -107,3 +107,94 @@ class TestGenomeCommands(helpers.TestCase):
     self.assertSuccess(res)
     res = epidb.add_genome("hg18", "Human genome 18 #2", hg18_genome_info, self.admin_key)
     self.assertFailure(res)
+
+
+  def test_incomplete_chromosome(self):
+    mm10_info = '''chr1 195471971
+chr2  182113224
+chrX  171031299
+chr3  160039680
+chr4  156508116
+chr5  151834684
+chr6  149736546
+chr7  145441459
+chr10 130694993
+chr8  129401213
+chr14 124902244
+chr9  124595110
+chr11 122082543
+chr13 120421639
+chr12 120129022
+chr15 104043685
+chr16 98207768
+chr17 94987271
+chrY  91744698
+chr18 90702639
+chr19 61431566
+chr5_JH584299_random  953012
+chrX_GL456233_random  336933
+chrY_JH584301_random  259875
+chr1_GL456211_random  241735
+chr4_GL456350_random  227966
+chr4_JH584293_random  207968
+chr1_GL456221_random  206961
+chr5_JH584297_random  205776
+chr5_JH584296_random  199368
+chr5_GL456354_random  195993
+chr4_JH584294_random  191905
+chr5_JH584298_random  184189
+chrY_JH584300_random  182347
+chr7_GL456219_random  175968
+chr1_GL456210_random  169725
+chrY_JH584303_random  158099
+chrY_JH584302_random  155838
+chr1_GL456212_random  153618
+chrUn_JH584304  114452
+chrUn_GL456379  72385
+chr4_GL456216_random  66673
+chrUn_GL456393  55711
+chrUn_GL456366  47073
+chrUn_GL456367  42057
+chrUn_GL456239  40056
+chr1_GL456213_random  39340
+chrUn_GL456383  38659
+chrUn_GL456385  35240
+chrUn_GL456360  31704
+chrUn_GL456378  31602
+chrUn_GL456389  28772
+chrUn_GL456372  28664
+chrUn_GL456370  26764
+chrUn_GL456381  25871
+chrUn_GL456387  24685
+chrUn_GL456390  24668
+chrUn_GL456394  24323
+chrUn_GL456392  23629
+chrUn_GL456382  23158
+chrUn_GL456359  22974
+chrUn_GL456396  21240
+chrUn_GL456368  20208
+chrM  16299
+chr4_JH584292_random  14945
+chr4_JH584295_random  1976'''
+
+    epidb = EpidbClient()
+    self.init_base(epidb)
+
+    sample_id = self.sample_ids[0]
+
+    res = epidb.add_genome("mm10", "Mouse genome 10", mm10_info, self.admin_key)
+    self.assertSuccess(res)
+
+    data = "1\t10\t30\nUn_GL456392\t123\t1234\nM\t1234\t2000"
+
+    res = epidb.add_experiment("test_exp1", "mm10", "Methylation", sample_id, "tech1",
+              "ENCODE", "desc1", data, "CHROMOSOME,START,END", None, self.admin_key)
+
+    self.assertSuccess(res)
+
+    (status, q) = epidb.select_regions('test_exp1', "mm10", None, None, None, None, None, None, None, self.admin_key)
+    (status, req) = epidb.get_regions(q, "CHROMOSOME,START,END", self.admin_key)
+
+    regions = self.get_regions_request(req)
+    expected = "chr1\t10\t30\nchrM\t1234\t2000\nchrUn_GL456392\t123\t1234"
+    self.assertEqual(regions, expected)

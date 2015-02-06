@@ -391,6 +391,7 @@ namespace epidb {
         }
 
         size_t size;
+        // TODO: check regions and positions regards the chromosome size!
         if (!genome_info->chromosome_size(internal_chromosome, size, msg)) {
           // TODO: delete data already included.
           c.done();

@@ -99,11 +99,14 @@ namespace epidb {
       }
 
       if (first_) {
+        /*
+        TODO: verify if the bin column is still used
         std::string buf;
         std::stringstream ss(line);
         std::string s;
         ss >> s;
         first_column_useless = s.find_first_not_of("0123456789") == std::string::npos;
+        */
         first_ = false;
       }
 

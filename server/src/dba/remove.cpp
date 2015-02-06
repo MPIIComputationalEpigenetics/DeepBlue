@@ -446,7 +446,27 @@ namespace epidb {
 
       bool column_type(const std::string &id, const std::string &user_key, std::string &msg)
       {
-        return false;
+        mongo::BSONObj column_type;
+        if (!data::column_type(id, column_type, msg)) {
+          msg = "Column Type " + id + " not found";
+          return false;
+        }
+
+        if (!has_permission(column_type, user_key, true, msg)) {
+          return false;
+        }
+
+        // delete from full text search
+        if (!search::remove(id, msg)) {
+          return false;
+        }
+
+        // Delete from collection
+        if (!helpers::remove_one(helpers::collection_name(Collections::COLUMN_TYPES()), id, msg)) {
+          return false;
+        }
+
+        return true;
       }
     }
   }

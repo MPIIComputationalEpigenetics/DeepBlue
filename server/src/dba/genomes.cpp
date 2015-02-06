@@ -7,8 +7,12 @@
 //
 
 #include <algorithm>
+#include <ctype.h>
+#include <functional>
+#include <iostream>
 #include <string>
-#include <map>
+#include <utility>
+
 
 #include <boost/foreach.hpp>
 
@@ -36,15 +40,46 @@ namespace epidb {
 
       bool GenomeInfo::internal_chromosome(const std::string &chromosome, std::string &intern_chromosome, std::string &msg)
       {
-        if ( chromosome.size() == 1 &&
-             ((chromosome.compare("X") == 0) || (chromosome.compare("Y") == 0))) {
-          intern_chromosome = std::string("chr") + chromosome;
-        } else if (utils::is_number(chromosome)) {
-          intern_chromosome = std::string("chr") + chromosome;
-        } else {
-          intern_chromosome = chromosome;
+        if (chromosome.empty()) {
+          msg = "The chromosome name is empty";
+          return false;
         }
-        return true;
+
+        std::string norm_chromosome = utils::normalize_name(chromosome);
+
+        std::cerr << chromosome << std::endl;
+        std::cerr << norm_chromosome << std::endl;
+
+        NamesPairs::const_iterator p;
+
+        // Return if the name is correct
+        p = names_pair_.find(norm_chromosome);
+        if (p != names_pair_.end()) {
+          intern_chromosome = p->second;
+          return true;
+        }
+
+        // Check if the name contains extra "chr". Remove it and check.
+        if ((chromosome.size() > 3) && (chromosome.compare(0, 3, "chr") == 0)) {
+          std::string tmp = norm_chromosome.substr(3);
+          p = names_pair_.find(tmp);
+          if (p != names_pair_.end()) {
+            intern_chromosome = p->second;
+            return true;
+          }
+        }
+
+        // Final try: Include "chr" in front of the chromosome name.
+        std::string tmp = std::string("chr") + norm_chromosome;
+        p = names_pair_.find(tmp);
+        if (p != names_pair_.end()) {
+          intern_chromosome = p->second;
+          return true;
+        }
+
+        msg = "Chromosome " + chromosome + " not found in the genome assembly " + name_;
+        return false;
+
       }
 
       bool GenomeInfo::get_chromosome(const std::string &name, ChromosomeInfo &chromosome_info, std::string &msg)
@@ -63,7 +98,7 @@ namespace epidb {
       {
         std::vector<std::string> r;
 
-        BOOST_FOREACH(const ChromosomeData &c, data_) {
+        for (const auto &c : data_) {
           r.push_back(c.first);
         }
         return r;
@@ -89,7 +124,7 @@ namespace epidb {
           return false;
         }
         std::vector<std::string> chroms = genome_info->chromosomes();
-        BOOST_FOREACH(const std::string &chrom, chroms) {
+        for (const auto &chrom : chroms) {
           chromosomes.insert(chrom);
         }
         return true;
@@ -103,7 +138,7 @@ namespace epidb {
           return false;
         }
         std::vector<std::string> chroms = genome_info->chromosomes();
-        BOOST_FOREACH(const std::string & chrom, chroms) {
+        for (const auto &chrom : chroms) {
           ChromosomeInfo chromosome_info;
           if (!genome_info->get_chromosome(chrom, chromosome_info, msg)) {
             return false;
@@ -133,14 +168,17 @@ namespace epidb {
         std::vector<mongo::BSONElement> c = o["chromosomes"].Array();
 
         GenomeData data;
+        NamesPairs names_pairs;
         for (std::vector<mongo::BSONElement>::iterator it = c.begin(); it != c.end(); it++) {
           mongo::BSONElement e = *it;
           std::string name = e["name"].String();
+          std::string norm_name = utils::normalize_name(name);
           int size = e["size"].Int();
           data[name] = size;
+          names_pairs[norm_name] = name;
         }
 
-        gi = boost::shared_ptr<GenomeInfo>(new GenomeInfo(name, data));
+        gi = boost::shared_ptr<GenomeInfo>(new GenomeInfo(name, data, names_pairs));
         return true;
       }
 
