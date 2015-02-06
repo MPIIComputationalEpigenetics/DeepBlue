@@ -9,7 +9,8 @@
 #include <string>
 
 #include <mongo/bson/bson.h>
-#include <mongo/client/dbclient.h>
+
+#include "../connection/connection.hpp"
 
 #include "collections.hpp"
 #include "config.hpp"
@@ -53,7 +54,7 @@ namespace epidb {
         create_user_builder.append("key", key);
         mongo::BSONObj cu = create_user_builder.obj();
 
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
+        Connection c;
         c->insert(helpers::collection_name(Collections::USERS()), cu);
         if (!c->getLastError().empty()) {
           msg = c->getLastError();
@@ -63,7 +64,7 @@ namespace epidb {
 
         mongo::BSONObjBuilder index_name;
         index_name.append("key", 1);
-        c->ensureIndex(helpers::collection_name(Collections::USERS()), index_name.obj());
+        c->createIndex(helpers::collection_name(Collections::USERS()), index_name.obj());
         if (!c->getLastError().empty()) {
           msg = c->getLastError();
           c.done();
@@ -107,13 +108,13 @@ namespace epidb {
         builder.append("password", password);
         builder.append("key", password);
 
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
+        Connection c;
         c->insert(helpers::collection_name(Collections::WEB_ACCESS()), create_column_type_calculated_builder.obj());
 
         mongo::BSONObjBuilder index;
         index.append("email", 1);
         index.append("password", 1);
-        c->ensureIndex(helpers::collection_name(Collections::WEB_ACCESS()), index.obj());
+        c->createIndex(helpers::collection_name(Collections::WEB_ACCESS()), index.obj());
         if (!c->getLastError().empty()) {
           msg = c->getLastError();
           c.done();
@@ -128,7 +129,7 @@ namespace epidb {
                                 "query" << BSON("_id" << user_id) <<
                                 "update" << BSON("$set" << BSON("admin" << value)));
 
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
+        Connection c;
         mongo::BSONObj info;
         bool result = c->runCommand(config::DATABASE_NAME(), o, info);
         if (!result) {
@@ -143,7 +144,7 @@ namespace epidb {
 
       bool is_admin_key(const std::string &admin_key, bool &ret, std::string &msg)
       {
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
+        Connection c;
 
         mongo::BSONObjBuilder query_builder;
 

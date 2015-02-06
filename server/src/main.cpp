@@ -22,18 +22,24 @@
 
 #include <boost/program_options.hpp>
 
+#include <mongo/client/init.h>
+
 #include "log.hpp"
 #include "version.hpp"
 #include "dba/config.hpp"
+#include "engine/queue_processer.hpp"
 #include "extras/compress.hpp"
 #include "httpd/server.hpp"
-
 
 #include "parser/wig.hpp"
 
 int main(int argc, char *argv[])
 {
   EPIDB_LOG(epidb::Version::info());
+  EPIDB_LOG("Initializing MongoDB Client...");
+  mongo::client::initialize();
+  // TODO: check initialize output
+  EPIDB_LOG("MongoDB Client initialized.");
 
   namespace po = boost::program_options;
 
@@ -50,7 +56,7 @@ int main(int argc, char *argv[])
   ("address,A", po::value<std::string>(&address)->default_value("localhost"), "Local address")
   ("port,P", po::value<std::string>(&port)->default_value("31415"), "Local port")
   ("threads,T", po::value<size_t>(&threads)->default_value(10), "Number of concurrent requests")
-  ("mongodb,M", po::value<std::string>(&mongodb_server)->default_value("127.0.0.1:27017"), "MongoDB address and port")
+  ("mongodb,M", po::value<std::string>(&mongodb_server)->default_value("mongodb://localhost:27017"), "MongoDB address and port")
   ("database_name,D", po::value<std::string>(&database_name)->default_value("epidb"), "Database name")
   ("sharding,S", "Use DeepBlue with sharding in the MongoDB")
   ;
@@ -92,6 +98,9 @@ int main(int argc, char *argv[])
     EPIDB_LOG_ERR("Problem initializing LZO compression algorithm.");
     return 1;
   }
+
+  epidb::engine::queue_processer_run(4);
+
   epidb::httpd::server s(address, port, threads);
   s.run();
 

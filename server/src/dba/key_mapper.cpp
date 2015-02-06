@@ -11,12 +11,13 @@
 #include <boost/thread/mutex.hpp>
 
 #include <mongo/bson/bson.h>
-#include <mongo/client/dbclient.h>
 
-#include "key_mapper.hpp"
-#include "config.hpp"
 #include "helpers.hpp"
+#include "key_mapper.hpp"
 #include "collections.hpp"
+
+#include "../connection/connection.hpp"
+
 #include "../log.hpp"
 
 
@@ -38,11 +39,11 @@ namespace epidb {
       if (loaded_)
         return true;
 
-      mongo::ScopedDbConnection c(config::get_mongodb_server());
+      Connection c;
 
       mongo::BSONObjBuilder index;
       index.append("s", 1);
-      c->ensureIndex(helpers::collection_name(Collections::KEY_MAPPER()), index.obj(), true);
+      c->createIndex(helpers::collection_name(Collections::KEY_MAPPER()), index.obj());
 
       std::auto_ptr<mongo::DBClientCursor> cursor =
         c->query(helpers::collection_name(Collections::KEY_MAPPER()), mongo::BSONObj());
@@ -75,7 +76,7 @@ namespace epidb {
         return true;
       }
 
-      mongo::ScopedDbConnection c(config::get_mongodb_server());
+      Connection c;
 
       mongo::BSONObjBuilder b;
       b.append("_id", l);

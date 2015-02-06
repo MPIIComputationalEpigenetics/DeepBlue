@@ -6,17 +6,15 @@
 //  Copyright (c) 2013,2014 Max Planck Institute for Computer Science. All rights reserved.
 //
 
-#include <sstream>
-#include <map>
-
 #include "../dba/dba.hpp"
-#include "../dba/queries.hpp"
+
+#include "../engine/commands.hpp"
+#include "../engine/engine.hpp"
 
 #include "../extras/serialize.hpp"
 
-#include "../engine/commands.hpp"
-
 #include "../errors.hpp"
+#include "../log.hpp"
 
 namespace epidb {
   namespace command {
@@ -26,13 +24,13 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::OPERATIONS, "Counts the number of regions in the result of the given query.");
+        return CommandDescription(categories::OPERATIONS, "Send a request to counts the number of regions in the result of the given query.");
       }
 
       static  Parameters parameters_()
       {
         Parameter p[] = {
-          Parameter("query_id", serialize::STRING, "id of the counted query"),
+          Parameter("query_id", serialize::STRING, "Query ID"),
           parameters::UserKey
         };
         Parameters params(&p[0], &p[0] + 2);
@@ -42,7 +40,7 @@ namespace epidb {
       static Parameters results_()
       {
         Parameter p[] = {
-          Parameter("size", serialize::INTEGER, "number of regions")
+          Parameter("request_id", serialize::STRING, "Request ID - Use it to retrieve the result with get_request_status and get_request_data")
         };
         Parameters results(&p[0], &p[0] + 1);
         return results;
@@ -73,14 +71,13 @@ namespace epidb {
           return false;
         }
 
-        size_t size = 0;
-        if (!dba::query::count_regions(user_key, query_id, size, msg)) {
+        std::string request_id;
+        if (!epidb::Engine::instance().queue_count_regions(query_id, user_key, request_id, msg)) {
           result.add_error(msg);
           return false;
         }
 
-        result.add_int(size);
-
+        result.add_string(request_id);
         return true;
       }
     } countRegionsCommand;

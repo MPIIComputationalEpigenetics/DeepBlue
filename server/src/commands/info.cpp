@@ -145,7 +145,7 @@ namespace epidb {
             serialize::ParameterPtr extra_metadata_parameter(new serialize::MapParameter());
             std::map<std::string, std::string>::iterator it;
             for (it = extra_metadata.begin(); it != extra_metadata.end(); ++it) {
-              serialize::ParameterPtr p(new serialize::SimpleParameter(serialize::STRING, it->second));
+              serialize::ParameterPtr p(new serialize::SimpleParameter(it->second));
               extra_metadata_parameter->add_child(it->first, p);
             }
             info->add_child("extra_metadata", extra_metadata_parameter);
@@ -155,7 +155,7 @@ namespace epidb {
             serialize::ParameterPtr sample_info_parameter(new serialize::MapParameter());
             std::map<std::string, std::string>::iterator it;
             for (it = sample_info.begin(); it != sample_info.end(); ++it) {
-              serialize::ParameterPtr p(new serialize::SimpleParameter(serialize::STRING, it->second));
+              serialize::ParameterPtr p(new serialize::SimpleParameter(it->second));
               sample_info_parameter->add_child(it->first, p);
             }
             info->add_child("sample_info", sample_info_parameter);
@@ -165,7 +165,7 @@ namespace epidb {
             serialize::ParameterPtr upload_info_parameter(new serialize::MapParameter());
             std::map<std::string, std::string>::iterator it;
             for (it = upload_info.begin(); it != upload_info.end(); ++it) {
-              serialize::ParameterPtr p(new serialize::SimpleParameter(serialize::STRING, it->second));
+              serialize::ParameterPtr p(new serialize::SimpleParameter(it->second));
               upload_info_parameter->add_child(it->first, p);
             }
             info->add_child("upload_info", upload_info_parameter);

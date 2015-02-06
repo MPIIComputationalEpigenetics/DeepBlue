@@ -10,10 +10,11 @@
 #include <vector>
 
 #include <mongo/bson/bson.h>
-#include <mongo/client/dbclient.h>
 
 #include "../parser/parser_factory.hpp"
 #include "../extras/utils.hpp"
+
+#include "../connection/connection.hpp"
 
 #include "../datatypes/column_types_def.hpp"
 #include "../datatypes/metadata.hpp"
@@ -22,7 +23,6 @@
 
 #include "annotations.hpp"
 #include "collections.hpp"
-#include "config.hpp"
 #include "experiments.hpp"
 #include "full_text.hpp"
 #include "info.hpp"
@@ -109,7 +109,7 @@ namespace epidb {
                        const std::string user_key, const std::string &ip,
                        std::string &_id, std::string &msg)
     {
-      mongo::ScopedDbConnection c(config::get_mongodb_server());
+      Connection c;
 
       mongo::BSONObj query = BSON("_id" << dataset_id);
 

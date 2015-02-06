@@ -19,8 +19,9 @@ class TestIntersection(helpers.TestCase):
     res, qid_3 = epidb.intersection(qid_1, qid_2, self.admin_key)
     self.assertSuccess(res, qid_3)
 
-    res, regions = epidb.get_regions(qid_3, "CHROMOSOME,START,END", self.admin_key)
-    self.assertSuccess(res, regions)
+    res, req = epidb.get_regions(qid_3, "CHROMOSOME,START,END", self.admin_key)
+    self.assertSuccess(res, req)
+    regions = self.get_regions_request(req)
 
     expected_regions = helpers.get_result("intersection")
     self.assertEqual(regions, expected_regions)
@@ -40,8 +41,9 @@ class TestIntersection(helpers.TestCase):
     res, qid_3 = epidb.intersection(qid_1, qid_2, self.admin_key)
     self.assertSuccess(res, qid_3)
 
-    res, regions = epidb.get_regions(qid_3, "CHROMOSOME,START,END", self.admin_key)
-    self.assertSuccess(res, regions)
+    res, req = epidb.get_regions(qid_3, "CHROMOSOME,START,END", self.admin_key)
+    self.assertSuccess(res, req)
+    regions = self.get_regions_request(req)
 
     expected_regions = helpers.get_result("intersection_multiple_genomes")
     self.assertEqual(regions, expected_regions)

@@ -14,6 +14,8 @@
 
 #include <mongo/bson/bson.h>
 
+#include "../connection/connection.hpp"
+
 #include "../datatypes/column_types_def.hpp"
 
 #include "../extras/utils.hpp"
@@ -21,7 +23,6 @@
 #include "../lua/sandbox.hpp"
 
 #include "collections.hpp"
-#include "config.hpp"
 #include "dba.hpp"
 #include "full_text.hpp"
 #include "helpers.hpp"
@@ -352,7 +353,7 @@ namespace epidb {
           return false;
         }
 
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
+        Connection c;
         c->insert(helpers::collection_name(Collections::COLUMN_TYPES()), obj);
         if (!c->getLastError().empty()) {
           msg = c->getLastError();
@@ -394,7 +395,7 @@ namespace epidb {
 
         create_column_type_calculated_builder.append("code", code);
 
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
+        Connection c;
         c->insert(helpers::collection_name(Collections::COLUMN_TYPES()), create_column_type_calculated_builder.obj());
         if (!c->getLastError().empty()) {
           msg = c->getLastError();
@@ -430,7 +431,7 @@ namespace epidb {
         mongo::BSONArray arr = helpers::build_array(items);
         create_column_type_category_builder.append("items", arr);
 
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
+        Connection c;
         c->insert(helpers::collection_name(Collections::COLUMN_TYPES()), create_column_type_category_builder.obj());
         if (!c->getLastError().empty()) {
           msg = c->getLastError();
@@ -465,7 +466,7 @@ namespace epidb {
         create_column_type_range_builder.append("minimum", minimum);
         create_column_type_range_builder.append("maximum", maximum);
 
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
+        Connection c;
         c->insert(helpers::collection_name(Collections::COLUMN_TYPES()), create_column_type_range_builder.obj());
         if (!c->getLastError().empty()) {
           msg = c->getLastError();
@@ -484,7 +485,7 @@ namespace epidb {
 
       bool list_column_types(const std::string &user_key, std::vector<utils::IdName> &content, std::string  &msg)
       {
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
+        Connection c;
         std::auto_ptr<mongo::DBClientCursor> data_cursor = c->query(helpers::collection_name(Collections::COLUMN_TYPES()), mongo::BSONObj());
 
         while (data_cursor->more()) {
@@ -547,7 +548,7 @@ namespace epidb {
 
       bool load_column_type(const std::string &name, mongo::BSONObj &obj_column_type, std::string &msg)
       {
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
+        Connection c;
         const std::string norm_name = utils::normalize_name(name);
         mongo::BSONObj query = BSON("norm_name" << norm_name);
         std::auto_ptr<mongo::DBClientCursor> data_cursor = c->query(helpers::collection_name(Collections::COLUMN_TYPES()), query, 1);

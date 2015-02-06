@@ -9,6 +9,8 @@
 #ifndef COLUMN_TYPES_DEF_HPP
 #define COLUMN_TYPES_DEF_HPP
 
+#include <string>
+
 namespace epidb {
   namespace datatypes {
     enum COLUMN_TYPES {

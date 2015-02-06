@@ -20,13 +20,14 @@
 #include <boost/bind.hpp>
 
 #include <mongo/bson/bson.h>
-#include <mongo/client/dbclient.h>
 
 #include "collections.hpp"
 #include "config.hpp"
 #include "helpers.hpp"
 #include "key_mapper.hpp"
 #include "queries.hpp"
+
+#include "../connection/connection.hpp"
 
 #include "../datatypes/regions.hpp"
 
@@ -229,7 +230,7 @@ namespace epidb {
                                        const mongo::BSONObj &regions_query,
                                        Regions &regions, std::string &msg)
       {
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
+        Connection c;
 
         Position start;
         Position end;
@@ -437,7 +438,7 @@ namespace epidb {
         std::string norm_genome = utils::normalize_name(genome);
         std::string filename = norm_genome + "." + chromosome;
 
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
+        Connection c;
         std::auto_ptr<mongo::DBClientCursor> data_cursor = c->query(helpers::collection_name(Collections::SEQUENCES()) + ".files",
             mongo::Query(BSON("filename" << filename)));
 
@@ -455,7 +456,7 @@ namespace epidb {
           return true;
         }
 
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
+        Connection c;
 
         mongo::BSONObj projection = BSON("chunkSize" << 1);
         std::auto_ptr<mongo::DBClientCursor> data_cursor = c->query(helpers::collection_name(Collections::SEQUENCES()) + ".files",
@@ -478,7 +479,7 @@ namespace epidb {
           oid = file_ids_.find(filename)->second;
           return true;
         }
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
+        Connection c;
 
         mongo::BSONObj projection = BSON("_id" << 1);
         std::auto_ptr<mongo::DBClientCursor> data_cursor = c->query(helpers::collection_name(Collections::SEQUENCES()) + ".files",
@@ -520,7 +521,7 @@ namespace epidb {
         }
         size_t chunk_number = start / chunk_size;
 
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
+        Connection c;
 
         mongo::BSONObj projection = BSON("data" << 1);
         std::auto_ptr<mongo::DBClientCursor> data_cursor = c->query(helpers::collection_name(Collections::SEQUENCES()) + ".chunks",

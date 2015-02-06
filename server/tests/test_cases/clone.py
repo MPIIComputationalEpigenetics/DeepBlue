@@ -222,11 +222,13 @@ class TestClone(helpers.TestCase):
     self.assertSuccess(s, clone_id)
 
     (status, wig_data) = epidb.select_regions('test_exp1', "hg19", None, None, None, None, None, None, None, self.admin_key)
-    (s, rs) = epidb.get_regions(wig_data, "CHROMOSOME,START,END,VALUE", self.admin_key)
+    (s, req) = epidb.get_regions(wig_data, "CHROMOSOME,START,END,VALUE", self.admin_key)
+    rs = self.get_regions_request(req)
 
     (status, wig_data) = epidb.select_regions('New Wig File', "hg19", None, None, None, None, None, None, None, self.admin_key)
-    (s, rs2) = epidb.get_regions(wig_data, "CHROMOSOME,START,END,METHYLATION_LEVEL", self.admin_key)
+    (s, req2) = epidb.get_regions(wig_data, "CHROMOSOME,START,END,METHYLATION_LEVEL", self.admin_key)
 
+    rs2 = self.get_regions_request(req2)
     self.assertEqual(rs.split("\n")[0].split("\t")[3], "8.1235")
     self.assertEqual(rs, rs2)
 
@@ -254,7 +256,8 @@ class TestClone(helpers.TestCase):
     self.assertSuccess(s, clone_id)
 
     (status, wig_data) = epidb.select_regions('New Wig File', "hg19", None, None, None, None, None, None, None, self.admin_key)
-    (s, rs) = epidb.get_regions(wig_data, "CHROMOSOME,START,END,METHYLATION_LEVEL,METHYLATION_LEVEL_SQRT", self.admin_key)
+    (s, req) = epidb.get_regions(wig_data, "CHROMOSOME,START,END,METHYLATION_LEVEL,METHYLATION_LEVEL_SQRT", self.admin_key)
+    rs = self.get_regions_request(req)
 
     self.assertEqual(rs.split("\n")[0].split("\t")[3], "8.1235")
     self.assertEqual(rs.split("\n")[0].split("\t")[4], "2.850168")

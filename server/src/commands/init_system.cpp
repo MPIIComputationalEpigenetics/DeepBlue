@@ -12,6 +12,7 @@
 #include "../dba/users.hpp"
 
 #include "../engine/commands.hpp"
+#include "../engine/engine.hpp"
 
 #include "../extras/serialize.hpp"
 
@@ -88,6 +89,8 @@ namespace epidb {
             result.add_error(msg);
             return false;
           }
+
+          epidb::Engine::instance().init();
 
           result.add_string(key);
           return true;

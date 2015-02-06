@@ -31,14 +31,17 @@ class TestOutput(helpers.TestCase):
     self.assertSuccess(res, qid_1)
     self.assertEqual(qid_1, 'q1')
 
-    res, count = epidb.count_regions(qid_1, self.admin_key)
-    self.assertSuccess(res, count)
+    res, req = epidb.count_regions(qid_1, self.admin_key)
+    self.assertSuccess(res, req)
+    count = self.count_request(req)
     self.assertEqual(10, count)
 
-    res, regions = epidb.get_regions(qid_1, "chr:start:end:name:length:cpgNum:gcNum:perCpg:perGc:obsExp", self.admin_key)
-    self.assertEquals("123000:Unable to find the column 'chr:start:end:name:length:cpgNum:gcNum:perCpg:perGc:obsExp' in the dataset format or in the DeepBlue columns.", regions)
+    res, req = epidb.get_regions(qid_1, "chr:start:end:name:length:cpgNum:gcNum:perCpg:perGc:obsExp", self.admin_key)
+    msg = self.get_regions_request_error(req)
+    self.assertEquals(msg, "123000:Unable to find the column 'chr:start:end:name:length:cpgNum:gcNum:perCpg:perGc:obsExp' in the dataset format or in the DeepBlue columns.")
 
-    res, regions = epidb.get_regions(qid_1, "CHROMOSOME,START,END,name,length,cpgNum,gcNum,perCpg,perGc,obsExp", self.admin_key)
+    res, req = epidb.get_regions(qid_1, "CHROMOSOME,START,END,name,length,cpgNum,gcNum,perCpg,perGc,obsExp", self.admin_key)
+    regions = self.get_regions_request(req)
 
     expected = """chr1\t28735\t29810\tCpG: 116\t1075\t116\t787\t21.6000\t73.2000\t0.8300
 chr1\t135124\t135563\tCpG: 30\t439\t30\t295\t13.7000\t67.2000\t0.6400

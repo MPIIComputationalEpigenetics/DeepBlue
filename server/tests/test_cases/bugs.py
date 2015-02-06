@@ -109,27 +109,34 @@ class TestBugs(helpers.TestCase):
 
     (status, qid_cpg) = epidb.select_annotations("Cpg Islands", "hg19", "chr1", None, None, self.admin_key)
 
-    (s, c) = epidb.count_regions(qid_cpg, self.admin_key)
+    (s, req) = epidb.count_regions(qid_cpg, self.admin_key)
+    self.assertSuccess(s, req)
+    c = self.count_request(req)
 
     self.assertEquals(2462, c)
 
     total = 0
     (status, cq1) = epidb.select_annotations("Cpg Islands", "hg19", "chr1", None, None, self.admin_key)
-    (s, c1) = epidb.count_regions(cq1, self.admin_key)
+    (s, req1) = epidb.count_regions(cq1, self.admin_key)
+    c1 = self.count_request(req1)
 
     (status, cq2) = epidb.select_annotations("Cpg Islands", "hg19", "chr7", None, None, self.admin_key)
-    (s, c2) = epidb.count_regions(cq2, self.admin_key)
+    (s, req2) = epidb.count_regions(cq2, self.admin_key)
+    c2 = self.count_request(req2)
 
     (status, cq3) = epidb.select_annotations("Cpg Islands", "hg19", "chr18", None, None, self.admin_key)
-    (s, c3) = epidb.count_regions(cq3, self.admin_key)
+    (s, req3) = epidb.count_regions(cq3, self.admin_key)
+    c3 = self.count_request(req3)
 
     (status, cq4) = epidb.select_annotations("Cpg Islands", "hg19", "chrX", None, None, self.admin_key)
-    (s, c4) = epidb.count_regions(cq4, self.admin_key)
+    (s, req4) = epidb.count_regions(cq4, self.admin_key)
+    c4 = self.count_request(req4)
 
     total = int(c1) + int(c2) + int(c3) + int(c4)
 
     (status, qid_count) = epidb.select_annotations("Cpg Islands", "hg19", ["chr1","chr7","chr18","chrX"], None, None, self.admin_key)
-    (s, c) = epidb.count_regions(qid_count, self.admin_key)
+    (s, req) = epidb.count_regions(qid_count, self.admin_key)
+    c = self.count_request(req)
     self.assertEquals(c, total)
 
     cpg_island_chrs = """chr1
@@ -203,7 +210,8 @@ chrX
 chrY"""
 
     (status, qid_count) = epidb.select_annotations("Cpg Islands", "hg19", cpg_island_chrs.split("\n"), None, None, self.admin_key)
-    (s, c) = epidb.count_regions(qid_count, self.admin_key)
+    (s, req) = epidb.count_regions(qid_count, self.admin_key)
+    c = self.count_request(req)
     self.assertEquals(size_total, c)
 
   def test_not_find_genome_and_in_order_chromosoms(self):
@@ -310,8 +318,10 @@ chrX 100000"""
     (s, tl) = epidb.tiling_regions(150000000, "hg19", "chr1", self.admin_key)
 
     res, qid_4 = epidb.aggregate(q, tl, "SCORE", self.admin_key)
-    s, rs = epidb.get_regions(qid_4, "CHROMOSOME,START,END,@AGG.MIN,@AGG.MAX,@AGG.MEAN,@AGG.COUNT", self.admin_key)
-    self.assertSuccess(s, rs)
+    s, req = epidb.get_regions(qid_4, "CHROMOSOME,START,END,@AGG.MIN,@AGG.MAX,@AGG.MEAN,@AGG.COUNT", self.admin_key)
+    self.assertSuccess(s, req)
+
+    rs = self.get_regions_request(req)
 
     self.assertEquals(rs, "chr1\t0\t150000000\t0.0000\t1.0000\t0.5000\t4")
 

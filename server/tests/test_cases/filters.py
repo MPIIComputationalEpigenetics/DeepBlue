@@ -16,8 +16,9 @@ class TestFilterCommand(helpers.TestCase):
     res, qid2 = epidb.filter_regions(qid, "START",  ">=", "875400 ", "number", self.admin_key)
     self.assertSuccess(res, qid2)
 
-    res, regions = epidb.get_regions(qid2, "CHROMOSOME,START,END", self.admin_key)
-    self.assertSuccess(res, regions)
+    res, req = epidb.get_regions(qid2, "CHROMOSOME,START,END", self.admin_key)
+    self.assertSuccess(res, req)
+    regions = self.get_regions_request(req)
 
     expected_regions = helpers.get_result("filter_ge_875400")
     self.assertEqual(regions, expected_regions)
@@ -33,8 +34,10 @@ class TestFilterCommand(helpers.TestCase):
     res, qid2 = epidb.filter_regions(qid, "START",  ">=", "875400 ", "number", self.admin_key)
     self.assertSuccess(res, qid2)
 
-    res, regions = epidb.get_regions(qid2, "CHROMOSOME,START,END", self.admin_key)
-    self.assertSuccess(res, regions)
+    res, req = epidb.get_regions(qid2, "CHROMOSOME,START,END", self.admin_key)
+    self.assertSuccess(res, req)
+    regions = self.get_regions_request(req)
 
     expected_regions = helpers.get_result("filter_multiple_genomes_ge_875400")
+
     self.assertEqual(regions, expected_regions)

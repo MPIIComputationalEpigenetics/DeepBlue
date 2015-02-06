@@ -18,7 +18,8 @@
 #include <boost/foreach.hpp>
 
 #include <mongo/bson/bson.h>
-#include <mongo/client/dbclient.h>
+
+#include "../connection/connection.hpp"
 
 #include "../datatypes/column_types_def.hpp"
 #include "../datatypes/regions.hpp"
@@ -33,7 +34,6 @@
 #include "annotations.hpp"
 #include "dba.hpp"
 #include "collections.hpp"
-#include "config.hpp"
 #include "experiments.hpp"
 #include "full_text.hpp"
 #include "genomes.hpp"
@@ -210,7 +210,7 @@ namespace epidb {
       }
 
       if (blocks_bulk.size() >= min_bulk_size || bulk_size >= MAXIMUM_SIZE) {
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
+        Connection c;
         c->insert(collection, blocks_bulk);
         if (!c->getLastError().empty()) {
           msg = c->getLastError();
@@ -275,8 +275,8 @@ namespace epidb {
     bool update_upload_info(const std::string &collection, const std::string &annotation_id,
                             const int total_size, std::string &msg)
     {
-      mongo::ScopedDbConnection c(config::get_mongodb_server());
-      c->update(helpers::collection_name(collection), QUERY("_id" << annotation_id),
+      Connection c;
+      c->update(helpers::collection_name(collection), BSON("_id" << annotation_id),
                 BSON("$set" << BSON("upload_info.total_size" << (unsigned int) total_size << "upload_info.done" << true << "upload_info.upload_end" << mongo::DATENOW)), false, true);
 
       if (!c->getLastError().empty()) {
@@ -319,7 +319,7 @@ namespace epidb {
       experiment_builder.append("upload_info", upload_info);
 
       mongo::BSONObj e = experiment_builder.obj();
-      mongo::ScopedDbConnection c(config::get_mongodb_server());
+      Connection c;
       c->insert(helpers::collection_name(Collections::EXPERIMENTS()), e);
       if (!c->getLastError().empty()) {
         msg = c->getLastError();
@@ -482,7 +482,7 @@ namespace epidb {
 
       mongo::BSONObj e = experiment_builder.obj();
 
-      mongo::ScopedDbConnection c(config::get_mongodb_server());
+      Connection c;
       c->insert(helpers::collection_name(Collections::EXPERIMENTS()), e);
       if (!c->getLastError().empty()) {
         msg = c->getLastError();
@@ -593,7 +593,7 @@ namespace epidb {
 
       mongo::BSONObj e = annotation_data_builder.obj();
 
-      mongo::ScopedDbConnection c(config::get_mongodb_server());
+      Connection c;
       c->insert(helpers::collection_name(Collections::ANNOTATIONS()), e);
       if (!c->getLastError().empty()) {
         msg = c->getLastError();
@@ -703,7 +703,7 @@ namespace epidb {
 
       mongo::BSONObj e = annotation_data_builder.obj();
 
-      mongo::ScopedDbConnection c(config::get_mongodb_server());
+      Connection c;
       c->insert(helpers::collection_name(Collections::ANNOTATIONS()), e);
       if (!c->getLastError().empty()) {
         msg = c->getLastError();

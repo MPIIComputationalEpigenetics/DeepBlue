@@ -12,7 +12,6 @@
 #include <boost/foreach.hpp>
 
 #include <mongo/bson/bson.h>
-#include <mongo/client/dbclient.h>
 
 #include "collections.hpp"
 #include "column_types.hpp"
@@ -22,7 +21,11 @@
 #include "list.hpp"
 
 #include "../algorithms/levenshtein.hpp"
+
+#include "../connection/connection.hpp"
+
 #include "../datatypes/metadata.hpp"
+
 #include "../extras/utils.hpp"
 
 namespace epidb {
@@ -140,7 +143,7 @@ namespace epidb {
 
       bool column_types(const std::string &user_key, std::vector<std::string> &content, std::string  &msg)
       {
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
+        Connection c;
         std::auto_ptr<mongo::DBClientCursor> data_cursor = c->query(helpers::collection_name(Collections::COLUMN_TYPES()), mongo::BSONObj());
 
         while (data_cursor->more()) {
@@ -255,7 +258,7 @@ namespace epidb {
 
         mongo::BSONObj agg_command = BSON( "aggregate" << Collections::EXPERIMENTS() << "pipeline" << pipeline);
 
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
+        Connection c;
 
         mongo::BSONObj res;
         c->runCommand(config::DATABASE_NAME(), agg_command, res);

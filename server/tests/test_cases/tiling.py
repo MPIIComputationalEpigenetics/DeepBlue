@@ -12,8 +12,9 @@ class TestTilingRegions(helpers.TestCase):
     res, qid = epidb.tiling_regions(1000000, "hg19", None, self.admin_key)
     self.assertSuccess(res, qid)
 
-    res, regions = epidb.get_regions(qid, "CHROMOSOME,START,END", self.admin_key)
-    self.assertSuccess(res, regions)
+    res, req = epidb.get_regions(qid, "CHROMOSOME,START,END", self.admin_key)
+    self.assertSuccess(res, req)
+    regions = self.get_regions_request(req)
 
 
   def test_chromosomes(self):
@@ -23,8 +24,9 @@ class TestTilingRegions(helpers.TestCase):
     res, qid = epidb.tiling_regions(1000000, "hg19", ["chr15", "chrX", "chr3"], self.admin_key)
     self.assertSuccess(res, qid)
 
-    res, regions = epidb.get_regions(qid, "CHROMOSOME,START,END", self.admin_key)
-    self.assertSuccess(res, regions)
+    res, req = epidb.get_regions(qid, "CHROMOSOME,START,END", self.admin_key)
+    self.assertSuccess(res, req)
+    regions = self.get_regions_request(req)
 
     chr3_tiles = 198022430 / 1000000
     chr15_tiles = 102531392 / 1000000
@@ -43,8 +45,9 @@ class TestTilingRegions(helpers.TestCase):
     res, qid2 = epidb.filter_regions(qid, "END",  "<=", "100000", "number", self.admin_key)
     self.assertSuccess(res, qid2)
 
-    res, regions = epidb.get_regions(qid2, "CHROMOSOME,START,END", self.admin_key)
-    self.assertSuccess(res, regions)
+    res, req = epidb.get_regions(qid2, "CHROMOSOME,START,END", self.admin_key)
+    self.assertSuccess(res, req)
+    regions = self.get_regions_request(req)
 
     expected_regions = helpers.get_result("filter_tiling")
     self.assertEqual(regions, expected_regions)
@@ -63,8 +66,9 @@ class TestTilingRegions(helpers.TestCase):
     res, qid3 = epidb.intersection(qid1, qid2, self.admin_key)
     self.assertSuccess(res, qid3)
 
-    res, regions = epidb.get_regions(qid3, "CHROMOSOME,START,END", self.admin_key)
-    self.assertSuccess(res, regions)
+    res, req = epidb.get_regions(qid3, "CHROMOSOME,START,END", self.admin_key)
+    self.assertSuccess(res, req)
+    regions = self.get_regions_request(req)
 
     expected_regions = helpers.get_result("intersect_tiling")
     self.assertEqual(regions, expected_regions)
@@ -89,8 +93,9 @@ class TestTilingRegions(helpers.TestCase):
     res, qid5 = epidb.merge_queries(qid4, qid2, self.admin_key)
     self.assertSuccess(res, qid5)
 
-    res, regions = epidb.get_regions(qid5, "CHROMOSOME,START,END", self.admin_key)
-    self.assertSuccess(res, regions)
+    res, req = epidb.get_regions(qid5, "CHROMOSOME,START,END", self.admin_key)
+    self.assertSuccess(res, req)
+    regions = self.get_regions_request(req)
 
     expected_regions = helpers.get_result("merge_tiling")
     self.assertEqual(regions, expected_regions)
@@ -102,18 +107,21 @@ class TestTilingRegions(helpers.TestCase):
     res, qid = epidb.tiling_regions(1000000, "hg19", "chrY", self.admin_key)
     self.assertSuccess(res, qid)
 
-    res, regions = epidb.get_regions(qid, "CHROMOSOME,START,END,experiment_name", self.admin_key)
-    self.assertFailure(res, regions)
-    self.assertEqual(regions, "123000:Unable to find the column 'experiment_name' in the dataset format or in the DeepBlue columns.")
+    res, req = epidb.get_regions(qid, "CHROMOSOME,START,END,experiment_name", self.admin_key)
+    self.assertSuccess(res, req)
+    msg = self.get_regions_request_error(req)
+    self.assertEqual(msg, "123000:Unable to find the column 'experiment_name' in the dataset format or in the DeepBlue columns.")
 
     expected = helpers.get_result("experiment_name_default")
-    res, regions = epidb.get_regions(qid, "CHROMOSOME,START,END,experiment_name:string: ", self.admin_key)
-    self.assertFailure(res, regions)
-    self.assertEqual(regions, "123000:Unable to find the column 'experiment_name:string:' in the dataset format or in the DeepBlue columns.")
+    res, req = epidb.get_regions(qid, "CHROMOSOME,START,END,experiment_name:string: ", self.admin_key)
+    self.assertSuccess(res, req)
+    msg = self.get_regions_request_error(req)
+    self.assertEqual(msg, "123000:Unable to find the column 'experiment_name:string:' in the dataset format or in the DeepBlue columns.")
 
     expected = """chrY\t0\t1000000\tTiling regions of 1000000 (Genome hg19)\t1000000\nchrY\t1000000\t2000000\tTiling regions of 1000000 (Genome hg19)\t1000000\nchrY\t2000000\t3000000\tTiling regions of 1000000 (Genome hg19)\t1000000\nchrY\t3000000\t4000000\tTiling regions of 1000000 (Genome hg19)\t1000000\nchrY\t4000000\t5000000\tTiling regions of 1000000 (Genome hg19)\t1000000\nchrY\t5000000\t6000000\tTiling regions of 1000000 (Genome hg19)\t1000000\nchrY\t6000000\t7000000\tTiling regions of 1000000 (Genome hg19)\t1000000\nchrY\t7000000\t8000000\tTiling regions of 1000000 (Genome hg19)\t1000000\nchrY\t8000000\t9000000\tTiling regions of 1000000 (Genome hg19)\t1000000\nchrY\t9000000\t10000000\tTiling regions of 1000000 (Genome hg19)\t1000000\nchrY\t10000000\t11000000\tTiling regions of 1000000 (Genome hg19)\t1000000\nchrY\t11000000\t12000000\tTiling regions of 1000000 (Genome hg19)\t1000000\nchrY\t12000000\t13000000\tTiling regions of 1000000 (Genome hg19)\t1000000\nchrY\t13000000\t14000000\tTiling regions of 1000000 (Genome hg19)\t1000000\nchrY\t14000000\t15000000\tTiling regions of 1000000 (Genome hg19)\t1000000\nchrY\t15000000\t16000000\tTiling regions of 1000000 (Genome hg19)\t1000000\nchrY\t16000000\t17000000\tTiling regions of 1000000 (Genome hg19)\t1000000\nchrY\t17000000\t18000000\tTiling regions of 1000000 (Genome hg19)\t1000000\nchrY\t18000000\t19000000\tTiling regions of 1000000 (Genome hg19)\t1000000\nchrY\t19000000\t20000000\tTiling regions of 1000000 (Genome hg19)\t1000000\nchrY\t20000000\t21000000\tTiling regions of 1000000 (Genome hg19)\t1000000\nchrY\t21000000\t22000000\tTiling regions of 1000000 (Genome hg19)\t1000000\nchrY\t22000000\t23000000\tTiling regions of 1000000 (Genome hg19)\t1000000\nchrY\t23000000\t24000000\tTiling regions of 1000000 (Genome hg19)\t1000000\nchrY\t24000000\t25000000\tTiling regions of 1000000 (Genome hg19)\t1000000\nchrY\t25000000\t26000000\tTiling regions of 1000000 (Genome hg19)\t1000000\nchrY\t26000000\t27000000\tTiling regions of 1000000 (Genome hg19)\t1000000\nchrY\t27000000\t28000000\tTiling regions of 1000000 (Genome hg19)\t1000000\nchrY\t28000000\t29000000\tTiling regions of 1000000 (Genome hg19)\t1000000\nchrY\t29000000\t30000000\tTiling regions of 1000000 (Genome hg19)\t1000000\nchrY\t30000000\t31000000\tTiling regions of 1000000 (Genome hg19)\t1000000\nchrY\t31000000\t32000000\tTiling regions of 1000000 (Genome hg19)\t1000000\nchrY\t32000000\t33000000\tTiling regions of 1000000 (Genome hg19)\t1000000\nchrY\t33000000\t34000000\tTiling regions of 1000000 (Genome hg19)\t1000000\nchrY\t34000000\t35000000\tTiling regions of 1000000 (Genome hg19)\t1000000\nchrY\t35000000\t36000000\tTiling regions of 1000000 (Genome hg19)\t1000000\nchrY\t36000000\t37000000\tTiling regions of 1000000 (Genome hg19)\t1000000\nchrY\t37000000\t38000000\tTiling regions of 1000000 (Genome hg19)\t1000000\nchrY\t38000000\t39000000\tTiling regions of 1000000 (Genome hg19)\t1000000\nchrY\t39000000\t40000000\tTiling regions of 1000000 (Genome hg19)\t1000000\nchrY\t40000000\t41000000\tTiling regions of 1000000 (Genome hg19)\t1000000\nchrY\t41000000\t42000000\tTiling regions of 1000000 (Genome hg19)\t1000000\nchrY\t42000000\t43000000\tTiling regions of 1000000 (Genome hg19)\t1000000\nchrY\t43000000\t44000000\tTiling regions of 1000000 (Genome hg19)\t1000000\nchrY\t44000000\t45000000\tTiling regions of 1000000 (Genome hg19)\t1000000\nchrY\t45000000\t46000000\tTiling regions of 1000000 (Genome hg19)\t1000000\nchrY\t46000000\t47000000\tTiling regions of 1000000 (Genome hg19)\t1000000\nchrY\t47000000\t48000000\tTiling regions of 1000000 (Genome hg19)\t1000000\nchrY\t48000000\t49000000\tTiling regions of 1000000 (Genome hg19)\t1000000\nchrY\t49000000\t50000000\tTiling regions of 1000000 (Genome hg19)\t1000000\nchrY\t50000000\t51000000\tTiling regions of 1000000 (Genome hg19)\t1000000\nchrY\t51000000\t52000000\tTiling regions of 1000000 (Genome hg19)\t1000000\nchrY\t52000000\t53000000\tTiling regions of 1000000 (Genome hg19)\t1000000\nchrY\t53000000\t54000000\tTiling regions of 1000000 (Genome hg19)\t1000000\nchrY\t54000000\t55000000\tTiling regions of 1000000 (Genome hg19)\t1000000\nchrY\t55000000\t56000000\tTiling regions of 1000000 (Genome hg19)\t1000000\nchrY\t56000000\t57000000\tTiling regions of 1000000 (Genome hg19)\t1000000\nchrY\t57000000\t58000000\tTiling regions of 1000000 (Genome hg19)\t1000000\nchrY\t58000000\t59000000\tTiling regions of 1000000 (Genome hg19)\t1000000"""
-    res, regions = epidb.get_regions(qid, "CHROMOSOME,START,END,@NAME,@LENGTH", self.admin_key)
-    self.assertSuccess(res, regions)
+    res, req = epidb.get_regions(qid, "CHROMOSOME,START,END,@NAME,@LENGTH", self.admin_key)
+    self.assertSuccess(res, req)
+    regions = self.get_regions_request(req)
     self.assertEqual(regions, expected)
 
 
@@ -129,6 +137,7 @@ class TestTilingRegions(helpers.TestCase):
     self.assertSuccess(res, qid)
 
     expected = helpers.get_result("experiment_name_custom_sequence")
-    res, regions = epidb.get_regions(qid, "CHROMOSOME,START,END,@NAME,@LENGTH,@SEQUENCE", self.admin_key)
-    self.assertSuccess(res, regions)
+    res, req = epidb.get_regions(qid, "CHROMOSOME,START,END,@NAME,@LENGTH,@SEQUENCE", self.admin_key)
+    self.assertSuccess(res, req)
+    regions = self.get_regions_request(req)
     self.assertEqual(regions, expected)

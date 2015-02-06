@@ -17,7 +17,8 @@
 #include <boost/foreach.hpp>
 
 #include <mongo/bson/bson.h>
-#include <mongo/client/dbclient.h>
+
+#include "../connection/connection.hpp"
 
 #include "../extras/utils.hpp"
 
@@ -40,19 +41,23 @@ namespace epidb {
       bool insert_full_text(const std::string &type, const std::string &id,
                             const mongo::BSONObj &data, std::string &msg)
       {
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
+        Connection c;
 
+        // XXX
+        // It was a bug in older C++ driver that came with mongodb version 2.4
+        // Delete these lines if the bug does not happen anymore
         // if the collection is dropped MongoDB doesn't realize the index is deleted
         // and will not recreate it even though it's missing. So we have to reset the
         // index cache manually.
-        c->resetIndexCache();
+        // c->resetIndexCache();
+
         if (!c->getLastError().empty()) {
           msg = c->getLastError();
           c.done();
           return false;
         }
 
-        c->ensureIndex(helpers::collection_name(Collections::TEXT_SEARCH()),
+        c->createIndex(helpers::collection_name(Collections::TEXT_SEARCH()),
                        mongo::fromjson("{\"epidb_id\": 1}"));
         if (!c->getLastError().empty()) {
           msg = c->getLastError();
@@ -60,7 +65,7 @@ namespace epidb {
           return false;
         }
 
-        c->ensureIndex(helpers::collection_name(Collections::TEXT_SEARCH()),
+        c->createIndex(helpers::collection_name(Collections::TEXT_SEARCH()),
                        mongo::fromjson("{\"$**\": \"text\", \"name\":\"text\", \"description\":\"text\"}"));
 
         if (!c->getLastError().empty()) {
@@ -138,7 +143,7 @@ namespace epidb {
       bool insert_related_term(const utils::IdName &id_name, const std::vector<std::string> &related_terms,
         std::string &msg)
       {
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
+        Connection c;
 
         mongo::BSONObjBuilder query_builder;
         query_builder.append("epidb_id", id_name.id);
@@ -184,7 +189,7 @@ namespace epidb {
 
       bool change_extra_metadata_full_text(const std::string &id, const std::string &key, const std::string &value, std::string &msg)
       {
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
+        Connection c;
 
         mongo::BSONObj query = BSON("epidb_id" << id);
         mongo::BSONObj change_value;
@@ -220,7 +225,7 @@ namespace epidb {
       bool search_full_text(const std::string &text, const std::vector<std::string> &types,
                             std::vector<TextSearchResult> &results, std::string &msg)
       {
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
+        Connection c;
 
         mongo::BSONObjBuilder cmd_builder;
         cmd_builder.append("text", Collections::TEXT_SEARCH());
@@ -264,7 +269,7 @@ namespace epidb {
       bool remove(const std::string &id, std::string &msg)
       {
         const std::string collection = helpers::collection_name(Collections::TEXT_SEARCH());
-        return helpers::remove_all(collection, QUERY("epidb_id" << id), msg);
+        return helpers::remove_all(collection, BSON("epidb_id" << id), msg);
       }
     }
   }

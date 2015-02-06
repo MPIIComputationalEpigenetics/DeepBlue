@@ -9,7 +9,8 @@
 #include <string>
 
 #include <mongo/bson/bson.h>
-#include <mongo/client/dbclient.h>
+
+#include "../connection/connection.hpp"
 
 #include "config.hpp"
 #include "collections.hpp"
@@ -36,7 +37,7 @@ namespace epidb {
           return false;
         }
 
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
+        Connection c;
 
         mongo::BSONObj query = BSON("_id" << id);
         mongo::BSONObj change_value;

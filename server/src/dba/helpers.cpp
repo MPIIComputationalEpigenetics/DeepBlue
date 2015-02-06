@@ -13,7 +13,8 @@
 #include <boost/thread/mutex.hpp>
 
 #include <mongo/bson/bson.h>
-#include <mongo/client/dbclient.h>
+
+#include "../connection/connection.hpp"
 
 #include "../extras/serialize.hpp"
 #include "../extras/utils.hpp"
@@ -128,7 +129,7 @@ namespace epidb {
       bool get(const std::string &where, const mongo::Query &query, const std::vector<std::string> &fields,
                std::vector<mongo::BSONObj> &results, std::string &msg)
       {
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
+        Connection c;
 
         mongo::BSONObjBuilder b;
         BOOST_FOREACH(const std::string & f, fields) {
@@ -157,7 +158,7 @@ namespace epidb {
       bool get_one(const std::string &where, const mongo::Query &query,
                    mongo::BSONObj &result, std::string &msg)
       {
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
+        Connection c;
         const std::string collection = collection_name(where);
         std::auto_ptr<mongo::DBClientCursor> data_cursor = c->query(collection, query);
         if (data_cursor->more()) {
@@ -226,7 +227,7 @@ namespace epidb {
       bool check_exist(const std::string &where, const std::string &field, const std::string &content,
                        bool &r, std::string &msg)
       {
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
+        Connection c;
         const std::string collection = collection_name(where);
 
         unsigned long long count = c->count(collection, BSON(field << content));
@@ -239,7 +240,7 @@ namespace epidb {
       bool check_exist(const std::string &where, const std::string &field, const bool content,
                        bool &r, std::string &msg)
       {
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
+        Connection c;
         const std::string collection = collection_name(where);
 
         unsigned long long count = c->count(collection, BSON(field << content));
@@ -256,8 +257,8 @@ namespace epidb {
 
       bool remove_one(const std::string &collection, const std::string &id, std::string &msg, const std::string &field)
       {
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
-        c->remove(collection, QUERY(field << id), 1);
+        Connection c;
+        c->remove(collection, BSON(field << id), 1);
         if (!c->getLastError().empty()) {
           msg = c->getLastError();
           c.done();
@@ -269,7 +270,7 @@ namespace epidb {
 
       bool remove_all(const std::string &collection, const mongo::Query &query, std::string &msg)
       {
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
+        Connection c;
         c->remove(collection, query);
         if (!c->getLastError().empty()) {
           msg = c->getLastError();
@@ -282,7 +283,7 @@ namespace epidb {
 
       bool collection_size(const std::string &where, unsigned long long &size, std::string &msg)
       {
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
+        Connection c;
         const std::string collection = collection_name(where);
         size = c->count(collection);
         c.done();
@@ -291,7 +292,7 @@ namespace epidb {
 
       bool remove_collection(const std::string &collection, std::string &msg)
       {
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
+        Connection c;
         mongo::BSONObj info;
         c->dropCollection(collection, &info);
 
@@ -309,7 +310,7 @@ namespace epidb {
       bool get_counter(const std::string &name, int &id, std::string &msg)
       {
         boost::mutex::scoped_lock lock(counter_mutex);
-        mongo::ScopedDbConnection c(config::get_mongodb_server());
+        Connection c;
 
         bool exist;
         if (!check_exist(Collections::COUNTERS(), "_id", name, exist, msg)) {

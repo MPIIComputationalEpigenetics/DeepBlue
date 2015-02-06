@@ -32,15 +32,19 @@ class TestAnnotationCommands(helpers.TestCase):
     res, qid = epidb.select_annotations("Cpg Islands", "hg19", None, None, None, self.admin_key)
     self.assertSuccess(res, qid)
 
-    res, count = epidb.count_regions(qid, self.admin_key)
-    self.assertSuccess(res, count)
+    res, req = epidb.count_regions(qid, self.admin_key)
+    self.assertSuccess(res, req)
+
+    count = self.count_request(req)
+
     self.assertEqual(size, count)
 
-    res, regions = epidb.get_regions(qid, "CHROMOSOME,START,END", self.admin_key)
-    self.assertSuccess(res, regions)
+    res, req = epidb.get_regions(qid, "CHROMOSOME,START,END", self.admin_key)
+    self.assertSuccess(res, req)
+    regions = self.get_regions_request(req)
     self.assertEqual(regions, file_data)
 
-  def test_annotation_full_cpg_islands(self):
+  def __test_annotation_full_cpg_islands(self):
     epidb = EpidbClient()
     self.init_base(epidb)
 
@@ -65,6 +69,7 @@ class TestAnnotationCommands(helpers.TestCase):
       res, qid_1 = epidb.select_annotations("Cpg Islands", "hg19", None, None, None, self.admin_key)
       self.assertSuccess(res, qid_1)
 
-      (s, c) = epidb.count_regions(qid_1, self.admin_key)
+      (s, req) = epidb.count_regions(qid_1, self.admin_key)
+      count = self.count_request(req)
 
-      self.assertEqual(regions_count, c)
+      self.assertEqual(regions_count, count)

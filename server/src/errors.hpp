@@ -6,6 +6,10 @@
 //  Copyright (c) 2013,2014 Max Planck Institute for Computer Science. All rights reserved.
 //
 
+
+#ifndef EPIDB_ERRORS_HPP
+#define EPIDB_ERRORS_HPP
+
 #include <string>
 
 namespace epidb {
@@ -66,3 +70,5 @@ namespace epidb {
   extern Error ERR_DATABASE_EXCEPTION;
   extern Error ERR_DATABASE_INVALID_BIOSOURCE;
 }
+
+#endif

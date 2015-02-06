@@ -17,9 +17,10 @@
 #include <boost/foreach.hpp>
 
 #include <mongo/bson/bson.h>
-#include <mongo/client/dbclient.h>
 
 #include "../algorithms/patterns.hpp"
+
+#include "../connection/connection.hpp"
 
 #include "../datatypes/metadata.hpp"
 #include "../datatypes/regions.hpp"
@@ -57,7 +58,7 @@ namespace epidb {
     bool init_system(const std::string &name, const std::string &email, const std::string &institution,
                      const std::string &key, std::string &msg)
     {
-      mongo::ScopedDbConnection c(config::get_mongodb_server());
+      Connection c;
 
       if (config::sharding()) {
         mongo::BSONObjBuilder builder;
@@ -85,7 +86,7 @@ namespace epidb {
         }
 
         // db.settings.save( { _id:"chunksize", value: <sizeInMB> } )
-        c->update("config.settings", QUERY("_id" << "chunksize"), BSON("$set" << BSON("value" << (unsigned) config::chunk_size())));
+        c->update("config.settings", BSON("_id" << "chunksize"), BSON("$set" << BSON("value" << (unsigned) config::chunk_size())));
         if (!c->getLastError().empty()) {
           msg = "Error Setting ChuckSize: " + c->getLastError();
           EPIDB_LOG_ERR(msg);
@@ -104,7 +105,7 @@ namespace epidb {
 
       mongo::BSONObjBuilder index_name;
       index_name.append("key", 1);
-      c->ensureIndex(helpers::collection_name(Collections::USERS()), index_name.obj());
+      c->createIndex(helpers::collection_name(Collections::USERS()), index_name.obj());
       if (!c->getLastError().empty()) {
         msg = c->getLastError();
         c.done();
@@ -163,7 +164,7 @@ namespace epidb {
     bool create_chromosome_collection(const std::string &genome_norm_name, const std::string &chromosome,
                                       std::string &msg)
     {
-      mongo::ScopedDbConnection c(config::get_mongodb_server());
+      Connection c;
       mongo::BSONObj info;
 
       std::string collection = helpers::region_collection_name(genome_norm_name, chromosome);
@@ -196,7 +197,7 @@ namespace epidb {
       dataset_start_end_index.append(KeyMapper::DATASET(), 1);
       dataset_start_end_index.append(KeyMapper::START(), 1);
       dataset_start_end_index.append(KeyMapper::END(), 1);
-      c->ensureIndex(collection, dataset_start_end_index.obj());
+      c->createIndex(collection, dataset_start_end_index.obj());
       if (!c->getLastError().empty()) {
         msg = c->getLastError();
         EPIDB_LOG_ERR("Indexing on DATASET, START and END at '" << collection << "' error: " << msg);
@@ -208,7 +209,7 @@ namespace epidb {
       mongo::BSONObjBuilder start_end_index;
       start_end_index.append(KeyMapper::START(), 1);
       start_end_index.append(KeyMapper::END(), 1);
-      c->ensureIndex(collection, start_end_index.obj());
+      c->createIndex(collection, start_end_index.obj());
       if (!c->getLastError().empty()) {
         msg = c->getLastError();
         EPIDB_LOG_ERR("Indexing on START and END at '" << collection << "' error: " << msg);
@@ -285,7 +286,7 @@ namespace epidb {
       create_genome_builder.append("user", id_user_name.name);
       mongo::BSONObj cem = create_genome_builder.obj();
 
-      mongo::ScopedDbConnection c(config::get_mongodb_server());
+      Connection c;
       c->insert(helpers::collection_name(Collections::GENOMES()), cem);
       if (!c->getLastError().empty()) {
         msg = c->getLastError();
@@ -355,7 +356,7 @@ namespace epidb {
       create_epi_mark_builder.append("user", id_user_name.name);
       mongo::BSONObj cem = create_epi_mark_builder.obj();
 
-      mongo::ScopedDbConnection c(config::get_mongodb_server());
+      Connection c;
       c->insert(helpers::collection_name(Collections::EPIGENETIC_MARKS()), cem);
       if (!c->getLastError().empty()) {
         msg = c->getLastError();
@@ -411,7 +412,7 @@ namespace epidb {
       create_biosource_builder.append("user", id_user_name.name);
       mongo::BSONObj cem = create_biosource_builder.obj();
 
-      mongo::ScopedDbConnection c(config::get_mongodb_server());
+      Connection c;
       c->insert(helpers::collection_name(Collections::BIOSOURCES()), cem);
       if (!c->getLastError().empty()) {
         msg = c->getLastError();
@@ -421,7 +422,7 @@ namespace epidb {
 
       mongo::BSONObjBuilder index_name;
       index_name.append("norm_name", 1);
-      c->ensureIndex(helpers::collection_name(Collections::BIOSOURCES()), index_name.obj());
+      c->createIndex(helpers::collection_name(Collections::BIOSOURCES()), index_name.obj());
       if (!c->getLastError().empty()) {
         msg = c->getLastError();
         c.done();
@@ -477,7 +478,7 @@ namespace epidb {
       create_technique_builder.append("user", id_user_name.name);
       mongo::BSONObj cem = create_technique_builder.obj();
 
-      mongo::ScopedDbConnection c(config::get_mongodb_server());
+      Connection c;
       c->insert(helpers::collection_name(Collections::TECHNIQUES()), cem);
       if (!c->getLastError().empty()) {
         msg = c->getLastError();
@@ -487,7 +488,7 @@ namespace epidb {
 
       mongo::BSONObjBuilder index_name;
       index_name.append("norm_name", 1);
-      c->ensureIndex(helpers::collection_name(Collections::TECHNIQUES()), index_name.obj());
+      c->createIndex(helpers::collection_name(Collections::TECHNIQUES()), index_name.obj());
       if (!c->getLastError().empty()) {
         msg = c->getLastError();
         c.done();
@@ -545,7 +546,7 @@ namespace epidb {
 
       mongo::BSONObj data = data_builder.obj();
 
-      mongo::ScopedDbConnection c(config::get_mongodb_server());
+      Connection c;
 
       // If we already have a sample with exactly the same information
       std::auto_ptr<mongo::DBClientCursor> cursor  = c->query(helpers::collection_name(Collections::SAMPLES()), data);
@@ -618,7 +619,7 @@ namespace epidb {
       create_project_builder.append("user", id_user_name.name);
       mongo::BSONObj cem = create_project_builder.obj();
 
-      mongo::ScopedDbConnection c(config::get_mongodb_server());
+      Connection c;
       c->insert(helpers::collection_name(Collections::PROJECTS()), cem);
       if (!c->getLastError().empty()) {
         msg = c->getLastError();
@@ -642,12 +643,12 @@ namespace epidb {
     {
       std::string filename = norm_genome + "." + chromosome;
 
-      mongo::ScopedDbConnection c(config::get_mongodb_server());
+      Connection c;
 
       // check for possible duplicate
       std::auto_ptr<mongo::DBClientCursor> data_cursor =
         c->query(helpers::collection_name(Collections::SEQUENCES()) + ".files",
-                 QUERY("filename" << filename), 1);
+                 BSON("filename" << filename), 1);
 
       if (data_cursor->more()) {
         c.done();
@@ -669,7 +670,7 @@ namespace epidb {
       }
 
       c->update(helpers::collection_name(Collections::GENOMES()),
-                QUERY("norm_name" << norm_genome << "chromosomes.name" << chromosome),
+                BSON("norm_name" << norm_genome << "chromosomes.name" << chromosome),
                 BSON("$set" << BSON("chromosomes.$.sequence_file" << filename)), false, true);
 
       if (!c->getLastError().empty()) {
@@ -857,7 +858,7 @@ namespace epidb {
         return false;
       }
       mongo::BSONObj o = BSON("_id" << query_id << "user" << id_user_name.name);
-      mongo::ScopedDbConnection c(config::get_mongodb_server());
+      Connection c;
       unsigned long long count = c->count(helpers::collection_name(Collections::QUERIES()), o );
       r = count > 0;
       c.done();
@@ -1042,7 +1043,7 @@ namespace epidb {
       annotations_query_builder.append("extra_metadata", metadata_builder.obj());
       annotations_query_builder.append("upload_info.done", true);
 
-      mongo::ScopedDbConnection c(config::get_mongodb_server());
+      Connection c;
 
       mongo::BSONObj annotation_query = annotations_query_builder.obj();
       std::auto_ptr<mongo::DBClientCursor> cursor = c->query(helpers::collection_name(Collections::ANNOTATIONS()), annotation_query);

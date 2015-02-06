@@ -18,26 +18,18 @@
 #pragma once
 
 #include <cfloat>
-#include <iostream>
 #include <sstream>
 #include <stdio.h>
 #include <string>
-#include <string.h>
 
-#include "mongo/bson/inline_decls.h"
+#include <boost/static_assert.hpp>
+
+#include "mongo/base/data_view.h"
 #include "mongo/base/string_data.h"
+#include "mongo/bson/inline_decls.h"
 #include "mongo/util/assert_util.h"
 
 namespace mongo {
-    /* Accessing unaligned doubles on ARM generates an alignment trap and aborts with SIGBUS on Linux.
-       Wrapping the double in a packed struct forces gcc to generate code that works with unaligned values too.
-       The generated code for other architectures (which already allow unaligned accesses) is the same as if
-       there was a direct pointer access.
-    */
-    struct PackedDouble {
-        double d;
-    } PACKED_DECL;
-
 
     /* Note the limit here is rather arbitrary and is simply a standard. generally the code works
        with any object that fits in ram.
@@ -147,34 +139,46 @@ namespace mongo {
         void decouple() { data = 0; }
 
         void appendUChar(unsigned char j) {
-            *((unsigned char*)grow(sizeof(unsigned char))) = j;
+            BOOST_STATIC_ASSERT(CHAR_BIT == 8);
+            appendNumImpl(j);
         }
         void appendChar(char j) {
-            *((char*)grow(sizeof(char))) = j;
+            appendNumImpl(j);
         }
         void appendNum(char j) {
-            *((char*)grow(sizeof(char))) = j;
+            appendNumImpl(j);
         }
         void appendNum(short j) {
-            *((short*)grow(sizeof(short))) = j;
+            BOOST_STATIC_ASSERT(sizeof(short) == 2);
+            appendNumImpl(j);
         }
         void appendNum(int j) {
-            *((int*)grow(sizeof(int))) = j;
+            BOOST_STATIC_ASSERT(sizeof(int) == 4);
+            appendNumImpl(j);
         }
         void appendNum(unsigned j) {
-            *((unsigned*)grow(sizeof(unsigned))) = j;
+            appendNumImpl(j);
         }
+
+        // Bool does not have a well defined encoding.
+#if __cplusplus >= 201103L
+        void appendNum(bool j) = delete;
+#else
         void appendNum(bool j) {
-            *((bool*)grow(sizeof(bool))) = j;
+            invariant(false);
         }
+#endif
+
         void appendNum(double j) {
-            (reinterpret_cast< PackedDouble* >(grow(sizeof(double))))->d = j;
+            BOOST_STATIC_ASSERT(sizeof(double) == 8);
+            appendNumImpl(j);
         }
         void appendNum(long long j) {
-            *((long long*)grow(sizeof(long long))) = j;
+            BOOST_STATIC_ASSERT(sizeof(long long) == 8);
+            appendNumImpl(j);
         }
         void appendNum(unsigned long long j) {
-            *((unsigned long long*)grow(sizeof(unsigned long long))) = j;
+            appendNumImpl(j);
         }
 
         void appendBuf(const void *src, size_t len) {
@@ -209,6 +213,16 @@ namespace mongo {
         }
 
     private:
+        template<typename T>
+        void appendNumImpl(T t) {
+            // NOTE: For now, we assume that all things written
+            // by a BufBuilder are intended for external use: either written to disk
+            // or to the wire. Since all of our encoding formats are little endian,
+            // we bake that assumption in here. This decision should be revisited soon.
+            DataView(grow(sizeof(t))).writeLE(t);
+        }
+
+
         /* "slow" portion of 'grow()'  */
         void NOINLINE_DECL grow_reallocate(int newLen) {
             int a = 64;
@@ -252,16 +266,18 @@ namespace mongo {
 #define snprintf _snprintf
 #endif
 
-    /** stringstream deals with locale so this is a lot faster than std::stringstream for UTF8 */
+    /** std::stringstream deals with locale so this is a lot faster than std::stringstream for UTF8 */
     template <typename Allocator>
     class StringBuilderImpl {
     public:
-        static const size_t MONGO_DBL_SIZE = 3 + DBL_MANT_DIG - DBL_MIN_EXP;
+        // Sizes are determined based on the number of characters in 64-bit + the trailing '\0'
+        static const size_t MONGO_DBL_SIZE = 3 + DBL_MANT_DIG - DBL_MIN_EXP + 1;
         static const size_t MONGO_S32_SIZE = 12;
         static const size_t MONGO_U32_SIZE = 11;
         static const size_t MONGO_S64_SIZE = 23;
         static const size_t MONGO_U64_SIZE = 22;
         static const size_t MONGO_S16_SIZE = 7;
+        static const size_t MONGO_PTR_SIZE = 19;    // Accounts for the 0x prefix
 
         StringBuilderImpl() { }
 
@@ -289,8 +305,23 @@ namespace mongo {
         StringBuilderImpl& operator<<( short x ) {
             return SBNUM( x , MONGO_S16_SIZE , "%hd" );
         }
+        StringBuilderImpl& operator<<(const void* x) {
+            if (sizeof(x) == 8) {
+                return SBNUM(x, MONGO_PTR_SIZE, "0x%llX");
+            }
+            else {
+                return SBNUM(x, MONGO_PTR_SIZE, "0x%lX");
+            }
+        }
         StringBuilderImpl& operator<<( char c ) {
             _buf.grow( 1 )[0] = c;
+            return *this;
+        }
+        StringBuilderImpl& operator<<(const char* str) {
+            return *this << StringData(str);
+        }
+        StringBuilderImpl& operator<<(const StringData& str) {
+            append(str);
             return *this;
         }
 
@@ -310,11 +341,6 @@ namespace mongo {
         void write( const char* buf, int len) { memcpy( _buf.grow( len ) , buf , len ); }
 
         void append( const StringData& str ) { str.copyTo( _buf.grow( str.size() ), false ); }
-
-        StringBuilderImpl& operator<<( const StringData& str ) {
-            append( str );
-            return *this;
-        }
 
         void reset( int maxSize = 0 ) { _buf.reset( maxSize ); }
 
