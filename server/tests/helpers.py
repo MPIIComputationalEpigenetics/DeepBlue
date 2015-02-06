@@ -307,7 +307,6 @@ class TestCase(unittest.TestCase):
       if not "big" in exp:
         self.insert_experiment(epidb, exp)
 
-
   def count_request(self, req):
     epidb = EpidbClient()
     sleep = 0.1
@@ -333,13 +332,12 @@ class TestCase(unittest.TestCase):
       sleep += sleep
 
     (s, data) = epidb.get_request_data(req, self.admin_key)
-
     return (s, data)
 
   def get_regions_request(self, req):
     (s, data) = self.__get_regions_request(req)
     self.assertSuccess(s, data)
-    return data.get("data", "")
+    return data
 
   def get_regions_request_error(self, req):
     (s, data) = self.__get_regions_request(req)

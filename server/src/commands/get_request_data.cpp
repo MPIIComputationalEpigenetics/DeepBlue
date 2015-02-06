@@ -72,34 +72,31 @@ namespace epidb {
           return false;
         }
 
-        serialize::ParameterPtr map(new serialize::MapParameter());
-
-        if (sb.empty()) {
-          for (auto &ss : data.strings) {
-            serialize::ParameterPtr p(new serialize::SimpleParameter(ss.second));
-            map->add_child(ss.first, std::move(p));
-          }
-
-          for (auto is : data.integers) {
-            serialize::ParameterPtr p(new serialize::SimpleParameter(is.second));
-            map->add_child(is.first, p);
-          }
-
-          for (auto fs : data.floats) {
-            serialize::ParameterPtr p(new serialize::SimpleParameter(fs.second));
-            map->add_child(fs.first, p);
-          }
-
-          if (!data.id_names.empty()) {
-            std::cerr << "load into request answer" << std::endl;
-            set_id_names_return(data.id_names, result);
-          }
-
-        } else {
-          serialize::ParameterPtr p(new serialize::SimpleParameter(sb));
-          map->add_child("data", p);
+        if (!data.id_names.empty()) {
+          set_id_names_return(data.id_names, result);
+          return true;
         }
 
+        if (!sb.empty()) {
+          result.add_stringbuilder(sb);
+          return true;
+        }
+
+        serialize::ParameterPtr map(new serialize::MapParameter());
+        for (auto &ss : data.strings) {
+          serialize::ParameterPtr p(new serialize::SimpleParameter(ss.second));
+          map->add_child(ss.first, std::move(p));
+        }
+
+        for (auto is : data.integers) {
+          serialize::ParameterPtr p(new serialize::SimpleParameter(is.second));
+          map->add_child(is.first, p);
+        }
+
+        for (auto fs : data.floats) {
+          serialize::ParameterPtr p(new serialize::SimpleParameter(fs.second));
+          map->add_child(fs.first, p);
+        }
         result.add_param(map);
 
         return true;

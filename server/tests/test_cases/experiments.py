@@ -203,39 +203,23 @@ class TestExperiments(helpers.TestCase):
     self.assertSuccess(res, qid1)
 
     res, req = epidb.get_experiments_by_query(qid1, self.admin_key)
-
-    epidb = EpidbClient()
-    sleep = 0.1
-    (s, ss) = epidb.get_request_status(req, self.admin_key)
-    while (ss[0] != "done") :
-      time.sleep(sleep)
-      (s, ss) = epidb.get_request_status(req, self.admin_key)
-      sleep += sleep
-
-    (s, data) = epidb.get_request_data(req, self.admin_key)
-    print s, data
-    return
-
-    self.assertSuccess(s, data)
-
-    return data["count"]
-
-
-    self.assertSuccess(res, exps)
+    exps = self.get_regions_request(req)
     self.assertEqual(len(exps), 1)
     self.assertEqual(exps[0], [eid1, "hg18_chr1_1"])
 
     (res, req) = epidb.get_regions(qid1, "CHROMOSOME,START,END", self.admin_key)
-    self.assertSuccess(res, req)
-    x = self.get_regions_request(req)
+    exps = self.get_regions_request(req)
 
-    self.assertEqual(x, 'chr1\t683240\t690390\nchr1\t697520\t697670\nchr1\t702900\t703050\nchr1\t714160\t714310\nchr1\t714540\t714690\nchr1\t715060\t715210\nchr1\t761180\t761330\nchr1\t762060\t762210\nchr1\t762420\t762570\nchr1\t762820\t762970\nchr1\t763020\t763170\nchr1\t839540\t839690\nchr1\t840080\t840230\nchr1\t840600\t840750\nchr1\t858880\t859030\nchr1\t859600\t859750\nchr1\t860240\t860390\nchr1\t861040\t861190\nchr1\t875400\t875550\nchr1\t875900\t876050\nchr1\t876400\t876650\nchr1\t877900\t878050\nchr1\t879180\t880330')
+    self.assertEqual(exps, 'chr1\t683240\t690390\nchr1\t697520\t697670\nchr1\t702900\t703050\nchr1\t714160\t714310\nchr1\t714540\t714690\nchr1\t715060\t715210\nchr1\t761180\t761330\nchr1\t762060\t762210\nchr1\t762420\t762570\nchr1\t762820\t762970\nchr1\t763020\t763170\nchr1\t839540\t839690\nchr1\t840080\t840230\nchr1\t840600\t840750\nchr1\t858880\t859030\nchr1\t859600\t859750\nchr1\t860240\t860390\nchr1\t861040\t861190\nchr1\t875400\t875550\nchr1\t875900\t876050\nchr1\t876400\t876650\nchr1\t877900\t878050\nchr1\t879180\t880330')
 
     res, qid2 = epidb.select_regions(None, "hg19", "Methylation", None, None,
         None, None, None, None, self.admin_key)
     self.assertSuccess(res, qid1)
 
-    res, exps = epidb.get_experiments_by_query(qid2, self.admin_key)
+    res, req = epidb.get_experiments_by_query(qid2, self.admin_key)
+    self.assertSuccess(res, req)
+    exps = self.get_regions_request(req)
+
     self.assertSuccess(res, exps)
     self.assertEqual(len(exps), 3)
     self.assertTrue([eid2, "hg19_chr1_1"] in exps)
