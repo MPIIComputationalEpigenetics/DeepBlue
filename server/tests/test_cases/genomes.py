@@ -6,7 +6,7 @@ from client import EpidbClient
 class TestGenomeCommands(helpers.TestCase):
 
 
-  def _test_genome_hg19(self):
+  def test_genome_hg19(self):
     epidb = EpidbClient()
     self.init(epidb)
 
@@ -21,7 +21,7 @@ class TestGenomeCommands(helpers.TestCase):
     self.assertEqual(len(genomes), 1)
     self.assertEqual(genomes[0][1], "hg19")
 
-  def _test_chromosomes(self):
+  def test_chromosomes(self):
     epidb = EpidbClient()
     self.init(epidb)
 
@@ -54,7 +54,7 @@ class TestGenomeCommands(helpers.TestCase):
     expected = [['chr1', 197195432], ['chr10', 129993255], ['chr11', 121843856], ['chr12', 121257530], ['chr13', 120284312], ['chr13_random', 400311], ['chr14', 125194864], ['chr15', 103494974], ['chr16', 98319150], ['chr16_random', 3994], ['chr17', 95272651], ['chr17_random', 628739], ['chr18', 90772031], ['chr19', 61342430], ['chr1_random', 1231697], ['chr2', 181748087], ['chr3', 159599783], ['chr3_random', 41899], ['chr4', 155630120], ['chr4_random', 160594], ['chr5', 152537259], ['chr5_random', 357350], ['chr6', 149517037], ['chr7', 152524553], ['chr7_random', 362490], ['chr8', 131738871], ['chr8_random', 849593], ['chr9', 124076172], ['chr9_random', 449403], ['chrM', 16299], ['chrUn_random', 5900358], ['chrX', 166650296], ['chrX_random', 1785075], ['chrY', 15902555], ['chrY_random', 58682461]]
     self.assertEqual(chroms, expected)
 
-  def _test_genome_empty(self):
+  def test_genome_empty(self):
     epidb = EpidbClient()
     self.init(epidb)
 
@@ -78,7 +78,7 @@ class TestGenomeCommands(helpers.TestCase):
     self.assertTrue("hg18" in genome_names)
     self.assertTrue("mm9" in genome_names)
 
-  def _test_genome_info(self):
+  def test_genome_info(self):
     epidb = EpidbClient()
     self.init(epidb)
 
@@ -95,7 +95,7 @@ class TestGenomeCommands(helpers.TestCase):
 
     self.assertEqual(info_answer, info)
 
-  def _test_genome_duplicate(self):
+  def test_genome_duplicate(self):
     epidb = EpidbClient()
     self.init(epidb)
 
