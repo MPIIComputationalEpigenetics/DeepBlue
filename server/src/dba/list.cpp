@@ -251,7 +251,10 @@ namespace epidb {
                   std::vector<utils::IdNameCount> &names, std::string &msg)
       {
         mongo::BSONArray pipeline = BSON_ARRAY(
-                                      BSON( "$group" <<
+                                      BSON("$match" <<
+                                           BSON("upload_info.done" << true)
+                                          )
+                                      << BSON( "$group" <<
                                             BSON( "_id" << key_name << "total" << BSON( "$sum" << 1 ) )
                                           )
                                     );
