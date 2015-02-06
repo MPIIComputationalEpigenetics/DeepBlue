@@ -8,7 +8,7 @@ COMMANDS = $(wildcard commands/*.cpp)
 COMMANDS_OBJS = $(COMMANDS:.cpp=.o)
 
 OBJS	= main.o version.o errors.o
-OBJLIBS	= $(COMMANDS_OBJS) libalgorithms.a libconnection.a libdatatypes.a libdba.a libengine.a libexternal.a libextras.a libhttpd.a liblua.a libmdbq.a libparser.a libprocessing.a
+OBJLIBS	= $(COMMANDS_OBJS) libhttpd.a libdba.a libparser.a libengine.a libextras.a libalgorithms.a libdatatypes.a liblua.a libexternal.a libmdbq.a libprocessing.a libconnection.a
 
 CXXFLAGS	= $(DEFCXXFLAGS)
 
