@@ -40,6 +40,7 @@
 #include "info.hpp"
 #include "helpers.hpp"
 #include "key_mapper.hpp"
+#include "remove.hpp"
 #include "users.hpp"
 
 #include "../log.hpp"
@@ -329,12 +330,20 @@ namespace epidb {
 
       if (!search::insert_full_text(Collections::EXPERIMENTS(), experiment_id, experiment_metadata, msg)) {
         c.done();
+        std::string new_msg;
+        if (!remove::experiment(experiment_id, user_key, new_msg)) {
+          msg = msg + " " + new_msg;
+        }
         return false;
       }
 
       genomes::GenomeInfoPtr genome_info;
       if (!genomes::get_genome_info(genome, genome_info, msg)) {
         c.done();
+        std::string new_msg;
+        if (!remove::experiment(experiment_id, user_key, new_msg)) {
+          msg = msg + " " + new_msg;
+        }
         return false;
       }
 
@@ -385,16 +394,22 @@ namespace epidb {
 
         std::string internal_chromosome;
         if (!genome_info->internal_chromosome(track->chromosome(), internal_chromosome, msg)) {
-          // TODO: delete data already included.
           c.done();
+          std::string new_msg;
+          if (!remove::experiment(experiment_id, user_key, new_msg)) {
+            msg = msg + " " + new_msg;
+          }
           return false;
         }
 
         size_t size;
         // TODO: check regions and positions regards the chromosome size!
         if (!genome_info->chromosome_size(internal_chromosome, size, msg)) {
-          // TODO: delete data already included.
           c.done();
+          std::string new_msg;
+          if (!remove::experiment(experiment_id, user_key, new_msg)) {
+            msg = msg + " " + new_msg;
+          }
           return false;
         }
 
@@ -407,6 +422,10 @@ namespace epidb {
             if (!c->getLastError().empty()) {
               msg = c->getLastError();
               c.done();
+              std::string new_msg;
+              if (!remove::experiment(experiment_id, user_key, new_msg)) {
+                msg = msg + " " + new_msg;
+              }
               return false;
             }
             bulk.clear();
@@ -423,6 +442,10 @@ namespace epidb {
           if (!c->getLastError().empty()) {
             msg = c->getLastError();
             c.done();
+            std::string new_msg;
+            if (!remove::experiment(experiment_id, user_key, new_msg)) {
+              msg = msg + " " + new_msg;
+            }
             return false;
           }
           bulk.clear();
@@ -435,12 +458,20 @@ namespace epidb {
         if (!c->getLastError().empty()) {
           msg = c->getLastError();
           c.done();
+          std::string new_msg;
+          if (!remove::experiment(experiment_id, user_key, new_msg)) {
+            msg = msg + " " + new_msg;
+          }
           return false;
         }
         bulk.clear();
       }
 
       if (!update_upload_info(Collections::EXPERIMENTS(), experiment_id, total_size, msg)) {
+        std::string new_msg;
+        if (!remove::experiment(experiment_id, user_key, new_msg)) {
+          msg = msg + " " + new_msg;
+        }
         return false;
       }
 
@@ -493,12 +524,20 @@ namespace epidb {
 
       if (!search::insert_full_text(Collections::EXPERIMENTS(), experiment_id, experiment_metadata, msg)) {
         c.done();
+        std::string new_msg;
+        if (!remove::experiment(experiment_id, user_key, new_msg)) {
+          msg = msg + " " + new_msg;
+        }
         return false;
       }
 
       genomes::GenomeInfoPtr genome_info;
       if (!genomes::get_genome_info(genome, genome_info, msg)) {
         c.done();
+        std::string new_msg;
+        if (!remove::experiment(experiment_id, user_key, new_msg)) {
+          msg = msg + " " + new_msg;
+        }
         return false;
       }
 
@@ -509,15 +548,21 @@ namespace epidb {
 
         std::string internal_chromosome;
         if (!genome_info->internal_chromosome(chrom_lines.first, internal_chromosome, msg)) {
-          // TODO: delete data already included.
           c.done();
+          std::string new_msg;
+          if (!remove::experiment(experiment_id, user_key, new_msg)) {
+            msg = msg + " " + new_msg;
+          }
           return false;
         }
 
         size_t size;
         if (!genome_info->chromosome_size(internal_chromosome, size, msg)) {
-          // TODO: delete data already included.
           c.done();
+          std::string new_msg;
+          if (!remove::experiment(experiment_id, user_key, new_msg)) {
+            msg = msg + " " + new_msg;
+          }
           return false;
         }
 
@@ -531,12 +576,20 @@ namespace epidb {
           mongo::BSONObjBuilder region_builder;
           if (!fill_region_builder(region_builder, bed_line, format, msg)) {
             c.done();
+            std::string new_msg;
+            if (!remove::experiment(experiment_id, user_key, new_msg)) {
+              msg = msg + " " + new_msg;
+            }
             return false;
           }
 
           if (bed_line.start > size || bed_line.end > size) {
             msg = out_of_range_message(bed_line.start, bed_line.end, bed_line.chromosome);
             c.done();
+            std::string new_msg;
+            if (!remove::experiment(experiment_id, user_key, new_msg)) {
+              msg = msg + " " + new_msg;
+            }
             return false;
           }
           mongo::BSONObj r = region_builder.obj();
@@ -546,17 +599,29 @@ namespace epidb {
 
           if (!check_bulk_size(dataset_id, collection, count, block, blocks_bulk, bulk_size, total_size, msg)) {
             c.done();
+            std::string new_msg;
+            if (!remove::experiment(experiment_id, user_key, new_msg)) {
+              msg = msg + " " + new_msg;
+            }
             return false;
           }
         }
 
         if (!check_remainings(dataset_id, collection, count, block, blocks_bulk, bulk_size, total_size, msg)) {
           c.done();
+          std::string new_msg;
+          if (!remove::experiment(experiment_id, user_key, new_msg)) {
+            msg = msg + " " + new_msg;
+          }
           return false;
         }
       }
 
       if (!update_upload_info(Collections::EXPERIMENTS(), experiment_id, total_size, msg)) {
+        std::string new_msg;
+        if (!remove::experiment(experiment_id, user_key, new_msg)) {
+          msg = msg + " " + new_msg;
+        }
         return false;
       }
 
@@ -604,12 +669,20 @@ namespace epidb {
 
       if (!search::insert_full_text(Collections::ANNOTATIONS(), annotation_id, annotation_metadata, msg)) {
         c.done();
+        std::string new_msg;
+        if (!remove::annotation(annotation_id, user_key, new_msg)) {
+          msg = msg + " " + new_msg;
+        }
         return false;
       }
 
       genomes::GenomeInfoPtr genome_info;
       if (!genomes::get_genome_info(genome, genome_info, msg)) {
         c.done();
+        std::string new_msg;
+        if (!remove::annotation(annotation_id, user_key, new_msg)) {
+          msg = msg + " " + new_msg;
+        }
         return false;
       }
 
@@ -623,15 +696,22 @@ namespace epidb {
 
         std::string internal_chromosome;
         if (!genome_info->internal_chromosome(chrom_lines.first, internal_chromosome, msg)) {
-          // TODO: delete data already included.
           c.done();
+          std::string new_msg;
+          if (!remove::annotation(annotation_id, user_key, new_msg)) {
+            msg = msg + " " + new_msg;
+          }
           return false;
         }
 
         size_t size;
         if (!genome_info->chromosome_size(internal_chromosome, size, msg)) {
-          // TODO: delete data already included.
           c.done();
+          return false;
+          std::string new_msg;
+          if (!remove::annotation(annotation_id, user_key, new_msg)) {
+            msg = msg + " " + new_msg;
+          }
           return false;
         }
 
@@ -643,11 +723,19 @@ namespace epidb {
           if (bed_line.start > size || bed_line.end > size) {
             msg = out_of_range_message(bed_line.start, bed_line.end, bed_line.chromosome);
             c.done();
+            std::string new_msg;
+            if (!remove::annotation(annotation_id, user_key, new_msg)) {
+              msg = msg + " " + new_msg;
+            }
             return false;
           }
 
           if (!fill_region_builder(region_builder, bed_line, format, msg)) {
             c.done();
+            std::string new_msg;
+            if (!remove::annotation(annotation_id, user_key, new_msg)) {
+              msg = msg + " " + new_msg;
+            }
             return false;
           }
 
@@ -655,18 +743,30 @@ namespace epidb {
           block.push_back(r);
           if (!check_bulk_size(dataset_id, collection, count, block, blocks_bulk, bulk_size, total_size, msg)) {
             c.done();
+            std::string new_msg;
+            if (!remove::annotation(annotation_id, user_key, new_msg)) {
+              msg = msg + " " + new_msg;
+            }
             return false;
           }
         }
 
         if (!check_remainings(dataset_id, collection, count, block, blocks_bulk, bulk_size, total_size, msg)) {
           c.done();
+          std::string new_msg;
+          if (!remove::annotation(annotation_id, user_key, new_msg)) {
+            msg = msg + " " + new_msg;
+          }
           return false;
         }
 
       }
 
       if (!update_upload_info(Collections::ANNOTATIONS(), annotation_id, total_size, msg)) {
+        std::string new_msg;
+        if (!remove::annotation(annotation_id, user_key, new_msg)) {
+          msg = msg + " " + new_msg;
+        }
         return false;
       }
 
@@ -714,12 +814,20 @@ namespace epidb {
 
       if (!search::insert_full_text(Collections::ANNOTATIONS(), annotation_id, annotation_metadata, msg)) {
         c.done();
+        std::string new_msg;
+        if (!remove::annotation(annotation_id, user_key, new_msg)) {
+          msg = msg + " " + new_msg;
+        }
         return false;
       }
 
       genomes::GenomeInfoPtr genome_info;
       if (!genomes::get_genome_info(genome, genome_info, msg)) {
         c.done();
+        std::string new_msg;
+        if (!remove::annotation(annotation_id, user_key, new_msg)) {
+          msg = msg + " " + new_msg;
+        }
         return false;
       }
 
@@ -735,14 +843,20 @@ namespace epidb {
         size_t chromosome_size;
 
         if (!genome_info->internal_chromosome(chromosome, internal_chromosome, msg)) {
-          // TODO: delete data already included.
           c.done();
+          std::string new_msg;
+          if (!remove::annotation(annotation_id, user_key, new_msg)) {
+            msg = msg + " " + new_msg;
+          }
           return false;
         }
 
         if (!genome_info->chromosome_size(internal_chromosome, chromosome_size, msg)) {
-          // TODO: delete data already included.
           c.done();
+          std::string new_msg;
+          if (!remove::annotation(annotation_id, user_key, new_msg)) {
+            msg = msg + " " + new_msg;
+          }
           return false;
         }
 
@@ -754,6 +868,10 @@ namespace epidb {
           if (region->start() > chromosome_size || region->end() > chromosome_size) {
             msg = out_of_range_message(region->start(), region->end(), chromosome);
             c.done();
+            std::string new_msg;
+            if (!remove::annotation(annotation_id, user_key, new_msg)) {
+              msg = msg + " " + new_msg;
+            }
             return false;
           }
 
@@ -765,16 +883,28 @@ namespace epidb {
 
           if (!check_bulk_size(dataset_id, collection, count, block, blocks_bulk, bulk_size, total_size, msg)) {
             c.done();
+            std::string new_msg;
+            if (!remove::annotation(annotation_id, user_key, new_msg)) {
+              msg = msg + " " + new_msg;
+            }
             return false;
           }
         }
         if (!check_remainings(dataset_id, collection, count, block, blocks_bulk, bulk_size, total_size, msg)) {
           c.done();
+          std::string new_msg;
+          if (!remove::annotation(annotation_id, user_key, new_msg)) {
+            msg = msg + " " + new_msg;
+          }
           return false;
         }
       }
 
       if (!update_upload_info(Collections::ANNOTATIONS(), annotation_id, total_size, msg)) {
+        std::string new_msg;
+        if (!remove::annotation(annotation_id, user_key, new_msg)) {
+          msg = msg + " " + new_msg;
+        }
         return false;
       }
 
