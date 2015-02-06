@@ -99,14 +99,17 @@ namespace epidb {
       }
 
       if (first_) {
-        /*
-        TODO: verify if the bin column is still used
         std::string buf;
         std::stringstream ss(line);
-        std::string s;
-        ss >> s;
-        first_column_useless = s.find_first_not_of("0123456789") == std::string::npos;
-        */
+        std::string first;
+        ss >> first;
+        std::string second;
+        ss >> second;
+
+        first_column_useless = (chromosome_pos == 0 &&
+          (first.find_first_not_of("0123456789") == std::string::npos) &&
+          (second.compare(0, 3, std::string("chr")) == 0));
+
         first_ = false;
       }
 
