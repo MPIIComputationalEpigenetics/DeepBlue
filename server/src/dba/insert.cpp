@@ -707,7 +707,6 @@ namespace epidb {
         size_t size;
         if (!genome_info->chromosome_size(internal_chromosome, size, msg)) {
           c.done();
-          return false;
           std::string new_msg;
           if (!remove::annotation(annotation_id, user_key, new_msg)) {
             msg = msg + " " + new_msg;
