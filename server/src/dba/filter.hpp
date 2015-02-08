@@ -42,17 +42,17 @@ namespace epidb {
 
 
     public:
-      Filter(const std::string &value)
-      {
-        type = STRING;
-        s_value = value;
-      }
+      Filter(const std::string &value) :
+        type(STRING),
+        s_value(value),
+        n_value(0.0)
+      { }
 
-      Filter(const double value)
-      {
-        type = NUMBER;
-        n_value = value;
-      }
+      Filter(const double value) :
+        type(NUMBER),
+        s_value(),
+        n_value(value)
+      { }
 
       virtual bool is(const std::string &value) = 0;
       virtual bool is(const double value) = 0;
