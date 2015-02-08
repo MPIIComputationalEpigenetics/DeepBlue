@@ -55,7 +55,7 @@ namespace epidb {
       public:
         virtual datatypes::COLUMN_TYPES type() const = 0;
 
-        const std::string name()
+        const std::string name() const
         {
           return _name;
         }
@@ -130,7 +130,7 @@ namespace epidb {
           return AbstractColumnType::BSONObj();
         }
 
-        const Type content()
+        const Type content() const
         {
           return _content;
         }
