@@ -36,17 +36,17 @@ namespace epidb {
         id_names = _id_names;
       }
 
-      void append(const std::string key, const std::string value)
+      void append(const std::string &key, const std::string &value)
       {
         strings.push_back(StringDataPair(key, value));
       }
 
-      void append(const std::string key, const long long value)
+      void append(const std::string &key, const long long value)
       {
         integers.push_back(IntegerDataPair(key, value));
       }
 
-      void append(const std::string key, const float value)
+      void append(const std::string &key, const float value)
       {
         floats.push_back(IntegerDataPair(key, value));
       }
