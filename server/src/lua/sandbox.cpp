@@ -37,10 +37,17 @@ namespace epidb {
     }
 
     Sandbox::Sandbox() :
+      L(luaL_newstate()),
       current_chromosome(EMPTY_CHROMOSOME),
       current_region_ptr(nullptr),
       current_metafield(EMPTY_METAFIELD)
-    { }
+    {
+      luaL_openlibs(L);
+
+      lua_pushlightuserdata(L, this);
+      lua_pushcclosure(L, &Sandbox::call_field_content, 1);
+      lua_setglobal(L, "value_of");
+    }
 
     Sandbox::~Sandbox()
     {
@@ -49,13 +56,6 @@ namespace epidb {
 
     bool Sandbox::store_row_code(const std::string &code, std::string &msg)
     {
-      L = luaL_newstate();
-      luaL_openlibs(L);
-
-      lua_pushlightuserdata(L, this);
-      lua_pushcclosure(L, &Sandbox::call_field_content, 1);
-      lua_setglobal(L, "value_of");
-
       if (luaL_loadstring(L, epidb::lua::LUA_ENV) || lua_pcall(L, 0, 0, 0)) {
         msg = std::string(lua_tostring(L, -1));
         return false;
@@ -110,7 +110,7 @@ namespace epidb {
 
     int Sandbox::call_field_content(lua_State *lua_state)
     {
-      Sandbox *sandbox = (Sandbox *) lua_touserdata(lua_state, lua_upvalueindex(1));
+      Sandbox *sandbox = static_cast<Sandbox *>(lua_touserdata(lua_state, lua_upvalueindex(1)));
       return sandbox->field_content(lua_state);
     }
 
