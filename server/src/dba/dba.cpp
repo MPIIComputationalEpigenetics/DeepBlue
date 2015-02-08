@@ -258,13 +258,13 @@ namespace epidb {
       create_genome_builder.appendElements(search_data);
 
       mongo::BSONArrayBuilder ab;
-      for (parser::ChromosomesInfo::const_iterator it = genome_info.begin(); it != genome_info.end(); it++) {
+      for (const auto& chr : genome_info) {
         mongo::BSONObjBuilder chromosome_builder;
-        chromosome_builder.append("name", it->first);
-        chromosome_builder.append("size", (int) it->second);
+        chromosome_builder.append("name", chr.first);
+        chromosome_builder.append("size", (int) chr.second);
         ab.append(chromosome_builder.obj());
 
-        if (!create_chromosome_collection(name, it->first, msg)) {
+        if (!create_chromosome_collection(name, chr.first, msg)) {
           return false;
         }
       }
@@ -293,10 +293,10 @@ namespace epidb {
       DatasetId id = DATASET_EMPTY_ID;
 
       ChromosomeRegionsList chromosome_regions_list;
-      for (parser::ChromosomesInfo::const_iterator it = genome_info.begin(); it != genome_info.end(); it++) {
+      for (const auto& chr: genome_info) {
         Regions regions = build_regions(1);
-        regions.push_back(build_bed_region(0, it->second, id));
-        ChromosomeRegions chromosome_regions(it->first, std::move(regions));
+        regions.push_back(build_bed_region(0, chr.second, id));
+        ChromosomeRegions chromosome_regions(chr.first, std::move(regions));
         chromosome_regions_list.push_back(std::move(chromosome_regions));
       }
 
@@ -528,10 +528,10 @@ namespace epidb {
         return false;
       }
 
-      for (it = names_values.begin(); it != names_values.end(); it++) {
-        std::string norm_title = "norm_" + it->first;
-        std::string norm_value = utils::normalize_name(it->second);
-        data_builder.append(it->first, it->second);
+      for (const auto& name_value: names_values) {
+        std::string norm_title = "norm_" + name_value.first;
+        std::string norm_value = utils::normalize_name(name_value.second);
+        data_builder.append(name_value.first, name_value.second);
         data_builder.append(norm_title, norm_value);
       }
 
