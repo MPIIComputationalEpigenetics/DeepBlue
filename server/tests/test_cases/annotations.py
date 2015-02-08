@@ -44,7 +44,7 @@ class TestAnnotationCommands(helpers.TestCase):
     regions = self.get_regions_request(req)
     self.assertEqual(regions, file_data)
 
-  def __test_annotation_full_cpg_islands(self):
+  def test_annotation_full_cpg_islands(self):
     epidb = EpidbClient()
     self.init_base(epidb)
 
@@ -73,3 +73,62 @@ class TestAnnotationCommands(helpers.TestCase):
       count = self.count_request(req)
 
       self.assertEqual(regions_count, count)
+
+
+  def test_annotation_shuffle(self):
+    epidb = EpidbClient()
+    self.init_base(epidb)
+
+    cpg_island =  ",".join([
+      "CHROMOSOME",
+      "START",
+      "END",
+      "name:String",
+      "length:Integer",
+      "cpgNum:Integer",
+      "gcNum:Integer",
+      "perCpg:Double",
+      "perGc:Double",
+      "obsExp:Double"
+      ])
+
+    file_data = None
+    with open("data/cpgIslandExtFull.bed", 'r') as f:
+      file_data = f.read()
+
+    res = epidb.add_annotation("Cpg Islands", "hg19", "CpG islands are associated ...",
+          file_data,
+          cpg_island,
+          {"url":"genome.ucsc.edu/cgi-bin/hgTables?db=hg19&hgta_group=regulation&hgta_track=cpgIslandExt&hgta_table=cpgIslandExt&hgta_doSchema=describe+table+schema"},
+          self.admin_key)
+    self.assertSuccess(res)
+
+    res, qid = epidb.select_annotations("Cpg Islands", "hg19", None, None, None, self.admin_key)
+    self.assertSuccess(res, qid)
+
+    res, req = epidb.get_regions(qid, "CHROMOSOME,START,END", self.admin_key)
+    self.assertSuccess(res, req)
+    regions = self.get_regions_request(req)
+
+    # ---
+
+    file_data = None
+    with open("data/cpgIslandExtShuffle.bed", 'r') as f:
+      file_data = f.read()
+
+    res = epidb.add_annotation("Cpg Islands Shuffle", "hg19", "CpG islands are associated ...",
+          file_data,
+          cpg_island,
+          {"url":"genome.ucsc.edu/cgi-bin/hgTables?db=hg19&hgta_group=regulation&hgta_track=cpgIslandExt&hgta_table=cpgIslandExt&hgta_doSchema=describe+table+schema"},
+          self.admin_key)
+    self.assertSuccess(res)
+
+    res, qid_shuffle = epidb.select_annotations("Cpg Islands Shuffle", "hg19", None, None, None, self.admin_key)
+    self.assertSuccess(res, qid)
+
+    res, req_shuffle = epidb.get_regions(qid_shuffle, "CHROMOSOME,START,END", self.admin_key)
+    self.assertSuccess(res, req)
+    regions_shuffle = self.get_regions_request(req_shuffle)
+    self.assertEqual(regions_shuffle, regions)
+
+    self.assertEqual(regions, regions_shuffle)
