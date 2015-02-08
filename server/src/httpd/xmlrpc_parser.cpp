@@ -53,7 +53,7 @@ namespace epidb {
     }
 
     void XMLRPCParser::start_handler(void *data, const XML_Char *name, const XML_Char **atts) {
-      XMLRPCParser* self = (XMLRPCParser*)(data);
+      XMLRPCParser* self = reinterpret_cast<XMLRPCParser*>(data);
       if (self->error_) return;
 
       int size = self->stack_.size();
@@ -149,7 +149,7 @@ namespace epidb {
     }
 
     void XMLRPCParser::end_handler(void *data, const XML_Char *name) {
-      XMLRPCParser* self = (XMLRPCParser*)(data);
+      XMLRPCParser* self = reinterpret_cast<XMLRPCParser*>(data);
       if (self->error_) return;
 
       if (self->stack_.size() == 0) {
@@ -261,7 +261,7 @@ namespace epidb {
     }
 
     void XMLRPCParser::char_handler(void *data, const XML_Char *s, int len) {
-      XMLRPCParser* self = (XMLRPCParser*)(data);
+      XMLRPCParser* self = reinterpret_cast<XMLRPCParser*>(data);
 
       if (self->error_) return;
 
