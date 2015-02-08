@@ -26,9 +26,9 @@ namespace epidb {
     namespace genomes {
 
 
-      bool GenomeInfo::chromosome_size(const std::string &intern_chromosome, size_t &size, std::string &msg)
+      bool GenomeInfo::chromosome_size(const std::string &intern_chromosome, size_t &size, std::string &msg) const
       {
-        GenomeData::iterator it = data_.find(intern_chromosome);
+        GenomeData::const_iterator it = data_.find(intern_chromosome);
         if (it != data_.end()) {
           size = it->second;
           return true;
@@ -38,7 +38,7 @@ namespace epidb {
         }
       }
 
-      bool GenomeInfo::internal_chromosome(const std::string &chromosome, std::string &intern_chromosome, std::string &msg)
+      bool GenomeInfo::internal_chromosome(const std::string &chromosome, std::string &intern_chromosome, std::string &msg) const
       {
         if (chromosome.empty()) {
           msg = "The chromosome name is empty";
@@ -82,9 +82,9 @@ namespace epidb {
 
       }
 
-      bool GenomeInfo::get_chromosome(const std::string &name, ChromosomeInfo &chromosome_info, std::string &msg)
+      bool GenomeInfo::get_chromosome(const std::string &name, ChromosomeInfo &chromosome_info, std::string &msg) const
       {
-        GenomeData::iterator it = data_.find(name);
+        GenomeData::const_iterator it = data_.find(name);
         if (it != data_.end()) {
           chromosome_info.name = it->first;
           chromosome_info.size = it->second;
@@ -94,7 +94,7 @@ namespace epidb {
         return false;
       }
 
-      const std::vector<std::string> GenomeInfo::chromosomes()
+      const std::vector<std::string> GenomeInfo::chromosomes() const
       {
         std::vector<std::string> r;
 

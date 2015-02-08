@@ -49,11 +49,11 @@ namespace epidb {
           : name_(name), data_(data), names_pair_(names_pair)
         {}
 
-        bool internal_chromosome(const std::string &chromosome, std::string &intern_chromosome, std::string &msg);
-        bool chromosome_size(const std::string &chromosome, size_t &size, std::string &msg);
+        bool internal_chromosome(const std::string &chromosome, std::string &intern_chromosome, std::string &msg) const;
+        bool chromosome_size(const std::string &chromosome, size_t &size, std::string &msg) const ;
 
-        bool get_chromosome(const std::string &name, ChromosomeInfo &chromosome_info, std::string &msg);
-        const std::vector<std::string> chromosomes();
+        bool get_chromosome(const std::string &name, ChromosomeInfo &chromosome_info, std::string &msg) const;
+        const std::vector<std::string> chromosomes() const;
       };
 
       typedef boost::shared_ptr<GenomeInfo> GenomeInfoPtr;
