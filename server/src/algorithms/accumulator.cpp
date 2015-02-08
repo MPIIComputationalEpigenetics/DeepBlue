@@ -33,48 +33,48 @@ namespace epidb {
       _calculated = false;
     }
 
-    Score Accumulator::min()
+    Score Accumulator::min() const
     {
       calculate();
       return _min;
     }
 
-    Score Accumulator::max()
+    Score Accumulator::max() const
     {
       calculate();
       return _max;
     }
 
-    Score Accumulator::mean()
+    Score Accumulator::mean() const
     {
       calculate();
       return _mean;
     }
 
-    Score Accumulator::var()
+    Score Accumulator::var() const
     {
       calculate();
       return _var;
     }
 
-    Score Accumulator::sd()
+    Score Accumulator::sd() const
     {
       calculate();
       return _sd;
     }
 
-    Score Accumulator::median()
+    Score Accumulator::median() const
     {
       calculate();
       return _median;
     }
 
-    Score Accumulator::count()
+    Score Accumulator::count() const
     {
       return values.size();
     }
 
-    void Accumulator::calculate()
+    void Accumulator::calculate() const
     {
       std::vector<Score> calculated_values = values;
 
@@ -101,7 +101,7 @@ namespace epidb {
       _calculated = true;
     }
 
-    const std::string Accumulator::string(std::string sep)
+    const std::string Accumulator::string(std::string sep) const
     {
       if (values.empty()) {
         return std::string();
