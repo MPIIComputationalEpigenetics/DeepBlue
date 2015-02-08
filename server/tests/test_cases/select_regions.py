@@ -5,7 +5,7 @@ from client import EpidbClient
 
 class TestSelectRegions(helpers.TestCase):
 
-  def _test_select_full_experiment(self, format=None):
+  def test_select_full_experiment(self, format=None):
     epidb = EpidbClient()
     self.init_base()
 
@@ -46,7 +46,7 @@ class TestSelectRegions(helpers.TestCase):
       regions = self.get_regions_request(req)
       self.assertEqual(regions, full_experiment_regions)
 
-  def _test_minimum_parameters(self):
+  def test_minimum_parameters(self):
     # select_regions needs at least one of
     # experiment name, epigenetic_mark, sample, technique or project
     epidb = EpidbClient()
@@ -83,7 +83,7 @@ class TestSelectRegions(helpers.TestCase):
       regions = self.get_regions_request(req)
       self.assertEqual(regions, expected_regions)
 
-  def _test_retrieve_with_defaults(self):
+  def test_retrieve_with_defaults(self):
     epidb = EpidbClient()
     self.init_base()
 
@@ -101,7 +101,7 @@ class TestSelectRegions(helpers.TestCase):
     regions = self.get_regions_request(req)
     self.assertEqual(regions, expected_regions)
 
-  def _test_experiment_name_metacolumn(self):
+  def test_experiment_name_metacolumn(self):
     epidb = EpidbClient()
     self.init_base()
 
@@ -119,7 +119,7 @@ class TestSelectRegions(helpers.TestCase):
     regions = self.get_regions_request(req)
     self.assertEqual(regions, expected_regions)
 
-  def _test_experiment_name_metacolumn2(self):
+  def test_experiment_name_metacolumn2(self):
     epidb = EpidbClient()
     self.init_base()
 
@@ -142,7 +142,7 @@ class TestSelectRegions(helpers.TestCase):
     l_expected = expected.split("\n")
     self.assertEqual(set(l_regions), set(l_expected))
 
-  def _test_chromosome_explicit(self):
+  def test_chromosome_explicit(self):
     # regression test: chromosome was put in the first column no matter
     # what the format string specified
 
@@ -187,7 +187,7 @@ class TestSelectRegions(helpers.TestCase):
     self.assertSuccess(res, regions)
     self.assertEqual(regions, regions_wo_chr)
 
-  def _test_malformed_format(self):
+  def test_malformed_format(self):
     epidb = EpidbClient()
     self.init_base()
 
@@ -212,7 +212,7 @@ class TestSelectRegions(helpers.TestCase):
       res, req = epidb.get_regions(qid, fmt, self.admin_key)
       regions = self.get_regions_request_error(req)
 
-  def _test_genome_required(self):
+  def test_genome_required(self):
     epidb = EpidbClient()
     self.init(epidb)
 
@@ -246,7 +246,7 @@ class TestSelectRegions(helpers.TestCase):
       regions = self.get_regions_request(req)
       self.assertEqual(0, len(regions))
 
-  def _test_argument_normalization(self):
+  def test_argument_normalization(self):
     epidb = EpidbClient()
     self.init_base()
 
@@ -286,7 +286,7 @@ class TestSelectRegions(helpers.TestCase):
     regions = self.get_regions_request(req)
     self.assertEqual(regions, range_regions)
 
-  def _test_multiple_experiments(self):
+  def test_multiple_experiments(self):
     epidb = EpidbClient()
     self.init_base()
 
@@ -308,7 +308,7 @@ class TestSelectRegions(helpers.TestCase):
 
     self.assertEqual(regions, multiple_experiments_regions)
 
-  def _test_multiple_genomes(self):
+  def test_multiple_genomes(self):
     epidb = EpidbClient()
     self.init_base()
 
@@ -334,7 +334,7 @@ class TestSelectRegions(helpers.TestCase):
 
       self.assertEqual(regions, multiple_genomes_regions)
 
-  def _test_multiple_genomes_2(self):
+  def test_multiple_genomes_2(self):
     epidb = EpidbClient()
     self.init_base()
 
