@@ -77,8 +77,8 @@ namespace epidb {
 
       void finish()
       {
-        for (iterator it = data_.begin(); it != data_.end(); it++) {
-          std::vector<parser::BedLine> &regions = it->second;
+        for (auto &chromosome: data_) {
+          std::vector<parser::BedLine> &regions = chromosome.second;
           std::sort(regions.begin(), regions.end());
         }
       }
@@ -111,10 +111,10 @@ namespace epidb {
           return false;
         }
 
-        for (const_iterator this_it = begin(); this_it < begin(); this_it++) {
+        for (auto& this_field: fields_) {
           bool found = false;
-          for (const_iterator other_it = begin(); other_it < begin(); other_it++) {
-            if ((*this_it)->name() == (*other_it)->name()) {
+          for (auto& other_field: other) {
+            if (this_field->name() == other_field->name()) {
               found = true;
               break;
             }
@@ -132,7 +132,7 @@ namespace epidb {
         return !(*this == other);
       }
 
-      void set_format(const std::string format)
+      void set_format(const std::string& format)
       {
         format_ = format;
       }
