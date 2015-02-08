@@ -58,22 +58,22 @@ namespace epidb {
        * List similars
        */
 
-      bool similar_biosources(const std::string name, const std::string &user_key,
+      bool similar_biosources(const std::string &name, const std::string &user_key,
                               std::vector<utils::IdName> &result, std::string &msg);
 
-      bool similar_techniques(const std::string name, const std::string &user_key,
+      bool similar_techniques(const std::string &name, const std::string &user_key,
                               std::vector<utils::IdName> &result, std::string &msg);
 
-      bool similar_projects(const std::string name, const std::string &user_key,
+      bool similar_projects(const std::string &name, const std::string &user_key,
                             std::vector<utils::IdName> &result, std::string &msg);
 
-      bool similar_epigenetic_marks(const std::string name, const std::string &user_key,
+      bool similar_epigenetic_marks(const std::string &name, const std::string &user_key,
                                     std::vector<utils::IdName> &result, std::string &msg);
 
-      bool similar_genomes(const std::string name, const std::string &user_key,
+      bool similar_genomes(const std::string &name, const std::string &user_key,
                            std::vector<utils::IdName> &result, std::string &msg);
 
-      bool similar_experiments(const std::string name, const std::string &genome, const std::string &user_key,
+      bool similar_experiments(const std::string &name, const std::string &genome, const std::string &user_key,
                                std::vector<utils::IdName> &result, std::string &msg);
 
 
@@ -89,7 +89,7 @@ namespace epidb {
        */
 
       bool in_use(const std::string &collection, const std::string &field_name, const std::string &user_key,
-                  std::vector<utils::IdNameCount> &names, std::string& msg);
+                  std::vector<utils::IdNameCount> &names, std::string &msg);
     }
   }
 }

@@ -159,37 +159,37 @@ namespace epidb {
         return true;
       }
 
-      bool similar_biosources(const std::string name, const std::string &user_key,
+      bool similar_biosources(const std::string &name, const std::string &user_key,
                               std::vector<utils::IdName> &result, std::string &msg)
       {
         return similar(Collections::BIOSOURCES(), name, user_key, result, msg);
       }
 
-      bool similar_techniques(const std::string name, const std::string &user_key,
+      bool similar_techniques(const std::string &name, const std::string &user_key,
                               std::vector<utils::IdName> &result, std::string &msg)
       {
         return similar(Collections::TECHNIQUES(), name, user_key, result, msg);
       }
 
-      bool similar_projects(const std::string name, const std::string &user_key,
+      bool similar_projects(const std::string &name, const std::string &user_key,
                             std::vector<utils::IdName> &result, std::string &msg)
       {
         return similar(Collections::PROJECTS(), name, user_key, result, msg);
       }
 
-      bool similar_epigenetic_marks(const std::string name, const std::string &user_key,
+      bool similar_epigenetic_marks(const std::string &name, const std::string &user_key,
                                     std::vector<utils::IdName> &result, std::string &msg)
       {
         return similar(Collections::EPIGENETIC_MARKS(), name, user_key, result, msg);
       }
 
-      bool similar_genomes(const std::string name, const std::string &user_key,
+      bool similar_genomes(const std::string &name, const std::string &user_key,
                            std::vector<utils::IdName> &result, std::string &msg)
       {
         return similar(Collections::GENOMES(), name, user_key, result, msg);
       }
 
-      bool similar_experiments(const std::string name, const std::string &genome, const std::string &user_key,
+      bool similar_experiments(const std::string &name, const std::string &genome, const std::string &user_key,
                                std::vector<utils::IdName> &result, std::string &msg)
       {
         return similar(Collections::EXPERIMENTS(), "name", name, "genome", genome, user_key, result, msg);
@@ -255,8 +255,8 @@ namespace epidb {
                                            BSON("upload_info.done" << true)
                                           )
                                       << BSON( "$group" <<
-                                            BSON( "_id" << key_name << "total" << BSON( "$sum" << 1 ) )
-                                          )
+                                               BSON( "_id" << key_name << "total" << BSON( "$sum" << 1 ) )
+                                             )
                                     );
 
         mongo::BSONObj agg_command = BSON( "aggregate" << Collections::EXPERIMENTS() << "pipeline" << pipeline);
