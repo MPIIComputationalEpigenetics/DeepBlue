@@ -34,8 +34,6 @@ namespace epidb {
       chr_regions = build_regions();
       auto it_ranges = ranges.begin();
 
-      Regions agg_regions;
-
       DatasetId dataset_id = -1;
       dba::columns::ColumnTypePtr column;
 
