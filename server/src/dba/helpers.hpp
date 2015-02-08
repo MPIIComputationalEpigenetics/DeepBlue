@@ -66,10 +66,10 @@ namespace epidb {
       bool get(const std::string &where, const mongo::Query &query, const std::vector<std::string> &fields,
                std::vector<mongo::BSONObj> &results, std::string &msg);
 
-      bool get_name(const std::string &where, const std::string norm_name,
+      bool get_name(const std::string &where, const std::string &norm_name,
                     utils::IdName &id_name, std::string &msg);
 
-      bool get_id(const std::string &where, const std::string norm_name,
+      bool get_id(const std::string &where, const std::string &norm_name,
                   std::string &id, std::string &msg);
 
       bool check_exist(const std::string &where, const std::string &field, const std::string &content,

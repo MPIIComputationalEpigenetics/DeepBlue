@@ -171,7 +171,7 @@ namespace epidb {
         }
       }
 
-      bool get_name(const std::string &where, const std::string norm_name,
+      bool get_name(const std::string &where, const std::string &norm_name,
                     utils::IdName &id_name, std::string &msg)
       {
         std::string field;
@@ -199,7 +199,7 @@ namespace epidb {
         return true;
       }
 
-      bool get_id(const std::string &where, const std::string norm_name,
+      bool get_id(const std::string &where, const std::string &norm_name,
                   std::string &id, std::string &msg)
       {
         std::string field;
