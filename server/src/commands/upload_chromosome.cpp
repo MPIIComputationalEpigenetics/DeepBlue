@@ -108,7 +108,6 @@ namespace epidb {
           return false;
         }
 
-        std::string id;
         bool ret = dba::add_chromosome_sequence(genome, norm_genome, chromosome, clear_data, user_key, msg);
 
         if (!ret) {
