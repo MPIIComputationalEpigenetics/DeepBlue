@@ -96,7 +96,6 @@ namespace epidb {
           }
         } else {
           sample_biosource_name = biosource_name;
-          norm_sample_biosource_name = norm_biosource_name;
         }
 
         result.add_string(sample_biosource_name);
