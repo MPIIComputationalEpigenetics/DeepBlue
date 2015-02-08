@@ -39,7 +39,7 @@ namespace epidb {
         std::string _name;
         int _pos;
 
-        AbstractColumnType(const std::string n) :
+        AbstractColumnType(const std::string &n) :
           _name(n),
           _pos(-1)
         {
@@ -47,7 +47,7 @@ namespace epidb {
 
         }
 
-        AbstractColumnType(const std::string n, int pos) :
+        AbstractColumnType(const std::string &n, int pos) :
           _name(n),
           _pos(pos)
         { }
