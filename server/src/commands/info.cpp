@@ -133,8 +133,8 @@ namespace epidb {
             serialize::ParameterPtr serialize_synonyms(new serialize::ListParameter());
             std::vector<std::string>::iterator it_syns = synonyms.begin();
 
-            for ( ; it_syns != synonyms.end(); it_syns++) {
-              serialize::ParameterPtr p(new serialize::SimpleParameter(serialize::STRING, *it_syns));
+            for (const auto& syn: synonyms) {
+              serialize::ParameterPtr p(new serialize::SimpleParameter(serialize::STRING, syn));
               serialize_synonyms->add_child(p);
             }
 

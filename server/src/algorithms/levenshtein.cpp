@@ -129,8 +129,9 @@ namespace epidb {
 
       std::vector<std::string> names;
 
-      for (std::vector<std::pair<std::string, float> >::iterator it = ps.begin(); it != ps.end() && it->second > threshould; it++) {
-        names.push_back(it->first);
+      for (auto& v: ps) {
+        if (v.second > threshould)
+        names.push_back(v.first);
       }
 
       return names;
