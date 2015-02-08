@@ -163,9 +163,9 @@ namespace epidb {
     while (!m_Pool.empty()) {
       StoredConnection conn = m_Pool.front();
       m_Pool.pop_front();
-      bool master;
       bool alive = false;
       try {
+        bool master;
         conn.conn->isMaster(master);
         alive = true;
       } catch (const DBException &e) {
