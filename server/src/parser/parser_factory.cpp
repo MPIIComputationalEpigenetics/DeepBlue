@@ -99,7 +99,6 @@ namespace epidb {
       }
 
       if (first_) {
-        std::string buf;
         std::stringstream ss(line);
         std::string first;
         ss >> first;
@@ -112,9 +111,6 @@ namespace epidb {
 
         first_ = false;
       }
-
-      std::string buf;
-      std::stringstream ss(line);
 
       std::vector<std::string> strs;
       boost::split(strs, line, boost::is_any_of("\t"));

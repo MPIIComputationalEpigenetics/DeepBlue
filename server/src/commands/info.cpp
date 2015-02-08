@@ -131,7 +131,6 @@ namespace epidb {
 
           if (!synonyms.empty()) {
             serialize::ParameterPtr serialize_synonyms(new serialize::ListParameter());
-            std::vector<std::string>::iterator it_syns = synonyms.begin();
 
             for (const auto& syn: synonyms) {
               serialize::ParameterPtr p(new serialize::SimpleParameter(serialize::STRING, syn));

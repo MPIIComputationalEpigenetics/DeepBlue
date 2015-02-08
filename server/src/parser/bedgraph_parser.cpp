@@ -36,12 +36,10 @@ namespace epidb {
     bool BedGraphParser::get(parser::WigPtr &wig, std::string &msg)
     {
       wig = boost::shared_ptr<WigFile>(new WigFile());
-      std::string current_chr;
 
       clock_t dsysTime = clock();
       clock_t init = clock();
 
-      static const std::string delimiters = "\t ";
       strtk::for_each_line_conditional(*input_, [&](const std::string & line) -> bool {
 
         actual_line_++;

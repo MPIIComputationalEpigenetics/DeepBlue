@@ -347,7 +347,6 @@ namespace epidb {
         }
 
         // unite results
-        std::vector<boost::shared_ptr<ChromosomeRegionsList> >::iterator it;
         for (auto &chromosome_regions_pre_result : result_parts) {
           for (auto &chromosome_regions_list : *chromosome_regions_pre_result) {
             results.push_back(std::move(chromosome_regions_list));

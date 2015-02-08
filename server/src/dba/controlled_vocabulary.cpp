@@ -243,7 +243,6 @@ namespace epidb {
         mongo::BSONObj append_value;
         if (is_biosource) {
           mongo::BSONObjBuilder syn_insert_builder;
-          std::string id = norm_biosource_name + "_" + norm_synonym;
           syn_insert_builder.append("name", input_biosource_name);
           syn_insert_builder.append("norm_name", norm_biosource_name);
           append_value = BSON("$set" << syn_insert_builder.obj() << "$addToSet" << value);
@@ -487,7 +486,6 @@ namespace epidb {
 
         c.done();
 
-        std::list<std::string> subs;
         BOOST_FOREACH(const mongo::BSONElement & be, e) {
           std::string sub = be.str();
           if (!__get_down_connected(sub, norm_names, msg)) {
@@ -511,7 +509,6 @@ namespace epidb {
             return false;
           }
         } else {
-          more_embracing_root = biosource_name;
           norm_more_embracing_root = norm_biosource_name;
         }
 
@@ -556,7 +553,6 @@ namespace epidb {
             return false;
           }
         } else {
-          more_embracing_root = biosource_name;
           norm_more_embracing_root = norm_biosource_name;
         }
 
