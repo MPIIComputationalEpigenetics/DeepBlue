@@ -85,19 +85,11 @@ namespace epidb {
     };
 
 
-    std::vector<std::string> string_to_vector(const std::string &s, const char sep = ',');
-
-    std::pair<std::string, std::string> string_to_pair(const std::string &s, const char sep = ',');
-
     bool string_to_int(const std::string &s, int &i);
 
     bool string_to_long(const std::string &s, size_t &i);
 
-    bool string_to_float(const std::string &s, float &d);
-
     bool string_to_position(const std::string &s, Position &p);
-
-    bool string_to_length(const std::string &s, Length p);
 
     bool string_to_score(const std::string &s, Score &c);
 
@@ -111,11 +103,7 @@ namespace epidb {
 
     bool is_number(const std::string &s);
 
-    bool valid_input_string(const std::string &in);
-
     std::string lower(const std::string &in);
-
-    std::string upper(const std::string &in);
 
     std::string normalize_name(const std::string &name);
 

@@ -55,30 +55,6 @@ namespace epidb {
     }
 
 
-    std::vector<std::string> string_to_vector(const std::string &s, const char sep)
-    {
-      std::vector<std::string> tokens;
-      std::istringstream ss(s);
-      std::string token;
-
-      while (std::getline(ss, token, sep)) {
-        tokens.push_back(token);
-      }
-
-      return tokens;
-    }
-
-    std::pair<std::string, std::string> string_to_pair(const std::string &s, const char sep)
-    {
-      std::string ss(s);
-      boost::trim(ss);
-      std::size_t found = s.find_first_of(sep);
-      if (found == std::string::npos) {
-        return std::pair<std::string, std::string>(s, "");
-      }
-      return std::pair<std::string, std::string>(s.substr(0, found), s.substr(found + 1));
-    }
-
     static uint64_t decdigits[100] = {
       0ll, 0ll, 0ll, 0ll, 0ll, 0ll, 0ll, 0ll, 0ll, 0,
       1ll, 10ll, 100ll, 1000ll, 10000ll, 100000ll, 1000000ll, 10000000ll, 100000000ll, 1000000000ll,
@@ -125,11 +101,6 @@ namespace epidb {
     bool string_to_position(const std::string &s, Position &p)
     {
       return string_to_fixed_point<Position>(s, p);
-    }
-
-    bool string_to_length(const std::string &s, Length &l)
-    {
-      return string_to_fixed_point<Length>(s, l);
     }
 
     template<typename T>
@@ -245,11 +216,6 @@ namespace epidb {
       return true;
     }
 
-    bool string_to_float(const std::string &s_, float &d)
-    {
-      return string_to_floating_point<float>(d, s_.c_str());
-    }
-
     bool string_to_score(const std::string &s_, Score &c)
     {
       return string_to_floating_point<Score>(c, s_.c_str());
@@ -284,35 +250,10 @@ namespace epidb {
       return !ss.empty() && it == ss.end();
     }
 
-    bool valid_input_string(const std::string &in)
-    {
-      std::string out;
-      for (std::string::const_iterator it = in.begin(); it != in.end(); ++it) {
-        char c = *it;
-
-        if (c == '[' ||
-            c == ']' ||
-            c == '{' ||
-            c == '}' ||
-            c == '$')
-
-          return false;
-      }
-
-      return true;
-    }
-
     std::string lower(const std::string &in)
     {
       std::string data(in);
       std::transform(data.begin(), data.end(), data.begin(), ::tolower);
-      return data;
-    }
-
-    std::string upper(const std::string &in)
-    {
-      std::string data(in);
-      std::transform(data.begin(), data.end(), data.begin(), ::toupper);
       return data;
     }
 
