@@ -280,21 +280,6 @@ namespace epidb {
         return true;
       }
 
-      bool check_value(const std::string &s, const std::string &type, std::string &msg)
-      {
-        if (s.length() == 0) {
-          msg = "The given value for " + type + " is empty.";
-          return false;
-        }
-
-        if (s.find('$') != std::string::npos) {
-          msg = "The given value(" + s + ") for " + type + " is invalid. Please, do not use '$'";
-          return false;
-        }
-
-        return true;
-      }
-
       bool check_operation(const std::string &operation, const std::string &type, std::string &msg)
       {
         if (type == "string") {
