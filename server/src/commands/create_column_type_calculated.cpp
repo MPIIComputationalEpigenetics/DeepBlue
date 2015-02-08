@@ -53,8 +53,6 @@ namespace epidb {
       virtual bool run(const std::string &ip,
                        const serialize::Parameters &parameters, serialize::Parameters &result) const
       {
-        std::vector<serialize::ParameterPtr> items;
-
         const std::string name = parameters[0]->as_string();
         const std::string description = parameters[1]->as_string();
         const std::string code = parameters[2]->as_string();
