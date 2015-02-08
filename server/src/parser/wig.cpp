@@ -72,12 +72,12 @@ namespace epidb {
       _span(0)
     { }
 
-    WigTrackType Track::type()
+    WigTrackType Track::type() const
     {
       return _type;
     }
 
-    size_t Track::features()
+    size_t Track::features() const
     {
       return _scores.size();
     }
@@ -116,7 +116,7 @@ namespace epidb {
       _scores.push_back(score);
     }
 
-    boost::shared_ptr<char> Track::data()
+    boost::shared_ptr<char> Track::data() const
     {
       size_t _starts_size = _starts.size() * sizeof(Position);
       size_t _ends_size = _ends.size() * sizeof(Position);
@@ -143,7 +143,7 @@ namespace epidb {
       }
     }
 
-    size_t Track::data_size()
+    size_t Track::data_size() const
     {
       size_t _starts_size = _starts.size() * sizeof(Position);
       size_t _ends_size = _ends.size() * sizeof(Position);
@@ -189,20 +189,20 @@ namespace epidb {
       content.push_back(track);
     }
 
-    WigContent::const_iterator WigFile::tracks_iterator()
+    WigContent::const_iterator WigFile::tracks_iterator() const
     {
       return content.begin();
     }
 
-    WigContent::const_iterator WigFile::tracks_iterator_end()
+    WigContent::const_iterator WigFile::tracks_iterator_end() const
     {
       return content.end();
     }
 
-    size_t WigFile::size()
+    size_t WigFile::size() const
     {
       size_t size(0);
-      for (WigContent::iterator it = content.begin(); it != content.end(); it++) {
+      for (WigContent::const_iterator it = content.begin(); it != content.end(); it++) {
         size += (*it)->features();
       }
       return size;

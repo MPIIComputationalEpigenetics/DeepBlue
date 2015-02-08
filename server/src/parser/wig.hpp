@@ -57,30 +57,30 @@ namespace epidb {
       Track(std::string &chr, Position start, Position end); // EncodeBedgraph
       Track(std::string &chr); // MiscBedgraph
 
-      WigTrackType type();
-      std::string chromosome()
+      WigTrackType type() const;
+      std::string chromosome() const
       {
         return _chromosome;
       }
-      Position start()
+      Position start() const
       {
         return _start;
       }
-      Position end()
+      Position end() const
       {
         return _end;
       }
-      Length step()
+      Length step() const
       {
         return _step;
       }
-      Length span()
+      Length span() const
       {
         return _span;
       }
-      size_t features();
-      boost::shared_ptr<char> data();
-      size_t data_size();
+      size_t features() const;
+      boost::shared_ptr<char> data() const;
+      size_t data_size() const;
       TrackPtr split();
       void add_feature(Score _score);
       void add_feature(Position position, Score _score);
@@ -98,10 +98,10 @@ namespace epidb {
       WigContent content;
 
     public:
-      bool check_feature(const std::string &chrm, const Position start, const size_t &line, std::string &msg);
-      WigContent::const_iterator tracks_iterator();
-      WigContent::const_iterator tracks_iterator_end();
-      size_t size();
+      bool check_feature(const std::string &chrm, const Position start, const size_t &line, std::string &msg) const;
+      WigContent::const_iterator tracks_iterator() const;
+      WigContent::const_iterator tracks_iterator_end() const;
+      size_t size() const;
       void add_track(TrackPtr track);
     };
 
