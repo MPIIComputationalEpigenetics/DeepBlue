@@ -166,7 +166,7 @@ namespace epidb {
 
   // The value returned indicates whether the element passed as first argument is considered to go before the second in the specific strict weak ordering it defines.
   static struct {
-    bool operator()(const RegionPtr &lhs, const RegionPtr &rhs)
+    bool operator()(const RegionPtr &lhs, const RegionPtr &rhs) const
     {
       if (lhs->start() < rhs->start()) {
         return true;
