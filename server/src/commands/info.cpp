@@ -129,7 +129,7 @@ namespace epidb {
             info->add_child(it->first, p);
           }
 
-          if (synonyms.size() > 0) {
+          if (!synonyms.empty()) {
             serialize::ParameterPtr serialize_synonyms(new serialize::ListParameter());
             std::vector<std::string>::iterator it_syns = synonyms.begin();
 
@@ -141,7 +141,7 @@ namespace epidb {
             info->add_child("synonyms", serialize_synonyms);
           }
 
-          if (extra_metadata.size() > 0) {
+          if (!extra_metadata.empty()) {
             serialize::ParameterPtr extra_metadata_parameter(new serialize::MapParameter());
             std::map<std::string, std::string>::iterator it;
             for (it = extra_metadata.begin(); it != extra_metadata.end(); ++it) {
@@ -151,7 +151,7 @@ namespace epidb {
             info->add_child("extra_metadata", extra_metadata_parameter);
           }
 
-          if (sample_info.size() > 0) {
+          if (!sample_info.empty()) {
             serialize::ParameterPtr sample_info_parameter(new serialize::MapParameter());
             std::map<std::string, std::string>::iterator it;
             for (it = sample_info.begin(); it != sample_info.end(); ++it) {
@@ -161,7 +161,7 @@ namespace epidb {
             info->add_child("sample_info", sample_info_parameter);
           }
 
-          if (upload_info.size() > 0) {
+          if (!upload_info.empty()) {
             serialize::ParameterPtr upload_info_parameter(new serialize::MapParameter());
             std::map<std::string, std::string>::iterator it;
             for (it = upload_info.begin(); it != upload_info.end(); ++it) {
@@ -171,7 +171,7 @@ namespace epidb {
             info->add_child("upload_info", upload_info_parameter);
           }
 
-          if (columns.size() > 0) {
+          if (!columns.empty()) {
             serialize::ParameterPtr columns_parameters(new serialize::ListParameter());
             for (std::vector< std::map<std::string, std::string> >::iterator c_it = columns.begin(); c_it != columns.end(); c_it++) {
 
