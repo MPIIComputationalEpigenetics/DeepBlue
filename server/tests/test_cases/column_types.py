@@ -208,4 +208,31 @@ class TestColumnTypes(helpers.TestCase):
                                     "desc1", regions_data, format, None, self.admin_key)
     self.assertFailure(res, msg)
     self.assertTrue("strand" in msg.lower())
-    # self.assertEqual(res[1], "Invalid value '+' for column STRAND")
+
+  def test_remove_column(self):
+    epidb = EpidbClient()
+    self.init(epidb)
+
+    res, u1 = epidb.add_user("user1", "test1@example.com", "test", self.admin_key)
+    self.assertSuccess(res, u1)
+
+    user_key = u1[1]
+
+    res, c = epidb.create_column_type_simple("GENE_ID_ENTREZ", "rebimboca da parafuseta", "string", user_key)
+    self.assertSuccess(res, c)
+
+    res = epidb.remove(c, user_key)
+    self.assertSuccess(res)
+
+    res, s = epidb.search("GENE_ID_ENTREZ", None, user_key)
+    self.assertSuccess(res, s)
+    self.assertEqual(len(s), 0)
+
+    res, s = epidb.search("rebimboca", None, user_key)
+    self.assertSuccess(res, s)
+    self.assertEqual(len(s), 0)
+
+    res, s = epidb.search("parafuseta", None, user_key)
+    self.assertSuccess(res, s)
+    self.assertEqual(len(s), 0)
+

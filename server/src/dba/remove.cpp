@@ -452,7 +452,7 @@ namespace epidb {
           return false;
         }
 
-        if (!has_permission(column_type, user_key, true, msg)) {
+        if (!has_permission(column_type, user_key, false, msg)) {
           return false;
         }
 
