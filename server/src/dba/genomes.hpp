@@ -27,7 +27,8 @@ namespace epidb {
         std::string name;
         size_t size;
 
-        ChromosomeInfo() {}
+        ChromosomeInfo():
+          name(), size(0) {}
         ChromosomeInfo(std::string n, size_t s) :
           name(n), size(s) {}
 
