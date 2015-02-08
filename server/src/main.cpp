@@ -37,7 +37,8 @@ int main(int argc, char *argv[])
 {
   EPIDB_LOG(epidb::Version::info());
   EPIDB_LOG("Initializing MongoDB Client...");
-  mongo::client::initialize();
+  mongo::client::Options op; // weird ugly core dump if I do not create this object here
+  mongo::client::initialize(op);
   // TODO: check initialize output
   EPIDB_LOG("MongoDB Client initialized.");
 
