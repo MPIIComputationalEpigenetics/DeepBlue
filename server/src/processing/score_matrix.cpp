@@ -62,7 +62,6 @@ namespace epidb {
         }
 
         if (column->type() != datatypes::COLUMN_INTEGER && column->type() != datatypes::COLUMN_DOUBLE && column->type() == datatypes::COLUMN_RANGE) {
-          std::cerr << column->type() << std::endl;
           msg = "The column " + experiment_input.second + " (" + datatypes::column_type_to_name(column->type()) + ") in the experiment " + experiment_name + " does not contain numerical values.";
           return false;
         }
