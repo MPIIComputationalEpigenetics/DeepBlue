@@ -70,7 +70,7 @@ namespace epidb {
       }
 
       double temp[4];
-      int I_i[N_a + 1][N_b + 1], I_j[N_a + 1][N_b + 1]; // Index matrices to remember the 'path' for backtracking
+      double H_max = 0.;
 
       // here comes the actual algorithm
       for (int i = 1; i <= N_a; i++) {
@@ -80,36 +80,9 @@ namespace epidb {
           temp[2] = H[i][j - 1] - delta;
           temp[3] = 0.;
           H[i][j] = find_array_max(temp, 4, ind);
-          switch (ind) {
-          case 0:                                  // score in (i,j) stems from a match/mismatch
-            I_i[i][j] = i - 1;
-            I_j[i][j] = j - 1;
-            break;
-          case 1:                                  // score in (i,j) stems from a deletion in sequence A
-            I_i[i][j] = i - 1;
-            I_j[i][j] = j;
-            break;
-          case 2:                                  // score in (i,j) stems from a deletion in sequence B
-            I_i[i][j] = i;
-            I_j[i][j] = j - 1;
-            break;
-          case 3:                                  // (i,j) is the beginning of a subsequence
-            I_i[i][j] = i;
-            I_j[i][j] = j;
-            break;
-          }
-        }
-      }
 
-      // search H for the maximal score
-      double H_max = 0.;
-      int i_max = 0, j_max = 0;
-      for (int i = 1; i <= N_a; i++) {
-        for (int j = 1; j <= N_b; j++) {
           if (H[i][j] > H_max) {
             H_max = H[i][j];
-            i_max = i;
-            j_max = j;
           }
         }
       }
