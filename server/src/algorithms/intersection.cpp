@@ -78,7 +78,6 @@ namespace epidb {
           // add overlaps to the total of intersections
           chr_intersections.reserve(intersections.size() + overlaps.size());
 
-          std::vector<Interval<RegionPtr> >::const_iterator ocit;
           for (auto &regions_b :  overlaps) {
             regions_b->set_start(region_a->start() > regions_b->start() ? region_a->start() : regions_b->start());
             regions_b->set_end(region_a->end() > regions_b->end() ? regions_b->end() : region_a->end());
