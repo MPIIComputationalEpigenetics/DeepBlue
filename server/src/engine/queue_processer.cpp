@@ -21,6 +21,8 @@
 
 #include "../extras/utils.hpp"
 
+#include "../log.hpp"
+
 #include "queue_processer.hpp"
 
 namespace epidb {
@@ -42,7 +44,7 @@ namespace epidb {
 
     void QueueHandler::run()
     {
-      std::cerr << "run()" << std::endl;
+      EPIDB_LOG_TRACE("Starting QueueHandler - " << utils::integer_to_string(_id));
       this->reg(ios, 0.1);
       ios.run();
     }
