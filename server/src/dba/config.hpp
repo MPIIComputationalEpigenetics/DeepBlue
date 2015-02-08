@@ -36,7 +36,6 @@ namespace epidb {
       bool sharding();
       void set_sharding(bool sharding);
       std::vector<std::string> get_shards_names();
-      size_t chunk_size();
       void set_chunk_size(size_t);
       bool check_mongodb(std::string &msg);
       void set_database_name(const std::string &name);

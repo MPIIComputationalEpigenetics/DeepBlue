@@ -83,17 +83,6 @@ namespace epidb {
         use_sharding = value;
       }
 
-      size_t chunk_size_value = 1024;
-      size_t chunk_size()
-      {
-        return chunk_size_value;
-      }
-
-      void set_chunk_size(size_t size)
-      {
-        chunk_size_value = size;
-      }
-
       bool check_mongodb(std::string &msg)
       {
         try {

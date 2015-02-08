@@ -84,15 +84,6 @@ namespace epidb {
         } else {
           EPIDB_LOG("Primary moved: " << info.toString());
         }
-
-        // db.settings.save( { _id:"chunksize", value: <sizeInMB> } )
-        c->update("config.settings", BSON("_id" << "chunksize"), BSON("$set" << BSON("value" << (unsigned) config::chunk_size())));
-        if (!c->getLastError().empty()) {
-          msg = "Error Setting ChuckSize: " + c->getLastError();
-          EPIDB_LOG_ERR(msg);
-          c.done();
-          return false;
-        }
       }
 
       std::string user_id;
