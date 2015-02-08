@@ -107,7 +107,6 @@ namespace epidb {
               return false;
             }
           } else {
-            biosource_root = biosource;
             norm_biosource_root = norm_biosource_name;
           }
 
