@@ -505,7 +505,6 @@ namespace epidb {
       data_builder.append("norm_biosource_name", norm_biosource_name);
 
       std::map<std::string, std::string> names_values;
-      std::map<std::string, std::string>::iterator it;
 
       std::string err_msg;
       bool err = false;
