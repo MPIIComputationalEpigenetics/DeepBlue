@@ -24,7 +24,7 @@ public:
   K start;
   K stop;
   T value;
-  Interval(K s, K e, T&& v)
+  Interval(K s, K e, T &&v)
     : start(s)
     , stop(e)
     , value(std::move(v))
@@ -32,17 +32,20 @@ public:
 };
 
 template <class T, typename K>
-int intervalStart(const Interval<T,K>& i) {
+int intervalStart(const Interval<T, K> &i)
+{
   return i.start;
 }
 
 template <class T, typename K>
-int intervalStop(const Interval<T,K>& i) {
+int intervalStop(const Interval<T, K> &i)
+{
   return i.stop;
 }
 
 template <class T, typename K>
-ostream& operator<<(ostream& out, Interval<T,K>& i) {
+ostream &operator<<(ostream &out, Interval<T, K> &i)
+{
   out << "Interval(" << i.start << ", " << i.stop << "): " << i.value;
   return out;
 }
@@ -50,7 +53,8 @@ ostream& operator<<(ostream& out, Interval<T,K>& i) {
 template <class T, typename K = int>
 class IntervalStartSorter {
 public:
-  bool operator() (const Interval<T,K>& a, const Interval<T,K>& b) {
+  bool operator() (const Interval<T, K> &a, const Interval<T, K> &b)
+  {
     return a.start < b.start;
   }
 };
@@ -59,25 +63,28 @@ template <class T, typename K = int>
 class IntervalTree {
 
 public:
-  typedef Interval<T,K> interval;
+  typedef Interval<T, K> interval;
   typedef vector<interval> intervalVector;
   typedef vector<T> overlapVector;
-  typedef IntervalTree<T,K> intervalTree;
+  typedef IntervalTree<T, K> intervalTree;
 
   intervalVector intervals;
-  intervalTree* left;
-  intervalTree* right;
+  intervalTree *left;
+  intervalTree *right;
   int center;
 
-  IntervalTree<T,K>(void)
-    : left(NULL)
-    , right(NULL)
+  IntervalTree<T, K>(void)
+    : left(nullptr)
+    , right(nullptr)
     , center(0)
   { }
 
-  IntervalTree<T,K>(const intervalTree& other) {
-    center = other.center;
-    intervals = other.intervals;
+  IntervalTree<T, K>(const intervalTree &other)
+    : intervals(other.intervals)
+    , left(nullptr)
+    , right(nullptr)
+    , center(other.center)
+  {
     if (other.left) {
       left = new intervalTree();
       *left = *other.left;
@@ -92,7 +99,11 @@ public:
     }
   }
 
-  IntervalTree<T,K>& operator=(const intervalTree& other) {
+  IntervalTree<T, K> &operator=(const intervalTree &other)
+  {
+    if (*this == &other) {
+      return *this;
+    }
     center = other.center;
     intervals = other.intervals;
     if (other.left) {
@@ -110,14 +121,14 @@ public:
     return *this;
   }
 
-  IntervalTree<T,K>(
-      intervalVector& ivals,
-      unsigned int depth = 16,
-      unsigned int minbucket = 64,
-      int leftextent = 0,
-      int rightextent = 0,
-      unsigned int maxbucket = 512
-      )
+  IntervalTree<T, K>(
+    intervalVector &ivals,
+    unsigned int depth = 16,
+    unsigned int minbucket = 64,
+    int leftextent = 0,
+    int rightextent = 0,
+    unsigned int maxbucket = 512
+  )
     : left(NULL)
     , right(NULL)
   {
@@ -128,7 +139,7 @@ public:
     } else {
       if (leftextent == 0 && rightextent == 0) {
         // sort intervals by start
-        IntervalStartSorter<T,K> intervalStartSorter;
+        IntervalStartSorter<T, K> intervalStartSorter;
         sort(ivals.begin(), ivals.end(), intervalStartSorter);
       }
 
@@ -143,7 +154,7 @@ public:
         leftp = ivals.front().start;
         vector<K> stops;
         stops.resize(ivals.size());
-        transform(ivals.begin(), ivals.end(), stops.begin(), intervalStop<T,K>);
+        transform(ivals.begin(), ivals.end(), stops.begin(), intervalStop<T, K>);
         rightp = *max_element(stops.begin(), stops.end());
       }
 
@@ -155,7 +166,7 @@ public:
       intervalVector rights;
 
       for (typename intervalVector::iterator i = ivals.begin(); i != ivals.end(); ++i) {
-        interval& interval = *i;
+        interval &interval = *i;
         if (interval.stop < center) {
           lefts.push_back(std::move(interval));
         } else if (interval.start > center) {
@@ -174,10 +185,11 @@ public:
     }
   }
 
-  void findOverlapping(K start, K stop, overlapVector& overlapping) {
+  void findOverlapping(K start, K stop, overlapVector &overlapping)
+  {
     if (!intervals.empty() && ! (stop < intervals.front().start)) {
       for (typename intervalVector::iterator i = intervals.begin(); i != intervals.end(); ++i) {
-        interval& interval = *i;
+        interval &interval = *i;
         if (interval.stop >= start && interval.start <= stop) {
           overlapping.push_back(std::move(interval.value->clone()));
         }
@@ -193,10 +205,11 @@ public:
     }
   }
 
-  bool hasOverlap(K start, K stop) {
+  bool hasOverlap(K start, K stop)
+  {
     if (!intervals.empty() && ! (stop < intervals.front().start)) {
       for (typename intervalVector::iterator i = intervals.begin(); i != intervals.end(); ++i) {
-        interval& interval = *i;
+        interval &interval = *i;
         if (interval.stop >= start && interval.start <= stop) {
           return true;
         }
@@ -214,10 +227,11 @@ public:
     return false;
   }
 
-  void findContained(K start, K stop, overlapVector& contained) {
+  void findContained(K start, K stop, overlapVector &contained)
+  {
     if (!intervals.empty() && ! (stop < intervals.front().start)) {
       for (typename intervalVector::iterator i = intervals.begin(); i != intervals.end(); ++i) {
-        interval& interval = *i;
+        interval &interval = *i;
         if (interval.start >= start && interval.stop <= stop) {
           contained.push_back(std::move(interval.value->clone()));
         }
@@ -233,7 +247,8 @@ public:
     }
   }
 
-  ~IntervalTree(void) {
+  ~IntervalTree(void)
+  {
     // traverse the left and right
     // delete them all the way down
     if (left) {
