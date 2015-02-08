@@ -26,7 +26,6 @@ namespace epidb {
       static const std::string& BED_COMPRESSED();
       static const std::string& BED_DATA();
       static const std::string& BED_DATASIZE();
-      static const std::string& CHROMOSOME();
       static const std::string& DATASET();
       static const std::string& END();
       static const std::string& FEATURES();
