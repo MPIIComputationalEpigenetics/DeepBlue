@@ -212,7 +212,7 @@ class TestSelectRegions(helpers.TestCase):
       res, req = epidb.get_regions(qid, fmt, self.admin_key)
       regions = self.get_regions_request_error(req)
 
-  def test_genome_required(self):
+  def test_select_all(self):
     epidb = EpidbClient()
     self.init(epidb)
 
@@ -220,8 +220,7 @@ class TestSelectRegions(helpers.TestCase):
                                None, None, None, None, self.admin_key)
 
     self.assertFailure(res, msg)
-    # "genome" should be mentioned in the error message
-    self.assertTrue("genome" in msg.lower())
+    self.assertTrue("at least one of the following fields must be provided: 'experiment name', 'epigenetic mark', 'sample id', 'project', 'technique'." in msg.lower())
 
   def test_unknown_parameters(self):
     epidb = EpidbClient()

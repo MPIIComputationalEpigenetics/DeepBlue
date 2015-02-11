@@ -91,11 +91,6 @@ namespace epidb {
           return false;
         }
 
-        if (genomes.size() == 0) {
-          result.add_error(Error::m(ERR_USER_GENOME_MISSING));
-          return false;
-        }
-
         bool has_filter = false;
         mongo::BSONObjBuilder args_builder;
 
