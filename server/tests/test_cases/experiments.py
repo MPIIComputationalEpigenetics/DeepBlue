@@ -41,9 +41,9 @@ class TestExperiments(helpers.TestCase):
     sample_id = self.sample_ids[0]
 
     # adding two experiments with the same data should work
-    res = epidb.add_experiment("test_exp1", "hg19", "Methylation", sample_id, "tech1",
+    (res, _id) = epidb.add_experiment("test_exp1", "hg19", "Methylation", sample_id, "tech1",
               "ENCODE", "desc1", "", "wig", {"__local_file__": "../tests/data/wig/scores1.wig"}, self.admin_key)
-    self.assertSuccess(res)
+    self.assertSuccess(res, _id)
 
     res = epidb.add_experiment("test_exp1", "hg19", "Methylation", sample_id, "tech1",
               "ENCODE", "desc1", "", "wig", {"__local_file__": "inexistent_file.wig"}, self.admin_key)
@@ -55,8 +55,17 @@ class TestExperiments(helpers.TestCase):
 
     res, qid1 = epidb.select_regions("test_exp1", "hg19", None, None, None, None, None, None, None, self.admin_key)
     self.assertSuccess(res, qid1)
-    (s, regions_1) = epidb.get_regions(qid1, "CHROMOSOME,START,END", self.admin_key)
-    self.assertSuccess(s, regions_1)
+    (s, req1) = epidb.get_regions(qid1, "CHROMOSOME,START,END", self.admin_key)
+    self.assertSuccess(s, req1)
+    data1 = self.get_regions_request(req1)
+
+    res, qid1 = epidb.select_regions(_id, None, None, None, None, None, None, None, None, self.admin_key)
+    self.assertSuccess(res, qid1)
+    (s, req2) = epidb.get_regions(qid1, "CHROMOSOME,START,END", self.admin_key)
+    self.assertSuccess(s, req2)
+    data2 = self.get_regions_request(req2)
+
+    self.assertEqual(data1, data2)
 
   def test_double_experiment_same_user_fail(self):
     epidb = EpidbClient()

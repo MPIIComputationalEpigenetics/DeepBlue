@@ -7,6 +7,7 @@
 //
 
 #include <limits>
+#include <regex>
 #include <string>
 
 #include <mongo/bson/bson.h>
@@ -33,6 +34,48 @@ namespace epidb {
           msg = Error::m(ERR_INVALID_EXPERIMENT_NAME, name.c_str());
           return false;
         }
+        return true;
+      }
+
+      bool by_id(const std::string &id, mongo::BSONObj &experiment, std::string &msg)
+      {
+        if (!helpers::get_one(Collections::EXPERIMENTS(), BSON("_id" << id), experiment, msg)) {
+          msg = Error::m(ERR_INVALID_EXPERIMENT_ID, id.c_str());
+          return false;
+        }
+        return true;
+      }
+
+      bool get_genome(const std::string &norm_name, std::string &norm_genome, std::string &msg)
+      {
+        mongo::BSONObj experiment;
+        if (!by_name(norm_name, experiment, msg)) {
+          return false;
+        }
+        norm_genome = experiment["norm_genome"].str();
+        std::cerr << "GENOME " << norm_genome << std::endl;
+
+        return true;
+      }
+
+      bool get_experiments_names(const std::vector<std::string> &names_ids, std::vector<std::string> &names, std::vector<std::string> &norm_names, std::string &msg)
+      {
+
+        for (const auto &name_id : names_ids) {
+          if (utils::is_id(name_id, "e")) {
+            mongo::BSONObj experiment;
+            if (!by_id(name_id, experiment, msg)) {
+              return false;
+            }
+            std::string name = experiment["norm_name"].str();
+            names.push_back(name);
+            norm_names.push_back(utils::normalize_name(name));
+          } else {
+            names.push_back(name_id);
+            norm_names.push_back(utils::normalize_name(name_id));
+          }
+        }
+
         return true;
       }
 

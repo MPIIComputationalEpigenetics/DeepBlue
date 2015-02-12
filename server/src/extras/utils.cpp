@@ -245,9 +245,9 @@ namespace epidb {
     {
       std::string ss(s_);
       boost::trim(ss);
-      std::string::const_iterator it = ss.begin();
-      while (it != ss.end() && std::isdigit(*it)) ++it;
-      return !ss.empty() && it == ss.end();
+      return !ss.empty() && std::find_if(ss.begin(), ss.end(), [](char c) {
+        return !std::isdigit(c);
+      }) == ss.end();
     }
 
     std::string lower(const std::string &in)
@@ -388,6 +388,20 @@ namespace epidb {
         }
       }
       return buffer;
+    }
+
+    bool is_id(const std::string &id, const std::string &prefix)
+    {
+
+      if (id.size() <= prefix.size()) {
+        return false;
+      }
+
+      if (id.compare(0, prefix.size(), prefix) != 0) {
+        return false;
+      }
+
+      return is_number(id.substr(prefix.size()));
     }
 
   }

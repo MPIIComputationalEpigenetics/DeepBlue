@@ -114,6 +114,8 @@ namespace epidb {
     std::string bson_to_string(const mongo::BSONElement &e);
 
     std::string sanitize(const std::string &data);
+
+    bool is_id(const std::string &id, const std::string &prefix);
   }
 }
 

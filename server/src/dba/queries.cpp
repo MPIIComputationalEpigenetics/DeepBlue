@@ -8,6 +8,7 @@
 
 #include <ctime>
 #include <cstring>
+#include <set>
 
 #include <boost/foreach.hpp>
 
@@ -410,16 +411,21 @@ namespace epidb {
           chromosomes.push_back(it->str());
         }
 
+        std::set<std::string> genomes;
+        std::vector<mongo::BSONElement> genome_bson_arr = args["norm_genomes"].Array();
+        for (auto be: genome_bson_arr) {
+          genomes.insert(be.str());
+        }
+
         std::vector<ChromosomeRegionsList> genome_regions;
 
         // get region data for all genomes
-        std::vector<mongo::BSONElement> genome_arr = args["norm_genomes"].Array();
-        std::vector<mongo::BSONElement>::iterator git;
-        for (git = genome_arr.begin(); git != genome_arr.end(); ++git) {
+        for (const auto& genome: genomes) {
           ChromosomeRegionsList reg;
-          if (!retrieve::get_regions(git->str(), chromosomes, regions_query, reg, msg)) {
+          if (!retrieve::get_regions(genome, chromosomes, regions_query, reg, msg)) {
             return false;
           }
+          std::cerr << "reg" << std::endl;
           genome_regions.push_back(std::move(reg));
         }
 
@@ -538,7 +544,7 @@ namespace epidb {
       }
 
 
-      bool filter_region(const AbstractRegion *region_ref, const std::string& field, const dba::columns::ColumnTypePtr column, Metafield &metafield, const std::string &chrom, FilterBuilder::FilterPtr filter)
+      bool filter_region(const AbstractRegion *region_ref, const std::string &field, const dba::columns::ColumnTypePtr column, Metafield &metafield, const std::string &chrom, FilterBuilder::FilterPtr filter)
       {
         if (field == "START") {
           return filter->is(region_ref->start());

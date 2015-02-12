@@ -104,16 +104,27 @@ namespace epidb {
         return r;
       }
 
-      bool get_chromosomes(const std::vector<std::string> &genomes,
+
+      template <class T>
+      bool get_chromosomes(const T &genomes,
                            std::set<std::string> &chromosomes, std::string &msg)
       {
-        std::vector<std::string>::const_iterator it;
-        for (it = genomes.begin(); it != genomes.end(); ++it) {
-          if (!get_chromosomes(*it, chromosomes, msg)) {
+        for (const auto &genome: genomes) {
+          if (!get_chromosomes(genome, chromosomes, msg)) {
             return false;
           }
         }
         return true;
+      }
+
+      bool get_chromosomes(const std::set<std::string> &genomes,
+                           std::set<std::string> &chromosomes, std::string &msg) {
+        return get_chromosomes<std::set<std::string>>(genomes, chromosomes, msg);
+      }
+
+      bool get_chromosomes(const std::vector<std::string> &genomes,
+                           std::set<std::string> &chromosomes, std::string &msg) {
+        return get_chromosomes<std::vector<std::string>>(genomes, chromosomes, msg);
       }
 
       bool get_chromosomes(const std::string &genome,

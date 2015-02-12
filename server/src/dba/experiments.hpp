@@ -25,9 +25,15 @@ namespace epidb {
     namespace experiments {
       bool by_name(const std::string &name, mongo::BSONObj &experiment, std::string &msg);
 
-      bool get_field_pos(const DatasetId &dataset_id, const std::string &column_name, columns::ColumnTypePtr& column_type, std::string &msg);
+      bool by_id(const std::string &id, mongo::BSONObj &experiment, std::string &msg);
 
-      bool get_field_pos(const std::string &experiment_name, const std::string &column_name, columns::ColumnTypePtr& column_type,  std::string &msg);
+      bool get_genome(const std::string &norm_name, std::string &norm_genome, std::string &msg);
+
+      bool get_experiments_names(const std::vector<std::string> &names_ids, std::vector<std::string> &names, std::vector<std::string> &norm_names, std::string &msg);
+
+      bool get_field_pos(const DatasetId &dataset_id, const std::string &column_name, columns::ColumnTypePtr &column_type, std::string &msg);
+
+      bool get_field_pos(const std::string &experiment_name, const std::string &column_name, columns::ColumnTypePtr &column_type,  std::string &msg);
 
       bool build_metadata(const std::string &name, const std::string &norm_name,
                           const std::string &genome, const std::string &norm_genome,

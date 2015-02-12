@@ -78,14 +78,13 @@ namespace epidb {
       bool check_exist(const std::string &where, const std::string &field, const bool content,
                        bool &r, std::string &msg);
 
-      bool remove_one(const std::string &collection, const std::string &id, std::string &msg, const std::string& field="_id");
+      bool remove_one(const std::string &collection, const std::string &id, std::string &msg, const std::string &field = "_id");
 
       bool remove_all(const std::string &collection, const mongo::Query &query, std::string &msg);
 
       bool remove_collection(const std::string &collection, std::string &msg);
 
       bool collection_size(const std::string &where, unsigned long long &size, std::string &msg);
-
 
       template<typename T>
       mongo::BSONObj build_condition_array(const std::vector<T> &params, const std::string &condition)

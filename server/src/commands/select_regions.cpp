@@ -11,6 +11,7 @@
 #include <set>
 
 #include "../dba/dba.hpp"
+#include "../dba/experiments.hpp"
 #include "../dba/genomes.hpp"
 #include "../dba/helpers.hpp"
 #include "../dba/queries.hpp"
@@ -94,9 +95,16 @@ namespace epidb {
         bool has_filter = false;
         mongo::BSONObjBuilder args_builder;
 
+        std::vector<std::string> names;
+        std::vector<std::string> norm_names;
         if (experiment_names.size() > 0) {
-          args_builder.append("experiment_name", dba::helpers::build_array(experiment_names));
-          args_builder.append("norm_experiment_name", dba::helpers::build_normalized_array(experiment_names));
+          std::vector<std::string> exp_names_string = dba::helpers::build_vector(experiment_names);
+          if (!dba::experiments::get_experiments_names(exp_names_string, names, norm_names, msg)) {
+            result.add_error(msg);
+            return false;
+          }
+          args_builder.append("experiment_name", dba::helpers::build_array(names));
+          args_builder.append("norm_experiment_name", dba::helpers::build_array(norm_names));
           has_filter = true;
         }
         // epigenetic mark
@@ -138,14 +146,27 @@ namespace epidb {
         }
 
 
-        std::vector<std::string> genomes_s;
-        std::vector<std::string> norm_genomes_s;
+        std::set<std::string> genomes_s;
+        std::set<std::string> norm_genomes_s;
+
         std::vector<serialize::ParameterPtr>::iterator git;
         for (git = genomes.begin(); git != genomes.end(); ++git) {
           std::string genome = (*git)->as_string();
           std::string norm_genome = utils::normalize_name(genome);
-          genomes_s.push_back(genome);
-          norm_genomes_s.push_back(norm_genome);
+          genomes_s.insert(genome);
+          norm_genomes_s.insert(norm_genome);
+        }
+
+        // We have to load the genomes from the experiments if the user did not specify the genome in the query
+        if (genomes_s.empty()) {
+          for (auto experiment_norm_name : norm_names) {
+            std::string genome;
+            if (!dba::experiments::get_genome(experiment_norm_name, genome, msg)) {
+              return false;
+            }
+            genomes_s.insert(genome);
+            norm_genomes_s.insert(genome);
+          }
         }
 
         std::set<std::string> chroms;

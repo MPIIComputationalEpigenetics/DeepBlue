@@ -61,6 +61,9 @@ namespace epidb {
       bool get_chromosomes(const std::string &genome,
                            std::set<std::string> &chromosomes, std::string &msg);
 
+      bool get_chromosomes(const std::set<std::string> &genomes,
+                           std::set<std::string> &chromosomes, std::string &msg);
+
       bool get_chromosomes(const std::vector<std::string> &genomes,
                            std::set<std::string> &chromosomes, std::string &msg);
 

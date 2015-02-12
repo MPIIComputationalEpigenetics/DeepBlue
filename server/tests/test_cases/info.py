@@ -112,7 +112,7 @@ class TestGetInfoCommand(helpers.TestCase):
     sample_id = self.sample_ids[0]
     self.insert_experiment(epidb, "hg19_chr1_1", sample_id)
 
-    res, qid = epidb.select_regions("exp1", "hg19", "Methylation", sample_id, "tech1",
+    res, qid = epidb.select_regions("hg19_chr1_1", "hg19", "Methylation", sample_id, "tech1",
                                     "ENCODE", "chr1", 713500, 850000, self.admin_key)
     self.assertSuccess(res, qid)
 
@@ -120,8 +120,9 @@ class TestGetInfoCommand(helpers.TestCase):
     self.assertSuccess(res, data)
     self.assertEqual(data[0]['_id'], qid)
     self.assertEqual(data[0]['type'], 'experiment_select')
-    self.assertEqual(data[0]['args'], '{ "experiment_name" : [ "exp1" ], "epigenetic_mark" : [ "Methylation" ], "sample_id" : [ "s1" ], "project" : [ "ENCODE" ], "technique" : [ "tech1" ], "has_filter" : true, "start" : 713500, "end" : 850000, "chromosomes" : [ "chr1" ], "genomes" : [ "hg19" ] }')
+    self.assertEqual(data[0]['args'], '{ "experiment_name" : [ "hg19_chr1_1" ], "epigenetic_mark" : [ "Methylation" ], "sample_id" : [ "s1" ], "project" : [ "ENCODE" ], "technique" : [ "tech1" ], "has_filter" : true, "start" : 713500, "end" : 850000, "chromosomes" : [ "chr1" ], "genomes" : [ "hg19" ] }')
     self.assertEqual(data[0]['user'], 'test_admin')
+
 
   def test_biosource_info(self):
     epidb = EpidbClient()
