@@ -110,12 +110,6 @@ namespace epidb {
           return false;
         }
 
-        if (s.empty() && metadata.empty()) {
-          result.add_error("At least one BioSource or Metadata information should be informed.");
-          return false;
-        }
-
-
         std::vector<std::string> ids;
         if (!dba::list::samples(user_key, s_array, metadata, ids, msg)) {
           result.add_error(msg);
