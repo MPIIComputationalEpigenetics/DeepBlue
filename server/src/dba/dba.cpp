@@ -60,6 +60,10 @@ namespace epidb {
     {
       Connection c;
 
+      if (!create_indexes(msg)) {
+        return false;
+      }
+
       if (config::sharding()) {
         mongo::BSONObjBuilder builder;
         builder.append("enableSharding", config::DATABASE_NAME());
@@ -91,15 +95,6 @@ namespace epidb {
         return false;
       }
       if (!users::set_user_admin(user_id, true, msg)) {
-        return false;
-      }
-
-      mongo::BSONObjBuilder index_name;
-      index_name.append("key", 1);
-      c->createIndex(helpers::collection_name(Collections::USERS()), index_name.obj());
-      if (!c->getLastError().empty()) {
-        msg = c->getLastError();
-        c.done();
         return false;
       }
 
@@ -149,6 +144,128 @@ namespace epidb {
       cv::biosources_cache.invalidate();
 
       c.done();
+      return true;
+    }
+
+    bool create_indexes(std::string &msg)
+    {
+      EPIDB_LOG("Creating Indexes");
+
+      Connection c;
+      {
+        mongo::BSONObjBuilder index_name;
+        index_name.append("norm_name", "hashed");
+        c->createIndex(helpers::collection_name(Collections::BIOSOURCES()), index_name.obj());
+        if (!c->getLastError().empty()) {
+          msg = c->getLastError();
+          c.done();
+          return false;
+        }
+      }
+
+      {
+        mongo::BSONObjBuilder index_syn_names;
+        index_syn_names.append("norm_synonym", "hashed");
+        c->createIndex(helpers::collection_name(Collections::BIOSOURCE_SYNONYM_NAMES()), index_syn_names.obj());
+        if (!c->getLastError().empty()) {
+          msg = c->getLastError();
+          c.done();
+          return false;
+        }
+      }
+
+      {
+
+        mongo::BSONObjBuilder index_name;
+        index_name.append("name", "hashed");
+        c->createIndex(helpers::collection_name(Collections::BIOSOURCE_SYNONYMS()), index_name.obj());
+        if (!c->getLastError().empty()) {
+          msg = c->getLastError();
+          c.done();
+          return false;
+        }
+      }
+
+      {
+        mongo::BSONObjBuilder index_norm_name;
+        index_norm_name.append("norm_name", "hashed");
+        c->createIndex(helpers::collection_name(Collections::BIOSOURCE_SYNONYMS()), index_norm_name.obj());
+        if (!c->getLastError().empty()) {
+          msg = c->getLastError();
+          c.done();
+          return false;
+        }
+      }
+
+      {
+        mongo::BSONObjBuilder index_syn;
+        index_syn.append("synonym", "hashed");
+        c->createIndex(helpers::collection_name(Collections::BIOSOURCE_SYNONYMS()), index_syn.obj());
+        if (!c->getLastError().empty()) {
+          msg = c->getLastError();
+          c.done();
+          return false;
+        }
+      }
+
+      {
+        mongo::BSONObjBuilder index_name;
+        index_name.append("norm_biosource_name", "hashed");
+        c->createIndex(helpers::collection_name(Collections::BIOSOURCE_EMBRACING()), index_name.obj());
+        if (!c->getLastError().empty()) {
+          msg = c->getLastError();
+          c.done();
+          return false;
+        }
+      }
+
+      {
+        mongo::BSONObjBuilder index_syn;
+        index_syn.append("norm_biosource_embracing", "hashed");
+        c->createIndex(helpers::collection_name(Collections::BIOSOURCE_EMBRACING()), index_syn.obj());
+        if (!c->getLastError().empty()) {
+        msg = c->getLastError();
+          c.done();
+          return false;
+        }
+      }
+
+      {
+        mongo::BSONObjBuilder index_syn;
+        index_syn.append("subs", 1);
+        c->createIndex(helpers::collection_name(Collections::BIOSOURCE_EMBRACING()), index_syn.obj());
+        if (!c->getLastError().empty()) {
+        msg = c->getLastError();
+          c.done();
+          return false;
+        }
+      }
+
+      {
+
+        mongo::BSONObjBuilder index_name;
+        index_name.append("norm_name", "hashed");
+        c->createIndex(helpers::collection_name(Collections::TECHNIQUES()), index_name.obj());
+        if (!c->getLastError().empty()) {
+          msg = c->getLastError();
+          c.done();
+          return false;
+        }
+      }
+
+      {
+        mongo::BSONObjBuilder index_name;
+        index_name.append("key", "hashed");
+        c->createIndex(helpers::collection_name(Collections::USERS()), index_name.obj());
+        if (!c->getLastError().empty()) {
+          msg = c->getLastError();
+          c.done();
+          return false;
+        }
+      }
+
+      c.done();
+
       return true;
     }
 
@@ -258,7 +375,7 @@ namespace epidb {
       create_genome_builder.appendElements(search_data);
 
       mongo::BSONArrayBuilder ab;
-      for (const auto& chr : genome_info) {
+      for (const auto &chr : genome_info) {
         mongo::BSONObjBuilder chromosome_builder;
         chromosome_builder.append("name", chr.first);
         chromosome_builder.append("size", (int) chr.second);
@@ -293,7 +410,7 @@ namespace epidb {
       DatasetId id = DATASET_EMPTY_ID;
 
       ChromosomeRegionsList chromosome_regions_list;
-      for (const auto& chr: genome_info) {
+      for (const auto &chr : genome_info) {
         Regions regions = build_regions(1);
         regions.push_back(build_bed_region(0, chr.second, id));
         ChromosomeRegions chromosome_regions(chr.first, std::move(regions));
@@ -411,15 +528,6 @@ namespace epidb {
         return false;
       }
 
-      mongo::BSONObjBuilder index_name;
-      index_name.append("norm_name", 1);
-      c->createIndex(helpers::collection_name(Collections::BIOSOURCES()), index_name.obj());
-      if (!c->getLastError().empty()) {
-        msg = c->getLastError();
-        c.done();
-        return false;
-      }
-
       if (!search::insert_full_text(Collections::BIOSOURCES(), biosource_id, search_data, msg)) {
         c.done();
         return false;
@@ -477,15 +585,6 @@ namespace epidb {
         return false;
       }
 
-      mongo::BSONObjBuilder index_name;
-      index_name.append("norm_name", 1);
-      c->createIndex(helpers::collection_name(Collections::TECHNIQUES()), index_name.obj());
-      if (!c->getLastError().empty()) {
-        msg = c->getLastError();
-        c.done();
-        return false;
-      }
-
       if (!search::insert_full_text(Collections::TECHNIQUES(), technique_id, search_data, msg)) {
         c.done();
         return false;
@@ -527,7 +626,7 @@ namespace epidb {
         return false;
       }
 
-      for (const auto& name_value: names_values) {
+      for (const auto &name_value : names_values) {
         std::string norm_title = "norm_" + name_value.first;
         std::string norm_value = utils::normalize_name(name_value.second);
         data_builder.append(name_value.first, name_value.second);

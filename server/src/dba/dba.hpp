@@ -32,6 +32,8 @@ namespace epidb {
     bool init_system(const std::string &name, const std::string &email, const std::string &institution,
                      const std::string &key, std::string &msg);
 
+    bool create_indexes(std::string &msg);
+
     bool add_genome(const std::string &name, const std::string &norm_name,
                     const std::string &description, const std::string &norm_description,
                     const parser::ChromosomesInfo &g,

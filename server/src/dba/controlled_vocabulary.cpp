@@ -205,34 +205,6 @@ namespace epidb {
         }
 
         std::string norm_synonym = utils::normalize_name(synonym);
-        Connection c;
-
-        mongo::BSONObjBuilder index_name;
-        index_name.append("name", 1);
-        c->createIndex(helpers::collection_name(Collections::BIOSOURCE_SYNONYMS()), index_name.obj());
-        if (!c->getLastError().empty()) {
-          msg = c->getLastError();
-          c.done();
-          return false;
-        }
-
-        mongo::BSONObjBuilder index_norm_name;
-        index_norm_name.append("norm_name", 1);
-        c->createIndex(helpers::collection_name(Collections::BIOSOURCE_SYNONYMS()), index_norm_name.obj());
-        if (!c->getLastError().empty()) {
-          msg = c->getLastError();
-          c.done();
-          return false;
-        }
-
-        mongo::BSONObjBuilder index_syn;
-        index_syn.append("synonym", 1);
-        c->createIndex(helpers::collection_name(Collections::BIOSOURCE_SYNONYMS()), index_syn.obj());
-        if (!c->getLastError().empty()) {
-          msg = c->getLastError();
-          c.done();
-          return false;
-        }
 
         mongo::BSONObjBuilder query_builder;
         query_builder.append("norm_name", norm_biosource_name);
@@ -250,16 +222,9 @@ namespace epidb {
           append_value = BSON("$addToSet" << value);
         }
 
-        c->update(helpers::collection_name(Collections::BIOSOURCE_SYNONYMS()), query, append_value, true, false);
-        if (!c->getLastError().empty()) {
-          msg = c->getLastError();
-          c.done();
-          return false;
-        }
+        Connection c;
 
-        mongo::BSONObjBuilder index_syn_names;
-        index_syn_names.append("norm_synonym", 1);
-        c->createIndex(helpers::collection_name(Collections::BIOSOURCE_SYNONYM_NAMES()), index_syn_names.obj());
+        c->update(helpers::collection_name(Collections::BIOSOURCE_SYNONYMS()), query, append_value, true, false);
         if (!c->getLastError().empty()) {
           msg = c->getLastError();
           c.done();
@@ -435,15 +400,6 @@ namespace epidb {
         mongo::BSONObj append_value = BSON("$addToSet" << value);
 
         c->update(helpers::collection_name(Collections::BIOSOURCE_EMBRACING()), query, append_value, true, false);
-        if (!c->getLastError().empty()) {
-          msg = c->getLastError();
-          c.done();
-          return false;
-        }
-
-        mongo::BSONObjBuilder index_name;
-        index_name.append("norm_biosource_name", 1);
-        c->createIndex(helpers::collection_name(Collections::BIOSOURCE_EMBRACING()), index_name.obj());
         if (!c->getLastError().empty()) {
           msg = c->getLastError();
           c.done();
