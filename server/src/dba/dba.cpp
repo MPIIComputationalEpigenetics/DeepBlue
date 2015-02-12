@@ -14,8 +14,6 @@
 #include <time.h>
 #include <math.h>
 
-#include <boost/foreach.hpp>
-
 #include <mongo/bson/bson.h>
 
 #include "../algorithms/patterns.hpp"
@@ -35,6 +33,7 @@
 #include "config.hpp"
 #include "collections.hpp"
 #include "controlled_vocabulary.hpp"
+#include "exists.hpp"
 #include "full_text.hpp"
 #include "genomes.hpp"
 #include "helpers.hpp"
@@ -50,9 +49,9 @@
 namespace epidb {
   namespace dba {
 
-    bool is_initialized(bool &ret, std::string &msg)
+    bool is_initialized()
     {
-      return helpers::check_exist(Collections::SETTINGS(), "initialized", true, ret, msg);
+      return helpers::check_exist(Collections::SETTINGS(), "initialized", true);
     }
 
     bool init_system(const std::string &name, const std::string &email, const std::string &institution,
@@ -607,7 +606,7 @@ namespace epidb {
 
       std::string err_msg;
       bool err = false;
-      BOOST_FOREACH(const datatypes::Metadata::value_type & kv, metadata) {
+      for(const datatypes::Metadata::value_type & kv: metadata) {
         if (kv.second.empty()) {
           msg = "The field " + kv.first + " does not have the value value.";
           return false;
@@ -779,22 +778,14 @@ namespace epidb {
 
     bool is_valid_biosource_name(const std::string &name, const std::string &norm_name, std::string &msg)
     {
-      bool exists = true;
-      if (!helpers::check_exist(Collections::BIOSOURCES(), "norm_name", norm_name, exists, msg)) {
-        return false;
-      }
-      if (exists) {
+      if (exists::biosource(norm_name)) {
         std::string e = Error::m(ERR_DUPLICATED_BIOSOURCE_NAME, name.c_str());
         EPIDB_LOG_TRACE(e);
         msg = e;
         return false;
       }
 
-      exists = true;
-      if (!helpers::check_exist(Collections::BIOSOURCE_SYNONYM_NAMES(), "norm_synonym", norm_name, exists, msg)) {
-        return false;
-      }
-      if (exists) {
+      if (exists::biosource_synonym(norm_name)) {
         std::string e = Error::m(ERR_DUPLICATED_BIOSOURCE_NAME, name.c_str());
         EPIDB_LOG_TRACE(e);
         msg = e;
@@ -806,11 +797,7 @@ namespace epidb {
 
     bool is_valid_technique_name(const std::string &name, const std::string &norm_name, std::string &msg)
     {
-      bool exists = true;
-      if (!helpers::check_exist(Collections::TECHNIQUES(), "norm_name", norm_name, exists, msg)) {
-        return false;
-      }
-      if (exists) {
+      if (exists::technique(norm_name)) {
         std::string s = Error::m(ERR_DUPLICATED_TECHNIQUE_NAME, name.c_str());
         EPIDB_LOG_TRACE(s);
         msg = s;
@@ -821,11 +808,7 @@ namespace epidb {
 
     bool is_valid_epigenetic_mark(const std::string &name, const std::string &norm_name, std::string &msg)
     {
-      bool exists = true;
-      if (!helpers::check_exist(Collections::EPIGENETIC_MARKS(), "norm_name", norm_name, exists, msg)) {
-        return false;
-      }
-      if (exists) {
+      if (exists::epigenetic_mark(norm_name)) {
         std::string s = Error::m(ERR_DUPLICATED_EPIGENETIC_MARK_NAME, name.c_str());
         EPIDB_LOG_TRACE(s);
         msg = s;
@@ -836,11 +819,7 @@ namespace epidb {
 
     bool is_project_valid(const std::string &name, const std::string &norm_name, std::string &msg)
     {
-      bool exists = true;
-      if (!helpers::check_exist(Collections::PROJECTS(), "norm_name", norm_name, exists, msg)) {
-        return false;
-      }
-      if (exists) {
+      if (exists::project(norm_name)) {
         std::string s = Error::m(ERR_DUPLICATED_PROJECT_NAME, name.c_str());
         EPIDB_LOG_TRACE(s);
         msg = s;
@@ -851,106 +830,12 @@ namespace epidb {
 
     bool is_valid_genome(const std::string &genome, const std::string &norm_genome, std::string &msg)
     {
-      bool exists = true;
-      if (!helpers::check_exist(Collections::GENOMES(), "norm_name", norm_genome, exists, msg)) {
-        return false;
-      }
-      if (exists) {
+      if (exists::genome(norm_genome)) {
         std::string s = Error::m(ERR_DUPLICATED_GENOME_NAME, genome.c_str());
         EPIDB_LOG_TRACE(s);
         msg = s;
         return false;
       }
-      return true;
-    }
-
-    bool check_genome(const std::string &genome, bool &r, std::string &msg)
-    {
-      std::string norm_genome = utils::normalize_name(genome);
-      return helpers::check_exist(Collections::GENOMES(), "norm_name", norm_genome, r, msg);
-    }
-
-    bool check_epigenetic_mark(const std::string &epigenetic_mark, bool &r, std::string &msg)
-    {
-      std::string norm_epigenetic_mark = utils::normalize_name(epigenetic_mark);
-      return helpers::check_exist(Collections::EPIGENETIC_MARKS(), "norm_name", norm_epigenetic_mark, r, msg);
-    }
-
-    bool sample(const std::string &biosource_name, bool &r, std::string &msg)
-    {
-      std::string norm_biosource_name = utils::normalize_name(biosource_name);
-      return helpers::check_exist(Collections::SAMPLES(), "norm_name", norm_biosource_name, r, msg);
-    }
-
-    bool check_biosource(const std::string &biosource_name, bool &r, std::string &msg)
-    {
-      std::string norm_biosource_name = utils::normalize_name(biosource_name);
-      return helpers::check_exist(Collections::BIOSOURCES(), "norm_name", norm_biosource_name, r, msg);
-    }
-
-    bool check_technique(const std::string &technique_name, bool &r, std::string &msg)
-    {
-      std::string norm_technique_name = utils::normalize_name(technique_name);
-      return helpers::check_exist(Collections::TECHNIQUES(), "norm_name", norm_technique_name, r, msg);
-    }
-
-    bool check_biosource_synonym(const std::string &biosource_synonym, bool &r, std::string &msg)
-    {
-      std::string norm_biosource_synonym = utils::normalize_name(biosource_synonym);
-      return helpers::check_exist(Collections::BIOSOURCE_SYNONYM_NAMES(), "norm_synonym", norm_biosource_synonym, r, msg);
-    }
-
-    bool check_project(const std::string &project, bool &r, std::string &msg)
-    {
-      std::string norm_project = utils::normalize_name(project);
-      return helpers::check_exist(Collections::PROJECTS(), "norm_name", norm_project, r, msg);
-    }
-
-    bool check_annotation(const std::string &annotation, const std::string &genome, bool &ok, std::string &msg)
-    {
-      std::string norm_annotation = utils::normalize_name(annotation);
-      std::vector<helpers::QueryPair> query;
-      query.push_back(helpers::QueryPair("norm_name", norm_annotation));
-      query.push_back(helpers::QueryPair("genome", genome));
-      std::vector<mongo::BSONObj> results;
-
-      if (!helpers::get("annotations", query, results, msg)) {
-        return false;
-      }
-
-      ok = results.size() == 0;
-
-      return true;
-    }
-
-    bool check_experiment_name(const std::string &name, const std::string &norm_name, const std::string &user_key,
-                               bool &ok, std::string &msg)
-    {
-      std::vector<helpers::QueryPair> query;
-      query.push_back(helpers::QueryPair("norm_name", norm_name));
-
-      std::vector<mongo::BSONObj> results;
-
-      if (!helpers::get("experiments", query, results, msg)) {
-        return false;
-      }
-
-      ok = results.size() == 0;
-
-      return true;
-    }
-
-    bool check_query(const std::string &user_key, const std::string &query_id, bool &r, std::string &msg)
-    {
-      utils::IdName id_user_name;
-      if (!users::get_user_name(user_key, id_user_name, msg)) {
-        return false;
-      }
-      mongo::BSONObj o = BSON("_id" << query_id << "user" << id_user_name.name);
-      Connection c;
-      unsigned long long count = c->count(helpers::collection_name(Collections::QUERIES()), o );
-      r = count > 0;
-      c.done();
       return true;
     }
 
@@ -991,7 +876,7 @@ namespace epidb {
         return false;
       }
 
-      BOOST_FOREACH(const std::string & norm_sub, norm_subs) {
+      for(const std::string & norm_sub: norm_subs) {
         utils::IdName sub_biosource_name;
         if (!helpers::get_name(Collections::BIOSOURCES(), norm_sub, sub_biosource_name, msg)) {
           return false;
@@ -1011,7 +896,7 @@ namespace epidb {
         return false;
       }
 
-      BOOST_FOREACH(const std::string & norm_sub, norm_subs) {
+      for(const std::string & norm_sub: norm_subs) {
         utils::IdName sub_biosource_name;
         if (!helpers::get_name(Collections::BIOSOURCES(), norm_sub, sub_biosource_name, msg)) {
           return false;
@@ -1062,7 +947,7 @@ namespace epidb {
 
       retrieve::SequenceRetriever retriever;
       std::vector<std::string> missing;
-      BOOST_FOREACH(const genomes::ChromosomeInfo & chromosome_info, chromosomes) {
+      for(const genomes::ChromosomeInfo & chromosome_info: chromosomes) {
         if (!retriever.exists(genome, chromosome_info.name)) {
           missing.push_back(chromosome_info.name);
         }
@@ -1072,7 +957,7 @@ namespace epidb {
       }
 
       ChromosomeRegionsList pattern_regions;
-      BOOST_FOREACH(const genomes::ChromosomeInfo & chromosome_info, chromosomes) {
+      for(const genomes::ChromosomeInfo & chromosome_info: chromosomes) {
         std::string sequence;
         if (!retriever.retrieve(norm_genome, chromosome_info.name, 0, chromosome_info.size, sequence, msg)) {
           return false;

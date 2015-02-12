@@ -14,6 +14,7 @@
 
 #include "collections.hpp"
 #include "config.hpp"
+#include "exists.hpp"
 #include "helpers.hpp"
 
 namespace epidb {
@@ -22,13 +23,9 @@ namespace epidb {
 
       bool is_valid_email(const std::string &email, std::string &msg)
       {
-        bool exists = true;
-        if (!helpers::check_exist(Collections::USERS(), "email", email, exists, msg)) {
-          return false;
-        }
-        if (exists) {
+        if (helpers::check_exist(Collections::USERS(), "email", email)) {
           std::stringstream ss;
-          ss << "Email '" << email << "' is already being used.";
+          ss << "Email '" << email << "' is already in use.";
           msg = ss.str();
           return false;
         }
@@ -73,11 +70,6 @@ namespace epidb {
 
         c.done();
         return true;
-      }
-
-      bool check_user(const std::string &user_key, bool &r, std::string &msg)
-      {
-        return helpers::check_exist(Collections::USERS(), "key", user_key, r, msg);
       }
 
       bool get_user_name(const std::string &user_key, std::string &name, std::string &msg)

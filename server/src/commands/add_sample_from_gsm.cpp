@@ -11,6 +11,7 @@
 #include "../dba/controlled_vocabulary.hpp"
 #include "../dba/data.hpp"
 #include "../dba/dba.hpp"
+#include "../dba/exists.hpp"
 #include "../dba/list.hpp"
 
 #include "../external/geo.hpp"
@@ -81,19 +82,8 @@ namespace epidb {
 
 
         // TODO Move to a helper function: get_biosource_root
-        bool is_biosource(false);
-        bool is_syn(false);
-        if (!dba::check_biosource(norm_biosource_name, is_biosource, msg)) {
-          result.add_error(msg);
-          return false;
-        }
-
-        if (!is_biosource) {
-          if (!dba::check_biosource_synonym(norm_biosource_name, is_syn, msg)) {
-            result.add_error(msg);
-            return false;
-          }
-        }
+        bool is_biosource = dba::exists::biosource(norm_biosource_name);
+        bool is_syn = dba::exists::biosource_synonym(norm_biosource_name);
 
         if (!(is_biosource || is_syn)) {
           std::string s = Error::m(ERR_INVALID_BIOSOURCE_NAME, biosource_name.c_str());

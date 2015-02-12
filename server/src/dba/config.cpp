@@ -86,9 +86,11 @@ namespace epidb {
       bool check_mongodb(std::string &msg)
       {
         try {
-          bool ret;
-          if (!is_initialized(ret, msg)) {
-            return false;
+          bool init = is_initialized();
+          if (init) {
+            EPIDB_LOG_DBG("Database " << database_name << " is ready.");
+          } else {
+            EPIDB_LOG_DBG("Database " << database_name << " is not initialized.");
           }
           return true;
         } catch (const std::exception &e) {

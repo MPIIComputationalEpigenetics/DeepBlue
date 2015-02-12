@@ -9,15 +9,11 @@
 #ifndef EPIDB_DBA_LIST_HPP
 #define EPIDB_DBA_LIST_HPP
 
-#include <map>
 #include <string>
-#include <sstream>
 #include <vector>
 
 #include <mongo/bson/bson.h>
 #include <mongo/client/dbclient.h>
-
-#include "dba.hpp"
 
 #include "../datatypes/metadata.hpp"
 
@@ -42,6 +38,8 @@ namespace epidb {
       bool projects(const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg);
 
       bool epigenetic_marks(const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg);
+
+      bool experiments(const mongo::BSONObj query, std::vector<utils::IdName> &result, std::string &msg);
 
       bool experiments(const mongo::Query query, std::vector<utils::IdName> &result, std::string &msg);
 

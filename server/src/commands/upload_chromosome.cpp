@@ -7,6 +7,7 @@
 //
 
 #include "../dba/dba.hpp"
+#include "../dba/exists.hpp"
 #include "../dba/genomes.hpp"
 #include "../dba/helpers.hpp"
 
@@ -66,13 +67,8 @@ namespace epidb {
           return false;
         }
 
-        bool ok = false;
         std::string norm_genome = utils::normalize_name(genome);
-        if (!dba::check_genome(norm_genome, ok, msg)) {
-          result.add_error(msg);
-          return false;
-        }
-        if (!ok) {
+        if (!dba::exists::genome(norm_genome)) {
           result.add_error("Invalid genome '" + genome + "'");
           return false;
         }

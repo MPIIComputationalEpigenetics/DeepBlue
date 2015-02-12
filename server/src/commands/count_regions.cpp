@@ -7,6 +7,7 @@
 //
 
 #include "../dba/dba.hpp"
+#include "../dba/exists.hpp"
 
 #include "../engine/commands.hpp"
 #include "../engine/engine.hpp"
@@ -61,13 +62,8 @@ namespace epidb {
           return false;
         }
 
-        bool ok = false;
-        if (!dba::check_query(user_key, query_id, ok, msg)) {
-          result.add_error(msg);
-          return false;
-        }
-        if (!ok) {
-          result.add_error("Invalid query id: '" + query_id + "'");
+        if (!dba::exists::query(query_id, user_key, msg)) {
+          result.add_error("Invalid query id: '" + query_id + "'" + msg);
           return false;
         }
 

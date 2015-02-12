@@ -96,33 +96,7 @@ namespace epidb {
 
     bool is_valid_genome(const std::string &genome, const std::string &norm_genome, std::string &msg);
 
-    bool is_initialized(bool &ret, std::string &msg);
-
-    /**
-     * Checks
-     */
-
-    bool check_genome(const std::string &genome, bool &r, std::string &msg);
-
-    bool check_epigenetic_mark(const std::string &epigenetic_mark, bool &r, std::string &msg);
-
-    bool check_biosource(const std::string &biosource_name_norm, bool &r, std::string &msg);
-
-    bool check_biosource_synonym(const std::string &biosource_syn_norm, bool &r, std::string &msg);
-
-    bool check_sample(const std::string &biosource_name_norm, bool &r, std::string &msg);
-
-    bool check_technique(const std::string &norm_technique_name, bool &r, std::string &msg);
-
-    bool check_project(const std::string &project, bool &r, std::string &msg);
-
-    bool check_annotation(const std::string &norm_annotation, const std::string &genome, bool &ok, std::string &msg);
-
-    bool check_query(const std::string &user_key, const std::string &query_id, bool &r, std::string &msg);
-
-    bool check_experiment_name(const std::string &name, const std::string &norm_name, const std::string &user_key,
-                               bool &ok, std::string &msg);
-
+    bool is_initialized();
 
     /**
      * Getters

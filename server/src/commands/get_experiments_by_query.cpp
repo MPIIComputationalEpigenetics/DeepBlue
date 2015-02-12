@@ -7,6 +7,7 @@
 //
 
 #include "../dba/dba.hpp"
+#include "../dba/exists.hpp"
 
 #include "../engine/commands.hpp"
 #include "../engine/engine.hpp"
@@ -56,19 +57,18 @@ namespace epidb {
         const std::string query_id = parameters[0]->as_string();
         const std::string user_key = parameters[1]->as_string();
 
-        bool ok = false;
         std::string msg;
         if (!Command::checks(user_key, msg)) {
           result.add_error(msg);
           return false;
         }
 
-        if (!dba::check_query(user_key, query_id, ok, msg)) {
-          result.add_error(msg);
-          return false;
-        }
-        if (!ok) {
-          result.add_error("Invalid query id.");
+        if (!dba::exists::query(query_id, user_key, msg)) {
+          if (msg.empty()) {
+            result.add_error("Invalid query ID: " + query_id);
+          } else {
+            result.add_error(msg);
+          }
           return false;
         }
 

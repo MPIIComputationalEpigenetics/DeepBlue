@@ -72,11 +72,11 @@ namespace epidb {
       bool get_id(const std::string &where, const std::string &norm_name,
                   std::string &id, std::string &msg);
 
-      bool check_exist(const std::string &where, const std::string &field, const std::string &content,
-                       bool &r, std::string &msg);
+      bool check_exist(const std::string &where, const std::string &field, const std::string &content);
 
-      bool check_exist(const std::string &where, const std::string &field, const bool content,
-                       bool &r, std::string &msg);
+      bool check_exist(const std::string &where, const std::string &field, const bool content);
+
+      bool check_exist(const std::string &where, const mongo::BSONObj query);
 
       bool remove_one(const std::string &collection, const std::string &id, std::string &msg, const std::string &field = "_id");
 
@@ -109,6 +109,11 @@ namespace epidb {
       mongo::BSONArray build_annotation_normalized_array(const std::vector<serialize::ParameterPtr> &params);
 
       std::vector<std::string> build_vector(const std::vector<serialize::ParameterPtr> &params);
+
+
+      bool check_parameters(const std::vector<serialize::ParameterPtr> &params, const std::function<std::string(const std::string&)> &normalizer, const std::function<bool(const std::string&)> &checker, std::string &wrong);
+
+      bool check_parameters(const std::vector<std::string> &params, const std::function<std::string(const std::string&)> &normalizer, const std::function<bool(const std::string&)> &checker, std::string &wrong);
     }
   }
 }

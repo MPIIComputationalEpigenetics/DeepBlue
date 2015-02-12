@@ -308,6 +308,10 @@ class TestCase(unittest.TestCase):
         self.insert_experiment(epidb, exp)
 
   def count_request(self, req):
+    if req[0] is not 'r':
+      print "Invalid request " + req
+      return
+
     epidb = EpidbClient()
     sleep = 0.1
     (s, ss) = epidb.get_request_status(req, self.admin_key)
@@ -323,6 +327,10 @@ class TestCase(unittest.TestCase):
     return data["count"]
 
   def __get_regions_request(self, req):
+    if req[0] is not 'r':
+      print "Invalid request " + req
+      return
+
     epidb = EpidbClient()
     sleep = 0.1
     (s, ss) = epidb.get_request_status(req, self.admin_key)

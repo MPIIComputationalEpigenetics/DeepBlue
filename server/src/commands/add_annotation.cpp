@@ -10,6 +10,7 @@
 #include <sstream>
 
 #include "../dba/dba.hpp"
+#include "../dba/exists.hpp"
 #include "../dba/insert.hpp"
 
 #include "../engine/commands.hpp"
@@ -84,23 +85,13 @@ namespace epidb {
         std::string norm_description = utils::normalize_name(description);
         std::string norm_genome = utils::normalize_name(genome);
 
-        bool ok;
-        if (!dba::check_annotation(norm_name, norm_genome, ok, msg)) {
-          result.add_error(msg);
-          return false;
-        }
-        if (!ok) {
+        if (dba::exists::annotation(norm_name, norm_genome)) {
           std::string s = "The annotation name " + name + " is already being used for the genome " + genome;
           result.add_error(s);
           return false;
         }
 
-        bool exists;
-        if (!dba::check_genome(norm_genome, exists, msg)) {
-          result.add_error(msg);
-          return false;
-        }
-        if (!exists) {
+        if (!dba::exists::genome(norm_genome)) {
           result.add_error("Invalid genome: " + genome);
           return false;
         }

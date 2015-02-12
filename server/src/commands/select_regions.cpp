@@ -12,6 +12,7 @@
 
 #include "../dba/dba.hpp"
 #include "../dba/experiments.hpp"
+#include "../dba/exists.hpp"
 #include "../dba/genomes.hpp"
 #include "../dba/helpers.hpp"
 #include "../dba/queries.hpp"
@@ -105,27 +106,48 @@ namespace epidb {
           }
           args_builder.append("experiment_name", dba::helpers::build_array(names));
           args_builder.append("norm_experiment_name", dba::helpers::build_array(norm_names));
+
+          if (!dba::helpers::check_parameters(names, utils::normalize_name, dba::exists::experiment, msg)) {
+            result.add_error("Experiment " + msg + " does not exists.");
+            return false;
+          }
           has_filter = true;
         }
         // epigenetic mark
         if (epigenetic_marks.size() > 0) {
+          if (!dba::helpers::check_parameters(epigenetic_marks, utils::normalize_epigenetic_mark, dba::exists::epigenetic_mark, msg)) {
+            result.add_error("Epigenetic mark " + msg + " does not exists.");
+            return false;
+          }
           args_builder.append("epigenetic_mark", dba::helpers::build_array(epigenetic_marks));
           args_builder.append("norm_epigenetic_mark", dba::helpers::build_epigenetic_normalized_array(epigenetic_marks));
           has_filter = true;
         }
         // sample id
         if (sample_ids.size() > 0) {
+          if (!dba::helpers::check_parameters(sample_ids, utils::normalize_name, dba::exists::sample, msg)) {
+            result.add_error("Sample ID " + msg + " does not exists.");
+            return false;
+          }
           args_builder.append("sample_id", dba::helpers::build_array(sample_ids));
           has_filter = true;
         }
         // project
         if (projects.size() > 0) {
+          if (!dba::helpers::check_parameters(projects, utils::normalize_name, dba::exists::project, msg)) {
+            result.add_error("Sample ID " + msg + " does not exists.");
+            return false;
+          }
           args_builder.append("project", dba::helpers::build_array(projects));
           args_builder.append("norm_project", dba::helpers::build_normalized_array(projects));
           has_filter = true;
         }
         // technique
         if (techniques.size() > 0) {
+          if (!dba::helpers::check_parameters(techniques, utils::normalize_name, dba::exists::technique, msg)) {
+            result.add_error("Sample ID " + msg + " does not exists.");
+            return false;
+          }
           args_builder.append("technique", dba::helpers::build_array(techniques));
           args_builder.append("norm_technique", dba::helpers::build_normalized_array(techniques));
           has_filter = true;

@@ -231,19 +231,28 @@ class TestSelectRegions(helpers.TestCase):
     self.insert_experiment(epidb, "hg19_chr1_1", sample_id)
 
     argument_combinations = [
-      (None, "hg19", "_invalid_mark", sample_id, "tech1", "ENCODE", None, None, None),
-      (None, "hg19", "Methylation", "_invalid_sid", "tech1", "ENCODE", None, None, None),
-      (None, "hg19", "Methylation", sample_id, "_invalid_tech", "ENCODE", None, None, None),
-      (None, "hg19", "Methylation", sample_id, "tech1", "_invalid_project", None, None, None)
+      (None, "hg19", "_invalid_mark", sample_id, "tech1", "ENCODE", None, None, None, self.admin_key),
+      (None, "hg19", "Methylation", "_invalid_sid", "tech1", "ENCODE", None, None, None, self.admin_key),
+      (None, "hg19", "Methylation", sample_id, "_invalid_tech", "ENCODE", None, None, None, self.admin_key),
+      (None, "hg19", "Methylation", sample_id, "tech1", "_invalid_project", None, None, None, self.admin_key)
     ]
 
-    for args in argument_combinations:
-      args = args + (self.admin_key,)
+    res, msg = epidb.select_regions(*argument_combinations[0])
+    self.assertFailure(res, msg)
+    self.assertEqual(msg, "Epigenetic mark _invalid_mark does not exists.")
 
-      res, msg = epidb.select_regions(*args)
-      (res, req) = epidb.get_regions(msg, "", self.admin_key)
-      regions = self.get_regions_request(req)
-      self.assertEqual(0, len(regions))
+    res, msg = epidb.select_regions(*argument_combinations[1])
+    self.assertFailure(res, msg)
+    self.assertEqual(msg, 'Sample ID _invalid_sid does not exists.')
+
+    res, msg = epidb.select_regions(*argument_combinations[2])
+    self.assertFailure(res, msg)
+    self.assertEqual(msg, 'Sample ID _invalid_tech does not exists.')
+
+    res, msg = epidb.select_regions(*argument_combinations[3])
+    self.assertFailure(res, msg)
+    self.assertEqual(msg, 'Sample ID _invalid_project does not exists.')
+
 
   def test_argument_normalization(self):
     epidb = EpidbClient()

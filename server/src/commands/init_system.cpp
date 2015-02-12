@@ -69,12 +69,7 @@ namespace epidb {
             return false;
           }
 
-          bool is_initialized;
-          if (!dba::is_initialized(is_initialized, msg)) {
-            result.add_error(msg);
-            return false;
-          }
-          if (is_initialized) {
+          if (dba::is_initialized()) {
             result.add_error("The system was already initialized.");
             return false;
           }

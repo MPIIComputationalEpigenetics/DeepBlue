@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "../dba/dba.hpp"
+#include "../dba/exists.hpp"
 
 #include "../engine/commands.hpp"
 #include "../engine/engine.hpp"
@@ -62,19 +63,18 @@ namespace epidb {
         const std::string regions_query_id = parameters[2]->as_string();
         const std::string user_key = parameters[3]->as_string();
 
-        bool ok = false;
         std::string msg;
         if (!Command::checks(user_key, msg)) {
           result.add_error(msg);
           return false;
         }
 
-        if (!dba::check_query(user_key, regions_query_id, ok, msg)) {
-          result.add_error(msg);
-          return false;
-        }
-        if (!ok) {
-          result.add_error(Error::m(ERR_INVALID_QUERY_ID, regions_query_id.c_str()));
+        if (!dba::exists::query(regions_query_id, user_key, msg)) {
+          if (msg.empty()) {
+            result.add_error(Error::m(ERR_INVALID_QUERY_ID, regions_query_id.c_str()));
+          } else {
+            result.add_error(msg);
+          }
           return false;
         }
 

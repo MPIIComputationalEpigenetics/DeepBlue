@@ -15,6 +15,7 @@
 #include "../datatypes/regions.hpp"
 
 #include "../dba/dba.hpp"
+#include "../dba/exists.hpp"
 #include "../dba/helpers.hpp"
 #include "../dba/queries.hpp"
 
@@ -77,22 +78,13 @@ namespace epidb {
           return false;
         }
 
-        bool ok = false;
-        if (!dba::check_query(user_key, data_id, ok, msg)) {
-          result.add_error(msg);
-          return false;
-        }
-        if (!ok) {
-          result.add_error("Invalid data query id.");
+        if (!dba::exists::query(data_id, user_key, msg)) {
+          result.add_error("Invalid data query id." + msg);
           return false;
         }
 
-        if (!dba::check_query(user_key, ranges_id, ok, msg)) {
-          result.add_error(msg);
-          return false;
-        }
-        if (!ok) {
-          result.add_error("Invalid regions query id.");
+        if (!dba::exists::query(ranges_id, user_key, msg)) {
+          result.add_error("Invalid regions query id." + msg);
           return false;
         }
 

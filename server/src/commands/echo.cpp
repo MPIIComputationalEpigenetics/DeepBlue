@@ -8,6 +8,7 @@
 
 #include "../version.hpp"
 #include "../dba/dba.hpp"
+#include "../dba/exists.hpp"
 #include "../dba/users.hpp"
 #include "../extras/serialize.hpp"
 
@@ -48,14 +49,8 @@ namespace epidb {
           const std::string user_key = parameters[0]->as_string();
 
           std::string msg;
-          bool ok;
-          if (!dba::users::check_user(user_key, ok, msg)) {
-            result.add_error(msg);
-            return false;
-          }
-
           std::string name;
-          if (!ok) {
+          if (!dba::exists::user(user_key)) {
             name = "a Stranger";
           } else {
             if (!dba::users::get_user_name(user_key, name, msg)) {

@@ -224,35 +224,37 @@ namespace epidb {
         return true;
       }
 
-      bool check_exist(const std::string &where, const std::string &field, const std::string &content,
-                       bool &r, std::string &msg)
+      bool check_exist(const std::string &where, const std::string &field, const std::string &content)
       {
         Connection c;
         const std::string collection = collection_name(where);
 
         unsigned long long count = c->count(collection, BSON(field << content));
-
-        r = count > 0;
         c.done();
-        return true;
+
+        return count > 0;
       }
 
-      bool check_exist(const std::string &where, const std::string &field, const bool content,
-                       bool &r, std::string &msg)
+      bool check_exist(const std::string &where, const std::string &field, const bool content)
       {
         Connection c;
         const std::string collection = collection_name(where);
 
         unsigned long long count = c->count(collection, BSON(field << content));
-        if (!c->getLastError().empty()) {
-          msg = c->getLastError();
-          c.done();
-          return false;
-        }
-
-        r = count > 0;
         c.done();
-        return true;
+
+        return count > 0;
+      }
+
+      bool check_exist(const std::string &where, const mongo::BSONObj query)
+      {
+        Connection c;
+        const std::string collection = collection_name(where);
+
+        unsigned long long count = c->count(collection, query);
+        c.done();
+
+        return count > 0;
       }
 
       bool remove_one(const std::string &collection, const std::string &id, std::string &msg, const std::string &field)
@@ -312,13 +314,7 @@ namespace epidb {
         boost::mutex::scoped_lock lock(counter_mutex);
         Connection c;
 
-        bool exist;
-        if (!check_exist(Collections::COUNTERS(), "_id", name, exist, msg)) {
-          c.done();
-          return false;
-        }
-
-        if (!exist) {
+        if (!check_exist(Collections::COUNTERS(), "_id", name)) {
           mongo::BSONObjBuilder b;
           b.append("_id", name);
           b.append("seq", 0);
@@ -403,6 +399,24 @@ namespace epidb {
           vector.push_back((**it).as_string());
         }
         return vector;
+      }
+
+      bool check_parameters(const std::vector<serialize::ParameterPtr> &params, const std::function<std::string(const std::string&)> &normalizer, const std::function<bool(const std::string&)> &checker, std::string &wrong)
+      {
+        std::vector<std::string> names = build_vector(params);
+        return check_parameters(names, normalizer, checker, wrong);
+      }
+
+      bool check_parameters(const std::vector<std::string> &names, const std::function<std::string(const std::string&)> &normalizer, const std::function<bool(const std::string&)> &checker, std::string &wrong)
+      {
+        for (auto  name : names) {
+          std::string norm_name = normalizer(name);
+          if (!checker(norm_name)) {
+            wrong = name;
+            return false;
+          }
+        }
+        return true;
       }
 
     }

@@ -16,7 +16,7 @@
 
 #include "../datatypes/metadata.hpp"
 #include "../dba/dba.hpp"
-#include "../dba/users.hpp"
+#include "../dba/exists.hpp"
 #include "../extras/utils.hpp"
 
 #include "../errors.hpp"
@@ -67,20 +67,12 @@ namespace epidb {
 
   bool Command::checks(const std::string &user_key, std::string &msg)
   {
-    bool is_initialized(false);
-    if (!dba::is_initialized(is_initialized, msg)) {
-      return false;
-    }
-    if (!is_initialized) {
+    if (!dba::is_initialized()) {
       msg = "The system was not initialized.";
       return false;
     }
 
-    bool ok = false;
-    if (!dba::users::check_user(user_key, ok, msg)) {
-      return false;
-    }
-    if (!ok) {
+    if (!dba::exists::user_by_key(user_key)) {
       msg = Error::m(ERR_INVALID_USER_KEY);
       return false;
     }

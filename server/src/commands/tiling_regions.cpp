@@ -6,11 +6,10 @@
 //  Copyright (c) 2013,2014 Max Planck Institute for Computer Science. All rights reserved.
 //
 
-#include <sstream>
-#include <map>
 #include <set>
 
 #include "../dba/dba.hpp"
+#include "../dba/exists.hpp"
 #include "../dba/genomes.hpp"
 #include "../dba/helpers.hpp"
 #include "../dba/queries.hpp"
@@ -65,20 +64,14 @@ namespace epidb {
         std::string genome = parameters[1]->as_string();
         const std::string user_key = parameters[3]->as_string();
 
-        std::string norm_genome = utils::normalize_name(genome);
-
         std::string msg;
         if (!Command::checks(user_key, msg)) {
           result.add_error(msg);
           return false;
         }
 
-        bool ok = false;
-        if (!dba::check_genome(norm_genome, ok, msg)) {
-          result.add_error(msg);
-          return false;
-        }
-        if (!ok) {
+        std::string norm_genome = utils::normalize_name(genome);
+        if (!dba::exists::genome(norm_genome)) {
           result.add_error("Invalid genome '" + genome + "'");
           return false;
         }

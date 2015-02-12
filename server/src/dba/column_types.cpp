@@ -24,6 +24,7 @@
 
 #include "collections.hpp"
 #include "dba.hpp"
+#include "exists.hpp"
 #include "full_text.hpp"
 #include "helpers.hpp"
 #include "users.hpp"
@@ -286,11 +287,7 @@ namespace epidb {
       bool is_column_type_name_valid(const std::string &name, const std::string &norm_name,
                                      std::string &msg)
       {
-        bool exists;
-        if (!helpers::check_exist(Collections::COLUMN_TYPES(), "norm_name", norm_name, exists, msg)) {
-          return false;
-        }
-        if (exists) {
+        if (exists::column_type(norm_name)) {
           msg = "Column type '" + name + "' already exists.";
           return false;
         }

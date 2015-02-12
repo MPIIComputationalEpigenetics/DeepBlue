@@ -14,6 +14,7 @@
 #include <boost/foreach.hpp>
 
 #include "../dba/dba.hpp"
+#include "../dba/exists.hpp"
 #include "../dba/insert.hpp"
 #include "../dba/list.hpp"
 
@@ -110,36 +111,23 @@ namespace epidb {
         std::string norm_project = utils::normalize_name(project);
         std::string norm_technique = utils::normalize_name(technique);
 
-        if (description.size() > 10000) {
+        if (description.size() > 2048) {
           result.add_error("Description is too long.");
           return false;
         }
 
-        bool ok = false;
-        if (!dba::check_experiment_name(name, norm_name, user_key, ok, msg)) {
-          result.add_error(msg);
-          return false;
-        }
-        if (!ok) {
+        if (dba::exists::experiment(norm_name)) {
           std::string s = Error::m(ERR_DUPLICATED_EXPERIMENT_NAME, name.c_str());
           result.add_error(s);
           return false;
         }
 
-        if (!dba::check_genome(norm_genome, ok, msg)) {
-          result.add_error(msg);
-          return false;
-        }
-        if (!ok) {
+        if (!dba::exists::genome(norm_genome)) {
           result.add_error("Invalid genome '" + genome + "'");
           return false;
         }
 
-        if (!dba::check_epigenetic_mark(norm_epigenetic_mark, ok, msg)) {
-          result.add_error(msg);
-          return false;
-        }
-        if (!ok) {
+        if (!dba::exists::epigenetic_mark(norm_epigenetic_mark)) {
           std::vector<utils::IdName> names;
           if (!dba::list::similar_epigenetic_marks(epigenetic_mark, user_key, names, msg)) {
             result.add_error(msg);
@@ -157,11 +145,7 @@ namespace epidb {
           return false;
         }
 
-        if (!dba::check_technique(norm_technique, ok, msg)) {
-          result.add_error(msg);
-          return false;
-        }
-        if (!ok) {
+        if (!dba::exists::technique(norm_technique)) {
           std::vector<utils::IdName> names;
           if (!dba::list::similar_techniques(technique, user_key, names, msg)) {
             result.add_error(msg);
@@ -181,11 +165,7 @@ namespace epidb {
 
         // TODO: check the sample
 
-        if (!dba::check_project(norm_project, ok, msg)) {
-          result.add_error(msg);
-          return false;
-        }
-        if (!ok) {
+        if (!dba::exists::project(norm_project)) {
           std::vector<utils::IdName> names;
           if (!dba::list::similar_projects(project, user_key, names, msg)) {
             result.add_error(msg);

@@ -7,6 +7,7 @@
 //
 
 #include "../dba/dba.hpp"
+#include "../dba/exists.hpp"
 #include "../dba/queries.hpp"
 
 #include "../engine/commands.hpp"
@@ -60,29 +61,25 @@ namespace epidb {
           return false;
         }
 
-        bool ok = false;
-
-                  // check query ids
-        if (!dba::check_query(user_key, query_a_id, ok, msg)) {
-          result.add_error(msg);
-          return false;
-        }
-        if (!ok) {
-          result.add_error("Invalid first query id.");
+        if (!dba::exists::query(query_a_id, user_key, msg)) {
+          if (msg.empty()) {
+            result.add_error("Invalid first query ID: " + query_a_id);
+          } else {
+            result.add_error(msg);
+          }
           return false;
         }
 
-        if (!dba::check_query(user_key, query_b_id, ok, msg)) {
-          result.add_error(msg);
-          return false;
-        }
-        if (!ok) {
-          result.add_error("Invalid second query id.");
+        if (!dba::exists::query(query_b_id, user_key, msg)) {
+          if (msg.empty()) {
+            result.add_error("Invalid second query ID: " + query_b_id);
+          } else {
+            result.add_error(msg);
+          }
           return false;
         }
 
         // TODO: check if query ids from same genome
-
         mongo::BSONObjBuilder args_builder;
         args_builder.append("qid_1", query_a_id);
         args_builder.append("qid_2", query_b_id);
