@@ -25,13 +25,11 @@ class EpidbClient(object):
         else:
             url = "http://%s" % address
         self.server = xmlrpclib.Server(url, encoding='UTF-8', allow_none=True, verbose=False)
-        self.server.echo()
 
     def set_key(self, key):
         self.key = key
 
     # Status command
-    @key_required
     def echo(self):
         return self.server.echo(self.key)
 
@@ -318,6 +316,7 @@ class EpidbClient(object):
         print(self, name, email, institution)
         return self.server.init_system(name, email, institution)
 
+    @key_required
     def add_user(self, name, email, institution):
         return self.server.add_user(name, email, institution, self.key)
 
