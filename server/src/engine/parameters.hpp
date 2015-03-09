@@ -58,7 +58,7 @@ namespace epidb {
   namespace parameters {
     const Parameter Genome("genome", serialize::STRING, "the target genome");
     const Parameter GenomeMultiple("genome", serialize::STRING, "the target genome", true);
-    const Parameter UserKey("user key", serialize::STRING, "users token key");
+    const Parameter UserKey("user_key", serialize::STRING, "users token key");
   }
 } // namespace epidb
 
