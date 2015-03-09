@@ -326,3 +326,19 @@ chrX 100000"""
 
     self.assertEquals(rs, "chr1\t0\t150000000\t0.0000\t1.0000\t0.5000\t4")
 
+  def test_empty_result(self):
+    epidb = EpidbClient()
+    self.init(epidb)
+
+    epidb.add_technique("chip-seq", "", None, self.admin_key)
+
+    (s, q) = epidb.select_regions(None, None, None, None, "chip-seq", None, None, 1000, 2000, self.admin_key)
+    self.assertSuccess(s, q)
+    (s, req) = epidb.get_regions(q, "CHROMOSOME,START,END", self.admin_key)
+    self.assertSuccess(s, q)
+    rs = self.get_regions_request(req)
+    print rs
+    self.assertEquals(rs, "")
+
+
+

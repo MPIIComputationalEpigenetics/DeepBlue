@@ -431,6 +431,10 @@ namespace epidb {
 
         // merge region data of all genomes
         std::vector<ChromosomeRegionsList>::iterator rit = genome_regions.begin();
+        if (rit == genome_regions.end()) {
+          return true;
+        }
+
         ChromosomeRegionsList &last = *rit;
         rit++;
         for (; rit != genome_regions.end(); ++rit) {
