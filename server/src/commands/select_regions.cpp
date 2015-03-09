@@ -39,7 +39,7 @@ namespace epidb {
           Parameter("experiment_name", serialize::STRING, "name(s) of selected experiment(s)", true),
           parameters::GenomeMultiple,
           Parameter("epigenetic_mark", serialize::STRING, "name(s) of selected epigenetic mark(s)", true),
-          Parameter("sample", serialize::STRING, "id(s) of selected sample(s)", true),
+          Parameter("sample_id", serialize::STRING, "id(s) of selected sample(s)", true),
           Parameter("technique", serialize::STRING, "name(s) of selected technique(es)", true),
           Parameter("project", serialize::STRING, "name(s) of selected projects", true),
           Parameter("chromosome", serialize::STRING, "chromosome name(s)", true),
@@ -135,7 +135,7 @@ namespace epidb {
         // project
         if (projects.size() > 0) {
           if (!dba::helpers::check_parameters(projects, utils::normalize_name, dba::exists::project, msg)) {
-            result.add_error("Sample ID " + msg + " does not exists.");
+            result.add_error("Project " + msg + " does not exists.");
             return false;
           }
           args_builder.append("project", dba::helpers::build_array(projects));
@@ -145,7 +145,7 @@ namespace epidb {
         // technique
         if (techniques.size() > 0) {
           if (!dba::helpers::check_parameters(techniques, utils::normalize_name, dba::exists::technique, msg)) {
-            result.add_error("Sample ID " + msg + " does not exists.");
+            result.add_error("Technique " + msg + " does not exists.");
             return false;
           }
           args_builder.append("technique", dba::helpers::build_array(techniques));
@@ -154,7 +154,7 @@ namespace epidb {
         }
 
         if (!has_filter) {
-          result.add_error("At least one of the following fields must be provided: 'experiment name', 'epigenetic mark', 'sample ID', 'project', 'technique'.");
+          result.add_error("At least one of the following fields must be provided: 'experiment_name', 'epigenetic_mark', 'sample_id', 'project', 'technique'.");
           return false;
         }
 
