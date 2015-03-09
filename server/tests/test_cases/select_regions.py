@@ -220,7 +220,7 @@ class TestSelectRegions(helpers.TestCase):
                                None, None, None, None, self.admin_key)
 
     self.assertFailure(res, msg)
-    self.assertTrue("at least one of the following fields must be provided: 'experiment name', 'epigenetic mark', 'sample id', 'project', 'technique'." in msg.lower())
+    self.assertTrue("at least one of the following fields must be provided: 'experiment_name', 'epigenetic_mark', 'sample_id', 'project', 'technique'." in msg.lower())
 
   def test_unknown_parameters(self):
     epidb = EpidbClient()
@@ -247,11 +247,11 @@ class TestSelectRegions(helpers.TestCase):
 
     res, msg = epidb.select_regions(*argument_combinations[2])
     self.assertFailure(res, msg)
-    self.assertEqual(msg, 'Sample ID _invalid_tech does not exists.')
+    self.assertEqual(msg, 'Technique _invalid_tech does not exists.')
 
     res, msg = epidb.select_regions(*argument_combinations[3])
     self.assertFailure(res, msg)
-    self.assertEqual(msg, 'Sample ID _invalid_project does not exists.')
+    self.assertEqual(msg, 'Project _invalid_project does not exists.')
 
 
   def test_argument_normalization(self):

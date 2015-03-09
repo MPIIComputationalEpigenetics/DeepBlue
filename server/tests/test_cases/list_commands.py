@@ -22,4 +22,4 @@ class TestListCommandsCommand(helpers.TestCase):
     self.assertEqual(cmds["add_experiment"]["parameters"][7], ['data', 'string', False, 'the BED formated data'])
     self.assertEqual(cmds["add_experiment"]["parameters"][8], ['format', 'string', False, 'format of the provided data'])
     self.assertEqual(cmds["add_experiment"]["parameters"][9], ['extra_metadata', 'struct', False, 'additional metadata'])
-    self.assertEqual(cmds["add_experiment"]["parameters"][10], ['user key', 'string', False, 'users token key'])
+    self.assertEqual(cmds["add_experiment"]["parameters"][10], ['user_key', 'string', False, 'users token key'])
