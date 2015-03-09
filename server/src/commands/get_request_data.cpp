@@ -67,39 +67,44 @@ namespace epidb {
 
         StringBuilder sb;
         request::Data data;
-        if (!epidb::Engine::instance().request_data(query_id, user_key, data, sb, msg)) {
+        request::DataType type = request::DataType::INVALID;
+        if (!epidb::Engine::instance().request_data(query_id, user_key, data, sb, type, msg)) {
           result.add_error(msg);
           return false;
         }
 
-        if (!data.id_names.empty()) {
+        if (type == request::ID_NAMES) {
           set_id_names_return(data.id_names, result);
           return true;
         }
 
-        if (!sb.empty()) {
+        if (type == request::REGIONS) {
           result.add_stringbuilder(sb);
           return true;
         }
 
-        serialize::ParameterPtr map(new serialize::MapParameter());
-        for (auto &ss : data.strings) {
-          serialize::ParameterPtr p(new serialize::SimpleParameter(ss.second));
-          map->add_child(ss.first, std::move(p));
+        if (type == request::MAP) {
+          serialize::ParameterPtr map(new serialize::MapParameter());
+          for (auto &ss : data.strings) {
+            serialize::ParameterPtr p(new serialize::SimpleParameter(ss.second));
+            map->add_child(ss.first, std::move(p));
+          }
+
+          for (auto is : data.integers) {
+            serialize::ParameterPtr p(new serialize::SimpleParameter(is.second));
+            map->add_child(is.first, p);
+          }
+
+          for (auto fs : data.floats) {
+            serialize::ParameterPtr p(new serialize::SimpleParameter(fs.second));
+            map->add_child(fs.first, p);
+          }
+          result.add_param(map);
+          return true;
         }
 
-        for (auto is : data.integers) {
-          serialize::ParameterPtr p(new serialize::SimpleParameter(is.second));
-          map->add_child(is.first, p);
-        }
-
-        for (auto fs : data.floats) {
-          serialize::ParameterPtr p(new serialize::SimpleParameter(fs.second));
-          map->add_child(fs.first, p);
-        }
-        result.add_param(map);
-
-        return true;
+        result.add_error("Internal Error: Invalid data type.");
+        return false;
       }
     } getRequestDataCommand;
   }

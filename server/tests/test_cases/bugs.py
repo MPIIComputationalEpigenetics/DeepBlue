@@ -341,4 +341,3 @@ chrX 100000"""
     self.assertEquals(rs, "")
 
 
-

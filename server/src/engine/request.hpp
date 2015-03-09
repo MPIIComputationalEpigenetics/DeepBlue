@@ -20,6 +20,13 @@ namespace epidb {
     using IntegerDataPair = std::pair<std::string, long long>;
     using FloatDataPair = std::pair<std::string, float>;
 
+    typedef enum {
+      INVALID,
+      REGIONS,
+      ID_NAMES,
+      MAP
+    } DataType;
+
     typedef struct Status {
       std::string state;
       std::string message;

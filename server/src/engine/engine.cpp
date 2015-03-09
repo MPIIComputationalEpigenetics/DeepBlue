@@ -125,7 +125,7 @@ namespace epidb {
   }
 
 
-  bool Engine::request_data(const std::string &request_id, const std::string &user_key, request::Data &data, StringBuilder &sb, std::string &msg)
+  bool Engine::request_data(const std::string &request_id, const std::string &user_key, request::Data &data, StringBuilder &sb, request::DataType& type,  std::string &msg)
   {
     mongo::BSONObj o = _hub.get_job(request_id, user_key);
     if (o.isEmpty()) {
@@ -148,15 +148,18 @@ namespace epidb {
     if (result.hasField("__id_names__")) {
       std::cerr << "id_names" << std::endl;
       mongo::BSONObj id_names = result["__id_names__"].Obj();
-      std::cerr << id_names.toString() << std::endl;
       data.set_id_names(utils::bson_to_id_name(id_names));
+      type = request::ID_NAMES;
+      return true;
     }
 
     if (result.hasField("__file__")) {
       std::string filename = result["__file__"].str();
+      type = request::REGIONS;
       return _hub.get_result(filename, sb, msg);
     }
 
+    type = request::MAP;
     data.load_from_bson(result);
 
     return true;
