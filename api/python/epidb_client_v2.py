@@ -309,8 +309,16 @@ class DeepBlueClient(object):
     def score_matrix(self, experiments, operation, regions_id):
         return self.server.score_matrix(experiments, operation, regions_id, self.key)
 
-    # Admin Operations
+    # Requests
+    @key_required
+    def get_request_status(self, request_id):
+        return self.server.get_request_status(request_id, self.key)
 
+    @key_required
+    def get_request_data(self, request_id):
+        return self.server.get_request_data(request_id, self.key)
+
+    # Admin Operations
     def init_system(self, name, email, institution):
         print(self.key, self.server)
         print(self, name, email, institution)
