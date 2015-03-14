@@ -6,11 +6,11 @@ def key_required(func):
             return func(self, *args, **kwargs)
         else:
             raise AttributeError("To use this function a key is required. Set it using "
-                                 "set_key or construct EpidbClient providing a key")
+                                 "set_key or construct DeepBlueClient providing a key")
     return func_wrapper
 
 
-class EpidbClient(object):
+class DeepBlueClient(object):
     """Conveniently access a DeepBlue server
     """
     def __init__(self, key=None, address="deepblue.mpi-inf.mpg.de/xmlrpc", port=None):
