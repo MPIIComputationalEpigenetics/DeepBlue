@@ -15,6 +15,9 @@ class EpidbClient:
     def echo(self, user_key):
         return self.server.echo(user_key)
 
+    def get_state(self, vocab, key):
+        return self.server.get_state(vocab, key)
+
     def test_types(self, *args):
         return self.server.test_types(*args)
 

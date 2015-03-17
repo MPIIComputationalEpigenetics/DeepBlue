@@ -33,6 +33,10 @@ class DeepBlueClient(object):
     def echo(self):
         return self.server.echo(self.key)
 
+    @key_required
+    def get_state(self, vocab):
+        return self.server.get_state(vocab, self.key)
+
     def test_types(self, *args):
         return self.server.test_types(*args)
 
