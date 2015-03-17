@@ -309,7 +309,7 @@ namespace epidb {
       }
 
       boost::mutex counter_mutex;
-      bool get_counter(const std::string &name, int &id, std::string &msg)
+      bool get_increment_counter(const std::string &name, int &id, std::string &msg)
       {
         boost::mutex::scoped_lock lock(counter_mutex);
         Connection c;
@@ -346,7 +346,36 @@ namespace epidb {
         return result;
       }
 
-      // TODO: move to arrays.cpp
+      bool get_counter(const std::string &name, int &count, std::string &msg)
+      {
+        mongo::BSONObjBuilder data_builder;
+        data_builder.append("_id", name);
+
+        if (!check_exist(Collections::COUNTERS(), "_id", name)) {
+          return get_increment_counter(name, count, msg);
+        }
+
+        mongo::BSONObj data = data_builder.obj();
+
+        Connection c;
+        auto cursor = c->query(helpers::collection_name(Collections::COUNTERS()), data);
+        if (cursor->more()) {
+          mongo::BSONObj count_cursor = cursor->next();
+          count = count_cursor["seq"].Int();
+          return true;
+        } else {
+          msg += "error reading the counter '" + name + "'.";
+        }
+        return false;
+      }
+
+      bool notify_change_occurred(const std::string &name, std::string &msg)
+      {
+        int tmp;
+        return get_increment_counter(name + "_operations", tmp, msg);
+      }
+
+    // TODO: move to arrays.cpp
       mongo::BSONArray build_array(const std::vector<std::string> &params)
       {
         mongo::BSONArrayBuilder ab;

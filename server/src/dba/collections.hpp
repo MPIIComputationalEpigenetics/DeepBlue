@@ -19,7 +19,7 @@ namespace epidb {
       static const std::vector<std::string> build_valid_search_Collections();
 
     public:
-      static bool is_valid_search_collection(std::string &name);
+      static bool is_valid_search_collection(const std::string &name);
 
       static const std::vector<std::string> &valid_search_Collections();
 

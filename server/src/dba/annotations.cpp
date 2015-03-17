@@ -12,6 +12,7 @@
 #include <mongo/bson/bson.h>
 
 #include "annotations.hpp"
+#include "collections.hpp"
 #include "helpers.hpp"
 
 #include "../datatypes/metadata.hpp"
@@ -33,7 +34,8 @@ namespace epidb {
                           mongo::BSONObj &annotation_metadata,
                           std::string &msg)
       {
-        if (!helpers::get_counter("datasets", dataset_id, msg))  {
+        if (!helpers::get_increment_counter("datasets", dataset_id, msg) ||
+            !helpers::notify_change_occurred("datasets", msg))  {
           return false;
         }
 
@@ -65,7 +67,8 @@ namespace epidb {
                                        std::string &msg)
       {
         int a_id;
-        if (!helpers::get_counter("annotations", a_id, msg))  {
+        if (!helpers::get_increment_counter("annotations", a_id, msg) ||
+            !helpers::notify_change_occurred(Collections::ANNOTATIONS(), msg))  {
           return false;
         }
         annotation_id = "a" + utils::integer_to_string(a_id);

@@ -99,7 +99,25 @@ namespace epidb {
       }
 
 
-      bool get_counter(const std::string &name, int &id, std::string &msg);
+      /**
+      * \brief  Increment counter variable from Database by one
+      * \param  name  Name of counter-variable
+      *         count Return: Updated counter value
+      */
+      bool get_increment_counter(const std::string &name, int &id, std::string &msg);
+
+      /**
+      * \brief  Get counter variable from Database
+      * \param  name  Name of counter-variable
+      *         count Return: Counter value
+      */
+      bool get_counter(const std::string &name, int &count, std::string &msg);
+
+      /**
+      * \brief  To be called if a change occurred in the stored data
+      * \param  name  Type of data
+      */
+      bool notify_change_occurred(const std::string &name, std::string &msg);
 
 
       mongo::BSONArray build_array(const std::vector<std::string> &params);

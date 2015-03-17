@@ -38,7 +38,7 @@ namespace epidb {
       return v;
     }
 
-    bool Collections::is_valid_search_collection(std::string &name)
+    bool Collections::is_valid_search_collection(const std::string &name)
     {
       return std::find(valid_search_Collections().begin(), valid_search_Collections().end(), name) != valid_search_Collections().end();
     }

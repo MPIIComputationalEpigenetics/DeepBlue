@@ -142,7 +142,8 @@ namespace epidb {
                           mongo::BSONObj &experiment_metadata,
                           std::string &msg)
       {
-        if (!helpers::get_counter("datasets", dataset_id, msg))  {
+        if (!helpers::get_increment_counter("datasets", dataset_id, msg) ||
+            !helpers::notify_change_occurred("datasets", msg))  {
           return false;
         }
 
@@ -181,7 +182,8 @@ namespace epidb {
                                        std::string &msg)
       {
         int e_id;
-        if (!helpers::get_counter("experiments", e_id, msg))  {
+        if (!helpers::get_increment_counter("experiments", e_id, msg) ||
+            !helpers::notify_change_occurred(Collections::EXPERIMENTS(), msg))  {
           return false;
         }
         experiment_id = "e" + utils::integer_to_string(e_id);

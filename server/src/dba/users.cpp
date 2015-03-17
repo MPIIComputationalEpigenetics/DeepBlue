@@ -37,7 +37,7 @@ namespace epidb {
       {
         {
           int id;
-          if (!helpers::get_counter("users", id, msg))  {
+          if (!helpers::get_increment_counter("users", id, msg))  {
             return false;
           }
           user_id = "u" + utils::integer_to_string(id);

@@ -142,7 +142,7 @@ namespace mdbq {
   bool Hub::insert_job(const mongo::BSONObj &job, unsigned int timeout, const int version_value, std::string &id, std::string &msg)
   {
     int r_id;
-    if (!epidb::dba::helpers::get_counter("request", r_id, msg))  {
+    if (!epidb::dba::helpers::get_increment_counter("request", r_id, msg))  {
       return false;
     }
 

@@ -70,6 +70,10 @@ namespace epidb {
           }
         }
 
+        if (!helpers::notify_change_occurred("dataset_operations", msg)){
+          return false;
+        }
+
         return true;
       }
 
@@ -112,6 +116,10 @@ namespace epidb {
           return false;
         }
 
+        if (!helpers::notify_change_occurred(Collections::ANNOTATIONS(), msg)){
+          return false;
+        }
+
         return true;
       }
 
@@ -151,6 +159,10 @@ namespace epidb {
 
         // Delete from collection
         if (!helpers::remove_one(helpers::collection_name(Collections::EXPERIMENTS()), id, msg)) {
+          return false;
+        }
+
+        if (!helpers::notify_change_occurred(Collections::EXPERIMENTS(), msg)){
           return false;
         }
 
@@ -243,6 +255,10 @@ namespace epidb {
           return false;
         }
 
+        if (!helpers::notify_change_occurred(Collections::GENOMES(), msg)){
+          return false;
+        }
+
         return true;
       }
 
@@ -282,6 +298,10 @@ namespace epidb {
           return false;
         }
 
+        if (!helpers::notify_change_occurred(Collections::PROJECTS(), msg)){
+          return false;
+        }
+
         return true;
       }
 
@@ -316,14 +336,21 @@ namespace epidb {
           return false;
         }
 
-
         // get_biosource_children return at least 1 element , that is the given biosource
         if (norm_subs.size() > 1) {
           msg = "This biosource has terms into his scope and can not be removed";
           return false;
         }
 
-        return cv::remove_biosouce(id, biosource_name , norm_biosource_name, msg);
+        if (!cv::remove_biosouce(id, biosource_name , norm_biosource_name, msg)){
+          return false;
+        }
+
+        if (!helpers::notify_change_occurred(Collections::BIOSOURCES(), msg)){
+          return false;
+        }
+
+        return true;
       }
 
       bool sample(const std::string &id, const std::string &user_key, std::string &msg)
@@ -359,6 +386,10 @@ namespace epidb {
 
         // Delete sample from samples collection
         if (!helpers::remove_one(helpers::collection_name(Collections::SAMPLES()), id, msg)) {
+          return false;
+        }
+
+        if (!helpers::notify_change_occurred(Collections::SAMPLES(), msg)){
           return false;
         }
 
@@ -401,6 +432,10 @@ namespace epidb {
           return false;
         }
 
+        if (!helpers::notify_change_occurred(Collections::EPIGENETIC_MARKS(), msg)){
+          return false;
+        }
+
         return true;
       }
 
@@ -440,6 +475,10 @@ namespace epidb {
           return false;
         }
 
+        if (!helpers::notify_change_occurred(Collections::TECHNIQUES(), msg)){
+          return false;
+        }
+
         return true;
       }
 
@@ -463,6 +502,10 @@ namespace epidb {
 
         // Delete from collection
         if (!helpers::remove_one(helpers::collection_name(Collections::COLUMN_TYPES()), id, msg)) {
+          return false;
+        }
+
+        if (!helpers::notify_change_occurred(Collections::COLUMN_TYPES(), msg)){
           return false;
         }
 

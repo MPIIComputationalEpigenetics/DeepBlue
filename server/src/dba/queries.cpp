@@ -49,7 +49,7 @@ namespace epidb {
                        std::string &query_id, std::string &msg)
       {
         int query_counter;
-        if (!helpers::get_counter("queries", query_counter, msg)) {
+        if (!helpers::get_increment_counter("queries", query_counter, msg)) {
           return false;
         }
         query_id = "q" + utils::integer_to_string(query_counter);
@@ -673,13 +673,13 @@ namespace epidb {
         }
 
         int t_id;
-        if (!helpers::get_counter("tiling", t_id, msg))  {
+        if (!helpers::get_increment_counter("tiling", t_id, msg))  {
           c.done();
           return false;
         }
         std::string tiling_id = "tr" + utils::integer_to_string(t_id);
 
-        if (!helpers::get_counter("datasets", dataset_id, msg))  {
+        if (!helpers::get_increment_counter("datasets", dataset_id, msg))  {
           return false;
         }
 

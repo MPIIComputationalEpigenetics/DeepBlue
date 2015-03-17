@@ -308,7 +308,8 @@ namespace epidb {
                                 std::string &column_type_id, mongo::BSONObj &obj, std::string &msg)
       {
         int id;
-        if (!helpers::get_counter(Collections::COLUMN_TYPES(), id, msg))  {
+        if (!helpers::get_increment_counter(Collections::COLUMN_TYPES(), id, msg) ||
+            !helpers::notify_change_occurred(Collections::COLUMN_TYPES(), msg))  {
           return false;
         }
         column_type_id = "ct" + utils::integer_to_string(id);
