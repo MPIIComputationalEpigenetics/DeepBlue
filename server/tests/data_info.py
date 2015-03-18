@@ -43,12 +43,20 @@ BIOSOURCES = {
   "K562": {
     "description": "some biosource",
     "metadata": {}
+  },
+
+  "BS2": {
+      "description": "some other biosource",
+      "metadata": {}
   }
 }
 
 PROJECTS = {
   "ENCODE": {
     "description": "The ENCODE Project: ENCyclopedia Of DNA Elements"
+  },
+  "Mouse ENCODE": {
+      "description": "The Mouse ENCODE Project"
   }
 }
 
@@ -64,6 +72,9 @@ EPIGENETIC_MARKS = {
 SAMPLES = {
   "K562": {
     "metadata": {"karyotype":"cancer", "sex":"F"}
+  },
+  "BS2": {
+      "metadata": {"karyotype":"cancer", "sex":"F"}
   }
 }
 
