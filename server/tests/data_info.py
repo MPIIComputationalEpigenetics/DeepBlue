@@ -45,7 +45,7 @@ BIOSOURCES = {
     "metadata": {}
   },
 
-  "BS2": {
+  "Brain": {
       "description": "some other biosource",
       "metadata": {}
   }
@@ -73,8 +73,8 @@ SAMPLES = {
   "K562": {
     "metadata": {"karyotype":"cancer", "sex":"F"}
   },
-  "BS2": {
-      "metadata": {"karyotype":"cancer", "sex":"F"}
+  "Brain": {
+      "metadata": {"karyotype":"normal", "sex":"M"}
   }
 }
 
