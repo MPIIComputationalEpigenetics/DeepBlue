@@ -42,11 +42,16 @@ namespace epidb {
                 return results;
             }
 
-            std::vector<std::string> allowed_names {dba::Collections::ANNOTATIONS(),
+            const std::vector<std::string> allowed_names {dba::Collections::ANNOTATIONS(),
                     dba::Collections::BIOSOURCES(), dba::Collections::COLUMN_TYPES(),
                     dba::Collections::EXPERIMENTS(), dba::Collections::EPIGENETIC_MARKS(),
                     dba::Collections::GENOMES(), dba::Collections::PROJECTS(),
                     dba::Collections::SAMPLES(), dba::Collections::TECHNIQUES()};
+
+            static std::string collection_to_operation(std::string counter_name)
+            {
+                return counter_name + "_operations";
+            }
 
         public:
             GetStateCommand() : Command("get_state", parameters_(), results_(), desc_()) {
@@ -70,7 +75,7 @@ namespace epidb {
                 }
 
                 int counter = 0;
-                if (!dba::helpers::get_counter(name + "_operations", counter, msg)){
+                if (!dba::helpers::get_counter(collection_to_operation(name), counter, msg)){
                     return false;
                 }
                 result.add_int(counter);
