@@ -29,6 +29,7 @@ import score_matrix
 import search
 import select_regions
 import sequence
+import states
 import techniques
 import tiling
 import wig_parser
