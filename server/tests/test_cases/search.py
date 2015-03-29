@@ -244,14 +244,14 @@ class TestSearch(helpers.TestCase):
     self.assertSuccess(res)
 
     (res, found) = epidb.search("another synonym", None, self.admin_key)
-    self.assertEquals(found, [['bs2', 'Bio Source A', 'biosources'], ['t2', 'tech2', 'techniques']])
+    self.assertEquals(found, [['bs3', 'Bio Source A', 'biosources'], ['t2', 'tech2', 'techniques']])
 
     (res, found) = epidb.search("bla bla blu blu", None, self.admin_key)
-    self.assertEquals(found, [['bs2', 'Bio Source A', 'biosources']])
+    self.assertEquals(found, [['bs3', 'Bio Source A', 'biosources']])
 
     (res, info) = epidb.info(bsid1, self.admin_key)
     self.assertSuccess(res, info)
-    self.assertEquals(info[0], {'description': 'bio source A', 'user': 'test_admin', '_id': 'bs2', 'type': 'biosource', 'name': 'Bio Source A'})
+    self.assertEquals(info[0], {'description': 'bio source A', 'user': 'test_admin', '_id': 'bs3', 'type': 'biosource', 'name': 'Bio Source A'})
 
   def test_search_embracing(self):
     epidb = EpidbClient()
@@ -386,7 +386,7 @@ class TestSearch(helpers.TestCase):
     self.assertEqual([['e1', 'las chicas', 'experiments']], r1)
 
     (s, r2) = epidb.search("Carolina", [], self.admin_key)
-    self.assertEqual([['bs4', 'Carolina', 'biosources'], ['s2', '', 'samples'], ['e1', 'las chicas', 'experiments']], r2)
+    self.assertEqual([['bs5', 'Carolina', 'biosources'], ['s3', '', 'samples'], ['e1', 'las chicas', 'experiments']], r2)
 
   def test_column_types_search(self):
     epidb = EpidbClient()
