@@ -60,6 +60,10 @@ namespace epidb {
           return false;
         }
 
+        if (!helpers::notify_change_occurred(collection, msg)) {
+          return false;
+        }
+
         c.done();
         return true;
       }
