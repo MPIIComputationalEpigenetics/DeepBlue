@@ -6,6 +6,22 @@ from client import EpidbClient
 
 class TestState(helpers.TestCase):
 
+    def test_state(self):
+        """Tests state after insert and remove for all data-types except experiments."""
+        epidb = EpidbClient()
+        self.init_base(epidb)
+
+        to_test = ["genomes", "annotations", "techniques", "epigenetic_marks", "projects",
+                   "biosources", "samples"]
+
+        ids = {}
+        for name in to_test:
+            ids[name] = self.insert_random(epidb, self._get_data_names()[name]["data"], name,
+                                           self._get_data_names()[name]["insert"])
+
+        to_test.reverse()
+        for name in to_test:
+            self.remove(epidb, name, ids[name])
 
     def test_state_experiments(self):
         """Tests state after insert and remove for experiments."""
