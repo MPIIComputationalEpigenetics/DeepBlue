@@ -127,6 +127,11 @@ namespace epidb {
         return true;
       }
 
+      bool annotations(const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg)
+      {
+        return helpers::get(Collections::ANNOTATIONS(), result, msg);
+      }
+
       bool column_types(const std::string &user_key, std::vector<utils::IdName> &content, std::string  &msg)
       {
         return dba::columns::list_column_types(user_key, content, msg);

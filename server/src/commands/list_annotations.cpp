@@ -64,22 +64,33 @@ namespace epidb {
           return false;
         }
 
+        /*
         if (genomes.size() == 0) {
           result.add_error(Error::m(ERR_USER_GENOME_MISSING));
           return false;
         }
+        */
 
         std::vector<utils::IdName> names;
 
-        std::vector<serialize::ParameterPtr>::iterator it;
-        for (it = genomes.begin(); it != genomes.end(); ++it) {
-          std::string genome = (**it).as_string();
 
+        if (genomes.empty()) {
           std::vector<utils::IdName> res;
-          if (!dba::list::annotations(genome, user_key, res, msg)) {
+          if (!dba::list::annotations(user_key, res, msg)) {
             result.add_error(msg);
           }
           names.insert(names.end(), res.begin(), res.end());
+        } else {
+          std::vector<serialize::ParameterPtr>::iterator it;
+          for (it = genomes.begin(); it != genomes.end(); ++it) {
+            std::string genome = (**it).as_string();
+
+            std::vector<utils::IdName> res;
+            if (!dba::list::annotations(genome, user_key, res, msg)) {
+              result.add_error(msg);
+            }
+            names.insert(names.end(), res.begin(), res.end());
+          }
         }
 
         set_id_names_return(names, result);
