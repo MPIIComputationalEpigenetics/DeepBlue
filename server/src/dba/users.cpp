@@ -87,6 +87,16 @@ namespace epidb {
         return helpers::get_name(Collections::USERS(), user_key, id_name, msg);
       }
 
+      bool get_user_id(const std::string &user_key, std::string &user_id, std::string &msg)
+      {
+        utils::IdName id_name;
+        if (!helpers::get_name(Collections::USERS(), user_key, id_name, msg)) {
+          return false;
+        }
+        user_id = id_name.id;
+        return true;
+      }
+
       bool bind_user(const std::string &email, const std::string &password, const std::string &user_key, const std::string &admin_key, std::string &id, std::string &msg)
       {
 
