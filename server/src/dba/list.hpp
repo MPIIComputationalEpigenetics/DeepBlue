@@ -46,6 +46,8 @@ namespace epidb {
       bool annotations(const std::string &genome, const std::string &user_key,
                        std::vector<utils::IdName> &result, std::string &msg);
 
+      bool annotations(const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg);
+
       bool users(const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg);
 
       bool techniques(const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg);

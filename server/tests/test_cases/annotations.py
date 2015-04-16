@@ -44,6 +44,46 @@ class TestAnnotationCommands(helpers.TestCase):
     regions = self.get_regions_request(req)
     self.assertEqual(regions, file_data)
 
+  def test_list_annotations(self):
+    epidb = EpidbClient()
+    self.init(epidb)
+
+    genome_info = None
+    with open("data/genomes/hg19", 'r') as f:
+      genome_info = f.read().replace(",", "")
+
+    file_data = None
+    with open("data/cpgIslandExt.txt", 'r') as f:
+      file_data = f.read()
+
+    res = epidb.add_genome("hg19", "Human genome 19", genome_info, self.admin_key)
+    self.assertSuccess(res)
+    res = epidb.add_annotation("Cpg Islands", "hg19", "CpG islands are associated ...",
+          file_data,
+          "",
+          {"url":"genome.ucsc.edu/cgi-bin/hgTables?db=hg19&hgta_group=regulation&hgta_track=cpgIslandExt&hgta_table=cpgIslandExt&hgta_doSchema=describe+table+schema"},
+          self.admin_key)
+    self.assertSuccess(res)
+
+    res = epidb.add_genome("hg19a", "Human genome 19a", genome_info, self.admin_key)
+    self.assertSuccess(res)
+    res = epidb.add_annotation("Cpg Islands", "hg19a", "CpG islands are associated ...",
+          file_data,
+          "",
+          {"url":"genome.ucsc.edu/cgi-bin/hgTables?db=hg19&hgta_group=regulation&hgta_track=cpgIslandExt&hgta_table=cpgIslandExt&hgta_doSchema=describe+table+schema"},
+          self.admin_key)
+    self.assertSuccess(res)
+
+    res = epidb.add_genome("hg19b", "Human genome 19b", genome_info, self.admin_key)
+    self.assertSuccess(res)
+    res = epidb.add_annotation("Cpg Islands", "hg19b", "CpG islands are associated ...",
+          file_data,
+          "",
+          {"url":"genome.ucsc.edu/cgi-bin/hgTables?db=hg19&hgta_group=regulation&hgta_track=cpgIslandExt&hgta_table=cpgIslandExt&hgta_doSchema=describe+table+schema"},
+          self.admin_key)
+    self.assertSuccess(res)
+    print epidb.list_annotations("", self.admin_key)
+
   def test_annotation_full_cpg_islands(self):
     epidb = EpidbClient()
     self.init_base(epidb)
