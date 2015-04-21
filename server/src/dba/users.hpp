@@ -24,8 +24,6 @@ namespace epidb {
 
       bool get_user_name(const std::string &user_key, std::string &name, std::string &msg);
 
-      bool get_user_id(const std::string &user_key, std::string &id, std::string &msg)
-
       bool get_user_name(const std::string &user_key, utils::IdName &id_name, std::string &msg);
 
       /*
