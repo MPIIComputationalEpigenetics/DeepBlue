@@ -35,8 +35,8 @@ namespace epidb {
           return true;
         }
 
-        std::string name;
-        if (!users::get_user_name(user_key, name, msg)) {
+        std::string user_id;
+        if (!users::get_user_id(user_key, user_id, msg)) {
           return false;
         }
 
@@ -47,7 +47,7 @@ namespace epidb {
           owner = entity["user"].String();
         }
 
-        if (owner == name) {
+        if (owner == user_id) {
           return true;
         } else {
           msg = "You do not have permission to delete this.";

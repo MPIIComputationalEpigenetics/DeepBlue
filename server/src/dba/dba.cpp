@@ -387,11 +387,11 @@ namespace epidb {
       }
       create_genome_builder.append("chromosomes", ab.arr());
 
-      utils::IdName id_user_name;
-      if (!users::get_user_name(user_key, id_user_name, msg)) {
+      std::string user_id;
+      if (!users::get_user_id(user_key, user_id, msg)) {
         return false;
       }
-      create_genome_builder.append("user", id_user_name.name);
+      create_genome_builder.append("user", user_id);
       mongo::BSONObj cem = create_genome_builder.obj();
 
       Connection c;
@@ -458,11 +458,11 @@ namespace epidb {
       mongo::BSONObjBuilder create_epi_mark_builder;
       create_epi_mark_builder.appendElements(search_data);
 
-      utils::IdName id_user_name;
-      if (!users::get_user_name(user_key, id_user_name, msg)) {
+      std::string user_id;
+      if (!users::get_user_id(user_key, user_id, msg)) {
         return false;
       }
-      create_epi_mark_builder.append("user", id_user_name.name);
+      create_epi_mark_builder.append("user", user_id);
       mongo::BSONObj cem = create_epi_mark_builder.obj();
 
       Connection c;
@@ -515,11 +515,11 @@ namespace epidb {
       mongo::BSONObjBuilder create_biosource_builder;
       create_biosource_builder.appendElements(search_data);
 
-      utils::IdName id_user_name;
-      if (!users::get_user_name(user_key, id_user_name, msg)) {
+      std::string user_id;
+      if (!users::get_user_id(user_key, user_id, msg)) {
         return false;
       }
-      create_biosource_builder.append("user", id_user_name.name);
+      create_biosource_builder.append("user", user_id);
       mongo::BSONObj cem = create_biosource_builder.obj();
 
       Connection c;
@@ -573,11 +573,11 @@ namespace epidb {
       mongo::BSONObjBuilder create_technique_builder;
       create_technique_builder.appendElements(search_data);
 
-      utils::IdName id_user_name;
-      if (!users::get_user_name(user_key, id_user_name, msg)) {
+      std::string user_id;
+      if (!users::get_user_id(user_key, user_id, msg)) {
         return false;
       }
-      create_technique_builder.append("user", id_user_name.name);
+      create_technique_builder.append("user", user_id);
       mongo::BSONObj cem = create_technique_builder.obj();
 
       Connection c;
@@ -660,11 +660,11 @@ namespace epidb {
       create_sample_builder.append("_id", sample_id);
       create_sample_builder.appendElements(data);
 
-      utils::IdName id_user_name;
-      if (!users::get_user_name(user_key, id_user_name, msg)) {
+      std::string user_id;
+      if (!users::get_user_id(user_key, user_id, msg)) {
         return false;
       }
-      create_sample_builder.append("user", id_user_name.name);
+      create_sample_builder.append("user", user_id);
       mongo::BSONObj cem = create_sample_builder.obj();
 
       c->insert(helpers::collection_name(Collections::SAMPLES()), cem);
@@ -706,11 +706,11 @@ namespace epidb {
       mongo::BSONObjBuilder create_project_builder;
       create_project_builder.appendElements(search_data);
 
-      utils::IdName id_user_name;
-      if (!users::get_user_name(user_key, id_user_name, msg)) {
+      std::string user_id;
+      if (!users::get_user_id(user_key, user_id, msg)) {
         return false;
       }
-      create_project_builder.append("user", id_user_name.name);
+      create_project_builder.append("user", user_id);
       mongo::BSONObj cem = create_project_builder.obj();
 
       Connection c;
