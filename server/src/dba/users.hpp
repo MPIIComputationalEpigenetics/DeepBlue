@@ -27,6 +27,13 @@ namespace epidb {
       bool get_user_name(const std::string &user_key, utils::IdName &id_name, std::string &msg);
 
       /*
+      * \brief  Get user-name for given user-ID
+      * \param  user_id     The user-ID
+      *        user_name   Return: The user-key
+      */
+      bool get_user_name_by_id(const std::string &user_id, std::string &user_name, std::string &msg);
+
+      /*
       * \brief  Get user-ID for given user-key
       * \param  user_key  The user-key
       *         user_id   Return: The user-ID

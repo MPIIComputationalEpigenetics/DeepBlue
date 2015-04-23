@@ -18,6 +18,7 @@
 
 #include "column_types.hpp"
 #include "data.hpp"
+#include "users.hpp"
 
 namespace epidb {
   namespace dba {
@@ -337,6 +338,16 @@ namespace epidb {
       bool get_column_type(const std::string &id, std::map<std::string, std::string> &res, std::string &msg)
       {
         return columns::get_column_type(id, res, msg);
+      }
+
+      bool id_to_name(std::map<std::string, std::string> &map, std::string &msg)
+      {
+        std::string user_name;
+        if (!dba::users::get_user_name_by_id(map["user"], user_name, msg)) {
+          return false;
+        }
+        map["user"] = user_name;
+        return true;
       }
     }
   }

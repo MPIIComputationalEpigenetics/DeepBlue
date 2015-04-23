@@ -375,7 +375,7 @@ namespace epidb {
         return get_increment_counter(name + "_operations", tmp, msg);
       }
 
-    // TODO: move to arrays.cpp
+      // TODO: move to arrays.cpp
       mongo::BSONArray build_array(const std::vector<std::string> &params)
       {
         mongo::BSONArrayBuilder ab;

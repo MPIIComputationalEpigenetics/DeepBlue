@@ -78,33 +78,43 @@ namespace epidb {
           std::vector<std::map<std::string, std::string> > columns;
           if (id.compare(0, 1, "a") == 0) {
             ok = dba::info::get_annotation(id, metadata, extra_metadata, columns, upload_info, msg);
+            ok = ok && dba::info::id_to_name(upload_info, msg);
             type = "annotation";
           } else if (id.compare(0, 1, "g") == 0) {
             ok = dba::info::get_genome(id, metadata, msg);
+            ok = ok && dba::info::id_to_name(metadata, msg);
             type = "genome";
           } else if (id.compare(0, 1, "p") == 0) {
             ok = dba::info::get_project(id, metadata, msg);
+            ok = ok && dba::info::id_to_name(metadata, msg);
             type = "project";
           } else if (id.compare(0, 2, "bs") == 0) {
             ok = dba::info::get_biosource(id, metadata, extra_metadata, synonyms, msg);
+            ok = ok && dba::info::id_to_name(metadata, msg);
             type = "biosource";
           } else if (id.compare(0, 1, "s") == 0) {
             ok = dba::info::get_sample_by_id(id, metadata, msg);
+            ok = ok && dba::info::id_to_name(metadata, msg);
             type = "sample";
           } else if (id.compare(0, 2, "em") == 0) {
             ok = dba::info::get_epigenetic_mark(id, metadata, msg);
+            ok = ok && dba::info::id_to_name(metadata, msg);
             type = "epigenetic_mark";
           } else if (id.compare(0, 1, "e") == 0) {
             ok = dba::info::get_experiment(id, metadata, extra_metadata, sample_info, columns, upload_info, msg);
+            ok = ok && dba::info::id_to_name(upload_info, msg);
             type = "experiment";
           } else if (id.compare(0, 1, "q") == 0) {
             ok = dba::info::get_query(id, metadata, msg);
+            ok = ok && dba::info::id_to_name(metadata, msg);
             type = "query";
           } else if (id.compare(0, 2, "tr") == 0) {
             ok = dba::info::get_tiling_region(id, metadata, msg);
+            ok = ok && dba::info::id_to_name(metadata, msg);
             type = "tiling_region";
           } else if (id.compare(0, 1, "t") == 0) {
             ok = dba::info::get_technique(id, metadata, extra_metadata, msg);
+            ok = ok && dba::info::id_to_name(metadata, msg);
             type = "technique";
           } else if (id.compare(0, 2, "ct") == 0) {
             ok = dba::info::get_column_type(id, metadata, msg);

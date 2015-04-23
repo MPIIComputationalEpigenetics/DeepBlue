@@ -54,6 +54,13 @@ namespace epidb {
       bool get_tiling_region(const std::string &id, std::map<std::string, std::string> &res, std::string &msg, bool full = false);
 
       bool get_column_type(const std::string &id, std::map<std::string, std::string> &res, std::string &msg);
+
+      /*
+      * \brief  Convert a map with an "name"-field containing a user-ID to one
+      *         containing a user-name in that field
+      * \param  map Map to be modified
+      */
+      bool id_to_name(std::map<std::string, std::string> &map, std::string &msg);
     }
   }
 }

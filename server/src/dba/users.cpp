@@ -87,6 +87,19 @@ namespace epidb {
         return helpers::get_name(Collections::USERS(), user_key, id_name, msg);
       }
 
+      bool get_user_name_by_id(const std::string &user_id, std::string &user_name, std::string &msg)
+      {
+        std::vector<mongo::BSONObj> results;
+        if (!helpers::get(Collections::USERS(), "_id",  user_id, results, msg)) {
+          return false;
+        }
+        if (results.size() != 0) {
+          user_name = results[0]["name"].str();
+          return true;
+        }
+        return false;
+      }
+
       bool get_user_id(const std::string &user_key, std::string &user_id, std::string &msg)
       {
         utils::IdName id_name;

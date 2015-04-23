@@ -124,6 +124,10 @@ namespace epidb {
             return false;
           }
 
+          if (!dba::info::id_to_name(sample_data, msg)) {
+            return false;
+          }
+
           serialize::ParameterPtr info(new serialize::MapParameter);
           for (std::map<std::string, std::string>::iterator it = sample_data.begin(); it != sample_data.end(); ++it) {
             serialize::ParameterPtr p(new serialize::SimpleParameter(serialize::STRING, it->second));
