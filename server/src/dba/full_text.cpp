@@ -141,7 +141,7 @@ namespace epidb {
       }
 
       bool insert_related_term(const utils::IdName &id_name, const std::vector<std::string> &related_terms,
-        std::string &msg)
+                               std::string &msg)
       {
         Connection c;
 
@@ -228,35 +228,32 @@ namespace epidb {
         Connection c;
 
         mongo::BSONObjBuilder cmd_builder;
-        cmd_builder.append("text", Collections::TEXT_SEARCH());
-        cmd_builder.append("search", text);
         if (types.size() > 0) {
-          cmd_builder.append("filter", BSON("type" << helpers::build_condition_array<std::string>(types, "$in")));
+          cmd_builder.append("type", helpers::build_condition_array<std::string>(types, "$in"));
         }
 
-        mongo::BSONObj result;
-        mongo::BSONObj o = cmd_builder.obj();
-        c->runCommand(config::DATABASE_NAME(), o, result);
+        mongo::BSONObjBuilder text_builder;
+        text_builder.append("$search", text);
+        cmd_builder.append("$text", text_builder.obj());
+        mongo::BSONObj search = cmd_builder.obj();
 
-        if (!c->getLastError().empty()) {
-          msg = c->getLastError();
-          c.done();
-          return false;
-        }
-        if (!result.getField("ok").trueValue()) {
-          msg = result.getStringField("errmsg");
-          c.done();
-          return false;
-        }
+        mongo::BSONObjBuilder view_builder;
+        view_builder.append("epidb_id", 1);
+        view_builder.append("name", 1);
+        view_builder.append("type", 1);
+        view_builder.append("score", BSON("$meta" << "textScore"));
 
-        TextSearchResult res;
-        std::vector<mongo::BSONElement> result_entries = result.getField("results").Array();
-        std::vector<mongo::BSONElement>::iterator it;
-        for (it = result_entries.begin(); it != result_entries.end(); ++it) {
-          res.id = it->Obj().getFieldDotted("obj.epidb_id").str();
-          res.name = it->Obj().getFieldDotted("obj.name").str();
-          res.type = it->Obj().getFieldDotted("obj.type").str();
-          res.score = it->Obj().getField("score").number();
+        mongo::BSONObj projection = view_builder.obj();
+
+        auto cursor = c->query(helpers::collection_name(Collections::TEXT_SEARCH()), search, 0, 0, &projection);
+
+        while (cursor->more()) {
+          TextSearchResult res;
+          mongo::BSONObj o = cursor->next();
+          res.id = o["epidb_id"].str();
+          res.name = o["name"].str();
+          res.type = o["type"].str();
+          res.score = o["score"].number();
           results.push_back(res);
         }
         c.done();
