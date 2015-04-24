@@ -36,11 +36,6 @@
 int main(int argc, char *argv[])
 {
   EPIDB_LOG(epidb::Version::info());
-  EPIDB_LOG("Initializing MongoDB Client...");
-  mongo::client::Options op; // weird ugly core dump if I do not create this object here
-  mongo::client::initialize(op);
-  // TODO: check initialize output
-  EPIDB_LOG("MongoDB Client initialized.");
 
   namespace po = boost::program_options;
 
@@ -77,6 +72,13 @@ int main(int argc, char *argv[])
   }
 
   EPIDB_LOG("Executing DeepBlue at " << address << ":" << port << " with " << threads << " threads.");
+
+  EPIDB_LOG("Initializing MongoDB Client...");
+  mongo::client::Options op; // weird ugly core dump if I do not create this object here
+  mongo::client::initialize(op);
+  // TODO: check initialize output
+  EPIDB_LOG("MongoDB Client initialized.");
+
   EPIDB_LOG("Connecting to MongoDB server " << mongodb_server << " and using database " << database_name << ".")
 
   epidb::dba::config::set_sharding(vm.count("sharding"));
