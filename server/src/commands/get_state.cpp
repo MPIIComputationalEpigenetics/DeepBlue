@@ -1,9 +1,9 @@
 //
-//  list_in_use.cpp
+//  get_state.cpp
 //  epidb
 //
-//  Created by Felipe Albrecht on 12.10.14.
-//  Copyright (c) 2013,2014 Max Planck Institute for Computer Science. All rights reserved.
+//  Created by Natalie Wirth on 18.03.15.
+//  Copyright (c) 2015 Max Planck Institute for Computer Science. All rights reserved.
 //
 
 #include <boost/foreach.hpp>
