@@ -362,10 +362,12 @@ namespace epidb {
         if (cursor->more()) {
           mongo::BSONObj count_cursor = cursor->next();
           count = count_cursor["seq"].Int();
+          c.done();
           return true;
         } else {
           msg += "error reading the counter '" + name + "'.";
         }
+        c.done();
         return false;
       }
 
