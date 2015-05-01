@@ -343,10 +343,16 @@ namespace epidb {
       bool id_to_name(std::map<std::string, std::string> &map, std::string &msg)
       {
         std::string user_name;
-        if (!dba::users::get_user_name_by_id(map["user"], user_name, msg)) {
-          return false;
+
+        std::string user = map["user"];
+        // XXX : Check because version <= 0.9.35 stores the user name, not the ID.
+        if (utils::is_id(user, "u")) {
+          if (!dba::users::get_user_name_by_id(user, user_name, msg)) {
+            return false;
+          }
+          map["user"] = user_name;
         }
-        map["user"] = user_name;
+
         return true;
       }
     }
