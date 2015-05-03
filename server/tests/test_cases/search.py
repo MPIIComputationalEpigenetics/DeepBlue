@@ -301,7 +301,7 @@ class TestSearch(helpers.TestCase):
 
     expected_one = [['bs2', 'Beatriz', 'biosources'], ['bs1', 'Ana', 'biosources'], ['bs4', 'Bianca Ana', 'biosources'], ['bs6', 'Bianca Carolina', 'biosources'], ['bs5', 'Bruna Branca', 'biosources'], ['bs7', 'Brunete Cinza Cerva', 'biosources'], ['bs3', 'Carolina', 'biosources']]
     (s, r1) = epidb.search("Ana Zebra Beatriz", None, self.admin_key)
-    self.assertEquals(r1, expected_one)
+    self.assertEquals(sorted(r1), sorted(expected_one))
 
     expected_two = [['bs1', 'Ana', 'biosources'], ['bs4', 'Bianca Ana', 'biosources'], ['bs3', 'Carolina', 'biosources'], ['bs7', 'Brunete Cinza Cerva', 'biosources'], ['bs5', 'Bruna Branca', 'biosources'], ['bs6', 'Bianca Carolina', 'biosources'], ['bs2', 'Beatriz', 'biosources']]
     (s, r2) = epidb.search("Ana", None, self.admin_key)
