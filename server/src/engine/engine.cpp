@@ -6,9 +6,10 @@
 //  Copyright (c) 2014 Max Planck Institute for Computer Science. All rights reserved.
 //
 
-#include <iostream>
 #include <sstream>
 #include <vector>
+
+#include <mongo/client/dbclient.h>
 
 #include "commands.hpp"
 #include "engine.hpp"
@@ -20,6 +21,8 @@
 #include "../extras/stringbuilder.hpp"
 
 #include "../processing/processing.hpp"
+
+#include "../mdbq/common.hpp"
 
 #include "../log.hpp"
 #include "../version.hpp"
@@ -146,6 +149,27 @@ namespace epidb {
     return true;
   }
 
+  bool Engine::request_jobs(const std::string &status_find, const std::string &user_key, std::vector<request::Job>& ret, std::string& msg)
+  {
+    std::string user_id;
+    if(!dba::users::get_user_id(user_key, user_id, msg)){
+      return false;
+    }
+    
+    mdbq::TaskState task_state = mdbq::Hub::state_number(status_find);
+    std::auto_ptr<mongo::DBClientCursor> cursor = _hub.get_jobs(task_state, user_id);
+    while (cursor->more()) {
+        mongo::BSONObj o = cursor->next();
+        request::Job job;
+        request::Status status;
+        status.state = mdbq::Hub::state_name(o);
+        status.message = mdbq::Hub::state_message(o);
+        job.status = status;
+        job._id = o["_id"];
+        ret.push_back(job);
+    }
+    return true;
+  }
 
   bool Engine::request_data(const std::string &request_id, const std::string &user_key, request::Data &data, StringBuilder &sb, request::DataType& type,  std::string &msg)
   {

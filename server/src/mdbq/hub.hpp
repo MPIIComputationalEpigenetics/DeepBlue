@@ -11,9 +11,11 @@
 #     define __MDBQ_HUB_HPP__
 
 #include <boost/shared_ptr.hpp>
+#include "../mdbq/common.hpp"
 
 namespace mongo {
   class  BSONObj;
+  class DBClientCursor;
 }
 namespace boost {
   namespace asio {
@@ -22,7 +24,7 @@ namespace boost {
 }
 
 namespace epidb {
-    class StringBuilder;
+  class StringBuilder;
 }
 
 namespace mdbq {
@@ -63,7 +65,14 @@ namespace mdbq {
 
     mongo::BSONObj get_job(const std::string& id, const std::string& user_key);
 
-
+    /*
+     * \brief Get all jobs in given state owned by given user. If no valid mdbq::TaskState is given,
+     *        all jobs are returned.
+     * \param state     State searched for
+     *        user_id   ID of owning user
+     */
+    std::auto_ptr<mongo::DBClientCursor> get_jobs(const mdbq::TaskState& state, const std::string &user_id);
+    
     /**
      * get newest finished job (primarily for testing)
      */
@@ -106,7 +115,11 @@ namespace mdbq {
 
     virtual void got_new_results();
 
+    static mdbq::TaskState state_number(const std::string& name);
+
     static std::string state_name(mongo::BSONObj& o);
+
+    static std::string state_name(int state);
 
     static std::string state_message(mongo::BSONObj& o);
 

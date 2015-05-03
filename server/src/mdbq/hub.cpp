@@ -14,7 +14,6 @@
 
 #include <mongo/client/dbclient.h>
 
-#include "common.hpp"
 #include "hub.hpp"
 #include "date_time.hpp"
 
@@ -56,7 +55,7 @@ namespace mdbq {
       std::auto_ptr<mongo::DBClientCursor> p =
         // note: currently snapshot mode may not be used w/ sorting or explicit hints
         m_con->query( m_prefix + ".jobs",
-                     BSON( "state"   << mongo::GT << -1));
+                      BSON( "state"   << mongo::GT << -1));
       CHECK_DB_ERR_LOG(m_con);
 
       std::cout << "JOB SUMMARY" << std::endl;
@@ -96,10 +95,10 @@ namespace mdbq {
                                 "nfailed" << 1);
       std::auto_ptr<mongo::DBClientCursor> p =
         m_con->query( m_prefix + ".jobs",
-                     BSON(
-                       "state" << TS_FAILED <<
-                       "nfailed" << mongo::LT << 1), /* first time failure only */
-                     0, 0, &ret);
+                      BSON(
+                        "state" << TS_FAILED <<
+                        "nfailed" << mongo::LT << 1), /* first time failure only */
+                      0, 0, &ret);
       CHECK_DB_ERR_LOG(m_con);
       while (p->more()) {
         mongo::BSONObj f = p->next();
@@ -111,13 +110,13 @@ namespace mdbq {
                   << f["owner"].String() << "' failed, rescheduling" << std::endl;
 
         m_con->update(m_prefix + ".jobs",
-                     BSON("_id" << f["_id"]),
-                     BSON(
-                       "$inc" << BSON("nfailed" << 1) <<
-                       "$set" << BSON(
-                         "state"         << TS_NEW
-                         << "book_time"   << mongo::Undefined
-                         << "refresh_time" << mongo::Undefined)));
+                      BSON("_id" << f["_id"]),
+                      BSON(
+                        "$inc" << BSON("nfailed" << 1) <<
+                        "$set" << BSON(
+                          "state"         << TS_NEW
+                          << "book_time"   << mongo::Undefined
+                          << "refresh_time" << mongo::Undefined)));
         CHECK_DB_ERR_LOG(m_con);
       }
 
@@ -150,19 +149,19 @@ namespace mdbq {
 
     boost::posix_time::ptime ctime = universal_date_time();
     m_ptr->m_con->insert(m_prefix + ".jobs",
-                        BSON( "_id" << id
-                              << "timeout"     << timeout
-                              << "version"     << version_value
-                              << "create_time" << to_mongo_date(ctime)
-                              << "finish_time" << mongo::Undefined
-                              << "book_time"   << mongo::Undefined
-                              << "refresh_time" << mongo::Undefined
-                              << "misc"        << job
-                              << "nfailed"     << (int)0
-                              << "state"       << TS_NEW
-                              << "version"     << (int)0
-                            )
-                       );
+                         BSON( "_id" << id
+                               << "timeout"     << timeout
+                               << "version"     << version_value
+                               << "create_time" << to_mongo_date(ctime)
+                               << "finish_time" << mongo::Undefined
+                               << "book_time"   << mongo::Undefined
+                               << "refresh_time" << mongo::Undefined
+                               << "misc"        << job
+                               << "nfailed"     << (int)0
+                               << "state"       << TS_NEW
+                               << "version"     << (int)0
+                             )
+                        );
     CHECK_DB_ERR_RETURN(m_ptr->m_con, msg);
 
     return true;
@@ -171,25 +170,25 @@ namespace mdbq {
   size_t Hub::get_n_open()
   {
     return m_ptr->m_con->count(m_prefix + ".jobs",
-                              BSON( "state" << TS_NEW));
+                               BSON( "state" << TS_NEW));
   }
 
   size_t Hub::get_n_assigned()
   {
     return m_ptr->m_con->count(m_prefix + ".jobs",
-                              BSON( "state" << TS_RUNNING));
+                               BSON( "state" << TS_RUNNING));
   }
 
   size_t Hub::get_n_ok()
   {
     return m_ptr->m_con->count(m_prefix + ".jobs",
-                              BSON( "state" << TS_DONE));
+                               BSON( "state" << TS_DONE));
   }
 
   size_t Hub::get_n_failed()
   {
     return m_ptr->m_con->count(m_prefix + ".jobs",
-                              BSON( "state" << TS_FAILED));
+                               BSON( "state" << TS_FAILED));
   }
 
   void Hub::clear_all()
@@ -200,7 +199,7 @@ namespace mdbq {
     m_ptr->m_con->dropCollection(m_prefix + ".fs.files");
 
     // this is from https://jira.mongodb.org/browse/SERVER-5323
-   // m_ptr->m_con->createIndex(m_prefix + ".fs.chunks", BSON("files_id" << 1 << "n" << 1));
+    // m_ptr->m_con->createIndex(m_prefix + ".fs.chunks", BSON("files_id" << 1 << "n" << 1));
   }
 
   void Hub::got_new_results()
@@ -220,22 +219,54 @@ namespace mdbq {
     return m_ptr->m_con->findOne(m_prefix + ".jobs", BSON("_id" << id << "misc.user_id" << user_id)) ;
   }
 
+  std::auto_ptr<mongo::DBClientCursor> Hub::get_jobs(const mdbq::TaskState& state, const std::string &user_id)
+  {
+    if (state == mdbq::_TS_END) {
+      return m_ptr->m_con->query(m_prefix + ".jobs", BSON("misc.user_id" << user_id));
+    } else {
+      return m_ptr->m_con->query(m_prefix + ".jobs", BSON("state" << state << "misc.user_id" << user_id));
+    }
+  }
+
   mongo::BSONObj Hub::get_newest_finished()
   {
     return m_ptr->m_con->findOne(m_prefix + ".jobs",
-                                mongo::Query(BSON("state" << TS_DONE)).sort("finish_time"));
+                                 mongo::Query(BSON("state" << TS_DONE)).sort("finish_time"));
+  }
+
+  mdbq::TaskState Hub::state_number(const std::string& name)
+  {
+    if (name == "new") {
+      return TS_NEW;
+    } else if (name == "running") {
+      return TS_RUNNING;
+    } else if (name == "done") {
+      return TS_DONE;
+    } else if (name == "failed") {
+      return TS_FAILED;
+    } else {
+      return _TS_END;
+    }
   }
 
   std::string Hub::state_name(mongo::BSONObj &o)
   {
-    int state = o["state"].Int();
+    return state_name(o["state"].Int());
+  }
 
+  std::string Hub::state_name(int state)
+  {
     switch (state) {
-    case TS_NEW: return "new";
-    case TS_RUNNING: return "running";
-    case TS_DONE: return "done";
-    case TS_FAILED: return "failed";
-    default : return "Invalid State: " + epidb::utils::integer_to_string(state);
+    case TS_NEW:
+      return "new";
+    case TS_RUNNING:
+      return "running";
+    case TS_DONE:
+      return "done";
+    case TS_FAILED:
+      return "failed";
+    default :
+      return "Invalid State: " + epidb::utils::integer_to_string(state);
     }
   }
 
@@ -244,11 +275,16 @@ namespace mdbq {
     int state = o["state"].Int();
 
     switch (state) {
-    case TS_NEW: return "";
-    case TS_RUNNING: return "";
-    case TS_DONE: return "";
-    case TS_FAILED: return "**failed message**"; // TODO: implement here
-    default : return "Invalid State: " + epidb::utils::integer_to_string(state);
+    case TS_NEW:
+      return "";
+    case TS_RUNNING:
+      return "";
+    case TS_DONE:
+      return "";
+    case TS_FAILED:
+      return "**failed message**"; // TODO: implement here
+    default :
+      return "Invalid State: " + epidb::utils::integer_to_string(state);
     }
   }
 

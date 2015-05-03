@@ -10,13 +10,14 @@
 #ifndef __MDBQ_COMMON_HPP__
 #define __MDBQ_COMMON_HPP__
 
-namespace mdbq
-{
-    enum TaskState{
-        TS_NEW,
-        TS_RUNNING,
-        TS_DONE,
-        TS_FAILED
-    };
+namespace mdbq {
+  enum TaskState {
+    TS_NEW,
+    TS_RUNNING,
+    TS_DONE,
+    TS_FAILED,
+    _TS_END,
+    _TS_FIRST = TS_NEW
+  };
 }
 #endif /* __MDBQ_COMMON_HPP__ */
