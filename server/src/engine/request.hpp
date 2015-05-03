@@ -31,7 +31,12 @@ namespace epidb {
       std::string state;
       std::string message;
     } Status;
-
+    
+    typedef struct Job {
+      std::string _id;
+      Status status;
+    } Job;
+    
     typedef struct Data {
       std::vector<utils::IdName> id_names;
       std::vector<StringDataPair> strings;

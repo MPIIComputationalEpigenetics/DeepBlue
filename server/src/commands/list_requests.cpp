@@ -85,7 +85,7 @@ namespace epidb {
           return false;
         }
 
-        for (request::Job job : jobs) {
+        for (const request::Job& job : jobs) {
           std::vector<serialize::ParameterPtr> list;
           list.push_back(serialize::ParameterPtr(new serialize::SimpleParameter(serialize::STRING, job._id)));
           list.push_back(serialize::ParameterPtr(new serialize::SimpleParameter(serialize::STRING, job.status.state)));
