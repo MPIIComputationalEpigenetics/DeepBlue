@@ -25,13 +25,13 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::GENERAL_INFORMATION, "Lists all requests in given state.");
+        return CommandDescription(categories::REQUESTS, "Lists all requests in given state.");
       }
 
       static Parameters parameters_()
       {
         Parameter p[] = {
-          Parameter("request_state", serialize::STRING, "Name of the state to get requests for"),
+          Parameter("request_state", serialize::STRING, "Name of the state to get requests for. The valid states are: new, running, done, and failed."),
           parameters::UserKey
         };
         Parameters params(&p[0], &p[0] + 2);
