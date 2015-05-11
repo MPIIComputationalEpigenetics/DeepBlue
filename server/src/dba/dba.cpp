@@ -141,6 +141,7 @@ namespace epidb {
 
       // Clear caches
       cv::biosources_cache.invalidate();
+      users::invalidate_cache();
 
       c.done();
       return true;

@@ -49,6 +49,11 @@ namespace epidb {
       bool set_user_admin(const std::string &user_id, const bool value, std::string &msg);
 
       bool is_admin_key(const std::string &admin_key, bool &ret, std::string &msg);
+
+      /*
+      * \brief Cleans cache
+      */
+      void invalidate_cache();
     }
   }
 }

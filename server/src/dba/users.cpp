@@ -21,6 +21,39 @@ namespace epidb {
   namespace dba {
     namespace users {
 
+      class NameCache {
+      private:
+
+        std::map<std::string, std::string> id_name;
+
+      public:
+
+        std::string get_user_name(const std::string &id)
+        {
+          return id_name[id];
+        }
+
+        void set_user_name(const std::string &id, const std::string &name)
+        {
+          id_name[id] = name;
+        }
+
+        bool exists_user_id(const std::string &id)
+        {
+          if (id_name.find(id) != id_name.end()) {
+            return true;
+          }
+          return false;
+        }
+
+        void invalidate()
+        {
+          id_name.clear();
+        }
+      };
+
+      NameCache name_cache;
+
       bool is_valid_email(const std::string &email, std::string &msg)
       {
         if (helpers::check_exist(Collections::USERS(), "email", email)) {
@@ -89,15 +122,21 @@ namespace epidb {
 
       bool get_user_name_by_id(const std::string &user_id, std::string &user_name, std::string &msg)
       {
-        std::vector<mongo::BSONObj> results;
-        if (!helpers::get(Collections::USERS(), "_id",  user_id, results, msg)) {
-          return false;
-        }
-        if (results.size() != 0) {
-          user_name = results[0]["name"].str();
+        if(name_cache.exists_user_id(user_id)) {
+          user_name = name_cache.get_user_name(user_id);
           return true;
+        } else {
+          std::vector<mongo::BSONObj> results;
+          if (!helpers::get(Collections::USERS(), "_id",  user_id, results, msg)) {
+            return false;
+          }
+          if (results.size() == 0) {
+            return false;
+          }
+          user_name = results[0]["name"].str();
+          name_cache.set_user_name(user_id, user_name);
         }
-        return false;
+        return true;
       }
 
       bool get_user_id(const std::string &user_key, std::string &user_id, std::string &msg)
@@ -177,6 +216,11 @@ namespace epidb {
         ret = count > 0;
         c.done();
         return true;
+      }
+
+      void invalidate_cache()
+      {
+        name_cache.invalidate();
       }
     }
   }
