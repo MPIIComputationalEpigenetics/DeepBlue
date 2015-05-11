@@ -219,13 +219,21 @@ namespace mdbq {
     return m_ptr->m_con->findOne(m_prefix + ".jobs", BSON("_id" << id << "misc.user_id" << user_id)) ;
   }
 
-  std::auto_ptr<mongo::DBClientCursor> Hub::get_jobs(const mdbq::TaskState& state, const std::string &user_id)
+  std::list<mongo::BSONObj> Hub::get_jobs(const mdbq::TaskState& state, const std::string &user_id)
   {
+    std::auto_ptr<mongo::DBClientCursor> cursor;
     if (state == mdbq::_TS_END) {
-      return m_ptr->m_con->query(m_prefix + ".jobs", BSON("misc.user_id" << user_id));
+      cursor = m_ptr->m_con->query(m_prefix + ".jobs", BSON("misc.user_id" << user_id));
     } else {
-      return m_ptr->m_con->query(m_prefix + ".jobs", BSON("state" << state << "misc.user_id" << user_id));
+      cursor = m_ptr->m_con->query(m_prefix + ".jobs", BSON("state" << state << "misc.user_id" << user_id));
     }
+      
+    std::list<mongo::BSONObj> ret;
+    while (cursor->more()) {
+      mongo::BSONObj o = cursor->next();
+      ret.push_back(o);
+    }
+    return ret;
   }
 
   mongo::BSONObj Hub::get_newest_finished()

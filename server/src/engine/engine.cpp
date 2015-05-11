@@ -9,8 +9,6 @@
 #include <sstream>
 #include <vector>
 
-#include <mongo/client/dbclient.h>
-
 #include "commands.hpp"
 #include "engine.hpp"
 
@@ -157,15 +155,14 @@ namespace epidb {
     }
     
     mdbq::TaskState task_state = mdbq::Hub::state_number(status_find);
-    std::auto_ptr<mongo::DBClientCursor> cursor = _hub.get_jobs(task_state, user_id);
-    while (cursor->more()) {
-        mongo::BSONObj o = cursor->next();
+    std::list<mongo::BSONObj> objects = _hub.get_jobs(task_state, user_id);
+    for(auto it = objects.begin(); it != objects.end(); it++) {
         request::Job job;
         request::Status status;
-        status.state = mdbq::Hub::state_name(o);
-        status.message = mdbq::Hub::state_message(o);
+        status.state = mdbq::Hub::state_name(*it);
+        status.message = mdbq::Hub::state_message(*it);
         job.status = status;
-        job._id = o["_id"];
+        job._id = (*it)["_id"];
         ret.push_back(job);
     }
     return true;

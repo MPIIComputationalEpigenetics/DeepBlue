@@ -70,8 +70,9 @@ namespace mdbq {
      *        all jobs are returned.
      * \param state     State searched for
      *        user_id   ID of owning user
+     * \return          Requested jobs
      */
-    std::auto_ptr<mongo::DBClientCursor> get_jobs(const mdbq::TaskState& state, const std::string &user_id);
+    std::list<mongo::BSONObj> get_jobs(const mdbq::TaskState& state, const std::string &user_id);
     
     /**
      * get newest finished job (primarily for testing)
