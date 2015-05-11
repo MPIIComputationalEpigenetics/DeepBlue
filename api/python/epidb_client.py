@@ -244,6 +244,9 @@ class EpidbClient:
         return self.server.score_matrix(experiments, operation, regions_id, user_key)
 
 ## Requests
+    def list_requests(self, status, user_key):
+        return self.server.list_requests(status, user_key)
+
     def get_request_status(self, request_id, user_key):
         return self.server.get_request_status(request_id, user_key)
 
