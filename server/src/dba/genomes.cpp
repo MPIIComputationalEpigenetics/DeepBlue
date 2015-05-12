@@ -47,9 +47,6 @@ namespace epidb {
 
         std::string norm_chromosome = utils::normalize_name(chromosome);
 
-        std::cerr << chromosome << std::endl;
-        std::cerr << norm_chromosome << std::endl;
-
         NamesPairs::const_iterator p;
 
         // Return if the name is correct
