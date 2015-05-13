@@ -50,7 +50,7 @@ namespace epidb {
 
           std::string msg;
           std::string name;
-          if (!dba::exists::user(user_key)) {
+          if (!dba::exists::user_by_key(user_key)) {
             name = "a Stranger";
           } else {
             if (!dba::users::get_user_name(user_key, name, msg)) {
