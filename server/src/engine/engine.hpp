@@ -29,6 +29,8 @@ namespace epidb {
 
     bool queue(const mongo::BSONObj &job, unsigned int timeout, std::string &request_id, std::string &msg);
 
+    request::Job get_job(mongo::BSONObj o);
+
   public:
     static Engine &instance()
     {
@@ -42,15 +44,21 @@ namespace epidb {
                  serialize::Parameters &parameters, serialize::Parameters &result) const;
 
     bool request_status(const std::string &request_id, const std::string &user_key, request::Status &status, std::string &msg);
-    
+
+    /*
+    * \brief Get job with given id owned by given user.
+    * \param    job     Return: Requested job
+    */
+    bool request_job(const std::string& request_id, const std::string& user_key, request::Job& job, std::string &msg);
+
     /*
     * \brief Get all jobs having given status owned by given user. If no status is given, it returns all jobs by given user.
-    * \param status     Status to search for
-     *       user_key   Key of the owning user
-     *       ret        Return: All requested jobs
+    * \param    status     Status to search for
+    *           user_key   Key of the owning user
+    *           ret        Return: All requested jobs
     */
     bool request_jobs(const std::string& status, const std::string& user_key, std::vector<request::Job>& ret, std::string &msg);
-    
+
     bool request_data(const std::string &request_id, const std::string &user_key, request::Data &data, StringBuilder &sb, request::DataType &type, std::string &msg);
 
     bool queue_count_regions(const std::string &query_id, const std::string &user_key, std::string &request_id, std::string &msg);

@@ -31,12 +31,18 @@ namespace epidb {
       std::string state;
       std::string message;
     } Status;
-    
+
     typedef struct Job {
       std::string _id;
       Status status;
+      boost::posix_time::ptime create_time;
+      /*
+      * \brief Time at which the job was finished. Only to be set, if status == TS_DONE
+      */
+      boost::posix_time::ptime finish_time;
+      std::string query_id;
     } Job;
-    
+
     typedef struct Data {
       std::vector<utils::IdName> id_names;
       std::vector<StringDataPair> strings;

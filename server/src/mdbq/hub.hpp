@@ -13,6 +13,9 @@
 #include <boost/shared_ptr.hpp>
 #include "../mdbq/common.hpp"
 
+#include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/date_time/gregorian/gregorian.hpp>
+
 namespace mongo {
   class  BSONObj;
   class DBClientCursor;
@@ -73,7 +76,7 @@ namespace mdbq {
      * \return          Requested jobs
      */
     std::list<mongo::BSONObj> get_jobs(const mdbq::TaskState& state, const std::string &user_id);
-    
+
     /**
      * get newest finished job (primarily for testing)
      */
@@ -118,13 +121,33 @@ namespace mdbq {
 
     static mdbq::TaskState state_number(const std::string& name);
 
-    static std::string state_name(mongo::BSONObj& o);
+    static std::string state_name(const mongo::BSONObj& o);
 
-    static std::string state_name(int state);
+    static std::string state_name(const int state);
 
-    static std::string state_message(mongo::BSONObj& o);
+    static std::string state_message(const mongo::BSONObj& o);
 
-    static bool is_done(mongo::BSONObj& o);
+    /*
+    * \brief Get the time at which a request was created
+    */
+    static boost::posix_time::ptime get_create_time(const mongo::BSONObj& o);
+
+    /*
+    * \brief Get the time at which a request was completed
+    */
+    static boost::posix_time::ptime get_finish_time(const mongo::BSONObj& o);
+
+    /*
+    * \brief Get misc info for a request
+    */
+    static mongo::BSONObj get_misc(const mongo::BSONObj& o);
+
+    /*
+    * \brief Get the id of a request
+    */
+    static std::string get_id(const mongo::BSONObj& o);
+
+    static bool is_done(const mongo::BSONObj& o);
   };
 }
 #endif /* __MDBQ_HUB_HPP__ */
