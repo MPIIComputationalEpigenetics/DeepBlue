@@ -194,7 +194,8 @@ namespace epidb {
       }
 
       bool similar(const std::string &where, const std::string &what,
-                   const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg)
+                   const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg,
+                   const size_t total)
       {
         std::vector<utils::IdName> id_names;
         if (!helpers::get(where, id_names, msg)) {
@@ -209,9 +210,14 @@ namespace epidb {
         }
         std::vector<std::string> ordered = epidb::algorithms::Levenshtein::order_by_score(what, names);
 
+        size_t count = 0;
         for(const std::string & name: ordered) {
           utils::IdName id_name(id_name_map[name], name);
           result.push_back(id_name);
+          count++;
+          if (count >= total) {
+            break;
+          }
         }
 
         return true;
@@ -219,7 +225,8 @@ namespace epidb {
 
       bool similar(const std::string &where, const std::string &field, const std::string &what,
                    const std::string &filter_field, const std::string &filter_what,
-                   const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg)
+                   const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg,
+                   const size_t total)
       {
         std::vector<mongo::BSONObj> docs;
 
@@ -237,9 +244,14 @@ namespace epidb {
 
         std::vector<std::string> ordered = epidb::algorithms::Levenshtein::order_by_score(what, names);
 
+        size_t count = 0;
         for(const std::string & name: ordered) {
           utils::IdName id_name(id_name_map[name], name);
           result.push_back(id_name);
+          count++;
+          if (count >= total) {
+            break;
+          }
         }
 
         return true;

@@ -73,7 +73,7 @@ namespace epidb {
           return false;
         }
 
-        if(std::find(allowed_status.begin(), allowed_status.end(), status_find) == allowed_status.end()) {
+        if (std::find(allowed_status.begin(), allowed_status.end(), status_find) == allowed_status.end()) {
           result.add_error(status_find + " is not an allowed data name. Allowed data names are: " +
                            allowed_status_string);
           return false;
@@ -85,7 +85,7 @@ namespace epidb {
           return false;
         }
 
-	result.set_as_array(true);
+        result.set_as_array(true);
 
         for (const request::Job& job : jobs) {
           std::vector<serialize::ParameterPtr> list;

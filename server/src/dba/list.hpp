@@ -78,11 +78,13 @@ namespace epidb {
 
 
       bool similar(const std::string &where, const std::string &what,
-                   const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg);
+                   const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg,
+                   const size_t total = 20);
 
       bool similar(const std::string &where, const std::string &field, const std::string &what,
                    const std::string &filter_field, const std::string &filter_what,
-                   const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg);
+                   const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg,
+                   const size_t total = 20);
 
       /**
        * List in use

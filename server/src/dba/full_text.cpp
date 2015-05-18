@@ -210,11 +210,6 @@ namespace epidb {
         return true;
       }
 
-      static bool __sort_search_full_text_result(TextSearchResult i, TextSearchResult j)
-      {
-        return i.score > j.score;
-      }
-
       bool search_full_text(const std::string &text, std::vector<TextSearchResult> &results,
                             std::string &msg)
       {
@@ -245,7 +240,10 @@ namespace epidb {
 
         mongo::BSONObj projection = view_builder.obj();
 
-        auto cursor = c->query(helpers::collection_name(Collections::TEXT_SEARCH()), search, 0, 0, &projection);
+        mongo::BSONObj SORT = BSON("score" << BSON("$meta" << "textScore"));
+
+        const size_t MAX_RESULTS = 50;
+        auto cursor = c->query(helpers::collection_name(Collections::TEXT_SEARCH()), mongo::Query(search).sort(SORT), MAX_RESULTS, 0, &projection);
 
         while (cursor->more()) {
           TextSearchResult res;
@@ -257,8 +255,6 @@ namespace epidb {
           results.push_back(res);
         }
         c.done();
-
-        std::sort(results.begin(), results.end(), __sort_search_full_text_result);
 
         return true;
       }

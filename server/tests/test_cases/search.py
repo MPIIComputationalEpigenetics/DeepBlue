@@ -382,7 +382,7 @@ class TestSearch(helpers.TestCase):
     self.assertEqual([['e1', 'las chicas', 'experiments']], r1)
 
     (s, r2) = epidb.search("Carolina", [], self.admin_key)
-    self.assertEqual([['bs5', 'Carolina', 'biosources'], ['e1', 'las chicas', 'experiments'], ['s3', '', 'samples']], r2)
+    self.assertEqual([['bs5', 'Carolina', 'biosources'], ['s3', '', 'samples'], ['e1', 'las chicas', 'experiments']], r2)
 
   def test_column_types_search(self):
     epidb = EpidbClient()
