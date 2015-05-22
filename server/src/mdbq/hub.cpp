@@ -313,7 +313,7 @@ namespace mdbq {
 
   std::string Hub::get_id(const mongo::BSONObj& o)
   {
-    return o["_id"];
+    return o["_id"].String();
   }
 
   bool Hub::is_done(const mongo::BSONObj &o)

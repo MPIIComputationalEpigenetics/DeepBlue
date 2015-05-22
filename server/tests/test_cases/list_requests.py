@@ -6,7 +6,8 @@ import re
 class TestListRequests(helpers.TestCase):
 
     def test_result_ids(self):
-        """Test the request-ID's returned by list_requests
+        """
+        Test the request-ID's returned by list_requests
         """
         epidb = client.EpidbClient()
         self.init_full(epidb)
@@ -17,7 +18,6 @@ class TestListRequests(helpers.TestCase):
         self.assertSuccess(s, query_id)
 
         requests = []
-
         for i in xrange(0, 10):
             s, request_id = epidb.get_regions(query_id, "CHROMOSOME,START,END", self.admin_key)
             self.assertSuccess(s, request_id)
@@ -26,10 +26,9 @@ class TestListRequests(helpers.TestCase):
         s, requests_list = epidb.list_requests(None, self.admin_key)
         self.assertSuccess(s, requests_list)
 
-        id_field = re.compile("_id: \"(r[0-9]*)\"")
-        for id, status in requests_list:
-            id_field_match = id_field.match(id)
-            id = id_field_match.group(1)
-            self.assertTrue(id in requests)
-            requests.remove(id)
-        self.assertTrue(len(requests) == 0)
+        for _id, status in requests_list:
+            self.assertTrue(_id in requests)
+
+        requests_ids = [r[0] for r in requests_list]
+
+        self.assertEquals(requests_ids, requests)
