@@ -230,7 +230,7 @@ namespace mdbq {
 
     std::list<mongo::BSONObj> ret;
     while (cursor->more()) {
-      mongo::BSONObj o = cursor->next();
+      mongo::BSONObj o = cursor->next().getOwned();
       ret.push_back(o);
     }
     return ret;
