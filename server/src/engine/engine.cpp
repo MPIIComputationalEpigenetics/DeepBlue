@@ -75,7 +75,7 @@ namespace epidb {
   bool Engine::queue_count_regions(const std::string &query_id, const std::string &user_key, std::string &id, std::string &msg)
   {
     std::string user_id;
-    if(!dba::users::get_user_id(user_key, user_id, msg)){
+    if(!dba::users::get_user_id(user_key, user_id, msg)) {
       return false;
     }
     if (!queue(BSON("command" << "count_regions" << "query_id" << query_id << "user_id" << user_id), 60 * 60, id, msg)) {
@@ -87,7 +87,7 @@ namespace epidb {
   bool Engine::queue_get_regions(const std::string &query_id, const std::string &output_format, const std::string &user_key, std::string &id, std::string &msg)
   {
     std::string user_id;
-    if(!dba::users::get_user_id(user_key, user_id, msg)){
+    if(!dba::users::get_user_id(user_key, user_id, msg)) {
       return false;
     }
     if (!queue(BSON("command" << "get_regions" << "query_id" << query_id << "format" << output_format << "user_id" << user_id), 60 * 60, id, msg)) {
@@ -105,7 +105,7 @@ namespace epidb {
     }
 
     std::string user_id;
-    if(!dba::users::get_user_id(user_key, user_id, msg)){
+    if(!dba::users::get_user_id(user_key, user_id, msg)) {
       return false;
     }
 
@@ -120,7 +120,7 @@ namespace epidb {
   bool Engine::queue_get_experiments_by_query(const std::string &query_id, const std::string &user_key, std::string &request_id, std::string &msg)
   {
     std::string user_id;
-    if(!dba::users::get_user_id(user_key, user_id, msg)){
+    if(!dba::users::get_user_id(user_key, user_id, msg)) {
       return false;
     }
     if (!queue(BSON("command" << "get_experiments_by_query" << "query_id" << query_id << "user_id" << user_id), 60 * 60, request_id, msg)) {
@@ -133,7 +133,7 @@ namespace epidb {
   bool Engine::request_status(const std::string &request_id, const std::string &user_key, request::Status &request_status, std::string &msg)
   {
     std::string user_id;
-    if(!dba::users::get_user_id(user_key, user_id, msg)){
+    if(!dba::users::get_user_id(user_key, user_id, msg)) {
       return false;
     }
     mongo::BSONObj o = _hub.get_job(request_id, user_id);
@@ -147,23 +147,53 @@ namespace epidb {
     return true;
   }
 
+  request::Job Engine::get_job(mongo::BSONObj o)
+  {
+    request::Job job;
+    request::Status status;
+
+    status.state = mdbq::Hub::state_name(o);
+    status.message = mdbq::Hub::state_message(o);
+    job.status = status;
+
+    job.create_time = mdbq::Hub::get_create_time(o);
+    if (status.state == mdbq::Hub::state_name(mdbq::TS_DONE)) {
+      job.finish_time = mdbq::Hub::get_finish_time(o);
+    }
+    job.query_id = mdbq::Hub::get_misc(o)["query_id"].String();
+    job._id = mdbq::Hub::get_id(o);
+
+    return job;
+  }
+
+  bool Engine::request_job(const std::string& request_id, const std::string& user_key, request::Job& job, std::string &msg)
+  {
+    std::string user_id;
+    if(!dba::users::get_user_id(user_key, user_id, msg)) {
+      return false;
+    }
+
+    mongo::BSONObj o = _hub.get_job(request_id, user_id);
+    if (o.isEmpty()) {
+      msg = "Request ID " + request_id + " not found.";
+      return false;
+    }
+    job = get_job(o);
+
+    return true;
+  }
+
   bool Engine::request_jobs(const std::string &status_find, const std::string &user_key, std::vector<request::Job>& ret, std::string& msg)
   {
     std::string user_id;
-    if(!dba::users::get_user_id(user_key, user_id, msg)){
+    if(!dba::users::get_user_id(user_key, user_id, msg)) {
       return false;
     }
-    
+
     mdbq::TaskState task_state = mdbq::Hub::state_number(status_find);
     std::list<mongo::BSONObj> objects = _hub.get_jobs(task_state, user_id);
     for(auto it = objects.begin(); it != objects.end(); it++) {
-        request::Job job;
-        request::Status status;
-        status.state = mdbq::Hub::state_name(*it);
-        status.message = mdbq::Hub::state_message(*it);
-        job.status = status;
-        job._id = (*it)["_id"];
-        ret.push_back(job);
+      ret.push_back(get_job(*it));
     }
     return true;
   }
@@ -171,7 +201,7 @@ namespace epidb {
   bool Engine::request_data(const std::string &request_id, const std::string &user_key, request::Data &data, StringBuilder &sb, request::DataType& type,  std::string &msg)
   {
     std::string user_id;
-    if(!dba::users::get_user_id(user_key, user_id, msg)){
+    if(!dba::users::get_user_id(user_key, user_id, msg)) {
       return false;
     }
     mongo::BSONObj o = _hub.get_job(request_id, user_id);

@@ -227,7 +227,7 @@ namespace mdbq {
     } else {
       cursor = m_ptr->m_con->query(m_prefix + ".jobs", BSON("state" << state << "misc.user_id" << user_id));
     }
-      
+
     std::list<mongo::BSONObj> ret;
     while (cursor->more()) {
       mongo::BSONObj o = cursor->next();
@@ -257,12 +257,12 @@ namespace mdbq {
     }
   }
 
-  std::string Hub::state_name(mongo::BSONObj &o)
+  std::string Hub::state_name(const mongo::BSONObj &o)
   {
     return state_name(o["state"].Int());
   }
 
-  std::string Hub::state_name(int state)
+  std::string Hub::state_name(const int state)
   {
     switch (state) {
     case TS_NEW:
@@ -278,7 +278,7 @@ namespace mdbq {
     }
   }
 
-  std::string Hub::state_message(mongo::BSONObj &o)
+  std::string Hub::state_message(const mongo::BSONObj &o)
   {
     int state = o["state"].Int();
 
@@ -296,7 +296,27 @@ namespace mdbq {
     }
   }
 
-  bool Hub::is_done(mongo::BSONObj &o)
+  boost::posix_time::ptime Hub::get_create_time(const mongo::BSONObj& o)
+  {
+    return to_ptime(o["create_time"].Date());
+  }
+
+  boost::posix_time::ptime Hub::get_finish_time(const mongo::BSONObj& o)
+  {
+    return to_ptime(o["finish_time"].Date());
+  }
+
+  mongo::BSONObj Hub::get_misc(const mongo::BSONObj& o)
+  {
+    return o["misc"].Obj();
+  }
+
+  std::string Hub::get_id(const mongo::BSONObj& o)
+  {
+    return o["_id"];
+  }
+
+  bool Hub::is_done(const mongo::BSONObj &o)
   {
     return o["state"].Int() == TS_DONE;
   }

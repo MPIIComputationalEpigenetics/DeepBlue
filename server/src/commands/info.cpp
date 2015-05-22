@@ -7,6 +7,7 @@
 //
 
 #include <map>
+#include <sstream>
 
 #include <boost/foreach.hpp>
 
@@ -15,6 +16,8 @@
 #include "../extras/serialize.hpp"
 
 #include "../engine/commands.hpp"
+#include "../engine/engine.hpp"
+#include "../engine/request.hpp"
 
 namespace epidb {
   namespace command {
@@ -45,6 +48,28 @@ namespace epidb {
         };
         Parameters results(&p[0], &p[0] + 1);
         return results;
+      }
+
+      bool get_request(const std::string& id, const std::string& user_key,
+                       std::map<std::string,std::string>& map, std::string& msg) const
+      {
+        request::Job job;
+        if (!epidb::Engine::instance().request_job(id, user_key, job, msg)) {
+          return false;
+        }
+        map["state"] = job.status.state;
+        map["message"] = job.status.message;
+        std::stringstream ss;
+        ss << job.create_time;
+        map["create_time"] = ss.str();
+        ss.str("");
+        ss << job.finish_time;
+        if(job.status.state == "done") {
+          map["finish_time"] = ss.str();
+        }
+        map["query_id"] = job.query_id;
+
+        return true;
       }
 
     public:
@@ -119,6 +144,9 @@ namespace epidb {
           } else if (id.compare(0, 2, "ct") == 0) {
             ok = dba::info::get_column_type(id, metadata, msg);
             type = "column_type";
+          } else if (id.compare(0, 1, "r") == 0) {
+            ok = get_request(id, user_key, metadata, msg);
+            type = "request";
           } else {
             result.add_error("Invalid identifier: " + id);
             return false;
