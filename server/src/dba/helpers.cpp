@@ -341,7 +341,8 @@ namespace epidb {
           return  false;
         }
         mongo::BSONElement f = info["value"]["seq"];
-        id = f.Int();
+        // We use number() not Int() because the seq may be "automatically" converted to double when we copy the collections using the mongodb console
+        id = f.number();
         c.done();
         return result;
       }
