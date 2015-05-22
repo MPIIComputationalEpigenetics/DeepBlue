@@ -147,7 +147,7 @@ namespace epidb {
     return true;
   }
 
-  request::Job Engine::get_job(mongo::BSONObj o)
+  request::Job Engine::get_job_info(mongo::BSONObj o)
   {
     request::Job job;
     request::Status status;
@@ -178,7 +178,7 @@ namespace epidb {
       msg = "Request ID " + request_id + " not found.";
       return false;
     }
-    job = get_job(o);
+    job = get_job_info(o);
 
     return true;
   }
@@ -191,9 +191,9 @@ namespace epidb {
     }
 
     mdbq::TaskState task_state = mdbq::Hub::state_number(status_find);
-    std::list<mongo::BSONObj> objects = _hub.get_jobs(task_state, user_id);
-    for(auto it = objects.begin(); it != objects.end(); it++) {
-      ret.push_back(get_job(*it));
+    std::list<mongo::BSONObj> jobs_bson = _hub.get_jobs(task_state, user_id);
+    for(auto &job_bson : jobs_bson) {
+      ret.push_back(get_job_info(job_bson));
     }
     return true;
   }

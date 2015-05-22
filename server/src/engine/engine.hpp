@@ -29,7 +29,7 @@ namespace epidb {
 
     bool queue(const mongo::BSONObj &job, unsigned int timeout, std::string &request_id, std::string &msg);
 
-    request::Job get_job(mongo::BSONObj o);
+    request::Job get_job_info(mongo::BSONObj o);
 
   public:
     static Engine &instance()
