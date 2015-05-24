@@ -66,7 +66,7 @@ namespace mdbq {
     bool insert_job(const mongo::BSONObj &job, unsigned int timeout, const int version_value, std::string &id, std::string &msg);
 
 
-    mongo::BSONObj get_job(const std::string& id, const std::string& user_key);
+    mongo::BSONObj get_job(const std::string& id);
 
     /*
      * \brief Get all jobs in given state owned by given user. If no valid mdbq::TaskState is given,
@@ -76,6 +76,8 @@ namespace mdbq {
      * \return          Requested jobs
      */
     std::list<mongo::BSONObj> get_jobs(const mdbq::TaskState& state, const std::string &user_id);
+
+    bool job_has_user_id(const std::string& request_id, const std::string& user_id);
 
     /**
      * get newest finished job (primarily for testing)

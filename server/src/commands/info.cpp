@@ -18,6 +18,7 @@
 #include "../engine/commands.hpp"
 #include "../engine/engine.hpp"
 #include "../engine/request.hpp"
+#include "../dba/users.hpp"
 
 namespace epidb {
   namespace command {
@@ -53,10 +54,22 @@ namespace epidb {
       bool get_request(const std::string& id, const std::string& user_key,
                        std::map<std::string,std::string>& map, std::string& msg) const
       {
-        request::Job job;
-        if (!epidb::Engine::instance().request_job(id, user_key, job, msg)) {
+
+        std::string user_id;
+        if(!dba::users::get_user_id(user_key, user_id, msg)) {
           return false;
         }
+
+        request::Job job;
+        if(epidb::Engine::instance().user_owns_request(id, user_id)) {
+          if (!epidb::Engine::instance().request_job(id, job, msg)) {
+            return false;
+          }
+        } else {
+          msg += "Error";
+          return false;
+        }
+
         map["state"] = job.status.state;
         map["message"] = job.status.message;
         std::stringstream ss;

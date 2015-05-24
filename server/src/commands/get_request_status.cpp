@@ -11,6 +11,7 @@
 
 #include "../dba/dba.hpp"
 #include "../dba/queries.hpp"
+#include "../dba/users.hpp"
 
 #include "../extras/serialize.hpp"
 
@@ -66,9 +67,19 @@ namespace epidb {
           return false;
         }
 
+        std::string user_id;
+        if (!dba::users::get_user_id(user_key, user_id, msg)) {
+          return false;
+        }
+
         request::Status request_status;
-        if (!epidb::Engine::instance().request_status(query_id, user_key, request_status, msg)) {
-          result.add_error(msg);
+        if (epidb::Engine::instance().user_owns_request(query_id, user_id)) {
+          if (!epidb::Engine::instance().request_status(query_id, user_key, request_status, msg)) {
+            result.add_error(msg);
+            return false;
+          }
+        } else {
+          msg = "Request ID " + query_id + " not found.";
           return false;
         }
 

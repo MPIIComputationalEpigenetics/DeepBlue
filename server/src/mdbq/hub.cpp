@@ -214,9 +214,9 @@ namespace mdbq {
     m_ptr->m_timer->async_wait(boost::bind(&HubImpl::update_check, m_ptr.get(), this, boost::asio::placeholders::error));
   }
 
-  mongo::BSONObj Hub::get_job(const std::string &id, const std::string &user_id)
+  mongo::BSONObj Hub::get_job(const std::string &id)
   {
-    return m_ptr->m_con->findOne(m_prefix + ".jobs", BSON("_id" << id << "misc.user_id" << user_id)) ;
+    return m_ptr->m_con->findOne(m_prefix + ".jobs", BSON("_id" << id));
   }
 
   std::list<mongo::BSONObj> Hub::get_jobs(const mdbq::TaskState& state, const std::string &user_id)
@@ -234,6 +234,11 @@ namespace mdbq {
       ret.push_back(o);
     }
     return ret;
+  }
+
+  bool Hub::job_has_user_id(const std::string& request_id, const std::string& user_id)
+  {
+    return m_ptr->m_con->count(m_prefix + ".jobs", BSON("_id" << request_id << "misc.user_id" << user_id)) > 0;
   }
 
   mongo::BSONObj Hub::get_newest_finished()

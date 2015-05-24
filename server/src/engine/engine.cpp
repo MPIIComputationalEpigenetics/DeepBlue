@@ -136,7 +136,7 @@ namespace epidb {
     if(!dba::users::get_user_id(user_key, user_id, msg)) {
       return false;
     }
-    mongo::BSONObj o = _hub.get_job(request_id, user_id);
+    mongo::BSONObj o = _hub.get_job(request_id); // TODO still check
     if (o.isEmpty()) {
       msg = "Request ID " + request_id + " not found.";
       return false;
@@ -166,14 +166,9 @@ namespace epidb {
     return job;
   }
 
-  bool Engine::request_job(const std::string& request_id, const std::string& user_key, request::Job& job, std::string &msg)
+  bool Engine::request_job(const std::string& request_id, request::Job& job, std::string &msg)
   {
-    std::string user_id;
-    if(!dba::users::get_user_id(user_key, user_id, msg)) {
-      return false;
-    }
-
-    mongo::BSONObj o = _hub.get_job(request_id, user_id);
+    mongo::BSONObj o = _hub.get_job(request_id);
     if (o.isEmpty()) {
       msg = "Request ID " + request_id + " not found.";
       return false;
@@ -204,7 +199,7 @@ namespace epidb {
     if(!dba::users::get_user_id(user_key, user_id, msg)) {
       return false;
     }
-    mongo::BSONObj o = _hub.get_job(request_id, user_id);
+    mongo::BSONObj o = _hub.get_job(request_id); //TODO still check
     if (o.isEmpty()) {
       msg = "Request ID " + request_id + " not found.";
       return false;
@@ -240,5 +235,13 @@ namespace epidb {
     data.load_from_bson(result);
 
     return true;
+  }
+
+  bool Engine::user_owns_request(const std::string& request_id, const std::string& user_id)
+  {
+    if(_hub.job_has_user_id(request_id, user_id)) {
+      return true;
+    }
+    return false;
   }
 }
