@@ -8,6 +8,7 @@
 
 #include <map>
 #include <sstream>
+#include <iostream>
 
 #include <boost/foreach.hpp>
 
@@ -60,13 +61,18 @@ namespace epidb {
           return false;
         }
 
+        bool admin_key = false;
+        if(! dba::users::is_admin_key(user_key, admin_key, msg)) {
+          return false;
+        }
+
         request::Job job;
-        if(epidb::Engine::instance().user_owns_request(id, user_id)) {
+        if(admin_key || epidb::Engine::instance().user_owns_request(id, user_id)) {
           if (!epidb::Engine::instance().request_job(id, job, msg)) {
             return false;
           }
         } else {
-          msg += "Error";
+          msg = "Request ID " + id + " not found.";
           return false;
         }
 
