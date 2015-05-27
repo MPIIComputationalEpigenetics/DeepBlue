@@ -83,16 +83,16 @@ namespace epidb {
 
       bool query(const std::string &query_id, const std::string &user_key, std::string &msg)
       {
-        utils::IdName user_name_id;
-        if (!users::get_user_name(user_key, user_name_id, msg)) {
+        utils::IdName user;
+        if (!users::get_user(user_key, user, msg)) {
           return false;
         }
 
-        if (user_name_id.name.empty()) {
+        if (user.name.empty()) {
           return false;
         }
 
-        mongo::BSONObj query = BSON("_id" << query_id << "user" << user_name_id.id);
+        mongo::BSONObj query = BSON("_id" << query_id << "user" << user.id);
         return helpers::check_exist(Collections::QUERIES(), query);
       }
     }

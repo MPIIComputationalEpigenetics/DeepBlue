@@ -59,11 +59,11 @@ namespace epidb {
         mongo::BSONObjBuilder stored_query_builder;
 
         stored_query_builder.append("_id", query_id);
-        std::string user_id;
-        if (!users::get_user_id(user_key, user_id, msg)) {
+        utils::IdName user;
+        if (!users::get_user(user_key, user, msg)) {
           return false;
         }
-        stored_query_builder.append("user", user_id);
+        stored_query_builder.append("user", user.id);
         stored_query_builder.appendTimeT("time", time_);
         stored_query_builder.append("type", type);
         stored_query_builder.append("args", args);

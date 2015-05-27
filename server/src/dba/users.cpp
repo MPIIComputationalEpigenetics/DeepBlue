@@ -105,17 +105,7 @@ namespace epidb {
         return true;
       }
 
-      bool get_user_name(const std::string &user_key, std::string &name, std::string &msg)
-      {
-        utils::IdName id_name;
-        if (!helpers::get_name(Collections::USERS(), user_key, id_name, msg)) {
-          return false;
-        }
-        name = id_name.name;
-        return true;
-      }
-
-      bool get_user_name(const std::string &user_key, utils::IdName &id_name, std::string &msg)
+      bool get_user(const std::string &user_key, utils::IdName &id_name, std::string &msg)
       {
         return helpers::get_name(Collections::USERS(), user_key, id_name, msg);
       }
@@ -136,16 +126,6 @@ namespace epidb {
           user_name = results[0]["name"].str();
           name_cache.set_user_name(user_id, user_name);
         }
-        return true;
-      }
-
-      bool get_user_id(const std::string &user_key, std::string &user_id, std::string &msg)
-      {
-        utils::IdName id_name;
-        if (!helpers::get_name(Collections::USERS(), user_key, id_name, msg)) {
-          return false;
-        }
-        user_id = id_name.id;
         return true;
       }
 

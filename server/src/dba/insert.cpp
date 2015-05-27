@@ -253,14 +253,14 @@ namespace epidb {
     bool build_upload_info(const std::string &user_key, const std::string &client_address, const std::string &content_format,
                            mongo::BSONObj &upload_info, std::string &msg)
     {
-      std::string user_id;
-      if (!users::get_user_id(user_key, user_id, msg)) {
+      utils::IdName user;
+      if (!users::get_user(user_key, user, msg)) {
         return false;
       }
 
       mongo::BSONObjBuilder upload_info_builder;
 
-      upload_info_builder.append("user", user_id);
+      upload_info_builder.append("user", user.id);
       upload_info_builder.append("content_format", content_format);
       upload_info_builder.append("done", false);
       upload_info_builder.append("client_address", client_address);

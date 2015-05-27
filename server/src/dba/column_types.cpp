@@ -322,11 +322,11 @@ namespace epidb {
         create_column_type_builder.append("norm_description", norm_description);
         create_column_type_builder.append("column_type", type);
 
-        std::string user_id;
-        if (!users::get_user_id(user_key, user_id, msg)) {
+        utils::IdName user;
+        if (!users::get_user(user_key, user, msg)) {
           return false;
         }
-        create_column_type_builder.append("user", user_id);
+        create_column_type_builder.append("user", user.id);
 
         obj = create_column_type_builder.obj();
         return true;

@@ -14,12 +14,14 @@
 
 #include "../dba/dba.hpp"
 #include "../dba/info.hpp"
-#include "../extras/serialize.hpp"
+#include "../dba/users.hpp"
 
 #include "../engine/commands.hpp"
 #include "../engine/engine.hpp"
 #include "../engine/request.hpp"
-#include "../dba/users.hpp"
+
+#include "../extras/serialize.hpp"
+#include "../extras/utils.hpp"
 
 namespace epidb {
   namespace command {
@@ -56,8 +58,8 @@ namespace epidb {
                        std::map<std::string,std::string>& map, std::string& msg) const
       {
 
-        std::string user_id;
-        if(!dba::users::get_user_id(user_key, user_id, msg)) {
+        utils::IdName user;
+        if(!dba::users::get_user(user_key, user, msg)) {
           return false;
         }
 
@@ -67,7 +69,7 @@ namespace epidb {
         }
 
         request::Job job;
-        if(admin_key || epidb::Engine::instance().user_owns_request(id, user_id)) {
+        if(admin_key || epidb::Engine::instance().user_owns_request(id, user.id)) {
           if (!epidb::Engine::instance().request_job(id, job, msg)) {
             return false;
           }

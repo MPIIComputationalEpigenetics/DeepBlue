@@ -264,14 +264,14 @@ namespace epidb {
       mongo::BSONObjBuilder clone_final_builder;
       clone_final_builder.appendElements(cloned_metadata);
 
-      std::string user_id;
-      if (!users::get_user_id(user_key, user_id, msg)) {
+      utils::IdName user;
+      if (!users::get_user(user_key, user, msg)) {
         c.done();
         return false;
       }
 
       mongo::BSONObjBuilder upload_info_builder;
-      upload_info_builder.append("user", user_id);
+      upload_info_builder.append("user", user.id);
       upload_info_builder.append("cloned_from", dataset_id);
       upload_info_builder.append("done", true);
       upload_info_builder.append("upload_end", mongo::jsTime());

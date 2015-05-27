@@ -22,9 +22,12 @@ namespace epidb {
       bool add_user(const std::string &name, const std::string &email, const std::string &institution,
                     const std::string &key, std::string &user_id, std::string &msg);
 
-      bool get_user_name(const std::string &user_key, std::string &name, std::string &msg);
-
-      bool get_user_name(const std::string &user_key, utils::IdName &id_name, std::string &msg);
+      /*
+      * \brief  Get IdName for given user-key
+      * \param  user_key  The user-key
+      *         id_name   Object with the user id and name
+      */
+      bool get_user(const std::string &user_key, utils::IdName &id_name, std::string &msg);
 
       /*
       * \brief  Get user-name for given user-ID
@@ -33,19 +36,12 @@ namespace epidb {
       */
       bool get_user_name_by_id(const std::string &user_id, std::string &user_name, std::string &msg);
 
-      /*
-      * \brief  Get user-ID for given user-key
-      * \param  user_key  The user-key
-      *         user_id   Return: The user-ID
-      */
-      bool get_user_id(const std::string &user_key, std::string &user_id, std::string &msg);
 
       bool bind_user(const std::string &email, const std::string &password, const std::string &user_key, const std::string &admin_key, std::string &id, std::string &msg);
 
       /**
        * Permissions
        */
-
       bool set_user_admin(const std::string &user_id, const bool value, std::string &msg);
 
       bool is_admin_key(const std::string &admin_key, bool &ret, std::string &msg);
