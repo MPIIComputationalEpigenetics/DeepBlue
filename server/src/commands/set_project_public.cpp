@@ -75,12 +75,12 @@ namespace epidb {
 
         std::cerr << "id: " << id << std::endl;
 
-        datatypes::Metadata res;
-        if (!dba::info::get_project(id, res, msg)) {
+        datatypes::Metadata project_res;
+        if (!dba::info::get_project(id, project_res, msg)) {
           result.add_error(msg);
           return false;
         }
-        std::string owner = res["user"];
+        std::string owner = project_res["user"];
 
         utils::IdName user;
         if (!dba::users::get_user(user_key, user, msg)) {
