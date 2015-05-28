@@ -14,6 +14,8 @@
 
 #include <mongo/bson/bson.h>
 
+#include "../datatypes/metadata.hpp"
+
 #include "../extras/utils.hpp"
 
 #include "column_types.hpp"
@@ -26,7 +28,7 @@ namespace epidb {
 
       const static std::string NORM_("norm_");
 
-      bool get_sample_by_id(const std::string &id, std::map<std::string, std::string> &res, std::string &msg, bool full = false)
+      bool get_sample_by_id(const std::string &id, datatypes::Metadata &res, std::string &msg, bool full = false)
       {
         mongo::BSONObj result;
         if (!data::sample(id, result, msg))  {
