@@ -116,12 +116,23 @@ namespace epidb {
           return false;
         }
 
-        BOOST_FOREACH(const mongo::BSONObj & o, r) {
-          utils::IdName utils(o["_id"].str(), o["name"].str());
-          results.push_back(utils);
-        }
+        results = bsonsToIdNames(r);
 
         return true;
+      }
+
+      std::vector<utils::IdName> bsonsToIdNames(const std::vector<mongo::BSONObj> bsons)
+      {
+        std::vector<utils::IdName> v;
+        BOOST_FOREACH(const mongo::BSONObj & o, bsons) {
+          v.push_back(bsonToIdName(o));
+        }
+        return v;
+      }
+
+      utils::IdName bsonToIdName(const mongo::BSONObj& bson)
+      {
+        return utils::IdName(bson["_id"].str(), bson["name"].str());
       }
 
       // Get content where the field content match with the query object and the fields.
@@ -191,10 +202,7 @@ namespace epidb {
           return false;
         }
 
-        std::string _id = results[0]["_id"].str();
-        std::string name = results[0]["name"].str();
-
-        id_name = utils::IdName(_id, name);
+        id_name = bsonToIdName(results[0]);
 
         return true;
       }
