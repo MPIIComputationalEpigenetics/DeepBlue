@@ -94,11 +94,48 @@ namespace epidb {
         if (!sample_ids.empty()) {
           args_builder.append("sample_id", dba::helpers::build_array(sample_ids));
         }
-        // project
-        if (!projects.empty()) {
-          args_builder.append("project", dba::helpers::build_array(projects));
-          args_builder.append("norm_project", dba::helpers::build_normalized_array(projects));
+
+        std::vector<utils::IdName> user_projects;
+        if (!dba::list::projects(user_key, user_projects, msg)) {
+          result.add_error(msg);
+          return false;
         }
+
+        // project.
+        if (!projects.empty()) {
+
+          // Filter the projects that are available to the user
+          std::vector<serialize::ParameterPtr> filtered_projects;
+          for (const auto& project : projects) {
+            std::string norm_project = utils::normalize_name(project->as_string());
+            bool found = false;
+            for (const auto& user_project : user_projects) {
+              std::string norm_user_project = utils::normalize_name(user_project.name);
+              if (norm_project == norm_user_project) {
+                filtered_projects.push_back(project);
+                found = true;
+                break;
+              }
+            }
+
+            if (!found) {
+              result.add_error("Project " + project->as_string() + " does not exists.");
+              return false;
+            }
+          }
+          args_builder.append("project", dba::helpers::build_array(filtered_projects));
+          args_builder.append("norm_project", dba::helpers::build_normalized_array(filtered_projects));
+        } else {
+
+          std::vector<std::string> user_projects_names;
+          for (const auto& project : user_projects) {
+            user_projects_names.push_back(project.name);
+          }
+
+          args_builder.append("project", dba::helpers::build_array(user_projects_names));
+          args_builder.append("norm_project", dba::helpers::build_normalized_array(user_projects_names));
+        }
+
         // technique
         if (!techniques.empty()) {
           args_builder.append("technique", dba::helpers::build_array(techniques));
