@@ -396,6 +396,16 @@ namespace epidb {
         return ab.arr();
       }
 
+      mongo::BSONArray build_normalized_array(const std::vector<std::string> &params)
+      {
+        mongo::BSONArrayBuilder ab;
+        for (std::vector<std::string>::const_iterator it = params.begin(); it != params.end(); it++) {
+          ab.append(utils::normalize_name(*it));
+        }
+        return ab.arr();
+      }
+
+
       mongo::BSONArray build_array(const std::vector<serialize::ParameterPtr> &params)
       {
         mongo::BSONArrayBuilder ab;
