@@ -4,6 +4,8 @@ import subprocess
 import os.path
 import time
 import unittest
+import time
+import sys
 
 from pymongo import MongoClient
 from client import EpidbClient
@@ -131,9 +133,13 @@ class TestCase(unittest.TestCase):
     mongo = MongoClient("localhost", 27017)
     mongo.drop_database("tests_suite")
     mongo.drop_database("tests_suite_queue")
+    self.startTime = time.time()
+
 
   def tearDown(self):
-    pass
+    t = time.time() - self.startTime
+    elapsed = "\t%.3f\t" % (t)
+    sys.stderr.write(elapsed)
     #print "--- Stoping Server ---"
     #self.epidb_process.terminate()
 
