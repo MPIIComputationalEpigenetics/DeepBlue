@@ -14,7 +14,6 @@
 #include <utility>
 
 #include <boost/shared_ptr.hpp>
-#include <boost/algorithm/string.hpp>
 
 #include <mongo/bson/bson.h>
 

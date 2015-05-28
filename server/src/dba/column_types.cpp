@@ -339,7 +339,7 @@ namespace epidb {
                                      std::string &column_type_id, std::string &msg)
       {
         std::string norm_type = type;
-        boost::algorithm::to_lower(norm_type);
+        norm_type = utils::lower(norm_type);
 
         if (!__check_value_type(type, msg)) {
           msg = "The acceptable values for a column type are: string, integer, double";
