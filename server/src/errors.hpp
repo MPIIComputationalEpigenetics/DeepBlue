@@ -64,6 +64,7 @@ namespace epidb {
 
   extern Error ERR_INVALID_BIOSOURCE_SYNONYM;
   extern Error ERR_INVALID_USER_KEY;
+  extern Error ERR_INVALID_USER_NAME;
 
   extern Error ERR_DUPLICATED_EPIGENETIC_MARK_NAME;
   extern Error ERR_DUPLICATED_PROJECT_NAME;

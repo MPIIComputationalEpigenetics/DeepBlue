@@ -54,6 +54,8 @@
  *
  * 100 - Do not have permission
  *
+ * 200 - Invalid User Key
+ *
  * 400 - Synonym already exists
  *
  * 555 - Connection Error
@@ -107,8 +109,8 @@ namespace epidb {
   Error ERR_FORMAT_END_MISSING("122002", "The END is missing in the format. Please, inform the END column in the Format.");
   Error ERR_FORMAT_COLUMN_NAME_MISSING("123002", "The Column Name is missing in the format. Please, inform the column name in the Format.");
 
-
-  Error ERR_INVALID_USER_KEY("100000", "Invalid User Key.");
+  Error ERR_INVALID_USER_KEY("100200", "Invalid User Key.");
+  Error ERR_INVALID_USER_NAME("100000", "Invalid User name '%s'.");
 
   Error ERR_DUPLICATED_EXPERIMENT_NAME("102001", "The experiment name '%s' is already being used.");
 
