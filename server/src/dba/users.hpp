@@ -23,6 +23,11 @@ namespace epidb {
                     const std::string &key, std::string &user_id, std::string &msg);
 
       /*
+       * \brief give the user name or Id and receive the ID. Useful for reading some commands inputs
+       */
+      bool get_id(const std::string &user, std::string& id, std::string &msg);
+
+      /*
       * \brief  Get IdName for given user-key
       * \param  user_key  The user-key
       *         id_name   Object with the user id and name

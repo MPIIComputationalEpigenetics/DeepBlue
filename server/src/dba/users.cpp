@@ -17,6 +17,8 @@
 #include "exists.hpp"
 #include "helpers.hpp"
 
+#include "../errors.hpp"
+
 namespace epidb {
   namespace dba {
     namespace users {
@@ -105,6 +107,23 @@ namespace epidb {
         return true;
       }
 
+      bool get_id(const std::string &user, std::string& id, std::string &msg)
+      {
+        if (utils::is_id(user, "u")) {
+          id = user;
+          return true;
+        }
+
+        mongo::BSONObj obj;
+        if (!dba::helpers::get_one(dba::Collections::USERS(), BSON("name" << user), obj, msg)) {
+          msg = Error::m(ERR_INVALID_USER_NAME, user.c_str());
+          return false;
+        }
+
+        id = obj["_id"].str();
+        return true;
+      }
+
       bool get_user(const std::string &user_key, utils::IdName &id_name, std::string &msg)
       {
         return helpers::get_name(Collections::USERS(), user_key, id_name, msg);
@@ -112,7 +131,7 @@ namespace epidb {
 
       bool get_user_name_by_id(const std::string &user_id, std::string &user_name, std::string &msg)
       {
-        if(name_cache.exists_user_id(user_id)) {
+        if (name_cache.exists_user_id(user_id)) {
           user_name = name_cache.get_user_name(user_id);
           return true;
         } else {
