@@ -128,8 +128,8 @@ namespace epidb {
 
       std::vector<std::string> build_vector(const std::vector<serialize::ParameterPtr> &params);
 
-      std::vector<utils::IdName> bsonsToIdNames(const std::vector<mongo::BSONObj> bsons);
-      utils::IdName bsonToIdName(const mongo::BSONObj& bson);
+      std::vector<utils::IdName> bsons_to_id_names(const std::vector<mongo::BSONObj> bsons);
+      utils::IdName bson_to_id_name(const mongo::BSONObj& bson);
 
       bool check_parameters(const std::vector<serialize::ParameterPtr> &params, const std::function<std::string(const std::string&)> &normalizer, const std::function<bool(const std::string&)> &checker, std::string &wrong);
 

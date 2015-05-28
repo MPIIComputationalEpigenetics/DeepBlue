@@ -116,21 +116,21 @@ namespace epidb {
           return false;
         }
 
-        results = bsonsToIdNames(r);
+        results = bsons_to_id_names(r);
 
         return true;
       }
 
-      std::vector<utils::IdName> bsonsToIdNames(const std::vector<mongo::BSONObj> bsons)
+      std::vector<utils::IdName> bsons_to_id_names(const std::vector<mongo::BSONObj> bsons)
       {
         std::vector<utils::IdName> v;
         BOOST_FOREACH(const mongo::BSONObj & o, bsons) {
-          v.push_back(bsonToIdName(o));
+          v.push_back(bson_to_id_name(o));
         }
         return v;
       }
 
-      utils::IdName bsonToIdName(const mongo::BSONObj& bson)
+      utils::IdName bson_to_id_name(const mongo::BSONObj& bson)
       {
         return utils::IdName(bson["_id"].str(), bson["name"].str());
       }
@@ -202,7 +202,7 @@ namespace epidb {
           return false;
         }
 
-        id_name = bsonToIdName(results[0]);
+        id_name = bson_to_id_name(results[0]);
 
         return true;
       }
