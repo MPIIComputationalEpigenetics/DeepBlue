@@ -18,6 +18,8 @@
 #include "../extras/serialize.hpp"
 #include "../extras/utils.hpp"
 
+#include "../errors.hpp"
+
 namespace epidb {
   namespace command {
 
@@ -93,7 +95,7 @@ namespace epidb {
         }
 
         if ((!is_admin_key) && (user.name != owner)) {
-          result.add_error("User is not the project owner neither the administration");
+          result.add_error(Error::m(ERR_PROJECT_PERMISSION, project.c_str()));
           return false;
         }
 

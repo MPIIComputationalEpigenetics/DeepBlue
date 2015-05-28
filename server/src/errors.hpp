@@ -48,6 +48,7 @@ namespace epidb {
 
   extern Error ERR_INVALID_PROJECT_NAME;
   extern Error ERR_INVALID_PROJECT_ID;
+  extern Error ERR_PROJECT_PERMISSION;
 
   extern Error ERR_INVALID_BIOSOURCE_NAME;
   extern Error ERR_INVALID_QUERY_ID;
