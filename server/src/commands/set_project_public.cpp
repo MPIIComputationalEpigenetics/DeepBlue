@@ -21,7 +21,7 @@
 namespace epidb {
   namespace command {
 
-    class AddUserCommand: public Command {
+    class SetProjectPublicCommand: public Command {
 
     private:
       static CommandDescription desc_()
@@ -33,7 +33,7 @@ namespace epidb {
       {
         Parameter p[] = {
           Parameter("project", serialize::STRING, "Project name or ID"),
-          Parameter("set", serialize::STRING, "True to set the project as public of false for unset"),
+          Parameter("set", serialize::BOOLEAN, "True to set the project as public of false for unset"),
           parameters::UserKey
         };
         Parameters params(&p[0], &p[0] + 3);
@@ -50,7 +50,7 @@ namespace epidb {
       }
 
     public:
-      AddUserCommand() : Command("set_project_public", parameters_(), results_(), desc_()) {}
+      SetProjectPublicCommand() : Command("set_project_public", parameters_(), results_(), desc_()) {}
 
       virtual bool run(const std::string &ip,
                        const serialize::Parameters &parameters, serialize::Parameters &result) const
@@ -70,6 +70,8 @@ namespace epidb {
           result.add_error(msg);
           return false;
         }
+
+        std::cerr << "id: " << id << std::endl;
 
         datatypes::Metadata res;
         if (!dba::info::get_project(id, res, msg)) {
