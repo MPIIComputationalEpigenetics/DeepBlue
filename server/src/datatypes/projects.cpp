@@ -136,6 +136,9 @@ namespace epidb {
 
       bool is_public(const std::string &project_id, bool& ret, std::string &msg)
       {
+        if (!dba::helpers::notify_change_occurred(dba::Collections::PROJECTS(), msg)) {
+          return false;
+        }
         Connection c;
 
         mongo::BSONObjBuilder query_builder;
