@@ -99,7 +99,6 @@ namespace epidb {
           return false;
         }
 
-
         if (!datatypes::projects::set_public(id, set, msg)) {
           result.add_error(msg);
           return false;
