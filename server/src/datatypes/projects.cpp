@@ -14,6 +14,7 @@
 
 #include "../dba/collections.hpp"
 #include "../dba/config.hpp"
+#include "../dba/full_text.hpp"
 #include "../dba/helpers.hpp"
 
 #include "../extras/utils.hpp"
@@ -23,6 +24,51 @@
 namespace epidb {
   namespace datatypes {
     namespace projects {
+
+
+      bool add_project(const std::string &name, const std::string &norm_name,
+                       const std::string &description, const std::string &norm_description,
+                       const utils::IdName &user,
+                       std::string &project_id, std::string &msg)
+      {
+        {
+          int id;
+          if (!dba::helpers::get_increment_counter("projects", id, msg) ||
+              !dba::helpers::notify_change_occurred(dba::Collections::PROJECTS(), msg)) {
+            return false;
+          }
+          project_id = "p" + utils::integer_to_string(id);
+        }
+        mongo::BSONObjBuilder search_data_builder;
+        search_data_builder.append("_id", project_id);
+        search_data_builder.append("name", name);
+        search_data_builder.append("norm_name", norm_name);
+        search_data_builder.append("description", description);
+        search_data_builder.append("norm_description", norm_description);
+
+        mongo::BSONObj search_data = search_data_builder.obj();
+        mongo::BSONObjBuilder create_project_builder;
+        create_project_builder.appendElements(search_data);
+
+        create_project_builder.append("user", user.id);
+        mongo::BSONObj cem = create_project_builder.obj();
+
+        Connection c;
+        c->insert(dba::helpers::collection_name(dba::Collections::PROJECTS()), cem);
+        if (!c->getLastError().empty()) {
+          msg = c->getLastError();
+          c.done();
+          return false;
+        }
+
+        if (!dba::search::insert_full_text(dba::Collections::PROJECTS(), project_id, search_data, msg)) {
+          c.done();
+          return false;
+        }
+
+        c.done();
+        return true;
+      }
 
       bool get_id(const std::string &project, std::string& id, std::string &msg)
       {
@@ -62,12 +108,12 @@ namespace epidb {
         return true;
       }
 
-      bool add_user_to_project(const std::string &user_id, const std::string &project_id, std::string &msg)
+      bool add_user_to_project(const utils::IdName &user, const std::string &project_id, std::string &msg)
       {
         Connection c;
 
         mongo::BSONObjBuilder query_builder;
-        query_builder.append("_id", user_id);
+        query_builder.append("_id", user.id);
         mongo::BSONObj query = query_builder.obj();
 
         mongo::BSONObj append_value = BSON("$addToSet" << BSON("projects" << project_id));

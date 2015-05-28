@@ -67,11 +67,6 @@ namespace epidb {
                        const std::string &user_key,
                        std::string &biosource_id, std::string &msg);
 
-    bool add_project(const std::string &name, const std::string &norm_name,
-                     const std::string &description, const std::string &norm_description,
-                     const std::string &user_key,
-                     std::string &project_id, std::string &msg);
-
     bool set_biosource_synonym(const std::string &biosource_name, const std::string &synonymous,
                                bool is_biosource, const bool is_syn,
                                const std::string &user_key, std::string &msg);

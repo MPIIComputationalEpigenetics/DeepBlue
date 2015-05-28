@@ -683,54 +683,6 @@ namespace epidb {
       return true;
     }
 
-    bool add_project(const std::string &name, const std::string &norm_name,
-                     const std::string &description, const std::string &norm_description,
-                     const std::string &user_key,
-                     std::string &project_id, std::string &msg)
-    {
-      {
-        int id;
-        if (!helpers::get_increment_counter("projects", id, msg) ||
-            !helpers::notify_change_occurred(Collections::PROJECTS(), msg)) {
-          return false;
-        }
-        project_id = "p" + utils::integer_to_string(id);
-      }
-      mongo::BSONObjBuilder search_data_builder;
-      search_data_builder.append("_id", project_id);
-      search_data_builder.append("name", name);
-      search_data_builder.append("norm_name", norm_name);
-      search_data_builder.append("description", description);
-      search_data_builder.append("norm_description", norm_description);
-
-      mongo::BSONObj search_data = search_data_builder.obj();
-      mongo::BSONObjBuilder create_project_builder;
-      create_project_builder.appendElements(search_data);
-
-      utils::IdName user;
-      if (!users::get_user(user_key, user, msg)) {
-        return false;
-      }
-      create_project_builder.append("user", user.id);
-      mongo::BSONObj cem = create_project_builder.obj();
-
-      Connection c;
-      c->insert(helpers::collection_name(Collections::PROJECTS()), cem);
-      if (!c->getLastError().empty()) {
-        msg = c->getLastError();
-        c.done();
-        return false;
-      }
-
-      if (!search::insert_full_text(Collections::PROJECTS(), project_id, search_data, msg)) {
-        c.done();
-        return false;
-      }
-
-      c.done();
-      return true;
-    }
-
     bool add_chromosome_sequence(const std::string &genome, const std::string &norm_genome,
                                  const std::string &chromosome,
                                  const std::string &sequence,
