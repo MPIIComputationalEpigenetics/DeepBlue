@@ -71,7 +71,7 @@ namespace epidb {
           return false;
         }
 
-        for(const mongo::BSONObj & o: samples) {
+        for (const mongo::BSONObj & o : samples) {
           result.push_back(o["_id"].String());
         }
 
@@ -80,7 +80,48 @@ namespace epidb {
 
       bool projects(const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg)
       {
-        return helpers::get(Collections::PROJECTS(), result, msg);
+        mongo::BSONObj user_bson;
+        if (!helpers::get_one(Collections::USERS(), BSON("key" << user_key), user_bson, msg)) {
+          return false;
+        }
+
+        bool user_admin = false;
+        if (user_bson.hasField("admin")) {
+          user_admin = user_bson["admin"].Bool();
+        }
+
+        mongo::BSONObj full_query;
+
+        // list all project if is admin
+        if (!user_admin) {
+          mongo::BSONObj public_projects =  BSON("public" << true);
+
+          // I am not so sure about this option. I have it because the actual data does not have the "public" field
+          mongo::BSONObj unset_public_projects = BSON("public" << BSON("$exists" << false));
+
+          std::cerr << user_bson.toString() << std::endl;
+          if (user_bson.hasField("projects")) {
+            std::vector<std::string> ps;
+            std::vector<mongo::BSONElement> projects = user_bson["projects"].Array();
+            for (const auto& p : projects) {
+              ps.push_back(p.String());
+            }
+
+            mongo::BSONObj user_projects = BSON("_id" << BSON("$in" << helpers::build_array(ps)));
+            full_query = BSON("$or" << BSON_ARRAY(public_projects <<  unset_public_projects << user_projects));
+          } else {
+            full_query = BSON("$or" << BSON_ARRAY(public_projects <<  unset_public_projects));
+          }
+        }
+
+        std::vector<mongo::BSONObj> projects;
+        if (!helpers::get(Collections::PROJECTS(), full_query, projects, msg)) {
+          return false;
+        }
+
+        result = helpers::bsons_to_id_names(projects);
+
+        return true;
       }
 
       bool epigenetic_marks(const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg)
@@ -93,7 +134,7 @@ namespace epidb {
         return experiments(mongo::Query(query), result, msg);
       }
 
-      bool experiments(const mongo::Query query,std::vector<utils::IdName> &result, std::string &msg)
+      bool experiments(const mongo::Query query, std::vector<utils::IdName> &result, std::string &msg)
       {
         std::vector<std::string> fields;
         fields.push_back("_id");
@@ -104,7 +145,7 @@ namespace epidb {
           return false;
         }
 
-        for(const mongo::BSONObj & o: objects) {
+        for (const mongo::BSONObj & o : objects) {
           utils::IdName id_name(o["_id"].String(), o["name"].String());
           result.push_back(id_name);
         }
@@ -119,7 +160,7 @@ namespace epidb {
           return false;
         }
 
-        for(const mongo::BSONObj & o: objects) {
+        for (const mongo::BSONObj & o : objects) {
           utils::IdName names(o["_id"].String(), o["name"].String());
           result.push_back(names);
         }
@@ -204,14 +245,14 @@ namespace epidb {
 
         std::vector<std::string> names;
         std::map<std::string, std::string> id_name_map;
-        for(const utils::IdName & id_name: id_names) {
+        for (const utils::IdName & id_name : id_names) {
           id_name_map[id_name.name] = id_name.id;
           names.push_back(id_name.name);
         }
         std::vector<std::string> ordered = epidb::algorithms::Levenshtein::order_by_score(what, names);
 
         size_t count = 0;
-        for(const std::string & name: ordered) {
+        for (const std::string & name : ordered) {
           utils::IdName id_name(id_name_map[name], name);
           result.push_back(id_name);
           count++;
@@ -245,7 +286,7 @@ namespace epidb {
         std::vector<std::string> ordered = epidb::algorithms::Levenshtein::order_by_score(what, names);
 
         size_t count = 0;
-        for(const std::string & name: ordered) {
+        for (const std::string & name : ordered) {
           utils::IdName id_name(id_name_map[name], name);
           result.push_back(id_name);
           count++;
@@ -285,7 +326,7 @@ namespace epidb {
         std::vector<mongo::BSONElement> result = res["result"].Array();
 
 
-        for(const mongo::BSONElement & be: result) {
+        for (const mongo::BSONElement & be : result) {
           std::string norm_name = be["_id"].String();
           long count = be["total"].safeNumberLong();
 
