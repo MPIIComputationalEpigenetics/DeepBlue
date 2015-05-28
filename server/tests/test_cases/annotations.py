@@ -82,7 +82,11 @@ class TestAnnotationCommands(helpers.TestCase):
           {"url":"genome.ucsc.edu/cgi-bin/hgTables?db=hg19&hgta_group=regulation&hgta_track=cpgIslandExt&hgta_table=cpgIslandExt&hgta_doSchema=describe+table+schema"},
           self.admin_key)
     self.assertSuccess(res)
-    print epidb.list_annotations("", self.admin_key)
+
+    expected = ['okay', [['a1', 'Chromosomes size for hg19'], ['a2', 'Cpg Islands'], ['a3', 'Chromosomes size for hg19a'], ['a4', 'Cpg Islands'], ['a5', 'Chromosomes size for hg19b'], ['a6', 'Cpg Islands']]]
+    result = epidb.list_annotations("", self.admin_key)
+
+    self.assertEqual(expected, result)
 
   def test_annotation_full_cpg_islands(self):
     epidb = EpidbClient()
