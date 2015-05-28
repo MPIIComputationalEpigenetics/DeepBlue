@@ -32,7 +32,7 @@ namespace epidb {
        */
       bool set_public(const std::string &project_id, const bool set, std::string &msg);
 
-      bool add_user_to_project(const utils::IdName &user, const std::string &project_id, std::string &msg);
+      bool add_user_to_project(const std::string &user_id, const std::string &project_id, const bool include, std::string &msg);
 
       /*
        * \brief List all projects that are available for the user

@@ -108,15 +108,20 @@ namespace epidb {
         return true;
       }
 
-      bool add_user_to_project(const utils::IdName &user, const std::string &project_id, std::string &msg)
+      bool add_user_to_project(const std::string &user_id, const std::string &project_id, const bool include, std::string &msg)
       {
         Connection c;
 
         mongo::BSONObjBuilder query_builder;
-        query_builder.append("_id", user.id);
+        query_builder.append("_id", user_id);
         mongo::BSONObj query = query_builder.obj();
 
-        mongo::BSONObj append_value = BSON("$addToSet" << BSON("projects" << project_id));
+        mongo::BSONObj append_value;
+        if (include) {
+          append_value = BSON("$addToSet" << BSON("projects" << project_id));
+        } else {
+          append_value = BSON("$pull" << BSON("projects" << project_id));
+        }
 
         c->update(dba::helpers::collection_name(dba::Collections::USERS()), query, append_value, true, false);
         if (!c->getLastError().empty()) {
