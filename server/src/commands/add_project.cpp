@@ -87,7 +87,7 @@ namespace epidb {
         }
 
         // Include user in its own project
-        if (!datatypes::projects::add_user_to_project(user, project_id, msg)) {
+        if (!datatypes::projects::add_user_to_project(user.id, project_id, true, msg)) {
           result.add_error(msg);
           return false;
         }
