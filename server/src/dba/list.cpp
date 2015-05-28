@@ -78,6 +78,9 @@ namespace epidb {
         return true;
       }
 
+      /*
+      * \brief List all projects that are available for the user
+      */
       bool projects(const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg)
       {
         mongo::BSONObj user_bson;
@@ -306,7 +309,7 @@ namespace epidb {
         }
 
         std::vector<std::string> project_names;
-        for (const auto& project: user_projects) {
+        for (const auto& project : user_projects) {
           project_names.push_back(project.name);
         }
 
