@@ -45,6 +45,8 @@ namespace epidb {
 
   extern Error ERR_INVALID_EXPERIMENT_NAME;
   extern Error ERR_INVALID_EXPERIMENT_ID;
+
+  extern Error ERR_INVALID_PROJECT_NAME;
   extern Error ERR_INVALID_PROJECT_ID;
 
   extern Error ERR_INVALID_BIOSOURCE_NAME;

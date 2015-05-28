@@ -119,6 +119,7 @@ namespace epidb {
 
   Error ERR_DUPLICATED_EPIGENETIC_MARK_NAME("105001", "Duplicated Epigenetic Mark Name '%s'." );
 
+  Error ERR_INVALID_PROJECT_NAME("107000", "Unable to find the project '%s'.");
   Error ERR_INVALID_PROJECT_ID("107000", "Unable to find the project ID '%s'.");
   Error ERR_DUPLICATED_PROJECT_NAME("107001", "Duplicated Project Name '%s'.");
 
