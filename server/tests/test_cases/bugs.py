@@ -79,8 +79,6 @@ class TestBugs(helpers.TestCase):
     (r,a) = epidb.list_biosources(self.admin_key)
     self.assertSuccess(r,a)
 
-    print a
-
     biosource_names = [x[1] for x in a]
     self.assertEquals(biosource_names, ['K562', 'Brain', 'rostrolateral thalamic nucleus of Butler <methodName>Saidel', 'testing <b>cool', 'testing ugly &Saidel', 'testing weird <Saidel', 'testing open Saidel>', 'testing closed <Saidel>', "!'234456789<<<<><<<;;.,.,-,>"])
 
