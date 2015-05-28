@@ -201,7 +201,7 @@ namespace epidb {
     bool Parameter::as_boolean() const
     {
       if (isBool() || isString()) {
-        return (value() == "true");
+        return (utils::lower(value()) == "true");
       }
       return as_number() <= 0;
     }
