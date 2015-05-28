@@ -6,7 +6,11 @@
 //  Copyright (c) 2013,2014 Max Planck Institute for Computer Science. All rights reserved.
 //
 
+#include "../datatypes/projects.hpp"
+
 #include "../dba/dba.hpp"
+#include "../dba/users.hpp"
+
 #include "../extras/utils.hpp"
 #include "../extras/serialize.hpp"
 
@@ -62,6 +66,12 @@ namespace epidb {
           return false;
         }
 
+        utils::IdName user;
+        if (!dba::users::get_user(user_key, user, msg)) {
+          result.add_error(msg);
+          return false;
+        }
+
         const std::string norm_name = utils::normalize_name(name);
         if (!dba::is_project_valid(name, norm_name, msg)) {
           result.add_error(msg);
@@ -70,14 +80,25 @@ namespace epidb {
 
         const std::string norm_description = utils::normalize_name(description);
 
-        std::string id;
-        bool ret = dba::add_project(name, norm_name, description, norm_description, user_key, id, msg);
-
+        std::string project_id;
+        bool ret = datatypes::projects::add_project(name, norm_name, description, norm_description, user, project_id, msg);
         if (!ret) {
           result.add_error(msg);
-        } else {
-          result.add_string(id);
         }
+
+        // Include user in its own project
+        if (!datatypes::projects::add_user_to_project(user, project_id, msg)) {
+          result.add_error(msg);
+          return false;
+        }
+
+        // All projects are private by default
+        if (!datatypes::projects::set_public(project_id, false, msg)) {
+          result.add_error(msg);
+          return false;
+        }
+
+        result.add_string(project_id);
 
         return ret;
       }
