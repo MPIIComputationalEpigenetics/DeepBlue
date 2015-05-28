@@ -83,6 +83,13 @@ namespace epidb {
         }
         std::string owner = project_res["user"];
 
+        // Getting the project owner ID
+        std::string owner_id;
+        if (!dba::users::get_id(owner, owner_id, msg)) {
+          result.add_error(msg);
+          return false;
+        }
+
 
         std::string user_id;
         if (!dba::users::get_id(user, user_id, msg)) {
@@ -104,11 +111,8 @@ namespace epidb {
           return false;
         }
 
-        std::cerr << working_user.id << std::endl;
-        std::cerr << owner << std::endl;
-
         // Is the command operator admin or project owner ?
-        if ((!is_admin_key) && (working_user.id != owner)) {
+        if ((!is_admin_key) && (working_user.id != owner_id)) {
           result.add_error(Error::m(ERR_PROJECT_PERMISSION, project.c_str()));
           return false;
         }
