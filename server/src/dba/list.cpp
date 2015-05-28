@@ -99,7 +99,6 @@ namespace epidb {
           // I am not so sure about this option. I have it because the actual data does not have the "public" field
           mongo::BSONObj unset_public_projects = BSON("public" << BSON("$exists" << false));
 
-          std::cerr << user_bson.toString() << std::endl;
           if (user_bson.hasField("projects")) {
             std::vector<std::string> ps;
             std::vector<mongo::BSONElement> projects = user_bson["projects"].Array();
@@ -301,14 +300,28 @@ namespace epidb {
       bool in_use(const std::string &collection, const std::string &key_name, const std::string &user_key,
                   std::vector<utils::IdNameCount> &names, std::string &msg)
       {
-        mongo::BSONArray pipeline = BSON_ARRAY(
-                                      BSON("$match" <<
-                                           BSON("upload_info.done" << true)
-                                          )
-                                      << BSON( "$group" <<
-                                               BSON( "_id" << key_name << "total" << BSON( "$sum" << 1 ) )
-                                             )
-                                    );
+        std::vector<utils::IdName> user_projects;
+        if (!projects(user_key, user_projects, msg)) {
+          return false;
+        }
+
+        std::vector<std::string> project_names;
+        for (const auto& project: user_projects) {
+          project_names.push_back(project.name);
+        }
+
+        mongo::BSONArray projects_array = helpers::build_array(project_names);
+
+        // Select experiments that are uploaded and from πublic projects or that the user has permission
+        mongo::BSONObj done = BSON("upload_info.done" << true);
+        mongo::BSONObj user_projects_bson = BSON("project" << BSON("$in" << projects_array));
+        mongo::BSONObj query = BSON("$and" << BSON_ARRAY(done <<  user_projects_bson));
+        mongo::BSONObj match = BSON("$match" << query);
+
+        // Group by count
+        mongo::BSONObj group = BSON( "$group" << BSON( "_id" << key_name << "total" << BSON( "$sum" << 1 ) ) );
+
+        mongo::BSONArray pipeline = BSON_ARRAY( match << group );
 
         mongo::BSONObj agg_command = BSON( "aggregate" << Collections::EXPERIMENTS() << "pipeline" << pipeline);
 
