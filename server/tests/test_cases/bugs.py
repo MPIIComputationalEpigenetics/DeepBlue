@@ -337,7 +337,6 @@ chrX 100000"""
     (s, req) = epidb.get_regions(q, "CHROMOSOME,START,END", self.admin_key)
     self.assertSuccess(s, q)
     rs = self.get_regions_request(req)
-    print rs
     self.assertEquals(rs, "")
 
 
