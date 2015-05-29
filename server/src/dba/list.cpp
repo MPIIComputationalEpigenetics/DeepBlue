@@ -79,7 +79,53 @@ namespace epidb {
       }
 
       /*
-      * \brief List all projects that are available for the user
+      * \brief List all projects that MUST NOT be  available to the user
+      */
+      bool private_projects(const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg)
+      {
+        mongo::BSONObj user_bson;
+        if (!helpers::get_one(Collections::USERS(), BSON("key" << user_key), user_bson, msg)) {
+          return false;
+        }
+
+        bool user_admin = false;
+        if (user_bson.hasField("admin")) {
+          user_admin = user_bson["admin"].Bool();
+        }
+
+        if (user_admin) {
+          result.clear();
+          return true;
+        }
+
+        mongo::BSONObj private_projects = BSON("public" << false);
+        mongo::BSONObj full_query;
+
+        if (user_bson.hasField("projects")) {
+          std::vector<std::string> ps;
+          std::vector<mongo::BSONElement> projects = user_bson["projects"].Array();
+          for (const auto& p : projects) {
+            ps.push_back(p.String());
+          }
+
+          mongo::BSONObj user_projects = BSON("_id" << BSON("$nin" << helpers::build_array(ps)));
+          full_query = BSON("$and" << BSON_ARRAY(private_projects << user_projects));
+        } else {
+          full_query = private_projects;
+        }
+
+        std::vector<mongo::BSONObj> projects;
+        if (!helpers::get(Collections::PROJECTS(), full_query, projects, msg)) {
+          return false;
+        }
+
+        result = helpers::bsons_to_id_names(projects);
+
+        return true;
+      }
+
+      /*
+      * \brief List all projects that are available to the user
       */
       bool projects(const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg)
       {
