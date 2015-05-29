@@ -96,7 +96,7 @@ namespace epidb {
       std::istream stream(&streambuf_);
 
       while (!stream.eof()) {
-        char buf[4096];
+        char buf[4096] = {};
         stream.read(buf, 4096);
         std::streamsize tocopy = stream.gcount();
         if ((m_read_length + tocopy > m_expected_length) && m_expected_length) {
