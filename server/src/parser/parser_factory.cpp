@@ -8,6 +8,7 @@
 
 #include <sstream>
 #include <string>
+#include <limits>
 
 #include <boost/algorithm/string.hpp>
 
@@ -40,13 +41,13 @@ namespace epidb {
       input_(content),
       first_(true),
       format_(format),
-      chromosome_pos(-1),
-      start_pos(-1),
-      end_pos(-1)
+      chromosome_pos(std::numeric_limits<size_t>::max()),
+      start_pos(std::numeric_limits<size_t>::max()),
+      end_pos(std::numeric_limits<size_t>::max())
     {
       // TODO: check duplicated fields
       // TODO: check missing fields
-      int count = 0;
+      size_t count = 0;
       for (auto &column : format_) {
         if (column->name() == "CHROMOSOME") {
           chromosome_pos = count;
@@ -65,15 +66,15 @@ namespace epidb {
 
     bool Parser::check_format(std::string &msg)
     {
-      if (chromosome_pos == -1) {
+      if (chromosome_pos == std::numeric_limits<size_t>::max()) {
         msg = Error::m(ERR_FORMAT_CHROMOSOME_MISSING);
         return false;
       }
-      if (start_pos == -1) {
+      if (start_pos == std::numeric_limits<size_t>::max()) {
         msg = Error::m(ERR_FORMAT_START_MISSING);
         return false;
       }
-      if (end_pos == -1) {
+      if (end_pos == std::numeric_limits<size_t>::max()) {
         msg = Error::m(ERR_FORMAT_END_MISSING);
         return false;
       }
@@ -120,7 +121,7 @@ namespace epidb {
         it++;
       }
 
-      for (int pos = 0; it < strs.end(); pos++, it++) {
+      for (size_t pos = 0; it < strs.end(); pos++, it++) {
         std::string s = *it;
         boost::trim(s);
 

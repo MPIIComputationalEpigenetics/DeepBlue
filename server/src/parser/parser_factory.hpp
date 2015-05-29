@@ -190,9 +190,9 @@ namespace epidb {
       std::stringstream input_;
       bool first_;
       FileFormat format_;
-      int chromosome_pos;
-      int start_pos;
-      int end_pos;
+      size_t chromosome_pos;
+      size_t start_pos;
+      size_t end_pos;
 
     public:
       Parser(const std::string &content, FileFormat &format);
