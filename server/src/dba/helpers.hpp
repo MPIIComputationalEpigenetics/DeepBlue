@@ -76,7 +76,7 @@ namespace epidb {
 
       bool check_exist(const std::string &where, const std::string &field, const bool content);
 
-      bool check_exist(const std::string &where, const mongo::BSONObj query);
+      bool check_exist(const std::string &where, const mongo::BSONObj& query);
 
       bool remove_one(const std::string &collection, const std::string &id, std::string &msg, const std::string &field = "_id");
 
