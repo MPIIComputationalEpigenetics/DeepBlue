@@ -12,6 +12,7 @@
 #include "../dba/dba.hpp"
 #include "../dba/collections.hpp"
 #include "../dba/full_text.hpp"
+#include "../dba/list.hpp"
 
 #include "../extras/serialize.hpp"
 
@@ -83,8 +84,19 @@ namespace epidb {
           types_s.push_back(type);
         }
 
+        std::vector<utils::IdName> private_projects_id_names;
+        if (!dba::list::private_projects(user_key, private_projects_id_names, msg)) {
+          result.add_error(msg);
+          return false;
+        }
+
+        std::vector<std::string> private_projects;
+        for (const auto& project : private_projects_id_names) {
+          private_projects.push_back(utils::normalize_name(project.name));
+        }
+
         std::vector<dba::search::TextSearchResult> search_res;
-        if (!dba::search::search_full_text(keyword, types_s, search_res, msg)) {
+        if (!dba::search::search_full_text(keyword, types_s, private_projects, search_res, msg)) {
           result.add_error(msg);
           return false;
         }

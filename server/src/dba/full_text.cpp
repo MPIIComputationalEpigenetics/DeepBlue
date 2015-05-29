@@ -210,21 +210,27 @@ namespace epidb {
         return true;
       }
 
-      bool search_full_text(const std::string &text, std::vector<TextSearchResult> &results,
-                            std::string &msg)
+      bool search_full_text(const std::string &text, const std::vector<std::string> private_projects,
+                            std::vector<TextSearchResult> &results, std::string &msg)
       {
         std::vector<std::string> e;
         return search_full_text(text, e, results, msg);
       }
 
       bool search_full_text(const std::string &text, const std::vector<std::string> &types,
+                            const std::vector<std::string> private_projects,
                             std::vector<TextSearchResult> &results, std::string &msg)
       {
         Connection c;
 
         mongo::BSONObjBuilder cmd_builder;
-        if (types.size() > 0) {
+        if (!types.empty()) {
           cmd_builder.append("type", helpers::build_condition_array<std::string>(types, "$in"));
+        }
+
+        if (!private_projects.empty()) {
+          cmd_builder.append("norm_project", helpers::build_condition_array<std::string>(private_projects, "$nin"));
+          cmd_builder.append("norm_name", helpers::build_condition_array<std::string>(private_projects, "$nin"));
         }
 
         mongo::BSONObjBuilder text_builder;
@@ -243,6 +249,8 @@ namespace epidb {
         mongo::BSONObj SORT = BSON("score" << BSON("$meta" << "textScore"));
 
         const size_t MAX_RESULTS = 50;
+
+
         auto cursor = c->query(helpers::collection_name(Collections::TEXT_SEARCH()), mongo::Query(search).sort(SORT), MAX_RESULTS, 0, &projection);
 
         while (cursor->more()) {
