@@ -37,7 +37,6 @@ namespace epidb {
         ss_line >> name;
 
         if (ss_line.eof()) {
-          std::stringstream ss;
           msg =  "The size of the chromosome " + name + " is missing.";
           return false;
         }
