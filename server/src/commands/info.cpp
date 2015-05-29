@@ -15,6 +15,7 @@
 #include "../dba/dba.hpp"
 #include "../dba/info.hpp"
 #include "../dba/users.hpp"
+#include "../dba/list.hpp"
 
 #include "../engine/commands.hpp"
 #include "../engine/engine.hpp"
@@ -55,21 +56,21 @@ namespace epidb {
       }
 
       bool get_request(const std::string& id, const std::string& user_key,
-                       std::map<std::string,std::string>& map, std::string& msg) const
+                       std::map<std::string, std::string>& map, std::string& msg) const
       {
 
         utils::IdName user;
-        if(!dba::users::get_user(user_key, user, msg)) {
+        if (!dba::users::get_user(user_key, user, msg)) {
           return false;
         }
 
         bool admin_key = false;
-        if(! dba::users::is_admin_key(user_key, admin_key, msg)) {
+        if (! dba::users::is_admin_key(user_key, admin_key, msg)) {
           return false;
         }
 
         request::Job job;
-        if(admin_key || epidb::Engine::instance().user_owns_request(id, user.id)) {
+        if (admin_key || epidb::Engine::instance().user_owns_request(id, user.id)) {
           if (!epidb::Engine::instance().request_job(id, job, msg)) {
             return false;
           }
@@ -85,7 +86,7 @@ namespace epidb {
         map["create_time"] = ss.str();
         ss.str("");
         ss << job.finish_time;
-        if(job.status.state == "done") {
+        if (job.status.state == "done") {
           map["finish_time"] = ss.str();
         }
         map["query_id"] = job.query_id;
@@ -106,6 +107,17 @@ namespace epidb {
         if (!Command::checks(user_key, msg)) {
           result.add_error(msg);
           return false;
+        }
+
+        std::vector<utils::IdName> user_projects_id_names;
+        if (!dba::list::projects(user_key, user_projects_id_names, msg)) {
+          result.add_error(msg);
+          return false;
+        }
+
+        std::vector<std::string> user_projects;
+        for (const auto& project : user_projects_id_names) {
+          user_projects.push_back(utils::normalize_name(project.name));
         }
 
         std::vector<serialize::ParameterPtr> ids_param;
@@ -131,7 +143,7 @@ namespace epidb {
             ok = ok && dba::info::id_to_name(metadata, msg);
             type = "genome";
           } else if (id.compare(0, 1, "p") == 0) {
-            ok = dba::info::get_project(id, metadata, msg);
+            ok = dba::info::get_project(id, user_projects, metadata, msg);
             ok = ok && dba::info::id_to_name(metadata, msg);
             type = "project";
           } else if (id.compare(0, 2, "bs") == 0) {
@@ -147,7 +159,7 @@ namespace epidb {
             ok = ok && dba::info::id_to_name(metadata, msg);
             type = "epigenetic_mark";
           } else if (id.compare(0, 1, "e") == 0) {
-            ok = dba::info::get_experiment(id, metadata, extra_metadata, sample_info, columns, upload_info, msg);
+            ok = dba::info::get_experiment(id, user_projects, metadata, extra_metadata, sample_info, columns, upload_info, msg);
             ok = ok && dba::info::id_to_name(upload_info, msg);
             type = "experiment";
           } else if (id.compare(0, 1, "q") == 0) {
@@ -191,7 +203,7 @@ namespace epidb {
           if (!synonyms.empty()) {
             serialize::ParameterPtr serialize_synonyms(new serialize::ListParameter());
 
-            for (const auto& syn: synonyms) {
+            for (const auto& syn : synonyms) {
               serialize::ParameterPtr p(new serialize::SimpleParameter(serialize::STRING, syn));
               serialize_synonyms->add_child(p);
             }

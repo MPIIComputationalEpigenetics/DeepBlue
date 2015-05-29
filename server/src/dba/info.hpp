@@ -20,7 +20,8 @@ namespace epidb {
 
       bool get_genome(const std::string &id, std::map<std::string, std::string> &, std::string &msg, bool full = false);
 
-      bool get_project(const std::string &id, datatypes::Metadata &res, std::string &msg, bool full = false);
+      bool get_project(const std::string &id, const std::vector<std::string>& user_projects,
+                       datatypes::Metadata &res, std::string &msg, bool full = false);
 
       bool get_biosource(const std::string &id,
                          std::map<std::string, std::string> &metadata,
@@ -43,7 +44,7 @@ namespace epidb {
                           std::map<std::string, std::string> &upload_info,
                           std::string &msg, bool full = false);
 
-      bool get_experiment(const std::string &id,
+      bool get_experiment(const std::string &id, const std::vector<std::string>& user_projects,
                           std::map<std::string, std::string> &metadata,
                           std::map<std::string, std::string> &extra_metadata,
                           std::map<std::string, std::string> &sample_info,

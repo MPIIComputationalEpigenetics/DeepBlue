@@ -21,7 +21,8 @@ namespace epidb {
 
       bool genome(const std::string &id, mongo::BSONObj &result, std::string &msg);
 
-      bool project(const std::string &id, mongo::BSONObj &result, std::string &msg);
+      bool project(const std::string &id, const std::vector<std::string>& user_projects,
+                   mongo::BSONObj &result, std::string &msg);
 
       bool technique(const std::string &id, mongo::BSONObj &result, std::string &msg);
 
@@ -31,7 +32,8 @@ namespace epidb {
 
       bool annotation(const std::string &id, mongo::BSONObj &result, std::string &msg);
 
-      bool experiment(const std::string &id, mongo::BSONObj &result, std::string &msg);
+      bool experiment(const std::string &id, const std::vector<std::string>& user_projects,
+                      mongo::BSONObj &result, std::string &msg);
 
       bool query(const std::string &id, mongo::BSONObj &result, std::string &msg);
 

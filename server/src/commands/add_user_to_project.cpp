@@ -12,6 +12,7 @@
 #include "../dba/dba.hpp"
 #include "../dba/info.hpp"
 #include "../dba/users.hpp"
+#include "../dba/list.hpp"
 
 #include "../engine/commands.hpp"
 
@@ -76,8 +77,19 @@ namespace epidb {
           return false;
         }
 
+        std::vector<utils::IdName> user_projects_id_names;
+        if (!dba::list::projects(user_key, user_projects_id_names, msg)) {
+          result.add_error(msg);
+          return false;
+        }
+
+        std::vector<std::string> user_projects;
+        for (const auto& project : user_projects_id_names) {
+          user_projects.push_back(utils::normalize_name(project.name));
+        }
+
         datatypes::Metadata project_res;
-        if (!dba::info::get_project(project_id, project_res, msg)) {
+        if (!dba::info::get_project(project_id, user_projects, project_res, msg)) {
           result.add_error(msg);
           return false;
         }

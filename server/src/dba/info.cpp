@@ -60,10 +60,10 @@ namespace epidb {
         return true;
       }
 
-      bool get_project(const std::string &id, std::map<std::string, std::string> &res, std::string &msg, bool full = false)
+      bool get_project(const std::string &id, const std::vector<std::string>& user_projects, std::map<std::string, std::string> &res, std::string &msg, bool full = false)
       {
         mongo::BSONObj result;
-        if (!data::project(id, result, msg))  {
+        if (!data::project(id, user_projects, result, msg))  {
           return false;
         }
 
@@ -210,7 +210,8 @@ namespace epidb {
         return true;
       }
 
-      bool get_experiment(const std::string &id, std::map<std::string, std::string> &metadata,
+      bool get_experiment(const std::string &id, const std::vector<std::string>& user_projects,
+                          std::map<std::string, std::string> &metadata,
                           std::map<std::string, std::string> &extra_metadata,
                           std::map<std::string, std::string> &sample_info,
                           std::vector<std::map<std::string, std::string> > &columns,
@@ -218,7 +219,7 @@ namespace epidb {
                           std::string &msg, bool full = false)
       {
         mongo::BSONObj result;
-        if (!data::experiment(id, result, msg))  {
+        if (!data::experiment(id, user_projects, result, msg))  {
           return false;
         }
 

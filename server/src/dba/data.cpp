@@ -35,9 +35,19 @@ namespace epidb {
         }
       }
 
-      bool project(const std::string &id, mongo::BSONObj &result, std::string &msg)
+      bool project(const std::string &id, const std::vector<std::string>& user_projects,
+                   mongo::BSONObj &result, std::string &msg)
       {
-        if (helpers::get_one(Collections::PROJECTS(), mongo::Query(BSON("_id" << id)), result, msg)) {
+        mongo::BSONObj query = BSON("$and" <<
+                                    BSON_ARRAY(
+                                      BSON("_id" << id) <<
+                                      BSON("norm_name" <<
+                                           BSON("$in" << helpers::build_array(user_projects))
+                                          )
+                                    )
+                                   );
+
+        if (helpers::get_one(Collections::PROJECTS(), mongo::Query(query), result, msg)) {
           return true;
         } else {
           msg = "Project ID '" + id + "' not found.";
@@ -85,9 +95,18 @@ namespace epidb {
         }
       }
 
-      bool experiment(const std::string &id, mongo::BSONObj &result, std::string &msg)
+      bool experiment(const std::string &id, const std::vector<std::string>& user_projects,
+                      mongo::BSONObj &result, std::string &msg)
       {
-        if (helpers::get_one(Collections::EXPERIMENTS(), mongo::Query(BSON("_id" << id)), result, msg)) {
+        mongo::BSONObj query = BSON("$and" <<
+                                    BSON_ARRAY(
+                                      BSON("_id" << id) <<
+                                      BSON("norm_project" <<
+                                           BSON("$in" << helpers::build_array(user_projects))
+                                          )
+                                    )
+                                   );
+        if (helpers::get_one(Collections::EXPERIMENTS(), mongo::Query(query), result, msg)) {
           return true;
         } else {
           msg = "Experiment ID '" + id + "' not found.";

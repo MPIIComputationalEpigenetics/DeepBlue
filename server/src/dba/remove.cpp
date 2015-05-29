@@ -19,6 +19,7 @@
 #include "key_mapper.hpp"
 #include "remove.hpp"
 #include "users.hpp"
+#include "list.hpp"
 
 namespace epidb {
   namespace dba {
@@ -70,7 +71,7 @@ namespace epidb {
           }
         }
 
-        if (!helpers::notify_change_occurred("dataset_operations", msg)){
+        if (!helpers::notify_change_occurred("dataset_operations", msg)) {
           return false;
         }
 
@@ -116,7 +117,7 @@ namespace epidb {
           return false;
         }
 
-        if (!helpers::notify_change_occurred(Collections::ANNOTATIONS(), msg)){
+        if (!helpers::notify_change_occurred(Collections::ANNOTATIONS(), msg)) {
           return false;
         }
 
@@ -125,8 +126,18 @@ namespace epidb {
 
       bool experiment(const std::string &id, const std::string &user_key, std::string &msg)
       {
+        std::vector<utils::IdName> user_projects_id_names;
+        if (!dba::list::projects(user_key, user_projects_id_names, msg)) {
+          return false;
+        }
+
+        std::vector<std::string> user_projects;
+        for (const auto& project : user_projects_id_names) {
+          user_projects.push_back(utils::normalize_name(project.name));
+        }
+
         mongo::BSONObj experiment;
-        if (!data::experiment(id, experiment, msg)) {
+        if (!data::experiment(id, user_projects, experiment, msg)) {
           msg = "Experiment " + id + " not found";
           return false;
         }
@@ -162,7 +173,7 @@ namespace epidb {
           return false;
         }
 
-        if (!helpers::notify_change_occurred(Collections::EXPERIMENTS(), msg)){
+        if (!helpers::notify_change_occurred(Collections::EXPERIMENTS(), msg)) {
           return false;
         }
 
@@ -255,7 +266,7 @@ namespace epidb {
           return false;
         }
 
-        if (!helpers::notify_change_occurred(Collections::GENOMES(), msg)){
+        if (!helpers::notify_change_occurred(Collections::GENOMES(), msg)) {
           return false;
         }
 
@@ -264,8 +275,18 @@ namespace epidb {
 
       bool project(const std::string &id, const std::string &user_key, std::string &msg)
       {
+        std::vector<utils::IdName> user_projects_id_names;
+        if (!dba::list::projects(user_key, user_projects_id_names, msg)) {
+          return false;
+        }
+
+        std::vector<std::string> user_projects;
+        for (const auto& project : user_projects_id_names) {
+          user_projects.push_back(utils::normalize_name(project.name));
+        }
+
         mongo::BSONObj project;
-        if (!data::project(id, project, msg)) {
+        if (!data::project(id, user_projects, project, msg)) {
           msg = "Project " + id + " not found";
           return false;
         }
@@ -298,7 +319,7 @@ namespace epidb {
           return false;
         }
 
-        if (!helpers::notify_change_occurred(Collections::PROJECTS(), msg)){
+        if (!helpers::notify_change_occurred(Collections::PROJECTS(), msg)) {
           return false;
         }
 
@@ -342,11 +363,11 @@ namespace epidb {
           return false;
         }
 
-        if (!cv::remove_biosouce(id, biosource_name , norm_biosource_name, msg)){
+        if (!cv::remove_biosouce(id, biosource_name , norm_biosource_name, msg)) {
           return false;
         }
 
-        if (!helpers::notify_change_occurred(Collections::BIOSOURCES(), msg)){
+        if (!helpers::notify_change_occurred(Collections::BIOSOURCES(), msg)) {
           return false;
         }
 
@@ -389,7 +410,7 @@ namespace epidb {
           return false;
         }
 
-        if (!helpers::notify_change_occurred(Collections::SAMPLES(), msg)){
+        if (!helpers::notify_change_occurred(Collections::SAMPLES(), msg)) {
           return false;
         }
 
@@ -432,7 +453,7 @@ namespace epidb {
           return false;
         }
 
-        if (!helpers::notify_change_occurred(Collections::EPIGENETIC_MARKS(), msg)){
+        if (!helpers::notify_change_occurred(Collections::EPIGENETIC_MARKS(), msg)) {
           return false;
         }
 
@@ -475,7 +496,7 @@ namespace epidb {
           return false;
         }
 
-        if (!helpers::notify_change_occurred(Collections::TECHNIQUES(), msg)){
+        if (!helpers::notify_change_occurred(Collections::TECHNIQUES(), msg)) {
           return false;
         }
 
@@ -505,7 +526,7 @@ namespace epidb {
           return false;
         }
 
-        if (!helpers::notify_change_occurred(Collections::COLUMN_TYPES(), msg)){
+        if (!helpers::notify_change_occurred(Collections::COLUMN_TYPES(), msg)) {
           return false;
         }
 
