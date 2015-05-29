@@ -423,7 +423,6 @@ namespace epidb {
           if (!retrieve::get_regions(genome, chromosomes, regions_query, reg, msg)) {
             return false;
           }
-          std::cerr << "reg" << std::endl;
           genome_regions.push_back(std::move(reg));
         }
 
