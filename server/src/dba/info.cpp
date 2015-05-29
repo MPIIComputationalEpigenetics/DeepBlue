@@ -111,7 +111,6 @@ namespace epidb {
         }
 
         std::string biosource_name = result["name"].String();
-        std::string norm_biosource_name = result["norm_name"].String();
 
         for (mongo::BSONObj::iterator it = result.begin(); it.more(); ) {
           mongo::BSONElement e = it.next();
@@ -127,8 +126,11 @@ namespace epidb {
         }
 
         utils::IdName id_name_biosource(id, biosource_name);
-        std::vector<utils::IdName> syns;
+
         /*
+        std::vector<utils::IdName> syns;
+        std::string norm_biosource_name = result["norm_name"].String();
+
         if (!get_biosource_synonyms(biosource_name, norm_biosource_name, true, "", syns, msg)) {
           return false;
         }
