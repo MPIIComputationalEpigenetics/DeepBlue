@@ -144,12 +144,6 @@ namespace epidb {
     }
 
 
-    const std::string &KeyMapper::WIG_TYPE()
-    {
-      static std::string VALUE = epidb::dba::KeyMapper::build_default("TYPE_WIG");
-      return VALUE;
-    }
-
     const std::string &KeyMapper::WIG_STEP()
     {
       static std::string VALUE = epidb::dba::KeyMapper::build_default("STEP_WIG");
@@ -218,7 +212,6 @@ namespace epidb {
 
       std::string sk;
       sk = l[0];
-      int i = 0;
 
       // Try to use some letter from the name
       size_t pos(0);
@@ -228,6 +221,7 @@ namespace epidb {
 
       // If not found useful letter, insert number
       if (stol_.find(sk) != stol_.end()) {
+        int i = 0;
         while (!(stol_.find(sk) == stol_.end())) {
           sk = l[0] + utils::integer_to_string(i++);
         }
