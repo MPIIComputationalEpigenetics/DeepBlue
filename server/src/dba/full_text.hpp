@@ -42,7 +42,7 @@ namespace epidb {
                             const mongo::BSONObj &extra_data, std::string &msg);
 
       // TODO: rename namespace to search
-      bool search_full_text(const std::string &text, const std::vector<std::string> private_projects,
+      bool search_full_text(const std::string &text, const std::vector<std::string>& private_projects,
                             std::vector<TextSearchResult> &results, std::string &msg);
 
       bool insert_related_term(const utils::IdName &id_name, const std::vector<std::string> &related_terms,
