@@ -12,7 +12,6 @@
 #include <sstream>
 
 #include "../extras/serialize.hpp"
-#include "httpd_exceptions.hpp"
 
 namespace epidb {
   namespace httpd {
@@ -28,6 +27,7 @@ namespace epidb {
      public:
       XmlrpcRequest(const std::string& method_name, const std::string& ip)
           : ip_(ip),
+            id_(0),
             method_name_(method_name)
       {}
 
