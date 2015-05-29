@@ -52,7 +52,7 @@ namespace epidb {
 
       // TODO: rename namespace to search
       bool search_full_text(const std::string &text, const std::vector<std::string> &types,
-                            const std::vector<std::string> private_projects,
+                            const std::vector<std::string>& private_projects,
                             std::vector<TextSearchResult> &results, std::string &msg);
 
       bool remove(const std::string &id, std::string &msg);

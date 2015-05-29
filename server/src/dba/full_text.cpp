@@ -218,7 +218,7 @@ namespace epidb {
       }
 
       bool search_full_text(const std::string &text, const std::vector<std::string> &types,
-                            const std::vector<std::string> private_projects,
+                            const std::vector<std::string>& private_projects,
                             std::vector<TextSearchResult> &results, std::string &msg)
       {
         Connection c;
