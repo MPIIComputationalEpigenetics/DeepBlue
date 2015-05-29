@@ -121,7 +121,7 @@ namespace epidb {
         return true;
       }
 
-      std::vector<utils::IdName> bsons_to_id_names(const std::vector<mongo::BSONObj> bsons)
+      std::vector<utils::IdName> bsons_to_id_names(const std::vector<mongo::BSONObj> &bsons)
       {
         std::vector<utils::IdName> v;
         BOOST_FOREACH(const mongo::BSONObj & o, bsons) {
@@ -390,8 +390,8 @@ namespace epidb {
       mongo::BSONArray build_array(const std::vector<std::string> &params)
       {
         mongo::BSONArrayBuilder ab;
-        for (std::vector<std::string>::const_iterator it = params.begin(); it != params.end(); it++) {
-          ab.append(*it);
+        for (const auto& param: params) {
+          ab.append(param);
         }
         return ab.arr();
       }
@@ -399,8 +399,8 @@ namespace epidb {
       mongo::BSONArray build_normalized_array(const std::vector<std::string> &params)
       {
         mongo::BSONArrayBuilder ab;
-        for (std::vector<std::string>::const_iterator it = params.begin(); it != params.end(); it++) {
-          ab.append(utils::normalize_name(*it));
+        for (const auto& param: params) {
+          ab.append(utils::normalize_name(param));
         }
         return ab.arr();
       }
@@ -409,8 +409,8 @@ namespace epidb {
       mongo::BSONArray build_array(const std::vector<serialize::ParameterPtr> &params)
       {
         mongo::BSONArrayBuilder ab;
-        for (std::vector<serialize::ParameterPtr>::const_iterator it = params.begin(); it != params.end(); it++) {
-          ab.append((**it).as_string());
+        for (const auto& param: params) {
+          ab.append(param->as_string());
         }
         return ab.arr();
       }
@@ -418,8 +418,8 @@ namespace epidb {
       mongo::BSONArray build_normalized_array(const std::vector<serialize::ParameterPtr> &params)
       {
         mongo::BSONArrayBuilder ab;
-        for (std::vector<serialize::ParameterPtr>::const_iterator it = params.begin(); it != params.end(); it++) {
-          ab.append(utils::normalize_name((**it).as_string()));
+        for (const auto& param: params) {
+          ab.append(utils::normalize_name(param->as_string()));
         }
         return ab.arr();
       }
@@ -427,8 +427,8 @@ namespace epidb {
       mongo::BSONArray build_epigenetic_normalized_array(const std::vector<serialize::ParameterPtr> &params)
       {
         mongo::BSONArrayBuilder ab;
-        for (std::vector<serialize::ParameterPtr>::const_iterator it = params.begin(); it != params.end(); it++) {
-          ab.append(utils::normalize_epigenetic_mark((**it).as_string()));
+        for (const auto& param: params) {
+          ab.append(utils::normalize_epigenetic_mark(param->as_string()));
         }
         return ab.arr();
       }
@@ -436,8 +436,8 @@ namespace epidb {
       mongo::BSONArray build_annotation_normalized_array(const std::vector<serialize::ParameterPtr> &params)
       {
         mongo::BSONArrayBuilder ab;
-        for (std::vector<serialize::ParameterPtr>::const_iterator it = params.begin(); it != params.end(); it++) {
-          ab.append(utils::normalize_annotation_name((**it).as_string()));
+        for (const auto& param: params) {
+          ab.append(utils::normalize_annotation_name(param->as_string()));
         }
         return ab.arr();
       }
@@ -445,8 +445,8 @@ namespace epidb {
       std::vector<std::string> build_vector(const std::vector<serialize::ParameterPtr> &params)
       {
         std::vector<std::string> vector;
-        for (std::vector<serialize::ParameterPtr>::const_iterator it = params.begin(); it != params.end(); it++) {
-          vector.push_back((**it).as_string());
+        for (const auto& param: params) {
+          vector.push_back(param->as_string());
         }
         return vector;
       }
