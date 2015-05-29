@@ -2,10 +2,8 @@
 //  client.hpp
 //  epidb
 //
-//  Created by Felipe Albrecht on 22.01.15.
-//  Copyright (c) 2013,2014 Max Planck Institute for Computer Science. All rights reserved.
-//
-// From: https://github.com/temporaer/MDBQ/
+// Code from https://github.com/temporaer/MDBQ/
+// adapted to DeepBlue by Felipe Albrecht on 22.01.2015
 
 #ifndef __MDBQ_CLIENT_HPP__
 #     define __MDBQ_CLIENT_HPP__
