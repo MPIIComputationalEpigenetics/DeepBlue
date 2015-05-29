@@ -50,7 +50,6 @@ namespace epidb {
       boost::tokenizer<boost::escaped_list_separator<char> > tok(s, els);
 
       for (boost::tokenizer<boost::escaped_list_separator<char> >::iterator beg = tok.begin(); beg != tok.end(); ++beg) {
-        std::vector<std::string> kv;
         size_t pos = beg->find_first_of("=");
         if (pos == std::string::npos) {
           msg = "The track seems to have an invalid <track> header line: " + *beg;
@@ -69,7 +68,6 @@ namespace epidb {
       params.clear();
 
       for (size_t i = 1; i < strs.size(); i++ ) {
-        std::vector<std::string> kv;
         size_t pos = strs[i].find_first_of("=");
         if (pos == std::string::npos) {
           msg = "The track seems to have an invalid parameters: " + strs[i] + " . Line: " + line_str();
@@ -101,9 +99,6 @@ namespace epidb {
       }
 
       std::string mode(strs[0]);
-      int start;
-      int step;
-      int span;
 
       if (params.find("chrom") == params.end()) {
         msg = "The track doesn't specify a chromosome. Line: " + line_str();
@@ -111,6 +106,7 @@ namespace epidb {
       }
       std::string chrom = params["chrom"];
 
+      int span;
       if (params.find("span") == params.end()) {
         span = 1;
       } else if (utils::string_to_int(params["span"], span)) {
@@ -124,6 +120,8 @@ namespace epidb {
       }
 
       if (mode == "fixedStep") {
+        int start;
+        int step;
         if (params.find("start") == params.end() || !utils::is_number(params["start"])) {
           msg = "The track has a non integer or smaller than 1 as start value. Line: " + line_str();
           return false;
