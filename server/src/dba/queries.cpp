@@ -216,8 +216,8 @@ namespace epidb {
         }
 
         count = 0;
-        for (ChromosomeRegionsList::const_iterator it = regions.begin(); it != regions.end(); it++) {
-          count += it->second.size();
+        for (const auto& chromosome: regions) {
+          count += chromosome.second.size();
         }
 
         return true;
@@ -613,10 +613,10 @@ namespace epidb {
         size_t keep = 0;
 
         Metafield metafield;
-        for (ChromosomeRegionsList::iterator it = regions.begin(); it != regions.end(); it++) {
-          const std::string &chromosome = it->first;
+        for (auto& chromosome_regions_list: regions) {
+          const std::string &chromosome = chromosome_regions_list.first;
           Regions saved = build_regions();
-          for (auto &region : it->second) {
+          for (auto& region : chromosome_regions_list.second) {
             if (!dba::Metafield::is_meta(field)) {
               if (region->dataset_id() != dataset_id) {
                 dataset_id = region->dataset_id();
