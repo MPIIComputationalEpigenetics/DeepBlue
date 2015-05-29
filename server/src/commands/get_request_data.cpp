@@ -81,7 +81,7 @@ namespace epidb {
             return false;
           }
         } else {
-          msg = "Request ID " + query_id + " not found.";
+          result.add_error("Request ID " + query_id + " not found.");
           return false;
         }
 
