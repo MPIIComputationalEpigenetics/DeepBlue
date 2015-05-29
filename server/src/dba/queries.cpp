@@ -207,7 +207,6 @@ namespace epidb {
           return false;
         }
         mongo::BSONObj query = result[0];
-        std::string type = query["type"].str();
         mongo::BSONObj args = query["args"].Obj();
 
         count = 0;
@@ -218,7 +217,6 @@ namespace epidb {
 
         count = 0;
         for (ChromosomeRegionsList::const_iterator it = regions.begin(); it != regions.end(); it++) {
-          std::string chromosome = it->first;
           count += it->second.size();
         }
 
@@ -608,7 +606,6 @@ namespace epidb {
           return false;
         }
 
-        std::string err;
         DatasetId dataset_id = -1;
         dba::columns::ColumnTypePtr column;
 
@@ -729,9 +726,6 @@ namespace epidb {
           return false;
         }
 
-        // generate tiling regions for all chromosomes
-        ChromosomeRegionsList chromosome_regions_list;
-
         std::vector<std::string>::iterator cit;
         dba::genomes::ChromosomeInfo chromosome_info;
 
@@ -809,12 +803,11 @@ namespace epidb {
             const std::string &column_type = column["column_type"].str();
             const std::string &column_name = column["name"].str();
 
-            int pos = -1;
-
             mongo::BSONObjBuilder bob;
             bob.appendElements(column);
 
             if (column_name != "CHROMOSOME" && column_name != "START" &&  column_name != "END") {
+              int pos = -1;
               if (column_type == "string") {
                 pos = s_count++;
               } else if (column_type == "integer") {
@@ -858,12 +851,11 @@ namespace epidb {
             const std::string &column_type = column["column_type"].str();
             const std::string &column_name = column["name"].str();
 
-            int pos = -1;
-
             mongo::BSONObjBuilder bob;
             bob.appendElements(column);
 
             if (column_name != "CHROMOSOME" && column_name != "START" &&  column_name != "END") {
+              int pos = -1;
               if (column_type == "string") {
                 pos = s_count++;
               } else if (column_type == "integer") {
