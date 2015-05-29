@@ -24,9 +24,6 @@ namespace epidb {
 
       bool get_id(const std::string &name, std::string& id, std::string &msg);
 
-
-      bool is_public(const std::string &project_id, bool& ret, std::string &msg);
-
       /*
        * \brief Set the project as public. Only project owner or admin may execute this operation
        */

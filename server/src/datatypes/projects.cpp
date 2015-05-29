@@ -133,31 +133,6 @@ namespace epidb {
         c.done();
         return true;
       }
-
-      bool is_public(const std::string &project_id, bool& ret, std::string &msg)
-      {
-        if (!dba::helpers::notify_change_occurred(dba::Collections::PROJECTS(), msg)) {
-          return false;
-        }
-        Connection c;
-
-        mongo::BSONObjBuilder query_builder;
-
-        query_builder.append("public", true);
-        query_builder.append("_id", project_id);
-
-        mongo::BSONObj query = query_builder.obj();
-        long long count = c->count(dba::helpers::collection_name(dba::Collections::PROJECTS()), query);
-        if (!c->getLastError().empty()) {
-          msg = c->getLastError();
-          c.done();
-          return false;
-        }
-
-        ret = count > 0;
-        c.done();
-        return true;
-      }
     }
   }
 }
