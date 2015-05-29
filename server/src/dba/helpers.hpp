@@ -90,8 +90,8 @@ namespace epidb {
       mongo::BSONObj build_condition_array(const std::vector<T> &params, const std::string &condition)
       {
         mongo::BSONArrayBuilder ab;
-        for (typename std::vector<T>::const_iterator it = params.begin(); it != params.end(); it++) {
-          ab.append(*it);
+        for (const auto& param :  params) {
+          ab.append(param);
         }
         mongo::BSONObjBuilder in_condition;
         in_condition.append (condition, ab.arr());
@@ -129,7 +129,7 @@ namespace epidb {
 
       std::vector<std::string> build_vector(const std::vector<serialize::ParameterPtr> &params);
 
-      std::vector<utils::IdName> bsons_to_id_names(const std::vector<mongo::BSONObj> bsons);
+      std::vector<utils::IdName> bsons_to_id_names(const std::vector<mongo::BSONObj> &bsons);
       utils::IdName bson_to_id_name(const mongo::BSONObj& bson);
 
       bool check_parameters(const std::vector<serialize::ParameterPtr> &params, const std::function<std::string(const std::string&)> &normalizer, const std::function<bool(const std::string&)> &checker, std::string &wrong);
