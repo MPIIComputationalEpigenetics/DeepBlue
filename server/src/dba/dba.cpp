@@ -255,6 +255,83 @@ namespace epidb {
 
       {
         mongo::BSONObjBuilder index_name;
+        index_name.append("name", "hashed");
+        c->createIndex(helpers::collection_name(Collections::EXPERIMENTS()), index_name.obj());
+        if (!c->getLastError().empty()) {
+          msg = c->getLastError();
+          c.done();
+          return false;
+        }
+      }
+
+      {
+        mongo::BSONObjBuilder index_name;
+        index_name.append("norm_name", "hashed");
+        c->createIndex(helpers::collection_name(Collections::EXPERIMENTS()), index_name.obj());
+        if (!c->getLastError().empty()) {
+          msg = c->getLastError();
+          c.done();
+          return false;
+        }
+      }
+
+      {
+        mongo::BSONObjBuilder index_name;
+        index_name.append("norm_genome", "hashed");
+        c->createIndex(helpers::collection_name(Collections::EXPERIMENTS()), index_name.obj());
+        if (!c->getLastError().empty()) {
+          msg = c->getLastError();
+          c.done();
+          return false;
+        }
+      }
+
+      {
+        mongo::BSONObjBuilder index_name;
+        index_name.append("norm_epigenetic_mark", "hashed");
+        c->createIndex(helpers::collection_name(Collections::EXPERIMENTS()), index_name.obj());
+        if (!c->getLastError().empty()) {
+          msg = c->getLastError();
+          c.done();
+          return false;
+        }
+      }
+
+      {
+        mongo::BSONObjBuilder index_name;
+        index_name.append("sample_id", "hashed");
+        c->createIndex(helpers::collection_name(Collections::EXPERIMENTS()), index_name.obj());
+        if (!c->getLastError().empty()) {
+          msg = c->getLastError();
+          c.done();
+          return false;
+        }
+      }
+
+      {
+        mongo::BSONObjBuilder index_name;
+        index_name.append("norm_technique", "hashed");
+        c->createIndex(helpers::collection_name(Collections::EXPERIMENTS()), index_name.obj());
+        if (!c->getLastError().empty()) {
+          msg = c->getLastError();
+          c.done();
+          return false;
+        }
+      }
+
+      {
+        mongo::BSONObjBuilder index_name;
+        index_name.append("norm_project", "hashed");
+        c->createIndex(helpers::collection_name(Collections::EXPERIMENTS()), index_name.obj());
+        if (!c->getLastError().empty()) {
+          msg = c->getLastError();
+          c.done();
+          return false;
+        }
+      }
+
+      {
+        mongo::BSONObjBuilder index_name;
         index_name.append("key", "hashed");
         c->createIndex(helpers::collection_name(Collections::USERS()), index_name.obj());
         if (!c->getLastError().empty()) {
