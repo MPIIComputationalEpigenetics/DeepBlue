@@ -319,10 +319,6 @@ class DeepBlueClient(object):
         return self.server.list_requests(status, self.key)
 
     @key_required
-    def get_request_status(self, request_id):
-        return self.server.get_request_status(request_id, self.key)
-
-    @key_required
     def get_request_data(self, request_id):
         return self.server.get_request_data(request_id, self.key)
 
