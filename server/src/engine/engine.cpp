@@ -110,7 +110,7 @@ namespace epidb {
       return false;
     }
 
-    if (!queue(BSON("command" << "score_matrix" << "experiments_formats" << bob_formats.obj() << "aggregation_function" << aggregation_function << "regions_query_id" << regions_query_id << "user_id" << user.id), 60 * 60, id, msg)) {
+    if (!queue(BSON("command" << "score_matrix" << "experiments_formats" << bob_formats.obj() << "aggregation_function" << aggregation_function << "query_id" << regions_query_id << "user_id" << user.id), 60 * 60, id, msg)) {
       return false;
     }
 
@@ -156,7 +156,7 @@ namespace epidb {
     status.state = mdbq::Hub::state_name(o);
     status.message = mdbq::Hub::state_message(o);
     job.status = status;
-
+    
     job.create_time = mdbq::Hub::get_create_time(o);
     if (status.state == mdbq::Hub::state_name(mdbq::TS_DONE)) {
       job.finish_time = mdbq::Hub::get_finish_time(o);
