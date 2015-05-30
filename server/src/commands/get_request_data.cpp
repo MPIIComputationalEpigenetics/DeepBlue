@@ -72,10 +72,15 @@ namespace epidb {
           return false;
         }
 
+        bool admin_key = false;
+        if (! dba::users::is_admin_key(user_key, admin_key, msg)) {
+          return false;
+        }
+        
         StringBuilder sb;
         request::Data data;
         request::DataType type = request::DataType::INVALID;
-        if (epidb::Engine::instance().user_owns_request(query_id, user.id)) {
+        if (admin_key || epidb::Engine::instance().user_owns_request(query_id, user.id)) {
           if (!epidb::Engine::instance().request_data(query_id, user_key, data, sb, type, msg)) {
             result.add_error(msg);
             return false;
