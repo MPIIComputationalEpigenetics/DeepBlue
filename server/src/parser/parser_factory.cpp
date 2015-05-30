@@ -106,9 +106,27 @@ namespace epidb {
         std::string second;
         ss >> second;
 
-        first_column_useless = (chromosome_pos == 0 &&
-          (first.find_first_not_of("0123456789") == std::string::npos) &&
-          (second.compare(0, 3, std::string("chr")) == 0));
+
+        std::vector<std::string> strs;
+        boost::split(strs, line, boost::is_any_of("\t"));
+
+        if (strs.size() == format_.size()) {
+          first_column_useless = false;
+        } else if (strs.size() - 1 == format_.size()) {
+          first_column_useless = true;
+        } else {
+          std::stringstream m;
+          m << "Error while reading the BED file. Line: 1 - '";
+          m << line;
+          m << "'. The number of tokens (" ;
+          m << strs.size() ;
+          m << ") is different from the format size (" ;
+          m << format_.size();
+          m << ") - ";
+          m << format_.format();
+          msg = m.str();
+          return false;
+        }
 
         first_ = false;
       }
