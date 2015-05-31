@@ -523,10 +523,10 @@ namespace epidb {
       params_.push_back(ParameterPtr(new SimpleParameter(STRING, value)));
     }
 
-    void Parameters::add_stringbuilder(StringBuilder &sb)
+    void Parameters::add_string_content(std::string&& content)
     {
       // TODO: In fact, read the file content only when build the xml response.
-      params_.push_back(ParameterPtr(new SimpleParameter(STRING, sb.to_string())));
+      params_.push_back(ParameterPtr(new SimpleParameter(STRING, std::move(content))));
     }
 
     void Parameters::add_int(size_t i)

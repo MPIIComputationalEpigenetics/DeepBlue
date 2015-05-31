@@ -17,6 +17,7 @@
 
 #include "../log.hpp"
 
+#include "../extras/compress.hpp"
 #include "../connection/connection.hpp"
 
 #include "../dba/helpers.hpp"
@@ -340,7 +341,7 @@ namespace mdbq {
     return false;
   }
 
-  bool Hub::get_result(const std::string &filename, epidb::StringBuilder &sb, std::string &msg)
+  bool Hub::get_result(const std::string &filename, std::vector<lzo_byte>& data, std::string &msg)
   {
     mongo::OID oid;
     size_t file_size;
@@ -351,15 +352,17 @@ namespace mdbq {
 
     mongo::BSONObj projection = BSON("data" << 1);
 
-    for (int i = 0; i * chunk_size < file_size; i++) {
-      mongo::Query q(BSON("files_id" << oid << "n" << i));
-
+    size_t remaining = file_size;
+    size_t n = 0;
+    while (remaining > 0) {
+      mongo::Query q(BSON("files_id" << oid << "n" << (long long) n));
       std::auto_ptr<mongo::DBClientCursor> data_cursor = m_ptr->m_con->query(m_ptr->m_prefix + ".fs.chunks", q, 0, 0, &projection);
-
       if (data_cursor->more()) {
-        int i_chuck_size = (int) chunk_size;
-        std::string chunk = data_cursor->next().getField("data").binData(i_chuck_size);
-        sb.append(std::move(chunk));
+        int read;
+        lzo_bytep compressed_data = (lzo_bytep) data_cursor->next().getField("data").binData(read);
+        std::copy(compressed_data, compressed_data + read, std::back_inserter(data));
+        n++;
+        remaining -= read;
       } else {
         msg = "Chunk for file " + filename + " not found.";
         return false;

@@ -11,6 +11,8 @@
 #include <boost/shared_ptr.hpp>
 #include "../mdbq/common.hpp"
 
+#include "../extras/compress.hpp"
+
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/date_time/gregorian/gregorian.hpp>
 
@@ -108,7 +110,7 @@ namespace mdbq {
      */
     void clear_all();
 
-    bool get_result(const std::string &filename, epidb::StringBuilder &sb, std::string &msg);
+    bool get_result(const std::string &filename, std::vector<lzo_byte>& data, std::string &msg);
 
     /**
      * register with the main loop

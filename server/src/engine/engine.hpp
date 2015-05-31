@@ -59,7 +59,7 @@ namespace epidb {
     */
     bool request_jobs(const std::string& status, const std::string& user_key, std::vector<request::Job>& ret, std::string &msg);
 
-    bool request_data(const std::string &request_id, const std::string &user_key, request::Data &data, StringBuilder &sb, request::DataType &type, std::string &msg);
+    bool request_data(const std::string &request_id, const std::string &user_key, request::Data &data, std::string& content, request::DataType& type, std::string &msg);
 
     bool queue_count_regions(const std::string &query_id, const std::string &user_key, std::string &request_id, std::string &msg);
 

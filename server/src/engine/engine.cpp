@@ -16,6 +16,7 @@
 #include "../dba/queries.hpp"
 #include "../dba/users.hpp"
 
+#include "../extras/compress.hpp"
 #include "../extras/stringbuilder.hpp"
 #include "../extras/utils.hpp"
 
@@ -76,7 +77,7 @@ namespace epidb {
   bool Engine::queue_count_regions(const std::string &query_id, const std::string &user_key, std::string &id, std::string &msg)
   {
     utils::IdName user;
-    if(!dba::users::get_user(user_key, user, msg)) {
+    if (!dba::users::get_user(user_key, user, msg)) {
       return false;
     }
     if (!queue(BSON("command" << "count_regions" << "query_id" << query_id << "user_id" << user.id), 60 * 60, id, msg)) {
@@ -88,7 +89,7 @@ namespace epidb {
   bool Engine::queue_get_regions(const std::string &query_id, const std::string &output_format, const std::string &user_key, std::string &id, std::string &msg)
   {
     utils::IdName user;
-    if(!dba::users::get_user(user_key, user, msg)) {
+    if (!dba::users::get_user(user_key, user, msg)) {
       return false;
     }
     if (!queue(BSON("command" << "get_regions" << "query_id" << query_id << "format" << output_format << "user_id" << user.id), 60 * 60, id, msg)) {
@@ -106,7 +107,7 @@ namespace epidb {
     }
 
     utils::IdName user;
-    if(!dba::users::get_user(user_key, user, msg)) {
+    if (!dba::users::get_user(user_key, user, msg)) {
       return false;
     }
 
@@ -121,7 +122,7 @@ namespace epidb {
   bool Engine::queue_get_experiments_by_query(const std::string &query_id, const std::string &user_key, std::string &request_id, std::string &msg)
   {
     utils::IdName user;
-    if(!dba::users::get_user(user_key, user, msg)) {
+    if (!dba::users::get_user(user_key, user, msg)) {
       return false;
     }
     if (!queue(BSON("command" << "get_experiments_by_query" << "query_id" << query_id << "user_id" << user.id), 60 * 60, request_id, msg)) {
@@ -134,7 +135,7 @@ namespace epidb {
   bool Engine::request_status(const std::string &request_id, const std::string &user_key, request::Status &request_status, std::string &msg)
   {
     utils::IdName user;
-    if(!dba::users::get_user(user_key, user, msg)) {
+    if (!dba::users::get_user(user_key, user, msg)) {
       return false;
     }
     mongo::BSONObj o = _hub.get_job(request_id); // TODO still check
@@ -182,22 +183,22 @@ namespace epidb {
   bool Engine::request_jobs(const std::string &status_find, const std::string &user_key, std::vector<request::Job>& ret, std::string& msg)
   {
     utils::IdName user;
-    if(!dba::users::get_user(user_key, user, msg)) {
+    if (!dba::users::get_user(user_key, user, msg)) {
       return false;
     }
 
     mdbq::TaskState task_state = mdbq::Hub::state_number(status_find);
     std::list<mongo::BSONObj> jobs_bson = _hub.get_jobs(task_state, user.id);
-    for(auto &job_bson : jobs_bson) {
+    for (auto &job_bson : jobs_bson) {
       ret.push_back(get_job_info(job_bson));
     }
     return true;
   }
 
-  bool Engine::request_data(const std::string &request_id, const std::string &user_key, request::Data &data, StringBuilder &sb, request::DataType& type,  std::string &msg)
+  bool Engine::request_data(const std::string &request_id, const std::string &user_key, request::Data &data, std::string &content, request::DataType& type,  std::string &msg)
   {
     utils::IdName user;
-    if(!dba::users::get_user(user_key, user, msg)) {
+    if (!dba::users::get_user(user_key, user, msg)) {
       return false;
     }
     mongo::BSONObj o = _hub.get_job(request_id); //TODO still check
@@ -219,7 +220,6 @@ namespace epidb {
     }
 
     if (result.hasField("__id_names__")) {
-      std::cerr << "id_names" << std::endl;
       mongo::BSONObj id_names = result["__id_names__"].Obj();
       data.set_id_names(utils::bson_to_id_name(id_names));
       type = request::ID_NAMES;
@@ -229,7 +229,28 @@ namespace epidb {
     if (result.hasField("__file__")) {
       std::string filename = result["__file__"].str();
       type = request::REGIONS;
-      return _hub.get_result(filename, sb, msg);
+      std::vector<lzo_byte> data;
+      if (!_hub.get_result(filename, data, msg)) {
+        return false;
+      }
+
+      const bool compressed = result.hasField("__compressed__") && result["__compressed__"].Bool();
+      if (compressed) {
+        long long original_size = result["__original_size__"].Long();
+        size_t data_size = data.size();
+        lzo_bytep data_ptr = data.data();
+        size_t uncompressed_size;
+        lzo_bytep decompressed_data = epidb::compress::decompress(data_ptr, data_size, original_size, uncompressed_size);
+
+        // assert uncompressed_size == original_size
+
+        const char* content_char = reinterpret_cast<const char *>(decompressed_data);
+        content = std::string(content_char, original_size);
+        free(decompressed_data);
+        return true;
+      } else {
+        //content = sb.to_string();
+      }
     }
 
     type = request::MAP;
@@ -240,7 +261,7 @@ namespace epidb {
 
   bool Engine::user_owns_request(const std::string& request_id, const std::string& user_id)
   {
-    if(_hub.job_has_user_id(request_id, user_id)) {
+    if (_hub.job_has_user_id(request_id, user_id)) {
       return true;
     }
     return false;

@@ -3,7 +3,7 @@
 //  epidb
 //
 //  Created by Felipe Albrecht on 22.01.15.
-//  Copyright (c) 2013,2014 Max Planck Institute for Computer Science. All rights reserved.
+//  Copyright (c) 2013,2014,2015 Max Planck Institute for Computer Science. All rights reserved.
 //
 
 #include <boost/asio.hpp>
@@ -13,13 +13,13 @@
 
 #include "../dba/config.hpp"
 
+#include "../extras/compress.hpp"
 #include "../extras/stringbuilder.hpp"
+#include "../extras/utils.hpp"
 
 #include "../mdbq/client.hpp"
 
 #include "../processing/processing.hpp"
-
-#include "../extras/utils.hpp"
 
 #include "../log.hpp"
 
@@ -98,8 +98,21 @@ namespace epidb {
       }
 
       std::string result = sb.to_string();
-      std::string filename = store_result(result.c_str(), result.length());
+      size_t size = result.size();
+      const char* data = result.c_str();
 
+      boost::shared_ptr<char> compressed_data;
+      size_t compressed_size = 0;
+      bool compressed = false;
+
+      compressed_data = epidb::compress::compress(data, size, compressed_size, compressed);
+
+      std::string filename = store_result(compressed_data.get(), compressed_size);
+
+      if (compressed) {
+        bob.append("__compressed__", true);
+        bob.append("__original_size__", (long long) size);
+      }
       bob.append("__file__", filename);
 
       return bob.obj();
@@ -128,7 +141,21 @@ namespace epidb {
         return bob.obj();
       }
 
-      std::string filename = store_result(matrix.c_str(), matrix.length());
+      size_t size = matrix.size();
+      const char* data = matrix.c_str();
+
+      boost::shared_ptr<char> compressed_data;
+      size_t compressed_size = 0;
+      bool compressed = false;
+
+      compressed_data = epidb::compress::compress(data, size, compressed_size, compressed);
+
+      std::string filename = store_result(compressed_data.get(), compressed_size);
+
+      if (compressed) {
+        bob.append("__compressed__", true);
+        bob.append("__original_size__", (long long) size);
+      }
       bob.append("__file__", filename);
 
       return bob.obj();
@@ -143,8 +170,6 @@ namespace epidb {
         bob.append("__error__", msg);
         return bob.obj();
       }
-
-      std::cerr << experiments.size() << std::endl;
 
       mongo::BSONObjBuilder experiments_ids_bob;
       for (auto &exp_format : experiments) {

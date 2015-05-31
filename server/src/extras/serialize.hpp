@@ -191,7 +191,7 @@ namespace epidb {
 
       void add_string(const std::string& str);
 
-      void add_stringbuilder(StringBuilder &sb);
+      void add_string_content(std::string&& content);
 
       void add_string(int i);
 

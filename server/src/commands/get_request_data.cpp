@@ -72,11 +72,11 @@ namespace epidb {
           return false;
         }
 
-        StringBuilder sb;
+        std::string content;
         request::Data data;
         request::DataType type = request::DataType::INVALID;
         if (epidb::Engine::instance().user_owns_request(query_id, user.id)) {
-          if (!epidb::Engine::instance().request_data(query_id, user_key, data, sb, type, msg)) {
+          if (!epidb::Engine::instance().request_data(query_id, user_key, data, content, type, msg)) {
             result.add_error(msg);
             return false;
           }
@@ -91,7 +91,7 @@ namespace epidb {
         }
 
         if (type == request::REGIONS) {
-          result.add_stringbuilder(sb);
+          result.add_string_content(std::move(content));
           return true;
         }
 
