@@ -154,3 +154,22 @@ class TestGetInfoCommand(helpers.TestCase):
     self.assertEqual(data[0]['sex'], "F")
     self.assertEqual(data[0]['user'], "test_admin")
     self.assertEqual(data[0]['_id'], sid)
+
+  def test_request_info_permission(self):
+    epidb = EpidbClient()
+    self.init_full(epidb)
+
+    s, user = epidb.add_user("user1", "test1@example.com", "test", self.admin_key)
+    id, user_key = user
+
+    s, id = epidb.add_epigenetic_mark("DNA Methylation", "", user_key)
+    self.assertSuccess(s, id)
+    s, query_id = epidb.select_regions(None, "hg19", "DNA Methylation", None, None, None, "chr1", None, None, user_key)
+    self.assertSuccess(s, query_id)
+
+    s, request_id = epidb.get_regions(query_id, "CHROMOSOME,START,END", user_key)
+
+    s, info = epidb.info(request_id, user_key)
+    self.assertSuccess(s, info)
+    s, info = epidb.info(request_id, self.admin_key)
+    self.assertSuccess(s, info)
