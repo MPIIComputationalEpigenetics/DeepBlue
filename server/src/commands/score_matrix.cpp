@@ -37,7 +37,7 @@ namespace epidb {
         Parameter p[] = {
           Parameter("experiments_format", serialize::MAP, "id of the query"),
           Parameter("aggregation_function", serialize::STRING, "aggregation function"),
-          Parameter("regions_query_id", serialize::STRING, "regions query id"),
+          Parameter("query_id", serialize::STRING, "regions query id"),
           parameters::UserKey
         };
         Parameters params(&p[0], &p[0] + 4);

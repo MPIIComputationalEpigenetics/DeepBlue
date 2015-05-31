@@ -58,7 +58,7 @@ namespace epidb {
       } if (command == "get_regions") {
         return process_get_regions(job["query_id"].str(), job["format"].str(), job["user_key"].str());
       } if (command == "score_matrix") {
-        return process_score_matrix(job["experiments_formats"].Obj(), job["aggregation_function"].str(), job["regions_query_id"].str(), job["user_key"].str());
+        return process_score_matrix(job["experiments_formats"].Obj(), job["aggregation_function"].str(), job["query_id"].str(), job["user_key"].str());
       } if (command == "get_experiments_by_query") {
         return process_get_experiments_by_query(job["query_id"].str(), job["user_key"].str());
       } else {

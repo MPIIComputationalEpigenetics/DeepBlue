@@ -320,10 +320,10 @@ class TestCase(unittest.TestCase):
 
     epidb = EpidbClient()
     sleep = 0.1
-    (s, ss) = epidb.get_request_status(req, self.admin_key)
-    while (ss[0] != "done") :
+    (s, ss) = epidb.info(req, self.admin_key)
+    while ss[0]["state"] != "done":
       time.sleep(sleep)
-      (s, ss) = epidb.get_request_status(req, self.admin_key)
+      (s, ss) = epidb.info(req, self.admin_key)
       sleep += sleep
 
     (s, data) = epidb.get_request_data(req, self.admin_key)
@@ -339,10 +339,10 @@ class TestCase(unittest.TestCase):
 
     epidb = EpidbClient()
     sleep = 0.1
-    (s, ss) = epidb.get_request_status(req, self.admin_key)
-    while (ss[0] != "done") :
+    (s, ss) = epidb.info(req, self.admin_key)
+    while ss[0]["state"] != "done":
       time.sleep(sleep)
-      (s, ss) = epidb.get_request_status(req, self.admin_key)
+      (s, ss) = epidb.info(req, self.admin_key)
       sleep += sleep
 
     (s, data) = epidb.get_request_data(req, self.admin_key)

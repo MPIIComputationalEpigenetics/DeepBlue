@@ -247,9 +247,6 @@ class EpidbClient:
     def list_requests(self, status, user_key):
         return self.server.list_requests(status, user_key)
 
-    def get_request_status(self, request_id, user_key):
-        return self.server.get_request_status(request_id, user_key)
-
     def get_request_data(self, request_id, user_key):
         return self.server.get_request_data(request_id, user_key)
 
