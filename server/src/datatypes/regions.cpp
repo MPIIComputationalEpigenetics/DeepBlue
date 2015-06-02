@@ -88,6 +88,12 @@ namespace epidb {
     // Nothing
   }
 
+  size_t AbstractRegion::size() const
+  {
+    static size_t size = sizeof(AbstractRegion) + sizeof(void *);
+    return size;
+  }
+
   Score AbstractRegion::value(const size_t pos) const
   {
     return std::numeric_limits<Score>::min();
@@ -103,9 +109,16 @@ namespace epidb {
   // -----------------------------------
   RegionPtr SimpleRegion::clone() const
   {
-    std::cerr << "clone SimpletRegion" << std::endl;
     return  RegionPtr(new SimpleRegion(*this));
   }
+
+  size_t SimpleRegion::size() const
+  {
+    static size_t size = sizeof(SimpleRegion) + sizeof(void *);
+    return  size;
+  }
+
+
 
   // -----------------------------------
   // BedRegion
@@ -148,6 +161,16 @@ namespace epidb {
     return _string_data[pos];
   }
 
+  size_t BedRegion::size() const
+  {
+    static size_t pre_size = sizeof(BedRegion) + sizeof(void *);
+    size_t size = pre_size + (_numeric_data.size() * sizeof(int));
+    for (const auto& s: _string_data) {
+      size += (s.length() + 1 * sizeof(char));
+    }
+    return size;
+  }
+
   RegionPtr BedRegion::clone() const
   {
     return RegionPtr(new BedRegion(*this));
@@ -163,6 +186,12 @@ namespace epidb {
       return std::numeric_limits<Score>::min();
     }
     return _value;
+  }
+
+  size_t WigRegion::size() const
+  {
+    static size_t size = sizeof(WigRegion) + sizeof(void *);
+    return size;
   }
 
   RegionPtr WigRegion::clone() const
@@ -211,6 +240,12 @@ namespace epidb {
   Score AggregateRegion::count() const
   {
     return _count;
+  }
+
+  size_t AggregateRegion::size() const
+  {
+    static size_t size = sizeof(WigRegion) + sizeof(void *);
+    return size;
   }
 
   RegionPtr AggregateRegion::clone() const

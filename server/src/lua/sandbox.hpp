@@ -28,12 +28,13 @@ namespace epidb {
       std::string &current_chromosome;
       const AbstractRegion *current_region_ptr;
       dba::Metafield &current_metafield;
+      processing::StatusPtr status;
 
     public:
       typedef boost::shared_ptr<Sandbox> LuaPtr;
-      static LuaPtr new_instance();
+      static LuaPtr new_instance(processing::StatusPtr status);
 
-      Sandbox();
+      Sandbox(processing::StatusPtr status);
       ~Sandbox();
 
       bool store_row_code(const std::string &code, std::string &msg);

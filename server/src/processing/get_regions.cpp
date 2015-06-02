@@ -28,20 +28,20 @@ namespace epidb {
   namespace processing {
 
     static bool process(const std::string &output_format, ChromosomeRegionsList &chromosomeRegionsList,
-                        StringBuilder &sb, std::string &msg);
+                        processing::StatusPtr status, StringBuilder &sb, std::string &msg);
 
     static inline bool format_region(StringBuilder &sb, const std::string &chromosome, RegionPtr region,
-                                     const parser::FileFormat &format, dba::Metafield &metafield, std::string &msg);
+                                     const parser::FileFormat &format, dba::Metafield &metafield, processing::StatusPtr status, std::string &msg);
 
-    bool get_regions(const std::string &query_id, const std::string &format, const std::string &user_key, StringBuilder &sb, std::string &msg)
+    bool get_regions(const std::string &query_id, const std::string &format, const std::string &user_key, processing::StatusPtr status, StringBuilder &sb, std::string &msg)
     {
 
       ChromosomeRegionsList chromosomeRegionsList;
-      if (!dba::query::retrieve_query(user_key, query_id, chromosomeRegionsList, msg)) {
+      if (!dba::query::retrieve_query(user_key, query_id, status, chromosomeRegionsList, msg)) {
         return false;
       }
 
-      if (!process(format, chromosomeRegionsList, sb, msg)) {
+      if (!process(format, chromosomeRegionsList, status, sb, msg)) {
         return false;
       }
 
@@ -49,7 +49,7 @@ namespace epidb {
     }
 
 
-    bool process(const std::string &output_format, ChromosomeRegionsList &chromosomeRegionsList,
+    bool process(const std::string &output_format, ChromosomeRegionsList &chromosomeRegionsList, processing::StatusPtr status,
                  StringBuilder &sb, std::string &msg)
     {
       std::unordered_map<DatasetId, parser::FileFormat> datasets_formats;
@@ -88,7 +88,7 @@ namespace epidb {
                 return false;
               }
               parser::FileFormat new_format;
-              if (!parser::FileFormatBuilder::build_for_outout(output_format, columns, new_format, msg)) {
+              if (!parser::FileFormatBuilder::build_for_outout(output_format, columns, status, new_format, msg)) {
                 return false;
               }
               datasets_formats[dataset_id] = new_format;
@@ -101,7 +101,7 @@ namespace epidb {
             actual_id = dataset_id;
           }
 
-          if (!format_region(sb, chromosome, std::move(region), format, metafield, msg)) {
+          if (!format_region(sb, chromosome, std::move(region), format, metafield, status, msg)) {
             return false;
           }
         }
@@ -110,7 +110,7 @@ namespace epidb {
     }
 
     static inline bool format_region(StringBuilder &sb, const std::string &chromosome, RegionPtr region,
-                                     const parser::FileFormat &format, dba::Metafield &metafield, std::string &msg)
+                                     const parser::FileFormat &format, dba::Metafield &metafield, processing::StatusPtr status, std::string &msg)
     {
       for (parser::FileFormat::const_iterator it =  format.begin(); it != format.end(); it++) {
         const dba::columns::ColumnTypePtr &column = *it;
@@ -131,7 +131,7 @@ namespace epidb {
           sb.append(utils::integer_to_string(region->end()));
         } else if (dba::Metafield::is_meta(column->name())) {
           std::string result;
-          if (!metafield.process(column->name(), chromosome, region.get(), result, msg)) {
+          if (!metafield.process(column->name(), chromosome, region.get(), status, result, msg)) {
             return false;
           }
           if (!result.empty()) {

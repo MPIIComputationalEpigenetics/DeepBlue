@@ -16,10 +16,10 @@
 namespace epidb {
   namespace processing {
 
-    bool get_experiments_by_query(const std::string &query_id, const std::string &user_key, std::vector<utils::IdName> &experiments, std::string &msg)
+    bool get_experiments_by_query(const std::string &query_id, const std::string &user_key, StatusPtr status, std::vector<utils::IdName> &experiments, std::string &msg)
     {
 
-      if (!dba::query::get_experiments_by_query(user_key, query_id, experiments, msg)) {
+      if (!dba::query::get_experiments_by_query(user_key, query_id, status, experiments, msg)) {
         return false;
       }
 

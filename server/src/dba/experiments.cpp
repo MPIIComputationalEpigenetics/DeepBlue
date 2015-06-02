@@ -81,16 +81,18 @@ namespace epidb {
 
       bool get_field_pos(const DatasetId &dataset_id, const std::string &column_name, columns::ColumnTypePtr &column_type, std::string &msg)
       {
+        processing::StatusPtr status = processing::build_dummy_status();
+
         if (column_name == "CHROMOSOME") {
-          return dba::columns::load_column_type("CHROMOSOME", column_type, msg);
+          return dba::columns::load_column_type("CHROMOSOME",  status, column_type, msg);
         }
 
         if (column_name == "START") {
-          return dba::columns::load_column_type("START", column_type, msg);
+          return dba::columns::load_column_type("START",  status, column_type, msg);
         }
 
         if (column_name == "END") {
-          return dba::columns::load_column_type("END", column_type, msg);
+          return dba::columns::load_column_type("END",  status, column_type, msg);
         }
 
         // TODO: cache experiment_columns
@@ -101,7 +103,7 @@ namespace epidb {
 
         for (auto column : experiment_columns) {
           if (column["name"].String() == column_name) {
-            if (!column_type_bsonobj_to_class(column, column_type, msg)) {
+            if (!column_type_bsonobj_to_class(column, status, column_type, msg)) {
               return false;
             }
             return true;

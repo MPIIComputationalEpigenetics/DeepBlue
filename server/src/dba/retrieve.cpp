@@ -46,13 +46,15 @@ namespace epidb {
       const size_t BULK_SIZE = 20000;
 
       struct RegionProcess {
-        size_t _count;
+        size_t _it_count;
+        size_t _it_size;
         Regions &_regions;
         Position _query_start;
         Position _query_end;
 
         RegionProcess(Regions &regions, Position query_start, Position query_end) :
-          _count(0),
+          _it_count(0),
+          _it_size(0),
           _regions(regions),
           _query_start(query_start),
           _query_end(query_end)
@@ -100,8 +102,9 @@ namespace epidb {
                   continue;
                 }
                 RegionPtr region = build_wig_region(start + (i * step), start + (i * step) + span, dataset_id, scores[i]);
+                _it_size += region->size();
                 _regions.push_back(std::move(region));
-                _count++;
+                _it_count++;
               }
 
             } else if (track_type == parser::VARIABLE_STEP) {
@@ -117,8 +120,9 @@ namespace epidb {
                   continue;
                 }
                 RegionPtr region = build_wig_region(starts[i], starts[i] + span, dataset_id, scores[i]);
+                _it_size += region->size();
                 _regions.push_back(std::move(region));
-                _count++;
+                _it_count++;
               }
 
             } else if ((track_type == parser::ENCODE_BEDGRAPH) || (track_type == parser::MISC_BEDGRAPH)) {
@@ -136,8 +140,9 @@ namespace epidb {
                   continue;
                 }
                 RegionPtr region = build_wig_region(starts[i], ends[i], dataset_id, scores[i]);
+                _it_size += region->size();
                 _regions.push_back(std::move(region));
-                _count++;
+                _it_count++;
               }
             }
 
@@ -184,8 +189,9 @@ namespace epidb {
                   default: region->insert(std::move(e.toString(false)));
                   }
                 }
+                _it_size += region->size();
                 _regions.push_back(std::move(region));
-                _count++;
+                _it_count++;
               }
               free(data);
 
@@ -218,8 +224,9 @@ namespace epidb {
                   default: region->insert(std::move(e.toString(false)));
                   }
                 }
+                _it_size += region->size();
                 _regions.push_back(std::move(region));
-                _count++;
+                _it_count++;
               }
             }
           }
@@ -228,6 +235,7 @@ namespace epidb {
 
       bool get_regions_from_collection(const std::string &collection,
                                        const mongo::BSONObj &regions_query,
+                                       processing::StatusPtr status,
                                        Regions &regions, std::string &msg)
       {
         Connection c;
@@ -267,6 +275,13 @@ namespace epidb {
           while (cursor->moreInCurrentBatch()) {
             mongo::BSONObj o = cursor->nextSafe();
             rp.read_region(o);
+            status->sum_regions(rp._it_count);
+            status->sum_size(rp._it_size);
+            rp._it_count = 0;
+            rp._it_size = 0;
+
+            // TODO: check if processing was canceled
+            // TODO: check memory limit
           }
         }
 
@@ -279,6 +294,7 @@ namespace epidb {
       void get_regions_job(const std::string &genome,
                            const boost::shared_ptr<std::vector<std::string> > chromosomes,
                            const mongo::BSONObj &regions_query,
+                           processing::StatusPtr status,
                            boost::shared_ptr<ChromosomeRegionsList> &result)
       {
 
@@ -286,7 +302,7 @@ namespace epidb {
           std::string collection = helpers::region_collection_name(genome, *chrom_it);
           Regions regions = build_regions();
           std::string msg;
-          if (!get_regions_from_collection(collection, regions_query, regions, msg)) {
+          if (!get_regions_from_collection(collection, regions_query, status, regions, msg)) {
             EPIDB_LOG_ERR(msg);
             return;
           }
@@ -300,11 +316,12 @@ namespace epidb {
 
       bool get_regions(const std::string &genome, std::string &chromosome,
                        const mongo::BSONObj &regions_query,
+                       processing::StatusPtr status,
                        Regions &regions, std::string &msg)
       {
         std::string collection = helpers::region_collection_name(genome, chromosome);
         regions = build_regions();
-        if (!get_regions_from_collection(collection, regions_query, regions, msg)) {
+        if (!get_regions_from_collection(collection, regions_query, status, regions, msg)) {
           EPIDB_LOG_ERR(msg);
           return false;
         }
@@ -313,6 +330,7 @@ namespace epidb {
 
       bool get_regions(const std::string &genome, std::vector<std::string> &chromosomes,
                        const mongo::BSONObj &regions_query,
+                       processing::StatusPtr status,
                        ChromosomeRegionsList &results, std::string &msg)
       {
         const size_t max_threads = 8;
@@ -334,7 +352,7 @@ namespace epidb {
           boost::shared_ptr<std::vector<std::string> > chrs(new std::vector<std::string>(start, end));
           boost::shared_ptr<ChromosomeRegionsList> result_part(new ChromosomeRegionsList);
           boost::thread *t = new boost::thread(&get_regions_job, boost::cref(genome), chrs,
-                                               boost::cref(regions_query), result_part);
+                                               boost::cref(regions_query), status, result_part);
           threads.push_back(t);
           result_parts.push_back(result_part);
         }
@@ -357,12 +375,12 @@ namespace epidb {
 
       // TODO: Fix for counting the *real* number
       bool count_regions(const std::string &genome, const std::string &chromosome, const mongo::BSONObj &regions_query,
-                         size_t &count)
+                         processing::StatusPtr status, size_t &count)
       {
         std::string collection_name = helpers::region_collection_name(genome, chromosome);
         std::string msg;
         Regions regions = build_regions();
-        if (!get_regions_from_collection(collection_name, regions_query, regions, msg)) {
+        if (!get_regions_from_collection(collection_name, regions_query, status, regions, msg)) {
           EPIDB_LOG_ERR(msg);
           count = 0;
           return false;
@@ -373,14 +391,16 @@ namespace epidb {
 
       void count_regions_job(const std::string &genome,
                              const boost::shared_ptr<std::vector<std::string> > chromosomes,
-                             const mongo::BSONObj &regions_query, boost::shared_ptr<std::vector<size_t> > results)
+                             const mongo::BSONObj &regions_query,
+                             processing::StatusPtr status,
+                             boost::shared_ptr<std::vector<size_t> > results)
       {
         size_t size = 0;
         for (std::vector<std::string>::const_iterator it = chromosomes->begin(); it != chromosomes->end(); ++it) {
           std::string collection_name = helpers::region_collection_name(genome, *it);
           Regions regions = build_regions();
           std::string msg;
-          if (!get_regions_from_collection(collection_name, regions_query, regions, msg)) {
+          if (!get_regions_from_collection(collection_name, regions_query, status, regions, msg)) {
             EPIDB_LOG_ERR(msg);
             return;
           }
@@ -389,9 +409,9 @@ namespace epidb {
         results->push_back(size);
       }
 
-      bool count_regions(const std::string &genome,
-                         std::vector<std::string> &chromosomes, const mongo::BSONObj &regions_query,
-                         size_t &size, std::string &msg)
+      bool count_regions(const std::string &genome, const std::vector<std::string> &chromosomes,
+                         const mongo::BSONObj &regions_query,
+                         processing::StatusPtr status, size_t &size, std::string &msg)
       {
         const size_t max_threads = 8;
         std::vector<boost::thread *> threads;
@@ -400,18 +420,18 @@ namespace epidb {
         size_t chunk_size = ceil(double(chromosomes.size()) / double(max_threads));
 
         for (size_t i = 0; i < max_threads; ++i) {
-          std::vector<std::string>::iterator start = chromosomes.begin() + i * chunk_size;
+          std::vector<std::string>::const_iterator start = chromosomes.begin() + i * chunk_size;
           if (start >= chromosomes.end()) {
             break;
           }
-          std::vector<std::string>::iterator end = start + chunk_size;
+          std::vector<std::string>::const_iterator end = start + chunk_size;
           if (end > chromosomes.end()) {
             end = chromosomes.end();
           }
           boost::shared_ptr<std::vector<std::string> > chrs(new std::vector<std::string>(start, end));
           boost::shared_ptr<std::vector<size_t> > result_part(new std::vector<size_t>);
           boost::thread *t = new boost::thread(&count_regions_job, boost::cref(genome), chrs,
-                                               boost::cref(regions_query), result_part);
+                                               boost::cref(regions_query), status, result_part);
           threads.push_back(t);
           result_parts.push_back(result_part);
         }

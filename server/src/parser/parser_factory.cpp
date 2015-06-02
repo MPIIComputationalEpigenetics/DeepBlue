@@ -218,17 +218,19 @@ namespace epidb {
       dba::columns::ColumnTypePtr start;
       dba::columns::ColumnTypePtr end;
 
+      processing::StatusPtr status = processing::build_dummy_status();
+
       std::string msg;
 
       format.set_format("CHROMOSOME,START,END");
 
-      if (!dba::columns::load_column_type("CHROMOSOME", chromosome, msg)) {
+      if (!dba::columns::load_column_type("CHROMOSOME", status, chromosome, msg)) {
         EPIDB_LOG_ERR(msg);
       }
-      if (!dba::columns::load_column_type("START", start, msg)) {
+      if (!dba::columns::load_column_type("START", status, start, msg)) {
         EPIDB_LOG_ERR(msg);
       }
-      if (!dba::columns::load_column_type("END", end, msg)) {
+      if (!dba::columns::load_column_type("END", status, end, msg)) {
         EPIDB_LOG_ERR(msg);
       }
 
@@ -252,16 +254,18 @@ namespace epidb {
 
       format.set_format("CHROMOSOME,START,END,VALUE");
 
-      if (!dba::columns::load_column_type("CHROMOSOME", chromosome, msg)) {
+      processing::StatusPtr status = processing::build_dummy_status();
+
+      if (!dba::columns::load_column_type("CHROMOSOME", status, chromosome, msg)) {
         EPIDB_LOG_ERR(msg);
       }
-      if (!dba::columns::load_column_type("START", start, msg)) {
+      if (!dba::columns::load_column_type("START", status, start, msg)) {
         EPIDB_LOG_ERR(msg);
       }
-      if (!dba::columns::load_column_type("END", end, msg)) {
+      if (!dba::columns::load_column_type("END", status, end, msg)) {
         EPIDB_LOG_ERR(msg);
       }
-      if (!dba::columns::load_column_type("VALUE", value, msg)) {
+      if (!dba::columns::load_column_type("VALUE", status, value, msg)) {
         EPIDB_LOG_ERR(msg);
       }
 
@@ -284,7 +288,7 @@ namespace epidb {
       return ab.arr();
     }
 
-    bool FileFormatBuilder::build_for_outout(const std::string &format, const std::vector<mongo::BSONObj> &experiment_columns, FileFormat &file_format, std::string &msg )
+    bool FileFormatBuilder::build_for_outout(const std::string &format, const std::vector<mongo::BSONObj> &experiment_columns, processing::StatusPtr status, FileFormat &file_format, std::string &msg )
     {
       if (format.empty()) {
         file_format = FileFormat::default_format();
@@ -314,7 +318,7 @@ namespace epidb {
             break;
           }
           if (column["name"].str() == field_string) {
-            if (!dba::columns::column_type_bsonobj_to_class(column, column_type, msg)) {
+            if (!dba::columns::column_type_bsonobj_to_class(column, status, column_type, msg)) {
               return false;
             } else {
               found = true;
@@ -330,7 +334,7 @@ namespace epidb {
           found = true;
         }
         // Load from database
-        if (!found && dba::columns::load_column_type(field_string, column_type, msg)) {
+        if (!found && dba::columns::load_column_type(field_string, status, column_type, msg)) {
           found = true;
         }
 
@@ -361,11 +365,13 @@ namespace epidb {
         std::vector<std::string> field_info;
         boost::split(field_info, field_string, boost::is_any_of(":"));
 
+        processing::StatusPtr status = processing::build_dummy_status();
+
         size_t s = field_info.size();
         if (s == 1) {
           dba::columns::ColumnTypePtr column_type;
           // Load from database
-          if (!dba::columns::load_column_type(field_info[0], column_type, msg)) {
+          if (!dba::columns::load_column_type(field_info[0], status, column_type, msg)) {
             msg = "Error loading column type: '" + field_info[0] + "'";
             return false;
           }

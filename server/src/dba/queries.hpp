@@ -29,16 +29,16 @@ namespace epidb {
                        std::string &query_id, std::string &msg);
 
       bool retrieve_query(const std::string &user_key, const std::string &query_id,
-                          ChromosomeRegionsList &regions, std::string &msg);
+                          processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg);
 
       bool get_experiments_by_query(const std::string &user_key, const std::string &query_id,
-                                    std::vector<utils::IdName> &experiments_name, std::string &msg);
+                                    processing::StatusPtr status, std::vector<utils::IdName> &experiments_name, std::string &msg);
 
       bool retrieve_experiment_select_query(const std::string &user_key, const mongo::BSONObj &query,
-                                            ChromosomeRegionsList &regions, std::string &msg);
+                                            processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg);
 
       bool count_regions(const std::string &query_id, const std::string &user_key,
-                         size_t &count, std::string &msg);
+                         processing::StatusPtr status, size_t &count, std::string &msg);
 
       const mongo::BSONObj build_query(const mongo::BSONObj &args);
 
@@ -54,28 +54,28 @@ namespace epidb {
                                   std::string &msg);
 
       bool retrieve_annotation_select_query(const std::string &user_key, const mongo::BSONObj &query,
-                                            ChromosomeRegionsList &regions, std::string &msg);
+                                            processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg);
 
       bool retrieve_intersection_query(const std::string &user_key, const mongo::BSONObj &query,
-                                       ChromosomeRegionsList &regions, std::string &msg);
+                                       processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg);
 
       bool retrieve_merge_query(const std::string &user_key, const mongo::BSONObj &query,
-                                ChromosomeRegionsList &regions, std::string &msg);
+                                processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg);
 
       bool retrieve_annotation_select_query(const std::string &user_key, const mongo::BSONObj &query,
-                                            ChromosomeRegionsList &regions, std::string &msg);
+                                            processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg);
 
       bool retrieve_filter_query(const std::string &user_key, const mongo::BSONObj &query,
-                                 ChromosomeRegionsList &regions, std::string &msg);
+                                 processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg);
 
       bool add_tiling(const std::string &genome, const size_t &tiling_size,
                       std::string &tiling_id, std::string &msg);
 
       bool retrieve_tiling_query(const mongo::BSONObj &query,
-                                 ChromosomeRegionsList &regions, std::string &msg);
+                                 processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg);
 
       bool process_aggregate(const std::string &user_key, const mongo::BSONObj &query,
-                             ChromosomeRegionsList &regions, std::string &msg);
+                             processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg);
 
       bool get_columns_from_dataset(const DatasetId &dataset_id, std::vector<mongo::BSONObj> &columns, std::string &msg);
     }

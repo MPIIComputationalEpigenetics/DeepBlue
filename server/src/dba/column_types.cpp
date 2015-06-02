@@ -376,7 +376,8 @@ namespace epidb {
                                          const std::string &user_key,
                                          std::string &column_type_id, std::string &msg)
       {
-        lua::Sandbox::LuaPtr lua = lua::Sandbox::new_instance();
+        processing::StatusPtr status = processing::build_dummy_status();
+        lua::Sandbox::LuaPtr lua = lua::Sandbox::new_instance(status);
         if (!lua->store_row_code(code, msg)) {
           return false;
         }
@@ -486,10 +487,11 @@ namespace epidb {
         Connection c;
         std::auto_ptr<mongo::DBClientCursor> data_cursor = c->query(helpers::collection_name(Collections::COLUMN_TYPES()), mongo::BSONObj());
 
+        processing::StatusPtr status = processing::build_dummy_status();
         while (data_cursor->more()) {
           mongo::BSONObj o = data_cursor->next().getOwned();
           ColumnTypePtr column_type;
-          if (!column_type_bsonobj_to_class(o, column_type, msg))  {
+          if (!column_type_bsonobj_to_class(o, status, column_type, msg))  {
             return false;
           }
           utils::IdName name(o["_id"].str(), column_type->str());
@@ -500,7 +502,7 @@ namespace epidb {
         return true;
       }
 
-      bool column_type_bsonobj_to_class(const mongo::BSONObj &obj, ColumnTypePtr &column_type, std::string &msg)
+      bool column_type_bsonobj_to_class(const mongo::BSONObj &obj, processing::StatusPtr status, ColumnTypePtr &column_type, std::string &msg)
       {
         const std::string name = obj["name"].String();
         const std::string type = obj["column_type"].String();
@@ -530,7 +532,7 @@ namespace epidb {
           column_type = boost::shared_ptr<ColumnType<Range > >(new ColumnType<Range>(name, range, pos));
         } else if (type == "calculated") {
           std::string code = obj["code"].String();
-          lua::Sandbox::LuaPtr lua = lua::Sandbox::new_instance();
+          lua::Sandbox::LuaPtr lua = lua::Sandbox::new_instance(status);
           if (!lua->store_row_code(code, msg)) {
             return false;
           }
@@ -563,14 +565,14 @@ namespace epidb {
       }
 
 
-      bool load_column_type(const std::string &name, ColumnTypePtr &column_type, std::string &msg)
+      bool load_column_type(const std::string &name, processing::StatusPtr status, ColumnTypePtr &column_type, std::string &msg)
       {
         mongo::BSONObj obj_column_type;
         if (!load_column_type(name, obj_column_type, msg)) {
           return false;
         }
 
-        return column_type_bsonobj_to_class(obj_column_type, column_type, msg);
+        return column_type_bsonobj_to_class(obj_column_type, status, column_type, msg);
       }
 
       bool get_column_type(const std::string &id, std::map<std::string, std::string> &res, std::string &msg)
@@ -580,8 +582,9 @@ namespace epidb {
           return false;
         }
 
+        processing::StatusPtr status = processing::build_dummy_status();
         ColumnTypePtr column_type;
-        if (!column_type_bsonobj_to_class(o, column_type, msg)) {
+        if (!column_type_bsonobj_to_class(o, status, column_type, msg)) {
           return false;
         }
 

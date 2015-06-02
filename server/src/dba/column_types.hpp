@@ -200,7 +200,7 @@ namespace epidb {
 
       bool load_column_type(const std::string &name, mongo::BSONObj &obj_column_type, std::string &msg);
 
-      bool load_column_type(const std::string &name, ColumnTypePtr &column_type, std::string &msg);
+      bool load_column_type(const std::string &name, processing::StatusPtr status, ColumnTypePtr &column_type, std::string &msg);
 
       bool is_column_type_name_valid(const std::string &name, const std::string &norm_name,
                                      std::string &msg);
@@ -227,7 +227,7 @@ namespace epidb {
                                          const std::string &user_key,
                                          std::string &id, std::string &msg);
 
-      bool column_type_bsonobj_to_class(const mongo::BSONObj &obj, ColumnTypePtr &column_type, std::string &msg);
+      bool column_type_bsonobj_to_class(const mongo::BSONObj &obj, processing::StatusPtr status, ColumnTypePtr &column_type, std::string &msg);
 
       bool get_column_type(const std::string &id, mongo::BSONObj &result, std::string &msg);
 

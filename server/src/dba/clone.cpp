@@ -58,6 +58,8 @@ namespace epidb {
       size_t original_columns_size = original_columns.size();
       size_t clone_columns_size = clone_columns.size();
 
+      processing::StatusPtr status = processing::build_dummy_status();
+
       for (size_t pos = 0; pos < clone_columns_size; pos++) {
         mongo::BSONObj clone_column_bson = clone_columns[pos].Obj();
 
@@ -65,12 +67,12 @@ namespace epidb {
           mongo::BSONObj original_column_bson = original_columns[pos].Obj();
 
           columns::ColumnTypePtr original_column;
-          if (!columns::column_type_bsonobj_to_class(original_column_bson, original_column, msg)) {
+          if (!columns::column_type_bsonobj_to_class(original_column_bson, status, original_column, msg)) {
             return false;
           }
 
           columns::ColumnTypePtr clone_column;
-          if (!columns::column_type_bsonobj_to_class(clone_column_bson, clone_column, msg)) {
+          if (!columns::column_type_bsonobj_to_class(clone_column_bson, status, clone_column, msg)) {
             return false;
           }
 
@@ -84,7 +86,7 @@ namespace epidb {
 
         } else {
           columns::ColumnTypePtr extra_column;
-          if (!columns::column_type_bsonobj_to_class(clone_column_bson, extra_column, msg)) {
+          if (!columns::column_type_bsonobj_to_class(clone_column_bson, status, extra_column, msg)) {
             return false;
           }
 

@@ -139,7 +139,7 @@ namespace epidb {
     }
 
     bool Metafield::process(const std::string &op, const std::string &chrom, const AbstractRegion *region_ref,
-                            std::string &result, std::string &msg)
+                            processing::StatusPtr status, std::string &result, std::string &msg)
     {
 
       mongo::BSONObj obj;
@@ -157,7 +157,7 @@ namespace epidb {
       it = functions.find(command);
       if (it != functions.end()) {
         Function f = it->second;
-        return (*this.*f)(op, chrom, obj, region_ref, result, msg);
+        return (*this.*f)(op, chrom, obj, region_ref, status, result, msg);
       }
       msg = "Metafield " + op + " does not exist.";
       return false;
@@ -172,7 +172,7 @@ namespace epidb {
     }
 
     bool Metafield::length(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion *region_ref,
-                           std::string &result, std::string &msg)
+                           processing::StatusPtr status, std::string &result, std::string &msg)
     {
 
       result = utils::integer_to_string(region_ref->end() - region_ref->start());
@@ -180,28 +180,28 @@ namespace epidb {
     }
 
     bool Metafield::name(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion *region_ref,
-                         std::string &result, std::string &msg)
+                         processing::StatusPtr status, std::string &result, std::string &msg)
     {
       result = get_by_region_set(obj, "name");
       return true;
     }
 
     bool Metafield::epigenetic_mark(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion *region_ref,
-                                    std::string &result, std::string &msg)
+                                    processing::StatusPtr status,  std::string &result, std::string &msg)
     {
       result = get_by_region_set(obj, "epigenetic_mark");
       return true;
     }
 
     bool Metafield::project(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion *region_ref,
-                            std::string &result, std::string &msg)
+                            processing::StatusPtr status, std::string &result, std::string &msg)
     {
       result = get_by_region_set(obj, "project");
       return true;
     }
 
     bool Metafield::biosource(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion *region_ref,
-                              std::string &result, std::string &msg)
+                              processing::StatusPtr status, std::string &result, std::string &msg)
     {
       if (obj.hasField("sample_info")) {
         result =  obj["sample_info"]["biosource_name"].str();
@@ -212,14 +212,14 @@ namespace epidb {
     }
 
     bool Metafield::sample_id(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion *region_ref,
-                              std::string &result, std::string &msg)
+                              processing::StatusPtr status, std::string &result, std::string &msg)
     {
       result = get_by_region_set(obj, "sample_id");
       return true;
     }
 
     bool Metafield::sequence(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion *region_ref,
-                             std::string &result, std::string &msg)
+                             processing::StatusPtr status, std::string &result, std::string &msg)
     {
 
       std::string genome = get_by_region_set(obj, "genome");
@@ -238,7 +238,7 @@ namespace epidb {
 
     bool Metafield::count_pattern(const std::string &pattern, const std::string &genome, const std::string &chrom,
                                   const AbstractRegion *region_ref, const bool overlap,
-                                  size_t &count, std::string &msg)
+                                  processing::StatusPtr status, size_t &count, std::string &msg)
     {
       DatasetId dataset_id;
       if (!dba::find_annotation_pattern(genome, pattern, overlap, dataset_id, msg)) {
@@ -254,7 +254,7 @@ namespace epidb {
 
       mongo::BSONObj region_query = region_query_builder.obj();
 
-      if (!retrieve::count_regions(genome, chrom, region_query, count)) {
+      if (!retrieve::count_regions(genome, chrom, region_query, status, count)) {
         msg = "Error while counting regions for " + genome + " " + chrom + " " + region_query.toString();
         count = 0;
         return false;
@@ -264,7 +264,7 @@ namespace epidb {
     }
 
     bool Metafield::count_overlap(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion *region_ref,
-                                  std::string &result, std::string &msg)
+                                  processing::StatusPtr status, std::string &result, std::string &msg)
     {
       unsigned int s = op.find("(") + 1;
       unsigned int e = op.find_last_of(")");
@@ -274,7 +274,7 @@ namespace epidb {
 
       std::string genome = get_by_region_set(obj, "genome");
       size_t count = 0;
-      if (!count_pattern(pattern, genome, chrom, region_ref, true, count, msg)) {
+      if (!count_pattern(pattern, genome, chrom, region_ref, true, status, count, msg)) {
         return false;
       }
 
@@ -283,7 +283,7 @@ namespace epidb {
     }
 
     bool Metafield::count_non_overlap(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion *region_ref,
-                                      std::string &result, std::string &msg)
+                                      processing::StatusPtr status, std::string &result, std::string &msg)
     {
       unsigned int s = op.find("(") + 1;
       unsigned int e = op.find_last_of(")");
@@ -293,7 +293,7 @@ namespace epidb {
 
       std::string genome = get_by_region_set(obj, "genome");
       size_t count = 0;
-      if (!count_pattern(pattern, genome, chrom, region_ref, false, count, msg)) {
+      if (!count_pattern(pattern, genome, chrom, region_ref, false, status, count, msg)) {
         return false;
       }
       result = utils::integer_to_string(count);
@@ -303,7 +303,7 @@ namespace epidb {
 
 
     bool Metafield::min(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion *region_ref,
-                        std::string &result, std::string &msg)
+                        processing::StatusPtr status, std::string &result, std::string &msg)
     {
       if (region_ref->has_stats()) {
         const AggregateRegion *aggregate_region = static_cast<const AggregateRegion *>(region_ref);
@@ -315,7 +315,7 @@ namespace epidb {
     }
 
     bool Metafield::max(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion *region_ref,
-                        std::string &result, std::string &msg)
+                        processing::StatusPtr status, std::string &result, std::string &msg)
     {
       if (region_ref->has_stats()) {
         const AggregateRegion *aggregate_region = static_cast<const AggregateRegion *>(region_ref);
@@ -327,7 +327,7 @@ namespace epidb {
     }
 
     bool Metafield::median(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion *region_ref,
-                           std::string &result, std::string &msg)
+                           processing::StatusPtr status, std::string &result, std::string &msg)
     {
       if (region_ref->has_stats()) {
         const AggregateRegion *aggregate_region = static_cast<const AggregateRegion *>(region_ref);
@@ -339,7 +339,7 @@ namespace epidb {
     }
 
     bool Metafield::mean(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion *region_ref,
-                         std::string &result, std::string &msg)
+                         processing::StatusPtr status, std::string &result, std::string &msg)
     {
       if (region_ref->has_stats()) {
         const AggregateRegion *aggregate_region = static_cast<const AggregateRegion *>(region_ref);
@@ -352,7 +352,7 @@ namespace epidb {
 
 
     bool Metafield::var(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion *region_ref,
-                        std::string &result, std::string &msg)
+                        processing::StatusPtr status, std::string &result, std::string &msg)
     {
       if (region_ref->has_stats()) {
         const AggregateRegion *aggregate_region = static_cast<const AggregateRegion *>(region_ref);
@@ -364,7 +364,7 @@ namespace epidb {
     }
 
     bool Metafield::sd(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion *region_ref,
-                       std::string &result, std::string &msg)
+                       processing::StatusPtr status, std::string &result, std::string &msg)
     {
       if (region_ref->has_stats()) {
         const AggregateRegion *aggregate_region = static_cast<const AggregateRegion *>(region_ref);
@@ -376,7 +376,7 @@ namespace epidb {
     }
 
     bool Metafield::count(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion *region_ref,
-                          std::string &result, std::string &msg)
+                          processing::StatusPtr status, std::string &result, std::string &msg)
     {
       if (region_ref->has_stats()) {
         const AggregateRegion *aggregate_region = static_cast<const AggregateRegion *>(region_ref);
@@ -388,7 +388,7 @@ namespace epidb {
     }
 
     bool Metafield::calculated(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion *region_ref,
-                               std::string &result, std::string &msg)
+                               processing::StatusPtr status, std::string &result, std::string &msg)
     {
       unsigned int s = op.find("(") + 1;
       unsigned int e = op.find_last_of(")");
@@ -396,7 +396,7 @@ namespace epidb {
 
       std::string code = op.substr(s, length);
 
-      lua::Sandbox::LuaPtr lua = lua::Sandbox::new_instance();
+      lua::Sandbox::LuaPtr lua = lua::Sandbox::new_instance(status);
       if (!lua->store_row_code(code, msg)) {
         return false;
       }

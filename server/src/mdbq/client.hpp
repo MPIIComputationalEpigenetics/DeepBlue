@@ -60,7 +60,7 @@ namespace mdbq {
     /**
      * acquire a new task in o.
      */
-    bool get_next_task(mongo::BSONObj &o);
+    bool get_next_task(std::string &_id, mongo::BSONObj &o);
 
     /**
      * finish the task.
@@ -91,9 +91,9 @@ namespace mdbq {
     /**
      * This function should be overwritten in real clients.
      *
-     * @param task the task description.
+     * @param task the task _id and description.
      */
-    virtual void handle_task(const mongo::BSONObj &task);
+    virtual void handle_task(const std::string& _id, const mongo::BSONObj &task);
 
 
     /**

@@ -31,16 +31,17 @@ namespace epidb {
     static std::string EMPTY_CHROMOSOME;
     static dba::Metafield EMPTY_METAFIELD;
 
-    Sandbox::LuaPtr Sandbox::new_instance()
+    Sandbox::LuaPtr Sandbox::new_instance(processing::StatusPtr status)
     {
-      return boost::shared_ptr<Sandbox>(new Sandbox());
+      return boost::shared_ptr<Sandbox>(new Sandbox(status));
     }
 
-    Sandbox::Sandbox() :
+    Sandbox::Sandbox(processing::StatusPtr status) :
       L(luaL_newstate()),
       current_chromosome(EMPTY_CHROMOSOME),
       current_region_ptr(nullptr),
-      current_metafield(EMPTY_METAFIELD)
+      current_metafield(EMPTY_METAFIELD),
+      status(status)
     {
       luaL_openlibs(L);
 
@@ -127,7 +128,7 @@ namespace epidb {
       std::string msg;
       if (dba::Metafield::is_meta(field_name)) {
         std::string result;
-        if (!current_metafield.process(field_name, current_chromosome, current_region_ptr, result, msg)) {
+        if (!current_metafield.process(field_name, current_chromosome, current_region_ptr, status, result, msg)) {
           lua_pushstring(lua_state, msg.c_str());
           return 1;
         }

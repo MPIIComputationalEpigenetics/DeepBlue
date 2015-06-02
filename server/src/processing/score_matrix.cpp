@@ -28,11 +28,11 @@
 namespace epidb {
   namespace processing {
 
-    bool score_matrix(const std::vector<std::pair<std::string, std::string>> &experiments_formats, const std::string& aggregation_function, const std::string &regions_query_id, const std::string &user_key, std::string &matrix, std::string &msg)
+    bool score_matrix(const std::vector<std::pair<std::string, std::string>> &experiments_formats, const std::string& aggregation_function, const std::string &regions_query_id, const std::string &user_key, processing::StatusPtr status, std::string &matrix, std::string &msg)
     {
 
       ChromosomeRegionsList range_regions;
-      if (!dba::query::retrieve_query(user_key, regions_query_id, range_regions, msg)) {
+      if (!dba::query::retrieve_query(user_key, regions_query_id, status, range_regions, msg)) {
         return false;
       }
 
@@ -87,7 +87,7 @@ namespace epidb {
             }
 
             Regions regions;
-            if (!dba::retrieve::get_regions(norm_genome, chromosome.first, regions_query, regions, msg)) {
+            if (!dba::retrieve::get_regions(norm_genome, chromosome.first, regions_query, status, regions, msg)) {
               return false;
             }
             algorithms::Accumulator acc;

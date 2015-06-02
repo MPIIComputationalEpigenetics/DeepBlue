@@ -29,7 +29,7 @@ namespace epidb {
   namespace algorithms {
 
     bool aggregate_regions(const std::string &chrom, Regions &data, const Regions &ranges, const std::string &field,
-                           dba::Metafield &metafield, Regions &chr_regions, std::string &msg)
+                           dba::Metafield &metafield, processing::StatusPtr status, Regions &chr_regions, std::string &msg)
     {
       chr_regions = build_regions();
       auto it_ranges = ranges.begin();
@@ -44,7 +44,7 @@ namespace epidb {
           if (((*it_ranges)->start() <= (*it_data)->end()) && ((*it_ranges)->end() >= (*it_data)->end())) {
             if (field[0] == '@') {
               std::string value;
-              if (!metafield.process(field, chrom, it_data->get(), value, msg)) {
+              if (!metafield.process(field, chrom, it_data->get(), status, value, msg)) {
                 return false;
               }
               Score s;
@@ -74,7 +74,7 @@ namespace epidb {
     }
 
     bool aggregate(ChromosomeRegionsList &data, ChromosomeRegionsList &ranges, const std::string &field,
-                   ChromosomeRegionsList &regions, std::string &msg)
+                   processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg)
     {
       // TODO :optimize it for finding the ChromosomeRegionsList data not in O(N) time
       dba::Metafield metafield;
@@ -82,7 +82,7 @@ namespace epidb {
         for (auto &datum : data) {
           Regions chr_regions;
           if (range.first == datum.first) {
-            if (!aggregate_regions(range.first, datum.second, range.second, field, metafield, chr_regions, msg)) {
+            if (!aggregate_regions(range.first, datum.second, range.second, field, metafield, status, chr_regions, msg)) {
               return false;
             }
             std::pair<std::string, Regions> r(range.first, std::move(chr_regions));

@@ -43,9 +43,10 @@ namespace mdbq {
     std::auto_ptr<boost::asio::deadline_timer> m_timer;
     void update_check(Client *c, const boost::system::error_code &error)
     {
+      std::string _id;
       mongo::BSONObj task;
-      if (c->get_next_task(task))
-        c->handle_task(task);
+      if (c->get_next_task(_id, task))
+        c->handle_task(_id, task);
       if (!error) {
         unsigned int ms;
         if (m_interval <= 1.f)
@@ -83,7 +84,7 @@ namespace mdbq {
     m_db = prefix;
   }
 
-  bool Client::get_next_task(mongo::BSONObj &o)
+  bool Client::get_next_task(std::string& _id, mongo::BSONObj &o)
   {
     if (!m_ptr->m_current_task.isEmpty()) {
       throw std::runtime_error("MDBQC: do tasks one by one, please!");
@@ -127,6 +128,7 @@ namespace mdbq {
     m_ptr->m_current_task_timeout_time = now + boost::posix_time::seconds(timeout_s);
     m_ptr->m_running_nr = 0;
 
+    _id  = m_ptr->m_current_task["_id"].str();
     o = m_ptr->m_current_task["misc"].Obj();
 
     // start logging
@@ -177,7 +179,7 @@ namespace mdbq {
     m_ptr->m_timer->async_wait(boost::bind(&ClientImpl::update_check, m_ptr.get(), this, boost::asio::placeholders::error));
   }
 
-  void Client::handle_task(const mongo::BSONObj &o)
+  void Client::handle_task(const std::string& _id, const mongo::BSONObj &o)
   {
     std::cerr << "MDBQC: WARNING: got a task, but no handler defined!" << std::endl;
     finish(BSON("error" << true));

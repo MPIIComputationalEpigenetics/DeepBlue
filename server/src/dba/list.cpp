@@ -233,10 +233,12 @@ namespace epidb {
         Connection c;
         std::auto_ptr<mongo::DBClientCursor> data_cursor = c->query(helpers::collection_name(Collections::COLUMN_TYPES()), mongo::BSONObj());
 
+        processing::StatusPtr status = processing::build_dummy_status();
+
         while (data_cursor->more()) {
           mongo::BSONObj o = data_cursor->next().getOwned();
           columns::ColumnTypePtr column_type;
-          if (! epidb::dba::columns::column_type_bsonobj_to_class(o, column_type, msg))  {
+          if (! epidb::dba::columns::column_type_bsonobj_to_class(o, status, column_type, msg))  {
             return false;
           }
           content.push_back(column_type->str());

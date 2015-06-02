@@ -58,6 +58,7 @@ namespace epidb {
     virtual const std::string  &get_string(const size_t pos) const;
     virtual Score value(const size_t pos) const;
     virtual bool has_stats() const;
+    virtual size_t size() const;
     virtual RegionPtr clone() const = 0;
   };
 
@@ -72,9 +73,9 @@ namespace epidb {
       AbstractRegion(s, e, _id) {}
 
     virtual RegionPtr clone() const;
+
+    virtual size_t size() const;
   };
-
-
 
 
   // -----------------------------------
@@ -94,6 +95,7 @@ namespace epidb {
     virtual void insert(const int value);
     virtual const std::string  &get_string(const size_t pos) const;
     virtual Score value(const size_t pos) const;
+    virtual size_t size() const;
     virtual RegionPtr clone() const;
   };
 
@@ -111,6 +113,7 @@ namespace epidb {
       _value(value) { }
 
     virtual Score value(const size_t pos) const;
+    virtual size_t size() const;
     virtual RegionPtr clone() const;
   };
 
@@ -147,6 +150,7 @@ namespace epidb {
     Score var() const;
     Score sd() const;
     Score count() const;
+    virtual size_t size() const;
     virtual RegionPtr clone() const;
   };
 

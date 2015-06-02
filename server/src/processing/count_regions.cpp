@@ -13,9 +13,9 @@
 namespace epidb {
   namespace processing {
 
-    bool count_regions(const std::string &query_id, const std::string &user_key, size_t &count, std::string &msg)
+    bool count_regions(const std::string &query_id, const std::string &user_key, processing::StatusPtr status, size_t &count, std::string &msg)
     {
-      if (!dba::query::count_regions(query_id, user_key, count, msg)) {
+      if (!dba::query::count_regions(query_id, user_key, status, count, msg)) {
         return false;
       }
       return true;

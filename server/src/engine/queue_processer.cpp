@@ -32,10 +32,11 @@ namespace epidb {
       mdbq::Client(url, prefix),
       _id(id) {}
 
-    void QueueHandler::handle_task(const mongo::BSONObj &o)
+    void QueueHandler::handle_task(const std::string& id, const mongo::BSONObj &o)
     {
       try {
-        mongo::BSONObj result = process(o);
+        processing::StatusPtr status = processing::build_status(id);
+        mongo::BSONObj result = process(o, status);
         finish(result, true);
       } catch (mdbq::timeout_exception) {
         /* do nothing */
@@ -49,18 +50,20 @@ namespace epidb {
       ios.run();
     }
 
-    mongo::BSONObj QueueHandler::process(const mongo::BSONObj &job)
+    mongo::BSONObj QueueHandler::process(const mongo::BSONObj &job, processing::StatusPtr status)
     {
+      std::string _id = job["_id"];
       std::string command = job["command"].str();
+      std::string user_key = job["user_key"].str();
 
       if (command == "count_regions") {
-        return process_count(job["query_id"].str(), job["user_key"].str());
+        return process_count(job["query_id"].str(), user_key, status);
       } if (command == "get_regions") {
-        return process_get_regions(job["query_id"].str(), job["format"].str(), job["user_key"].str());
+        return process_get_regions(job["query_id"].str(), job["format"].str(), user_key, status);
       } if (command == "score_matrix") {
-        return process_score_matrix(job["experiments_formats"].Obj(), job["aggregation_function"].str(), job["query_id"].str(), job["user_key"].str());
+        return process_score_matrix(job["experiments_formats"].Obj(), job["aggregation_function"].str(), job["query_id"].str(), user_key, status);
       } if (command == "get_experiments_by_query") {
-        return process_get_experiments_by_query(job["query_id"].str(), job["user_key"].str());
+        return process_get_experiments_by_query(job["query_id"].str(), user_key, status);
       } else {
         mongo::BSONObjBuilder bob;
         bob.append("success", false);
@@ -69,13 +72,13 @@ namespace epidb {
       }
     }
 
-    mongo::BSONObj QueueHandler::process_count(const std::string &query_id, const std::string &user_key)
+    mongo::BSONObj QueueHandler::process_count(const std::string &query_id, const std::string &user_key, processing::StatusPtr status)
     {
       std::string msg;
       mongo::BSONObjBuilder bob;
       size_t count = 0;
 
-      if (!processing::count_regions(query_id, user_key, count, msg)) {
+      if (!processing::count_regions(query_id, user_key, status, count, msg)) {
         bob.append("__error__", msg);
         return bob.obj();
       }
@@ -86,13 +89,13 @@ namespace epidb {
     }
 
 
-    mongo::BSONObj QueueHandler::process_get_regions(const std::string &query_id, const std::string &format, const std::string &user_key)
+    mongo::BSONObj QueueHandler::process_get_regions(const std::string &query_id, const std::string &format, const std::string &user_key, processing::StatusPtr status)
     {
       std::string msg;
       StringBuilder sb;
       mongo::BSONObjBuilder bob;
 
-      if (!processing::get_regions(query_id, format, user_key, sb, msg)) {
+      if (!processing::get_regions(query_id, format, user_key, status, sb, msg)) {
         bob.append("__error__", msg);
         return bob.obj();
       }
@@ -118,7 +121,7 @@ namespace epidb {
       return bob.obj();
     }
 
-    mongo::BSONObj QueueHandler::process_score_matrix(const mongo::BSONObj &experiments_formats_bson, const std::string &aggregation_function, const std::string &regions_query_id, const std::string &user_key)
+    mongo::BSONObj QueueHandler::process_score_matrix(const mongo::BSONObj &experiments_formats_bson, const std::string &aggregation_function, const std::string &regions_query_id, const std::string &user_key, processing::StatusPtr status)
     {
       std::string msg;
       StringBuilder sb;
@@ -136,7 +139,7 @@ namespace epidb {
       }
 
       std::string matrix;
-      if (!processing::score_matrix(experiments_formats, aggregation_function, regions_query_id, user_key, matrix, msg)) {
+      if (!processing::score_matrix(experiments_formats, aggregation_function, regions_query_id, user_key, status, matrix, msg)) {
         bob.append("__error__", msg);
         return bob.obj();
       }
@@ -161,12 +164,12 @@ namespace epidb {
       return bob.obj();
     }
 
-    mongo::BSONObj QueueHandler::process_get_experiments_by_query(const std::string &query_id, const std::string &user_key)
+    mongo::BSONObj QueueHandler::process_get_experiments_by_query(const std::string &query_id, const std::string &user_key, processing::StatusPtr status)
     {
       std::string msg;
       mongo::BSONObjBuilder bob;
       std::vector<utils::IdName> experiments;
-      if (!processing::get_experiments_by_query(query_id, user_key, experiments, msg)) {
+      if (!processing::get_experiments_by_query(query_id, user_key, status, experiments, msg)) {
         bob.append("__error__", msg);
         return bob.obj();
       }
