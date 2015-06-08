@@ -56,29 +56,31 @@ namespace epidb {
       std::string _request_id;
       std::string _processing_id;
 
-      std::atomic_size_t _total_regions;
-      std::atomic_size_t _total_size;
-      std::atomic_size_t _total_stored_data;
-      std::atomic_size_t _total_stored_data_compressed;
+      const long long _maximum_memory;
+
+      std::atomic_llong _total_regions;
+      std::atomic_llong _total_size;
+      std::atomic_llong _total_stored_data;
+      std::atomic_llong _total_stored_data_compressed;
 
       mongo::BSONObj toBson();
 
     public:
-      Status(const std::string &request_id);
+      Status(const std::string &request_id, const long long maximum_memory);
       ~Status();
       RunningOp start_operation(OP op, const mongo::BSONObj& params = mongo::BSONObj());
-      void sum_regions(size_t qtd);
-      void sum_size(size_t size);
-      void set_total_stored_data(size_t size);
-      void set_total_stored_data_compressed(size_t size);
-      size_t regions();
-      size_t size();
+      void sum_regions(const long long qtd);
+      long long sum_size(const long long size);
+      void set_total_stored_data(long long size);
+      void set_total_stored_data_compressed(long long size);
+      long long total_regions();
+      long long total_size();
+      long long maximum_size();
     };
 
     typedef std::shared_ptr<Status> StatusPtr;
 
-    StatusPtr build_status(const std::string& _id, const size_t maximum);
-    StatusPtr build_status(const std::string& _id);
+    StatusPtr build_status(const std::string& _id, const long long maximum_memory);
     StatusPtr build_dummy_status();
 
     bool count_regions(const std::string &query_id, const std::string &user_key, processing::StatusPtr status, size_t &count, std::string &msg);

@@ -75,8 +75,9 @@ namespace epidb {
     }
 
 
-    Status::Status(const std::string &request_id) :
+    Status::Status(const std::string &request_id, const long long maximum_memory) :
       _request_id(request_id),
+      _maximum_memory(maximum_memory),
       _total_regions(0),
       _total_size(0),
       _total_stored_data(0),
@@ -112,7 +113,7 @@ namespace epidb {
       return RunningOp(_processing_id, op, params);
     }
 
-    void Status::sum_regions(size_t qtd)
+    void Status::sum_regions(const long long qtd)
     {
       _total_regions += qtd;
 
@@ -125,7 +126,7 @@ namespace epidb {
       }
     }
 
-    void Status::sum_size(size_t size)
+    long long Status::sum_size(const long long size)
     {
       _total_size += size;
 
@@ -136,9 +137,11 @@ namespace epidb {
         c->update(dba::helpers::collection_name(dba::Collections::PROCESSING()), query, update_value, false, false);
         c.done();
       }
+
+      return _maximum_memory - _total_size;
     }
 
-    void Status::set_total_stored_data(size_t size)
+    void Status::set_total_stored_data(const long long size)
     {
       _total_stored_data = size;
 
@@ -149,7 +152,7 @@ namespace epidb {
       c.done();
     }
 
-    void Status::set_total_stored_data_compressed(size_t size)
+    void Status::set_total_stored_data_compressed(const long long size)
     {
       _total_stored_data_compressed = size;
 
@@ -160,26 +163,31 @@ namespace epidb {
       c.done();
     }
 
-    size_t Status::regions()
+    long long Status::total_regions()
     {
       return _total_regions;
     }
 
-    size_t Status::size()
+    long long Status::total_size()
     {
       return _total_size;
     }
 
+    long long Status::maximum_size()
+    {
+      return _maximum_memory;
+    }
+
     typedef std::shared_ptr<Status> StatusPtr;
 
-    StatusPtr build_status(const std::string& _id)
+    StatusPtr build_status(const std::string& _id, const long long maximum_memory)
     {
-      return std::shared_ptr<Status>(new Status(_id));
+      return std::shared_ptr<Status>(new Status(_id, maximum_memory));
     }
 
     StatusPtr build_dummy_status()
     {
-      return std::shared_ptr<Status>(new Status(DUMMY_REQUEST));
+      return std::shared_ptr<Status>(new Status(DUMMY_REQUEST, 0));
     }
 
     std::string DUMMY_REQUEST = "dummy";
