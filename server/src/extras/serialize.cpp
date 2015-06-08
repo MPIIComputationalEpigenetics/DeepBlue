@@ -475,9 +475,9 @@ namespace epidb {
           params_ss << "<null>";
         } else if ((**it).isString() && truncate_strings) {
           std::string s = (**it).as_string();
-          if (s.length() > 1024) {
-            params_ss << s.substr(0, 1024);
-            params_ss << " ... [" << s.length() - 1024 << " more characters]";
+          if (s.length() > 256) {
+            params_ss << s.substr(0, 256);
+            params_ss << " ... [" << s.length() - 256 << " more characters]";
           } else {
             params_ss << s;
           }
@@ -485,9 +485,9 @@ namespace epidb {
           if (truncate_strings) {
             std::string tmp_string((**it).as_string());
             size_t l = tmp_string.length();
-            if (l > 1024) {
-              params_ss << tmp_string.substr(0, 1024);
-              params_ss << " ... [" << l - 1024 << " more characters]";
+            if (l > 256) {
+              params_ss << tmp_string.substr(0, 256);
+              params_ss << " ... [" << l - 256 << " more characters]";
             }
           } else {
             params_ss << (**it).as_string();
