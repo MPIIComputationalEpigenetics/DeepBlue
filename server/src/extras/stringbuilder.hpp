@@ -6,8 +6,8 @@
 //  Copyright (c) 2013,2014 Max Planck Institute for Computer Science. All rights reserved.
 //
 
-#ifndef EPIDB_STRINGBUILDER_HPP_
-#define EPIDB_STRINGBUILDER_HPP_
+#ifndef EPIDB_STRINGBUILDER_HPP
+#define EPIDB_STRINGBUILDER_HPP
 
 #include <string>
 #include <vector>
