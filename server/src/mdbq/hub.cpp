@@ -13,11 +13,12 @@
 #include <mongo/client/dbclient.h>
 
 #include "hub.hpp"
-#include "date_time.hpp"
 
 #include "../log.hpp"
 
 #include "../extras/compress.hpp"
+#include "../extras/date_time.hpp"
+
 #include "../connection/connection.hpp"
 
 #include "../dba/helpers.hpp"
@@ -77,10 +78,10 @@ namespace mdbq {
                   << std::setw(8) << f["state"].Int()
                   << std::setw(8) << f["nfailed"].Int()
                   << std::setw(10) << f["owner"].Array()[0].String()
-                  << std::setw(16) << dt_format(to_ptime(f["create_time"].Date()))
-                  << std::setw(16) << dt_format(to_ptime(f["book_time"].Date()))
-                  << std::setw(16) << dt_format(to_ptime(f["finish_time"].Date()))
-                  << std::setw(16) << dt_format(to_ptime(f["book_time"].Date()) + boost::posix_time::seconds(f["timeout"].Int()))
+                  << std::setw(16) << epidb::extras::dt_format(epidb::extras::to_ptime(f["create_time"].Date()))
+                  << std::setw(16) << epidb::extras::dt_format(epidb::extras::to_ptime(f["book_time"].Date()))
+                  << std::setw(16) << epidb::extras::dt_format(epidb::extras::to_ptime(f["finish_time"].Date()))
+                  << std::setw(16) << epidb::extras::dt_format(epidb::extras::to_ptime(f["book_time"].Date()) + boost::posix_time::seconds(f["timeout"].Int()))
                   << " " << f["misc"]
                   << std::endl;
       }
@@ -146,12 +147,12 @@ namespace mdbq {
 
     id = "r" + epidb::utils::integer_to_string(r_id);
 
-    boost::posix_time::ptime ctime = universal_date_time();
+    boost::posix_time::ptime ctime = epidb::extras::universal_date_time();
     m_ptr->m_con->insert(m_prefix + ".jobs",
                          BSON( "_id" << id
                                << "timeout"     << timeout
                                << "version"     << version_value
-                               << "create_time" << to_mongo_date(ctime)
+                               << "create_time" << epidb::extras::to_mongo_date(ctime)
                                << "finish_time" << mongo::Undefined
                                << "book_time"   << mongo::Undefined
                                << "refresh_time" << mongo::Undefined
@@ -302,12 +303,12 @@ namespace mdbq {
 
   boost::posix_time::ptime Hub::get_create_time(const mongo::BSONObj& o)
   {
-    return to_ptime(o["create_time"].Date());
+    return epidb::extras::to_ptime(o["create_time"].Date());
   }
 
   boost::posix_time::ptime Hub::get_finish_time(const mongo::BSONObj& o)
   {
-    return to_ptime(o["finish_time"].Date());
+    return epidb::extras::to_ptime(o["finish_time"].Date());
   }
 
   mongo::BSONObj Hub::get_misc(const mongo::BSONObj& o)

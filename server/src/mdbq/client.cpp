@@ -15,9 +15,10 @@
 #include <mongo/client/dbclient.h>
 #include <mongo/client/gridfs.h>
 
+#include "../extras/date_time.hpp"
+
 #include "client.hpp"
 #include "common.hpp"
-#include "date_time.hpp"
 
 #include "../connection/connection.hpp"
 
@@ -89,7 +90,7 @@ namespace mdbq {
     if (!m_ptr->m_current_task.isEmpty()) {
       throw std::runtime_error("MDBQC: do tasks one by one, please!");
     }
-    boost::posix_time::ptime now = universal_date_time();
+    boost::posix_time::ptime now = epidb::extras::universal_date_time();
 
     std::string hostname(256, '\0');
     gethostname(&hostname[0], 256);
@@ -105,9 +106,9 @@ namespace mdbq {
             "findAndModify" << "jobs" <<
             "query" << query <<
             "update" << BSON("$set" <<
-                             BSON("book_time" << to_mongo_date(now)
+                             BSON("book_time" << epidb::extras::to_mongo_date(now)
                                   << "state" << TS_RUNNING
-                                  << "refresh_time" << to_mongo_date(now)
+                                  << "refresh_time" << epidb::extras::to_mongo_date(now)
                                   << "owner" << hostname_pid)));
 
     m_ptr->m_con->runCommand(m_db, cmd, res);
@@ -145,7 +146,7 @@ namespace mdbq {
 
     this->checkpoint(false); // flush logs, do not check for timeout
 
-    boost::posix_time::ptime finish_time = universal_date_time();
+    boost::posix_time::ptime finish_time = epidb::extras::universal_date_time();
     int version = ct["version"].Int();
     if (ok) {
       m_ptr->m_con->update(m_jobcol,
@@ -154,7 +155,7 @@ namespace mdbq {
                           BSON("$set" << BSON(
                                  "state" << TS_DONE <<
                                  "version" << version + 1 <<
-                                 "finish_time" << to_mongo_date(finish_time) <<
+                                 "finish_time" << epidb::extras::to_mongo_date(finish_time) <<
                                  "result" << result)));
     } else {
       m_ptr->m_con->update(m_jobcol,
@@ -163,7 +164,7 @@ namespace mdbq {
                           BSON("$set" << BSON(
                                  "state" << TS_FAILED <<
                                  "version" << version + 1 <<
-                                 "failure_time" << to_mongo_date(finish_time) <<
+                                 "failure_time" << epidb::extras::to_mongo_date(finish_time) <<
                                  "error" << result)));
     }
     CHECK_DB_ERR(m_ptr->m_con);
@@ -218,7 +219,7 @@ namespace mdbq {
     }
 
     if (check_for_timeout) { // first, check whether the task has timed out.
-      boost::posix_time::ptime now = universal_date_time();
+      boost::posix_time::ptime now = epidb::extras::universal_date_time();
       if (now >= m_ptr->m_current_task_timeout_time) {
         std::string hostname(256, '\0');
         gethostname(&hostname[0], 256);
@@ -243,10 +244,10 @@ namespace mdbq {
       }
     }
 
-    boost::posix_time::ptime now = universal_date_time();
+    boost::posix_time::ptime now = epidb::extras::universal_date_time();
     m_ptr->m_con->update(m_jobcol,
                         BSON("_id" << ct["_id"]),
-                        BSON( "$set" << BSON("refresh_time" << to_mongo_date(now))));
+                        BSON( "$set" << BSON("refresh_time" << epidb::extras::to_mongo_date(now))));
     CHECK_DB_ERR(m_ptr->m_con);
 
     if (m_ptr->m_log.size()) {
