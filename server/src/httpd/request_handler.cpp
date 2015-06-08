@@ -68,7 +68,7 @@ namespace epidb {
       XMLRPCParser parser;
       boost::shared_ptr<XmlrpcRequest> xmlrpc_request;
 
-      char buf[8192];
+      char buf[8192] = {};
       size_t len = 0;
 
       for (size_t i = 0; i < content.length(); ++i){
