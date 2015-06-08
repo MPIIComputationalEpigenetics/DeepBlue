@@ -8,6 +8,8 @@
 
 #include "../dba/dba.hpp"
 #include "../dba/users.hpp"
+#include "../entities/User.hpp"
+#include "../entities/Database.hpp"
 #include "../extras/serialize.hpp"
 
 #include "../engine/commands.hpp"
@@ -57,17 +59,14 @@ namespace epidb {
         const std::string admin_key = parameters[3]->as_string();
 
         std::string msg;
-        if (!Command::checks(admin_key, msg)) {
-          result.add_error(msg);
-          return false;
-        }
 
-        bool is_admin_key;
-        if (!dba::users::is_admin_key(admin_key, is_admin_key, msg)) {
+        User admin;
+        if (!db::get_user(admin_key, admin, msg)) {
           result.add_error(msg);
           return false;
         }
-        if (!is_admin_key) {
+        
+        if (!admin.has_permission(Permission::ADMIN)) {
           result.add_error("The given key is not an admin-key");
           return false;
         }
@@ -76,13 +75,14 @@ namespace epidb {
           result.add_error(msg);
           return false;
         }
+        
+        User user = User(name, email, institution);
+        
+        user.generate_key();
 
-        const std::string key = gen_random(16);
-
-        std::string id;
-        if (dba::users::add_user(name, email, institution, key, id, msg)) {
-          result.add_string(id);
-          result.add_string(key);
+        if (db::add_user(user, msg)) {
+          result.add_string(user.get_id());
+          result.add_string(user.get_key());
           return true;
         } else {
           result.add_error(msg);
