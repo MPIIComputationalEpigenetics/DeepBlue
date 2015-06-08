@@ -8,9 +8,12 @@
 
 #include <algorithm>
 #include <cstdlib>
+#include <future>
 #include <limits>
 #include <numeric>
 #include <string>
+#include <thread>
+#include <tuple>
 #include <vector>
 
 #include <boost/ref.hpp>
@@ -276,12 +279,17 @@ namespace epidb {
             mongo::BSONObj o = cursor->nextSafe();
             rp.read_region(o);
             status->sum_regions(rp._it_count);
-            status->sum_size(rp._it_size);
-            rp._it_count = 0;
-            rp._it_size = 0;
 
             // TODO: check if processing was canceled
-            // TODO: check memory limit
+
+            // Check memory consumption
+            if (status->sum_size(rp._it_size) < 0) {
+              msg = "Memory exhausted. Used "  + utils::size_t_to_string(status->total_size()) + "bytes of " + utils::size_t_to_string(status->maximum_size()) + "bytes allowed. Please, select a smaller initial dataset, for example, selecting fewer chromosomes)"; // TODO: put a better error msg.
+              c.done();
+              return false;
+            }
+            rp._it_count = 0;
+            rp._it_size = 0;
           }
         }
 
@@ -291,11 +299,11 @@ namespace epidb {
         return true;
       }
 
-      void get_regions_job(const std::string &genome,
-                           const boost::shared_ptr<std::vector<std::string> > chromosomes,
-                           const mongo::BSONObj &regions_query,
-                           processing::StatusPtr status,
-                           boost::shared_ptr<ChromosomeRegionsList> &result)
+      std::tuple<bool, std::string> get_regions_job(const std::string &genome,
+          const std::shared_ptr<std::vector<std::string> > chromosomes,
+          const mongo::BSONObj &regions_query,
+          processing::StatusPtr status,
+          std::shared_ptr<ChromosomeRegionsList> result)
       {
 
         for (std::vector<std::string>::const_iterator chrom_it = chromosomes->begin(); chrom_it != chromosomes->end(); chrom_it++) {
@@ -303,8 +311,8 @@ namespace epidb {
           Regions regions = build_regions();
           std::string msg;
           if (!get_regions_from_collection(collection, regions_query, status, regions, msg)) {
-            EPIDB_LOG_ERR(msg);
-            return;
+            return std::make_tuple(false, msg);
+            return false;
           }
 
           if (regions.size() > 0) {
@@ -312,6 +320,8 @@ namespace epidb {
             result->push_back(std::move(chromossomeRegions));
           }
         }
+
+        return std::make_tuple(true, std::string(""));
       }
 
       bool get_regions(const std::string &genome, std::string &chromosome,
@@ -334,8 +344,8 @@ namespace epidb {
                        ChromosomeRegionsList &results, std::string &msg)
       {
         const size_t max_threads = 8;
-        std::vector<boost::thread *> threads;
-        std::vector<boost::shared_ptr<ChromosomeRegionsList> > result_parts;
+        std::vector<std::future<std::tuple<bool, std::string> > > threads;
+        std::vector<std::shared_ptr<ChromosomeRegionsList> > result_parts;
 
         size_t chunk_size = ceil(double(chromosomes.size()) / double(max_threads));
 
@@ -349,19 +359,24 @@ namespace epidb {
             end = chromosomes.end();
           }
 
-          boost::shared_ptr<std::vector<std::string> > chrs(new std::vector<std::string>(start, end));
-          boost::shared_ptr<ChromosomeRegionsList> result_part(new ChromosomeRegionsList);
-          boost::thread *t = new boost::thread(&get_regions_job, boost::cref(genome), chrs,
-                                               boost::cref(regions_query), status, result_part);
-          threads.push_back(t);
+          std::shared_ptr<std::vector<std::string> > chrs(new std::vector<std::string>(start, end));
+          std::shared_ptr<ChromosomeRegionsList> result_part(new ChromosomeRegionsList);
+
+          auto t = std::async(&get_regions_job, std::ref(genome), chrs, std::ref(regions_query), status, result_part);
+
+          threads.push_back(std::move(t));
           result_parts.push_back(result_part);
         }
 
         // kill threads
         size_t thread_count = threads.size();
         for (size_t i = 0; i < thread_count; ++i) {
-          threads[i]->join();
-          delete threads[i];
+          threads[i].wait();
+          auto result = threads[i].get();
+          if (!std::get<0>(result)) {
+            msg = std::get<1>(result);
+            return false;
+          }
         }
 
         // unite results
@@ -390,10 +405,10 @@ namespace epidb {
       }
 
       void count_regions_job(const std::string &genome,
-                             const boost::shared_ptr<std::vector<std::string> > chromosomes,
+                             const std::shared_ptr<std::vector<std::string> > chromosomes,
                              const mongo::BSONObj &regions_query,
                              processing::StatusPtr status,
-                             boost::shared_ptr<std::vector<size_t> > results)
+                             std::shared_ptr<std::vector<size_t> > results)
       {
         size_t size = 0;
         for (std::vector<std::string>::const_iterator it = chromosomes->begin(); it != chromosomes->end(); ++it) {
@@ -415,7 +430,7 @@ namespace epidb {
       {
         const size_t max_threads = 8;
         std::vector<boost::thread *> threads;
-        std::vector<boost::shared_ptr<std::vector<size_t> > > result_parts;
+        std::vector<std::shared_ptr<std::vector<size_t> > > result_parts;
 
         size_t chunk_size = ceil(double(chromosomes.size()) / double(max_threads));
 
@@ -428,8 +443,8 @@ namespace epidb {
           if (end > chromosomes.end()) {
             end = chromosomes.end();
           }
-          boost::shared_ptr<std::vector<std::string> > chrs(new std::vector<std::string>(start, end));
-          boost::shared_ptr<std::vector<size_t> > result_part(new std::vector<size_t>);
+          std::shared_ptr<std::vector<std::string> > chrs(new std::vector<std::string>(start, end));
+          std::shared_ptr<std::vector<size_t> > result_part(new std::vector<size_t>);
           boost::thread *t = new boost::thread(&count_regions_job, boost::cref(genome), chrs,
                                                boost::cref(regions_query), status, result_part);
           threads.push_back(t);
@@ -444,7 +459,7 @@ namespace epidb {
         }
 
         size = 0;
-        std::vector<boost::shared_ptr<std::vector<size_t> > >::iterator it;
+        std::vector<std::shared_ptr<std::vector<size_t> > >::iterator it;
         for (it = result_parts.begin(); it != result_parts.end(); ++it) {
           std::vector<size_t> v = **it;
           size += std::accumulate(v.begin(), v.end(), 0ll);

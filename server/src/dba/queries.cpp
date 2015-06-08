@@ -576,7 +576,6 @@ namespace epidb {
         ChromosomeRegionsList regions;
         bool ret = retrieve_query(user_key, args["query"].str(), status, regions, msg);
         if (!ret) {
-          msg = "Cannot retrieve region set: " + msg;
           return false;
         }
 
@@ -758,14 +757,12 @@ namespace epidb {
         ChromosomeRegionsList data;
         bool ret = retrieve_query(user_key, query_id, status, data, msg);
         if (!ret) {
-          msg = "Cannot retrieve region set: " + msg;
           return false;
         }
 
         ChromosomeRegionsList ranges;
         ret = retrieve_query(user_key, regions_id, status, ranges, msg);
         if (!ret) {
-          msg = "Cannot retrieve region set: " + msg;
           return false;
         }
 
