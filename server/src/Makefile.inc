@@ -70,7 +70,7 @@ ifeq ($(host),macosx)
  DEFCXXFLAGS = -O3 -Ofast -ffast-math -march=native -std=c++11 -stdlib=libc++ -Werror -Wall -Wextra  -Weffc++ -Wno-unused-parameter -Wno-ignored-qualifiers -Wno-deprecated-declarations -I/opt/boost-new-new/include/ -I/Users/albrecht/mpi/DeepBlue/server/third_party/drivers/macosx/include -I$(CPPFORMAT) -I$(STRTK) -I$(MINILZO) -I$(URDL) -I$(LUA) -DBOOST_LOG_DYN_LINK -DURDL_HEADER_ONLY=1 -DURDL_DISABLE_SSL=1
  BOOST_DIR = /opt/boost-new-new/lib
  LD	= clang++ -DBOOST_LOG_DYN_LINK -pagezero_size 10000 -image_base 100000000  #LuaJit options
- LDFLAGS =
+ LDFLAGS = -pthread
  MONGOLIBS =  -L/Users/albrecht/mpi/DeepBlue/server/third_party/drivers/macosx/lib -lmongoclient
  BOOSTLIBS = -L$(BOOST_DIR) -lboost_log_setup -lboost_log -lboost_filesystem -lboost_thread -lboost_system -lboost_regex -lboost_timer -lboost_chrono -lboost_program_options
  THIRDLIBS = ../third_party/libexpat_macosx.a
