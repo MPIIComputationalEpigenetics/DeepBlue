@@ -165,16 +165,33 @@ namespace epidb {
 
     const std::string &Collections::COUNTERS()
     {
-      static std::string settings("counters");
-      return settings;
+      static std::string counters("counters");
+      return counters;
     }
 
     const std::string &Collections::KEY_MAPPER()
     {
-      static std::string settings("key_mapper");
+      static std::string key_mapper("key_mapper");
+      return key_mapper;
+    }
+
+    const std::string &Collections::JOBS()
+    {
+      static std::string jobs("jobs");
+      return jobs;
+    }
+
+    const std::string &Collections::PROCESSING()
+    {
+      static std::string settings("processing");
       return settings;
     }
 
+    const std::string &Collections::PROCESSING_OPS()
+    {
+      static std::string settings("processing_ops");
+      return settings;
+    }
 
   }
 }
