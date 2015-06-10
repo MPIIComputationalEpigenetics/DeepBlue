@@ -69,7 +69,7 @@ namespace epidb {
       boost::posix_time::ptime now = extras::universal_date_time();
       boost::posix_time::time_duration  total = now - _start_time;
       mongo::BSONObj query = BSON("_id" << _id);
-      mongo::BSONObj update_value = BSON("$set" << BSON("e" << extras::to_mongo_date(now) << "t" << total. total_milliseconds()));
+      mongo::BSONObj update_value = BSON("$set" << BSON("e" << extras::to_mongo_date(now) << "t" << (long long) total.total_milliseconds()));
       c->update(dba::helpers::collection_name(dba::Collections::PROCESSING_OPS()), query, update_value, false, false);
       c.done();
     }

@@ -78,7 +78,7 @@ namespace epidb {
 
             int db_data_size;
             const char *data;
-            lzo_bytep decompressed_data;
+            lzo_bytep decompressed_data = NULL;
             bool compressed = false;
             if (region_bson.hasField(KeyMapper::WIG_COMPRESSED())) {
               compressed = true;
@@ -312,7 +312,6 @@ namespace epidb {
           std::string msg;
           if (!get_regions_from_collection(collection, regions_query, status, regions, msg)) {
             return std::make_tuple(false, msg);
-            return false;
           }
 
           if (regions.size() > 0) {
