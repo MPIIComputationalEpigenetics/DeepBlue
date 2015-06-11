@@ -62,7 +62,7 @@ class TestOverlaps(helpers.TestCase):
     res, req = epidb.count_regions(i_id, self.admin_key)
     self.assertSuccess(res, req)
     count = self.count_request(req)
-    self.assertEqual(count, 8)
+    self.assertEqual(count, 3)
 
     res, i_id = epidb.intersection(qid_2, qid_2, self.admin_key)
     self.assertSuccess(res, i_id)

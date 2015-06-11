@@ -17,7 +17,7 @@ class TestAggregateCommand(helpers.TestCase):
       "CHROMOSOME",
       "START",
       "END",
-      "name:String",
+      "NAME",
       "length:Integer",
       "cpgNum:Integer",
       "gcNum:Integer",
@@ -65,25 +65,6 @@ class TestAggregateCommand(helpers.TestCase):
 
     sample_id = self.sample_ids[0]
 
-    # Insert experiment
-    (s, m) = epidb.create_column_type_simple("NAME", "", "string", self.admin_key)
-    self.assertSuccess(s,m)
-
-    (s, m) = epidb.create_column_type_simple("SCORE", "", "double", self.admin_key)
-    self.assertSuccess(s,m)
-
-    (s, m) = epidb.create_column_type_simple("strand", "", "string", self.admin_key)
-    self.assertSuccess(s,m)
-
-    (s, m) = epidb.create_column_type_simple("SIGNAL_VALUE", "", "double", self.admin_key)
-    self.assertSuccess(s,m)
-
-    (s, m) = epidb.create_column_type_simple("P_VALUE", "", "double", self.admin_key)
-    self.assertSuccess(s,m)
-
-    (s, m) = epidb.create_column_type_simple("Q_VALUE", "", "double", self.admin_key)
-    self.assertSuccess(s,m)
-
     self.insert_experiment(epidb, "hg19_chr1_1", sample_id)
     broad_peak_format = ",".join([
       "CHROMOSOME",
@@ -109,7 +90,7 @@ class TestAggregateCommand(helpers.TestCase):
       "CHROMOSOME",
       "START",
       "END",
-      "name:String",
+      "NAME",
       "length:Integer",
       "cpgNum:Integer",
       "gcNum:Integer",
@@ -147,25 +128,6 @@ class TestAggregateCommand(helpers.TestCase):
 
     sample_id = self.sample_ids[0]
 
-    # Insert experiment
-    (s, m) = epidb.create_column_type_simple("NAME", "", "string", self.admin_key)
-    self.assertSuccess(s,m)
-
-    (s, m) = epidb.create_column_type_simple("SCORE", "", "double", self.admin_key)
-    self.assertSuccess(s,m)
-
-    (s, m) = epidb.create_column_type_simple("strand", "", "string", self.admin_key)
-    self.assertSuccess(s,m)
-
-    (s, m) = epidb.create_column_type_simple("SIGNAL_VALUE", "", "double", self.admin_key)
-    self.assertSuccess(s,m)
-
-    (s, m) = epidb.create_column_type_simple("P_VALUE", "", "double", self.admin_key)
-    self.assertSuccess(s,m)
-
-    (s, m) = epidb.create_column_type_simple("Q_VALUE", "", "double", self.admin_key)
-    self.assertSuccess(s,m)
-
     self.insert_experiment(epidb, "hg19_chr1_1", sample_id)
     broad_peak_format = ",".join([
       "CHROMOSOME",
@@ -191,7 +153,7 @@ class TestAggregateCommand(helpers.TestCase):
       "CHROMOSOME",
       "START",
       "END",
-      "name:String",
+      "NAME",
       "length:Integer",
       "cpgNum:Integer",
       "gcNum:Integer",

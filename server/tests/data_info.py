@@ -21,7 +21,7 @@ ANNOTATIONS = {
   "Cpg Islands All Fields": {
     "data_file": "data/cpgIslandAllFields.txt",
     "description": "CpG islands are associated ... (all fields)",
-    "format": "CHROMOSOME,START,END,name:String,length:Integer,cpgNum:Integer,gcNum:Integer,perCpg:Double,perGc:Double,obsExp:Double",
+    "format": "CHROMOSOME,START,END,NAME,length:Integer,cpgNum:Integer,gcNum:Integer,perCpg:Double,perGc:Double,obsExp:Double",
     "metadata": {"url":"genome.ucsc.edu/cgi-bin/hgTables?db=hg19&hgta_group=regulation&hgta_track=cpgIslandExt&hgta_table=cpgIslandExt&hgta_doSchema=describe+table+schema"},
     "genome": "hg19"
   }
@@ -108,13 +108,13 @@ EXPERIMENTS = {
       "CHROMOSOME",
       "START",
       "END",
-      "name:String",
-      "score:Integer",
-      "strand:String",
-      "signalValue:Integer",
-      "pValue:Double",
-      "qValue:Integer",
-      "peak:Integer"
+      "NAME",
+      "SCORE",
+      "STRAND",
+      "SIGNAL_VALUE",
+      "P_VALUE",
+      "Q_VALUE",
+      "PEAK"
     ])
   },
 
@@ -129,13 +129,13 @@ EXPERIMENTS = {
       "CHROMOSOME",
       "START",
       "END",
-      "name:String",
-      "score:Integer",
-      "strand:String",
-      "signalValue:Double",
-      "pValue:Double",
-      "qValue:Double",
-      "peak:Integer"
+      "NAME",
+      "SCORE",
+      "STRAND",
+      "SIGNAL_VALUE",
+      "P_VALUE",
+      "Q_VALUE",
+      "PEAK"
     ])
   },
 
@@ -150,13 +150,13 @@ EXPERIMENTS = {
       "CHROMOSOME",
       "START",
       "END",
-      "name:String",
-      "score:Integer",
-      "strand:String",
-      "signalValue:Double",
-      "pValue:Double",
-      "qValue:Double",
-      "peak:Integer"
+      "NAME",
+      "SCORE",
+      "STRAND",
+      "SIGNAL_VALUE",
+      "P_VALUE",
+      "Q_VALUE",
+      "PEAK"
     ])
   },
 
@@ -171,13 +171,13 @@ EXPERIMENTS = {
       "CHROMOSOME",
       "START",
       "END",
-      "name:String",
-      "score:Integer",
-      "strand:String",
-      "signalValue:Double",
-      "pValue:Double",
-      "qValue:Double",
-      "peak:Integer"
+      "NAME",
+      "SCORE",
+      "STRAND",
+      "SIGNAL_VALUE",
+      "P_VALUE",
+      "Q_VALUE",
+      "PEAK"
     ])
   },
 
@@ -192,12 +192,12 @@ EXPERIMENTS = {
       "CHROMOSOME",
       "START",
       "END",
-      "name:String",
-      "score:Integer",
-      "strand:String",
-      "pValue:Double",
-      "qValue:Double",
-      "peak:Integer"
+      "NAME",
+      "SCORE",
+      "STRAND",
+      "P_VALUE",
+      "Q_VALUE",
+      "PEAK"
     ])
   },
 
@@ -212,12 +212,12 @@ EXPERIMENTS = {
       "CHROMOSOME",
       "START",
       "END",
-      "name:String",
-      "score:Integer",
-      "strand:String",
-      "pValue:Double",
-      "qValue:Double",
-      "peak:Integer"
+      "NAME",
+      "SCORE",
+      "STRAND",
+      "P_VALUE",
+      "Q_VALUE",
+      "PEAK"
     ])
   },
 
@@ -232,12 +232,12 @@ EXPERIMENTS = {
       "CHROMOSOME",
       "START",
       "END",
-      "name:String",
-      "score:Integer",
-      "strand:String",
-      "pValue:Double",
-      "qValue:Double",
-      "peak:Integer"
+      "NAME",
+      "SCORE",
+      "STRAND",
+      "P_VALUE",
+      "Q_VALUE",
+      "PEAK"
     ])
   },
 
@@ -251,3 +251,73 @@ EXPERIMENTS = {
     "format": ""
   }
 }
+
+COLUMNS = [
+  ("AVG_METHYL_LEVEL", "Average methylation level in region", "double"),
+  ("NAME", "Region name", "string"),
+  ("SCORE", "Region score", "double"),
+  ("SIGNAL_VALUE", "Signal value", "double"),
+  ("P_VALUE", "P value", "double"),
+  ("Q_VALUE", "Q value", "double"),
+  ("PEAK", "Region peak", "integer"),
+  ("THICK_START", "Thick start", "integer"),
+  ("THICK_END", "Thick end", "integer"),
+  ("ITEM_RGB", "Item RGB", "string"),
+  ("BLOCK_COUNT", "Block count", "string"),
+  ("BLOCK_SIZES", "Block sizes", "string"),
+  ("BLOCK_STARTS", "Block starts", "string"),
+  ("LEVEL", "Level", "double"),
+  ("SIGN_IF", "Sign if", "double"),
+  ("SCORE_2", "Level", "double"),
+  ("LENGTH", "Length", "integer"),
+  ("NUM_CPG", "Number of CpGs in region", "integer"),
+  ("NUM_GC", "Number of GCs dinucleotide in region", "integer"),
+  ("MEDIAN_NON_CONVERTED_CPG", "Median number of non-converted reads at CpGs in region", "integer"),
+  ("MEDIAN_CONVERTED_CPG", "Median number of converted reads at CpGs in region", "integer"),
+  ("MEDIAN_TOTAL_CPG", "Median number of total reads at CpGs in region", "integer"),
+  ("PER_CPG", "Per CPG", "double"),
+  ("PER_GC", "Per GC", "double"),
+  ("OBS_EXP", "Obs Exp", "double"),
+  ("GENE_ID_ENSEMBL", "Gene Ensemble ID", "string"),
+  ("SPAN", "span", "integer"),
+  ("COUNT", "count", "integer"),
+  ("OFFSET", "offset", "integer"),
+  ("FILE", "file", "string"),
+  ("LOWER_LIMIT", "Lower limit", "double"),
+  ("DATA_RANGE", "Data range", "double"),
+  ("VALID_COUNT", "Valid count", "integer"),
+  ("SUM_DATA", "Sum data", "double"),
+  ("SUM_SQUARES", "Sum squares", "double"),
+  ("SW_SCORE", "SW score", "integer"),
+  ("MILLI_DIV", "milliDiv", "integer"),
+  ("MILLI_DEL", "milliDel", "integer"),
+  ("MILLI_INS", "milliIns", "integer"),
+  ("GENO_LEFT", "genoLeft", "integer"),
+  ("REF_GENES", "refGene annotation (union of refGene  annotations for all CpGs in region)", "string"),
+  ("REP_NAME", "repName", "string"),
+  ("REP_CLASS", "repClass", "string"),
+  ("REP_FAMILY", "repFamily", "string"),
+  ("REP_START", "repStart", "integer"),
+  ("REP_END", " repEnd", "integer"),
+  ("REP_LEFT", "repLeft", "integer"),
+  ("ID", "Region id", "string"),
+  ("ISLAND_SHELF_SHORE", "Island/Shelf/Shore (union of CpG Island annotations for all CpGs in region)",
+   "string"),
+  ("SIZE", "Size of region in base pairs", "integer"),
+  ("IGNORE", "Ignored column", "string"),
+  ("TRANSCRIPT_ID_ENSEMBL", "ENSEMBL transcript ID", "string"),
+  ("TRANSCRIPT_SYMBOL", "Analogous to GENE_SYMBOL, usually GENE_SYMBOL with numeric suffix", "string"),
+  ("GENE_SYMBOL", "Gene Symbol", "string"),
+  ("PROBE_ID", "Microarray probe id", "string"),
+  ("EXPRESSION_NORM_GCRMA", "GCRMA-normalized signal intensity", "double"),
+  ("DNA_METH_U", "Number of unmethylated reads for a cytosine in a bisulfite sequencing experiment", "integer"),
+  ("DNA_METH_M", "Number of methylated reads for a cytosine in a bisulfite sequencing experiment", "integer"),
+  ("DNA_METH_T", "Number of total reads for a cytosine in a bisulfite sequencing experiment", "integer"),
+  ("GENE_ID_ENTREZ", "Gene ID in Entrez", "string"),
+  ("EXPRESSION_NORM", "", "double"),
+  ("SOURCE", "name of the program that generated this feature, or the data source (database or project name)", "string"),
+  ("FEATURE", "feature type name, e.g. Gene, Variation, Similarity", "string"),
+  ("FRAME", "One of '0', '1' or '2'. '0' indicates that the first base of the feature is the first base of a codon, '1' that the second base is the first base of a codon, and so on.. The type is a string because the value '.' is also acceptable.", "string"),
+  ("ATTRIBUTE", "A semicolon-separated list of tag-value pairs, providing additional information about each feature.", "string"),
+  ("GFF_SCORE", "A floating point value. The type is a string because the value '.' is also acceptable.", "string"),
+]

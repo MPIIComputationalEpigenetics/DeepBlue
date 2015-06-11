@@ -178,6 +178,11 @@ class TestCase(unittest.TestCase):
     return gid
 
 
+  def insert_column(self, epidb, column):
+    res, cid =epidb.create_column_type_simple(column[0], column[1], column[2], self.admin_key)
+    self.assertSuccess(res, cid)
+    return cid
+
   def insert_annotation(self, epidb, name):
     ann = data.ANNOTATIONS[name]
     annotation_data = None
@@ -297,6 +302,10 @@ class TestCase(unittest.TestCase):
     for sample in data.SAMPLES:
       self.insert_samples(epidb, sample)
 
+    for column in data.COLUMNS:
+      self.insert_column(epidb, column)
+    res, cid = epidb.create_column_type_category("STRAND", "Region strand: +, -, .", ["+", "-", "."], self.admin_key)
+    self.assertSuccess(res, cid)
 
   def init_full(self, epidb=None):
     if not epidb:

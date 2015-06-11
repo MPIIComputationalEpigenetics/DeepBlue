@@ -15,7 +15,7 @@ class TestSelectRegions(helpers.TestCase):
     full_experiment_regions = helpers.get_result("hg19_chr1_1_output")
     region_count = len(full_experiment_regions.split("\n"))
 
-    format = "CHROMOSOME,START,END,name,score,strand,signalValue,pValue,qValue,peak"
+    format = "CHROMOSOME,START,END,NAME,SCORE,STRAND,SIGNAL_VALUE,P_VALUE,Q_VALUE,PEAK"
 
     # test to retrieve the whole data with all parameters of the experiment
     # set or not set
@@ -62,7 +62,7 @@ class TestSelectRegions(helpers.TestCase):
 
     # at least one: should pass
     expected_regions = helpers.get_result("hg19_chr1_1_output")
-    format = "CHROMOSOME,START,END,name,score,strand,signalValue,pValue,qValue,peak"
+    format = "CHROMOSOME,START,END,NAME,SCORE,STRAND,SIGNAL_VALUE,P_VALUE,Q_VALUE,PEAK"
 
     argument_combinations = [
       (None, "hg19", None, sample_id, None, None, None, None, None),
@@ -90,8 +90,7 @@ class TestSelectRegions(helpers.TestCase):
     self.insert_experiment(epidb, "hg19_chr1_1")
     expected_regions = helpers.get_result("hg19_chr1_1_output")
 
-    #format = "CHROMOSOME,START,END,name:.,score:0,strand:.,signalValue:0.0,pValue:-1,qValue:-1,peak:-1"
-    format = "CHROMOSOME,START,END,name,score,strand,signalValue,pValue,qValue,peak"
+    format = "CHROMOSOME,START,END,NAME,SCORE,STRAND,SIGNAL_VALUE,P_VALUE,Q_VALUE,PEAK"
 
     res, qid = epidb.select_regions("hg19_chr1_1", "hg19", None, None, None, None, None, None, None, self.admin_key)
     self.assertSuccess(res, qid)
@@ -160,13 +159,13 @@ class TestSelectRegions(helpers.TestCase):
                                     None, None, None, None, self.admin_key)
     self.assertSuccess(res, qid)
 
-    fmt = "foobar,START,END,name,score,strand,signalValue,pValue,qValue,peak"
+    fmt = "foobar,START,END,NAME,SCORE,STRAND,SIGNAL_VALUE,P_VALUE,Q_VALUE,PEAK"
     res, req = epidb.get_regions(qid, fmt, self.admin_key)
     self.assertSuccess(res, req)
     regions = self.get_regions_request(req)
     self.assertNotEqual(regions, full_experiment_regions)
 
-    fmt = "START,START,END,name,score,strand,signalValue,pValue,qValue,peak"
+    fmt = "START,START,END,NAME,SCORE,STRAND,SIGNAL_VALUE,P_VALUE,Q_VALUE,PEAK"
     res, req = epidb.get_regions(qid, fmt, self.admin_key)
     self.assertSuccess(res, req)
     regions = self.get_regions_request(req)
@@ -177,10 +176,10 @@ class TestSelectRegions(helpers.TestCase):
 
     # Creating another column, named NAME, that in the experiment is name.
     # This column should return empty.
-    (s, m) = epidb.create_column_type_simple("NAME", "", "string", self.admin_key)
+    (s, m) = epidb.create_column_type_simple("COISA", "", "string", self.admin_key)
     self.assertSuccess(s, m)
 
-    fmt = "START,END,NAME,score,strand,signalValue,pValue,qValue,peak"
+    fmt = "START,END,COISA,SCORE,STRAND,SIGNAL_VALUE,P_VALUE,Q_VALUE,PEAK"
     res, req = epidb.get_regions(qid, fmt, self.admin_key)
     regions = self.get_regions_request(req)
 
@@ -263,7 +262,7 @@ class TestSelectRegions(helpers.TestCase):
     self.insert_experiment(epidb, "hg19_chr1_1", sample_id)
     full_experiment_regions = helpers.get_result("full_experiment_regions")
 
-    format = "CHROMOSOME,START,END,name,score,strand,signalValue,pValue,qValue,peak"
+    format = "CHROMOSOME,START,END,NAME,SCORE,STRAND,SIGNAL_VALUE,P_VALUE,Q_VALUE,PEAK"
 
     res, qid = epidb.select_regions("HG19_CHR1_1", "hg19", "methylation", sample_id, " Tech1",
                                     "ENCode ", "chr1", 713240, 876330, self.admin_key)

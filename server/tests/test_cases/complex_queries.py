@@ -5,33 +5,37 @@ from client import EpidbClient
 
 class TestComplexQueries(helpers.TestCase):
 
-  def test_complex1(self):
+  def _test_complex1(self):
     epidb = EpidbClient()
     self.init_full(epidb)
 
-    res, qid_1 = epidb.select_regions("hg19_chr1_1", "hg19", None, None, None,
+    res, qid_1_1 = epidb.select_regions("hg19_chr1_1", "hg19", None, None, None,
                                       None, None, None, None, self.admin_key)
-    self.assertSuccess(res, qid_1)
-    res, qid_2 = epidb.select_regions("hg19_chr1_2", "hg19", None, None, None,
+    #server.get_regions(qid_1_1, )
+
+    self.assertSuccess(res, qid_1_1)
+    res, qid_1_2 = epidb.select_regions("hg19_chr1_2", "hg19", None, None, None,
                                       None, None, None, None, self.admin_key)
+    self.assertSuccess(res, qid_1_2)
+
+    res, qid_2 = epidb.merge_queries(qid_1_1, qid_1_2, self.admin_key)
     self.assertSuccess(res, qid_2)
 
-    res, qid_3 = epidb.merge_queries(qid_1, qid_2, self.admin_key)
-    self.assertSuccess(res, qid_3)
-
-    res, regions = epidb.get_regions(qid_3, "CHROMOSOME,START,END", self.admin_key)
+    res, regions = epidb.get_regions(qid_2, "CHROMOSOME,START,END", self.admin_key)
     self.assertSuccess(res, regions)
 
-    res, qid_4 = epidb.select_regions("hg19_chr1_3", "hg19", None, None, None,
+    res, qid_1_3 = epidb.select_regions("hg19_chr1_3", "hg19", None, None, None,
                                       None, None, None, None, self.admin_key)
-    self.assertSuccess(res, qid_4)
+    self.assertSuccess(res, qid_1_3)
 
-    res, qid_5 = epidb.intersection(qid_3, qid_4, self.admin_key)
+    res, qid_5 = epidb.intersection(qid_2, qid_1_3, self.admin_key)
     self.assertSuccess(res, qid_5)
 
-    res, req = epidb.get_regions(qid_5, "CHROMOSOME,START,END", self.admin_key)
+    res, req = epidb.get_regions(qid_5, "CHROMOSOME,START,END,NAME,SCORE,STRAND,SIGNAL_VALUE,P_VALUE,Q_VALUE,PEAK", self.admin_key)
     self.assertSuccess(res, req)
     regions = self.get_regions_request(req)
+
+    print regions
 
     expected_regions = helpers.get_result("complex1")
     self.assertEqual(regions, expected_regions)
@@ -89,6 +93,7 @@ class TestComplexQueries(helpers.TestCase):
     res, req = epidb.count_regions(qid_4_2, self.admin_key)
     self.assertSuccess(res, req)
     c = self.count_request(req)
+    self.assertEqual(c, 8961)
 
     res, qid_5_1 = epidb.intersection(qid_4_1, qid_4_2, self.admin_key)
     self.assertSuccess(res, qid_5_1)
@@ -96,10 +101,21 @@ class TestComplexQueries(helpers.TestCase):
     self.assertSuccess(res, req)
     count = self.count_request(req)
 
-    self.assertEqual(count, 16009)
+    self.assertEqual(count, 14370)
 
     res, qid_6_1 = epidb.filter_regions(qid_5_1, "END",  "<", "2200000", "number", self.admin_key)
     self.assertSuccess(res, qid_6_1)
 
-    res, regions = epidb.get_regions(qid_6_1, "CHROMOSOME,START,END", self.admin_key)
-    self.assertSuccess(res, regions)
+    res, req = epidb.count_regions(qid_6_1, self.admin_key)
+    self.assertSuccess(res, req)
+    count = self.count_request(req)
+    self.assertEqual(count, 52)
+
+
+    res, req = epidb.get_regions(qid_6_1, "CHROMOSOME,START,END,NAME,SCORE,STRAND,SIGNAL_VALUE,P_VALUE,Q_VALUE,PEAK,@NAME", self.admin_key)
+    self.assertSuccess(res, req)
+    regions = self.get_regions_request(req)
+
+    expected_regions = helpers.get_result("complex2")
+    self.assertEqual(regions, expected_regions)
+
