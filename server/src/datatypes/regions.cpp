@@ -244,7 +244,7 @@ namespace epidb {
 
   size_t AggregateRegion::size() const
   {
-    static size_t size = sizeof(WigRegion) + sizeof(void *);
+    static size_t size = sizeof(AggregateRegion) + sizeof(void *);
     return size;
   }
 
