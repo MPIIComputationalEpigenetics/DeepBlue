@@ -333,8 +333,8 @@ namespace mdbq {
     if (data_cursor->more()) {
       auto fileinfo = data_cursor->next();
       oid = fileinfo["_id"].OID();
-      chunk_size = fileinfo["chunkSize"].Int();
-      file_size = fileinfo["length"].Int();
+      chunk_size = fileinfo["chunkSize"].numberLong();
+      file_size = fileinfo["length"].numberLong();
       return true;
     }
 

@@ -496,7 +496,7 @@ namespace epidb {
             mongo::Query(BSON("filename" << filename)), 0, 0, &projection);
 
         if (data_cursor->more()) {
-          chunk_size = data_cursor->next().getField("chunkSize").Int();
+          chunk_size = data_cursor->next().getField("chunkSize").numberLong();
           chunk_sizes_[filename] = chunk_size;
           c.done();
           return true;

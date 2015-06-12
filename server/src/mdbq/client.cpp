@@ -130,7 +130,7 @@ namespace mdbq {
     m_ptr->m_running_nr = 0;
 
     _id  = m_ptr->m_current_task["_id"].str();
-    o = m_ptr->m_current_task["misc"].Obj();
+    o = m_ptr->m_current_task["misc"].Obj().getOwned();
 
     // start logging
     m_ptr->m_log.clear();
