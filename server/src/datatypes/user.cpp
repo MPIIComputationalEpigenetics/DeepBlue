@@ -24,6 +24,7 @@ namespace epidb {
     const std::string User::FIELD_EMAIL = "email";
     const std::string User::FIELD_INSTITUTION = "institution";
     const std::string User::FIELD_ADMIN = "admin";
+    const std::string User::FIELD_PASSWORD = "password";
     const size_t User::KEY_LENGTH = 16;
 
     int User::seed = rand();
@@ -71,6 +72,7 @@ namespace epidb {
       fields[FIELD_NAME] = name;
       fields[FIELD_EMAIL] = email;
       fields[FIELD_INSTITUTION] = institution;
+      fields[FIELD_PASSWORD] = password;
       return fields;
     }
 
@@ -118,26 +120,35 @@ namespace epidb {
       this->institution = institution;
     }
 
-    std::string User::get_id()
+    void User::set_password(std::string password)
+    {
+      this->password = password;
+    }
+
+    std::string User::get_id() const
     {
       return id;
     }
-    std::string User::get_key()
+    std::string User::get_key() const
     {
       return key;
     }
-    std::string User::get_name()
+    std::string User::get_name() const
     {
       return name;
     }
-    std::string User::get_email()
+    std::string User::get_email() const
     {
       return email;
     }
-    std::string User::get_institution()
+    std::string User::get_institution() const
     {
       return institution;
     }
 
+    std::string User::get_password() const
+    {
+      return password;
+    }
   }
 }

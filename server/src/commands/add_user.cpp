@@ -9,7 +9,7 @@
 #include "../dba/dba.hpp"
 #include "../dba/users.hpp"
 #include "../datatypes/user.hpp"
-#include "../entities/database.hpp"
+#include "../entities/users.hpp"
 #include "../extras/serialize.hpp"
 
 #include "../engine/commands.hpp"
@@ -61,7 +61,7 @@ namespace epidb {
         std::string msg;
 
         datatypes::User admin;
-        if (!dba::get_user(admin_key, admin, msg)) {
+        if (!dba::get_user_by_key(admin_key, admin, msg)) {
           result.add_error(msg);
           return false;
         }

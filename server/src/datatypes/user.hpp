@@ -42,21 +42,24 @@ namespace epidb {
       static const std::string FIELD_EMAIL;
       static const std::string FIELD_INSTITUTION;
       static const std::string FIELD_ADMIN;
+      static const std::string FIELD_PASSWORD;
       static const size_t KEY_LENGTH;
 
       std::map<std::string, std::string> get_fields();
 
-      std::string get_id();
-      std::string get_key();
-      std::string get_name();
-      std::string get_email();
-      std::string get_institution();
+      std::string get_id() const;
+      std::string get_key() const;
+      std::string get_name() const;
+      std::string get_email() const;
+      std::string get_institution() const;
+      std::string get_password() const;
 
       void set_id(std::string id_);
       void set_key(std::string key_);
       void set_name(std::string name_);
       void set_email(std::string email_);
       void set_institution(std::string institution_);
+      void set_password(std::string password_);
 
       void generate_key();
       bool generate_id(std::string msg);
@@ -69,6 +72,7 @@ namespace epidb {
       std::string name;
       std::string email;
       std::string institution;
+      std::string password;
       bool admin;
 
       static int seed;
