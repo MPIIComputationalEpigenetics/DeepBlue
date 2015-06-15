@@ -83,15 +83,12 @@ namespace epidb {
       bool retrieve_query(const std::string &user_key, const std::string &query_id,
                           processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg)
       {
-        std::vector<mongo::BSONObj> result;
-        if (!helpers::get("queries", "_id", query_id, result, msg)) {
+        mongo::BSONObj query;
+        if (!helpers::get_one("queries", BSON("_id" << query_id), query, msg)) {
+          msg = Error::m(ERR_INVALID_QUERY_ID, query_id.c_str());
           return false;
         }
-        if (result.size() == 0) {
-          msg = "Query key is invalid";
-          return false;
-        }
-        mongo::BSONObj query = result[0];
+
         std::string type = query["type"].str();
         mongo::BSONObj args = query["args"].Obj();
 
