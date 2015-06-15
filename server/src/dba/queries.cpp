@@ -49,7 +49,7 @@ namespace epidb {
                        std::string &query_id, std::string &msg)
       {
         int query_counter;
-        if (!helpers::get_increment_counter("queries", query_counter, msg)) {
+        if (!helpers::get_increment_counter(Collections::QUERIES(), query_counter, msg)) {
           return false;
         }
         query_id = "q" + utils::integer_to_string(query_counter);
@@ -84,16 +84,15 @@ namespace epidb {
                           processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg)
       {
         mongo::BSONObj query;
-        if (!helpers::get_one("queries", BSON("_id" << query_id), query, msg)) {
+        if (!helpers::get_one(Collections::QUERIES(), BSON("_id" << query_id), query, msg)) {
           msg = Error::m(ERR_INVALID_QUERY_ID, query_id.c_str());
           return false;
         }
 
         std::string type = query["type"].str();
-        mongo::BSONObj args = query["args"].Obj();
 
         if (type == "experiment_select") {
-          if (!retrieve_experiment_select_query(user_key, query, status, regions, msg)) {
+          if (!retrieve_experiment_select_query(query, status, regions, msg)) {
             return false;
           }
         } else if (type == "intersect") {
@@ -187,12 +186,12 @@ namespace epidb {
 
 
       bool count_regions(const std::string &query_id, const std::string &user_key,
-                         processing::StatusPtr status,size_t &count, std::string &msg)
+                         processing::StatusPtr status, size_t &count, std::string &msg)
       {
         processing::RunningOp runningOp = status->start_operation(processing::COUNT_REGIONS);
 
         std::vector<mongo::BSONObj> result;
-        if (!helpers::get("queries", "_id", query_id, result, msg)) {
+        if (!helpers::get(Collections::QUERIES(), "_id", query_id, result, msg)) {
           return false;
         }
         if (result.size() == 0) {
@@ -273,7 +272,7 @@ namespace epidb {
       }
 
       bool build_experiment_query(const int start, const int end, const std::string &experiment_name,
-                                  const std::string &user_key,  mongo::BSONObj &regions_query, std::string &msg)
+                                  mongo::BSONObj &regions_query, std::string &msg)
       {
         Connection c;
         std::string norm_name = utils::normalize_name(experiment_name);
@@ -299,7 +298,19 @@ namespace epidb {
         return true;
       }
 
-      bool build_experiment_query(const std::string &user_key, const mongo::BSONObj &query,
+      bool build_experiment_query(const int start, const int end, const std::vector<int> dataset_ids, const std::string &user_key,  mongo::BSONObj &regions_query, std::string &msg)
+      {
+        mongo::BSONObjBuilder regions_query_builder;
+
+        mongo::BSONArray datasets_array = helpers::build_array(dataset_ids);
+        regions_query_builder.append(KeyMapper::DATASET(), BSON("$in" << datasets_array ));
+        regions_query_builder.append(KeyMapper::START(), BSON("$lte" << end));
+        regions_query_builder.append(KeyMapper::END(), BSON("$gte" << start));
+        regions_query = regions_query_builder.obj();
+        return true;
+      }
+
+      bool build_experiment_query(const mongo::BSONObj &query,
                                   mongo::BSONObj &regions_query, std::string &msg)
       {
         mongo::BSONObj args = query["args"].Obj();
@@ -339,7 +350,7 @@ namespace epidb {
         return true;
       }
 
-      bool build_annotation_query(const std::string &user_key, const mongo::BSONObj &query,
+      bool build_annotation_query(const mongo::BSONObj &query,
                                   mongo::BSONObj &regions_query,  std::string &msg)
       {
         mongo::BSONObj args = query["args"].Obj();
@@ -384,30 +395,20 @@ namespace epidb {
         return true;
       }
 
-      bool retrieve_experiment_select_query(const std::string &user_key, const mongo::BSONObj &query,
+      bool retrieve_experiment_select_query(const mongo::BSONObj &query,
                                             processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg)
       {
         processing::RunningOp runningOp = status->start_operation(processing::RETRIEVE_EXPERIMENT_SELECT_QUERY, query);
 
         mongo::BSONObj regions_query;
-        if (!build_experiment_query(user_key, query, regions_query, msg)) {
+        if (!build_experiment_query(query, regions_query, msg)) {
           return false;
         }
 
         mongo::BSONObj args = query["args"].Obj();
 
-        std::vector<std::string> chromosomes;
-        std::vector<mongo::BSONElement> chr_arr = args["chromosomes"].Array();
-        std::vector<mongo::BSONElement>::iterator it;
-        for (it = chr_arr.begin(); it != chr_arr.end(); ++it) {
-          chromosomes.push_back(it->str());
-        }
-
-        std::set<std::string> genomes;
-        std::vector<mongo::BSONElement> genome_bson_arr = args["norm_genomes"].Array();
-        for (auto be : genome_bson_arr) {
-          genomes.insert(be.str());
-        }
+        std::vector<std::string> chromosomes = helpers::build_vector(args["chromosomes"].Array());
+        std::set<std::string> genomes = helpers::build_set(args["norm_genomes"].Array());
 
         std::vector<ChromosomeRegionsList> genome_regions;
 
@@ -443,7 +444,7 @@ namespace epidb {
         processing::RunningOp runningOp = status->start_operation(processing::RETRIEVE_ANNOTATION_SELECT_QUERY, query);
 
         mongo::BSONObj regions_query;
-        if (!build_annotation_query(user_key, query, regions_query, msg)) {
+        if (!build_annotation_query(query, regions_query, msg)) {
           return false;
         }
 
@@ -487,32 +488,54 @@ namespace epidb {
 
         mongo::BSONObj args = query["args"].Obj();
 
-        // load both region sets.
-        ChromosomeRegionsList regions_a;
-        bool ret = retrieve_query(user_key, args["qid_1"].str(), status, regions_a, msg);
-        if (!ret) {
-          msg = "Cannot retrieve first region set: " + msg;
+        mongo::BSONObj query_a;
+        const std::string query_a_id = args["qid_1"].str();
+        if (!helpers::get_one(Collections::QUERIES(), BSON("_id" << query_a_id), query_a, msg)) {
+          msg = Error::m(ERR_INVALID_QUERY_ID, query_a_id.c_str());
           return false;
         }
+        std::string query_a_type = query_a["type"].str();
+        bool use_fast = false;
+        if ((query_a_type == "experiment_select") || (query_a_type == "annotation_select")) {
+          use_fast = true;
+        }
+        use_fast = false;
 
+        // Load regions that will be used for the overlap
         ChromosomeRegionsList regions_b;
-        ret = retrieve_query(user_key, args["qid_2"].str(), status, regions_b, msg);
-        if (!ret) {
+        const std::string query_b_id = args["qid_2"].str();
+        if (!retrieve_query(user_key, query_b_id, status, regions_b, msg)) {
           msg = "Cannot retrieve second region set: " + msg;
           return false;
         }
 
-        ret = algorithms::intersect(regions_a, regions_b, regions);
-        if (!ret) {
-          return false;
+
+        ChromosomeRegionsList regions_a;
+        if (use_fast) {
+          mongo::BSONObj args = query_a["args"].Obj();
+
+        } else {
+          // load both region sets.
+
+          bool ret = retrieve_query(user_key, args["qid_1"].str(), status, regions_a, msg);
+          if (!ret) {
+            msg = "Cannot retrieve first region set: " + msg;
+            return false;
+          }
+
+          ret = algorithms::intersect(regions_a, regions_b, regions);
+          if (!ret) {
+            return false;
+          }
         }
 
         return true;
+
       }
 
 
-      bool retrieve_merge_query(const std::string &user_key, const mongo::BSONObj &query,
-                                processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg)
+      bool retrieve_merge_query(const std::string & user_key, const mongo::BSONObj & query,
+                                processing::StatusPtr status, ChromosomeRegionsList & regions, std::string & msg)
       {
         processing::RunningOp runningOp = status->start_operation(processing::RETRIEVE_MERGE_QUERY, query);
 
@@ -539,7 +562,7 @@ namespace epidb {
       }
 
 
-      bool filter_region(const AbstractRegion *region_ref, const std::string &field, const dba::columns::ColumnTypePtr column, Metafield &metafield, const std::string &chrom, FilterBuilder::FilterPtr filter, processing::StatusPtr status)
+      bool filter_region(const AbstractRegion * region_ref, const std::string & field, const dba::columns::ColumnTypePtr column, Metafield & metafield, const std::string & chrom, FilterBuilder::FilterPtr filter, processing::StatusPtr status)
       {
         if (field == "START") {
           return filter->is(region_ref->start());
@@ -562,8 +585,8 @@ namespace epidb {
         }
       }
 
-      bool retrieve_filter_query(const std::string &user_key, const mongo::BSONObj &query,
-                                 processing::StatusPtr status, ChromosomeRegionsList &filtered_regions, std::string &msg)
+      bool retrieve_filter_query(const std::string & user_key, const mongo::BSONObj & query,
+                                 processing::StatusPtr status, ChromosomeRegionsList & filtered_regions, std::string & msg)
       {
         processing::RunningOp runningOp = status->start_operation(processing::RETRIEVE_FILTER_QUERY, query);
 
@@ -637,8 +660,8 @@ namespace epidb {
         return true;
       }
 
-      bool add_tiling(const std::string &genome, const size_t &tiling_size,
-                      DatasetId &dataset_id, std::string &msg)
+      bool add_tiling(const std::string & genome, const size_t &tiling_size,
+                      DatasetId & dataset_id, std::string & msg)
       {
         Connection c;
 
@@ -695,8 +718,8 @@ namespace epidb {
       }
 
 
-      bool retrieve_tiling_query(const mongo::BSONObj &query,
-                                 processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg)
+      bool retrieve_tiling_query(const mongo::BSONObj & query,
+                                 processing::StatusPtr status, ChromosomeRegionsList & regions, std::string & msg)
       {
         processing::RunningOp runningOp = status->start_operation(processing::RETRIEVE_TILING_QUERY, query);
 
@@ -741,8 +764,8 @@ namespace epidb {
         return true;
       }
 
-      bool process_aggregate(const std::string &user_key, const mongo::BSONObj &query,
-                             processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg)
+      bool process_aggregate(const std::string & user_key, const mongo::BSONObj & query,
+                             processing::StatusPtr status, ChromosomeRegionsList & regions, std::string & msg)
       {
         processing::RunningOp runningOp = status->start_operation(processing::PROCESS_AGGREGATE, query);
 
@@ -766,7 +789,7 @@ namespace epidb {
         return algorithms::aggregate(data, ranges, field, status, regions, msg);
       }
 
-      bool get_columns_from_dataset(const DatasetId &dataset_id, std::vector<mongo::BSONObj> &columns, std::string &msg)
+      bool get_columns_from_dataset(const DatasetId & dataset_id, std::vector<mongo::BSONObj> &columns, std::string & msg)
       {
         if (dataset_id == DATASET_EMPTY_ID) {
           return true;
