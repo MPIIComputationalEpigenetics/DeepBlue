@@ -26,8 +26,6 @@ namespace epidb {
 
     Reply get_download_data(const std::string& uri)
     {
-      std::cerr << uri << std::endl;
-
       std::smatch sm;
       if (!std::regex_match(uri, sm, std::regex("/download\\\?r=(\\w+)&key=(\\w+)"))) {
         return Reply::stock_reply(Reply::bad_request, "Invalid request: " + uri);
@@ -35,9 +33,6 @@ namespace epidb {
 
       std::string request_id = sm[1];
       std::string user_key = sm[2];
-
-      std::cerr << request_id << std::endl;
-      std::cerr << user_key << std::endl;
 
       std::string msg;
       utils::IdName user;
@@ -57,13 +52,7 @@ namespace epidb {
       }
 
       if (type == request::REGIONS) {
-        std::stringstream inStream(std::move(content));
-        std::stringstream outStream;
-        boost::iostreams::filtering_streambuf< boost::iostreams::input> in;
-        in.push( boost::iostreams::bzip2_compressor());
-        in.push( inStream );
-        boost::iostreams::copy(in, outStream);
-        return Reply::stock_reply_download(Reply::ok, request_id, std::move(outStream.str()));
+        return Reply::stock_reply_download(Reply::ok, request_id, std::move(content));
       }
 
       return Reply::stock_reply(Reply::bad_request, "Invalid data");

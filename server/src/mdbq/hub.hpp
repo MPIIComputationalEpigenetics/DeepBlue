@@ -110,7 +110,7 @@ namespace mdbq {
      */
     void clear_all();
 
-    bool get_result(const std::string &filename, std::vector<lzo_byte>& data, std::string &msg);
+    bool get_result(const std::string &filename, std::string& data, std::string &msg);
 
     /**
      * register with the main loop

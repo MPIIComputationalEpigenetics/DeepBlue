@@ -198,8 +198,8 @@ namespace mdbq {
     std::string filename = ct["_id"].str();
 
     mongo::GridFS gridfs((*m_ptr).m_con.conn(), m_db, "fs");
-    mongo::BSONObj ret = gridfs.storeFile(ptr, len, filename);
     gridfs.setChunkSize(2 << 22); // 8MB
+    mongo::BSONObj ret = gridfs.storeFile(ptr, len, filename);
 
     mongo::BSONObjBuilder bob;
     bob.appendElements(ret);

@@ -342,7 +342,7 @@ namespace mdbq {
     return false;
   }
 
-  bool Hub::get_result(const std::string &filename, std::vector<lzo_byte>& data, std::string &msg)
+  bool Hub::get_result(const std::string &filename, std::string &content, std::string &msg)
   {
     mongo::OID oid;
     size_t file_size;
@@ -355,13 +355,17 @@ namespace mdbq {
 
     size_t remaining = file_size;
     size_t n = 0;
+
+    std::stringstream ss;
+
     while (remaining > 0) {
       mongo::Query q(BSON("files_id" << oid << "n" << (long long) n));
       std::auto_ptr<mongo::DBClientCursor> data_cursor = m_ptr->m_con->query(m_ptr->m_prefix + ".fs.chunks", q, 0, 0, &projection);
       if (data_cursor->more()) {
         int read;
-        lzo_bytep compressed_data = (lzo_bytep) data_cursor->next().getField("data").binData(read);
-        std::copy(compressed_data, compressed_data + read, std::back_inserter(data));
+        char* compressed_data = (char *) data_cursor->next().getField("data").binData(read);
+        ss.write(compressed_data, read);
+
         n++;
         remaining -= read;
       } else {
@@ -369,6 +373,7 @@ namespace mdbq {
         return false;
       }
     }
+    content = ss.str();
     return true;
   }
 

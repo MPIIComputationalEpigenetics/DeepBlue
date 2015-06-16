@@ -6,8 +6,18 @@
 //  Copyright (c) 2013,2014,2015 Max Planck Institute for Computer Science. All rights reserved.
 //
 
+#include <iostream>
+#include <regex>
+#include <string>
+#include <sstream>
+
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
+
+#include <boost/iostreams/filtering_streambuf.hpp>
+#include <boost/iostreams/copy.hpp>
+#include <boost/iostreams/filter/bzip2.hpp>
+#include <boost/iostreams/stream.hpp>
 
 #include <mongo/client/dbclient.h>
 
@@ -103,25 +113,26 @@ namespace epidb {
       }
 
       std::string result = sb.to_string();
-      size_t size = result.size();
-      const char* data = result.c_str();
 
-      boost::shared_ptr<char> compressed_data;
-      size_t compressed_size = 0;
-      bool compressed = false;
+      std::stringbuf inStream(std::move(result));
+      std::stringbuf outStream;
+      boost::iostreams::filtering_streambuf< boost::iostreams::input> in;
+      in.push( boost::iostreams::bzip2_compressor());
+      in.push( inStream );
+      boost::iostreams::copy(in, outStream);
 
-      compressed_data = epidb::compress::compress(data, size, compressed_size, compressed);
+      std::string compressed_s = outStream.str();
+      const char* compressed = compressed_s.data();
 
-      std::string filename = store_result(compressed_data.get(), compressed_size);
+      std::cerr << result.length() << std::endl;
+      std::cerr << compressed_s.length() << std::endl;
 
-      status->set_total_stored_data(size);
-      status->set_total_stored_data_compressed(compressed_size);
-
-      if (compressed) {
-        bob.append("__compressed__", true);
-        bob.append("__original_size__", (long long) size);
-      }
+      std::string filename = store_result(compressed, compressed_s.size());
       bob.append("__file__", filename);
+      bob.append("__compressed_size__", (long long) compressed_s.size());
+
+      status->set_total_stored_data(result.size());
+      status->set_total_stored_data_compressed(compressed_s.size());
 
       return bob.obj();
     }

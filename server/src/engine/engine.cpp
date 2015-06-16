@@ -6,8 +6,16 @@
 //  Copyright (c) 2014 Max Planck Institute for Computer Science. All rights reserved.
 //
 
+#include <iostream>
+#include <regex>
+#include <string>
 #include <sstream>
 #include <vector>
+
+#include <boost/iostreams/filtering_streambuf.hpp>
+#include <boost/iostreams/copy.hpp>
+#include <boost/iostreams/filter/bzip2.hpp>
+#include <boost/iostreams/stream.hpp>
 
 #include "commands.hpp"
 #include "engine.hpp"
@@ -157,7 +165,7 @@ namespace epidb {
     status.state = mdbq::Hub::state_name(o);
     status.message = mdbq::Hub::state_message(o);
     job.status = status;
-    
+
     job.create_time = mdbq::Hub::get_create_time(o);
     if (status.state == mdbq::Hub::state_name(mdbq::TS_DONE)) {
       job.finish_time = mdbq::Hub::get_finish_time(o);
@@ -229,28 +237,21 @@ namespace epidb {
     if (result.hasField("__file__")) {
       std::string filename = result["__file__"].str();
       type = request::REGIONS;
-      std::vector<lzo_byte> data;
-      if (!_hub.get_result(filename, data, msg)) {
+
+      std::string file_content;
+      if (!_hub.get_result(filename, file_content, msg)) {
         return false;
       }
 
-      const bool compressed = result.hasField("__compressed__") && result["__compressed__"].Bool();
-      if (compressed) {
-        long long original_size = result["__original_size__"].Long();
-        size_t data_size = data.size();
-        lzo_bytep data_ptr = data.data();
-        size_t uncompressed_size;
-        lzo_bytep decompressed_data = epidb::compress::decompress(data_ptr, data_size, original_size, uncompressed_size);
+      std::istringstream inStream(file_content, std::ios::binary);
+      std::stringstream outStream;
+      boost::iostreams::filtering_streambuf< boost::iostreams::input> in;
+      in.push( boost::iostreams::bzip2_decompressor());
+      in.push( inStream );
+      boost::iostreams::copy(in, outStream);
+      content = outStream.str();
 
-        // assert uncompressed_size == original_size
-
-        const char* content_char = reinterpret_cast<const char *>(decompressed_data);
-        content = std::string(content_char, original_size);
-        free(decompressed_data);
-        return true;
-      } else {
-        //content = sb.to_string();
-      }
+      return true;
     }
 
     type = request::MAP;
