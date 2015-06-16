@@ -38,18 +38,15 @@ namespace epidb {
     Reply request_handler::handle_request(const Request& req, std::string& content)
     {
       Reply reply;
-      if (req.method == "GET")
-      {
+      if (req.method == "GET") {
         reply = Reply::stock_reply(Reply::bad_request, "");
       }
 
-      else if (req.method == "OPTIONS")
-      {
+      else if (req.method == "OPTIONS") {
         reply = Reply::options_reply();
       }
 
-      else if (req.method == "POST")
-      {
+      else if (req.method == "POST") {
         bool error = true;
         std::string message = process_content(req, content, error);
 
@@ -63,7 +60,7 @@ namespace epidb {
     }
 
     const std::string request_handler::process_content(
-        const Request& request, std::string& content, bool& error)
+      const Request& request, std::string& content, bool& error)
     {
       XMLRPCParser parser;
       boost::shared_ptr<XmlrpcRequest> xmlrpc_request;
@@ -71,9 +68,9 @@ namespace epidb {
       char buf[8192] = {};
       size_t len = 0;
 
-      for (size_t i = 0; i < content.length(); ++i){
+      for (size_t i = 0; i < content.length(); ++i) {
         buf[len++] = content[i];
-        bool done = (i+1) == content.length();
+        bool done = (i + 1) == content.length();
         if (len == 8192 || done) {
           if (!parser.parse(buf, len)) {
             error = true;
@@ -81,7 +78,7 @@ namespace epidb {
             return XmlrpcResponse::error_response("[1] parsing error");
           }
           if (done) {
-            if(!parser.done(xmlrpc_request)) {
+            if (!parser.done(xmlrpc_request)) {
               error = true;
               EPIDB_LOG("[2] request from " << request.ip << ": parsing error.");
               return XmlrpcResponse::error_response("[2] parsing error on done");
