@@ -254,7 +254,7 @@ namespace epidb {
 
       mongo::BSONObj region_query = region_query_builder.obj();
 
-      if (!retrieve::count_regions(genome, chrom, region_query, status, count)) {
+      if (!retrieve::count_regions(genome, chrom, region_query, true, status, count)) {
         msg = "Error while counting regions for " + genome + " " + chrom + " " + region_query.toString();
         count = 0;
         return false;

@@ -5,7 +5,7 @@ from client import EpidbClient
 
 class TestComplexQueries(helpers.TestCase):
 
-  def _test_complex1(self):
+  def test_complex1(self):
     epidb = EpidbClient()
     self.init_full(epidb)
 
@@ -34,8 +34,6 @@ class TestComplexQueries(helpers.TestCase):
     res, req = epidb.get_regions(qid_5, "CHROMOSOME,START,END,NAME,SCORE,STRAND,SIGNAL_VALUE,P_VALUE,Q_VALUE,PEAK", self.admin_key)
     self.assertSuccess(res, req)
     regions = self.get_regions_request(req)
-
-    print regions
 
     expected_regions = helpers.get_result("complex1")
     self.assertEqual(regions, expected_regions)
@@ -68,6 +66,7 @@ class TestComplexQueries(helpers.TestCase):
     res, req = epidb.count_regions(qid_2_1, self.admin_key)
     self.assertSuccess(res, req)
     c = self.count_request(req)
+    self.assertEqual(c, 247)
 
     res, qid_2_2 = epidb.tiling_regions(1000, "hg19", ["chr1", "chr2", "chr15", "chrX"], self.admin_key)
     self.assertSuccess(res, qid_2_2)

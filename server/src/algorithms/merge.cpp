@@ -47,8 +47,6 @@ namespace epidb {
 
     ChromosomeRegionsList merge_chromosome_regions(ChromosomeRegionsList &chrregions_a, ChromosomeRegionsList &chrregions_b)
     {
-      std::cerr << "merge_chromosome_regions" << std::endl;
-
       ChromosomeRegionsList results;
       // find out common chromosomes
       std::map<std::string, Regions> chromosomes_a;

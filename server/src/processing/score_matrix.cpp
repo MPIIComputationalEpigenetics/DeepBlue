@@ -87,7 +87,7 @@ namespace epidb {
             }
 
             Regions regions;
-            if (!dba::retrieve::get_regions(norm_genome, chromosome.first, regions_query, status, regions, msg)) {
+            if (!dba::retrieve::get_regions(norm_genome, chromosome.first, regions_query, true, status, regions, msg)) {
               return false;
             }
             algorithms::Accumulator acc;

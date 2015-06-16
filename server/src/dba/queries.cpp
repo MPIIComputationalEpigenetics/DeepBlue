@@ -9,6 +9,8 @@
 #include <ctime>
 #include <cstring>
 #include <set>
+#include <iterator>
+#include <utility>
 
 #include <boost/foreach.hpp>
 
@@ -291,6 +293,7 @@ namespace epidb {
         regions_query_builder.append(KeyMapper::DATASET(), dataset_id.Int());
         regions_query_builder.append(KeyMapper::START(), BSON("$lte" << end));
         regions_query_builder.append(KeyMapper::END(), BSON("$gte" << start));
+
         regions_query = regions_query_builder.obj();
 
         c.done();
@@ -298,11 +301,11 @@ namespace epidb {
         return true;
       }
 
-      bool build_experiment_query(const int start, const int end, const std::vector<int> dataset_ids, const std::string &user_key,  mongo::BSONObj &regions_query, std::string &msg)
+      bool build_experiment_query(const int start, const int end, const mongo::BSONArray& datasets_array,
+                                  mongo::BSONObj &regions_query, std::string &msg)
       {
         mongo::BSONObjBuilder regions_query_builder;
 
-        mongo::BSONArray datasets_array = helpers::build_array(dataset_ids);
         regions_query_builder.append(KeyMapper::DATASET(), BSON("$in" << datasets_array ));
         regions_query_builder.append(KeyMapper::START(), BSON("$lte" << end));
         regions_query_builder.append(KeyMapper::END(), BSON("$gte" << start));
@@ -415,7 +418,7 @@ namespace epidb {
         // get region data for all genomes
         for (const auto& genome : genomes) {
           ChromosomeRegionsList reg;
-          if (!retrieve::get_regions(genome, chromosomes, regions_query, status, reg, msg)) {
+          if (!retrieve::get_regions(genome, chromosomes, regions_query, true, status, reg, msg)) {
             return false;
           }
           genome_regions.push_back(std::move(reg));
@@ -463,7 +466,7 @@ namespace epidb {
         std::vector<mongo::BSONElement>::iterator git;
         for (git = genome_arr.begin(); git != genome_arr.end(); ++git) {
           ChromosomeRegionsList reg;
-          if (!retrieve::get_regions(git->str(), chromosomes, regions_query, status, reg, msg)) {
+          if (!retrieve::get_regions(git->str(), chromosomes, regions_query, true, status, reg, msg)) {
             return false;
           }
           genome_regions.push_back(std::move(reg));
@@ -496,41 +499,111 @@ namespace epidb {
         }
         std::string query_a_type = query_a["type"].str();
         bool use_fast = false;
-        if ((query_a_type == "experiment_select") || (query_a_type == "annotation_select")) {
+        //if ((query_a_type == "experiment_select") || (query_a_type == "annotation_select")) {
+        if (query_a_type == "experiment_select") {
           use_fast = true;
         }
-        use_fast = false;
 
         // Load regions that will be used for the overlap
-        ChromosomeRegionsList regions_b;
+        ChromosomeRegionsList range_regions;
         const std::string query_b_id = args["qid_2"].str();
-        if (!retrieve_query(user_key, query_b_id, status, regions_b, msg)) {
+        if (!retrieve_query(user_key, query_b_id, status, range_regions, msg)) {
           msg = "Cannot retrieve second region set: " + msg;
           return false;
         }
 
-
         ChromosomeRegionsList regions_a;
+
         if (use_fast) {
+          std::cerr << "FASSTT" << std::endl;
           mongo::BSONObj args = query_a["args"].Obj();
 
+          mongo::BSONArrayBuilder datasets_array_builder;
+          if (args["has_filter"].Bool()) {
+            const mongo::BSONObj query = build_query(args);
+            Connection c;
+            std::auto_ptr<mongo::DBClientCursor> cursor = c->query(helpers::collection_name(Collections::EXPERIMENTS()), query);
+            while (cursor->more()) {
+              mongo::BSONObj p = cursor->next();
+              mongo::BSONElement dataset_id = p.getField(KeyMapper::DATASET());
+              datasets_array_builder.append(dataset_id.Int());
+            }
+            c.done();
+          }
+          mongo::BSONArray datasets_array = datasets_array_builder.arr();
+
+          std::set<std::string> genomes = helpers::build_set(args["norm_genomes"].Array());
+
+          std::vector<ChromosomeRegionsList> genome_regions;
+
+          unsigned int selection_start = std::numeric_limits<unsigned int>::min();
+          unsigned int selection_end = std::numeric_limits<unsigned int>::max();
+
+          if (args.hasField("start")) {
+            selection_start = args["start"].Int();
+          }
+
+          if (args.hasField("end")) {
+            selection_end = args["end"].Int();
+          }
+
+          // get region data for all genomes
+          for (const auto& genome : genomes) {
+            ChromosomeRegionsList chromosome_region_list;
+            for (auto &chromosome : range_regions) {
+              Regions chromosome_regions = build_regions();
+              for (auto &region : chromosome.second) {
+                if (region->start() >= selection_start && region->end() <= selection_end) {
+                  mongo::BSONObj regions_query;
+                  if (!dba::query::build_experiment_query(region->start(), region->end(), datasets_array, regions_query, msg)) {
+                    return false;
+                  }
+
+                  Regions regions;
+                  if (!dba::retrieve::get_regions(genome, chromosome.first, regions_query, false, status, regions, msg)) {
+                    return false;
+                  }
+
+                  chromosome_regions.reserve(chromosome_regions.size() + regions.size());
+                  chromosome_regions.insert(chromosome_regions.end(),
+                                            std::make_move_iterator(regions.begin()),
+                                            std::make_move_iterator(regions.end()));
+                }
+              }
+              ChromosomeRegions chromossomeRegions(chromosome.first, std::move(chromosome_regions));
+              chromosome_region_list.push_back(std::move(chromossomeRegions));
+            }
+            genome_regions.push_back(std::move(chromosome_region_list));
+          }
+
+          // merge region data of all genomes
+          auto rit = genome_regions.begin();
+          if (rit == genome_regions.end()) {
+            return true;
+          }
+
+          ChromosomeRegionsList &last = *rit;
+          rit++;
+          for (; rit != genome_regions.end(); ++rit) {
+            last = algorithms::merge_chromosome_regions(last, *rit);
+          }
+          regions = std::move(last);
+
+          return true;
+
+          // Do the slow way: load all data from query 1, and intersect.
         } else {
           // load both region sets.
 
-          bool ret = retrieve_query(user_key, args["qid_1"].str(), status, regions_a, msg);
-          if (!ret) {
+          if (!retrieve_query(user_key, args["qid_1"].str(), status, regions_a, msg)) {
             msg = "Cannot retrieve first region set: " + msg;
             return false;
           }
 
-          ret = algorithms::intersect(regions_a, regions_b, regions);
-          if (!ret) {
-            return false;
-          }
+          return algorithms::intersect(regions_a, range_regions, regions);
+
+          return true;
         }
-
-        return true;
-
       }
 
 

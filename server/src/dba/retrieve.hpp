@@ -24,28 +24,23 @@ namespace epidb {
     namespace retrieve {
 
       bool get_regions(const std::string &genome, std::string &chromosome,
-                       const mongo::BSONObj &regions_query,
+                       const mongo::BSONObj &regions_query, const bool full_overlap,
                        processing::StatusPtr status,
                        Regions &regions, std::string &msg);
 
       bool get_regions(const std::string &genome, std::vector<std::string> &chromosomes,
-                       const mongo::BSONObj &regions_query,
+                       const mongo::BSONObj &regions_query, const bool full_overlap,
                        processing::StatusPtr status,
                        ChromosomeRegionsList &results, std::string &msg);
 
-      bool retrieve_query(const std::string &user_key, const std::string &query_id,
-                          const std::vector<std::string> &ids,
-                          processing::StatusPtr status,
-                          ChromosomeRegionsList &regions, std::string &msg);
-
       bool count_regions(const std::string &genome, const std::string &chromosome,
-                         const mongo::BSONObj &regions_query,
+                         const mongo::BSONObj &regions_query, const bool full_overlap,
                          processing::StatusPtr status,
                          size_t &count);
 
       bool count_regions(const std::string &genome,
                          std::vector<std::string> &chromosomes,
-                         const mongo::BSONObj &regions_query,
+                         const mongo::BSONObj &regions_query, const bool full_overlap,
                          processing::StatusPtr status,
                          size_t &size, std::string &msg);
 

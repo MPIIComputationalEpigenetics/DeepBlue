@@ -120,6 +120,7 @@ namespace epidb {
       bool notify_change_occurred(const std::string &name, std::string &msg);
 
 
+      mongo::BSONArray build_array(const std::vector<std::string> &params);
       mongo::BSONArray build_array(const std::vector<int> &params);
       mongo::BSONArray build_array(const std::vector<serialize::ParameterPtr> &params);
       mongo::BSONArray build_normalized_array(const std::vector<std::string> &params);
