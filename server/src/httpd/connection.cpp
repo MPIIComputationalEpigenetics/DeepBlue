@@ -17,13 +17,15 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
 
+#include <regex>
+#include <string>
 #include <iostream>
 #include <vector>
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
 
 #include "connection.hpp"
-
+#include "download.hpp"
 #include "request_handler.hpp"
 
 #include "../log.hpp"
@@ -53,7 +55,6 @@ namespace epidb {
 
     void Connection::start()
     {
-      //PROFINY_SCOPE
       boost::asio::async_read_until(socket_, streambuf_, "\r\n\r\n",
                                     strand_.wrap(boost::bind(&Connection::handle_read,
                                         shared_from_this(), boost::asio::placeholders::error,
@@ -67,15 +68,31 @@ namespace epidb {
       if (!error) {
         bool result = request_parser_.parse(request_, &streambuf_);
         m_expected_length = request_.content_length;
-        m_content_->reserve(m_expected_length);
-        request_.ip =  socket_.remote_endpoint().address().to_string();
-        if (result) {
-          read_data();
-        } else if (error == boost::asio::error::eof) {
-          EPIDB_LOG_WARN("EOF: Connection :"  << id_);
-        } else {
-          Reply reply = Reply::stock_reply(Reply::bad_request, "");
+
+        static std::string DOWNLOAD_STRING("/download");
+        if (request_.path.substr(0, DOWNLOAD_STRING.length()) == DOWNLOAD_STRING) {
+          Reply reply = get_download_data(request_.path);
           boost::asio::write(socket_, reply.to_buffers());
+          boost::asio::async_write(socket_, reply_.to_buffers(),
+                                   strand_.wrap(
+                                     boost::bind(&Connection::handle_write, shared_from_this(),
+                                                 boost::asio::placeholders::error,
+                                                 boost::asio::placeholders::bytes_transferred)));
+        } else {
+          m_content_->reserve(m_expected_length);
+          request_.ip =  socket_.remote_endpoint().address().to_string();
+          if (result) {
+            read_data();
+          } else if (error == boost::asio::error::eof) {
+            EPIDB_LOG_WARN("EOF: Connection :"  << id_);
+          } else {
+            Reply reply = Reply::stock_reply(Reply::bad_request, "");
+            boost::asio::async_write(socket_, reply_.to_buffers(),
+                                     strand_.wrap(
+                                       boost::bind(&Connection::handle_write, shared_from_this(),
+                                                   boost::asio::placeholders::error,
+                                                   boost::asio::placeholders::bytes_transferred)));
+          }
         }
       }
     }

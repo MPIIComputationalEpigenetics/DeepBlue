@@ -75,7 +75,6 @@ namespace epidb {
 
     void server::start_accept()
     {
-      ////PROFINY_SCOPE
       new_connection_.reset(new Connection(io_service_, request_handler_));
       acceptor_.async_accept(new_connection_->socket(),
                              boost::bind(&server::handle_accept, this,

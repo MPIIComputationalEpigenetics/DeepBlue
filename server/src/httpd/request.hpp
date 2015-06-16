@@ -31,7 +31,7 @@ namespace epidb {
     struct Request {
       unsigned long long id_;
       std::string method;
-      std::string uri;
+      std::string path;
       std::string ip;
       int http_version_major;
       int http_version_minor;

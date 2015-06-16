@@ -3,7 +3,7 @@ include ../Makefile.inc
 CXXFLAGS	= $(DEFCXXFLAGS) -I..
 
 OBJLIBS	= ../libhttpd.a
-OBJS	= connection.o reply.o request_handler.o request_parser.o server.o xmlrpc_request.o xmlrpc_parser.o
+OBJS	= connection.o download.o reply.o request_handler.o request_parser.o server.o xmlrpc_request.o xmlrpc_parser.o
 
 all : $(OBJLIBS)
 

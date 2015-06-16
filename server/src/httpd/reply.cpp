@@ -272,6 +272,30 @@ namespace epidb {
       return rep;
     }
 
+    Reply Reply::stock_reply_download(Reply::ReplyType status, const std::string& file_name, std::string&& content)
+    {
+      Reply rep;
+      rep.type = status;
+
+      if (status != ok && content.length() == 0) {
+        rep.content = stock_replies::to_string(status);
+      } else {
+        rep.content = std::move(content);
+      }
+      rep.headers.resize(4);
+      // header('Content-Disposition: ");
+      rep.headers[0].name = "content-type";
+      rep.headers[0].value = "application/x-bzip2";
+      rep.headers[1].name = "Access-Control-Allow-Origin";
+      rep.headers[1].value = "*";
+      rep.headers[2].name = "Content-Disposition";
+      rep.headers[2].value = "attachment; filename=deepblue_data_"+file_name+".bed.bz2";
+      rep.headers[3].name = "Content-Length";
+      rep.headers[3].value = utils::size_t_to_string(rep.content.size());
+
+      return rep;
+    }
+
     // TODO: get Access-Control-Allow-Origin from a configuration/option
     Reply Reply::options_reply()
     {

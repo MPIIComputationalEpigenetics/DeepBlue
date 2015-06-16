@@ -105,7 +105,7 @@ namespace epidb {
           }
           else
           {
-            req.uri.push_back(input);
+            req.path.push_back(input);
             return boost::indeterminate;
           }
         case http_version_h:

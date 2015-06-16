@@ -199,6 +199,7 @@ namespace mdbq {
 
     mongo::GridFS gridfs((*m_ptr).m_con.conn(), m_db, "fs");
     mongo::BSONObj ret = gridfs.storeFile(ptr, len, filename);
+    gridfs.setChunkSize(2 << 22); // 8MB
 
     mongo::BSONObjBuilder bob;
     bob.appendElements(ret);

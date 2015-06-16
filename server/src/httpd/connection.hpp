@@ -66,6 +66,8 @@ namespace epidb {
 
       void handle_content(const boost::system::error_code &e, std::size_t bytes_transferred);
 
+      void handle_download(const std::string& uri);
+
       void read_data();
 
       /// Strand to ensure the connection's handlers are not called concurrently.
