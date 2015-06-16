@@ -24,7 +24,7 @@ namespace epidb {
       extern std::string mongodb_server;
       extern mongo::ConnectionString mongodb_server_connection;
       extern std::string database_name;
-
+      extern long long processing_max_memory;
       extern std::vector<std::string> shards;
 
       bool set_shards_tags();
@@ -40,6 +40,8 @@ namespace epidb {
       bool check_mongodb(std::string &msg);
       void set_database_name(const std::string &name);
       const std::string DATABASE_NAME();
+      void set_processing_max_memory(const long long memory);
+      long long get_processing_max_memory();
     }
   }
 }

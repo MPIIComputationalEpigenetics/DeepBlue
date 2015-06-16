@@ -29,6 +29,7 @@ namespace epidb {
       std::string mongodb_server;
       std::string database_name;
       mongo::ConnectionString mongodb_server_connection;
+      long long processing_max_memory;
 
       void set_mongodb_server(const std::string &server)
       {
@@ -65,6 +66,16 @@ namespace epidb {
       void set_database_name(const std::string &name)
       {
         database_name = name;
+      }
+
+      void set_processing_max_memory(const long long memory)
+      {
+        processing_max_memory = memory;
+      }
+
+      long long get_processing_max_memory()
+      {
+        return processing_max_memory;
       }
 
       const std::string DATABASE_NAME()

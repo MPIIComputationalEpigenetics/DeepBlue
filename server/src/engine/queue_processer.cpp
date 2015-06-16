@@ -44,7 +44,7 @@ namespace epidb {
     void QueueHandler::handle_task(const std::string& id, const mongo::BSONObj &o)
     {
       try {
-        processing::StatusPtr status = processing::build_status(id, 8ll * 1024 * 1024 * 1024); // TODO: get from user.
+        processing::StatusPtr status = processing::build_status(id, dba::config::get_processing_max_memory()); // TODO: get from user.
         mongo::BSONObj result = process(o, status);
         finish(result, true);
       } catch (mdbq::timeout_exception) {

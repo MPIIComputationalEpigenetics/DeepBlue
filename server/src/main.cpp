@@ -42,8 +42,10 @@ int main(int argc, char *argv[])
   std::string address;
   std::string port;
   size_t threads;
+  size_t processing_threads;
   std::string mongodb_server;
   std::string database_name;
+  long long processing_max_memory;
 
   // Declare the supported options.
   po::options_description desc("DeepBlue parameters");
@@ -51,9 +53,11 @@ int main(int argc, char *argv[])
   ("help,H", "Help message")
   ("address,A", po::value<std::string>(&address)->default_value("localhost"), "Local address")
   ("port,P", po::value<std::string>(&port)->default_value("31415"), "Local port")
-  ("threads,T", po::value<size_t>(&threads)->default_value(10), "Number of concurrent requests")
+  ("threads,T", po::value<size_t>(&threads)->default_value(10), "Number of concurrent http data listeners")
   ("mongodb,M", po::value<std::string>(&mongodb_server)->default_value("mongodb://localhost:27017"), "MongoDB address and port")
   ("database_name,D", po::value<std::string>(&database_name)->default_value("epidb"), "Database name")
+  ("processing_threads,R", po::value<size_t>(&processing_threads)->default_value(4), "Number of concurrent threads for processing request data")
+  ("processing_max_memory,O", po::value<long long>(&processing_max_memory)->default_value(8ll * 1024 * 1024 * 1024), "Maximum memory available for request data processing (in bytes) ")
   ("sharding,S", "Use DeepBlue with sharding in the MongoDB")
   ;
 
@@ -84,6 +88,7 @@ int main(int argc, char *argv[])
   epidb::dba::config::set_sharding(vm.count("sharding"));
   epidb::dba::config::set_mongodb_server(mongodb_server);
   epidb::dba::config::set_database_name(database_name);
+  epidb::dba::config::set_processing_max_memory(processing_max_memory);
 
   std::string msg;
   if (!epidb::dba::config::check_mongodb(msg)) {
@@ -102,7 +107,7 @@ int main(int argc, char *argv[])
     return 1;
   }
 
-  epidb::engine::queue_processer_run(4);
+  epidb::engine::queue_processer_run(processing_threads);
 
   epidb::httpd::server s(address, port, threads);
   s.run();
