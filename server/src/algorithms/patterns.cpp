@@ -6,13 +6,10 @@
 //  Copyright (c) 2014 Max Planck Institute for Computer Science. All rights reserved.
 //
 
-#include <string>
-#include <fstream>
-#include <functional>
 
+#include <string>
 #include <iostream>
 
-#include <boost/foreach.hpp>
 #include <boost/bind.hpp>
 #include <boost/ref.hpp>
 #include <boost/regex.hpp>
