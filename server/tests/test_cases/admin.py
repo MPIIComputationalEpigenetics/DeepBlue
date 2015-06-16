@@ -21,6 +21,13 @@ class TestAdminCommands(helpers.TestCase):
     self.assertTrue(EPIDB_TEST_ADMIN[0] in user_names)
     self.assertTrue("user1" in user_names)
 
+
+  def test_echo(self):
+    epidb = EpidbClient()
+    self.init(epidb)
+    self.assertEquals(epidb.echo(self.admin_key), ['okay', 'DeepBlue (0.9.62) says hi to test_admin'])
+    self.assertEquals(epidb.echo("invalid"), ['okay', 'DeepBlue (0.9.62) says hi to a Stranger'])
+
   def test_unequal_keys(self):
     epidb = EpidbClient()
     self.init(epidb)
@@ -60,4 +67,3 @@ class TestAdminCommands(helpers.TestCase):
 
     res, msg = epidb.add_user("user2", "test2@example.com", "test", u1[1])
     self.assertFailure(res, msg)
-    
