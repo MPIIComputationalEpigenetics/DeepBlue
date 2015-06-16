@@ -3,7 +3,7 @@ include ../Makefile.inc
 CXXFLAGS	= $(DEFCXXFLAGS) -I..
 
 OBJLIBS	= ../libentities.a
-OBJS	= User.o
+OBJS    = users.o
 
 all : $(OBJLIBS)
 
