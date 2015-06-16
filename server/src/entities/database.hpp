@@ -8,16 +8,16 @@
 
 #include <iostream>
 
-#include "../datatypes/user.hpp"
+#include "User.hpp"
 
 #include "../connection/connection.hpp"
 #include "../dba/helpers.hpp"
 #include "../dba/collections.hpp"
 
 namespace epidb {
-namespace dba {
+namespace db {
 
-bool add_user(datatypes::User& user, std::string& msg) {
+bool add_user(User& user, std::string& msg) {
     mongo::BSONObjBuilder create_user_builder;
     std::map<std::string, std::string> fields = user.get_fields();
     for (auto it = fields.begin(); it != fields.end(); ++it) {
@@ -28,7 +28,7 @@ bool add_user(datatypes::User& user, std::string& msg) {
     if (!dba::helpers::get_increment_counter("users", result, msg)) {
         return false;
     }
-    user.set_id(datatypes::User::PREFIX + std::to_string(result));
+    user.set_id(User::PREFIX + std::to_string(result));
     create_user_builder.append("_id", user.get_id());
     
     mongo::BSONObj cu = create_user_builder.obj();
@@ -54,14 +54,14 @@ bool add_user(datatypes::User& user, std::string& msg) {
     return true;
 }
 
-bool get_user(const std::string& key, datatypes::User& user, std::string& msg){
+bool get_user(const std::string& key, User& user, std::string& msg){
     std::vector<mongo::BSONObj> result;
-    dba::helpers::get(datatypes::User::COLLECTION, datatypes::User::FIELD_KEY, key, result, msg);
+    dba::helpers::get(User::COLLECTION, User::FIELD_KEY, key, result, msg);
     if (result.size() == 0) {
           msg = "Unable to retrieve user with key %s" + key;
           return false;
     }
-    user = datatypes::User(result);
+    user = User(result);
     return true;
 }
 }
