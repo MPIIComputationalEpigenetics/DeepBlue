@@ -58,7 +58,7 @@ namespace epidb {
       virtual bool run(const std::string &ip,
                        const serialize::Parameters &parameters, serialize::Parameters &result) const
       {
-        const std::string query_id = parameters[0]->as_string();
+        const std::string request_id = parameters[0]->as_string();
         const std::string user_key = parameters[1]->as_string();
 
         std::string msg;
@@ -75,13 +75,13 @@ namespace epidb {
         std::string content;
         request::Data data;
         request::DataType type = request::DataType::INVALID;
-        if (epidb::Engine::instance().user_owns_request(query_id, user.id)) {
-          if (!epidb::Engine::instance().request_data(query_id, user_key, data, content, type, msg)) {
-            result.add_error(msg);
-            return false;
-          }
-        } else {
-          result.add_error("Request ID " + query_id + " not found.");
+        if (!epidb::Engine::instance().user_owns_request(request_id, user.id)) {
+          result.add_error("Request ID " + request_id + " not found.");
+          return false;
+        }
+
+        if (!epidb::Engine::instance().request_data(request_id, user_key, data, content, type, msg)) {
+          result.add_error(msg);
           return false;
         }
 
