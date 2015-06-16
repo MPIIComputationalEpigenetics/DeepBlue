@@ -16,7 +16,6 @@
 
 #include "../log.hpp"
 
-#include "../extras/compress.hpp"
 #include "../extras/date_time.hpp"
 
 #include "../connection/connection.hpp"

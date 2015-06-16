@@ -11,8 +11,6 @@
 #include <boost/shared_ptr.hpp>
 #include "../mdbq/common.hpp"
 
-#include "../extras/compress.hpp"
-
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/date_time/gregorian/gregorian.hpp>
 

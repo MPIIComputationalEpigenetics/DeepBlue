@@ -24,7 +24,6 @@
 #include "../dba/queries.hpp"
 #include "../dba/users.hpp"
 
-#include "../extras/compress.hpp"
 #include "../extras/stringbuilder.hpp"
 #include "../extras/utils.hpp"
 
