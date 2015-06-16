@@ -82,12 +82,12 @@ namespace epidb {
           std::vector<algorithms::Accumulator> experiments_accs;
           for (auto &experiment_format : norm_experiments_formats) {
             mongo::BSONObj regions_query;
-            if (!dba::query::build_experiment_query(region->start(), region->end(), experiment_format.first, user_key, regions_query, msg)) {
+            if (!dba::query::build_experiment_query(region->start(), region->end(), experiment_format.first, regions_query, msg)) {
               return false;
             }
 
             Regions regions;
-            if (!dba::retrieve::get_regions(norm_genome, chromosome.first, regions_query, status, regions, msg)) {
+            if (!dba::retrieve::get_regions(norm_genome, chromosome.first, regions_query, true, status, regions, msg)) {
               return false;
             }
             algorithms::Accumulator acc;

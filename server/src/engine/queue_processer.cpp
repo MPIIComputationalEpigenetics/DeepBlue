@@ -35,7 +35,7 @@ namespace epidb {
     void QueueHandler::handle_task(const std::string& id, const mongo::BSONObj &o)
     {
       try {
-        processing::StatusPtr status = processing::build_status(id);
+        processing::StatusPtr status = processing::build_status(id, 8ll * 1024 * 1024 * 1024); // TODO: get from user.
         mongo::BSONObj result = process(o, status);
         finish(result, true);
       } catch (mdbq::timeout_exception) {
@@ -84,6 +84,8 @@ namespace epidb {
       }
 
       bob.append("count", (long long) count);
+      status->set_total_stored_data(sizeof(long long));
+      status->set_total_stored_data_compressed(sizeof(long long));
 
       return bob.obj();
     }
@@ -111,6 +113,9 @@ namespace epidb {
       compressed_data = epidb::compress::compress(data, size, compressed_size, compressed);
 
       std::string filename = store_result(compressed_data.get(), compressed_size);
+
+      status->set_total_stored_data(size);
+      status->set_total_stored_data_compressed(compressed_size);
 
       if (compressed) {
         bob.append("__compressed__", true);
@@ -152,8 +157,10 @@ namespace epidb {
       bool compressed = false;
 
       compressed_data = epidb::compress::compress(data, size, compressed_size, compressed);
-
       std::string filename = store_result(compressed_data.get(), compressed_size);
+
+      status->set_total_stored_data(size);
+      status->set_total_stored_data_compressed(compressed_size);
 
       if (compressed) {
         bob.append("__compressed__", true);
@@ -180,8 +187,12 @@ namespace epidb {
         experiments_ids_bob.appendElements(BSON(exp_format.id << exp_format.name));
       }
 
-      bob.append("__id_names__", experiments_ids_bob.obj());
+      mongo::BSONObj o = experiments_ids_bob.obj();
+      bob.append("__id_names__", o);
 
+      int size = o.objsize();
+      status->set_total_stored_data(size);
+      status->set_total_stored_data_compressed(size);
       return bob.obj();
     }
 

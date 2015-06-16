@@ -386,7 +386,18 @@ namespace epidb {
         return get_increment_counter(name + "_operations", tmp, msg);
       }
 
+      // TODO: Use template
+      mongo::BSONArray build_array(const std::vector<int> &params)
+      {
+        mongo::BSONArrayBuilder ab;
+        for (const auto& param : params) {
+          ab.append(param);
+        }
+        return ab.arr();
+      }
+
       // TODO: move to arrays.cpp
+      // TODO: Use template
       mongo::BSONArray build_array(const std::vector<std::string> &params)
       {
         mongo::BSONArrayBuilder ab;
@@ -449,6 +460,24 @@ namespace epidb {
           vector.push_back(param->as_string());
         }
         return vector;
+      }
+
+      std::vector<std::string> build_vector(const std::vector<mongo::BSONElement> &params)
+      {
+        std::vector<std::string> vector;
+        for (auto be : params) {
+          vector.push_back(be.str());
+        }
+        return vector;
+      }
+
+      std::set<std::string> build_set(const std::vector<mongo::BSONElement> &params)
+      {
+        std::set<std::string> set;
+        for (auto be : params) {
+          set.insert(be.str());
+        }
+        return set;
       }
 
       bool check_parameters(const std::vector<serialize::ParameterPtr> &params, const std::function<std::string(const std::string&)> &normalizer, const std::function<bool(const std::string&)> &checker, std::string &wrong)

@@ -11,7 +11,7 @@ class TestBugs(helpers.TestCase):
 
     rmsk = [
   "bin:string",
-  "swScore:Integer",
+  "swSCORE",
   "milliDiv:Integer",
   "milliDel:Integer",
   "milliIns:Integer",
@@ -19,8 +19,8 @@ class TestBugs(helpers.TestCase):
   "start:Integer",
   "end:Integer",
   "genoLeft:Integer",
-  "strand:String",
-  "repName:String",
+  "STRAND",
+  "repNAME",
   "repClass:String",
   "repFamily:String",
   "repStart:Integer",
@@ -41,7 +41,7 @@ class TestBugs(helpers.TestCase):
 
     rmsk2 = [
   "bin:string",
-  "swScore:Integer",
+  "swSCORE",
   "milliDiv:Integer",
   "milliDel:Integer",
   "milliIns:Integer",
@@ -49,8 +49,8 @@ class TestBugs(helpers.TestCase):
   "START:Integer",
   "END:Integer",
   "genoLeft:Integer",
-  "strand:String",
-  "repName:String",
+  "STRAND",
+  "repNAME",
   "repClass:String",
   "repFamily:String",
   "repStart:Integer",
@@ -90,7 +90,7 @@ class TestBugs(helpers.TestCase):
       "CHROMOSOME",
       "START",
       "END",
-      "name:String",
+      "NAME",
       "length:Integer",
       "cpgNum:Integer",
       "gcNum:Integer",
@@ -303,9 +303,6 @@ chrX 100000"""
     epidb = EpidbClient()
     self.init_base(epidb)
     sample_id = self.sample_ids[0]
-
-    (s, m) = epidb.create_column_type_simple("SCORE", "", "double", self.admin_key)
-    self.assertSuccess(s,m)
 
     data = "chr1\t100\t110\t1\nchr1\t200\t400\t0\nchr1\t400\t500\t1\nchr1\t200\t400\t0\n"
     format = "CHROMOSOME,START,END,SCORE"

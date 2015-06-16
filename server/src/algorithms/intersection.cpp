@@ -51,12 +51,11 @@ namespace epidb {
       std::set<std::string> chromosomes;
       merge_chromosomes(regions_a, regions_b, chromosomes);
 
-      std::set<std::string>::const_iterator cit;
-      for (cit = chromosomes.begin(); cit != chromosomes.end(); ++cit) {
+      for (const auto& chr: chromosomes) {
 
         Regions chr_regions_a, chr_regions_b;
-        if (!get_chromosome_regions(regions_a, *cit, chr_regions_a) ||
-            !get_chromosome_regions(regions_b, *cit, chr_regions_b)) {
+        if (!get_chromosome_regions(regions_a, chr, chr_regions_a) ||
+            !get_chromosome_regions(regions_b, chr, chr_regions_b)) {
           // XXX: is this an error?
           continue;
         }
@@ -75,17 +74,12 @@ namespace epidb {
           std::vector<RegionPtr> overlaps;
           tree.findOverlapping(region_a->start(), region_a->end(), overlaps);
 
-          // add overlaps to the total of intersections
-          chr_intersections.reserve(intersections.size() + overlaps.size());
-
-          for (auto &regions_b :  overlaps) {
-            regions_b->set_start(region_a->start() > regions_b->start() ? region_a->start() : regions_b->start());
-            regions_b->set_end(region_a->end() > regions_b->end() ? regions_b->end() : region_a->end());
-            chr_intersections.push_back(std::move(regions_b));
+          if (!overlaps.empty()) {
+            chr_intersections.push_back(std::move(region_a));
           }
         }
         // add found intersections to query result
-        intersections.push_back(ChromosomeRegions(*cit, std::move(chr_intersections)));
+        intersections.push_back(ChromosomeRegions(chr, std::move(chr_intersections)));
       }
 
       return true;

@@ -69,8 +69,8 @@ namespace epidb {
 
         const std::string user_key = parameters[5]->as_string();
 
-        const long long start = parameters[3]->isNull() ? -1 : parameters[3]->as_long();
-        const long long end = parameters[4]->isNull() ? -1 : parameters[4]->as_long();
+        const int start = parameters[3]->isNull() ? -1 : parameters[3]->as_long();
+        const int end = parameters[4]->isNull() ? -1 : parameters[4]->as_long();
 
         std::string msg;
         if (!Command::checks(user_key, msg)) {
@@ -94,11 +94,11 @@ namespace epidb {
           args_builder.append("norm_annotation", dba::helpers::build_annotation_normalized_array(annotations));
         }
 
-        if (start >= 0) {
-          args_builder.append("start", start);
+        if (start > 0) {
+          args_builder.append("start", (int) start);
         }
-        if (end >= 0) {
-          args_builder.append("end", end);
+        if (end > 0) {
+          args_builder.append("end", (int) end);
         }
 
         std::vector<std::string> genomes_s;

@@ -60,7 +60,7 @@ namespace epidb {
         std::vector<serialize::ParameterPtr> chromosomes;
         parameters[2]->children(chromosomes);
 
-        const long long size = parameters[0]->as_long();
+        const unsigned int size = parameters[0]->as_long();
         std::string genome = parameters[1]->as_string();
         const std::string user_key = parameters[3]->as_string();
 

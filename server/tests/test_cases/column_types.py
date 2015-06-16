@@ -9,9 +9,9 @@ class TestColumnTypes(helpers.TestCase):
     epidb = EpidbClient()
     self.init(epidb)
 
-    res = epidb.create_column_type_simple("name", "description", "string", self.admin_key)
+    res = epidb.create_column_type_simple("name2", "description", "string", self.admin_key)
     self.assertSuccess(res)
-    res = epidb.create_column_type_simple("name", "description", "integer", self.admin_key)
+    res = epidb.create_column_type_simple("name2", "description", "integer", self.admin_key)
     self.assertFailure(res)
 
 
@@ -107,21 +107,6 @@ class TestColumnTypes(helpers.TestCase):
       "PEAK"
     ])
 
-    res = epidb.create_column_type_simple("NAME", "name of the region", "string", self.admin_key)
-    self.assertSuccess(res)
-    res = epidb.create_column_type_simple("SCORE", "score of the region", "integer", self.admin_key)
-    self.assertSuccess(res)
-    res = epidb.create_column_type_category("STRAND", "strand of the region", ["+", "-"], self.admin_key)
-    self.assertSuccess(res)
-    res = epidb.create_column_type_range("SIGNAL_VALUE", "signal value", 0.0, 100.0, self.admin_key)
-    self.assertSuccess(res)
-    res = epidb.create_column_type_range("P_VALUE", "p-value", 0.0, 200.0, self.admin_key)
-    self.assertSuccess(res)
-    res = epidb.create_column_type_range("Q_VALUE", "q-value", 0.0, 100.0, self.admin_key)
-    self.assertSuccess(res)
-    res = epidb.create_column_type_range("PEAK", "peak", 0.0, 100.0, self.admin_key)
-    self.assertSuccess(res)
-
     res = epidb.add_experiment("test_exp1", "hg19", "Methylation", sample_id, "tech1",
                                "ENCODE", "desc1", "", format, None, self.admin_key)
     self.assertFailure(res)
@@ -142,31 +127,19 @@ class TestColumnTypes(helpers.TestCase):
       "SCORE",
       "STRAND",
       "SIGNAL_VALUE",
-      "P_VALUE",
+      "P_VALUE_RANGE",
       "Q_VALUE",
       "PEAK"
     ])
 
-    res = epidb.create_column_type_simple("NAME", "name of the region", "string", self.admin_key)
-    self.assertSuccess(res)
-    res = epidb.create_column_type_simple("SCORE", "score of the region", "integer", self.admin_key)
-    self.assertSuccess(res)
-    res = epidb.create_column_type_category("STRAND", "strand of the region", ["+", "-"], self.admin_key)
-    self.assertSuccess(res)
-    res = epidb.create_column_type_range("SIGNAL_VALUE", "signal value", 0.0, 100.0, self.admin_key)
-    self.assertSuccess(res)
-    res = epidb.create_column_type_range("P_VALUE", "p-value", 0.0, 10.0, self.admin_key)
-    self.assertSuccess(res)
-    res = epidb.create_column_type_range("Q_VALUE", "q-value", 0.0, 100.0, self.admin_key)
-    self.assertSuccess(res)
-    res = epidb.create_column_type_range("PEAK", "peak", 0.0, 100.0, self.admin_key)
+    res = epidb.create_column_type_range("P_VALUE_RANGE", "p-value", 0.0, 10.0, self.admin_key)
     self.assertSuccess(res)
 
     regions_data = helpers.load_bed("hg19_chr1_1")
     res, msg = epidb.add_experiment("test_exp_fail", "hg19", "Methylation", sample_id, "tech1", "ENCODE", "desc1",
                                     regions_data, format, None, self.admin_key)
     self.assertFailure(res, msg)
-    self.assertTrue("p_value" in msg.lower())
+    self.assertTrue("P_VALUE_RANGE" in msg)
     # self.assertEqual(msg, "Invalid value '69.6' for column P_VALUE")
 
   def test_category_fail(self):
@@ -181,33 +154,21 @@ class TestColumnTypes(helpers.TestCase):
       "END",
       "NAME",
       "SCORE",
-      "STRAND",
+      "STRAND_X",
       "SIGNAL_VALUE",
       "P_VALUE",
       "Q_VALUE",
       "PEAK"
     ])
 
-    res = epidb.create_column_type_simple("NAME", "name of the region", "string", self.admin_key)
-    self.assertSuccess(res)
-    res = epidb.create_column_type_simple("SCORE", "score of the region", "integer", self.admin_key)
-    self.assertSuccess(res)
-    res = epidb.create_column_type_category("STRAND", "strand of the region", ["X", "-"], self.admin_key)
-    self.assertSuccess(res)
-    res = epidb.create_column_type_range("SIGNAL_VALUE", "signal value", 0.0, 100.0, self.admin_key)
-    self.assertSuccess(res)
-    res = epidb.create_column_type_range("P_VALUE", "p-value", 0.0, 200.0, self.admin_key)
-    self.assertSuccess(res)
-    res = epidb.create_column_type_range("Q_VALUE", "q-value", 0.0, 100.0, self.admin_key)
-    self.assertSuccess(res)
-    res = epidb.create_column_type_range("PEAK", "peak", 0.0, 100.0, self.admin_key)
+    res = epidb.create_column_type_category("STRAND_X", "strand of the region", ["X", "-"], self.admin_key)
     self.assertSuccess(res)
 
     regions_data = helpers.load_bed("hg19_chr1_1")
     res, msg = epidb.add_experiment("test_exp_fail2", "hg19", "Methylation", sample_id, "tech1", "ENCODE",
                                     "desc1", regions_data, format, None, self.admin_key)
     self.assertFailure(res, msg)
-    self.assertTrue("strand" in msg.lower())
+    self.assertTrue("STRAND_X" in msg)
 
   def test_remove_column(self):
     epidb = EpidbClient()

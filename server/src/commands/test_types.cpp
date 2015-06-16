@@ -57,7 +57,7 @@ namespace epidb {
                        const serialize::Parameters &parameters, serialize::Parameters &result) const
       {
         const std::string string_ = parameters[0]->as_string();
-        const long long integer_ = parameters[1]->as_number();
+        const unsigned int integer_ = parameters[1]->as_number();
         const double double_ = parameters[2]->as_number();
         bool bool_ = parameters[3]->as_boolean();
 

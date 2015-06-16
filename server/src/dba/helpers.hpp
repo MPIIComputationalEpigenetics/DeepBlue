@@ -121,6 +121,7 @@ namespace epidb {
 
 
       mongo::BSONArray build_array(const std::vector<std::string> &params);
+      mongo::BSONArray build_array(const std::vector<int> &params);
       mongo::BSONArray build_array(const std::vector<serialize::ParameterPtr> &params);
       mongo::BSONArray build_normalized_array(const std::vector<std::string> &params);
       mongo::BSONArray build_normalized_array(const std::vector<serialize::ParameterPtr> &params);
@@ -128,6 +129,8 @@ namespace epidb {
       mongo::BSONArray build_annotation_normalized_array(const std::vector<serialize::ParameterPtr> &params);
 
       std::vector<std::string> build_vector(const std::vector<serialize::ParameterPtr> &params);
+      std::vector<std::string> build_vector(const std::vector<mongo::BSONElement> &params);
+      std::set<std::string> build_set(const std::vector<mongo::BSONElement> &params);
 
       std::vector<utils::IdName> bsons_to_id_names(const std::vector<mongo::BSONObj> &bsons);
       utils::IdName bson_to_id_name(const mongo::BSONObj& bson);
