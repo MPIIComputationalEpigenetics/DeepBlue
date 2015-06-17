@@ -11,10 +11,7 @@
 #include <string>
 #include <sstream>
 
-#include <boost/iostreams/filtering_streambuf.hpp>
-#include <boost/iostreams/copy.hpp>
-#include <boost/iostreams/filter/bzip2.hpp>
-#include <boost/iostreams/stream.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include "../dba/users.hpp"
 #include "../engine/engine.hpp"
@@ -26,13 +23,33 @@ namespace epidb {
 
     Reply get_download_data(const std::string& uri)
     {
-      std::smatch sm;
-      if (!std::regex_match(uri, sm, std::regex("/download\\\?r=(\\w+)&key=(\\w+)"))) {
-        return Reply::stock_reply(Reply::bad_request, "Invalid request: " + uri);
+      std::vector<std::string> strs;
+      boost::split(strs, uri, boost::is_any_of("?"));
+
+      if (strs.size() != 2) {
+        return Reply::stock_reply(Reply::bad_request, "Invalid request, it must be: /download?r_id=REQUEST_ID&key=USER_KEY");
       }
 
-      std::string request_id = sm[1];
-      std::string user_key = sm[2];
+      std::vector<std::string> params;
+      boost::split(params, strs[1], boost::is_any_of("&"));
+      if (params.size() != 2) {
+        return Reply::stock_reply(Reply::bad_request, "Invalid request, it was not possible to read the parameters. It must be: /download?r_id=REQUEST_ID&key=USER_KEY");
+      }
+
+      std::vector<std::string> request;
+      boost::split(request, params[0], boost::is_any_of("="));
+      if (request.size() != 2) {
+        return Reply::stock_reply(Reply::bad_request, "Invalid request, it was not possible to read the request ID. It must be: /download?r_id=REQUEST_ID&key=USER_KEY");
+      }
+      const std::string request_id = request[1];
+
+
+      std::vector<std::string> key;
+      boost::split(key, params[1], boost::is_any_of("="));
+      if (key.size() != 2) {
+        return Reply::stock_reply(Reply::bad_request, "Invalid request, it was not possible to read the user_key.  It must be: /download?r_id=REQUEST_ID&key=USER_KEY");
+      }
+      const std::string user_key = key[1];
 
       std::string msg;
       utils::IdName user;
