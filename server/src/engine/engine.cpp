@@ -6,16 +6,10 @@
 //  Copyright (c) 2014 Max Planck Institute for Computer Science. All rights reserved.
 //
 
-#include <iostream>
 #include <regex>
 #include <string>
 #include <sstream>
 #include <vector>
-
-#include <boost/iostreams/filtering_streambuf.hpp>
-#include <boost/iostreams/copy.hpp>
-#include <boost/iostreams/filter/bzip2.hpp>
-#include <boost/iostreams/stream.hpp>
 
 #include "commands.hpp"
 #include "engine.hpp"
@@ -237,20 +231,7 @@ namespace epidb {
       std::string filename = result["__file__"].str();
       type = request::REGIONS;
 
-      std::string file_content;
-      if (!_hub.get_result(filename, file_content, msg)) {
-        return false;
-      }
-
-      std::istringstream inStream(file_content, std::ios::binary);
-      std::stringstream outStream;
-      boost::iostreams::filtering_streambuf< boost::iostreams::input> in;
-      in.push( boost::iostreams::bzip2_decompressor());
-      in.push( inStream );
-      boost::iostreams::copy(in, outStream);
-      content = outStream.str();
-
-      return true;
+      return _hub.get_result(filename, content, msg);
     }
 
     type = request::MAP;

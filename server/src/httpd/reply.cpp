@@ -289,7 +289,7 @@ namespace epidb {
       rep.headers[1].name = "Access-Control-Allow-Origin";
       rep.headers[1].value = "*";
       rep.headers[2].name = "Content-Disposition";
-      rep.headers[2].value = "attachment; filename=deepblue_data_"+file_name+".bed";
+      rep.headers[2].value = "attachment; filename=deepblue_data_"+file_name+".bed.bz2";
       rep.headers[3].name = "Content-Length";
       rep.headers[3].value = utils::size_t_to_string(rep.content.size());
 

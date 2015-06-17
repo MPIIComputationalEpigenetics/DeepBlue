@@ -6,8 +6,14 @@
 //  Copyright (c) 2013,2014,2015 Max Planck Institute for Computer Science. All rights reserved.
 //
 
+#include <iostream>
 #include <sstream>
 #include <map>
+
+#include <boost/iostreams/filtering_streambuf.hpp>
+#include <boost/iostreams/copy.hpp>
+#include <boost/iostreams/filter/bzip2.hpp>
+#include <boost/iostreams/stream.hpp>
 
 #include "../dba/dba.hpp"
 #include "../dba/queries.hpp"
@@ -72,7 +78,7 @@ namespace epidb {
           return false;
         }
 
-        std::string content;
+        std::string file_content;
         request::Data data;
         request::DataType type = request::DataType::INVALID;
         if (!epidb::Engine::instance().user_owns_request(request_id, user.id)) {
@@ -80,7 +86,7 @@ namespace epidb {
           return false;
         }
 
-        if (!epidb::Engine::instance().request_data(request_id, user_key, data, content, type, msg)) {
+        if (!epidb::Engine::instance().request_data(request_id, user_key, data, file_content, type, msg)) {
           result.add_error(msg);
           return false;
         }
@@ -91,7 +97,13 @@ namespace epidb {
         }
 
         if (type == request::REGIONS) {
-          result.add_string_content(std::move(content));
+          std::istringstream inStream(file_content, std::ios::binary);
+          std::stringstream outStream;
+          boost::iostreams::filtering_streambuf< boost::iostreams::input> in;
+          in.push( boost::iostreams::bzip2_decompressor());
+          in.push( inStream );
+          boost::iostreams::copy(in, outStream);
+          result.add_string_content(outStream.str());
           return true;
         }
 
