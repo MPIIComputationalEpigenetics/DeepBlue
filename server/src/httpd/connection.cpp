@@ -71,13 +71,13 @@ namespace epidb {
 
         static std::string DOWNLOAD_STRING("/download");
         if (request_.path.substr(0, DOWNLOAD_STRING.length()) == DOWNLOAD_STRING) {
-          Reply reply = get_download_data(request_.path);
-          boost::asio::write(socket_, reply.to_buffers());
+          reply_ = get_download_data(request_.path);
+          buffers_ = reply_.to_buffers();
           boost::asio::async_write(socket_, reply_.to_buffers(),
                                    strand_.wrap(
-                                     boost::bind(&Connection::handle_write, shared_from_this(),
-                                                 boost::asio::placeholders::error,
-                                                 boost::asio::placeholders::bytes_transferred)));
+                                      boost::bind(&Connection::handle_write, shared_from_this(),
+                                               boost::asio::placeholders::error,
+                                               boost::asio::placeholders::bytes_transferred)));
         } else {
           m_content_->reserve(m_expected_length);
           request_.ip =  socket_.remote_endpoint().address().to_string();
@@ -86,7 +86,8 @@ namespace epidb {
           } else if (error == boost::asio::error::eof) {
             EPIDB_LOG_WARN("EOF: Connection :"  << id_);
           } else {
-            Reply reply = Reply::stock_reply(Reply::bad_request, "");
+            reply_ = Reply::stock_reply(Reply::bad_request, "");
+            buffers_ = reply_.to_buffers();
             boost::asio::async_write(socket_, reply_.to_buffers(),
                                      strand_.wrap(
                                        boost::bind(&Connection::handle_write, shared_from_this(),
@@ -151,6 +152,7 @@ namespace epidb {
       if (e) {
         EPIDB_LOG(e.category().name() << ":" << e.message() << " - Sent " << bytes_transferred << " bytes.");
       } else {
+	std::cerr << "closing connection" << std::endl;
         boost::system::error_code ignored_ec;
         socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ignored_ec);
       }
