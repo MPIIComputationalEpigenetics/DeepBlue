@@ -25,18 +25,17 @@ namespace epidb {
       static Parameters parameters_()
       {
         Parameter p[] = {
-          Parameter("email", serialize::STRING, "Email of a user"),
-          Parameter("password", serialize::STRING, "Password of a user"),
-          parameters::UserKey
+          Parameter("email", serialize::STRING, "User's email"),
+          Parameter("password", serialize::STRING, "User's password"),
         };
-        Parameters params(&p[0], &p[0] + 3);
+        Parameters params(&p[0], &p[0] + 2);
         return params;
       }
 
       static Parameters results_()
       {
         Parameter p[] = {
-          Parameter("user_key", serialize::STRING, "Key of the user")
+          Parameter("user_key", serialize::STRING, "User's user_key")
         };
         Parameters results(&p[0], &p[0] + 1);
         return results;
@@ -50,34 +49,17 @@ namespace epidb {
       {
         const std::string email = parameters[0]->as_string();
         const std::string password = parameters[1]->as_string();
-        const std::string admin_key = parameters[2]->as_string();
 
         std::string msg;
 
-        datatypes::User admin;
-        if (!dba::get_user_by_key(admin_key, admin, msg)) {
+        datatypes::User user;
+        if (!dba::get_user_by_email(email, user, msg)) {
           result.add_error(msg);
           return false;
         }
-        
-        if (!admin.has_permission(datatypes::PermissionLevel::ADMIN)) {
-          result.add_error("The given key is not an admin-key");
-          return false;
-        }
-                
-        datatypes::User user;
-        if (!dba::get_user_by_email(email, user, msg)) {
-            result.add_error(msg);
-            return false;
-        }
-        
-        if (user.get_password() == password) {
-            result.add_string(user.get_key());
-            return true;
-        } else {
-            result.add_error("Email-password combination does not exist");
-        }
-        return false;
+
+        result.add_string(user.get_key());
+        return true;
       }
     } userAuthCommand;
   }
