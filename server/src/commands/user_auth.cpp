@@ -53,7 +53,7 @@ namespace epidb {
         std::string msg;
 
         datatypes::User user;
-        if (!dba::get_user_by_email(email, user, msg)) {
+        if (!dba::get_user_by_email(email, password, user, msg)) {
           result.add_error(msg);
           return false;
         }
