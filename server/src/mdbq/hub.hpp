@@ -110,6 +110,13 @@ namespace mdbq {
 
     bool get_result(const std::string &filename, std::string& data, std::string &msg);
 
+
+    /**
+     * Cancel, stop, or delete a request
+     */
+    bool cancel_request(const std::string& request_id, std::string& msg);
+
+
     /**
      * register with the main loop
      *
@@ -148,6 +155,8 @@ namespace mdbq {
     static std::string get_id(const mongo::BSONObj& o);
 
     static bool is_done(const mongo::BSONObj& o);
+
+    static bool is_failed(const mongo::BSONObj& o);
   };
 }
 #endif /* __MDBQ_HUB_HPP__ */
