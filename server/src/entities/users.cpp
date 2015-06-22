@@ -4,7 +4,7 @@
  */
 
 #ifndef DATABASE_HPP
-#define	DATABASE_HPP
+#define DATABASE_HPP
 
 #include <iostream>
 
@@ -76,12 +76,14 @@ namespace epidb {
       return true;
     }
 
-    bool get_user_by_email(const std::string& email, datatypes::User& user, std::string& msg)
+    bool get_user_by_email(const std::string& email, const std::string& password, datatypes::User& user, std::string& msg)
     {
       std::vector<mongo::BSONObj> result;
-      dba::helpers::get(datatypes::User::COLLECTION, datatypes::User::FIELD_EMAIL, email, result, msg);
+      dba::helpers::get(datatypes::User::COLLECTION,
+                        BSON(datatypes::User::FIELD_EMAIL << email << datatypes::User::FIELD_PASSWORD << password),
+                        result, msg);
       if (result.size() == 0) {
-        msg = "Unable to retrieve user with email %s" + email;
+        msg = "Invalid Email-password combination.";
         return false;
       }
       user = datatypes::User(result);
@@ -109,5 +111,5 @@ namespace epidb {
     }
   }
 }
-#endif	/* DATABASE_HPP */
+#endif  /* DATABASE_HPP */
 
