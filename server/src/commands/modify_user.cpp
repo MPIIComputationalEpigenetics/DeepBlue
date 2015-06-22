@@ -31,13 +31,15 @@ namespace epidb {
           Parameter("value", serialize::STRING, "New value to store in field"),
           parameters::UserKey
         };
-        Parameters params(&p[0], &p[0] + 4);
+        Parameters params(&p[0], &p[0] + 3);
         return params;
       }
 
       static Parameters results_()
       {
-        Parameter p[] = {};
+        Parameter p[] = {
+          Parameter("ID", serialize::STRING, "ID of the modified user"),
+        };
         Parameters results(&p[0], &p[0] + 0);
         return results;
       }
