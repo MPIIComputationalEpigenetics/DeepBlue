@@ -144,28 +144,26 @@ namespace mdbq {
       throw std::runtime_error("MDBQC: get a task first before you finish!");
     }
 
-    this->checkpoint(false); // flush logs, do not check for timeout
-
     boost::posix_time::ptime finish_time = epidb::extras::universal_date_time();
     int version = ct["version"].Int();
     if (ok) {
       m_ptr->m_con->update(m_jobcol,
-                          BSON("_id" << ct["_id"] <<
-                               "version" << version),
-                          BSON("$set" << BSON(
-                                 "state" << TS_DONE <<
-                                 "version" << version + 1 <<
-                                 "finish_time" << epidb::extras::to_mongo_date(finish_time) <<
-                                 "result" << result)));
+                           BSON("_id" << ct["_id"] <<
+                                "version" << version),
+                           BSON("$set" << BSON(
+                                  "state" << TS_DONE <<
+                                  "version" << version + 1 <<
+                                  "finish_time" << epidb::extras::to_mongo_date(finish_time) <<
+                                  "result" << result)));
     } else {
       m_ptr->m_con->update(m_jobcol,
-                          BSON("_id" << ct["_id"] <<
-                               "version" << version),
-                          BSON("$set" << BSON(
-                                 "state" << TS_FAILED <<
-                                 "version" << version + 1 <<
-                                 "failure_time" << epidb::extras::to_mongo_date(finish_time) <<
-                                 "error" << result)));
+                           BSON("_id" << ct["_id"] <<
+                                "version" << version),
+                           BSON("$set" << BSON(
+                                  "state" << TS_FAILED <<
+                                  "version" << version + 1 <<
+                                  "failure_time" << epidb::extras::to_mongo_date(finish_time) <<
+                                  "error" << result["__error__"].str())));
     }
     CHECK_DB_ERR(m_ptr->m_con);
     m_ptr->m_current_task = mongo::BSONObj(); // empty, call get_next_task.
@@ -204,66 +202,19 @@ namespace mdbq {
     mongo::BSONObjBuilder bob;
     bob.appendElements(ret);
     m_ptr->m_con->update(m_fscol + ".files",
-                        BSON("filename" << ret.getField("filename")),
-                        bob.obj(), false, false);
+                         BSON("filename" << ret.getField("filename")),
+                         bob.obj(), false, false);
 
     CHECK_DB_ERR(m_ptr->m_con);
 
     return filename;
   }
 
-  void Client::checkpoint(bool check_for_timeout)
-  {
-    const mongo::BSONObj &ct = m_ptr->m_current_task;
-    if (ct.isEmpty()) {
-      throw std::runtime_error("MDBQC: get a task first before you call checkpoints!");
-    }
-
-    if (check_for_timeout) { // first, check whether the task has timed out.
-      boost::posix_time::ptime now = epidb::extras::universal_date_time();
-      if (now >= m_ptr->m_current_task_timeout_time) {
-        std::string hostname(256, '\0');
-        gethostname(&hostname[0], 256);
-        std::string hostname_pid = (boost::format("%s:%d") % &hostname[0] % getpid()).str();
-
-        // set to failed in DB
-        m_ptr->m_con->update(m_jobcol,
-                            BSON("_id" << ct["_id"] <<
-                                 // do not overwrite job that has been taken by someone else!
-                                 // this may happen due to timeouts and rescheduling.
-                                 "owner" << hostname_pid),
-                            BSON("$set" <<
-                                 BSON("state" << TS_FAILED <<
-                                      "error" << "timeout")));
-        CHECK_DB_ERR(m_ptr->m_con);
-
-        // clean up current state
-        m_ptr->m_current_task = mongo::BSONObj();
-        m_ptr->m_current_task_timeout_time = boost::posix_time::pos_infin;
-
-        throw timeout_exception();
-      }
-    }
-
-    boost::posix_time::ptime now = epidb::extras::universal_date_time();
-    m_ptr->m_con->update(m_jobcol,
-                        BSON("_id" << ct["_id"]),
-                        BSON( "$set" << BSON("refresh_time" << epidb::extras::to_mongo_date(now))));
-    CHECK_DB_ERR(m_ptr->m_con);
-
-    if (m_ptr->m_log.size()) {
-      m_ptr->m_con->insert(m_logcol, m_ptr->m_log);
-      m_ptr->m_log.clear();
-      CHECK_DB_ERR(m_ptr->m_con);
-    }
-
-  }
-  std::vector<mongo::BSONObj>
-  Client::get_log(const mongo::BSONObj &task)
+  std::vector<mongo::BSONObj> Client::get_log(const mongo::BSONObj &task)
   {
     std::auto_ptr<mongo::DBClientCursor> p =
       m_ptr->m_con->query( m_logcol,
-                          mongo::Query(BSON("taskid" << task["_id"])).sort("nr"));
+                           mongo::Query(BSON("taskid" << task["_id"])).sort("nr"));
     CHECK_DB_ERR(m_ptr->m_con);
     std::vector<mongo::BSONObj> log;
     while (p->more()) {

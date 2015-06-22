@@ -82,13 +82,6 @@ namespace mdbq {
     std::vector<mongo::BSONObj> get_log(const mongo::BSONObj &task);
 
     /**
-     * flush logs and check for timeouts (throws timeout_exception).
-     *
-     * @param check_for_timeout if false, this flushes logs even when timeout occured.
-     */
-    void checkpoint(bool check_for_timeout = true);
-
-    /**
      * This function should be overwritten in real clients.
      *
      * @param task the task _id and description.
@@ -97,9 +90,10 @@ namespace mdbq {
 
 
     /**
+     * Store the result data into GSF
      *
-     *
-     *
+     * @param ptr pointer to the data
+     * @param len data size
      */
     std::string store_result(const char *ptr, size_t len);
 

@@ -341,7 +341,7 @@ class TestCase(unittest.TestCase):
 
     return data["count"]
 
-  def __get_regions_request(self, req):
+  def __get_regions_request(self, req, status=["done"]):
     if req[0] is not 'r':
       print "Invalid request " + req
       return
@@ -349,7 +349,7 @@ class TestCase(unittest.TestCase):
     epidb = EpidbClient()
     sleep = 0.1
     (s, ss) = epidb.info(req, self.admin_key)
-    while ss[0]["state"] != "done":
+    while ss[0]["state"] not in status:
       time.sleep(sleep)
       (s, ss) = epidb.info(req, self.admin_key)
       sleep += sleep
@@ -363,6 +363,6 @@ class TestCase(unittest.TestCase):
     return data
 
   def get_regions_request_error(self, req):
-    (s, data) = self.__get_regions_request(req)
+    (s, data) = self.__get_regions_request(req, ["failed"])
     self.assertFailure(s, data)
     return data

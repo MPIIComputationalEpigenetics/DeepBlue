@@ -14,6 +14,7 @@ namespace mdbq {
     TS_RUNNING,
     TS_DONE,
     TS_FAILED,
+    TS_CANCELLED,
     _TS_END,
     _TS_FIRST = TS_NEW
   };

@@ -41,17 +41,6 @@ namespace epidb {
       mdbq::Client(url, prefix),
       _id(id) {}
 
-    void QueueHandler::handle_task(const std::string& id, const mongo::BSONObj &o)
-    {
-      try {
-        processing::StatusPtr status = processing::build_status(id, dba::config::get_processing_max_memory()); // TODO: get from user.
-        mongo::BSONObj result = process(o, status);
-        finish(result, true);
-      } catch (mdbq::timeout_exception) {
-        /* do nothing */
-      }
-    }
-
     void QueueHandler::run()
     {
       EPIDB_LOG_TRACE("Starting QueueHandler - " << utils::integer_to_string(_id));
@@ -59,29 +48,37 @@ namespace epidb {
       ios.run();
     }
 
-    mongo::BSONObj QueueHandler::process(const mongo::BSONObj &job, processing::StatusPtr status)
+    void QueueHandler::handle_task(const std::string& id, const mongo::BSONObj &o)
+    {
+        processing::StatusPtr status = processing::build_status(id, dba::config::get_processing_max_memory()); // TODO: get from user.
+        mongo::BSONObj result;
+        bool success = process(o, status, result);
+        finish(result, success);
+    }
+
+    bool QueueHandler::process(const mongo::BSONObj &job, processing::StatusPtr status, mongo::BSONObj& result)
     {
       std::string _id = job["_id"];
       std::string command = job["command"].str();
       std::string user_key = job["user_key"].str();
 
       if (command == "count_regions") {
-        return process_count(job["query_id"].str(), user_key, status);
+        return process_count(job["query_id"].str(), user_key, status, result);
       } if (command == "get_regions") {
-        return process_get_regions(job["query_id"].str(), job["format"].str(), user_key, status);
+        return process_get_regions(job["query_id"].str(), job["format"].str(), user_key, status, result);
       } if (command == "score_matrix") {
-        return process_score_matrix(job["experiments_formats"].Obj(), job["aggregation_function"].str(), job["query_id"].str(), user_key, status);
+        return process_score_matrix(job["experiments_formats"].Obj(), job["aggregation_function"].str(), job["query_id"].str(), user_key, status, result);
       } if (command == "get_experiments_by_query") {
-        return process_get_experiments_by_query(job["query_id"].str(), user_key, status);
+        return process_get_experiments_by_query(job["query_id"].str(), user_key, status, result);
       } else {
         mongo::BSONObjBuilder bob;
-        bob.append("success", false);
         bob.append("__error__", "Invalid command " + command);
-        return bob.obj();
+        result = bob.obj();
+        return false;
       }
     }
 
-    mongo::BSONObj QueueHandler::process_count(const std::string &query_id, const std::string &user_key, processing::StatusPtr status)
+    bool QueueHandler::process_count(const std::string &query_id, const std::string &user_key, processing::StatusPtr status, mongo::BSONObj& result)
     {
       std::string msg;
       mongo::BSONObjBuilder bob;
@@ -89,18 +86,20 @@ namespace epidb {
 
       if (!processing::count_regions(query_id, user_key, status, count, msg)) {
         bob.append("__error__", msg);
-        return bob.obj();
+        result = bob.obj();
+        return false;
       }
 
       bob.append("count", (long long) count);
       status->set_total_stored_data(sizeof(long long));
       status->set_total_stored_data_compressed(sizeof(long long));
+      result = bob.obj();
 
-      return bob.obj();
+      return true;
     }
 
 
-    mongo::BSONObj QueueHandler::process_get_regions(const std::string &query_id, const std::string &format, const std::string &user_key, processing::StatusPtr status)
+    bool QueueHandler::process_get_regions(const std::string &query_id, const std::string &format, const std::string &user_key, processing::StatusPtr status, mongo::BSONObj& result)
     {
       std::string msg;
       StringBuilder sb;
@@ -108,12 +107,13 @@ namespace epidb {
 
       if (!processing::get_regions(query_id, format, user_key, status, sb, msg)) {
         bob.append("__error__", msg);
-        return bob.obj();
+        result = bob.obj();
+        return false;
       }
 
-      std::string result = sb.to_string();
+      std::string result_string = sb.to_string();
 
-      std::stringbuf inStream(std::move(result));
+      std::stringbuf inStream(std::move(result_string));
       std::stringbuf outStream;
       boost::iostreams::filtering_streambuf< boost::iostreams::input> in;
       in.push( boost::iostreams::bzip2_compressor());
@@ -125,16 +125,17 @@ namespace epidb {
 
       std::string filename = store_result(compressed, compressed_s.size());
       bob.append("__file__", filename);
-      bob.append("__original_size__", (long long) result.size());
+      bob.append("__original_size__", (long long) result_string.size());
       bob.append("__compressed_size__", (long long) compressed_s.size());
 
-      status->set_total_stored_data(result.size());
+      status->set_total_stored_data(result_string.size());
       status->set_total_stored_data_compressed(compressed_s.size());
 
-      return bob.obj();
+      result = bob.obj();
+      return true;
     }
 
-    mongo::BSONObj QueueHandler::process_score_matrix(const mongo::BSONObj &experiments_formats_bson, const std::string &aggregation_function, const std::string &regions_query_id, const std::string &user_key, processing::StatusPtr status)
+    bool QueueHandler::process_score_matrix(const mongo::BSONObj &experiments_formats_bson, const std::string &aggregation_function, const std::string &regions_query_id, const std::string &user_key, processing::StatusPtr status, mongo::BSONObj& result)
     {
       std::string msg;
       StringBuilder sb;
@@ -154,7 +155,8 @@ namespace epidb {
       std::string matrix;
       if (!processing::score_matrix(experiments_formats, aggregation_function, regions_query_id, user_key, status, matrix, msg)) {
         bob.append("__error__", msg);
-        return bob.obj();
+        result = bob.obj();
+        return false;
       }
 
       std::stringbuf inStream(std::move(matrix));
@@ -175,17 +177,19 @@ namespace epidb {
       status->set_total_stored_data(matrix.size());
       status->set_total_stored_data_compressed(compressed_s.size());
 
-      return bob.obj();
+      result = bob.obj();
+      return true;
     }
 
-    mongo::BSONObj QueueHandler::process_get_experiments_by_query(const std::string &query_id, const std::string &user_key, processing::StatusPtr status)
+    bool QueueHandler::process_get_experiments_by_query(const std::string &query_id, const std::string &user_key, processing::StatusPtr status, mongo::BSONObj& result)
     {
       std::string msg;
       mongo::BSONObjBuilder bob;
       std::vector<utils::IdName> experiments;
       if (!processing::get_experiments_by_query(query_id, user_key, status, experiments, msg)) {
         bob.append("__error__", msg);
-        return bob.obj();
+        result = bob.obj();
+        return false;
       }
 
       mongo::BSONObjBuilder experiments_ids_bob;
@@ -200,7 +204,8 @@ namespace epidb {
       int size = o.objsize();
       status->set_total_stored_data(size);
       status->set_total_stored_data_compressed(size);
-      return bob.obj();
+      result = bob.obj();
+      return true;
     }
 
     void queue_processer_run(size_t num)

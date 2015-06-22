@@ -294,7 +294,7 @@ namespace mdbq {
     case TS_DONE:
       return "";
     case TS_FAILED:
-      return "**failed message**"; // TODO: implement here
+      return o["error"].str();
     default :
       return "Invalid State: " + epidb::utils::integer_to_string(state);
     }
@@ -322,7 +322,14 @@ namespace mdbq {
 
   bool Hub::is_done(const mongo::BSONObj &o)
   {
-    return o["state"].Int() == TS_DONE;
+    TaskState task_state = (TaskState) o["state"].Int();
+    return task_state == TS_DONE;
+  }
+
+  bool Hub::is_failed(const mongo::BSONObj &o)
+  {
+    TaskState task_state = (TaskState) o["state"].Int();
+    return task_state == TS_FAILED;
   }
 
   bool Hub::get_file_info(const std::string &filename, mongo::OID &oid, size_t &chunk_size, size_t &file_size, std::string &msg)
@@ -376,4 +383,56 @@ namespace mdbq {
     return true;
   }
 
+  bool Hub::cancel_request(const std::string& request_id, std::string& msg)
+  {
+    boost::posix_time::ptime now = epidb::extras::universal_date_time();
+
+    mongo::BSONObjBuilder queryb;
+    mongo::BSONObj res, cmd, query;
+    queryb.append("_id", request_id);
+
+    query = queryb.obj();
+    cmd = BSON(
+            "findAndModify" << "jobs" <<
+            "query" << query <<
+            "update" << BSON("$set" <<
+                             BSON("book_time" << epidb::extras::to_mongo_date(now)
+                                  << "state" << TS_CANCELLED
+                                  << "refresh_time" << epidb::extras::to_mongo_date(now)
+                                 )
+                            )
+          );
+
+    CHECK_DB_ERR_RETURN(m_ptr->m_con, msg);
+    m_ptr->m_con->runCommand(m_ptr->m_prefix, cmd, res);
+
+
+    if (!res["value"].isABSONObj()) {
+      std::cout << "No task available, cmd:" << cmd << std::endl;
+      return false;
+    }
+
+    mongo::BSONObj task_info = res["value"].Obj();
+    TaskState task_state = (TaskState) task_info["state"].Int();
+
+    // The task was new and was canceled.
+    if (task_state == TS_NEW) {
+      return true;
+    }
+
+    // If it is running, it must stop the processing.
+    if (task_state == TS_RUNNING) {
+      // TODO: return stop_processing(request_id);
+    }
+
+    if (task_state == TS_DONE) {
+      // TODO: return remove_processed_data(request_id);
+    }
+
+    if (task_state == TS_FAILED) {
+      // TODO: return remove_processed_data(request_id);
+    }
+
+    return true;
+  }
 }

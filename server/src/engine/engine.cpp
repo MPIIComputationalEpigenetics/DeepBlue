@@ -208,17 +208,17 @@ namespace epidb {
       return false;
     }
 
+    if (mdbq::Hub::is_failed(o)) {
+      msg = o["error"].str();
+      return false;
+    }
+
     if (!mdbq::Hub::is_done(o)) {
       msg = "Request ID " + request_id + " was not finished. Please, check its status.";
       return false;
     }
 
     mongo::BSONObj result = o["result"].Obj();
-
-    if (result.hasField("__error__")) {
-      msg = result["__error__"].str();
-      return false;
-    }
 
     if (result.hasField("__id_names__")) {
       mongo::BSONObj id_names = result["__id_names__"].Obj();
