@@ -152,7 +152,6 @@ namespace epidb {
       if (e) {
         EPIDB_LOG(e.category().name() << ":" << e.message() << " - Sent " << bytes_transferred << " bytes.");
       } else {
-	std::cerr << "closing connection" << std::endl;
         boost::system::error_code ignored_ec;
         socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ignored_ec);
       }
