@@ -11,17 +11,20 @@
 #include <boost/bind.hpp>
 
 #include <mongo/client/dbclient.h>
+#include <mongo/client/gridfs.h>
 
 #include "hub.hpp"
 
 #include "../log.hpp"
 
+#include "../dba/collections.hpp"
+#include "../dba/helpers.hpp"
+#include "../dba/users.hpp"
+
 #include "../extras/date_time.hpp"
+#include "../extras/utils.hpp"
 
 #include "../connection/connection.hpp"
-
-#include "../dba/helpers.hpp"
-#include "../extras/utils.hpp"
 
 
 #define CHECK_DB_ERR_LOG(CON)\
@@ -49,42 +52,6 @@ namespace mdbq {
     unsigned int m_interval;
     std::string  m_prefix;
     std::auto_ptr<boost::asio::deadline_timer> m_timer;
-    void print_current_job_summary(Hub *c, const boost::system::error_code &error)
-    {
-      std::auto_ptr<mongo::DBClientCursor> p =
-        // note: currently snapshot mode may not be used w/ sorting or explicit hints
-        m_con->query( m_prefix + ".jobs",
-                      BSON( "state"   << mongo::GT << -1));
-      CHECK_DB_ERR_LOG(m_con);
-
-      std::cout << "JOB SUMMARY" << std::endl;
-      std::cout << "===========" << std::endl
-                << "Type    : "
-                << std::setw(8) << "state"
-                << std::setw(8) << "nfailed"
-                << std::setw(10) << "owner"
-                << std::setw(16) << "create_time"
-                << std::setw(16) << "book_time"
-                << std::setw(16) << "finish_time"
-                << std::setw(16) << "deadline"
-                << std::setw(16) << "misc"
-                << std::endl;
-      while (p->more()) {
-        mongo::BSONObj f = p->next();
-        if (f.isEmpty())
-          continue;
-        std::cout << "ASSIGNED: "
-                  << std::setw(8) << f["state"].Int()
-                  << std::setw(8) << f["nfailed"].Int()
-                  << std::setw(10) << f["owner"].Array()[0].String()
-                  << std::setw(16) << epidb::extras::dt_format(epidb::extras::to_ptime(f["create_time"].Date()))
-                  << std::setw(16) << epidb::extras::dt_format(epidb::extras::to_ptime(f["book_time"].Date()))
-                  << std::setw(16) << epidb::extras::dt_format(epidb::extras::to_ptime(f["finish_time"].Date()))
-                  << std::setw(16) << epidb::extras::dt_format(epidb::extras::to_ptime(f["book_time"].Date()) + boost::posix_time::seconds(f["timeout"].Int()))
-                  << " " << f["misc"]
-                  << std::endl;
-      }
-    }
 
     void update_check(Hub *c, const boost::system::error_code &error)
     {
@@ -383,6 +350,52 @@ namespace mdbq {
     return true;
   }
 
+  bool Hub::remove_request_data(const std::string& request_id, std::string& msg)
+  {
+    // This function has 3 steps:
+    // 1. Mark the request as removed.
+    // 2. Mark the processing as removed, but keep it for future reference.
+    // 3. Delete the data from gridfs
+
+    // 1.
+    epidb::Connection c;
+    boost::posix_time::ptime now = epidb::extras::universal_date_time();
+    mongo::BSONObj cmd = BSON(
+                           "findAndModify" << "jobs" <<
+                           "query" << BSON("_id" << request_id) <<
+                           "update" << BSON("$set" <<
+                                            BSON("book_time" << epidb::extras::to_mongo_date(now)
+                                                << "state" << TS_REMOVED
+                                                << "refresh_time" << epidb::extras::to_mongo_date(now)
+                                                )
+                                           )
+                         );
+    mongo::BSONObj res;
+    c->runCommand(m_ptr->m_prefix, cmd, res);
+    if (!res["value"].isABSONObj()) {
+        msg =  "No request available, cmd:" + cmd.toString();
+      return false;
+    }
+
+
+    // 2.
+    mongo::BSONObj query = BSON("request_id" << request_id);
+    mongo::BSONObj update = BSON("$set" << BSON("status" << TS_REMOVED));
+    c->update(epidb::dba::helpers::collection_name(epidb::dba::Collections::PROCESSING()), query, update, false, true);
+    if (!m_ptr->m_con->getLastError().empty()) {
+      msg = c->getLastError();
+      c.done();
+      return false;
+    }
+
+    // 3.
+    EPIDB_LOG_DBG("Removing data for the request: " + request_id);
+    mongo::GridFS gridfs(c.conn(), m_ptr->m_prefix, "fs");
+    gridfs.removeFile(request_id);
+
+    return true;
+  }
+
   bool Hub::cancel_request(const std::string& request_id, std::string& msg)
   {
     boost::posix_time::ptime now = epidb::extras::universal_date_time();
@@ -403,8 +416,8 @@ namespace mdbq {
                             )
           );
 
-    CHECK_DB_ERR_RETURN(m_ptr->m_con, msg);
-    m_ptr->m_con->runCommand(m_ptr->m_prefix, cmd, res);
+    epidb::Connection c;
+    c->runCommand(m_ptr->m_prefix, cmd, res);
 
 
     if (!res["value"].isABSONObj()) {

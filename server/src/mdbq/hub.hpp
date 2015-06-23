@@ -118,6 +118,12 @@ namespace mdbq {
 
 
     /**
+     *
+     */
+    bool remove_request_data(const std::string& request_id, std::string& msg);
+
+
+    /**
      * register with the main loop
      *
      * @param interval querying interval
