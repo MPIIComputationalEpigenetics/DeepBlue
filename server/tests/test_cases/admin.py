@@ -25,8 +25,8 @@ class TestAdminCommands(helpers.TestCase):
   def test_echo(self):
     epidb = EpidbClient()
     self.init(epidb)
-    self.assertEquals(epidb.echo(self.admin_key), ['okay', 'DeepBlue (0.9.65) says hi to test_admin'])
-    self.assertEquals(epidb.echo("invalid"), ['okay', 'DeepBlue (0.9.65) says hi to a Stranger'])
+    self.assertEquals(epidb.echo(self.admin_key), ['okay', 'DeepBlue (0.9.66) says hi to test_admin'])
+    self.assertEquals(epidb.echo("invalid"), ['okay', 'DeepBlue (0.9.66) says hi to a Stranger'])
 
   def test_unequal_keys(self):
     epidb = EpidbClient()
