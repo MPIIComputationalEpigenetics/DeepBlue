@@ -41,11 +41,13 @@ namespace epidb {
       static const std::string FIELD_NAME;
       static const std::string FIELD_EMAIL;
       static const std::string FIELD_INSTITUTION;
-      static const std::string FIELD_ADMIN;
       static const std::string FIELD_PASSWORD;
+      static const std::string FIELD_ADMIN;
+      static const std::string FIELD_MEMORY_LIMIT;
+      
       static const size_t KEY_LENGTH;
 
-      std::map<std::string, std::string> get_fields();
+      void write_to_BSONObjBuilder(mongo::BSONObjBuilder& builder);
 
       std::string get_id() const;
       std::string get_key() const;
@@ -53,6 +55,8 @@ namespace epidb {
       std::string get_email() const;
       std::string get_institution() const;
       std::string get_password() const;
+      long long get_memory_limit() const;
+      bool is_admin() const;
 
       void set_id(std::string id_);
       void set_key(std::string key_);
@@ -60,6 +64,7 @@ namespace epidb {
       void set_email(std::string email_);
       void set_institution(std::string institution_);
       void set_password(std::string password_);
+      void set_memory_limit(long long memory_limit);
 
       void generate_key();
       bool generate_id(std::string msg);
@@ -73,7 +78,8 @@ namespace epidb {
       std::string email;
       std::string institution;
       std::string password;
-      bool admin;
+      bool admin = false;
+      long long memory_limit;
 
       static int seed;
 

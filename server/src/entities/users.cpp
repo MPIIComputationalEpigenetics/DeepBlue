@@ -27,10 +27,7 @@ namespace epidb {
     bool add_new_user(datatypes::User& user, std::string& msg)
     {
       mongo::BSONObjBuilder create_user_builder;
-      std::map<std::string, std::string> fields = user.get_fields();
-      for (auto it = fields.begin(); it != fields.end(); ++it) {
-        create_user_builder.append(it->first, it->second);
-      }
+      user.write_to_BSONObjBuilder(create_user_builder);
 
       if (user.get_id() == "") {
         int result;

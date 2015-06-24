@@ -25,19 +25,12 @@ namespace epidb {
     const std::string User::FIELD_INSTITUTION = "institution";
     const std::string User::FIELD_ADMIN = "admin";
     const std::string User::FIELD_PASSWORD = "password";
+    const std::string User::FIELD_MEMORY_LIMIT = "memory_limit";
     const size_t User::KEY_LENGTH = 16;
 
     int User::seed = rand();
 
     User::User() {}
-
-    User::User(std::string id, std::string key, std::string name, std::string email,
-               std::string institution)
-    {
-      set_id(id);
-      set_key(key);
-      User(name, email, institution);
-    }
 
     User::User(std::string name, std::string email, std::string institution)
     {
@@ -49,12 +42,15 @@ namespace epidb {
 
     User::User(std::vector<mongo::BSONObj> bsonobj)
     {
-      User(bsonobj[0][FIELD_NAME].str(),
-           bsonobj[0][FIELD_EMAIL].str(),
-           bsonobj[0][FIELD_INSTITUTION].str());
+      set_name(bsonobj[0][FIELD_NAME].str());
+      set_email(bsonobj[0][FIELD_EMAIL].str());
+      set_institution(bsonobj[0][FIELD_INSTITUTION].str());
       set_id(bsonobj[0][FIELD_ID].str());
       set_key(bsonobj[0][FIELD_KEY].str());
-      admin = bsonobj[0][FIELD_ADMIN].Bool();
+      set_password(bsonobj[0][FIELD_PASSWORD].str());
+      if (bsonobj[0].hasElement(FIELD_ADMIN)){
+        admin = bsonobj[0][FIELD_ADMIN].Bool();
+      }
     }
 
     User::User(const User& orig)
@@ -65,15 +61,15 @@ namespace epidb {
     {
     }
 
-    std::map<std::string, std::string> User::get_fields()
+    void User::write_to_BSONObjBuilder(mongo::BSONObjBuilder& builder)
     {
-      std::map<std::string, std::string> fields;
-      fields[FIELD_KEY] = key;
-      fields[FIELD_NAME] = name;
-      fields[FIELD_EMAIL] = email;
-      fields[FIELD_INSTITUTION] = institution;
-      fields[FIELD_PASSWORD] = password;
-      return fields;
+      builder.append(FIELD_KEY, get_key());
+      builder.append(FIELD_NAME, get_name());
+      builder.append(FIELD_EMAIL, get_email());
+      builder.append(FIELD_INSTITUTION, get_institution());
+      builder.append(FIELD_PASSWORD, get_password());
+      builder.append(FIELD_ADMIN, is_admin());
+      builder.append(FIELD_MEMORY_LIMIT, get_memory_limit());
     }
 
     void User::generate_key()
@@ -124,6 +120,11 @@ namespace epidb {
     {
       this->password = password;
     }
+    
+    void User::set_memory_limit(long long memory_limit)
+    {
+      this->memory_limit = memory_limit;
+    }
 
     std::string User::get_id() const
     {
@@ -149,6 +150,16 @@ namespace epidb {
     std::string User::get_password() const
     {
       return password;
+    }
+    
+    long long User::get_memory_limit() const
+    {
+      return memory_limit;
+    }
+    
+    bool User::is_admin() const
+    {
+      return admin;
     }
   }
 }
