@@ -11,11 +11,11 @@
 namespace epidb {
   namespace dba {
     bool add_user(datatypes::User& user, std::string& msg);
-    bool add_new_user(datatypes::User& user, std::string& msg);
+    bool modify_user(datatypes::User& user, std::string& msg);
+    bool remove_user(const datatypes::User& user, std::string& msg);
     bool get_user_by_key(const std::string& key, datatypes::User& user, std::string& msg);
     bool get_user_by_email(const std::string& email, const std::string& password, datatypes::User& user, std::string& msg);
     bool get_user_by_id(const std::string& id, datatypes::User& user, std::string& msg);
-    bool remove_user(const datatypes::User& user, std::string& msg);
   }
 }
 #endif	/* USER_HPP */

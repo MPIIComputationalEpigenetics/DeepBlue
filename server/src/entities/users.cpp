@@ -14,28 +14,21 @@
 #include "../dba/helpers.hpp"
 #include "../dba/collections.hpp"
 
+#include <mongo/bson/bson.h>
+
 namespace epidb {
   namespace dba {
 
     bool add_user(datatypes::User& user, std::string& msg)
     {
-      std::string _;
-      remove_user(user, _);
-      return add_new_user(user, msg);
-    }
-
-    bool add_new_user(datatypes::User& user, std::string& msg)
-    {
       mongo::BSONObjBuilder create_user_builder;
       user.write_to_BSONObjBuilder(create_user_builder);
 
-      if (user.get_id() == "") {
-        int result;
-        if (!dba::helpers::get_increment_counter("users", result, msg)) {
-          return false;
-        }
-        user.set_id(datatypes::User::PREFIX + std::to_string(result));
+      int result;
+      if (!dba::helpers::get_increment_counter("users", result, msg)) {
+        return false;
       }
+      user.set_id(datatypes::User::PREFIX + std::to_string(result));
       create_user_builder.append(datatypes::User::FIELD_ID, user.get_id());
 
       mongo::BSONObj cu = create_user_builder.obj();
@@ -58,6 +51,32 @@ namespace epidb {
       }
 
       c.done();
+      return true;
+    }
+
+    bool modify_user(datatypes::User& user, std::string& msg)
+    {
+      mongo::BSONObjBuilder create_user_builder;
+      user.write_to_BSONObjBuilder(create_user_builder);
+      
+      Connection c;
+      c->update(dba::helpers::collection_name(dba::Collections::USERS()),
+              BSON("_id" << user.get_id()),
+              BSON("$set" << create_user_builder.obj()));
+      if (!c->getLastError().empty()) {
+        msg = c->getLastError();
+        c.done();
+        return false;
+      }
+      c.done();
+      return true;
+    }
+    
+    bool remove_user(const datatypes::User& user, std::string& msg)
+    {
+      if (!dba::helpers::remove_one(helpers::collection_name(datatypes::User::COLLECTION), user.get_id(), msg)) {
+        return false;
+      }
       return true;
     }
 
@@ -96,14 +115,6 @@ namespace epidb {
         return false;
       }
       user = datatypes::User(result);
-      return true;
-    }
-
-    bool remove_user(const datatypes::User& user, std::string& msg)
-    {
-      if (!dba::helpers::remove_one(helpers::collection_name(datatypes::User::COLLECTION), user.get_id(), msg)) {
-        return false;
-      }
       return true;
     }
   }

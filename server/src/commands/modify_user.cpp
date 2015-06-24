@@ -76,7 +76,7 @@ namespace epidb {
           return false;
         }
 
-        if (!dba::add_user(user, msg)) {
+        if (!dba::modify_user(user, msg)) {
           result.add_error(msg);
           return false;
         }
