@@ -4,6 +4,7 @@
  */
 
 #include <iostream>
+#include <sstream>
 
 #include "../dba/dba.hpp"
 #include "../dba/users.hpp"
@@ -70,7 +71,10 @@ namespace epidb {
         } else if (field == "institution") {
           user.set_institution(value);
         } else if (field == "memory_limit") {
-          // TODO
+          long long converted;
+          std::stringstream ss(value);
+          ss >> converted;
+          user.set_memory_limit(converted);
         } else {
           result.add_error("Invalid field name");
           return false;
