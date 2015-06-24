@@ -67,7 +67,7 @@ namespace epidb {
             if (!by_id(name_id, experiment, msg)) {
               return false;
             }
-            std::string name = experiment["norm_name"].str();
+            std::string name = experiment["name"].str();
             names.push_back(name);
             norm_names.push_back(utils::normalize_name(name));
           } else {
