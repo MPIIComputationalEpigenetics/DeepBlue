@@ -34,5 +34,6 @@ import sequence
 import states
 import techniques
 import tiling
+import user_auth
 import wig_parser
 import xml
