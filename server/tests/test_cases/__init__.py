@@ -20,6 +20,7 @@ import list_similar
 import list_requests
 import lua
 import merge
+import modify_user
 import overlaps
 import output
 import patterns
