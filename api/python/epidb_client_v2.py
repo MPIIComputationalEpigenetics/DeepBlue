@@ -340,3 +340,9 @@ class DeepBlueClient(object):
     @key_required
     def list_users(self):
         return self.server.list_users(self.key)
+
+    def user_auth(self, email, password):
+        return self.server.user_auth(email, password)
+
+    def modify_user(self, field, value, key):
+        return self.server.modify_user(field, value, key)

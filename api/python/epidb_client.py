@@ -260,3 +260,9 @@ class EpidbClient:
 
     def list_users(self, admin_key):
         return self.server.list_users(admin_key)
+
+    def user_auth(self, email, password):
+        return self.server.user_auth(email, password)
+
+    def modify_user(self, field, value, key):
+        return self.server.modify_user(field, value, key)
