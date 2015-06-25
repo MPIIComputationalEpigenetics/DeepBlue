@@ -11,6 +11,7 @@
 
 #include "user.hpp"
 
+#include "../dba/config.hpp"
 #include "../dba/helpers.hpp"
 
 namespace epidb {
@@ -29,10 +30,12 @@ namespace epidb {
     const size_t User::KEY_LENGTH = 16;
 
     int User::seed = rand();
+    
+    User::User() {
+      memory_limit = dba::config::get_processing_max_memory();
+    }
 
-    User::User() {}
-
-    User::User(std::string name, std::string email, std::string institution)
+    User::User(std::string name, std::string email, std::string institution) : User()
     {
       set_name(name);
       set_email(email);
@@ -40,7 +43,7 @@ namespace epidb {
       generate_key();
     }
 
-    User::User(std::vector<mongo::BSONObj> bsonobj)
+    User::User(std::vector<mongo::BSONObj> bsonobj) : User()
     {
       set_name(bsonobj[0][FIELD_NAME].str());
       set_email(bsonobj[0][FIELD_EMAIL].str());
@@ -50,6 +53,9 @@ namespace epidb {
       set_password(bsonobj[0][FIELD_PASSWORD].str());
       if (bsonobj[0].hasElement(FIELD_ADMIN)){
         admin = bsonobj[0][FIELD_ADMIN].Bool();
+      }
+      if (bsonobj[0].hasElement(FIELD_MEMORY_LIMIT)){
+        memory_limit = bsonobj[0][FIELD_MEMORY_LIMIT].Long();
       }
     }
 
@@ -69,7 +75,9 @@ namespace epidb {
       builder.append(FIELD_INSTITUTION, get_institution());
       builder.append(FIELD_PASSWORD, get_password());
       builder.append(FIELD_ADMIN, is_admin());
-      builder.append(FIELD_MEMORY_LIMIT, get_memory_limit());
+      if (get_memory_limit() != dba::config::get_processing_max_memory()) {
+        builder.append(FIELD_MEMORY_LIMIT, get_memory_limit());
+      }
     }
 
     void User::generate_key()
