@@ -298,7 +298,6 @@ namespace epidb {
           return false;
         }
 
-        res["genome"] = utils::bson_to_string(result["genome"]);
         res["_id"] = utils::bson_to_string(result["_id"]);
         res["user"] = utils::bson_to_string(result["user"]);
         res["type"] = utils::bson_to_string(result["type"]);
