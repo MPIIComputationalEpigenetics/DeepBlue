@@ -13,11 +13,13 @@ class TestModifyUserCommand(helpers.TestCase):
         self.assertSuccess(s)
         s, key = epidb.user_auth(settings.EPIDB_TEST_ADMIN[1], "password123")
         self.assertSuccess(s)
+        self.assertEquals(key, self.admin_key)
 
         s = epidb.modify_user("email", "new@email.com", self.admin_key)
         self.assertSuccess(s)
         s, key = epidb.user_auth("new@email.com", "password123")
         self.assertSuccess(s)
+        self.assertEquals(key, self.admin_key)
 
         s = epidb.modify_user("institution", "new_institution", self.admin_key)
         self.assertSuccess(s)

@@ -13,7 +13,7 @@ class TestUserAuthCommand(helpers.TestCase):
         self.assertSuccess(s)
         s, key = epidb.user_auth(settings.EPIDB_TEST_ADMIN[1], "password123")
         self.assertSuccess(s)
-        self.assertTrue(key == self.admin_key)
+        self.assertEquals(key, self.admin_key)
 
         s, user_info = epidb.add_user("user1", "email@example.com", "institution", self.admin_key)
         user_id, user_key = user_info
@@ -22,7 +22,7 @@ class TestUserAuthCommand(helpers.TestCase):
         self.assertSuccess(s)
         s, key = epidb.user_auth("email@example.com", "password567")
         self.assertSuccess(s)
-        self.assertTrue(key == user_key)
+        self.assertEquals(key, user_key)
 
     def test_wrong_password(self):
         epidb = EpidbClient()
