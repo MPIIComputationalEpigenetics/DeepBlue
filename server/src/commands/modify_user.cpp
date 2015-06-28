@@ -85,6 +85,7 @@ namespace epidb {
           return false;
         }
 
+        result.add_string(user.get_id());
         return true;
       }
     } modifyUserCommand;
