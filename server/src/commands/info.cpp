@@ -23,6 +23,7 @@
 
 #include "../extras/serialize.hpp"
 #include "../extras/utils.hpp"
+#include "../entities/users.hpp"
 
 namespace epidb {
   namespace command {
@@ -91,6 +92,19 @@ namespace epidb {
         }
         map["query_id"] = job.query_id;
 
+        return true;
+      }
+      
+      bool get_user(const std::string& key, std::map<std::string, std::string>& metadata, std::string& msg) const
+      {
+        datatypes::User user;
+        if (!dba::get_user_by_key(key, user, msg)) {
+            return false;
+        }
+        metadata["id"] = user.get_id();
+        metadata["name"] = user.get_name();
+        metadata["email"] = user.get_email();
+        metadata["institution"] = user.get_institution();
         return true;
       }
 
@@ -180,6 +194,9 @@ namespace epidb {
           } else if (id.compare(0, 1, "r") == 0) {
             ok = get_request(id, user_key, metadata, msg);
             type = "request";
+          } else if (id == "me"){
+            ok = get_user(user_key, metadata, msg);
+            type = "user";
           } else {
             result.add_error("Invalid identifier: " + id);
             return false;
