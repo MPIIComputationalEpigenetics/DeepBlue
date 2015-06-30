@@ -79,7 +79,7 @@ namespace epidb {
       std::string institution;
       std::string password;
       bool admin = false;
-      long long memory_limit;
+      long long memory_limit = -1;
 
       static int seed;
 
