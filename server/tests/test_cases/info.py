@@ -1,4 +1,5 @@
 import helpers
+import settings
 
 from client import EpidbClient
 
@@ -154,6 +155,17 @@ class TestGetInfoCommand(helpers.TestCase):
     self.assertEqual(data[0]['sex'], "F")
     self.assertEqual(data[0]['user'], "test_admin")
     self.assertEqual(data[0]['_id'], sid)
+
+  def test_me_info(self):
+    epidb = EpidbClient()
+    self.init(epidb)
+
+    s, info = epidb.info("me", self.admin_key)
+    self.assertSuccess(s)
+    info = info[0]
+    self.assertTrue("name" in info and info["name"] == settings.EPIDB_TEST_ADMIN[0])
+    self.assertTrue("email" in info and info["email"] == settings.EPIDB_TEST_ADMIN[1])
+    self.assertTrue("institution" in info and info["institution"] == settings.EPIDB_TEST_ADMIN[2])
 
   def test_request_info_permission(self):
     epidb = EpidbClient()

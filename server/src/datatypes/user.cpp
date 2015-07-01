@@ -32,10 +32,9 @@ namespace epidb {
     int User::seed = rand();
     
     User::User() {
-      memory_limit = dba::config::get_processing_max_memory();
     }
 
-    User::User(std::string name, std::string email, std::string institution) : User()
+    User::User(std::string name, std::string email, std::string institution)
     {
       set_name(name);
       set_email(email);
@@ -43,7 +42,7 @@ namespace epidb {
       generate_key();
     }
 
-    User::User(std::vector<mongo::BSONObj> bsonobj) : User()
+    User::User(std::vector<mongo::BSONObj> bsonobj)
     {
       set_name(bsonobj[0][FIELD_NAME].str());
       set_email(bsonobj[0][FIELD_EMAIL].str());
@@ -75,7 +74,7 @@ namespace epidb {
       builder.append(FIELD_INSTITUTION, get_institution());
       builder.append(FIELD_PASSWORD, get_password());
       builder.append(FIELD_ADMIN, is_admin());
-      if (get_memory_limit() != dba::config::get_processing_max_memory()) {
+      if (memory_limit != -1) {
         builder.append(FIELD_MEMORY_LIMIT, get_memory_limit());
       }
     }
@@ -131,7 +130,7 @@ namespace epidb {
     
     void User::set_memory_limit(long long memory_limit)
     {
-      this->memory_limit = memory_limit;
+        this->memory_limit = memory_limit;
     }
 
     std::string User::get_id() const
@@ -162,7 +161,11 @@ namespace epidb {
     
     long long User::get_memory_limit() const
     {
-      return memory_limit;
+      if (this->memory_limit == -1) {
+        return dba::config::processing_max_memory;
+      } else {
+        return this->memory_limit;
+      }
     }
     
     bool User::is_admin() const
