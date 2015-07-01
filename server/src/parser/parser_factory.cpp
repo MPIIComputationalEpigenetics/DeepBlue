@@ -34,11 +34,11 @@ namespace epidb {
       return a.start < b.start;
     }
 
-    Parser::Parser(const std::string &content, FileFormat &format) :
+    Parser::Parser(std::unique_ptr<std::istream> &&input, FileFormat &format) :
       actual_line_content_(""),
       actual_line_(0),
       first_column_useless(false),
-      input_(content),
+      input_(std::move(input)),
       first_(true),
       format_(format),
       chromosome_pos(std::numeric_limits<size_t>::max()),
@@ -84,12 +84,12 @@ namespace epidb {
 
     bool Parser::parse_line(BedLine &bed_line, std::string &msg)
     {
-      if (input_.eof()) {
+      if (input_->eof()) {
         msg = "Unexpected EOF";
         return false;
       }
       std::string line;
-      std::getline(input_, line);
+      std::getline(*input_, line);
       actual_line_content_ = line;
 
       boost::trim(line);
@@ -185,7 +185,7 @@ namespace epidb {
 
     bool Parser::eof()
     {
-      return input_.eof();
+      return input_->eof();
     }
 
     size_t Parser::actual_line()

@@ -6,13 +6,8 @@
 //  Copyright (c) 2013,2014 Max Planck Institute for Computer Science. All rights reserved.
 //
 
-#include <string>
-
-
-#include <boost/algorithm/string.hpp>
-
 #include <ctime>
-
+#include <string>
 #include <strtk.hpp>
 
 #include "bedgraph_parser.hpp"

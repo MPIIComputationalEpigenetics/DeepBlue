@@ -183,20 +183,20 @@ namespace epidb {
           return false;
         }
 
+        std::unique_ptr<std::istream> _input;
+        if (extra_metadata.find("__local_file__") != extra_metadata.end()) {
+          std::string &file_name = extra_metadata["__local_file__"];
+          _input = std::unique_ptr<std::istream>(new std::ifstream(file_name.c_str()));
+          if (!_input->good()) {
+            result.add_error("File " + file_name + " does not exist or it is not accessible.");
+            return false;
+          }
+        } else {
+          _input = std::unique_ptr<std::istream>(new std::stringstream(data));
+        }
+
         if (format == "wig" || format == "bedgraph") {
           parser::WigPtr wig;
-          std::unique_ptr<std::istream> _input;
-          if (extra_metadata.find("__local_file__") != extra_metadata.end()) {
-            std::string &file_name = extra_metadata["__local_file__"];
-            _input = std::unique_ptr<std::istream>(new std::ifstream(file_name.c_str()));
-            if (!_input->good()) {
-              result.add_error("File " + file_name + " does not exist or it is not accessible.");
-              return false;
-            }
-          } else {
-            _input = std::unique_ptr<std::istream>(new std::stringstream(data));
-          }
-
           if (format == "wig") {
             parser::WIGParser wig_parser(std::move(_input));
             if (!wig_parser.get(wig, msg)) {
@@ -232,7 +232,7 @@ namespace epidb {
             return false;
           }
 
-          parser::Parser parser(data, fileFormat);
+          parser::Parser parser(std::move(_input), fileFormat);
           if (!parser.check_format(msg)) {
             result.add_error(msg);
             return false;

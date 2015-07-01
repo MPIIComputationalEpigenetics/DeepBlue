@@ -102,7 +102,8 @@ namespace epidb {
           return false;
         }
 
-        parser::Parser parser(data, fileFormat);
+        std::unique_ptr<std::istream> _input = std::unique_ptr<std::istream>(new std::stringstream(data));
+        parser::Parser parser(std::move(_input), fileFormat);
         if (!parser.check_format(msg)) {
           result.add_error(msg);
           return false;

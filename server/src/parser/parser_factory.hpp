@@ -187,7 +187,7 @@ namespace epidb {
       std::string actual_line_content_;
       size_t actual_line_;
       bool first_column_useless;
-      std::stringstream input_;
+      std::unique_ptr<std::istream> input_;
       bool first_;
       FileFormat format_;
       size_t chromosome_pos;
@@ -195,7 +195,7 @@ namespace epidb {
       size_t end_pos;
 
     public:
-      Parser(const std::string &content, FileFormat &format);
+      Parser(std::unique_ptr<std::istream> &&input, FileFormat &format);
       bool check_format(std::string &msg);
       bool parse_line(BedLine &bed_line, std::string &msg);
       bool check_length(const BedLine &bed_line);
