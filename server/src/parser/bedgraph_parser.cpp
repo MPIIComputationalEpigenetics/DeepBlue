@@ -43,15 +43,21 @@ namespace epidb {
         }
 
         if (line.compare(0, 5, "track") == 0) {
+          // Ignoring more than one TRACK
+          /*
           if (declare_track_)  {
             msg = "It is allowed only one track by file. Line: " + line_str();
             return false;
           }
+          */
 
+          // Ignoring TRACK content
+          /*
           std::map<std::string, std::string> info;
           if (!read_track(line, info, msg)) {
             return false;
           }
+          */
 
           declare_track_ = true;
           return true;
