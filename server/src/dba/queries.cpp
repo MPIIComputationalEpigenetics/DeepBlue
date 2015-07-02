@@ -515,7 +515,6 @@ namespace epidb {
         ChromosomeRegionsList regions_a;
 
         if (use_fast) {
-          std::cerr << "FASSTT" << std::endl;
           mongo::BSONObj args = query_a["args"].Obj();
 
           mongo::BSONArrayBuilder datasets_array_builder;
