@@ -84,20 +84,23 @@ namespace epidb {
 
     bool Parser::parse_line(BedLine &bed_line, std::string &msg)
     {
-      if (input_->eof()) {
-        msg = "Unexpected EOF";
-        return false;
-      }
       std::string line;
-      std::getline(*input_, line);
-      actual_line_content_ = line;
 
-      boost::trim(line);
+      do {
+        if (input_->eof()) {
+          msg = "EOF";
+          return true;
+        }
+        std::getline(*input_, line);
+        actual_line_content_ = line;
+        boost::trim(line);
 
-      if (line.empty()) {
-        msg = "Empty line";
-        return false;
-      }
+        if (line.empty()) {
+          msg = "Empty line";
+          return false;
+        }
+
+      } while ((line[0] == '#') || (line.substr(0, 5) == "track") || (line.substr(0, 7) == "browser"));
 
       if (first_) {
         std::stringstream ss(line);
