@@ -131,7 +131,8 @@ namespace epidb {
         }
 
         c.done();
-        return true;
+
+        return dba::helpers::notify_change_occurred(dba::Collections::PROJECTS(), msg);
       }
     }
   }
