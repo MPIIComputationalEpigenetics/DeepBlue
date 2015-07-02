@@ -53,7 +53,14 @@ class TestState(helpers.TestCase):
             data[new_key] = value
             ids.append(insert(epidb, new_key))
             state_new = self.get_state(vocab, epidb)
-            self.assertTrue(state_old + 1 == state_new)
+            s = 1
+            # When we create a new project it:
+            # creates the project (+1)
+            # insert user to the project (+1)
+            # set project private (+1)
+            if vocab == "projects":
+                s = 3
+            self.assertTrue(state_old + s == state_new)
             state_old = state_new
 
         return ids

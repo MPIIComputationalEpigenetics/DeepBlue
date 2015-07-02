@@ -105,7 +105,7 @@ namespace epidb {
           return  false;
         }
         c.done();
-        return true;
+        return dba::helpers::notify_change_occurred(dba::Collections::PROJECTS(), msg);;
       }
 
       bool add_user_to_project(const std::string &user_id, const std::string &project_id, const bool include, std::string &msg)
