@@ -196,7 +196,7 @@ namespace epidb {
         experiment_data_builder.append("name", name);
         experiment_data_builder.append("norm_name", norm_name);
         experiment_data_builder.append("genome", genome);
-        experiment_data_builder.append("norm_genome", genome);
+        experiment_data_builder.append("norm_genome", norm_genome);
         experiment_data_builder.append("epigenetic_mark", epigenetic_mark);
         experiment_data_builder.append("norm_epigenetic_mark", norm_epigenetic_mark);
         experiment_data_builder.append("sample_id", sample_id);
