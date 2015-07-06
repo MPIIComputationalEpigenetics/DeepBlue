@@ -389,9 +389,8 @@ namespace epidb {
 
         std::vector<mongo::BSONElement> result = res["result"].Array();
 
-
         for (const mongo::BSONElement & be : result) {
-          std::string norm_name = be["_id"].String();
+          std::string norm_name = utils::normalize_name(be["_id"].String());
           long count = be["total"].safeNumberLong();
 
           utils::IdNameCount inc;
