@@ -59,6 +59,10 @@ namespace epidb {
       bool get_one(const std::string &where, const mongo::Query &query,
                    mongo::BSONObj &result, std::string &msg);
 
+      // Get Id and Name from the given collection documents and a filter BSon
+      bool get(const std::string &where, mongo::BSONObj filter,
+               std::vector<utils::IdName> &results, std::string &msg);
+
       // Get Id and Name from the given collection documents.
       bool get(const std::string &where, std::vector<utils::IdName> &results, std::string &msg);
 

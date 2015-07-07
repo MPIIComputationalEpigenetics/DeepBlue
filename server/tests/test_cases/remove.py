@@ -186,7 +186,7 @@ class TestRemoveCommands(helpers.TestCase):
     epidb = EpidbClient()
     self.init_base(epidb)
 
-    res, biosources = epidb.list_biosources(self.admin_key)
+    res, biosources = epidb.list_biosources(None, self.admin_key)
 
     for biosource in biosources:
       res = epidb.remove(biosource[0], self.admin_key)

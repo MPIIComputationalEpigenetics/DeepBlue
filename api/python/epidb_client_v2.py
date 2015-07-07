@@ -98,8 +98,8 @@ class DeepBlueClient(object):
                                          extra_metadata, self.key)
 
     @key_required
-    def list_biosources(self):
-        return self.server.list_biosources(self.key)
+    def list_biosources(self, metadata):
+        return self.server.list_biosources(metadata, self.key)
 
     @key_required
     def list_similar_biosources(self, biosource_name):

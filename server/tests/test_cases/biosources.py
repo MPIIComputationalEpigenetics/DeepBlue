@@ -12,7 +12,7 @@ class TestBioSourceCommands(helpers.TestCase):
     self.assertSuccess(epidb.add_biosource("K562b", "leukemia cell", {}, self.admin_key))
     self.assertSuccess(epidb.add_biosource("HepG2", "hepatocellular carcinoma", {}, self.admin_key))
 
-    res, biosources = epidb.list_biosources(self.admin_key)
+    res, biosources = epidb.list_biosources(None, self.admin_key)
     self.assertSuccess(res, biosources)
 
     biosources_names = [x[1] for x in biosources]
@@ -46,7 +46,7 @@ class TestBioSourceCommands(helpers.TestCase):
     self.assertSuccess(epidb.add_biosource("blood", None, {}, self.admin_key))
     self.assertSuccess(epidb.add_biosource("mesoderm", None, {}, self.admin_key))
 
-    res, biosources = epidb.list_biosources(self.admin_key)
+    res, biosources = epidb.list_biosources(None, self.admin_key)
     self.assertSuccess(res, biosources)
 
     biosources_names = [x[1] for x in biosources]

@@ -29,7 +29,8 @@ namespace epidb {
 
       bool genomes(const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg);
 
-      bool biosources(const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg);
+      bool biosources(const datatypes::Metadata &metadata,
+                      std::vector<utils::IdName> &result, std::string &msg);
 
       bool samples(const std::string &user_key, const mongo::BSONArray &biosources,
                    const datatypes::Metadata &metadata,

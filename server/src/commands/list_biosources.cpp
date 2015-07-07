@@ -28,9 +28,10 @@ namespace epidb {
       static Parameters parameters_()
       {
         Parameter p[] = {
+          Parameter("metadata", serialize::MAP, "metadadata to be matched"),
           parameters::UserKey
         };
-        Parameters params(&p[0], &p[0] + 1);
+        Parameters params(&p[0], &p[0] + 2);
         return params;
       }
 
@@ -49,7 +50,8 @@ namespace epidb {
       virtual bool run(const std::string &ip,
                        const serialize::Parameters &parameters, serialize::Parameters &result) const
       {
-        const std::string user_key = parameters[0]->as_string();
+
+        const std::string user_key = parameters[1]->as_string();
 
         std::string msg;
         if (!Command::checks(user_key, msg)) {
@@ -57,8 +59,14 @@ namespace epidb {
           return false;
         }
 
+        datatypes::Metadata metadata;
+        if (!read_metadata(parameters[0], metadata, msg)) {
+          result.add_error(msg);
+          return false;
+        }
+
         std::vector<utils::IdName> names;
-        if (!dba::list::biosources(user_key, names, msg)) {
+        if (!dba::list::biosources(metadata, names, msg)) {
           result.add_error(msg);
           return false;
         }

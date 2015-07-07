@@ -40,9 +40,15 @@ namespace epidb {
         return helpers::get(Collections::GENOMES(), result, msg);
       }
 
-      bool biosources(const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg)
+      bool biosources(const datatypes::Metadata &metadata,
+                      std::vector<utils::IdName> &result, std::string &msg)
       {
-        return helpers::get(Collections::BIOSOURCES(), result, msg);
+        mongo::BSONObjBuilder query_builder;
+        datatypes::Metadata::const_iterator it;
+        for (const auto& p : metadata) {
+          query_builder.append("extra_metadata."+p.first, p.second);
+        }
+        return helpers::get(Collections::BIOSOURCES(), query_builder.obj(), result, msg);
       }
 
       bool techniques(const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg)

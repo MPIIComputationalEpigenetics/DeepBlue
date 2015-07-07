@@ -76,7 +76,7 @@ class TestBugs(helpers.TestCase):
     epidb.add_biosource("testing closed <Saidel>", "", {}, self.admin_key)
     epidb.add_biosource("!'234456789<<<<><<<;;.,.,-,>", "", {}, self.admin_key)
 
-    (r,a) = epidb.list_biosources(self.admin_key)
+    (r,a) = epidb.list_biosources(None, self.admin_key)
     self.assertSuccess(r,a)
 
     biosource_names = [x[1] for x in a]

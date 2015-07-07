@@ -104,6 +104,24 @@ namespace epidb {
         return get(where, query, v, results, msg);
       }
 
+      // Get Id and Name from the given collection documents and a filter BSon
+      bool get(const std::string &where, mongo::BSONObj filter,
+               std::vector<utils::IdName> &results, std::string &msg)
+      {
+        std::vector<std::string> v;
+        v.push_back("_id");
+        v.push_back("name");
+
+        std::vector<mongo::BSONObj> r;
+        if (!get(where, mongo::Query(filter), v, r, msg)) {
+          return false;
+        }
+
+        results = bsons_to_id_names(r);
+
+        return true;
+      }
+
       // Get Id and Name from the given collection documents.
       bool get(const std::string &where, std::vector<utils::IdName> &results, std::string &msg)
       {

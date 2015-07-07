@@ -65,8 +65,8 @@ class EpidbClient:
         return self.server.add_biosource(name, description,
                                           extra_metadata, user_key)
 
-    def list_biosources(self, user_key):
-        return self.server.list_biosources(user_key)
+    def list_biosources(self, extra_metadata, user_key):
+        return self.server.list_biosources(extra_metadata, user_key)
 
     def list_similar_biosources(self, biosource_name, user_key):
         return self.server.list_similar_biosources(biosource_name, user_key)
