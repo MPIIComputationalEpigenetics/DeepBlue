@@ -14,14 +14,15 @@
 namespace epidb {
   namespace datatypes {
 
-    enum PermissionLevel {
+    enum PermissionLevel { 
       ADMIN,
-      INCLUDE_CV_TERMS,
+      INCLUDE_COLLECTION_TERMS,
       INCLUDE_EXPERIMENTS,
       INCLUDE_ANNOTATIONS,
       GET_DATA,
       LIST_COLLECTIONS,
-      NONE
+      NONE,
+      NOT_SET
     };
 
     class User {
@@ -44,6 +45,7 @@ namespace epidb {
       static const std::string FIELD_PASSWORD;
       static const std::string FIELD_ADMIN;
       static const std::string FIELD_MEMORY_LIMIT;
+      static const std::string FIELD_PERMISSION_LEVEL;
       
       static const size_t KEY_LENGTH;
 
@@ -56,6 +58,7 @@ namespace epidb {
       std::string get_institution() const;
       std::string get_password() const;
       long long get_memory_limit() const;
+      PermissionLevel get_permission_level() const;
       bool is_admin() const;
 
       void set_id(std::string id_);
@@ -65,6 +68,7 @@ namespace epidb {
       void set_institution(std::string institution_);
       void set_password(std::string password_);
       void set_memory_limit(long long memory_limit);
+      void set_permission_level(PermissionLevel permission_level);
 
       void generate_key();
       bool generate_id(std::string msg);
@@ -72,6 +76,8 @@ namespace epidb {
       bool has_permission(PermissionLevel permission);
 
     private:
+      void set_permission_level(int permission_level);
+        
       std::string id;
       std::string key;
       std::string name;
@@ -80,6 +86,7 @@ namespace epidb {
       std::string password;
       bool admin = false;
       long long memory_limit = -1;
+      PermissionLevel permission_level = NOT_SET;
 
       static int seed;
 
