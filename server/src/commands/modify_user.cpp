@@ -70,11 +70,6 @@ namespace epidb {
           user.set_password(value);
         } else if (field == "institution") {
           user.set_institution(value);
-        } else if (field == "memory_limit") {
-          long long converted;
-          std::stringstream ss(value);
-          ss >> converted;
-          user.set_memory_limit(converted);
         } else {
           result.add_error("Invalid field name");
           return false;
