@@ -875,23 +875,6 @@ namespace epidb {
       return true;
     }
 
-    bool set_biosource_synonym(const std::string &biosource_name, const std::string &synonymous,
-                               bool is_biosource, const bool is_syn, const std::string &user_key, std::string &msg)
-    {
-      if (!cv::set_biosource_synonym(biosource_name, synonymous, is_biosource, is_syn, user_key, msg)) {
-        return false;
-      }
-      return true;
-    }
-
-    bool get_biosource_synonyms(const std::string &biosource_name, const std::string &norm_biosource_name,
-                                bool is_biosource, const std::string &user_key,
-                                std::vector<utils::IdName> &syns,
-                                std::string &msg)
-    {
-      return cv::get_biosource_synonyms("", biosource_name, norm_biosource_name, is_biosource, user_key, syns, msg);
-    }
-
     bool set_biosource_parent(const std::string &biosource_more_embracing, const std::string &norm_biosource_more_embracing,
                               const std::string &biosource_less_embracing, const std::string &norm_biosource_less_embracing,
                               bool more_embracing_is_syn, const bool less_embracing_is_syn,

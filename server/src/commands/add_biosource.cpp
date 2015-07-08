@@ -7,6 +7,7 @@
 //
 
 #include "../dba/dba.hpp"
+#include "../dba/exists.hpp"
 #include "../extras/utils.hpp"
 #include "../extras/serialize.hpp"
 
@@ -89,6 +90,3 @@ namespace epidb {
     } addBioSourceCommand;
   }
 }
-
-
-

@@ -6,7 +6,7 @@
 //  Copyright (c) 2013,2014 Max Planck Institute for Computer Science. All rights reserved.
 //
 
-#include "../dba/dba.hpp"
+#include "../dba/controlled_vocabulary.hpp"
 #include "../dba/exists.hpp"
 #include "../extras/utils.hpp"
 #include "../extras/serialize.hpp"
@@ -89,7 +89,7 @@ namespace epidb {
 
           is_biosource = dba::exists::biosource(norm_related_biosource);
 
-          if (!dba::get_biosource_synonyms(related_biosource.name, norm_related_biosource, is_biosource, user_key, related_syns, msg)) {
+          if (!dba::cv::get_biosource_synonyms("", related_biosource.name, norm_related_biosource, is_biosource, user_key, related_syns, msg)) {
             result.add_error(msg);
             return false;
           }

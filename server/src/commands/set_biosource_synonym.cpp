@@ -6,13 +6,11 @@
 //  Copyright (c) 2013,2014 Max Planck Institute for Computer Science. All rights reserved.
 //
 
-#include "../dba/dba.hpp"
-#include "../dba/exists.hpp"
-
-#include "../extras/utils.hpp"
-#include "../extras/serialize.hpp"
+#include "../dba/controlled_vocabulary.hpp"
 
 #include "../engine/commands.hpp"
+
+#include "../extras/serialize.hpp"
 
 #include "../log.hpp"
 #include "../errors.hpp"
@@ -64,34 +62,7 @@ namespace epidb {
           return false;
         }
 
-        const std::string norm_biosource_name = utils::normalize_name(biosource_name);
-
-        // TODO Move to a helper function: get_biosource_root
-        // Check if the actual biosource exists
-        bool is_biosource = dba::exists::biosource(norm_biosource_name);
-        bool is_syn = dba::exists::biosource_synonym(norm_biosource_name);
-
-        if (!(is_biosource || is_syn)) {
-          std::string s = Error::m(ERR_INVALID_BIOSOURCE_NAME, biosource_name.c_str());
-          EPIDB_LOG_TRACE(s);
-          result.add_error(s);
-          return false;
-        }
-
-        // TODO Move to a helper function: get_biosource_root
-        // Check if synonym name is already being user
-        std::string norm_synoynm_name = utils::normalize_name(synonym_name);
-        bool syn_is_biosource = dba::exists::biosource(norm_synoynm_name);
-        bool syn_is_syn = dba::exists::biosource_synonym(norm_synoynm_name);
-
-        if (syn_is_biosource || syn_is_syn) {
-          std::string s = Error::m(ERR_INVALID_BIOSOURCE_SYNONYM, synonym_name.c_str());
-          EPIDB_LOG_TRACE(s);
-          result.add_error(s);
-          return false;
-        }
-
-        if (!dba::set_biosource_synonym(biosource_name, synonym_name, is_biosource, is_syn, user_key, msg)) {
+        if (!dba::cv::set_biosource_synonym_complete(biosource_name, synonym_name, user_key, msg)) {
           result.add_error(msg);
           return false;
         }

@@ -18,6 +18,7 @@
 
 #include "controlled_vocabulary.hpp"
 #include "collections.hpp"
+#include "exists.hpp"
 #include "helpers.hpp"
 #include "full_text.hpp"
 
@@ -186,7 +187,8 @@ namespace epidb {
         return true;
       }
 
-      bool set_biosource_synonym(const std::string &input_biosource_name, const std::string &synonym,
+
+      bool __set_biosource_synonym(const std::string &input_biosource_name, const std::string &synonym,
                                  bool is_biosource, const bool is_syn, const std::string &user_key,
                                  std::string &msg)
       {
@@ -256,6 +258,38 @@ namespace epidb {
         return true;
       }
 
+      bool set_biosource_synonym_complete(const std::string &biosource_name, const std::string &synonym_name, const std::string& user_key, std::string& msg)
+      {
+
+        const std::string norm_biosource_name = utils::normalize_name(biosource_name);
+
+        // TODO Move to a helper function: get_biosource_root
+        // Check if the actual biosource exists
+        bool is_biosource = exists::biosource(norm_biosource_name);
+        bool is_syn = exists::biosource_synonym(norm_biosource_name);
+
+        if (!(is_biosource || is_syn)) {
+          msg = Error::m(ERR_INVALID_BIOSOURCE_NAME, biosource_name.c_str());
+          return false;
+        }
+
+        // TODO Move to a helper function: get_biosource_root
+        // Check if synonym name is already being user
+        std::string norm_synoynm_name = utils::normalize_name(synonym_name);
+        bool syn_is_biosource = exists::biosource(norm_synoynm_name);
+        bool syn_is_syn = exists::biosource_synonym(norm_synoynm_name);
+
+        if (syn_is_biosource || syn_is_syn) {
+          msg = Error::m(ERR_INVALID_BIOSOURCE_SYNONYM, synonym_name.c_str());
+          return false;
+        }
+
+        if (!__set_biosource_synonym(biosource_name, synonym_name, is_biosource, is_syn, user_key, msg)) {
+          return false;
+        }
+
+        return true;
+      }
 
       bool get_biosource_synonyms(const std::string &id, const std::string &biosource_name,
                                   const std::string &norm_biosource_name,

@@ -66,17 +66,6 @@ namespace epidb {
                        const datatypes::Metadata &extra_metadata,
                        const std::string &user_key,
                        std::string &biosource_id, std::string &msg);
-
-    bool set_biosource_synonym(const std::string &biosource_name, const std::string &synonymous,
-                               bool is_biosource, const bool is_syn,
-                               const std::string &user_key, std::string &msg);
-
-    bool set_biosource_parent(const std::string &biosource_more_embracing, const std::string &norm_biosource_more_embracing,
-                              const std::string &biosource_less_embracing, const std::string &norm_biosource_less_embracing,
-                              bool more_embracing_is_syn, const bool less_embracing_is_syn,
-                              const std::string &user_key, std::string &msg);
-
-
     /**
      * Validation
      */

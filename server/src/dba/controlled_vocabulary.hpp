@@ -67,9 +67,9 @@ namespace epidb {
 
 
       extern BiosourceConnectedCache biosources_cache;
-      bool set_biosource_synonym(const std::string &actual_existing_biosource_name, const std::string &new_biosource_name,
-                                 bool is_biosource, const bool is_syn,
-                                 const std::string &user_key, std::string &msg);
+
+      bool set_biosource_synonym_complete(const std::string &biosource_name, const std::string &synonym_name,
+                                          const std::string& user_key, std::string& msg);
 
       bool get_biosource_synonyms(const std::string &id, const std::string &biosource_name, const std::string &norm_biosource_name,
                                   bool is_biosource, const std::string &user_key,

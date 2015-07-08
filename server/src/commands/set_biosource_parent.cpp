@@ -6,7 +6,7 @@
 //  Copyright (c) 2013,2014 Max Planck Institute for Computer Science. All rights reserved.
 //
 
-#include "../dba/dba.hpp"
+#include "../dba/controlled_vocabulary.hpp"
 #include "../dba/exists.hpp"
 
 #include "../extras/utils.hpp"
@@ -80,7 +80,7 @@ namespace epidb {
         }
 
         std::string msg;
-        if (dba::set_biosource_parent(bigger_scope, norm_bigger_scope,
+        if (dba::cv::set_biosource_parent(bigger_scope, norm_bigger_scope,
                                       smaller_scope, norm_smaller_scope,
                                       bigger_scope_is_syn, smaller_scope_is_syn,
                                       user_key, msg)) {
