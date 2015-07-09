@@ -6,8 +6,10 @@
 //  Copyright (c) 2013,2014 Max Planck Institute for Computer Science. All rights reserved.
 //
 
+#include "../dba/controlled_vocabulary.hpp"
 #include "../dba/dba.hpp"
 #include "../dba/exists.hpp"
+#include "../dba/list.hpp"
 #include "../extras/utils.hpp"
 #include "../extras/serialize.hpp"
 
@@ -70,6 +72,34 @@ namespace epidb {
           return false;
         }
 
+        //// Check if a biosource with the same ontology_id already exists.
+        //// If it does exists, include the new biosource as a synonym
+        auto ontology_id = extra_metadata.find("ontology_id");
+        if (ontology_id != extra_metadata.end()) {
+          datatypes::Metadata search_metadata;
+          search_metadata["ontology_id"] = ontology_id->second;
+          std::vector<utils::IdName> names;
+          if (!dba::list::biosources(search_metadata, names, msg)) {
+            result.add_error(msg);
+            return false;
+          }
+          if (!names.empty()) {
+            if (names.size() > 1) {
+              result.add_error("Fatal error, it was expected only one BioSource with the ontology_id:" + ontology_id->second + ". But more than one was found. Please, contact us. Meanwhile, you can use the equivalent biosource \"" + names[0].name + "\".");
+              return false;
+            }
+            bool ret = dba::cv::set_biosource_synonym_complete(names[0].name, name, user_key, msg);
+            if (!ret) {
+              result.add_error(msg);
+            } else {
+              result.add_string(names[0].id);
+            }
+            return ret;
+          }
+        }
+        ////
+
+        // Normal add_biosource code flow.
         std::string norm_name = utils::normalize_name(name);
         if (!dba::is_valid_biosource_name(name, norm_name, msg)) {
           result.add_error(msg);

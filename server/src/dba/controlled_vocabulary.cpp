@@ -284,11 +284,7 @@ namespace epidb {
           return false;
         }
 
-        if (!__set_biosource_synonym(biosource_name, synonym_name, is_biosource, is_syn, user_key, msg)) {
-          return false;
-        }
-
-        return true;
+        return __set_biosource_synonym(biosource_name, synonym_name, is_biosource, is_syn, user_key, msg);
       }
 
       bool get_biosource_synonyms(const std::string &id, const std::string &biosource_name,
