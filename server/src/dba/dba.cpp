@@ -689,11 +689,6 @@ namespace epidb {
       std::string err_msg;
       bool err = false;
       for (const datatypes::Metadata::value_type &kv : metadata) {
-        if (kv.second.empty()) {
-          msg = "The field " + kv.first + " does not have the value value.";
-          return false;
-        }
-
         if (names_values.find(kv.first) != names_values.end()) {
           msg = "Field " + kv.first + " is duplicated.";
           return false;
