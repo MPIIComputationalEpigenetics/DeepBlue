@@ -72,6 +72,8 @@ class TestExperiments(helpers.TestCase):
     self.init_base(epidb)
 
     uid, user_key = self.insert_user(epidb, "test_user")
+    s, tmp_user = epidb.modify_user_admin(user_key, "permission_level", "INCLUDE_EXPERIMENTS", self.admin_key)
+    self.assertSuccess(s)
 
     sample_id = self.sample_ids[0]
     regions_data = helpers.load_bed("hg19_chr1_1")

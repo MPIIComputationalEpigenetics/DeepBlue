@@ -173,6 +173,7 @@ class TestGetInfoCommand(helpers.TestCase):
 
     s, user = epidb.add_user("user1", "test1@example.com", "test", self.admin_key)
     id, user_key = user
+    epidb.modify_user_admin(user_key, "permission_level", "INCLUDE_COLLECTION_TERMS", self.admin_key)
 
     s, id = epidb.add_epigenetic_mark("DNA Methylation", "", user_key)
     self.assertSuccess(s, id)

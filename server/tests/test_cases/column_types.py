@@ -178,6 +178,8 @@ class TestColumnTypes(helpers.TestCase):
     self.assertSuccess(res, u1)
 
     user_key = u1[1]
+    s, user_tmp = epidb.modify_user_admin(user_key, "permission_level", "INCLUDE_COLLECTION_TERMS", self.admin_key)
+    self.assertSuccess(s)
 
     res, c = epidb.create_column_type_simple("GENE_ID_ENTREZ", "rebimboca da parafuseta", "string", user_key)
     self.assertSuccess(res, c)
