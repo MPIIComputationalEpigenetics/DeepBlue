@@ -27,7 +27,8 @@ namespace epidb {
 
     class TilingRegionsCommand: public Command {
 
-    private: static CommandDescription desc_()
+    private:
+      static CommandDescription desc_()
       {
         return CommandDescription(categories::OPERATIONS, "Creates regions with the tiling size over the chromosomes.");
       }
@@ -67,16 +68,16 @@ namespace epidb {
         const std::string user_key = parameters[3]->as_string();
 
         std::string msg;
-        
+
         datatypes::User user;
         if (!dba::get_user_by_key(user_key, user, msg)) {
           result.add_error(msg);
           return false;
         }
-        
+
         if (!user.has_permission(datatypes::GET_DATA)) {
-            result.add_error(Error::m(ERR_INSUFFICIENT_PERMISSION));
-            return false;
+          result.add_error(Error::m(ERR_INSUFFICIENT_PERMISSION));
+          return false;
         }
 
         std::string norm_genome = utils::normalize_name(genome);

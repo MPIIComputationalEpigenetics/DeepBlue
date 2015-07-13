@@ -30,7 +30,8 @@ namespace epidb {
 
     class SelectRegionsCommand: public Command {
 
-    private: static CommandDescription desc_()
+    private:
+      static CommandDescription desc_()
       {
         return CommandDescription(categories::OPERATIONS, "Selects experiment regions matching the given parameters.");
       }
@@ -90,16 +91,16 @@ namespace epidb {
         const int end = parameters[8]->isNull() ? -1 : parameters[8]->as_long();
 
         std::string msg;
-        
+
         datatypes::User user;
         if (!dba::get_user_by_key(user_key, user, msg)) {
           result.add_error(msg);
           return false;
         }
-        
+
         if (!user.has_permission(datatypes::GET_DATA)) {
-            result.add_error(Error::m(ERR_INSUFFICIENT_PERMISSION));
-            return false;
+          result.add_error(Error::m(ERR_INSUFFICIENT_PERMISSION));
+          return false;
         }
 
         bool has_filter = false;

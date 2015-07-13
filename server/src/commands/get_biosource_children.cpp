@@ -60,16 +60,16 @@ namespace epidb {
         std::string norm_biosource_name = utils::normalize_name(biosource_name);
 
         std::string msg;
-        
+
         datatypes::User user;
         if (!dba::get_user_by_key(user_key, user, msg)) {
           result.add_error(msg);
           return false;
         }
-        
+
         if (!user.has_permission(datatypes::GET_DATA)) {
-            result.add_error(Error::m(ERR_INSUFFICIENT_PERMISSION));
-            return false;
+          result.add_error(Error::m(ERR_INSUFFICIENT_PERMISSION));
+          return false;
         }
 
         bool is_biosource = dba::exists::biosource(norm_biosource_name);
@@ -85,7 +85,7 @@ namespace epidb {
         std::vector<utils::IdName> related_biosources;
 
         if (!dba::get_biosource_children(biosource_name, norm_biosource_name,
-                                      is_biosource, user_key, related_biosources, msg)) {
+                                         is_biosource, user_key, related_biosources, msg)) {
           result.add_error(msg);
           return false;
         }

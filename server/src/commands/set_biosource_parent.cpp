@@ -56,18 +56,18 @@ namespace epidb {
         const std::string bigger_scope = parameters[0]->as_string();
         const std::string smaller_scope = parameters[1]->as_string();
         const std::string user_key = parameters[2]->as_string();
-        
+
         std::string msg;
-        
+
         datatypes::User user;
         if (!dba::get_user_by_key(user_key, user, msg)) {
           result.add_error(msg);
           return false;
         }
-        
+
         if (!user.has_permission(datatypes::INCLUDE_COLLECTION_TERMS)) {
-            result.add_error(Error::m(ERR_INSUFFICIENT_PERMISSION));
-            return false;
+          result.add_error(Error::m(ERR_INSUFFICIENT_PERMISSION));
+          return false;
         }
 
         std::string norm_bigger_scope = utils::normalize_name(bigger_scope);
@@ -93,9 +93,9 @@ namespace epidb {
         }
 
         if (dba::cv::set_biosource_parent(bigger_scope, norm_bigger_scope,
-                                      smaller_scope, norm_smaller_scope,
-                                      bigger_scope_is_syn, smaller_scope_is_syn,
-                                      user_key, msg)) {
+                                          smaller_scope, norm_smaller_scope,
+                                          bigger_scope_is_syn, smaller_scope_is_syn,
+                                          user_key, msg)) {
           result.add_string(bigger_scope);
           result.add_string(smaller_scope);
           return true;

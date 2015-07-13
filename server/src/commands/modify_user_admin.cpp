@@ -59,16 +59,16 @@ namespace epidb {
         const std::string admin_key = parameters[3]->as_string();
 
         std::string msg;
-        
+
         datatypes::User admin;
         if (!dba::get_user_by_key(admin_key, admin, msg)) {
           result.add_error(msg);
           return false;
         }
-        
+
         if(!admin.has_permission(datatypes::ADMIN)) {
-            result.add_error(Error::m(ERR_INSUFFICIENT_PERMISSION));
-            return false;
+          result.add_error(Error::m(ERR_INSUFFICIENT_PERMISSION));
+          return false;
         }
 
         datatypes::User user;
@@ -76,31 +76,31 @@ namespace epidb {
           result.add_error(msg);
           return false;
         }
-        
+
         if (field == "memory_limit") {
           long long converted;
           std::stringstream ss(value);
           ss >> converted;
           user.set_memory_limit(converted);
         } else if (field == "permission_level") {
-            if (value == "ADMIN") {
-                user.set_permission_level(datatypes::ADMIN);
-            } else if (value == "INCLUDE_COLLECTION_TERMS") {
-                user.set_permission_level(datatypes::INCLUDE_COLLECTION_TERMS);
-            } else if (value == "INCLUDE_EXPERIMENTS") {
-                user.set_permission_level(datatypes::INCLUDE_EXPERIMENTS);
-            } else if (value == "INCLUDE_ANNOTATIONS") {
-                user.set_permission_level(datatypes::INCLUDE_ANNOTATIONS);
-            } else if (value == "GET_DATA") {
-                user.set_permission_level(datatypes::GET_DATA);
-            } else if (value == "LIST_COLLECTIONS") {
-                user.set_permission_level(datatypes::LIST_COLLECTIONS);
-            } else if (value == "NONE") {
-                user.set_permission_level(datatypes::NONE);
-            } else {
-                result.add_error("Invalid key");
-                return false;
-            }
+          if (value == "ADMIN") {
+            user.set_permission_level(datatypes::ADMIN);
+          } else if (value == "INCLUDE_COLLECTION_TERMS") {
+            user.set_permission_level(datatypes::INCLUDE_COLLECTION_TERMS);
+          } else if (value == "INCLUDE_EXPERIMENTS") {
+            user.set_permission_level(datatypes::INCLUDE_EXPERIMENTS);
+          } else if (value == "INCLUDE_ANNOTATIONS") {
+            user.set_permission_level(datatypes::INCLUDE_ANNOTATIONS);
+          } else if (value == "GET_DATA") {
+            user.set_permission_level(datatypes::GET_DATA);
+          } else if (value == "LIST_COLLECTIONS") {
+            user.set_permission_level(datatypes::LIST_COLLECTIONS);
+          } else if (value == "NONE") {
+            user.set_permission_level(datatypes::NONE);
+          } else {
+            result.add_error("Invalid key");
+            return false;
+          }
         } else {
           result.add_error("Invalid field name");
           return false;

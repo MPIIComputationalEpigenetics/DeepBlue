@@ -95,12 +95,12 @@ namespace epidb {
 
         return true;
       }
-      
+
       bool get_user(const std::string& key, std::map<std::string, std::string>& metadata, std::string& msg) const
       {
         datatypes::User user;
         if (!dba::get_user_by_key(key, user, msg)) {
-            return false;
+          return false;
         }
         metadata["id"] = user.get_id();
         metadata["name"] = user.get_name();
@@ -119,16 +119,16 @@ namespace epidb {
 
         bool ok;
         std::string msg;
-        
+
         datatypes::User user;
         if (!dba::get_user_by_key(user_key, user, msg)) {
           result.add_error(msg);
           return false;
         }
-        
+
         if (!user.has_permission(datatypes::LIST_COLLECTIONS)) {
-            result.add_error(Error::m(ERR_INSUFFICIENT_PERMISSION));
-            return false;
+          result.add_error(Error::m(ERR_INSUFFICIENT_PERMISSION));
+          return false;
         }
 
         std::vector<utils::IdName> user_projects_id_names;
@@ -202,7 +202,7 @@ namespace epidb {
           } else if (id.compare(0, 1, "r") == 0) {
             ok = get_request(id, user_key, metadata, msg);
             type = "request";
-          } else if (id == "me"){
+          } else if (id == "me") {
             ok = get_user(user_key, metadata, msg);
             type = "user";
           } else {

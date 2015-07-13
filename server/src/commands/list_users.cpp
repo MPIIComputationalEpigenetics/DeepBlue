@@ -56,16 +56,16 @@ namespace epidb {
         const std::string admin_key = parameters[0]->as_string();
 
         std::string msg;
-        
+
         datatypes::User admin;
         if (!dba::get_user_by_key(admin_key, admin, msg)) {
           result.add_error(msg);
           return false;
         }
-        
+
         if (!admin.has_permission(datatypes::ADMIN)) {
-            result.add_error(Error::m(ERR_INSUFFICIENT_PERMISSION));
-            return false;
+          result.add_error(Error::m(ERR_INSUFFICIENT_PERMISSION));
+          return false;
         }
 
         std::vector<utils::IdName> names;

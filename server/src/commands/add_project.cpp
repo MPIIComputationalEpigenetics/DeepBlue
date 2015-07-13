@@ -62,16 +62,16 @@ namespace epidb {
         const std::string user_key = parameters[2]->as_string();
 
         std::string msg;
-        
+
         datatypes::User user1;
         if (!dba::get_user_by_key(user_key, user1, msg)) {
           result.add_error(msg);
           return false;
         }
-        
+
         if (!user1.has_permission(datatypes::INCLUDE_EXPERIMENTS)) {
-            result.add_error(Error::m(ERR_INSUFFICIENT_PERMISSION));
-            return false;
+          result.add_error(Error::m(ERR_INSUFFICIENT_PERMISSION));
+          return false;
         }
 
         utils::IdName user;

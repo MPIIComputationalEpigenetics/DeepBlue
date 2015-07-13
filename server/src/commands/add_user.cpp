@@ -65,7 +65,7 @@ namespace epidb {
           result.add_error(msg);
           return false;
         }
-               
+
         if (!admin.has_permission(datatypes::PermissionLevel::ADMIN)) {
           result.add_error("The given key is not an admin-key");
           return false;
@@ -75,9 +75,9 @@ namespace epidb {
           result.add_error(msg);
           return false;
         }
-        
+
         datatypes::User user = datatypes::User(name, email, institution);
-        
+
         user.generate_key();
 
         if (dba::add_user(user, msg)) {
