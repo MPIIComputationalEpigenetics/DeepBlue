@@ -9,12 +9,9 @@
 #include "../dba/controlled_vocabulary.hpp"
 #include "../dba/dba.hpp"
 #include "../dba/exists.hpp"
-<<<<<<< Updated upstream
 #include "../dba/list.hpp"
-=======
 #include "../datatypes/user.hpp"
 #include "../entities/users.hpp"
->>>>>>> Stashed changes
 #include "../extras/utils.hpp"
 #include "../extras/serialize.hpp"
 
