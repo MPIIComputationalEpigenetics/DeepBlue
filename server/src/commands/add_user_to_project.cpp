@@ -13,7 +13,8 @@
 #include "../dba/info.hpp"
 #include "../dba/users.hpp"
 #include "../dba/list.hpp"
-
+#include "../datatypes/user.hpp"
+#include "../entities/users.hpp"
 #include "../engine/commands.hpp"
 
 #include "../extras/serialize.hpp"
@@ -66,9 +67,16 @@ namespace epidb {
         const std::string user_key = parameters[3]->as_string();
 
         std::string msg;
-        if (!Command::checks(user_key, msg)) {
+        
+        datatypes::User user1;
+        if (!dba::get_user_by_key(user_key, user1, msg)) {
           result.add_error(msg);
           return false;
+        }
+        
+        if (!user1.has_permission(datatypes::INCLUDE_EXPERIMENTS)) {
+            result.add_error(Error::m(ERR_INSUFFICIENT_PERMISSION));
+            return false;
         }
 
         std::string project_id;

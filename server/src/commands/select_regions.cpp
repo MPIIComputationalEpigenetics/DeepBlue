@@ -17,7 +17,8 @@
 #include "../dba/helpers.hpp"
 #include "../dba/list.hpp"
 #include "../dba/queries.hpp"
-
+#include "../datatypes/user.hpp"
+#include "../entities/users.hpp"
 #include "../engine/commands.hpp"
 
 #include "../extras/serialize.hpp"
@@ -89,9 +90,16 @@ namespace epidb {
         const int end = parameters[8]->isNull() ? -1 : parameters[8]->as_long();
 
         std::string msg;
-        if (!Command::checks(user_key, msg)) {
+        
+        datatypes::User user;
+        if (!dba::get_user_by_key(user_key, user, msg)) {
           result.add_error(msg);
           return false;
+        }
+        
+        if (!user.has_permission(datatypes::GET_DATA)) {
+            result.add_error(Error::m(ERR_INSUFFICIENT_PERMISSION));
+            return false;
         }
 
         bool has_filter = false;
