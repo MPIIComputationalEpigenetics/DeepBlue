@@ -27,6 +27,7 @@ namespace epidb {
   };
 
   extern Error ERR_USER_USER_MISSING;
+  extern Error ERR_INSUFFICIENT_PERMISSION;
   extern Error ERR_USER_EXPERIMENT_MISSING;
   extern Error ERR_USER_ANNOTATION_MISSING;
   extern Error ERR_USER_SAMPLE_MISSING;
