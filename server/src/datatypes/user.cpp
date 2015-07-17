@@ -109,7 +109,7 @@ namespace epidb {
 
     bool User::has_permission(PermissionLevel permission)
     {
-      return static_cast<int>(permission_level) <= static_cast<int>(permission);
+      return static_cast<int>(get_permission_level()) <= static_cast<int>(permission);
     }
 
     void User::set_id(std::string id)
@@ -191,7 +191,7 @@ namespace epidb {
     PermissionLevel User::get_permission_level() const
     {
         if (permission_level == NOT_SET) {
-            return GET_DATA;
+            return LIST_COLLECTIONS;
         } else {
             return permission_level;
         }
