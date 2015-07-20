@@ -191,7 +191,6 @@ namespace epidb {
             type = "column_type";
           } else if (id.compare(0, 1, "r") == 0) {
             ok = get_request(id, user_key, metadata, msg);
-            std::cerr << "ok" << ok << std::endl;
             type = "request";
           } else if (id == "me") {
             ok = get_user(user_key, metadata, msg);
