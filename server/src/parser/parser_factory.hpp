@@ -77,11 +77,21 @@ namespace epidb {
 
       void finish()
       {
-        for (auto &chromosome: data_) {
+        for (auto &chromosome : data_) {
           std::vector<parser::BedLine> &regions = chromosome.second;
           std::sort(regions.begin(), regions.end());
         }
       }
+
+      std::vector<std::string> chromosomes()
+      {
+        std::vector<std::string> chromosomes;
+        for (auto kv : data_) {
+          chromosomes.push_back(kv.first);
+        }
+        return chromosomes;
+      }
+
     } ChromosomeRegionsMap;
 
     typedef std::map<std::string, std::string> ParsedLine;
@@ -111,9 +121,9 @@ namespace epidb {
           return false;
         }
 
-        for (auto& this_field: fields_) {
+        for (auto& this_field : fields_) {
           bool found = false;
-          for (auto& other_field: other) {
+          for (auto& other_field : other) {
             if (this_field->name() == other_field->name()) {
               found = true;
               break;
