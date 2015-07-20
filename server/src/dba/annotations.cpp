@@ -91,8 +91,6 @@ namespace epidb {
         annotation_metadata = annotation_data_builder.obj();
         return true;
       }
-
-
     }
   }
 }
