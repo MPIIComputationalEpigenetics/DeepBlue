@@ -312,7 +312,7 @@ namespace epidb {
       }
 
       mongo::BSONObj upload_info;
-      if (!build_upload_info(user_key, ip, "wig", upload_info, msg)) {
+      if (!build_upload_info(user_key, ip, "signal", upload_info, msg)) {
         return false;
       }
       mongo::BSONObjBuilder experiment_builder;
@@ -504,7 +504,7 @@ namespace epidb {
       }
 
       mongo::BSONObj upload_info;
-      if (!build_upload_info(user_key, ip, "bed", upload_info, msg)) {
+      if (!build_upload_info(user_key, ip, "peaks", upload_info, msg)) {
         return false;
       }
 
@@ -649,7 +649,7 @@ namespace epidb {
       }
 
       mongo::BSONObj upload_info;
-      if (!build_upload_info(user_key, ip, "internal", upload_info, msg)) {
+      if (!build_upload_info(user_key, ip, "peaks", upload_info, msg)) {
         return false;
       }
 
@@ -793,7 +793,7 @@ namespace epidb {
       }
 
       mongo::BSONObj upload_info;
-      if (!build_upload_info(user_key, ip, "internal", upload_info, msg)) {
+      if (!build_upload_info(user_key, ip, "regions", upload_info, msg)) {
         return false;
       }
 
