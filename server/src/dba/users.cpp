@@ -148,34 +148,6 @@ namespace epidb {
         return true;
       }
 
-      bool bind_user(const std::string &email, const std::string &password, const std::string &user_key, const std::string &admin_key, std::string &id, std::string &msg)
-      {
-
-        return false;
-
-        /*
-        mongo::BSONObjBuilder builder;
-
-        builder.append("_id", _id);
-        builder.append("email", email);
-        builder.append("password", password);
-        builder.append("key", password);
-
-        Connection c;
-        c->insert(helpers::collection_name(Collections::WEB_ACCESS()), create_column_type_calculated_builder.obj());
-
-        mongo::BSONObjBuilder index;
-        index.append("email", 1);
-        index.append("password", 1);
-        c->createIndex(helpers::collection_name(Collections::WEB_ACCESS()), index.obj());
-        if (!c->getLastError().empty()) {
-          msg = c->getLastError();
-          c.done();
-          return false;
-        }
-        */
-      }
-
       bool set_user_admin(const std::string &user_id, const bool value, std::string &msg)
       {
         mongo::BSONObj o = BSON("findandmodify" << Collections::USERS() <<
