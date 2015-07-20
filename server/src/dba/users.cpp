@@ -209,47 +209,6 @@ namespace epidb {
         return true;
       }
 
-      bool set_user_admin(const std::string &user_id, const bool value, std::string &msg)
-      {
-        mongo::BSONObj o = BSON("findandmodify" << Collections::USERS() <<
-                                "query" << BSON("_id" << user_id) <<
-                                "update" << BSON("$set" << BSON("admin" << value)));
-
-        Connection c;
-        mongo::BSONObj info;
-        bool result = c->runCommand(config::DATABASE_NAME(), o, info);
-        if (!result) {
-          // TODO: get info error
-          msg = "error setting admin in user '" + user_id + "'.";
-          c.done();
-          return  false;
-        }
-        c.done();
-        return true;
-      }
-
-      bool is_admin_key(const std::string &admin_key, bool &ret, std::string &msg)
-      {
-        Connection c;
-
-        mongo::BSONObjBuilder query_builder;
-
-        query_builder.append("admin", true);
-        query_builder.append("key", admin_key);
-
-        mongo::BSONObj query = query_builder.obj();
-        long long count = c->count(helpers::collection_name(Collections::USERS()), query);
-        if (!c->getLastError().empty()) {
-          msg = c->getLastError();
-          c.done();
-          return false;
-        }
-
-        ret = count > 0;
-        c.done();
-        return true;
-      }
-
       void invalidate_cache()
       {
         name_cache.invalidate();

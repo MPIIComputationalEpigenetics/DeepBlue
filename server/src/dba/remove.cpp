@@ -27,18 +27,13 @@ namespace epidb {
 
       bool has_permission(mongo::BSONObj entity, const std::string &user_key, bool is_exp_ann, std::string &msg)
       {
-        bool is_admin = false;
-        if (!users::is_admin_key(user_key, is_admin, msg)) {
+        datatypes::User user;
+        if (!users::get_user_by_key(user_key, user, msg)) {
           return false;
         }
 
-        if (is_admin) {
+        if (user.is_admin()) {
           return true;
-        }
-
-        utils::IdName user;
-        if (!users::get_user(user_key, user, msg)) {
-          return false;
         }
 
         std::string owner;
@@ -48,7 +43,7 @@ namespace epidb {
           owner = entity["user"].String();
         }
 
-        if (owner == user.id) {
+        if (owner == user.get_id()) {
           return true;
         } else {
           msg = "You do not have permission to delete this.";

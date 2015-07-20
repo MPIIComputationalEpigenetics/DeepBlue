@@ -119,14 +119,8 @@ namespace epidb {
           return false;
         }
 
-        bool is_admin_key;
-        if (!dba::users::is_admin_key(user_key, is_admin_key, msg)) {
-          result.add_error(msg);
-          return false;
-        }
-
         // Is the command operator admin or project owner ?
-        if ((!is_admin_key) && (working_user.id != owner_id)) {
+        if ((user.is_admin()) && (working_user.id != owner_id)) {
           result.add_error(Error::m(ERR_PROJECT_PERMISSION, project.c_str()));
           return false;
         }

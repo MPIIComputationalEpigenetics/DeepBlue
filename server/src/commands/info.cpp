@@ -61,18 +61,13 @@ namespace epidb {
                        std::map<std::string, std::string>& map, std::string& msg) const
       {
 
-        utils::IdName user;
-        if (!dba::users::get_user(user_key, user, msg)) {
-          return false;
-        }
-
-        bool admin_key = false;
-        if (! dba::users::is_admin_key(user_key, admin_key, msg)) {
+        datatypes::User user;
+        if (!dba::users::get_user_by_key(user_key, user, msg)) {
           return false;
         }
 
         request::Job job;
-        if (admin_key || epidb::Engine::instance().user_owns_request(id, user.id)) {
+        if (user.is_admin() || epidb::Engine::instance().user_owns_request(id, user.get_id())) {
           if (!epidb::Engine::instance().request_job(id, job, msg)) {
             return false;
           }
@@ -196,6 +191,7 @@ namespace epidb {
             type = "column_type";
           } else if (id.compare(0, 1, "r") == 0) {
             ok = get_request(id, user_key, metadata, msg);
+            std::cerr << "ok" << ok << std::endl;
             type = "request";
           } else if (id == "me") {
             ok = get_user(user_key, metadata, msg);

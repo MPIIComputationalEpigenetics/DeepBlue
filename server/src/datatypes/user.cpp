@@ -24,7 +24,6 @@ namespace epidb {
     const std::string User::FIELD_NAME = "name";
     const std::string User::FIELD_EMAIL = "email";
     const std::string User::FIELD_INSTITUTION = "institution";
-    const std::string User::FIELD_ADMIN = "admin";
     const std::string User::FIELD_PASSWORD = "password";
     const std::string User::FIELD_MEMORY_LIMIT = "memory_limit";
     const std::string User::FIELD_PERMISSION_LEVEL = "permission_level";
@@ -55,12 +54,6 @@ namespace epidb {
       if (bsonobj[0].hasElement(FIELD_PERMISSION_LEVEL)) {
         set_permission_level(bsonobj[0][FIELD_PERMISSION_LEVEL].Int());
       }
-      if (bsonobj[0].hasElement(FIELD_ADMIN)) {
-        admin = bsonobj[0][FIELD_ADMIN].Bool();
-        if (admin) {
-          set_permission_level(ADMIN);
-        }
-      }
       if (bsonobj[0].hasElement(FIELD_MEMORY_LIMIT)) {
         memory_limit = bsonobj[0][FIELD_MEMORY_LIMIT].Long();
       }
@@ -81,7 +74,6 @@ namespace epidb {
       builder.append(FIELD_EMAIL, get_email());
       builder.append(FIELD_INSTITUTION, get_institution());
       builder.append(FIELD_PASSWORD, get_password());
-      builder.append(FIELD_ADMIN, is_admin());
       if (memory_limit != -1) {
         builder.append(FIELD_MEMORY_LIMIT, get_memory_limit());
       }
@@ -209,7 +201,7 @@ namespace epidb {
 
     bool User::is_admin() const
     {
-      return admin;
+      return get_permission_level() == PermissionLevel::ADMIN;
     }
   }
 }

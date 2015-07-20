@@ -8,6 +8,7 @@
 
 #include "../datatypes/metadata.hpp"
 #include "../datatypes/projects.hpp"
+#include "../datatypes/user.hpp"
 
 #include "../dba/dba.hpp"
 #include "../dba/info.hpp"
@@ -63,7 +64,8 @@ namespace epidb {
         const std::string user_key = parameters[2]->as_string();
 
         std::string msg;
-        if (!Command::checks(user_key, msg)) {
+        datatypes::User user;
+        if (!check_permissions(user_key, datatypes::INCLUDE_EXPERIMENTS, user, msg )) {
           result.add_error(msg);
           return false;
         }
@@ -92,19 +94,8 @@ namespace epidb {
         }
         std::string owner = project_res["user"];
 
-        utils::IdName user;
-        if (!dba::users::get_user(user_key, user, msg)) {
-          result.add_error(msg);
-          return false;
-        }
 
-        bool is_admin_key;
-        if (!dba::users::is_admin_key(user_key, is_admin_key, msg)) {
-          result.add_error(msg);
-          return false;
-        }
-
-        if ((!is_admin_key) && (user.name != owner)) {
+        if (!user.is_admin() && user.get_name() != owner) {
           result.add_error(Error::m(ERR_PROJECT_PERMISSION, project.c_str()));
           return false;
         }

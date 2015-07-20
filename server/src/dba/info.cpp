@@ -259,15 +259,10 @@ namespace epidb {
               if (field_name.compare(0, 5, "norm_") != 0) {
                 if (field_name == "content_format") {
                   std::string type = utils::bson_to_string(ee);
-                  if (type == "bed") {
-                    metadata["data_type"] = "peaks";
-                  } else if ((type == "wig") || (type == "bedgraph")) {
-                    metadata["data_type"] = "signal";
-                  } else {
-                    metadata["data_type"] = "Unknown";
-                  }
+                  metadata["data_type"] = type;
+                } else {
+                  upload_info[field_name] = utils::bson_to_string(ee);
                 }
-                upload_info[field_name] = utils::bson_to_string(ee);
               }
             }
           } else if (std::string(e.fieldName()) == "columns") {

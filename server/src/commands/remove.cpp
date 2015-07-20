@@ -8,6 +8,8 @@
 
 #include <string>
 
+#include "../datatypes/user.hpp"
+
 #include "../dba/users.hpp"
 #include "../dba/remove.hpp"
 
@@ -55,13 +57,9 @@ namespace epidb {
         const std::string user_key = parameters[1]->as_string();
 
         std::string msg;
-        if (!Command::checks(user_key, msg)) {
-          result.add_error(msg);
-          return false;
-        }
+        datatypes::User user;
 
-        bool is_admin_key;
-        if (!dba::users::is_admin_key(user_key, is_admin_key, msg)) {
+        if (!check_permissions(user_key, datatypes::INCLUDE_COLLECTION_TERMS, user, msg )) {
           result.add_error(msg);
           return false;
         }

@@ -54,13 +54,6 @@ namespace epidb {
 
       bool bind_user(const std::string &email, const std::string &password, const std::string &user_key, const std::string &admin_key, std::string &id, std::string &msg);
 
-      /**
-       * Permissions
-       */
-      bool set_user_admin(const std::string &user_id, const bool value, std::string &msg);
-
-      bool is_admin_key(const std::string &admin_key, bool &ret, std::string &msg);
-
       /*
       * \brief Cleans cache
       */
