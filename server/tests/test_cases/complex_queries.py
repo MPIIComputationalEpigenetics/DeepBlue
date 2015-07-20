@@ -118,3 +118,24 @@ class TestComplexQueries(helpers.TestCase):
     expected_regions = helpers.get_result("complex2")
     self.assertEqual(regions, expected_regions)
 
+  def test_complex_input_regions(self):
+    epidb = EpidbClient()
+    self.init_full(epidb)
+
+    regions = "chr1\t1\t10000\nchr2\t2\t20000\nchr3\t3\t30000"
+
+    (s, q) = epidb.input_regions("hg19", regions, self.admin_key)
+    res, req = epidb.count_regions(q, self.admin_key)
+    self.assertSuccess(res, req)
+    count = self.count_request(req)
+    self.assertEqual(count, 3)
+
+    res, req = epidb.get_regions(q, "CHROMOSOME,START,END,NAME,@NAME,@EPIGENETIC_MARK,@CALCULATED(return value_of('END') - value_of('START') )", self.admin_key)
+    self.assertSuccess(res, req)
+    regions = self.get_regions_request(req)
+
+    output = """chr1\t1\t10000\t\tQuery q1 regions set\t\t9999.000000
+chr2\t2\t20000\t\tQuery q1 regions set\t\t19998.000000
+chr3\t3\t30000\t\tQuery q1 regions set\t\t29997.000000"""
+
+    self.assertEqual(regions, output)
