@@ -910,5 +910,103 @@ namespace epidb {
       c.done();
       return true;
     }
+
+    bool insert_query_region_set(const std::string &genome, const std::string &norm_genome,
+                                 const std::string &user_key, const std::string &ip,
+                                 const parser::ChromosomeRegionsMap &map_regions,
+                                 const parser::FileFormat &format,
+                                 int& dataset_id, std::string &msg)
+    {
+      if (!helpers::get_increment_counter("datasets", dataset_id, msg)) {
+        return false;
+      }
+
+      Connection c;
+
+      genomes::GenomeInfoPtr genome_info;
+      if (!genomes::get_genome_info(norm_genome, genome_info, msg)) {
+        c.done();
+        std::string new_msg;
+        return false;
+      }
+
+      size_t count = 0;
+      size_t total_size = 0;
+      size_t bulk_size = 0;
+      std::vector<mongo::BSONObj> block;
+      std::vector<mongo::BSONObj> blocks_bulk;
+
+      BOOST_FOREACH(parser::ChromosomeBedLines chrom_lines, map_regions) {
+
+        std::string internal_chromosome;
+        if (!genome_info->internal_chromosome(chrom_lines.first, internal_chromosome, msg)) {
+          c.done();
+          std::string new_msg;
+          if (!remove::dataset(dataset_id, norm_genome, msg)) {
+            msg = msg + " " + new_msg;
+          }
+          return false;
+        }
+
+        size_t size;
+        if (!genome_info->chromosome_size(internal_chromosome, size, msg)) {
+          c.done();
+          std::string new_msg;
+          if (!remove::dataset(dataset_id, norm_genome, msg)) {
+            msg = msg + " " + new_msg;
+          }
+          return false;
+        }
+
+        std::string collection = helpers::region_collection_name(genome, internal_chromosome);
+
+        BOOST_FOREACH(const parser::BedLine & bed_line, chrom_lines.second) {
+          mongo::BSONObjBuilder region_builder;
+
+          if (bed_line.start > size || bed_line.end > size) {
+            msg = out_of_range_message(bed_line.start, bed_line.end, bed_line.chromosome);
+            c.done();
+            std::string new_msg;
+            if (!remove::dataset(dataset_id, norm_genome, msg)) {
+              msg = msg + " " + new_msg;
+            }
+            return false;
+          }
+
+          if (!fill_region_builder(region_builder, bed_line, format, msg)) {
+            c.done();
+            std::string new_msg;
+            if (!remove::dataset(dataset_id, norm_genome, msg)) {
+              msg = msg + " " + new_msg;
+            }
+            return false;
+          }
+
+          mongo::BSONObj r = region_builder.obj();
+          block.push_back(r);
+          if (!check_bulk_size(dataset_id, collection, count, block, blocks_bulk, bulk_size, total_size, msg)) {
+            c.done();
+            std::string new_msg;
+            if (!remove::dataset(dataset_id, norm_genome, msg)) {
+              msg = msg + " " + new_msg;
+            }
+            return false;
+          }
+        }
+
+        if (!check_remainings(dataset_id, collection, count, block, blocks_bulk, bulk_size, total_size, msg)) {
+          c.done();
+          std::string new_msg;
+          if (!remove::dataset(dataset_id, norm_genome, msg)) {
+            msg = msg + " " + new_msg;
+          }
+          return false;
+        }
+      }
+
+      c.done();
+      return true;
+    }
+
   }
 }

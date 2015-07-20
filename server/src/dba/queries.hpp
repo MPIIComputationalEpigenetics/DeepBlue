@@ -68,6 +68,9 @@ namespace epidb {
       bool retrieve_merge_query(const std::string &user_key, const mongo::BSONObj &query,
                                 processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg);
 
+      bool retrieve_query_region_set(const mongo::BSONObj &query,
+                                     processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg);
+
       bool retrieve_annotation_select_query(const std::string &user_key, const mongo::BSONObj &query,
                                             processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg);
 

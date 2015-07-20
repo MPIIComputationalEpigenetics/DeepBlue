@@ -122,6 +122,11 @@ namespace epidb {
             return false;
           }
 
+        } else if (type == "input_regions") {
+          if (!retrieve_query_region_set(query, status, regions, msg)) {
+            return false;
+          }
+
         } else {
           msg = "Unknown query type";
           return false;
@@ -441,6 +446,23 @@ namespace epidb {
       }
 
 
+      bool retrieve_query_region_set(const mongo::BSONObj &query,
+                                     processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg)
+      {
+        processing::RunningOp runningOp = status->start_operation(processing::RETRIEVE_QUERY_REGION_SET, query);
+
+        mongo::BSONObj regions_query = BSON(KeyMapper::DATASET() << query["dataset_id"].Int());
+
+        std::vector<std::string> chromosomes = helpers::build_vector(query["chromosomes"].Array());
+        std::string genome = query["norm_genome"].String();
+
+        if (!retrieve::get_regions(genome, chromosomes, regions_query, true, status, regions, msg)) {
+          return false;
+        }
+
+        return true;
+      }
+
       bool retrieve_annotation_select_query(const std::string &user_key, const mongo::BSONObj &query,
                                             processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg)
       {
@@ -452,12 +474,7 @@ namespace epidb {
         }
 
         mongo::BSONObj args = query["args"].Obj();
-        std::vector<std::string> chromosomes;
-        std::vector<mongo::BSONElement> chr_arr = args["chromosomes"].Array();
-        std::vector<mongo::BSONElement>::iterator it;
-        for (it = chr_arr.begin(); it != chr_arr.end(); ++it) {
-          chromosomes.push_back(it->str());
-        }
+        std::vector<std::string> chromosomes = helpers::build_vector(args["chromosomes"].Array());
 
         std::vector<ChromosomeRegionsList> genome_regions;
 

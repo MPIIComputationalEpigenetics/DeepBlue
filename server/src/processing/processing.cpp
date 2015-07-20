@@ -36,6 +36,7 @@ namespace epidb {
       m[RETRIEVE_FILTER_QUERY] = "Filtering";
       m[RETRIEVE_TILING_QUERY] = "Tiling regions";
       m[PROCESS_AGGREGATE] = "Aggregate";
+      m[RETRIEVE_QUERY_REGION_SET] = "Retrieve query regions set";
 
       return m;
     }

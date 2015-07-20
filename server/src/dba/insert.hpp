@@ -64,11 +64,11 @@ namespace epidb {
                            const parser::FileFormat &format,
                            std::string &experiment_id, std::string &msg);
 
-    bool clone_dataset(const std::string &dataset_id, const std::string &name, const std::string &norm_name,
-                       const std::string &description, const std::string &norm_description,
-                       const parser::FileFormat &format,
-                       const datatypes::Metadata &extra_metadata,
-                       std::string &_id, std::string &msg);
+    bool insert_query_region_set(const std::string &genome, const std::string &norm_genome,
+                                 const std::string &user_key, const std::string &ip,
+                                 const parser::ChromosomeRegionsMap &map_regions,
+                                 const parser::FileFormat &format,
+                                 int& dataset_id, std::string &msg);
 
   }
 }

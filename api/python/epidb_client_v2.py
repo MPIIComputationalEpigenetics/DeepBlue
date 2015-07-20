@@ -278,6 +278,10 @@ class DeepBlueClient(object):
                                           self.key)
 
     @key_required
+    def input_regions(genome, regions):
+        return self.server.input_regions(genome, regions, self.key)
+
+    @key_required
     def select_annotations(self, annotations_name, genome, chromosomes,
                            start, end):
         return self.server.select_annotations(annotations_name, genome,
