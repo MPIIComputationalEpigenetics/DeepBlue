@@ -133,6 +133,19 @@ namespace epidb {
         return true;
       }
 
+      data_cursor = c->query(helpers::collection_name(Collections::QUERIES()),
+                             BSON("type" << "input_regions" << "args.dataset_id" << dataset_id));
+      if (data_cursor->more()) {
+        mongo::BSONObj query = data_cursor->next().getOwned();
+
+        obj = BSON("name" << ("Query " + query["_id"].String() + " regions set") <<
+                   "genome" << query["args"]["genome"].String()
+                  );
+        obj_by_dataset_id[dataset_id] = obj;
+        c.done();
+        return true;
+      }
+
       c.done();
       msg = Error::m(ERR_DATASET_NOT_FOUND, dataset_id);
       return false;

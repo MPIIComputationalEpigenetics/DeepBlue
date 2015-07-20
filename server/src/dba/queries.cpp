@@ -449,12 +449,13 @@ namespace epidb {
       bool retrieve_query_region_set(const mongo::BSONObj &query,
                                      processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg)
       {
+        mongo::BSONObj args = query["args"].Obj();
         processing::RunningOp runningOp = status->start_operation(processing::RETRIEVE_QUERY_REGION_SET, query);
 
-        mongo::BSONObj regions_query = BSON(KeyMapper::DATASET() << query["dataset_id"].Int());
+        mongo::BSONObj regions_query = BSON(KeyMapper::DATASET() << args["dataset_id"].Int());
 
-        std::vector<std::string> chromosomes = helpers::build_vector(query["chromosomes"].Array());
-        std::string genome = query["norm_genome"].String();
+        std::vector<std::string> chromosomes = helpers::build_vector(args["chromosomes"].Array());
+        std::string genome = args["norm_genome"].String();
 
         if (!retrieve::get_regions(genome, chromosomes, regions_query, true, status, regions, msg)) {
           return false;
@@ -1000,12 +1001,22 @@ namespace epidb {
           return true;
         }
 
+        cursor = c->query(helpers::collection_name(Collections::QUERIES()), BSON("type" << "input_regions" << "args.dataset_id" << dataset_id));
+        if (cursor->more()) {
+          for (const auto& column : parser::FileFormat::default_format()) {
+            columns.push_back(column->BSONObj());
+          }
+          c.done();
+          return true;
+        }
+
         c.done();
 
         if (found) {
           return true;
         } else {
           msg = Error::m(ERR_DATASET_NOT_FOUND, dataset_id);
+          std::cerr << "bbbb" << std::endl;
           return false;
         }
       }
