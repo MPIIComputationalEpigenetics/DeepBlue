@@ -52,7 +52,7 @@ namespace epidb {
       set_key(bsonobj[0][FIELD_KEY].str());
       set_password(bsonobj[0][FIELD_PASSWORD].str());
       if (bsonobj[0].hasElement(FIELD_PERMISSION_LEVEL)) {
-        set_permission_level(bsonobj[0][FIELD_PERMISSION_LEVEL].Int());
+        set_permission_level(bsonobj[0][FIELD_PERMISSION_LEVEL].safeNumberLong());
       }
       if (bsonobj[0].hasElement(FIELD_MEMORY_LIMIT)) {
         memory_limit = bsonobj[0][FIELD_MEMORY_LIMIT].Long();
