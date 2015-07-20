@@ -64,7 +64,7 @@ namespace epidb {
         std::string msg;
         datatypes::User admin;
 
-        if (!check_permissions(user_key, datatypes::ADMIN, admin, msg )) {
+        if (!check_permissions(admin_key, datatypes::ADMIN, admin, msg )) {
           result.add_error(msg);
           return false;
         }
