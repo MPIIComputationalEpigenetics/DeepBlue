@@ -208,7 +208,7 @@ namespace epidb {
         if (clone_format.format() != original_file_format.format()) {
 
           if (clone_format.size() < original_file_format.size()) {
-            msg = "Your new format has less columns than the original format (" + original_format + ")";
+            msg = "The new format has fewer columns than the original format (" + original_format + ")";
             c.done();
             return false;
           }
