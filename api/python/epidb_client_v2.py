@@ -350,3 +350,6 @@ class DeepBlueClient(object):
 
     def modify_user(self, field, value, key):
         return self.server.modify_user(field, value, key)
+
+    def modify_user_admin(self, user_key, field, value, admin_key):
+        return self.server.modify_user_admin(user_key, field, value, admin_key
