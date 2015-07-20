@@ -17,14 +17,14 @@ namespace epidb {
   namespace datatypes {
 
     enum PermissionLevel {
-      ADMIN,
-      INCLUDE_COLLECTION_TERMS,
-      INCLUDE_EXPERIMENTS,
-      INCLUDE_ANNOTATIONS,
-      GET_DATA,
-      LIST_COLLECTIONS,
-      NONE,
-      NOT_SET
+      ADMIN = 0,
+      INCLUDE_COLLECTION_TERMS = 10,
+      INCLUDE_EXPERIMENTS = 20,
+      INCLUDE_ANNOTATIONS = 30,
+      GET_DATA = 40,
+      LIST_COLLECTIONS = 50,
+      NONE = 1000,
+      NOT_SET = 10000
     };
 
     class User {
