@@ -113,26 +113,6 @@ namespace epidb {
     }
   }
 
-
-  int seed = rand();
-  const std::string Command::gen_random(const size_t len) const
-  {
-    static const char alphanum[] =
-      "0123456789"
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-      "abcdefghijklmnopqrstuvwxyz";
-
-    srand(time(NULL)^seed);
-    seed = rand();
-
-    std::stringstream ss;
-    for (size_t i = 0; i < len; ++i) {
-      ss << alphanum[rand() % (sizeof(alphanum) - 1)];
-    }
-
-    return ss.str();
-  }
-
   bool Command::check_parameters(serialize::Parameters &parameters,
                                  std::string &msg) const
   {
