@@ -29,6 +29,8 @@
 #include "helpers.hpp"
 #include "users.hpp"
 
+#include "../errors.hpp"
+
 #include "column_types.hpp"
 
 namespace epidb {
@@ -261,9 +263,10 @@ namespace epidb {
           return false;
 
         default:
-          msg = "Invalid column type: " +  utils::integer_to_string(type);;
+          msg = Error::m(ERR_COLUMN_TYPE_MISSING, type);
           return false;
         }
+
       }
 
       bool column_type_simple(const std::string &name, const std::string &type, ColumnTypePtr &column_type, std::string &msg)
@@ -279,7 +282,7 @@ namespace epidb {
           column_type = boost::shared_ptr<ColumnType<Score> >(new ColumnType<Score>(name, 0.0, -1));
           return true;
         } else {
-          msg = "Invalid column type '" + type_l + "'";
+          msg = Error::m(ERR_COLUMN_TYPE_NAME_MISSING, type.c_str());
           return false;
         }
       }
@@ -288,7 +291,7 @@ namespace epidb {
                                      std::string &msg)
       {
         if (exists::column_type(norm_name)) {
-          msg = "Column type '" + name + "' already exists.";
+          msg = Error::m(ERR_DUPLICATED_COLUMN_NAME, name.c_str());
           return false;
         }
         return true;

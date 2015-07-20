@@ -54,6 +54,9 @@ namespace epidb {
   extern Error ERR_INVALID_BIOSOURCE_NAME;
   extern Error ERR_INVALID_QUERY_ID;
   extern Error ERR_INVALID_COLUMN_NAME;
+  extern Error ERR_DUPLICATED_COLUMN_NAME;
+
+  extern Error ERR_INVALID_META_COLUMN_NAME;
 
   extern Error ERR_DUPLICATED_BIOSOURCE_NAME;
   extern Error ERR_DUPLICATED_EXPERIMENT_NAME;
@@ -71,6 +74,9 @@ namespace epidb {
   extern Error ERR_DUPLICATED_PROJECT_NAME;
   extern Error ERR_DUPLICATED_GENOME_NAME;
   extern Error ERR_DUPLICATED_TECHNIQUE_NAME;
+
+  extern Error ERR_COLUMN_TYPE_MISSING;
+  extern Error ERR_COLUMN_TYPE_NAME_MISSING;
 
   extern Error ERR_DATASET_NOT_FOUND;
 

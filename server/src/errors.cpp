@@ -42,6 +42,8 @@
  * 21 - Start
  * 22 - End
  * 23 - Column Name
+ * 24 - Column Type
+ * 25 - Metacolumn
  * 50 - Dataset
  * 66 - Internal
  */
@@ -139,6 +141,12 @@ namespace epidb {
 
   Error ERR_INVALID_QUERY_ID("110000", "Unable to find the query ID '%s'.");
   Error ERR_INVALID_COLUMN_NAME("123000", "Unable to find the column '%s' in the dataset format or in the DeepBlue columns.");
+  Error ERR_DUPLICATED_COLUMN_NAME("123001", "Duplicated column name '%s'.");
+
+  Error ERR_INVALID_META_COLUMN_NAME("125000", "The meta-column '%s' does not exist.");
+
+  Error ERR_COLUMN_TYPE_MISSING("323002", "The Column Type '%d' does not exist.");
+  Error ERR_COLUMN_TYPE_NAME_MISSING("323003", "The Column Type '%s' does not exist.");
 
   Error ERR_DATASET_NOT_FOUND("350000", "Dataset '%ld' not found.");
 

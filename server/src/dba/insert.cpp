@@ -43,6 +43,7 @@
 #include "remove.hpp"
 #include "users.hpp"
 
+#include "../errors.hpp"
 #include "../log.hpp"
 
 
@@ -110,7 +111,7 @@ namespace epidb {
           }
           builder.append(name, s);
         } else {
-          std::string err = "Invalid column type: " + column_type->str();
+          std::string err = Error::m(ERR_COLUMN_TYPE_NAME_MISSING, column_type->str().c_str());
           EPIDB_LOG_ERR(err);
           msg = err;
           return false;

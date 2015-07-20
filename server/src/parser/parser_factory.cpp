@@ -304,7 +304,6 @@ namespace epidb {
       boost::split(fields_string, format, boost::is_any_of(","));
 
       BOOST_FOREACH(std::string & field_string, fields_string) {
-
         boost::trim(field_string);
 
         if (field_string.empty()) {
@@ -399,6 +398,10 @@ namespace epidb {
       static const std::string open_parenthesis("(");
       std::string command = op.substr(0, op.find(open_parenthesis));
       std::string type = dba::Metafield::command_type(command);
+      if (type.empty()) {
+        msg = Error::m(ERR_INVALID_META_COLUMN_NAME, command.c_str());
+        return false;
+      }
       return dba::columns::column_type_simple(op, type, column_type, msg);
     }
   }
