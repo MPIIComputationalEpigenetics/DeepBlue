@@ -231,7 +231,7 @@ class EpidbClient:
         return self.server.filter_regions(query_id, field, operation,
                                           value, type_,  user_key)
 
-    def input_regions(genome, regions, user_key):
+    def input_regions(self, genome, regions, user_key):
         return self.server.input_regions(genome, regions, user_key)
 
     def tiling_regions(self, size, genome, chromosomes, user_key):
