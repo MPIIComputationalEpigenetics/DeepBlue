@@ -1,6 +1,6 @@
 include Makefile.inc
 
-LIB_DIRS	= algorithms connection datatypes dba engine external extras httpd lua mdbq parser processing entities
+LIB_DIRS	= algorithms connection datatypes dba engine external extras httpd lua mdbq parser processing
 
 EXE	= server
 
@@ -8,7 +8,7 @@ COMMANDS = $(wildcard commands/*.cpp)
 COMMANDS_OBJS = $(COMMANDS:.cpp=.o)
 
 OBJS	= main.o version.o errors.o
-OBJLIBS	= $(COMMANDS_OBJS) libhttpd.a libdba.a libparser.a libengine.a libextras.a libalgorithms.a libdatatypes.a liblua.a libexternal.a libmdbq.a libprocessing.a libconnection.a libentities.a
+OBJLIBS	= $(COMMANDS_OBJS) libhttpd.a libdba.a libparser.a libengine.a libextras.a libalgorithms.a libdatatypes.a liblua.a libexternal.a libmdbq.a libprocessing.a libconnection.a
 
 CXXFLAGS	= $(DEFCXXFLAGS)
 
@@ -72,10 +72,6 @@ libmdbq.a: force_look
 libpool.a: force_look
 	@$(ECHO) looking into poll : $(MAKE) $(MFLAGS)
 	@cd pool; $(MAKE) $(MFLAGS)
-
-libentities.a: force_look
-	@$(ECHO) looking into entities : $(MAKE) $(MFLAGS)
-	@cd entities; $(MAKE) $(MFLAGS)
 
 clean:
 	$(ECHO) cleaning up in .

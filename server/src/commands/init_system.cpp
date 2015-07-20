@@ -82,15 +82,15 @@ namespace epidb {
           return false;
         }
 
-        const std::string key = gen_random(16);
-        if (!dba::init_system(name, email, institution, key, msg)) {
+        std::string user_key;
+        if (!dba::init_system(name, email, institution, user_key, msg)) {
           result.add_error(msg);
           return false;
         }
 
         epidb::Engine::instance().init();
 
-        result.add_string(key);
+        result.add_string(user_key);
         return true;
       }
 

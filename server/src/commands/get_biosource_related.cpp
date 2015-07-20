@@ -8,12 +8,13 @@
 
 #include "../dba/controlled_vocabulary.hpp"
 #include "../dba/exists.hpp"
+
 #include "../datatypes/user.hpp"
-#include "../entities/users.hpp"
-#include "../extras/utils.hpp"
-#include "../extras/serialize.hpp"
 
 #include "../engine/commands.hpp"
+
+#include "../extras/utils.hpp"
+#include "../extras/serialize.hpp"
 
 #include "../errors.hpp"
 #include "../log.hpp"
@@ -60,15 +61,10 @@ namespace epidb {
         std::string norm_biosource_name = utils::normalize_name(biosource_name);
 
         std::string msg;
-
         datatypes::User user;
-        if (!dba::get_user_by_key(user_key, user, msg)) {
-          result.add_error(msg);
-          return false;
-        }
 
-        if (!user.has_permission(datatypes::ADMIN)) {
-          result.add_error(Error::m(ERR_INSUFFICIENT_PERMISSION));
+        if (!check_permissions(user_key, datatypes::GET_DATA, user, msg )) {
+          result.add_error(msg);
           return false;
         }
 

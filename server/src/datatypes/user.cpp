@@ -31,8 +31,9 @@ namespace epidb {
     const size_t User::KEY_LENGTH = 16;
 
     int User::seed = rand();
-    
-    User::User() {
+
+    User::User()
+    {
     }
 
     User::User(std::string name, std::string email, std::string institution)
@@ -51,16 +52,16 @@ namespace epidb {
       set_id(bsonobj[0][FIELD_ID].str());
       set_key(bsonobj[0][FIELD_KEY].str());
       set_password(bsonobj[0][FIELD_PASSWORD].str());
-      if (bsonobj[0].hasElement(FIELD_PERMISSION_LEVEL)){
+      if (bsonobj[0].hasElement(FIELD_PERMISSION_LEVEL)) {
         set_permission_level(bsonobj[0][FIELD_PERMISSION_LEVEL].Int());
       }
-      if (bsonobj[0].hasElement(FIELD_ADMIN)){
+      if (bsonobj[0].hasElement(FIELD_ADMIN)) {
         admin = bsonobj[0][FIELD_ADMIN].Bool();
         if (admin) {
           set_permission_level(ADMIN);
         }
       }
-      if (bsonobj[0].hasElement(FIELD_MEMORY_LIMIT)){
+      if (bsonobj[0].hasElement(FIELD_MEMORY_LIMIT)) {
         memory_limit = bsonobj[0][FIELD_MEMORY_LIMIT].Long();
       }
     }
@@ -137,7 +138,7 @@ namespace epidb {
     {
       this->password = password;
     }
-    
+
     void User::set_memory_limit(long long memory_limit)
     {
       this->memory_limit = memory_limit;
@@ -147,28 +148,37 @@ namespace epidb {
     {
       this->permission_level = permission_level;
     }
-    
+
     void User::set_permission_level(int permission_level)
     {
       set_permission_level(static_cast<PermissionLevel>(permission_level));
     }
-    
+
     std::string User::get_id() const
     {
       return id;
     }
+
     std::string User::get_key() const
     {
       return key;
     }
+
     std::string User::get_name() const
     {
       return name;
     }
+
+    utils::IdName User::get_id_name() const
+    {
+      return utils::IdName(this->get_id(), this->get_name());
+    }
+
     std::string User::get_email() const
     {
       return email;
     }
+
     std::string User::get_institution() const
     {
       return institution;
@@ -178,7 +188,7 @@ namespace epidb {
     {
       return password;
     }
-    
+
     long long User::get_memory_limit() const
     {
       if (this->memory_limit == -1) {
@@ -187,16 +197,16 @@ namespace epidb {
         return this->memory_limit;
       }
     }
-    
+
     PermissionLevel User::get_permission_level() const
     {
-        if (permission_level == NOT_SET) {
-            return LIST_COLLECTIONS;
-        } else {
-            return permission_level;
-        }
+      if (permission_level == NOT_SET) {
+        return LIST_COLLECTIONS;
+      } else {
+        return permission_level;
+      }
     }
-    
+
     bool User::is_admin() const
     {
       return admin;

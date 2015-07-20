@@ -11,7 +11,6 @@
 #include "../dba/dba.hpp"
 #include "../dba/users.hpp"
 #include "../datatypes/user.hpp"
-#include "../entities/users.hpp"
 #include "../extras/utils.hpp"
 #include "../extras/serialize.hpp"
 
@@ -62,20 +61,9 @@ namespace epidb {
         const std::string user_key = parameters[2]->as_string();
 
         std::string msg;
+        datatypes::User user;
 
-        datatypes::User user1;
-        if (!dba::get_user_by_key(user_key, user1, msg)) {
-          result.add_error(msg);
-          return false;
-        }
-
-        if (!user1.has_permission(datatypes::INCLUDE_EXPERIMENTS)) {
-          result.add_error(Error::m(ERR_INSUFFICIENT_PERMISSION));
-          return false;
-        }
-
-        utils::IdName user;
-        if (!dba::users::get_user(user_key, user, msg)) {
+        if (!check_permissions(user_key, datatypes::INCLUDE_EXPERIMENTS, user, msg )) {
           result.add_error(msg);
           return false;
         }
@@ -89,13 +77,14 @@ namespace epidb {
         const std::string norm_description = utils::normalize_name(description);
 
         std::string project_id;
-        bool ret = datatypes::projects::add_project(name, norm_name, description, norm_description, user, project_id, msg);
+        bool ret = datatypes::projects::add_project(name, norm_name, description, norm_description, user.get_id_name(),
+                   project_id, msg);
         if (!ret) {
           result.add_error(msg);
         }
 
         // Include user in its own project
-        if (!datatypes::projects::add_user_to_project(user.id, project_id, true, msg)) {
+        if (!datatypes::projects::add_user_to_project(user.get_id(), project_id, true, msg)) {
           result.add_error(msg);
           return false;
         }

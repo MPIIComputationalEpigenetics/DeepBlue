@@ -22,11 +22,14 @@
 
 #include "../datatypes/metadata.hpp"
 #include "../datatypes/regions.hpp"
+#include "../datatypes/user.hpp"
 
 #include "../extras/utils.hpp"
 #include "../parser/genome_data.hpp"
 #include "../parser/parser_factory.hpp"
 #include "../parser/wig_parser.hpp"
+
+#include "../version.hpp"
 
 #include "dba.hpp"
 #include "users.hpp"
@@ -55,7 +58,7 @@ namespace epidb {
     }
 
     bool init_system(const std::string &name, const std::string &email, const std::string &institution,
-                     const std::string &key, std::string &msg)
+                     std::string &user_key, std::string &msg)
     {
       Connection c;
 
@@ -89,11 +92,11 @@ namespace epidb {
         }
       }
 
-      std::string user_id;
-      if (!users::add_user(name, email, institution, key, user_id, msg)) {
-        return false;
-      }
-      if (!users::set_user_admin(user_id, true, msg)) {
+      datatypes::User user = datatypes::User(name, email, institution);
+      user.generate_key();
+      user.set_permission_level(datatypes::PermissionLevel::ADMIN);
+      user_key = user.get_key();
+      if (!dba::users::add_user(user, msg)) {
         return false;
       }
 
@@ -103,6 +106,7 @@ namespace epidb {
       long long t = static_cast<long long>(time(NULL));
       create_settings_builder.append("date", t);
       create_settings_builder.append("initialized", true);
+      create_settings_builder.append("version", Version::version());
       mongo::BSONObj s = create_settings_builder.obj();
 
       c->insert(helpers::collection_name(Collections::SETTINGS()), s);
@@ -117,25 +121,25 @@ namespace epidb {
       if (!dba::columns::create_column_type_simple("CHROMOSOME", utils::normalize_name("CHROMOSOME"),
           "Chromosome name column",
           "This column should be used to store the Chromosome value in all experiments and annotations",
-          "string", key, column_id, msg)) {
+          "string", user_key, column_id, msg)) {
         return false;
       }
       if (!dba::columns::create_column_type_simple("START", utils::normalize_name("START"),
           "Region Start column",
           "This column should be used to store the Region Start position all experiments and annotations",
-          "integer", key, column_id, msg)) {
+          "integer", user_key, column_id, msg)) {
         return false;
       }
       if (!dba::columns::create_column_type_simple("END", utils::normalize_name("END"),
           "Region End column",
           "This column should be used to store the Region End position all experiments and annotations",
-          "integer", key, column_id, msg)) {
+          "integer", user_key, column_id, msg)) {
         return false;
       }
       if (!dba::columns::create_column_type_simple("VALUE", utils::normalize_name("VALUE"),
           "Region Value",
           "This column should be used to store the Wig Files Region Values",
-          "double", key, column_id, msg)) {
+          "double", user_key, column_id, msg)) {
         return false;
       }
 

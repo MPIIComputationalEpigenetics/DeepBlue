@@ -12,10 +12,12 @@
 
 #include "../dba/dba.hpp"
 #include "../dba/list.hpp"
+
 #include "../datatypes/user.hpp"
-#include "../entities/users.hpp"
+
 #include "../extras/utils.hpp"
 #include "../extras/serialize.hpp"
+
 #include "../errors.hpp"
 
 namespace epidb {
@@ -56,20 +58,15 @@ namespace epidb {
         const std::string admin_key = parameters[0]->as_string();
 
         std::string msg;
+        datatypes::User user;
 
-        datatypes::User admin;
-        if (!dba::get_user_by_key(admin_key, admin, msg)) {
+        if (!check_permissions(admin_key, datatypes::ADMIN, user, msg )) {
           result.add_error(msg);
           return false;
         }
 
-        if (!admin.has_permission(datatypes::ADMIN)) {
-          result.add_error(Error::m(ERR_INSUFFICIENT_PERMISSION));
-          return false;
-        }
-
         std::vector<utils::IdName> names;
-        bool ret = dba::list::users(admin_key, names, msg);
+        bool ret = dba::list::users(user.get_key(), names, msg);
 
         if (!ret) {
           result.add_error(msg);

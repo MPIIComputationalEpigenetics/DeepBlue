@@ -10,8 +10,9 @@
 
 #include "../dba/dba.hpp"
 #include "../dba/list.hpp"
+
 #include "../datatypes/user.hpp"
-#include "../entities/users.hpp"
+
 #include "../extras/utils.hpp"
 #include "../extras/serialize.hpp"
 
@@ -60,27 +61,14 @@ namespace epidb {
 
 
         std::string msg;
-
         datatypes::User user;
-        if (!dba::get_user_by_key(user_key, user, msg)) {
+
+        if (!check_permissions(user_key, datatypes::LIST_COLLECTIONS, user, msg )) {
           result.add_error(msg);
           return false;
         }
 
-        if (!user.has_permission(datatypes::LIST_COLLECTIONS)) {
-          result.add_error(Error::m(ERR_INSUFFICIENT_PERMISSION));
-          return false;
-        }
-
-        /*
-        if (genomes.size() == 0) {
-          result.add_error(Error::m(ERR_USER_GENOME_MISSING));
-          return false;
-        }
-        */
-
         std::vector<utils::IdName> names;
-
 
         if (genomes.empty()) {
           std::vector<utils::IdName> res;

@@ -18,16 +18,17 @@
 #include "../dba/dba.hpp"
 #include "../dba/queries.hpp"
 #include "../dba/users.hpp"
+
 #include "../datatypes/user.hpp"
-#include "../entities/users.hpp"
+
 #include "../engine/commands.hpp"
 #include "../engine/engine.hpp"
 #include "../engine/request.hpp"
 
-#include "../errors.hpp"
-
 #include "../extras/serialize.hpp"
 #include "../extras/utils.hpp"
+
+#include "../errors.hpp"
 
 namespace epidb {
   namespace command {
@@ -69,27 +70,17 @@ namespace epidb {
         const std::string user_key = parameters[1]->as_string();
 
         std::string msg;
+        datatypes::User user;
 
-        datatypes::User user1;
-        if (!dba::get_user_by_key(user_key, user1, msg)) {
+        if (!check_permissions(user_key, datatypes::GET_DATA, user, msg )) {
           result.add_error(msg);
-          return false;
-        }
-
-        if (!user1.has_permission(datatypes::GET_DATA)) {
-          result.add_error(Error::m(ERR_INSUFFICIENT_PERMISSION));
-          return false;
-        }
-
-        utils::IdName user;
-        if (!dba::users::get_user(user_key, user, msg)) {
           return false;
         }
 
         std::string file_content;
         request::Data data;
         request::DataType type = request::DataType::INVALID;
-        if (!epidb::Engine::instance().user_owns_request(request_id, user.id)) {
+        if (!epidb::Engine::instance().user_owns_request(request_id, user.get_id())) {
           result.add_error("Request ID " + request_id + " not found.");
           return false;
         }

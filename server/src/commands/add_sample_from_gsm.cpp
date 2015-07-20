@@ -14,7 +14,6 @@
 #include "../dba/exists.hpp"
 #include "../dba/list.hpp"
 #include "../datatypes/user.hpp"
-#include "../entities/users.hpp"
 #include "../external/geo.hpp"
 
 #include "../extras/utils.hpp"
@@ -67,15 +66,10 @@ namespace epidb {
         const std::string norm_biosource_name = utils::normalize_name(biosource_name);
 
         std::string msg;
-
         datatypes::User user;
-        if (!dba::get_user_by_key(user_key, user, msg)) {
-          result.add_error(msg);
-          return false;
-        }
 
-        if (!user.has_permission(datatypes::INCLUDE_COLLECTION_TERMS)) {
-          result.add_error(Error::m(ERR_INSUFFICIENT_PERMISSION));
+        if (!check_permissions(user_key, datatypes::INCLUDE_COLLECTION_TERMS, user, msg )) {
+          result.add_error(msg);
           return false;
         }
 

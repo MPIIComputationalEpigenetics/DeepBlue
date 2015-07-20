@@ -8,8 +8,9 @@
 
 #include "../dba/dba.hpp"
 #include "../dba/users.hpp"
+
 #include "../datatypes/user.hpp"
-#include "../entities/users.hpp"
+
 #include "../extras/serialize.hpp"
 
 #include "../engine/commands.hpp"
@@ -58,7 +59,7 @@ namespace epidb {
         std::string msg;
 
         datatypes::User user;
-        if (!dba::get_user_by_key(user_key, user, msg)) {
+        if (!dba::users::get_user_by_key(user_key, user, msg)) {
           result.add_error(msg);
           return false;
         }
@@ -75,7 +76,7 @@ namespace epidb {
           return false;
         }
 
-        if (!dba::modify_user(user, msg)) {
+        if (!dba::users::modify_user(user, msg)) {
           result.add_error(msg);
           return false;
         }

@@ -30,7 +30,7 @@ namespace epidb {
                                        std::string &experiment_name, std::string &msg);
 
     bool init_system(const std::string &name, const std::string &email, const std::string &institution,
-                     const std::string &key, std::string &msg);
+                     std::string &key, std::string &msg);
 
     bool create_indexes(std::string &msg);
 
@@ -86,13 +86,13 @@ namespace epidb {
      * Getters
      */
     bool get_biosource_children(const std::string &biosource_name, const std::string &norm_biosource_name,
-                             bool is_biosource, const std::string &user_key,
-                             std::vector<utils::IdName> &biosources, std::string &msg);
+                                bool is_biosource, const std::string &user_key,
+                                std::vector<utils::IdName> &biosources, std::string &msg);
 
 
     bool get_biosource_parents(const std::string &biosource_name, const std::string &norm_biosource_name,
-                             bool is_biosource, const std::string &user_key,
-                             std::vector<utils::IdName> &related_biosources, std::string &msg);
+                               bool is_biosource, const std::string &user_key,
+                               std::vector<utils::IdName> &related_biosources, std::string &msg);
 
     bool get_biosource_synonyms(const std::string &biosource_name, const std::string &norm_biosource_name,
                                 bool is_biosource, const std::string &user_key,

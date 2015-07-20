@@ -5,8 +5,9 @@
 
 #include "../dba/dba.hpp"
 #include "../dba/users.hpp"
+
 #include "../datatypes/user.hpp"
-#include "../entities/users.hpp"
+
 #include "../extras/serialize.hpp"
 
 #include "../engine/commands.hpp"
@@ -51,9 +52,9 @@ namespace epidb {
         const std::string password = parameters[1]->as_string();
 
         std::string msg;
-
         datatypes::User user;
-        if (!dba::get_user_by_email(email, password, user, msg)) {
+
+        if (!dba::users::get_user_by_email(email, password, user, msg)) {
           result.add_error(msg);
           return false;
         }

@@ -11,16 +11,26 @@
 
 #include <string>
 
+#include "../datatypes/user.hpp"
 #include "../extras/utils.hpp"
 
 namespace epidb {
   namespace dba {
     namespace users {
 
-      bool is_valid_email(const std::string &email, std::string &msg);
+      bool add_user(datatypes::User& user, std::string& msg);
 
-      bool add_user(const std::string &name, const std::string &email, const std::string &institution,
-                    const std::string &key, std::string &user_id, std::string &msg);
+      bool modify_user(datatypes::User& user, std::string& msg);
+
+      bool remove_user(const datatypes::User& user, std::string& msg);
+
+      bool get_user_by_key(const std::string& key, datatypes::User& user, std::string& msg);
+
+      bool get_user_by_email(const std::string& email, const std::string& password, datatypes::User& user, std::string& msg);
+
+      bool get_user_by_id(const std::string& id, datatypes::User& user, std::string& msg);
+
+      bool is_valid_email(const std::string &email, std::string &msg);
 
       /*
        * \brief give the user name or Id and receive the ID. Useful for reading some commands inputs

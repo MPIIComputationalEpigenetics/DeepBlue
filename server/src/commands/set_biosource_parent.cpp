@@ -8,8 +8,8 @@
 
 #include "../dba/controlled_vocabulary.hpp"
 #include "../dba/exists.hpp"
+#include "../dba/users.hpp"
 #include "../datatypes/user.hpp"
-#include "../entities/users.hpp"
 #include "../extras/utils.hpp"
 #include "../extras/serialize.hpp"
 
@@ -58,15 +58,10 @@ namespace epidb {
         const std::string user_key = parameters[2]->as_string();
 
         std::string msg;
-
         datatypes::User user;
-        if (!dba::get_user_by_key(user_key, user, msg)) {
-          result.add_error(msg);
-          return false;
-        }
 
-        if (!user.has_permission(datatypes::INCLUDE_COLLECTION_TERMS)) {
-          result.add_error(Error::m(ERR_INSUFFICIENT_PERMISSION));
+        if (!check_permissions(user_key, datatypes::INCLUDE_COLLECTION_TERMS, user, msg )) {
+          result.add_error(msg);
           return false;
         }
 

@@ -10,21 +10,21 @@
 #include <sstream>
 #include <iostream>
 
-#include <boost/foreach.hpp>
+#include "../datatypes/user.hpp"
 
 #include "../dba/dba.hpp"
 #include "../dba/info.hpp"
 #include "../dba/users.hpp"
 #include "../dba/list.hpp"
-#include "../datatypes/user.hpp"
-#include "../entities/users.hpp"
+
 #include "../engine/commands.hpp"
 #include "../engine/engine.hpp"
 #include "../engine/request.hpp"
-#include "../errors.hpp"
+
 #include "../extras/serialize.hpp"
 #include "../extras/utils.hpp"
-#include "../entities/users.hpp"
+
+#include "../errors.hpp"
 
 namespace epidb {
   namespace command {
@@ -99,7 +99,7 @@ namespace epidb {
       bool get_user(const std::string& key, std::map<std::string, std::string>& metadata, std::string& msg) const
       {
         datatypes::User user;
-        if (!dba::get_user_by_key(key, user, msg)) {
+        if (!dba::users::get_user_by_key(key, user, msg)) {
           return false;
         }
         metadata["id"] = user.get_id();
@@ -119,15 +119,10 @@ namespace epidb {
 
         bool ok;
         std::string msg;
-
         datatypes::User user;
-        if (!dba::get_user_by_key(user_key, user, msg)) {
-          result.add_error(msg);
-          return false;
-        }
 
-        if (!user.has_permission(datatypes::LIST_COLLECTIONS)) {
-          result.add_error(Error::m(ERR_INSUFFICIENT_PERMISSION));
+        if (!check_permissions(user_key, datatypes::LIST_COLLECTIONS, user, msg )) {
+          result.add_error(msg);
           return false;
         }
 

@@ -9,7 +9,6 @@
 #include "../dba/dba.hpp"
 #include "../dba/users.hpp"
 #include "../datatypes/user.hpp"
-#include "../entities/users.hpp"
 #include "../extras/serialize.hpp"
 
 #include "../engine/commands.hpp"
@@ -61,13 +60,8 @@ namespace epidb {
         std::string msg;
 
         datatypes::User admin;
-        if (!dba::get_user_by_key(admin_key, admin, msg)) {
+        if (!check_permissions(admin_key, datatypes::ADMIN, admin, msg )) {
           result.add_error(msg);
-          return false;
-        }
-
-        if (!admin.has_permission(datatypes::PermissionLevel::ADMIN)) {
-          result.add_error("The given key is not an admin-key");
           return false;
         }
 
@@ -76,13 +70,13 @@ namespace epidb {
           return false;
         }
 
-        datatypes::User user = datatypes::User(name, email, institution);
+        datatypes::User new_user = datatypes::User(name, email, institution);
 
-        user.generate_key();
+        new_user.generate_key();
 
-        if (dba::add_user(user, msg)) {
-          result.add_string(user.get_id());
-          result.add_string(user.get_key());
+        if (dba::users::add_user(new_user, msg)) {
+          result.add_string(new_user.get_id());
+          result.add_string(new_user.get_key());
           return true;
         } else {
           result.add_error(msg);

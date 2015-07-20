@@ -8,10 +8,13 @@
 
 #include "../dba/dba.hpp"
 #include "../dba/users.hpp"
+
 #include "../datatypes/user.hpp"
-#include "../entities/users.hpp"
-#include "../errors.hpp"
+
 #include "../extras/serialize.hpp"
+
+#include "../errors.hpp"
+
 
 #include "../engine/commands.hpp"
 
@@ -59,20 +62,15 @@ namespace epidb {
         const std::string admin_key = parameters[3]->as_string();
 
         std::string msg;
-
         datatypes::User admin;
-        if (!dba::get_user_by_key(admin_key, admin, msg)) {
+
+        if (!check_permissions(user_key, datatypes::ADMIN, admin, msg )) {
           result.add_error(msg);
           return false;
         }
 
-        if(!admin.has_permission(datatypes::ADMIN)) {
-          result.add_error(Error::m(ERR_INSUFFICIENT_PERMISSION));
-          return false;
-        }
-
         datatypes::User user;
-        if (!dba::get_user_by_key(user_key, user, msg)) {
+        if (!dba::users::get_user_by_key(user_key, user, msg)) {
           result.add_error(msg);
           return false;
         }
@@ -106,7 +104,7 @@ namespace epidb {
           return false;
         }
 
-        if (!dba::modify_user(user, msg)) {
+        if (!dba::users::modify_user(user, msg)) {
           result.add_error(msg);
           return false;
         }

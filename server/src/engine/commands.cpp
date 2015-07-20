@@ -15,8 +15,13 @@
 #include "commands.hpp"
 
 #include "../datatypes/metadata.hpp"
+#include "../datatypes/user.hpp"
+
 #include "../dba/dba.hpp"
+#include "../dba/users.hpp"
+
 #include "../dba/exists.hpp"
+
 #include "../extras/utils.hpp"
 
 #include "../errors.hpp"
@@ -51,15 +56,21 @@ namespace epidb {
     (*commands_)[name_] = this;
   }
 
-  // TODO: Check how to discover if the given ip is the local ip.
-  bool Command::check_local(const std::string &ip, bool &r, std::string &msg) const
+  bool Command::check_permissions(const std::string& user_key, const datatypes::PermissionLevel& permission, datatypes::User &user, std::string& msg ) const
   {
-    r = true;
+    if (!dba::users::get_user_by_key(user_key, user, msg)) {
+      return false;
+    }
+
+    if (!user.has_permission(permission)) {
+      msg = Error::m(ERR_INSUFFICIENT_PERMISSION);
+      return false;
+    }
     return true;
   }
 
-  // TODO: Implement
-  bool Command::check_email(const std::string &email, bool &r, std::string &msg) const
+  // TODO: Check how to discover if the given ip is the local ip.
+  bool Command::check_local(const std::string &ip, bool &r, std::string &msg) const
   {
     r = true;
     return true;

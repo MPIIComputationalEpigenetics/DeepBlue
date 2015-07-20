@@ -14,7 +14,6 @@
 #include "../dba/users.hpp"
 #include "../dba/list.hpp"
 #include "../datatypes/user.hpp"
-#include "../entities/users.hpp"
 #include "../engine/commands.hpp"
 
 #include "../extras/serialize.hpp"
@@ -61,21 +60,16 @@ namespace epidb {
       virtual bool run(const std::string &ip,
                        const serialize::Parameters &parameters, serialize::Parameters &result) const
       {
-        const std::string user = parameters[0]->as_string();
+        const std::string user_to_include = parameters[0]->as_string();
         const std::string project = parameters[1]->as_string();
         const bool include = parameters[2]->as_boolean();
         const std::string user_key = parameters[3]->as_string();
 
         std::string msg;
+        datatypes::User user;
 
-        datatypes::User user1;
-        if (!dba::get_user_by_key(user_key, user1, msg)) {
+        if (!check_permissions(user_key, datatypes::INCLUDE_EXPERIMENTS, user, msg )) {
           result.add_error(msg);
-          return false;
-        }
-
-        if (!user1.has_permission(datatypes::INCLUDE_EXPERIMENTS)) {
-          result.add_error(Error::m(ERR_INSUFFICIENT_PERMISSION));
           return false;
         }
 
@@ -112,7 +106,7 @@ namespace epidb {
 
 
         std::string user_id;
-        if (!dba::users::get_id(user, user_id, msg)) {
+        if (!dba::users::get_id(user_to_include, user_id, msg)) {
           result.add_error(msg);
           return false;
         }

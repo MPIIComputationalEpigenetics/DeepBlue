@@ -17,6 +17,7 @@
 #include <vector>
 
 #include "../datatypes/metadata.hpp"
+#include "../datatypes/user.hpp"
 
 #include "../extras/utils.hpp"
 #include "../extras/serialize.hpp"
@@ -84,9 +85,7 @@ namespace epidb {
 
     bool check_init(bool &r, std::string &msg) const;
 
-    bool check_email(const std::string &email, bool &r, std::string &msg) const;
-
-    const std::string gen_random(const size_t len) const;
+    bool check_permissions(const std::string& user_key, const datatypes::PermissionLevel& permission, datatypes::User &user, std::string& msg) const;
 
     void set_id_names_return(const std::vector<utils::IdName> &id_names, serialize::Parameters &result) const;
 

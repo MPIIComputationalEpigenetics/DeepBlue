@@ -12,6 +12,8 @@
 
 #include "../connection/connection.hpp"
 
+#include "../datatypes/user.hpp"
+
 #include "collections.hpp"
 #include "config.hpp"
 #include "exists.hpp"
@@ -56,38 +58,22 @@ namespace epidb {
 
       NameCache name_cache;
 
-      bool is_valid_email(const std::string &email, std::string &msg)
+      bool add_user(datatypes::User& user, std::string& msg)
       {
-        if (helpers::check_exist(Collections::USERS(), "email", email)) {
-          std::stringstream ss;
-          ss << "Email '" << email << "' is already in use.";
-          msg = ss.str();
+        mongo::BSONObjBuilder create_user_builder;
+        user.write_to_BSONObjBuilder(create_user_builder);
+
+        int result;
+        if (!dba::helpers::get_increment_counter("users", result, msg)) {
           return false;
         }
-        return true;
-      }
+        user.set_id(datatypes::User::PREFIX + std::to_string(result));
+        create_user_builder.append(datatypes::User::FIELD_ID, user.get_id());
 
-      bool add_user(const std::string &name, const std::string &email, const std::string &institution,
-                    const std::string &key, std::string &user_id, std::string &msg)
-      {
-        {
-          int id;
-          if (!helpers::get_increment_counter("users", id, msg))  {
-            return false;
-          }
-          user_id = "u" + utils::integer_to_string(id);
-        }
-
-        mongo::BSONObjBuilder create_user_builder;
-        create_user_builder.append("_id", user_id);
-        create_user_builder.append("name", name);
-        create_user_builder.append("email", email);
-        create_user_builder.append("institution", institution);
-        create_user_builder.append("key", key);
         mongo::BSONObj cu = create_user_builder.obj();
 
         Connection c;
-        c->insert(helpers::collection_name(Collections::USERS()), cu);
+        c->insert(dba::helpers::collection_name(dba::Collections::USERS()), cu);
         if (!c->getLastError().empty()) {
           msg = c->getLastError();
           c.done();
@@ -96,7 +82,7 @@ namespace epidb {
 
         mongo::BSONObjBuilder index_name;
         index_name.append("key", 1);
-        c->createIndex(helpers::collection_name(Collections::USERS()), index_name.obj());
+        c->createIndex(dba::helpers::collection_name(dba::Collections::USERS()), index_name.obj());
         if (!c->getLastError().empty()) {
           msg = c->getLastError();
           c.done();
@@ -104,6 +90,81 @@ namespace epidb {
         }
 
         c.done();
+        return true;
+      }
+
+      bool modify_user(datatypes::User& user, std::string& msg)
+      {
+        mongo::BSONObjBuilder create_user_builder;
+        user.write_to_BSONObjBuilder(create_user_builder);
+
+        Connection c;
+        c->update(dba::helpers::collection_name(dba::Collections::USERS()),
+                  BSON("_id" << user.get_id()),
+                  BSON("$set" << create_user_builder.obj()));
+        if (!c->getLastError().empty()) {
+          msg = c->getLastError();
+          c.done();
+          return false;
+        }
+        c.done();
+        return true;
+      }
+
+      bool remove_user(const datatypes::User& user, std::string& msg)
+      {
+        if (!dba::helpers::remove_one(helpers::collection_name(datatypes::User::COLLECTION), user.get_id(), msg)) {
+          return false;
+        }
+        return true;
+      }
+
+      bool get_user_by_key(const std::string& key, datatypes::User& user, std::string& msg)
+      {
+        std::vector<mongo::BSONObj> result;
+        dba::helpers::get(datatypes::User::COLLECTION, datatypes::User::FIELD_KEY, key, result, msg);
+        if (result.size() == 0) {
+          msg = "Unable to retrieve user with key %s" + key;
+          return false;
+        }
+        user = datatypes::User(result);
+        return true;
+      }
+
+      bool get_user_by_email(const std::string& email, const std::string& password, datatypes::User& user, std::string& msg)
+      {
+        std::vector<mongo::BSONObj> result;
+        dba::helpers::get(datatypes::User::COLLECTION,
+                          BSON(datatypes::User::FIELD_EMAIL << email << datatypes::User::FIELD_PASSWORD << password),
+                          result, msg);
+        if (result.size() == 0) {
+          msg = "Invalid Email-password combination.";
+          return false;
+        }
+        user = datatypes::User(result);
+        return true;
+      }
+
+      bool get_user_by_id(const std::string& id, datatypes::User& user, std::string& msg)
+      {
+        std::vector<mongo::BSONObj> result;
+        dba::helpers::get(datatypes::User::COLLECTION, datatypes::User::FIELD_ID, id, result, msg);
+        if (result.size() == 0) {
+          msg = "Unable to retrieve user with id %s" + id;
+          return false;
+        }
+        user = datatypes::User(result);
+        return true;
+      }
+
+      bool is_valid_email(const std::string &email, std::string &msg)
+      {
+        if (helpers::check_exist(Collections::USERS(), "email", email)) {
+          std::stringstream ss;
+          ss << "Email '" << email << "' is already in use.";
+          msg = ss.str();
+          return false;
+        }
         return true;
       }
 

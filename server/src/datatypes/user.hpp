@@ -6,6 +6,8 @@
 #ifndef USER_H
 #define	USER_H
 
+#include "../extras/utils.hpp"
+
 #include <string>
 #include <map>
 #include <vector>
@@ -14,7 +16,7 @@
 namespace epidb {
   namespace datatypes {
 
-    enum PermissionLevel { 
+    enum PermissionLevel {
       ADMIN,
       INCLUDE_COLLECTION_TERMS,
       INCLUDE_EXPERIMENTS,
@@ -46,7 +48,7 @@ namespace epidb {
       static const std::string FIELD_ADMIN;
       static const std::string FIELD_MEMORY_LIMIT;
       static const std::string FIELD_PERMISSION_LEVEL;
-      
+
       static const size_t KEY_LENGTH;
 
       void write_to_BSONObjBuilder(mongo::BSONObjBuilder& builder);
@@ -54,6 +56,7 @@ namespace epidb {
       std::string get_id() const;
       std::string get_key() const;
       std::string get_name() const;
+      utils::IdName get_id_name() const;
       std::string get_email() const;
       std::string get_institution() const;
       std::string get_password() const;
@@ -77,7 +80,7 @@ namespace epidb {
 
     private:
       void set_permission_level(int permission_level);
-        
+
       std::string id;
       std::string key;
       std::string name;
