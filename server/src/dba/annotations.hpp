@@ -40,6 +40,14 @@ namespace epidb {
                                        std::string &annotation_id,
                                        mongo::BSONObj &annotation_metadata,
                                        std::string &msg);
+
+      bool build_query_region_set_metadata(const std::string &genome, const std::string &norm_genome,
+                                           const std::string &user_key, const std::string &ip,
+                                           const parser::FileFormat &format,
+                                           int& dataset_id,
+                                           std::string &query_region_set_id,
+                                           mongo::BSONObj &query_region_set_metadata,
+                                           std::string &msg);
     }
   }
 }
