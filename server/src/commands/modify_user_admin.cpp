@@ -56,6 +56,7 @@ namespace epidb {
       virtual bool run(const std::string &ip,
                        const serialize::Parameters &parameters, serialize::Parameters &result) const
       {
+        // TODO: Use user ID or Name, see add_user_to_project.cpp:109
         const std::string user_key = parameters[0]->as_string();
         const std::string field = parameters[1]->as_string();
         const std::string value = parameters[2]->as_string();
