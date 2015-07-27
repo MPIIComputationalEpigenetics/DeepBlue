@@ -13,6 +13,7 @@
 #include "../connection/connection.hpp"
 
 #include "../datatypes/user.hpp"
+#include "../dba/collections.hpp"
 
 #include "collections.hpp"
 #include "config.hpp"
@@ -20,6 +21,7 @@
 #include "helpers.hpp"
 
 #include "../errors.hpp"
+#include "users.hpp"
 
 namespace epidb {
   namespace dba {
@@ -212,6 +214,32 @@ namespace epidb {
       void invalidate_cache()
       {
         name_cache.invalidate();
+      }
+      
+      bool get_owner(const std::string& id, datatypes::User& user, std::string& msg) {
+          std::string collection;
+          if (!dba::Collections::get_collection_for_id(id, collection)){
+              msg = "Datatype not accepted for this function";
+              return false;
+          }
+          std::cout << collection << std::endl;
+          mongo::BSONObj result;
+          if (!helpers::get_one(collection, mongo::Query(BSON("_id" << id)), result, msg)) {
+              msg = "Could not get data from database";
+              return false;
+          }
+          std::string user_id;
+          if (result.hasField("user")) {
+              user_id = result["user"].str();
+          } else if (result.hasField("upload_info")) {
+              user_id = result["upload_info"]["user"].str();
+          } else {
+              return false;
+          }
+          if (!get_user_by_id(user_id, user, msg)) {
+            return false;
+          }
+          return true;
       }
     }
   }

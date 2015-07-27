@@ -58,6 +58,8 @@ namespace epidb {
       * \brief Cleans cache
       */
       void invalidate_cache();
+      
+      bool get_owner(const std::string& id, datatypes::User& user, std::string& msg);
     }
   }
 }
