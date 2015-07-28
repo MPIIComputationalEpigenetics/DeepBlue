@@ -59,8 +59,9 @@ namespace epidb {
         const std::string user_key = parameters[3]->as_string();
 
         std::string msg;
-        datatypes::User user, user2;
+        datatypes::User user;
         if (!check_permissions(user_key, datatypes::ADMIN, user, msg )) {
+            datatypes::User user2;
             if (!dba::users::get_owner(id, user2, msg)) {
                 result.add_error(msg);
                 return false;
