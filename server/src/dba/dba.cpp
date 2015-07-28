@@ -168,6 +168,50 @@ namespace epidb {
       }
 
       {
+        mongo::BSONObjBuilder index_name;
+        index_name.append("extra_metadata.ontology_id", "hashed");
+        c->createIndex(helpers::collection_name(Collections::BIOSOURCES()), index_name.obj());
+        if (!c->getLastError().empty()) {
+          msg = c->getLastError();
+          c.done();
+          return false;
+        }
+      }
+
+      {
+        mongo::BSONObjBuilder index_name;
+        index_name.append("norm_biosource_name", "hashed");
+        c->createIndex(helpers::collection_name(Collections::TEXT_SEARCH()), index_name.obj());
+        if (!c->getLastError().empty()) {
+          msg = c->getLastError();
+          c.done();
+          return false;
+        }
+      }
+
+      {
+        mongo::BSONObjBuilder index_name;
+        index_name.append("epidb_id", "hashed");
+        c->createIndex(helpers::collection_name(Collections::TEXT_SEARCH()), index_name.obj());
+        if (!c->getLastError().empty()) {
+          msg = c->getLastError();
+          c.done();
+          return false;
+        }
+      }
+
+      {
+        mongo::BSONObjBuilder index_name;
+        index_name.append("sample_info_norm_biosource_name", "hashed");
+        c->createIndex(helpers::collection_name(Collections::TEXT_SEARCH()), index_name.obj());
+        if (!c->getLastError().empty()) {
+          msg = c->getLastError();
+          c.done();
+          return false;
+        }
+      }
+
+      {
         mongo::BSONObjBuilder index_syn_names;
         index_syn_names.append("norm_synonym", "hashed");
         c->createIndex(helpers::collection_name(Collections::BIOSOURCE_SYNONYM_NAMES()), index_syn_names.obj());
