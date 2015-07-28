@@ -9,11 +9,10 @@ class TestPermissions(helpers.TestCase):
     def get_new_user(self, epidb):
         s, user = epidb.add_user("user", "email", "institution", self.admin_key)
         self.assertSuccess(s)
-        s, user_key = user
-        return user_key
+        return user
 
-    def modify_user_permission(self, epidb, user, permission):
-        s = epidb.modify_user_admin(user, "permission_level", permission, self.admin_key)
+    def modify_user_permission(self, epidb, user_id, permission):
+        s = epidb.modify_user_admin(user_id, "permission_level", permission, self.admin_key)
         self.assertSuccess(s)
 
     def test_admin(self):
@@ -23,7 +22,7 @@ class TestPermissions(helpers.TestCase):
         s = epidb.add_user("user", "email", "institution", self.admin_key)
         self.assertSuccess(s)
 
-        self.modify_user_permission(epidb, self.admin_key, "INCLUDE_COLLECTION_TERMS")
+        self.modify_user_permission(epidb, "u1", "INCLUDE_COLLECTION_TERMS")
 
         s = epidb.add_user("user2", "email2", "institution", self.admin_key)
         self.assertFailure(s)
@@ -32,12 +31,12 @@ class TestPermissions(helpers.TestCase):
         epidb = EpidbClient()
         self.init_base(epidb)
 
-        user_key = self.get_new_user(epidb)
+        user_id, user_key = self.get_new_user(epidb)
 
         s = epidb.add_biosource("b", "D", {}, user_key)
         self.assertFailure(s)
 
-        self.modify_user_permission(epidb, user_key, "INCLUDE_COLLECTION_TERMS")
+        self.modify_user_permission(epidb, user_id, "INCLUDE_COLLECTION_TERMS")
 
         s = epidb.add_biosource("b", "D", {}, user_key)
         self.assertSuccess(s)
@@ -46,7 +45,7 @@ class TestPermissions(helpers.TestCase):
         epidb = EpidbClient()
         self.init_base(epidb)
 
-        user_key = self.get_new_user(epidb)
+        user_id, user_key = self.get_new_user(epidb)
 
         ann = helpers.data.ANNOTATIONS["Cpg Islands"]
         with open(ann["data_file"], 'r') as f:
@@ -57,7 +56,7 @@ class TestPermissions(helpers.TestCase):
                                     user_key)
         self.assertFailure(s)
 
-        self.modify_user_permission(epidb, user_key, "INCLUDE_ANNOTATIONS")
+        self.modify_user_permission(epidb, user_id, "INCLUDE_ANNOTATIONS")
 
         s = epidb.add_annotation("Cpg Islands", ann["genome"], ann["description"],
                                  annotation_data, ann["format"], ann["metadata"],
@@ -68,12 +67,12 @@ class TestPermissions(helpers.TestCase):
         epidb = EpidbClient()
         self.init_base(epidb)
 
-        user_key = self.get_new_user(epidb)
+        user_id, user_key = self.get_new_user(epidb)
 
         s = epidb.list_requests("running", user_key)
         self.assertFailure(s)
 
-        self.modify_user_permission(epidb, user_key, "GET_DATA")
+        self.modify_user_permission(epidb, user_id, "GET_DATA")
 
         s = epidb.list_requests("running", user_key)
         self.assertSuccess(s)
@@ -82,12 +81,12 @@ class TestPermissions(helpers.TestCase):
         epidb = EpidbClient()
         self.init_base(epidb)
 
-        user_key = self.get_new_user(epidb)
+        user_id, user_key = self.get_new_user(epidb)
 
         s = epidb.info("me", user_key)
         self.assertSuccess(s)
 
-        self.modify_user_permission(epidb, user_key, "NONE")
+        self.modify_user_permission(epidb, user_id, "NONE")
 
         s = epidb.info("me", user_key)
         self.assertFailure(s)
@@ -96,8 +95,8 @@ class TestPermissions(helpers.TestCase):
         epidb = EpidbClient()
         self.init_base(epidb)
 
-        user_key = self.get_new_user(epidb)
-        self.modify_user_permission(epidb, user_key, "INCLUDE_COLLECTION_TERMS")
+        user_id, user_key = self.get_new_user(epidb)
+        self.modify_user_permission(epidb, user_id, "INCLUDE_COLLECTION_TERMS")
 
         s, id = epidb.add_biosource("lsdjf", "sdf", {"a": "b", "c": "d"}, user_key)
 
@@ -109,8 +108,8 @@ class TestPermissions(helpers.TestCase):
 
         s, user = epidb.add_user("user2", "email2", "institution2", self.admin_key)
         self.assertSuccess(s)
-        s, user_key2 = user
-        self.modify_user_permission(epidb, user_key2, "INCLUDE_COLLECTION_TERMS")
+        user_id2, user_key2 = user
+        self.modify_user_permission(epidb, user_id2, "INCLUDE_COLLECTION_TERMS")
 
         s = epidb.change_extra_metadata(id, "c", "g", user_key2)
         self.assertFailure(s)
