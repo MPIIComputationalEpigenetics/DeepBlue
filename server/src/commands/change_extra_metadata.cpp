@@ -10,6 +10,7 @@
 
 #include "../dba/changes.hpp"
 #include "../dba/dba.hpp"
+#include "../dba/users.hpp"
 #include "../engine/commands.hpp"
 #include "../extras/serialize.hpp"
 
@@ -58,9 +59,16 @@ namespace epidb {
         const std::string user_key = parameters[3]->as_string();
 
         std::string msg;
-        if (!Command::checks(user_key, msg)) {
-          result.add_error(msg);
-          return false;
+        datatypes::User user, user2;
+        if (!check_permissions(user_key, datatypes::ADMIN, user, msg )) {
+            if (!dba::users::get_owner(id, user2, msg)) {
+                result.add_error(msg);
+                return false;
+            }
+            if (user.get_id() != user2.get_id()) {
+                result.add_error(msg);
+                return false;
+            }
         }
 
         if (!dba::changes::change_extra_metadata(id, extra_metadata_key, extra_metadata_value, msg)) {

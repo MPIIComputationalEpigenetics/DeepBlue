@@ -42,6 +42,45 @@ namespace epidb {
     {
       return std::find(valid_search_Collections().begin(), valid_search_Collections().end(), name) != valid_search_Collections().end();
     }
+    
+    const bool Collections::get_collection_for_id(const std::string& id, std::string& collection) {
+        unsigned int char_count = 0;
+        for (const char& c : id) {
+            if (isalpha(c)) {
+                char_count++;
+            }
+        }
+        std::string collection_prefix = id.substr(0, char_count);
+        
+        if ("a" == collection_prefix) {
+            collection = ANNOTATIONS();
+        } else if ("bs" == collection_prefix) {
+            collection = BIOSOURCES();
+        } else if ("ct" == collection_prefix) {
+            collection = COLUMN_TYPES();
+        } else if ("em" == collection_prefix) {
+            collection = EPIGENETIC_MARKS();
+        } else if ("e" == collection_prefix) {
+            collection = EXPERIMENTS();
+        } else if ("g" == collection_prefix) {
+            collection = GENOMES();
+        } else if ("p" == collection_prefix) {
+            collection = PROJECTS();
+        } else if ("q" == collection_prefix) {
+            collection = QUERIES();
+        } else if ("s" == collection_prefix) {
+            collection = SAMPLES();
+        } else if ("t" == collection_prefix) {
+            collection = TECHNIQUES();
+        } else if ("tr" == collection_prefix) {
+            collection = TILINGS();
+        } else if ("u" == collection_prefix) {
+            collection = USERS();
+        } else {
+            return false;
+        }
+        return true;
+    }
 
     const std::string &Collections::EXPERIMENTS()
     {

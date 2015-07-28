@@ -22,6 +22,8 @@ namespace epidb {
       static bool is_valid_search_collection(const std::string &name);
 
       static const std::vector<std::string> &valid_search_Collections();
+      
+      static const bool get_collection_for_id(const std::string& id, std::string& collection);
 
       static const std::string &EXPERIMENTS();
       static const std::string &GENOMES();

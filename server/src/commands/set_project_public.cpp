@@ -64,16 +64,23 @@ namespace epidb {
         const std::string user_key = parameters[2]->as_string();
 
         std::string msg;
-        datatypes::User user;
-        if (!check_permissions(user_key, datatypes::INCLUDE_EXPERIMENTS, user, msg )) {
-          result.add_error(msg);
-          return false;
-        }
-
+        
         std::string id;
         if (!datatypes::projects::get_id(project, id, msg)) {
           result.add_error(msg);
           return false;
+        }
+        
+        datatypes::User user, user2;
+        if (!check_permissions(user_key, datatypes::ADMIN, user, msg )) {
+            if (!dba::users::get_owner(id, user2, msg)) {
+                result.add_error(msg);
+                return false;
+            }
+            if (user.get_id() != user2.get_id()) {
+                result.add_error(msg);
+                return false;
+            }
         }
 
         std::vector<utils::IdName> user_projects_id_names;
