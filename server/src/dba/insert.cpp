@@ -305,6 +305,9 @@ namespace epidb {
     {
       mongo::BSONObj experiment_metadata;
       mongo::BSONObj extra_metadata_obj = datatypes::extra_metadata_to_bson(extra_metadata);
+
+      bool ignore_unknow_chromosomes = extra_metadata.find("__ignore_unknow_chromosomes__") != extra_metadata.end();
+
       int dataset_id;
       if (!experiments::build_metadata(name, norm_name, genome, norm_genome, epigenetic_mark, norm_epigenetic_mark,
                                        sample_id, technique, norm_technique, project, norm_project, description, norm_description, extra_metadata_obj,
@@ -357,7 +360,24 @@ namespace epidb {
 
       parser::WigContent::const_iterator end = wig->tracks_iterator_end();
       for (parser::WigContent::const_iterator it = wig->tracks_iterator(); it != end; it++) {
+
         parser::TrackPtr track = *it;
+
+        std::string internal_chromosome;
+        if (!genome_info->internal_chromosome(track->chromosome(), internal_chromosome, msg)) {
+          if (ignore_unknow_chromosomes) {
+            std::cerr << "ignore_unknow_chromosome " << track->chromosome() << std::endl;
+            msg = "";
+            continue;
+          }
+          c.done();
+          std::string new_msg;
+          if (!remove::experiment(experiment_id, user_key, new_msg)) {
+            msg = msg + " " + new_msg;
+          }
+          return false;
+        }
+
         mongo::BSONObjBuilder region_builder;
         region_builder.append("_id", (long long) dataset_id << 32 | (long long) count++);
         region_builder.append(KeyMapper::DATASET(), (int) dataset_id);
@@ -392,16 +412,6 @@ namespace epidb {
         }
 
         total_regions +=  track->features();
-
-        std::string internal_chromosome;
-        if (!genome_info->internal_chromosome(track->chromosome(), internal_chromosome, msg)) {
-          c.done();
-          std::string new_msg;
-          if (!remove::experiment(experiment_id, user_key, new_msg)) {
-            msg = msg + " " + new_msg;
-          }
-          return false;
-        }
 
         size_t size;
         // TODO: check regions and positions regards the chromosome size!
@@ -504,6 +514,8 @@ namespace epidb {
         return false;
       }
 
+      bool ignore_unknow_chromosomes = extra_metadata.find("__ignore_unknow_chromosomes__") != extra_metadata.end();
+
       mongo::BSONObj upload_info;
       if (!build_upload_info(user_key, ip, "peaks", upload_info, msg)) {
         return false;
@@ -549,6 +561,11 @@ namespace epidb {
 
         std::string internal_chromosome;
         if (!genome_info->internal_chromosome(chrom_lines.first, internal_chromosome, msg)) {
+          if (ignore_unknow_chromosomes) {
+            std::cerr << "ignore_unknow_chromosome " << chrom_lines.first << std::endl;
+            msg = "";
+            continue;
+          }
           c.done();
           std::string new_msg;
           if (!remove::experiment(experiment_id, user_key, new_msg)) {

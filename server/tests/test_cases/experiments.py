@@ -187,6 +187,32 @@ class TestExperiments(helpers.TestCase):
     self.assertFailure(res)
 
 
+  def test_add_with_invalid_chromosome(self):
+    epidb = EpidbClient()
+    self.init_base(epidb)
+
+    sample_id = self.sample_ids[0]
+    regions_data = helpers.load_bed("hg18_invalid_chr")
+    _format = data_info.EXPERIMENTS["hg19_chr1_1"]["format"]
+
+    res = epidb.add_experiment("test_exp1", "hg19", "Methylation", sample_id, "tech1",
+              "ENCODE", "desc1", regions_data, _format, None, self.admin_key)
+    self.assertFailure(res)
+
+    res = epidb.add_experiment("test_exp1", "hg19", "Methylation", sample_id, "tech1",
+              "ENCODE", "desc1", regions_data, _format, {"__ignore_unknow_chromosomes__": True}, self.admin_key)
+    self.assertSuccess(res)
+
+    res, q_exp = epidb.select_regions("test_exp1", "hg19", None, None, None, None, None, None, None,self.admin_key)
+    res, req = epidb.get_regions(q_exp, _format, self.admin_key)
+
+    data = self.get_regions_request(req)
+
+    regions_data_okay = helpers.load_bed("hg18_invalid_chr_okay")
+
+    self.assertEqual(data, regions_data_okay)
+
+
   def test_add_with_invalid_epigenetic_mark(self):
     epidb = EpidbClient()
     self.init_base(epidb)
