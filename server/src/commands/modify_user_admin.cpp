@@ -32,7 +32,7 @@ namespace epidb {
       static  Parameters parameters_()
       {
         Parameter p[] = {
-          Parameter("user_key", serialize::STRING, "Key of the user to be updated"),
+          Parameter("user_id", serialize::STRING, "Key of the user to be updated"),
           Parameter("field", serialize::STRING, "Name of field to update"),
           Parameter("value", serialize::STRING, "New value to store in field"),
           parameters::UserKey
@@ -57,7 +57,7 @@ namespace epidb {
                        const serialize::Parameters &parameters, serialize::Parameters &result) const
       {
         // TODO: Use user ID or Name, see add_user_to_project.cpp:109
-        const std::string user_key = parameters[0]->as_string();
+        const std::string user_id = parameters[0]->as_string();
         const std::string field = parameters[1]->as_string();
         const std::string value = parameters[2]->as_string();
         const std::string admin_key = parameters[3]->as_string();
@@ -71,7 +71,7 @@ namespace epidb {
         }
 
         datatypes::User user;
-        if (!dba::users::get_user_by_key(user_key, user, msg)) {
+        if (!dba::users::get_user_by_id(user_id, user, msg)) {
           result.add_error(msg);
           return false;
         }
