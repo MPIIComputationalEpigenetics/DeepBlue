@@ -45,7 +45,7 @@ namespace epidb {
         Parameter p[] = {
           Parameter("data_id", serialize::STRING, "id of the query with the data"),
           Parameter("ranges_id", serialize::STRING, "id of the query with the regions range"),
-          Parameter("field", serialize::STRING, "id of the aggregate regions range"),
+          Parameter("column", serialize::STRING, "name of the column that will be used in the aggregation"),
           parameters::UserKey
         };
         Parameters params(&p[0], &p[0] + 4);
