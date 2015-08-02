@@ -275,11 +275,11 @@ namespace epidb {
     }
 
     bool update_upload_info(const std::string &collection, const std::string &annotation_id,
-                            const int total_size, std::string &msg)
+                            const size_t total_size, std::string &msg)
     {
       Connection c;
       c->update(helpers::collection_name(collection), BSON("_id" << annotation_id),
-                BSON("$set" << BSON("upload_info.total_size" << (unsigned int) total_size << "upload_info.done" << true << "upload_info.upload_end" << mongo::DATENOW)), false, true);
+                BSON("$set" << BSON("upload_info.total_size" << (long long) total_size << "upload_info.done" << true << "upload_info.upload_end" << mongo::DATENOW)), false, true);
 
       if (!c->getLastError().empty()) {
         msg = c->getLastError();
