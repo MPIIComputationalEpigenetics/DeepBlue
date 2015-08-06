@@ -84,6 +84,7 @@ namespace epidb {
             }
         }
 
+
         std::vector<utils::IdName> user_projects_id_names;
         if (!dba::list::projects(user_key, user_projects_id_names, msg)) {
           result.add_error(msg);
@@ -102,8 +103,7 @@ namespace epidb {
         }
         std::string owner = project_res["user"];
 
-
-        if (!user.is_admin() && user.get_name() != owner) {
+        if (!user.is_admin() && user.get_id() != owner) {
           result.add_error(Error::m(ERR_PROJECT_PERMISSION, project.c_str()));
           return false;
         }
