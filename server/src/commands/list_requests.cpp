@@ -93,10 +93,13 @@ namespace epidb {
         result.set_as_array(true);
 
         for (const request::Job& job : jobs) {
-          std::vector<serialize::ParameterPtr> list;
-          list.push_back(serialize::ParameterPtr(new serialize::SimpleParameter(serialize::STRING, job._id)));
-          list.push_back(serialize::ParameterPtr(new serialize::SimpleParameter(serialize::STRING, job.status.state)));
-          result.add_list(list);
+          if ((job.status.state != "canceled" && job.status.state != "removed") ||
+              (status_find == "canceled" || status_find == "removed")) {
+            std::vector<serialize::ParameterPtr> list;
+            list.push_back(serialize::ParameterPtr(new serialize::SimpleParameter(serialize::STRING, job._id)));
+            list.push_back(serialize::ParameterPtr(new serialize::SimpleParameter(serialize::STRING, job.status.state)));
+            result.add_list(list);
+          }
         }
 
         return true;
