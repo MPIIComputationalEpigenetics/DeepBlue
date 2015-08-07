@@ -74,6 +74,10 @@ namespace epidb {
     * \return False also if request_id or user_id do not exist
     */
     bool user_owns_request(const std::string& request_id, const std::string& user_id);
+
+    bool cancel_request(const std::string& request_id, std::string& msg);
+
+    bool remove_request_data(const std::string& request_id, std::string& msg);
   };
 }
 

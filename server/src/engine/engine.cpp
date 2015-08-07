@@ -247,4 +247,14 @@ namespace epidb {
     }
     return false;
   }
+
+  bool Engine::cancel_request(const std::string& request_id, std::string& msg)
+  {
+    return _hub.cancel_request(request_id, msg);
+  }
+
+  bool Engine::remove_request_data(const std::string& request_id, std::string& msg)
+  {
+    return _hub.remove_request_data(request_id, msg);
+  }
 }
