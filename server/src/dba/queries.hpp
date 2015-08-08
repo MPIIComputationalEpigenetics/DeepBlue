@@ -87,6 +87,8 @@ namespace epidb {
                              processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg);
 
       bool get_columns_from_dataset(const DatasetId &dataset_id, std::vector<mongo::BSONObj> &columns, std::string &msg);
+
+      bool is_canceled(processing::StatusPtr status, std::string msg);
     }
   }
 }

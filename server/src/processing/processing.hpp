@@ -48,9 +48,9 @@ namespace epidb {
       const mongo::BSONObj params;
       const boost::posix_time::ptime _start_time;
 
-      public:
-        RunningOp(const std::string& processing_id, const OP& op, const mongo::BSONObj& params);
-        ~RunningOp();
+    public:
+      RunningOp(const std::string& processing_id, const OP& op, const mongo::BSONObj& params);
+      ~RunningOp();
     };
 
     class Status {
@@ -77,6 +77,7 @@ namespace epidb {
       long long total_regions();
       long long total_size();
       long long maximum_size();
+      bool is_canceled(bool& ret, std::string& msg);
     };
 
     typedef std::shared_ptr<Status> StatusPtr;
