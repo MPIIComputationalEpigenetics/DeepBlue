@@ -1,7 +1,6 @@
 UNAME_S := $(shell uname -s)
 UNAME_N := $(shell uname -n)
 
-host =
 
 ifeq ($(UNAME_S),Linux)
 	host = linux
@@ -17,10 +16,15 @@ ifeq ($(UNAME_S),Linux)
 	ifeq ($(UNAME_N),srv-13-41)
 		host = new_server
 	endif
+	ifeq ($(UNAME_N), pih-mpi)
+		host = ubuntu
+	endif
+
 endif
 ifeq ($(UNAME_S),Darwin)
 	host = macosx
 endif
+ 
 
 #Root Directory
 ifeq ($(host),new_server)
@@ -32,12 +36,27 @@ endif
 ifeq ($(host),macosx)
 	ROOT=/Users/albrecht/mpi/DeepBlue/server/
 endif
+ifeq ($(host),ubuntu)
+	ROOT=/home/albrecht/projects/DeepBlue/server
+endif
 
-LUA=$(ROOT)/third_party/luajit-2.0/src
+LUA=$(ROOT)/third_party/luajit-2.0/sr
 MINILZO=$(ROOT)/third_party/minilzo
 STRTK=$(ROOT)/third_party/strtk
 CPPFORMAT=$(ROOT)/third_party/cppformat
 URDL=$(ROOT)/third_party/urdl-0.1/include
+
+ifeq ($(host),ubuntu)
+ CXX = g++
+ LD  = g++ -DBOOST_LOG_DYN_LINK
+ LDFLAGS   = -pthread 
+ MONGOLIBS = /opt/mongo/lib/libmongoclient.a
+ BOOST_DIR = /opt/boost/lib
+ DEFCXXFLAGS = -std=c++11 -Wall -O3 -ffast-math -march=native -Ofast -I/opt/mongo/include/ -I/opt/boost/include/ -I$(MINILZO) -I$(URDL) -I$(CPPFORMAT) -I$(STRTK) -I$(LUA) -DURDL_HEADER_ONLY=1 -DURDL_DISABLE_SSL=1
+ BOOSTLIBS = $(BOOST_DIR)/libboost_filesystem.a $(BOOST_DIR)/libboost_thread.a $(BOOST_DIR)/libboost_system.a $(BOOST_DIR)/libboost_regex.a $(BOOST_DIR)/libboost_log.a  $(BOOST_DIR)/libboost_timer.a  $(BOOST_DIR)/libboost_chrono.a $(BOOST_DIR)/libboost_program_options.a $(BOOST_DIR)/libboost_iostreams.a /home/albrecht/projects/DeepBlue/server/third_party/bzip/lib/libbz2.a -lrt
+ THIRDLIBS = ../third_party/libexpat_linux.a
+endif
+
 
 # Servers
 ifeq ($(host),new_server)
@@ -47,7 +66,7 @@ ifeq ($(host),new_server)
  MONGOLIBS = /local/data/libraries/mongo-cxx-driver/lib/libmongoclient.a
  BOOST_DIR = /local/data/libraries/boost/lib
  DEFCXXFLAGS = -std=c++11 -Wall -O3 -ffast-math -march=native -Ofast -I/local/data/libraries/mongo-cxx-driver/include/ -I/local/data/libraries/boost/include/ -I$(MINILZO) -I$(URDL) -I$(CPPFORMAT) -I$(STRTK) -I$(LUA) -DURDL_HEADER_ONLY=1 -DURDL_DISABLE_SSL=1
- BOOSTLIBS = $(BOOST_DIR)/libboost_filesystem.a $(BOOST_DIR)/libboost_thread.a $(BOOST_DIR)/libboost_system.a $(BOOST_DIR)/libboost_regex.a $(BOOST_DIR)/libboost_log.a  $(BOOST_DIR)/libboost_timer.a  $(BOOST_DIR)/libboost_chrono.a $(BOOST_DIR)/libboost_program_options.a -lrt
+ BOOSTLIBS = -lbzip2 $(BOOST_DIR)/libboost_filesystem.a $(BOOST_DIR)/libboost_thread.a $(BOOST_DIR)/libboost_system.a $(BOOST_DIR)/libboost_regex.a $(BOOST_DIR)/libboost_log.a  $(BOOST_DIR)/libboost_timer.a  $(BOOST_DIR)/libboost_chrono.a $(BOOST_DIR)/libboost_program_options.a -lboost_iostreams -lrt
  THIRDLIBS = ../third_party/libexpat_linux.a
 endif
 
