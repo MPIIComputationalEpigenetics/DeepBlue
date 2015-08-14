@@ -25,7 +25,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::OPERATIONS, "Send a request to counts the number of regions in the result of the given query.");
+        return CommandDescription(categories::OPERATIONS, "Send a request to count the number of regions in the result of the given query.");
       }
 
       static  Parameters parameters_()
