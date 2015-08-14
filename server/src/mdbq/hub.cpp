@@ -223,6 +223,10 @@ namespace mdbq {
       return TS_DONE;
     } else if (name == "failed") {
       return TS_FAILED;
+    } else if (name == "canceled") {
+      return TS_CANCELLED;
+    } else if (name == "removed") {
+      return TS_REMOVED;
     } else {
       return _TS_END;
     }
@@ -244,6 +248,10 @@ namespace mdbq {
       return "done";
     case TS_FAILED:
       return "failed";
+    case TS_CANCELLED:
+      return "canceled";
+    case TS_REMOVED:
+      return "removed";
     default :
       return "Invalid State: " + epidb::utils::integer_to_string(state);
     }
@@ -255,10 +263,10 @@ namespace mdbq {
 
     switch (state) {
     case TS_NEW:
-      return "";
     case TS_RUNNING:
-      return "";
     case TS_DONE:
+    case TS_CANCELLED:
+    case TS_REMOVED:
       return "";
     case TS_FAILED:
       return o["error"].str();
@@ -373,7 +381,7 @@ namespace mdbq {
     mongo::BSONObj res;
     c->runCommand(m_ptr->m_prefix, cmd, res);
     if (!res["value"].isABSONObj()) {
-        msg =  "No request available, cmd:" + cmd.toString();
+      msg =  "No request available, cmd:" + cmd.toString();
       return false;
     }
 
@@ -428,24 +436,9 @@ namespace mdbq {
     mongo::BSONObj task_info = res["value"].Obj();
     TaskState task_state = (TaskState) task_info["state"].Int();
 
-    // The task was new and was canceled.
-    if (task_state == TS_NEW) {
-      return true;
+    if (task_state == TS_DONE || task_state == TS_FAILED) {
+      remove_request_data(request_id, msg);
     }
-
-    // If it is running, it must stop the processing.
-    if (task_state == TS_RUNNING) {
-      // TODO: return stop_processing(request_id);
-    }
-
-    if (task_state == TS_DONE) {
-      // TODO: return remove_processed_data(request_id);
-    }
-
-    if (task_state == TS_FAILED) {
-      // TODO: return remove_processed_data(request_id);
-    }
-
     return true;
   }
 }

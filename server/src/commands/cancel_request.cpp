@@ -13,6 +13,8 @@
 #include "../dba/users.hpp"
 
 #include "../engine/commands.hpp"
+#include "../engine/engine.hpp"
+#include "../mdbq/hub.hpp"
 
 namespace epidb {
   namespace command {
@@ -57,6 +59,11 @@ namespace epidb {
         datatypes::User user;
 
         if (!check_permissions(user_key, datatypes::INCLUDE_EXPERIMENTS, user, msg )) {
+          result.add_error(msg);
+          return false;
+        }
+
+        if (!epidb::Engine::instance().cancel_request(id, msg)) {
           result.add_error(msg);
           return false;
         }

@@ -7,6 +7,7 @@
 
 #include <chrono>
 #include <random>
+#include <vector>
 
 #include <boost/format.hpp>
 #include <boost/asio.hpp>
@@ -15,6 +16,7 @@
 #include <mongo/client/dbclient.h>
 #include <mongo/client/gridfs.h>
 
+#include "../engine/engine.hpp"
 #include "../extras/date_time.hpp"
 
 #include "client.hpp"
@@ -143,7 +145,6 @@ namespace mdbq {
     if (ct.isEmpty()) {
       throw std::runtime_error("MDBQC: get a task first before you finish!");
     }
-
     boost::posix_time::ptime finish_time = epidb::extras::universal_date_time();
     int version = ct["version"].Int();
     if (ok) {
@@ -156,14 +157,24 @@ namespace mdbq {
                                   "finish_time" << epidb::extras::to_mongo_date(finish_time) <<
                                   "result" << result)));
     } else {
-      m_ptr->m_con->update(m_jobcol,
-                           BSON("_id" << ct["_id"] <<
-                                "version" << version),
-                           BSON("$set" << BSON(
-                                  "state" << TS_FAILED <<
-                                  "version" << version + 1 <<
-                                  "failure_time" << epidb::extras::to_mongo_date(finish_time) <<
-                                  "error" << result["__error__"].str())));
+      std::string tmp;
+      mongo::BSONObj ret;
+      ret = m_ptr->m_con->findOne(m_jobcol, BSON("_id" << ct["_id"]));
+      if (ret.hasField("state") &&
+          (ret["state"].Int() == mdbq::TS_CANCELLED ||
+           ret["state"].Int() == mdbq::TS_REMOVED)) {
+        std::cout << "removed" << std::endl;
+        epidb::Engine::instance().remove_request_data(ct["_id"], tmp);
+      } else {
+        m_ptr->m_con->update(m_jobcol,
+                             BSON("_id" << ct["_id"] <<
+                                  "version" << version),
+                             BSON("$set" << BSON(
+                                    "state" << TS_FAILED <<
+                                    "version" << version + 1 <<
+                                    "failure_time" << epidb::extras::to_mongo_date(finish_time) <<
+                                    "error" << result["__error__"].str())));
+      }
     }
     CHECK_DB_ERR(m_ptr->m_con);
     m_ptr->m_current_task = mongo::BSONObj(); // empty, call get_next_task.

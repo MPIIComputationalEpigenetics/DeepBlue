@@ -39,9 +39,10 @@
 #include "helpers.hpp"
 #include "key_mapper.hpp"
 #include "metafield.hpp"
-#include "queries.hpp"
 #include "retrieve.hpp"
 #include "users.hpp"
+
+#include "queries.hpp"
 
 namespace epidb {
   namespace dba {
@@ -139,6 +140,9 @@ namespace epidb {
                                     processing::StatusPtr status, std::vector<utils::IdName> &experiments_name, std::string &msg)
       {
         processing::RunningOp runningOp = status->start_operation(processing::GET_EXPERIMENT_BY_QUERY);
+        if (is_canceled(status, msg)) {
+          return false;
+        }
 
         ChromosomeRegionsList chromossome_regions;
         if (!retrieve_query(user_key, query_id, status, chromossome_regions, msg)) {
@@ -196,6 +200,9 @@ namespace epidb {
                          processing::StatusPtr status, size_t &count, std::string &msg)
       {
         processing::RunningOp runningOp = status->start_operation(processing::COUNT_REGIONS);
+        if (is_canceled(status, msg)) {
+          return false;
+        }
 
         std::vector<mongo::BSONObj> result;
         if (!helpers::get(Collections::QUERIES(), "_id", query_id, result, msg)) {
@@ -407,6 +414,9 @@ namespace epidb {
                                             processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg)
       {
         processing::RunningOp runningOp = status->start_operation(processing::RETRIEVE_EXPERIMENT_SELECT_QUERY, query);
+        if (is_canceled(status, msg)) {
+          return false;
+        }
 
         mongo::BSONObj regions_query;
         if (!build_experiment_query(query, regions_query, msg)) {
@@ -451,6 +461,9 @@ namespace epidb {
       {
         mongo::BSONObj args = query["args"].Obj();
         processing::RunningOp runningOp = status->start_operation(processing::RETRIEVE_QUERY_REGION_SET, query);
+        if (is_canceled(status, msg)) {
+          return false;
+        }
 
         mongo::BSONObj regions_query = BSON(KeyMapper::DATASET() << args["dataset_id"].Int());
 
@@ -468,6 +481,9 @@ namespace epidb {
                                             processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg)
       {
         processing::RunningOp runningOp = status->start_operation(processing::RETRIEVE_ANNOTATION_SELECT_QUERY, query);
+        if (is_canceled(status, msg)) {
+          return false;
+        }
 
         mongo::BSONObj regions_query;
         if (!build_annotation_query(query, regions_query, msg)) {
@@ -506,6 +522,9 @@ namespace epidb {
                                        processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg)
       {
         processing::RunningOp runningOp = status->start_operation(processing::RETRIEVE_INTERSECTION_QUERY, query);
+        if (is_canceled(status, msg)) {
+          return false;
+        }
 
         mongo::BSONObj args = query["args"].Obj();
 
@@ -628,6 +647,9 @@ namespace epidb {
                                 processing::StatusPtr status, ChromosomeRegionsList & regions, std::string & msg)
       {
         processing::RunningOp runningOp = status->start_operation(processing::RETRIEVE_MERGE_QUERY, query);
+        if (is_canceled(status, msg)) {
+          return false;
+        }
 
         mongo::BSONObj args = query["args"].Obj();
 
@@ -679,6 +701,9 @@ namespace epidb {
                                  processing::StatusPtr status, ChromosomeRegionsList & filtered_regions, std::string & msg)
       {
         processing::RunningOp runningOp = status->start_operation(processing::RETRIEVE_FILTER_QUERY, query);
+        if (is_canceled(status, msg)) {
+          return false;
+        }
 
         mongo::BSONObj args = query["args"].Obj();
 
@@ -812,6 +837,9 @@ namespace epidb {
                                  processing::StatusPtr status, ChromosomeRegionsList & regions, std::string & msg)
       {
         processing::RunningOp runningOp = status->start_operation(processing::RETRIEVE_TILING_QUERY, query);
+        if (is_canceled(status, msg)) {
+          return false;
+        }
 
         mongo::BSONObj args = query["args"].Obj();
 
@@ -858,6 +886,10 @@ namespace epidb {
                              processing::StatusPtr status, ChromosomeRegionsList & regions, std::string & msg)
       {
         processing::RunningOp runningOp = status->start_operation(processing::PROCESS_AGGREGATE, query);
+
+        if (is_canceled(status, msg)) {
+          return false;
+        }
 
         mongo::BSONObj args = query["args"].Obj();
         const std::string query_id = args["data_id"].str();
@@ -1019,6 +1051,18 @@ namespace epidb {
           std::cerr << "bbbb" << std::endl;
           return false;
         }
+      }
+
+      bool is_canceled(processing::StatusPtr status, std::string msg)
+      {
+        bool is_canceled;
+        if (status->is_canceled(is_canceled, msg)) {
+          return true;
+        }
+        if (is_canceled) {
+          return true;
+        }
+        return false;
       }
     }
   }

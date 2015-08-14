@@ -13,7 +13,9 @@
 #include "../connection/connection.hpp"
 #include "../dba/collections.hpp"
 #include "../dba/helpers.hpp"
+#include "../engine/engine.hpp"
 #include "../extras/utils.hpp"
+#include "../mdbq/common.hpp"
 
 #include "processing.hpp"
 
@@ -177,6 +179,23 @@ namespace epidb {
     long long Status::maximum_size()
     {
       return _maximum_memory;
+    }
+
+    boost::posix_time::ptime last_checked;
+    bool canceled = false;
+    bool Status::is_canceled(bool& ret, std::string& msg)
+    {
+      boost::posix_time::ptime now(epidb::extras::universal_date_time());
+      if (last_checked + boost::posix_time::seconds(5) < now) {
+        mongo::BSONObj result;
+        dba::helpers::get_one(dba::Collections::PROCESSING(), 
+                mongo::Query(BSON("_id" << _processing_id)), result, msg);
+        if (result["state"].Int() == mdbq::TS_CANCELLED) {
+          canceled = true;
+        }
+      }
+
+      return canceled;
     }
 
     typedef std::shared_ptr<Status> StatusPtr;
