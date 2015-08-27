@@ -126,7 +126,7 @@ namespace epidb {
         std::vector<mongo::BSONObj> result;
         dba::helpers::get(datatypes::User::COLLECTION, datatypes::User::FIELD_KEY, key, result, msg);
         if (result.size() == 0) {
-          msg = "Unable to retrieve user with key %s" + key;
+          msg = "Unable to retrieve user with key " + key;
           return false;
         }
         user = datatypes::User(result);
@@ -152,7 +152,7 @@ namespace epidb {
         std::vector<mongo::BSONObj> result;
         dba::helpers::get(datatypes::User::COLLECTION, datatypes::User::FIELD_ID, id, result, msg);
         if (result.size() == 0) {
-          msg = "Unable to retrieve user with id %s" + id;
+          msg = "Unable to retrieve user with id: " + id;
           return false;
         }
         user = datatypes::User(result);
@@ -215,7 +215,7 @@ namespace epidb {
       {
         name_cache.invalidate();
       }
-      
+
       bool get_owner(const std::string& id, datatypes::User& user, std::string& msg) {
           std::string collection;
           if (!dba::Collections::get_collection_for_id(id, collection)){
