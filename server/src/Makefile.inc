@@ -24,7 +24,7 @@ endif
 ifeq ($(UNAME_S),Darwin)
 	host = macosx
 endif
- 
+
 
 #Root Directory
 ifeq ($(host),new_server)
@@ -37,10 +37,10 @@ ifeq ($(host),macosx)
 	ROOT=/Users/albrecht/mpi/DeepBlue/server/
 endif
 ifeq ($(host),ubuntu)
-	ROOT=/home/albrecht/projects/DeepBlue/server
+	ROOT=/home/albrecht/DeepBlue/DeepBlue/server
 endif
 
-LUA=$(ROOT)/third_party/luajit-2.0/sr
+LUA=$(ROOT)/third_party/luajit-2.0/src
 MINILZO=$(ROOT)/third_party/minilzo
 STRTK=$(ROOT)/third_party/strtk
 CPPFORMAT=$(ROOT)/third_party/cppformat
@@ -49,11 +49,11 @@ URDL=$(ROOT)/third_party/urdl-0.1/include
 ifeq ($(host),ubuntu)
  CXX = g++
  LD  = g++ -DBOOST_LOG_DYN_LINK
- LDFLAGS   = -pthread 
+ LDFLAGS   = -pthread
  MONGOLIBS = /opt/mongo/lib/libmongoclient.a
  BOOST_DIR = /opt/boost/lib
  DEFCXXFLAGS = -std=c++11 -Wall -O3 -ffast-math -march=native -Ofast -I/opt/mongo/include/ -I/opt/boost/include/ -I$(MINILZO) -I$(URDL) -I$(CPPFORMAT) -I$(STRTK) -I$(LUA) -DURDL_HEADER_ONLY=1 -DURDL_DISABLE_SSL=1
- BOOSTLIBS = $(BOOST_DIR)/libboost_filesystem.a $(BOOST_DIR)/libboost_thread.a $(BOOST_DIR)/libboost_system.a $(BOOST_DIR)/libboost_regex.a $(BOOST_DIR)/libboost_log.a  $(BOOST_DIR)/libboost_timer.a  $(BOOST_DIR)/libboost_chrono.a $(BOOST_DIR)/libboost_program_options.a $(BOOST_DIR)/libboost_iostreams.a /home/albrecht/projects/DeepBlue/server/third_party/bzip/lib/libbz2.a -lrt
+ BOOSTLIBS = $(BOOST_DIR)/libboost_filesystem.a $(BOOST_DIR)/libboost_thread.a $(BOOST_DIR)/libboost_system.a $(BOOST_DIR)/libboost_regex.a $(BOOST_DIR)/libboost_log.a  $(BOOST_DIR)/libboost_timer.a  $(BOOST_DIR)/libboost_chrono.a $(BOOST_DIR)/libboost_program_options.a $(BOOST_DIR)/libboost_iostreams.a /home/albrecht/DeepBlue/DeepBlue/server/third_party/bzip2/lib/linux/libbz2.a -lrt
  THIRDLIBS = ../third_party/libexpat_linux.a
 endif
 
@@ -77,7 +77,7 @@ ifeq ($(host),production)
  MONGOLIBS = /opt/mongodb/install/mongo-driver/lib/libmongoclient.a
  BOOST_DIR = /opt/mongodb/boost/lib
  DEFCXXFLAGS = -std=c++11 -Wall -O3 -ffast-math -march=native -Ofast -I/opt/mongodb/install/mongo-driver/include/ -I$(MINILZO) -I$(URDL) -I$(CPPFORMAT) -I$(STRTK) -I$(LUA) -DURDL_HEADER_ONLY=1 -DURDL_DISABLE_SSL=1
- BOOSTLIBS = $(BOOST_DIR)/libboost_filesystem.a $(BOOST_DIR)/libboost_thread.a $(BOOST_DIR)/libboost_system.a $(BOOST_DIR)/libboost_regex.a $(BOOST_DIR)/libboost_log.a  $(BOOST_DIR)/libboost_timer.a  $(BOOST_DIR)/libboost_chrono.a $(BOOST_DIR)/libboost_program_options.a $(BOOST_DIR)/libboost_iostreams.a /local/data/DeepBlue/server/third_party/bzip2-1.0.6/lib/lib/libbz2.a -lrt
+ BOOSTLIBS = $(BOOST_DIR)/libboost_filesystem.a $(BOOST_DIR)/libboost_thread.a $(BOOST_DIR)/libboost_system.a $(BOOST_DIR)/libboost_regex.a $(BOOST_DIR)/libboost_log.a  $(BOOST_DIR)/libboost_timer.a  $(BOOST_DIR)/libboost_chrono.a $(BOOST_DIR)/libboost_program_options.a $(BOOST_DIR)/libboost_iostreams.a /local/data/DeepBlue/server/third_party/bzip2/lib/linux/libbz2.a -lrt
  THIRDLIBS = ../third_party/libexpat_linux.a
 endif
 

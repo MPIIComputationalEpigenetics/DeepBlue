@@ -38,7 +38,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::REQUESTS, "Get the status of the given request.");
+        return CommandDescription(categories::REQUESTS, "Get the request data.");
       }
 
       static  Parameters parameters_()
@@ -54,7 +54,7 @@ namespace epidb {
       static Parameters results_()
       {
         Parameter p[] = {
-          Parameter("information", serialize::MAP, "Maps containing the request data", true)
+          Parameter("data", serialize::STRING, "The output can be (i) a string (get_regions, score_matrix, and count_regions), or (ii) a list of ID and names (get_experiments_by_query).", true)
         };
         Parameters results(&p[0], &p[0] + 1);
         return results;
