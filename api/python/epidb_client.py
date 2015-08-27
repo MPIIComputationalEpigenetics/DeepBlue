@@ -139,6 +139,9 @@ class EpidbClient:
     def list_similar_projects(self, project_name, user_key):
         return self.server.list_similar_projects(project_name, user_key)
 
+    def set_project_public(self, project, set, user_key):
+        return self.server.set_project_public(project, set, user_key)
+
   ## Bio Source names
     def set_biosource_synonym(self, biosource_name, synonym_name, user_key):
         return self.server.set_biosource_synonym(biosource_name,

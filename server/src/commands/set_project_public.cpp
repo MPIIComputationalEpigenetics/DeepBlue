@@ -64,13 +64,13 @@ namespace epidb {
         const std::string user_key = parameters[2]->as_string();
 
         std::string msg;
-        
+
         std::string id;
         if (!datatypes::projects::get_id(project, id, msg)) {
           result.add_error(msg);
           return false;
         }
-        
+
         datatypes::User user;
         if (!check_permissions(user_key, datatypes::ADMIN, user, msg )) {
             datatypes::User user2;

@@ -23,6 +23,9 @@
 #include "../connection/connection.hpp"
 
 #include "../datatypes/metadata.hpp"
+#include "../datatypes/user.hpp"
+
+#include "../dba/users.hpp"
 
 #include "../extras/utils.hpp"
 
@@ -140,15 +143,14 @@ namespace epidb {
           return false;
         }
 
-        bool user_admin = false;
-        if (user_bson.hasField("admin")) {
-          user_admin = user_bson["admin"].Bool();
+        datatypes::User user;
+        if (!dba::users::get_user_by_key(user_key, user, msg)) {
+          return false;
         }
-
         mongo::BSONObj full_query;
 
         // list all project if is admin
-        if (!user_admin) {
+        if (!user.is_admin()) {
           mongo::BSONObj public_projects =  BSON("public" << true);
 
           // I am not so sure about this option. I have it because the actual data does not have the "public" field
@@ -163,8 +165,6 @@ namespace epidb {
 
             mongo::BSONObj user_projects = BSON("_id" << BSON("$in" << helpers::build_array(ps)));
             full_query = BSON("$or" << BSON_ARRAY(public_projects <<  unset_public_projects << user_projects));
-          } else {
-            full_query = BSON("$or" << BSON_ARRAY(public_projects <<  unset_public_projects));
           }
         }
 
