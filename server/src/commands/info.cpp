@@ -101,6 +101,23 @@ namespace epidb {
         metadata["name"] = user.get_name();
         metadata["email"] = user.get_email();
         metadata["institution"] = user.get_institution();
+
+        datatypes::PermissionLevel pl = user.get_permission_level();
+        std::string pl_string;
+
+        switch (pl) {
+          case datatypes::ADMIN: pl_string = "ADMIN"; break;
+          case datatypes::INCLUDE_COLLECTION_TERMS: pl_string = "INCLUDE_COLLECTION_TERMS"; break;
+          case datatypes::INCLUDE_EXPERIMENTS: pl_string = "INCLUDE_EXPERIMENTS"; break;
+          case datatypes::INCLUDE_ANNOTATIONS: pl_string = "INCLUDE_ANNOTATIONS"; break;
+          case datatypes::GET_DATA: pl_string = "GET_DATA"; break;
+          case datatypes::LIST_COLLECTIONS: pl_string = "LIST_COLLECTIONS"; break;
+          case datatypes::NONE: pl_string = "NONE"; break;
+          default: pl_string = "Unknown permission level: " + utils::integer_to_string(pl); break;
+        }
+
+        metadata["permission_level"] = pl_string;
+
         return true;
       }
 
@@ -154,7 +171,6 @@ namespace epidb {
           if (id == "me") {
             ok = get_user(user_key, metadata, msg);
             type = "user";
-            continue;
           } else {
             // must have LIST_COLLECTIONS permission to get information about the other data types.
             if (!has_list_collections_permissions) {

@@ -83,10 +83,18 @@ class TestPermissions(helpers.TestCase):
 
         user_id, user_key = self.get_new_user(epidb)
 
-        s = epidb.info("me", user_key)
-        self.assertSuccess(s)
+        s, info = epidb.info("me", user_key)
+        self.assertSuccess(s, info)
+
+        self.assertEquals(info[0]["permission_level"], "LIST_COLLECTIONS")
 
         self.modify_user_permission(epidb, user_id, "NONE")
+
+        s, info = epidb.info("me", user_key)
+        self.assertSuccess(s, info)
+
+        self.assertEquals(info[0]["permission_level"], "NONE")
+
 
         s = epidb.info("me", user_key)
         self.assertSuccess(s)

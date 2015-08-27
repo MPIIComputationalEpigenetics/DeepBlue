@@ -6,7 +6,7 @@ from client import EpidbClient
 
 class TestGetInfoCommand(helpers.TestCase):
   maxDiff = None
-  def _test_genome_info(self):
+  def test_genome_info(self):
     epidb = EpidbClient()
     self.init(epidb)
 
@@ -24,7 +24,7 @@ class TestGetInfoCommand(helpers.TestCase):
     self.assertEqual(data[0]['_id'], gid)
 
 
-  def _test_epigenetic_mark_info(self):
+  def test_epigenetic_mark_info(self):
     epidb = EpidbClient()
     self.init(epidb)
 
@@ -38,7 +38,7 @@ class TestGetInfoCommand(helpers.TestCase):
     self.assertEqual(data[0]['_id'], emid)
 
 
-  def _test_annotation_info(self):
+  def test_annotation_info(self):
     epidb = EpidbClient()
     self.init_base(epidb)
 
@@ -60,7 +60,7 @@ class TestGetInfoCommand(helpers.TestCase):
     self.assertEqual(data[0]['_id'], aid)
 
 
-  def _test_experiment_info(self):
+  def test_experiment_info(self):
     epidb = EpidbClient()
     self.init_base(epidb)
 
@@ -106,7 +106,7 @@ class TestGetInfoCommand(helpers.TestCase):
     self.assertEqual(data[0]['format'], "CHROMOSOME,START,END,NAME,SCORE,STRAND,SIGNAL_VALUE,P_VALUE,Q_VALUE,PEAK")
     self.assertEqual(data[0]['_id'], eid)
 
-  def _test_query_info(self):
+  def test_query_info(self):
     epidb = EpidbClient()
     self.init_base(epidb)
 
@@ -125,7 +125,7 @@ class TestGetInfoCommand(helpers.TestCase):
     self.assertEqual(data[0]['user'], 'test_admin')
 
 
-  def _test_biosource_info(self):
+  def test_biosource_info(self):
     epidb = EpidbClient()
     self.init(epidb)
 
@@ -139,7 +139,7 @@ class TestGetInfoCommand(helpers.TestCase):
     self.assertEqual(data[0]['user'], "test_admin")
     self.assertEqual(data[0]['_id'], bsid)
 
-  def _test_sample_info(self):
+  def test_sample_info(self):
     epidb = EpidbClient()
     self.init(epidb)
 
@@ -156,7 +156,7 @@ class TestGetInfoCommand(helpers.TestCase):
     self.assertEqual(data[0]['user'], "test_admin")
     self.assertEqual(data[0]['_id'], sid)
 
-  def _test_me_info(self):
+  def test_me_info(self):
     epidb = EpidbClient()
     self.init(epidb)
 
@@ -166,6 +166,7 @@ class TestGetInfoCommand(helpers.TestCase):
     self.assertTrue("name" in info and info["name"] == settings.EPIDB_TEST_ADMIN[0])
     self.assertTrue("email" in info and info["email"] == settings.EPIDB_TEST_ADMIN[1])
     self.assertTrue("institution" in info and info["institution"] == settings.EPIDB_TEST_ADMIN[2])
+    self.assertTrue("permission_level" in info and info["permission_level"] == "ADMIN")
 
   def test_request_info_permission(self):
     epidb = EpidbClient()
