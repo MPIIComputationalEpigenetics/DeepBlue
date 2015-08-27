@@ -112,13 +112,15 @@ namespace epidb {
       {
         const std::string user_key = parameters[1]->as_string();
 
-        bool ok;
         std::string msg;
         datatypes::User user;
 
-        if (!check_permissions(user_key, datatypes::LIST_COLLECTIONS, user, msg )) {
-          result.add_error(msg);
-          return false;
+        std::string err_msg;
+        bool has_list_collections_permissions = false;
+        if (check_permissions(user_key, datatypes::LIST_COLLECTIONS, user, msg )) {
+          has_list_collections_permissions = true;
+        } else {
+          msg = err_msg;
         }
 
         std::vector<utils::IdName> user_projects_id_names;
@@ -146,62 +148,74 @@ namespace epidb {
           std::map<std::string, std::string> sample_info;
           std::map<std::string, std::string> upload_info;
           std::vector<std::map<std::string, std::string> > columns;
-          if (id.compare(0, 1, "a") == 0) {
-            ok = dba::info::get_annotation(id, metadata, extra_metadata, columns, upload_info, msg);
-            ok = ok && dba::info::id_to_name(upload_info, msg);
-            type = "annotation";
-          } else if (id.compare(0, 1, "g") == 0) {
-            ok = dba::info::get_genome(id, metadata, msg);
-            ok = ok && dba::info::id_to_name(metadata, msg);
-            type = "genome";
-          } else if (id.compare(0, 1, "p") == 0) {
-            ok = dba::info::get_project(id, user_projects, metadata, msg);
-            ok = ok && dba::info::id_to_name(metadata, msg);
-            type = "project";
-          } else if (id.compare(0, 2, "bs") == 0) {
-            ok = dba::info::get_biosource(id, metadata, extra_metadata, synonyms, msg);
-            ok = ok && dba::info::id_to_name(metadata, msg);
-            type = "biosource";
-          } else if (id.compare(0, 1, "s") == 0) {
-            ok = dba::info::get_sample_by_id(id, metadata, msg);
-            ok = ok && dba::info::id_to_name(metadata, msg);
-            type = "sample";
-          } else if (id.compare(0, 2, "em") == 0) {
-            ok = dba::info::get_epigenetic_mark(id, metadata, msg);
-            ok = ok && dba::info::id_to_name(metadata, msg);
-            type = "epigenetic_mark";
-          } else if (id.compare(0, 1, "e") == 0) {
-            ok = dba::info::get_experiment(id, user_projects, metadata, extra_metadata, sample_info, columns, upload_info, msg);
-            ok = ok && dba::info::id_to_name(upload_info, msg);
-            type = "experiment";
-          } else if (id.compare(0, 1, "q") == 0) {
-            ok = dba::info::get_query(id, metadata, msg);
-            ok = ok && dba::info::id_to_name(metadata, msg);
-            type = "query";
-          } else if (id.compare(0, 2, "tr") == 0) {
-            ok = dba::info::get_tiling_region(id, metadata, msg);
-            ok = ok && dba::info::id_to_name(metadata, msg);
-            type = "tiling_region";
-          } else if (id.compare(0, 1, "t") == 0) {
-            ok = dba::info::get_technique(id, metadata, extra_metadata, msg);
-            ok = ok && dba::info::id_to_name(metadata, msg);
-            type = "technique";
-          } else if (id.compare(0, 2, "ct") == 0) {
-            ok = dba::info::get_column_type(id, metadata, msg);
-            type = "column_type";
-          } else if (id.compare(0, 1, "r") == 0) {
-            ok = get_request(id, user_key, metadata, msg);
-            type = "request";
-          } else if (id == "me") {
+          bool ok;
+
+          // Any user can request information about himself
+          if (id == "me") {
             ok = get_user(user_key, metadata, msg);
             type = "user";
+            continue;
           } else {
-            result.add_error("Invalid identifier: " + id);
-            return false;
-          }
-          if (!ok) {
-            result.add_error(msg);
-            return false;
+            // must have LIST_COLLECTIONS permission to get information about the other data types.
+            if (!has_list_collections_permissions) {
+              result.add_error(err_msg);
+              return false;
+            }
+
+            if (id.compare(0, 1, "a") == 0) {
+              ok = dba::info::get_annotation(id, metadata, extra_metadata, columns, upload_info, msg);
+              ok = ok && dba::info::id_to_name(upload_info, msg);
+              type = "annotation";
+            } else if (id.compare(0, 1, "g") == 0) {
+              ok = dba::info::get_genome(id, metadata, msg);
+              ok = ok && dba::info::id_to_name(metadata, msg);
+              type = "genome";
+            } else if (id.compare(0, 1, "p") == 0) {
+              ok = dba::info::get_project(id, user_projects, metadata, msg);
+              ok = ok && dba::info::id_to_name(metadata, msg);
+              type = "project";
+            } else if (id.compare(0, 2, "bs") == 0) {
+              ok = dba::info::get_biosource(id, metadata, extra_metadata, synonyms, msg);
+              ok = ok && dba::info::id_to_name(metadata, msg);
+              type = "biosource";
+            } else if (id.compare(0, 1, "s") == 0) {
+              ok = dba::info::get_sample_by_id(id, metadata, msg);
+              ok = ok && dba::info::id_to_name(metadata, msg);
+              type = "sample";
+            } else if (id.compare(0, 2, "em") == 0) {
+              ok = dba::info::get_epigenetic_mark(id, metadata, msg);
+              ok = ok && dba::info::id_to_name(metadata, msg);
+              type = "epigenetic_mark";
+            } else if (id.compare(0, 1, "e") == 0) {
+              ok = dba::info::get_experiment(id, user_projects, metadata, extra_metadata, sample_info, columns, upload_info, msg);
+              ok = ok && dba::info::id_to_name(upload_info, msg);
+              type = "experiment";
+            } else if (id.compare(0, 1, "q") == 0) {
+              ok = dba::info::get_query(id, metadata, msg);
+              ok = ok && dba::info::id_to_name(metadata, msg);
+              type = "query";
+            } else if (id.compare(0, 2, "tr") == 0) {
+              ok = dba::info::get_tiling_region(id, metadata, msg);
+              ok = ok && dba::info::id_to_name(metadata, msg);
+              type = "tiling_region";
+            } else if (id.compare(0, 1, "t") == 0) {
+              ok = dba::info::get_technique(id, metadata, extra_metadata, msg);
+              ok = ok && dba::info::id_to_name(metadata, msg);
+              type = "technique";
+            } else if (id.compare(0, 2, "ct") == 0) {
+              ok = dba::info::get_column_type(id, metadata, msg);
+              type = "column_type";
+            } else if (id.compare(0, 1, "r") == 0) {
+              ok = get_request(id, user_key, metadata, msg);
+              type = "request";
+            } else {
+              result.add_error("Invalid identifier: " + id);
+              return false;
+            }
+            if (!ok) {
+              result.add_error(msg);
+              return false;
+            }
           }
 
           serialize::ParameterPtr info(new serialize::MapParameter());

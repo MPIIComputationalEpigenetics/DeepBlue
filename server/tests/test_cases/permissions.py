@@ -89,6 +89,15 @@ class TestPermissions(helpers.TestCase):
         self.modify_user_permission(epidb, user_id, "NONE")
 
         s = epidb.info("me", user_key)
+        self.assertSuccess(s)
+
+        s = epidb.info("e1", user_key)
+        self.assertFailure(s)
+
+        s = epidb.info("p1", user_key)
+        self.assertFailure(s)
+
+        s = epidb.info("bs1", user_key)
         self.assertFailure(s)
 
     def test_change_extra_metadata(self):
