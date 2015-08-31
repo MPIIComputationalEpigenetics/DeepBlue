@@ -44,6 +44,7 @@
  * 23 - Column Name
  * 24 - Column Type
  * 25 - Metacolumn
+ * 30 - Request
  * 50 - Dataset
  * 66 - Internal
  */
@@ -57,6 +58,8 @@
  * 100 - Do not have permission
  *
  * 200 - Invalid User Key
+ *
+ * 300 - Canceled
  *
  * 400 - Synonym already exists
  *
@@ -144,6 +147,8 @@ namespace epidb {
   Error ERR_DUPLICATED_COLUMN_NAME("123001", "Duplicated column name '%s'.");
 
   Error ERR_INVALID_META_COLUMN_NAME("125000", "The meta-column '%s' does not exist.");
+
+  Error ERR_REQUEST_CANCELED("130300", "The request was canceled.");
 
   Error ERR_COLUMN_TYPE_MISSING("323002", "The Column Type '%d' does not exist.");
   Error ERR_COLUMN_TYPE_NAME_MISSING("323003", "The Column Type '%s' does not exist.");

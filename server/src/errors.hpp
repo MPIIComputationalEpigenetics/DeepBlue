@@ -83,6 +83,8 @@ namespace epidb {
   extern Error ERR_DATABASE_CONNECTION;
   extern Error ERR_DATABASE_EXCEPTION;
   extern Error ERR_DATABASE_INVALID_BIOSOURCE;
+
+  extern Error ERR_REQUEST_CANCELED;
 }
 
 #endif
