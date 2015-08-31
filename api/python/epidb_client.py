@@ -256,6 +256,9 @@ class EpidbClient:
     def get_request_data(self, request_id, user_key):
         return self.server.get_request_data(request_id, user_key)
 
+    def cancel_request(self, request_id, user_key):
+        return self.server.cancel_request(request_id, user_key)
+
 ## Admin Operations
 
     def init_system(self, name, email, institution):
