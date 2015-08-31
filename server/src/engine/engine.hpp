@@ -77,7 +77,7 @@ namespace epidb {
 
     bool cancel_request(const std::string& request_id, std::string& msg);
 
-    bool remove_request_data(const std::string& request_id, std::string& msg);
+    bool remove_request_data(const std::string& request_id, mdbq::TaskState state, std::string& msg);
   };
 }
 

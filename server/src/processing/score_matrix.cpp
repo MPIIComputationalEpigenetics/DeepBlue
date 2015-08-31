@@ -78,6 +78,19 @@ namespace epidb {
         // Get the accumulators from each region
         std::vector<std::pair<RegionPtr, std::vector<algorithms::Accumulator>>> regions_accs;
         for (auto &region : chromosome.second) {
+
+
+           // Check if processing was canceled
+          bool is_canceled = false;
+          if (!status->is_canceled(is_canceled, msg)) {
+            return true;
+          }
+          if (is_canceled) {
+            msg = Error::m(ERR_REQUEST_CANCELED);
+            return false;
+          }
+          // ***
+
           // Get the accumulator from each experiment
           std::vector<algorithms::Accumulator> experiments_accs;
           for (auto &experiment_format : norm_experiments_formats) {
@@ -120,6 +133,17 @@ namespace epidb {
         const std::string &chromosome = chromosome_accs_it->first;
         auto &region_accs = chromosome_accs_it->second;
         for (auto regions_accs_it = region_accs.begin(); regions_accs_it != region_accs.end(); regions_accs_it++) {
+
+          // Check if processing was canceled
+          bool is_canceled = false;
+          if (!status->is_canceled(is_canceled, msg)) {
+            return true;
+          }
+          if (is_canceled) {
+            msg = Error::m(ERR_REQUEST_CANCELED);
+            return false;
+          }
+          // ***
 
           RegionPtr region = std::move(regions_accs_it->first);
           std::vector<algorithms::Accumulator> &experiments_accs = regions_accs_it->second;

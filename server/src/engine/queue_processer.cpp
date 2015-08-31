@@ -30,6 +30,7 @@
 
 #include "../processing/processing.hpp"
 
+#include "../errors.hpp"
 #include "../log.hpp"
 
 #include "queue_processer.hpp"
@@ -50,10 +51,10 @@ namespace epidb {
 
     void QueueHandler::handle_task(const std::string& id, const mongo::BSONObj &o)
     {
-        processing::StatusPtr status = processing::build_status(id, dba::config::get_processing_max_memory()); // TODO: get from user.
-        mongo::BSONObj result;
-        bool success = process(o, status, result);
-        finish(result, success);
+      processing::StatusPtr status = processing::build_status(id, dba::config::get_processing_max_memory()); // TODO: get from user.
+      mongo::BSONObj result;
+      bool success = process(o, status, result);
+      finish(result, success);
     }
 
     bool QueueHandler::process(const mongo::BSONObj &job, processing::StatusPtr status, mongo::BSONObj& result)
@@ -76,6 +77,7 @@ namespace epidb {
         result = bob.obj();
         return false;
       }
+
     }
 
     bool QueueHandler::process_count(const std::string &query_id, const std::string &user_key, processing::StatusPtr status, mongo::BSONObj& result)
@@ -94,6 +96,10 @@ namespace epidb {
       status->set_total_stored_data(sizeof(long long));
       status->set_total_stored_data_compressed(sizeof(long long));
       result = bob.obj();
+
+      if (is_canceled(status, msg)) {
+        return false;
+      }
 
       return true;
     }
@@ -132,6 +138,11 @@ namespace epidb {
       status->set_total_stored_data_compressed(compressed_s.size());
 
       result = bob.obj();
+
+      if (is_canceled(status, msg)) {
+        return false;
+      }
+
       return true;
     }
 
@@ -178,6 +189,11 @@ namespace epidb {
       status->set_total_stored_data_compressed(compressed_s.size());
 
       result = bob.obj();
+
+      if (is_canceled(status, msg)) {
+        return false;
+      }
+
       return true;
     }
 
@@ -205,7 +221,26 @@ namespace epidb {
       status->set_total_stored_data(size);
       status->set_total_stored_data_compressed(size);
       result = bob.obj();
+
+      if (is_canceled(status, msg)) {
+        return false;
+      }
+
       return true;
+    }
+
+
+    bool QueueHandler::is_canceled(processing::StatusPtr status, std::string msg)
+    {
+      bool is_canceled = false;
+      if (!status->is_canceled(is_canceled, msg)) {
+        return true;
+      }
+      if (is_canceled) {
+        msg = Error::m(ERR_REQUEST_CANCELED);
+        return true;
+      }
+      return false;
     }
 
     void queue_processer_run(size_t num)
@@ -215,7 +250,7 @@ namespace epidb {
       std::cerr << "queue_processer_run(" << num << ")" << std::endl;
 
       std::string server = dba::config::get_mongodb_server();
-      std::string collection = dba::config::DATABASE_NAME() + "_queue";
+      std::string collection = dba::config::DATABASE_NAME();
 
       QueueHandler *clients[num];
       boost::thread   *threads[num];

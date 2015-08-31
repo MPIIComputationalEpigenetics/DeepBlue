@@ -81,6 +81,7 @@ namespace epidb {
     Status::Status(const std::string &request_id, const long long maximum_memory) :
       _request_id(request_id),
       _maximum_memory(maximum_memory),
+      _canceled(false),
       _total_regions(0),
       _total_size(0),
       _total_stored_data(0),
@@ -182,20 +183,22 @@ namespace epidb {
     }
 
     boost::posix_time::ptime last_checked;
-    bool canceled = false;
     bool Status::is_canceled(bool& ret, std::string& msg)
     {
       boost::posix_time::ptime now(epidb::extras::universal_date_time());
       if (last_checked + boost::posix_time::seconds(5) < now) {
         mongo::BSONObj result;
-        dba::helpers::get_one(dba::Collections::PROCESSING(), 
-                mongo::Query(BSON("_id" << _processing_id)), result, msg);
-        if (result["state"].Int() == mdbq::TS_CANCELLED) {
-          canceled = true;
+
+        if (!dba::helpers::get_one(dba::Collections::PROCESSING(),
+                mongo::Query(BSON("_id" << _processing_id)), result, msg)) {
+          return false;
         }
+        _canceled = (result["state"].Int() == mdbq::TS_CANCELLED);
       }
 
-      return canceled;
+      ret = _canceled;
+
+      return true;
     }
 
     typedef std::shared_ptr<Status> StatusPtr;

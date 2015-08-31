@@ -23,6 +23,7 @@
 
 #include "../extras/utils.hpp"
 
+#include "../errors.hpp"
 #include "../log.hpp"
 
 namespace epidb {
@@ -38,6 +39,18 @@ namespace epidb {
       dba::columns::ColumnTypePtr column;
 
       while (it_ranges != ranges.end()) {
+
+        // Check if processing was canceled
+        bool is_canceled = false;
+        if (!status->is_canceled(is_canceled, msg)) {
+          return true;
+        }
+        if (is_canceled) {
+          msg = Error::m(ERR_REQUEST_CANCELED);
+          return false;
+        }
+        // ***
+
         Accumulator acc;
         auto it_data = data.begin();
         while (it_data != data.end()) {

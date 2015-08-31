@@ -1055,11 +1055,12 @@ namespace epidb {
 
       bool is_canceled(processing::StatusPtr status, std::string msg)
       {
-        bool is_canceled;
-        if (status->is_canceled(is_canceled, msg)) {
+        bool is_canceled = false;
+        if (!status->is_canceled(is_canceled, msg)) {
           return true;
         }
         if (is_canceled) {
+          msg = Error::m(ERR_REQUEST_CANCELED);
           return true;
         }
         return false;

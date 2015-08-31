@@ -31,7 +31,7 @@
 namespace epidb {
 
   Engine::Engine()
-    : _hub(dba::config::get_mongodb_server(), dba::config::DATABASE_NAME() + "_queue")
+    : _hub(dba::config::get_mongodb_server(), dba::config::DATABASE_NAME())
   {
     EPIDB_LOG("Creating Engine");
   }
@@ -253,8 +253,8 @@ namespace epidb {
     return _hub.cancel_request(request_id, msg);
   }
 
-  bool Engine::remove_request_data(const std::string& request_id, std::string& msg)
+  bool Engine::remove_request_data(const std::string& request_id, mdbq::TaskState state, std::string& msg)
   {
-    return _hub.remove_request_data(request_id, msg);
+    return _hub.remove_request_data(request_id, state, msg);
   }
 }

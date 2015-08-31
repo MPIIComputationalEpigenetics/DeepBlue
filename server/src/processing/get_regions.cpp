@@ -22,6 +22,7 @@
 #include "../extras/utils.hpp"
 #include "../extras/stringbuilder.hpp"
 
+#include "../errors.hpp"
 #include "../log.hpp"
 
 namespace epidb {
@@ -76,6 +77,17 @@ namespace epidb {
           if (cit != regions.begin()) {
             sb.endLine();
           }
+
+          // Check if processing was canceled
+          bool is_canceled = false;
+          if (!status->is_canceled(is_canceled, msg)) {
+            return true;
+          }
+          if (is_canceled) {
+            msg = Error::m(ERR_REQUEST_CANCELED);
+            return false;
+          }
+          // ***
 
           RegionPtr region = std::move(*cit);
           DatasetId dataset_id = region->dataset_id();

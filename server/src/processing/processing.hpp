@@ -59,6 +59,8 @@ namespace epidb {
 
       const long long _maximum_memory;
 
+      bool _canceled;
+
       std::atomic_llong _total_regions;
       std::atomic_llong _total_size;
       std::atomic_llong _total_stored_data;

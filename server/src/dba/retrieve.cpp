@@ -30,6 +30,8 @@
 #include "key_mapper.hpp"
 #include "queries.hpp"
 
+#include "../errors.hpp"
+
 #include "../connection/connection.hpp"
 
 #include "../datatypes/regions.hpp"
@@ -269,7 +271,16 @@ namespace epidb {
             rp.read_region(o);
             status->sum_regions(rp._it_count);
 
-            // TODO: check if processing was canceled
+            // Check if processing was canceled
+            bool is_canceled = false;
+            if (!status->is_canceled(is_canceled, msg)) {
+              return true;
+            }
+            if (is_canceled) {
+              msg = Error::m(ERR_REQUEST_CANCELED);
+              return false;
+            }
+            // ***
 
             // Check memory consumption
             if (status->sum_size(rp._it_size) < 0) {
@@ -277,6 +288,9 @@ namespace epidb {
               c.done();
               return false;
             }
+            // ***
+
+            // Reset iteration stats
             rp._it_count = 0;
             rp._it_size = 0;
           }
