@@ -23,6 +23,7 @@ namespace epidb {
 
       bool change_extra_metadata(const std::string &id, const std::string &key, const std::string &value, std::string &msg)
       {
+        bool is_sample = false;
         std::string collection;
         if (id.compare(0, 1, "a") == 0) {
           collection = Collections::ANNOTATIONS();
@@ -30,6 +31,7 @@ namespace epidb {
           collection = Collections::BIOSOURCES();
         } else if (id.compare(0, 1, "s") == 0) {
           collection = Collections::SAMPLES();
+          is_sample = true;
         } else if (id.compare(0, 1, "e") == 0) {
           collection = Collections::EXPERIMENTS();
         } else {
@@ -39,13 +41,36 @@ namespace epidb {
 
         Connection c;
 
+        std::string norm_value = utils::normalize_name(value);
+
         mongo::BSONObj query = BSON("_id" << id);
         mongo::BSONObj change_value;
 
-        if (value.empty()) {
-        	change_value = BSON("$unset" << BSON("extra_metadata." + key << value));
+        std::string db_key;
+
+        if (is_sample) {
+          if ((key == "_id") || (key == "epidb_id") || (key == "type") || (key == "related_terms") || (key == "biosource_name")) {
+            msg = "The sample key " + key + " is immutable";
+            return false;
+          }
+          db_key = key;
         } else {
-        	change_value = BSON("$set" << BSON("extra_metadata." + key << value));
+          db_key = "extra_metadata." + key;
+        }
+
+        // we do not normalize the extra metadata content
+        if (value.empty()) {
+          if (is_sample) {
+            change_value = BSON("$unset" << BSON(db_key << "" << "norm_" + key << ""));
+          } else {
+            change_value = BSON("$unset" << BSON(db_key << ""));
+          }
+        } else {
+          if (is_sample) {
+            change_value = BSON("$set" << BSON(db_key << value << "norm_" + key << norm_value));
+          } else {
+            change_value = BSON("$set" << BSON(db_key << value));
+          }
         }
 
         c->update(helpers::collection_name(collection), query, change_value);
@@ -55,7 +80,7 @@ namespace epidb {
           return false;
         }
 
-        if (!search::change_extra_metadata_full_text(id, key, value, msg)) {
+        if (!search::change_extra_metadata_full_text(id, key, value, norm_value, is_sample, msg)) {
           c.done();
           return false;
         }

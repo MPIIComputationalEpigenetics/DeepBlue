@@ -33,3 +33,9 @@ class TestChanges(helpers.TestCase):
     self.assertEqual(0, len(ss))
 
 
+    res = epidb.change_extra_metadata(sample_id, "source", "ENCODE", self.admin_key)
+    self.assertSuccess(res)
+
+    s, info = epidb.info(sample_id, self.admin_key)
+    self.assertEqual(info[0]["source"], "ENCODE")
+

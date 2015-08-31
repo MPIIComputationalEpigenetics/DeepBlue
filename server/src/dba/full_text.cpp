@@ -187,18 +187,42 @@ namespace epidb {
         return true;
       }
 
-      bool change_extra_metadata_full_text(const std::string &id, const std::string &key, const std::string &value, std::string &msg)
+      bool change_extra_metadata_full_text(const std::string &id, const std::string &key, const std::string &value,
+                                           const std::string &norm_value, const bool is_sample,
+                                           std::string &msg)
       {
         Connection c;
 
         mongo::BSONObj query = BSON("epidb_id" << id);
         mongo::BSONObj change_value;
 
-        if (value.empty()) {
-          change_value = BSON("$unset" << BSON("extra_metadata_" + key << value));
+        std::string db_key;
+        std::string norm_db_key;
+
+        if (is_sample) {
+          db_key = key;
+          norm_db_key = "norm_" + key;
         } else {
-          change_value = BSON("$set" << BSON("extra_metadata_" + key << value));
+          db_key = "extra_metadata_" + key;
+          norm_db_key = "extra_metadata_norm_" + key;
         }
+
+        if (value.empty()) {
+          if (is_sample) {
+            change_value = BSON("$unset" << BSON(db_key << "" << norm_db_key << ""));
+          } else {
+            change_value = BSON("$unset" << BSON(db_key << ""));
+          }
+
+        } else {
+          if (is_sample) {
+            change_value = BSON("$set" << BSON(db_key << value << norm_db_key << norm_value));
+          } else {
+            change_value = BSON("$set" << BSON(db_key << value));
+          }
+        }
+
+        std::cerr << change_value.toString() << std::endl;
 
         c->update(helpers::collection_name(Collections::TEXT_SEARCH()), query, change_value);
         if (!c->getLastError().empty()) {
