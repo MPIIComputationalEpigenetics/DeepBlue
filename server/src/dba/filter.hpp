@@ -250,7 +250,7 @@ namespace epidb {
         std::vector<std::string> operations;
 
         operations.push_back("==");
-        operations.push_back("=!");
+        operations.push_back("!=");
         operations.push_back(">");
         operations.push_back(">=");
         operations.push_back("<");
