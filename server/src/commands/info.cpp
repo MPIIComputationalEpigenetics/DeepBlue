@@ -76,6 +76,7 @@ namespace epidb {
           return false;
         }
 
+        map["_id"] = job._id;
         map["state"] = job.status.state;
         map["message"] = job.status.message;
         std::stringstream ss;
