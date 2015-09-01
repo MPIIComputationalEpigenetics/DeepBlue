@@ -33,7 +33,7 @@ namespace epidb {
       Type type;
 
       std::string s_value;
-      double n_value;
+      Score n_value;
 
       bool check(Type t)
       {
@@ -48,14 +48,14 @@ namespace epidb {
         n_value(0.0)
       { }
 
-      Filter(const double value) :
+      Filter(const Score value) :
         type(NUMBER),
         s_value(),
         n_value(value)
       { }
 
       virtual bool is(const std::string &value) = 0;
-      virtual bool is(const double value) = 0;
+      virtual bool is(const Score value) = 0;
 
       virtual ~Filter() {}
     };
@@ -63,7 +63,7 @@ namespace epidb {
     class EqualsFilter: public Filter {
     public:
       EqualsFilter(const std::string &value): Filter(value) { }
-      EqualsFilter(const double value): Filter(value) { }
+      EqualsFilter(const Score value): Filter(value) { }
 
       bool is(const std::string &value)
       {
@@ -74,24 +74,24 @@ namespace epidb {
           if (!utils::string_to_score(value, s)) {
             return false;
           }
-          return std::fabs(s - n_value) < std::numeric_limits<double>::epsilon();
+          return std::fabs(s - n_value) < std::numeric_limits<Score>::epsilon();
         }
         return false;
       }
 
-      bool is(const double value)
+      bool is(const Score value)
       {
         if (!check(NUMBER)) {
           return false;
         }
-        return std::fabs(value - n_value) < std::numeric_limits<double>::epsilon();
+        return std::fabs(value - n_value) < std::numeric_limits<Score>::epsilon();
       }
     };
 
     class NotEqualsFilter: public Filter {
     public:
       NotEqualsFilter(const std::string &value): Filter(value) { }
-      NotEqualsFilter(const double value): Filter(value) { }
+      NotEqualsFilter(const Score value): Filter(value) { }
 
       bool is(const std::string &value)
       {
@@ -102,24 +102,24 @@ namespace epidb {
           if (!utils::string_to_score(value, s)) {
             return false;
           }
-          return std::fabs(s - n_value) > std::numeric_limits<double>::epsilon();
+          return std::fabs(s - n_value) > std::numeric_limits<Score>::epsilon();
         }
         return false;
       }
 
-      bool is(const double value)
+      bool is(const Score value)
       {
         if (!check(NUMBER)) {
           return false;
         }
-        return std::fabs(value - n_value) > std::numeric_limits<double>::epsilon();
+        return std::fabs(value - n_value) > std::numeric_limits<Score>::epsilon();
       }
     };
 
     class GreaterFilter: public Filter {
     public:
       GreaterFilter(const std::string &value): Filter(value) { }
-      GreaterFilter(const double value): Filter(value) { }
+      GreaterFilter(const Score value): Filter(value) { }
 
       bool is(const std::string &value)
       {
@@ -130,14 +130,16 @@ namespace epidb {
         if (!utils::string_to_score(value, s)) {
           return false;
         }
-        return s > n_value;
+
+        return s > n_value + std::numeric_limits<Score>::epsilon();
       }
 
-      bool is(const double value)
+      bool is(const Score value)
       {
         if (!check(NUMBER)) {
           return false;
         }
+
         return value > n_value;
       }
     };
@@ -145,7 +147,7 @@ namespace epidb {
     class GreaterEqualsFilter: public Filter {
     public:
       GreaterEqualsFilter(const std::string &value): Filter(value) { }
-      GreaterEqualsFilter(const double value): Filter(value) { }
+      GreaterEqualsFilter(const Score value): Filter(value) { }
 
       bool is(const std::string &value)
       {
@@ -156,10 +158,10 @@ namespace epidb {
         if (!utils::string_to_score(value, s)) {
           return false;
         }
-        return s >= n_value;
+        return s >= n_value + std::numeric_limits<Score>::epsilon();
       }
 
-      bool is(const double value)
+      bool is(const Score value)
       {
         if (!check(NUMBER)) {
           return false;
@@ -171,7 +173,7 @@ namespace epidb {
     class LessFilter: public Filter {
     public:
       LessFilter(const std::string &value): Filter(value) { }
-      LessFilter(const double value): Filter(value) { }
+      LessFilter(const Score value): Filter(value) { }
 
       bool is(const std::string &value)
       {
@@ -182,10 +184,10 @@ namespace epidb {
         if (!utils::string_to_score(value, s)) {
           return false;
         }
-        return s < n_value;
+        return s < n_value ;
       }
 
-      bool is(const double value)
+      bool is(const Score value)
       {
         if (!check(NUMBER)) {
           return false;
@@ -197,7 +199,7 @@ namespace epidb {
     class LessEqualsFilter: public Filter {
     public:
       LessEqualsFilter(const std::string &value): Filter(value) { }
-      LessEqualsFilter(const double value): Filter(value) { }
+      LessEqualsFilter(const Score value): Filter(value) { }
 
       bool is(const std::string &value)
       {
@@ -211,7 +213,7 @@ namespace epidb {
         return s <= n_value;
       }
 
-      bool is(const double value)
+      bool is(const Score value)
       {
         if (!check(NUMBER)) {
           return false;
@@ -350,7 +352,7 @@ namespace epidb {
         return nullPtr;
       }
 
-      FilterPtr build(const std::string &field, const std::string &op, const double value,
+      FilterPtr build(const std::string &field, const std::string &op, const Score value,
                       bool &error, std::string &msg)
       {
         if (!check_name(field, "field", msg)) {

@@ -42,6 +42,15 @@ class TestAggregateCommand(helpers.TestCase):
 
     res, qid_3 = epidb.aggregate(q_cgi, qid_2, "@LENGTH", self.admin_key)
     self.assertSuccess(res, qid_3)
+    res, qid_4 = epidb.filter_regions(qid_3, "@AGG.COUNT",  ">", "0", "number", self.admin_key)
+    res, req = epidb.count_regions(qid_4, self.admin_key)
+    count = self.count_request(req)
+    self.assertEquals(count, 2572)
+
+    res, qid_4 = epidb.filter_regions(qid_2, "@AGG.COUNT",  "<", "0", "number", self.admin_key)
+    res, req = epidb.count_regions(qid_4, self.admin_key)
+    count = self.count_request(req)
+    self.assertEquals(count, 0)
 
     res, qid_4 = epidb.filter_regions(qid_3, "@AGG.COUNT",  ">=", "100", "number", self.admin_key)
     (res, req) = epidb.get_regions(qid_4, "CHROMOSOME,START,END,@AGG.MIN,@AGG.MAX,@AGG.MEDIAN,@AGG.MEAN,@AGG.VAR,@AGG.SD,@AGG.COUNT", self.admin_key)
