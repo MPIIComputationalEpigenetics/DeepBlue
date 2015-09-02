@@ -337,3 +337,27 @@ chrX 100000"""
     self.assertEquals(rs, "")
 
 
+  def test_empty_no_permission_column_type(self):
+    epidb = EpidbClient()
+    self.init_base(epidb)
+
+    res, cid = epidb.create_column_type_category("PLUS_MINUS_DOT", "Region strand: +, -, .", ["+", "-", "."], self.admin_key)
+
+    s, (u_id, u_key) = epidb.add_user("user", "email", "institution", self.admin_key)
+    self.assertSuccess(s)
+
+    s = epidb.modify_user_admin(u_id, "permission_level", "NONE", self.admin_key)
+    self.assertSuccess(s)
+
+    info = epidb.info(cid, u_key)
+    self.assertEqual(info, ['error', ['100100:Insufficient permission. Permission LIST_COLLECTIONS is required.']])
+    info_e1 = epidb.info("e1", u_key)
+    self.assertEqual(info_e1, ['error', ['100100:Insufficient permission. Permission LIST_COLLECTIONS is required.']])
+    info_e2 = epidb.info("me", u_key)
+    self.assertEqual(info_e2, ['okay', [{'name': 'user', 'institution': 'institution', 'id': 'u2', 'permission_level': 'NONE', 'type': 'user', 'email': 'email'}]])
+
+
+
+
+
+

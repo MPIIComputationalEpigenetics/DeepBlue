@@ -127,7 +127,7 @@ namespace epidb {
         if (check_permissions(user_key, datatypes::LIST_COLLECTIONS, user, msg )) {
           has_list_collections_permissions = true;
         } else {
-          msg = err_msg;
+          err_msg = msg;
         }
 
         std::vector<utils::IdName> user_projects_id_names;
