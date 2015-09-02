@@ -188,8 +188,8 @@ class DeepBlueClient(object):
         return self.server.list_similar_projects(project_name, self.key)
 
     @key_required
-    def set_project_public(self, project):
-        return self.server.set_project_public(project, set, self.key)
+    def set_project_public(self, project_name, set):
+        return self.server.set_project_public(project_name, set, self.key)
 
 
         # Bio Source names
