@@ -53,7 +53,6 @@ namespace epidb {
           return false;
         }
         norm_genome = experiment["norm_genome"].str();
-        std::cerr << "GENOME " << norm_genome << std::endl;
 
         return true;
       }

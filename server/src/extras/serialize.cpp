@@ -243,9 +243,6 @@ namespace epidb {
 
     void SimpleParameter::set_type(Type type)
     {
-      std::cerr << "mudou" << std::endl;
-      std::cerr << type_ << std::endl;
-      std::cerr << type << std::endl;
       type_ = type;
     }
 

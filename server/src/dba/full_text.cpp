@@ -222,8 +222,6 @@ namespace epidb {
           }
         }
 
-        std::cerr << change_value.toString() << std::endl;
-
         c->update(helpers::collection_name(Collections::TEXT_SEARCH()), query, change_value);
         if (!c->getLastError().empty()) {
           msg = c->getLastError();

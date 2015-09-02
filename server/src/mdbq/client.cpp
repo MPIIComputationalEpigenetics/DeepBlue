@@ -163,12 +163,11 @@ namespace epidb {
                                       "version" << version + 1 <<
                                       "finish_time" << epidb::extras::to_mongo_date(finish_time) <<
                                       "result" << result)));
-        std::cerr << o.toString() << std::endl;
         bool result = c->runCommand(dba::config::DATABASE_NAME(), o, info);
         if (!result) {
           EPIDB_LOG_ERR(info["errmsg"].toString() << " - " << __FILE__ << ":" << __LINE__);
         }
-        std::cerr << info.toString() << std::endl;
+
       } else {
         std::string tmp;
         mongo::BSONObj ret;
@@ -190,8 +189,6 @@ namespace epidb {
           if (!result) {
             EPIDB_LOG_ERR(info["errmsg"].toString() << " - " << __FILE__ << ":" << __LINE__);
           }
-          std::cerr << o.toString() << std::endl;
-          std::cerr << info.toString() << std::endl;
         }
       }
       m_ptr->m_current_task = mongo::BSONObj(); // empty, call get_next_task.

@@ -90,8 +90,6 @@ namespace epidb {
           return false;
         }
 
-        std::cerr << content << std::endl;
-
         if (!parse_gsm(content, metadata, msg)) {
           msg = gsm_id + " is an invalid identifier.";
           return false;

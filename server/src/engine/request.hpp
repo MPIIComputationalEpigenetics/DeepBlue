@@ -73,7 +73,6 @@ namespace epidb {
       {
         for (mongo::BSONObj::iterator it = o.begin(); it.more(); ) {
           mongo::BSONElement e = it.next();
-          std::cerr << e.toString() << std::endl;
 
           std::string fieldname = e.fieldName();
 

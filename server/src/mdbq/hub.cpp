@@ -435,8 +435,6 @@ namespace epidb {
       mongo::BSONObj task_info = res["value"].Obj();
       TaskState task_state = static_cast<TaskState>(task_info["state"].Int());
 
-      std::cerr << task_info.toString() << std::endl;
-
       if (task_state == TS_DONE || task_state == TS_FAILED) {
         remove_request_data(request_id, TS_REMOVED, msg);
       }

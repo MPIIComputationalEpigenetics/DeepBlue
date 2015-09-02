@@ -210,7 +210,6 @@ namespace epidb {
 
       mongo::BSONObjBuilder experiments_ids_bob;
       for (auto &exp_format : experiments) {
-        std::cerr << exp_format.id << std::endl;
         experiments_ids_bob.appendElements(BSON(exp_format.id << exp_format.name));
       }
 
