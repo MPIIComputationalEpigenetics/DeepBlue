@@ -98,7 +98,7 @@ namespace epidb {
   }
 
   Error ERR_USER_USER_MISSING("100002", "The User is missing. Please, specify the User.");
-  Error ERR_INSUFFICIENT_PERMISSION("100100", "Insufficient permission");
+  Error ERR_INSUFFICIENT_PERMISSION("100100", "Insufficient permission. Permission %s is required.");
   Error ERR_USER_EXPERIMENT_MISSING("101002", "The Experiment is missing. Please, specify the Experiment.");
   Error ERR_USER_ANNOTATION_MISSING("102002", "The Annotation is missing. Please, specify the Annotation.");
   Error ERR_USER_SAMPLE_MISSING("103002", "The Sample is missing. Please, specify the Sample.");

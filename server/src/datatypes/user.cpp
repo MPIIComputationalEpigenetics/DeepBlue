@@ -29,6 +29,20 @@ namespace epidb {
     const std::string User::FIELD_PERMISSION_LEVEL = "permission_level";
     const size_t User::KEY_LENGTH = 16;
 
+    std::string permission_level_to_string(PermissionLevel pl)
+    {
+      switch (pl) {
+      case datatypes::ADMIN: return "ADMIN";
+      case datatypes::INCLUDE_COLLECTION_TERMS: return "INCLUDE_COLLECTION_TERMS";
+      case datatypes::INCLUDE_EXPERIMENTS: return "INCLUDE_EXPERIMENTS";
+      case datatypes::INCLUDE_ANNOTATIONS: return "INCLUDE_ANNOTATIONS";
+      case datatypes::GET_DATA: return "GET_DATA";
+      case datatypes::LIST_COLLECTIONS: return "LIST_COLLECTIONS";
+      case datatypes::NONE: return "NONE";
+      default: return "Unknown permission level: " + utils::integer_to_string(pl);
+      }
+    }
+
     int User::seed = rand();
 
     User::User()

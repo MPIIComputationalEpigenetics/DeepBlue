@@ -4,7 +4,7 @@
  */
 
 #ifndef USER_H
-#define	USER_H
+#define USER_H
 
 #include "../extras/utils.hpp"
 
@@ -26,6 +26,10 @@ namespace epidb {
       NONE = 1000,
       NOT_SET = 10000
     };
+
+
+    std::string permission_level_to_string(PermissionLevel pl);
+
 
     class User {
     public:
@@ -98,5 +102,5 @@ namespace epidb {
   }
 }
 
-#endif	/* USER_H */
+#endif  /* USER_H */
 
