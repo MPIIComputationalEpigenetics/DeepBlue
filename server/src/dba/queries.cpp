@@ -48,6 +48,46 @@ namespace epidb {
   namespace dba {
     namespace query {
 
+      // TODO: Merge wtth users cache and use templates
+      class ExperimentNameDatasetIdCache {
+      private:
+
+        std::map<std::string, DatasetId> name_dataset_id;
+
+      public:
+
+        DatasetId get_dataset_id(const std::string &name)
+        {
+          return name_dataset_id[name];
+        }
+
+        void set_dataset_id(const std::string &name, const DatasetId id)
+        {
+          name_dataset_id[name] = id;
+        }
+
+        bool exists_dataset_id(const std::string &name)
+        {
+          if (name_dataset_id.find(name) != name_dataset_id.end()) {
+            return true;
+          }
+          return false;
+        }
+
+        void invalidate()
+        {
+          name_dataset_id.clear();
+        }
+      };
+
+      ExperimentNameDatasetIdCache experiment_name_dataset_id_cache;
+
+
+      void invalidate_cache()
+      {
+        experiment_name_dataset_id_cache.invalidate();
+      }
+
       bool store_query(const std::string &type, const mongo::BSONObj &args, const std::string &user_key,
                        std::string &query_id, std::string &msg)
       {
@@ -289,20 +329,29 @@ namespace epidb {
                                   mongo::BSONObj &regions_query, std::string &msg)
       {
         Connection c;
-        std::string norm_name = utils::normalize_name(experiment_name);
-        std::auto_ptr<mongo::DBClientCursor> cursor =
-          c->query(helpers::collection_name(Collections::EXPERIMENTS()), BSON("norm_name" << norm_name));
 
-        if (!cursor->more()) {
-          msg = "Experiments name '" + experiment_name + "' not found";
-          c.done();
-          return false;
+        DatasetId dataset_id;
+        std::string norm_name = utils::normalize_name(experiment_name);
+        if (experiment_name_dataset_id_cache.exists_dataset_id(norm_name)) {
+          dataset_id = experiment_name_dataset_id_cache.get_dataset_id(norm_name);
+        } else {
+          std::auto_ptr<mongo::DBClientCursor> cursor =
+            c->query(helpers::collection_name(Collections::EXPERIMENTS()), BSON("norm_name" << norm_name));
+
+          if (!cursor->more()) {
+            msg = "Experiments name '" + experiment_name + "' not found";
+            c.done();
+            return false;
+          }
+
+          mongo::BSONObj p = cursor->next();
+          mongo::BSONElement dataset_id_elem = p.getField(KeyMapper::DATASET());
+          dataset_id = dataset_id_elem.Int();
+          experiment_name_dataset_id_cache.set_dataset_id(norm_name, dataset_id);
         }
 
-        mongo::BSONObj p = cursor->next();
-        mongo::BSONElement dataset_id = p.getField(KeyMapper::DATASET());
         mongo::BSONObjBuilder regions_query_builder;
-        regions_query_builder.append(KeyMapper::DATASET(), dataset_id.Int());
+        regions_query_builder.append(KeyMapper::DATASET(), dataset_id);
         regions_query_builder.append(KeyMapper::START(), BSON("$lte" << end));
         regions_query_builder.append(KeyMapper::END(), BSON("$gte" << start));
 
@@ -792,7 +841,7 @@ namespace epidb {
           return false;
         }
         if (data_cursor->more()) {
-          mongo::BSONObj result = data_cursor->next().getOwned();
+          mongo::BSONObj result = data_cursor->next();
           dataset_id = result.getField(KeyMapper::DATASET()).Int();
           c.done();
           return true;
@@ -1048,7 +1097,7 @@ namespace epidb {
           return true;
         } else {
           msg = Error::m(ERR_DATASET_NOT_FOUND, dataset_id);
-          std::cerr << "bbbb" << std::endl;
+          std::cerr << "ERR_DATASET_NOT_FOUND" << std::endl;
           return false;
         }
       }

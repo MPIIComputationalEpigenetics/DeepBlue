@@ -24,6 +24,8 @@ namespace epidb {
   namespace dba {
     namespace query {
 
+      void invalidate_cache();
+
       bool store_query(const std::string &type,
                        const mongo::BSONObj &args, const std::string &user_key,
                        std::string &query_id, std::string &msg);
