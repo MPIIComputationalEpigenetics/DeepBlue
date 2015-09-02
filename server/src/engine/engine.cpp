@@ -69,10 +69,11 @@ namespace epidb {
 
   bool Engine::queue(const mongo::BSONObj &job, unsigned int timeout, std::string &id, std::string &msg)
   {
-    if (!_hub.insert_job(job, timeout, Version::version_value(), id, msg)) {
-      return false;
+    if (_hub.exists_job(job, id)) {
+      return true;
     }
-    return true;
+
+    return _hub.insert_job(job, timeout, Version::version_value(), id, msg);
   }
 
   bool Engine::queue_count_regions(const std::string &query_id, const std::string &user_key, std::string &id, std::string &msg)

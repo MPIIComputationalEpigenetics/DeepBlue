@@ -55,6 +55,12 @@ namespace epidb {
        */
       Hub(const std::string &url, const std::string &prefix);
 
+
+      /**
+       * Check if job with the given parameters already exists.
+       */
+      bool exists_job(const mongo::BSONObj &job, std::string &id);
+
       /**
        * insert job
        *

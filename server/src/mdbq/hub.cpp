@@ -106,6 +106,29 @@ namespace epidb {
       m_ptr->m_prefix = prefix;
     }
 
+    bool Hub::exists_job(const mongo::BSONObj &job, std::string &id)
+    {
+      epidb::Connection c;
+      mongo::BSONObj ret = c->findOne(dba::helpers::collection_name(dba::Collections::JOBS()), BSON("misc" << job));
+      c.done();
+
+      if (ret.isEmpty()) {
+        return false;
+      } else {
+        std::cerr << "ACHOUU" << std::endl;
+        mongo::Date_t time = ret["create_time"].Date();
+        boost::posix_time::ptime ptime = epidb::extras::to_ptime(time);
+        std::cerr << ptime << std::endl;
+        std::cerr << epidb::extras::universal_date_time() << std::endl;
+        if (epidb::extras::universal_date_time() < ptime + boost::posix_time::minutes(1)) {
+          std::cerr << "é menos" << std::endl;
+          id = ret["_id"].String();
+          return true;
+        }
+        return false;
+      }
+    }
+
     bool Hub::insert_job(const mongo::BSONObj &job, unsigned int timeout, const int version_value, std::string &id, std::string &msg)
     {
       int r_id;

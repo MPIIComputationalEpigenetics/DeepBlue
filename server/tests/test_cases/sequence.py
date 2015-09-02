@@ -119,16 +119,17 @@ chrM\t16\t32\thg19_small\t\t16\tH3K4me3\tENCODE\tK562\ts1"""
     sequence = open("data/genomes/chromosomes/chrM.fa").read()
     res = epidb.upload_chromosome("hg19", "chrM", sequence, self.admin_key)
     self.assertSuccess(res)
+    fmt = "CHROMOSOME,START,END,@NAME,@SEQUENCE,@LENGTH,@EPIGENETIC_MARK,@PROJECT,@BIOSOURCE"
     res, req = epidb.get_regions(qid, fmt, self.admin_key)
     self.assertSuccess(res, req)
     regions = self.get_regions_request(req)
 
-    expected = """chrM\t0\t1\thg19_small\tG\t1\tH3K4me3\tENCODE\tK562\ts1
-chrM\t1\t2\thg19_small\tA\t1\tH3K4me3\tENCODE\tK562\ts1
-chrM\t2\t4\thg19_small\tTC\t2\tH3K4me3\tENCODE\tK562\ts1
-chrM\t4\t8\thg19_small\tACAG\t4\tH3K4me3\tENCODE\tK562\ts1
-chrM\t8\t16\thg19_small\tGTCTATCA\t8\tH3K4me3\tENCODE\tK562\ts1
-chrM\t16\t32\thg19_small\tCCCTATTAACCACTCA\t16\tH3K4me3\tENCODE\tK562\ts1"""
+    expected = """chrM\t0\t1\thg19_small\tG\t1\tH3K4me3\tENCODE\tK562
+chrM\t1\t2\thg19_small\tA\t1\tH3K4me3\tENCODE\tK562
+chrM\t2\t4\thg19_small\tTC\t2\tH3K4me3\tENCODE\tK562
+chrM\t4\t8\thg19_small\tACAG\t4\tH3K4me3\tENCODE\tK562
+chrM\t8\t16\thg19_small\tGTCTATCA\t8\tH3K4me3\tENCODE\tK562
+chrM\t16\t32\thg19_small\tCCCTATTAACCACTCA\t16\tH3K4me3\tENCODE\tK562"""
 
     self.assertEquals(regions, expected)
 
