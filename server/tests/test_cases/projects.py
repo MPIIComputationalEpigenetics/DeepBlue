@@ -47,3 +47,41 @@ class TestProjects(helpers.TestCase):
 
     res = epidb.set_project_public("Other2", True, self.admin_key)
     self.assertSuccess(res)
+
+  def test_set_project_public(self):
+    epidb = EpidbClient()
+    self.init_base(epidb)
+
+    res = epidb.add_project("Other", "Some other project", self.admin_key)
+    self.assertSuccess(res)
+
+    s, user = epidb.add_user("user", "email", "institution", self.admin_key)
+    (user_id, user_key) = user
+    self.assertSuccess(s)
+
+    status, projects = epidb.list_projects(self.admin_key)
+    self.assertEqual(projects, [['p1', 'ENCODE'], ['p2', 'Mouse ENCODE'], ['p3', 'Other']])
+
+    status, projects = epidb.list_projects(user_key)
+    self.assertEqual(projects, [])
+
+    epidb.set_project_public("ENCODE", True, self.admin_key)
+
+    status, projects = epidb.list_projects(user_key)
+    self.assertEqual(projects, [["p1", "ENCODE"]])
+
+    epidb.set_project_public("ENCODE", False, self.admin_key)
+
+    status, projects = epidb.list_projects(user_key)
+    self.assertEqual(projects, [])
+
+    epidb.set_project_public("Mouse ENCODE", True, self.admin_key)
+    epidb.set_project_public("ENCODE", True, self.admin_key)
+
+    status, projects = epidb.list_projects(user_key)
+    self.assertEqual(projects, [['p1', 'ENCODE'], ['p2', 'Mouse ENCODE']])
+
+    epidb.set_project_public("Other", True, self.admin_key)
+
+    status, projects = epidb.list_projects(user_key)
+    self.assertEqual(projects, [['p1', 'ENCODE'], ['p2', 'Mouse ENCODE'], ['p3', 'Other']])

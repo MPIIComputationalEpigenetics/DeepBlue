@@ -151,21 +151,16 @@ namespace epidb {
 
         // list all project if is admin
         if (!user.is_admin()) {
-          mongo::BSONObj public_projects =  BSON("public" << true);
-
-          // I am not so sure about this option. I have it because the actual data does not have the "public" field
-          mongo::BSONObj unset_public_projects = BSON("public" << BSON("$exists" << false));
+          mongo::BSONObj public_projects = BSON("public" << true);
+          std::vector<std::string> ps;
 
           if (user_bson.hasField("projects")) {
-            std::vector<std::string> ps;
             std::vector<mongo::BSONElement> projects = user_bson["projects"].Array();
             for (const auto& p : projects) {
               ps.push_back(p.String());
             }
-
-            mongo::BSONObj user_projects = BSON("_id" << BSON("$in" << helpers::build_array(ps)));
-            full_query = BSON("$or" << BSON_ARRAY(public_projects <<  unset_public_projects << user_projects));
           }
+          full_query = BSON("$or" << BSON_ARRAY(public_projects << BSON("_id" << BSON("$in" << helpers::build_array(ps)))));
         }
 
         std::vector<mongo::BSONObj> projects;
