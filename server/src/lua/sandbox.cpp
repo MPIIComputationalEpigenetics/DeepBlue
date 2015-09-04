@@ -11,7 +11,7 @@
 
 #include <lua.hpp>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "sandbox.hpp"
 
@@ -33,7 +33,7 @@ namespace epidb {
 
     Sandbox::LuaPtr Sandbox::new_instance(processing::StatusPtr status)
     {
-      return boost::shared_ptr<Sandbox>(new Sandbox(status));
+      return std::shared_ptr<Sandbox>(new Sandbox(status));
     }
 
     Sandbox::Sandbox(processing::StatusPtr status) :

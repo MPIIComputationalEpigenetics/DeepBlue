@@ -20,7 +20,7 @@
 #include "server.hpp"
 #include <boost/thread/thread.hpp>
 #include <boost/bind.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <vector>
 
 //#include "../Profiny.h"
@@ -60,10 +60,10 @@ namespace epidb {
     void server::run()
     {
       // Create a pool of threads to run all of the io_services.
-      std::vector<boost::shared_ptr<boost::thread> > threads;
+      std::vector<std::shared_ptr<boost::thread> > threads;
       for (std::size_t i = 0; i < thread_pool_size_; ++i)
       {
-        boost::shared_ptr<boost::thread> thread(new boost::thread(
+        std::shared_ptr<boost::thread> thread(new boost::thread(
                                                                   boost::bind(&boost::asio::io_service::run, &io_service_)));
         threads.push_back(thread);
       }

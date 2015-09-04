@@ -63,7 +63,7 @@ namespace epidb {
       const Request& request, std::string& content, bool& error)
     {
       XMLRPCParser parser;
-      boost::shared_ptr<XmlrpcRequest> xmlrpc_request;
+      std::shared_ptr<XmlrpcRequest> xmlrpc_request;
 
       char buf[8192] = {};
       size_t len = 0;

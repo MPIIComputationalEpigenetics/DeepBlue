@@ -13,7 +13,7 @@
 #include <sstream>
 #include <list>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "wig.hpp"
 
@@ -29,7 +29,7 @@ namespace epidb {
       std::map<std::string, std::string> info_;
       bool declare_track_;
       TrackPtr actual_track;
-      std::map<std::string, boost::shared_ptr<boost::icl::interval_set<int> > > map_overlap_counter;
+      std::map<std::string, std::shared_ptr<boost::icl::interval_set<int> > > map_overlap_counter;
       bool read_track(const std::string &line, std::map<std::string, std::string> &info, std::string &msg);
       bool read_parameters(const std::vector<std::string> &strs, std::map<std::string, std::string> &params, std::string &msg);
       bool read_format(std::string &line, TrackPtr &track, std::string &msg);

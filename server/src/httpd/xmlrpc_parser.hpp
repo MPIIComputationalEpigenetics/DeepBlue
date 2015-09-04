@@ -12,7 +12,7 @@
 #include <string>
 #include <vector>
 #include <boost/noncopyable.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "../extras/serialize.hpp"
 
@@ -29,7 +29,7 @@ namespace epidb {
       ~XMLRPCParser();
 
       bool parse(char* buf, int len);
-      bool done(boost::shared_ptr<XmlrpcRequest>& req);
+      bool done(std::shared_ptr<XmlrpcRequest>& req);
 
      private:
       typedef enum { METHOD_CALL, METHOD_NAME, PARAMS, PARAM, TYPE, MEMBER, NAME, VALUE, NONE } State;
@@ -39,7 +39,7 @@ namespace epidb {
       static void char_handler(void *data, const XML_Char *s, int len);
 
       XML_Parser parser_;
-      boost::shared_ptr<XmlrpcRequest> request_;
+      std::shared_ptr<XmlrpcRequest> request_;
 
       std::string buf_;
       std::string last_member_name_;

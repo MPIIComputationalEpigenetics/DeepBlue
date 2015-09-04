@@ -10,7 +10,7 @@
 
 #include <stdexcept>
 #include <vector>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <string>
 
 namespace mongo {
@@ -34,7 +34,7 @@ namespace epidb {
     struct ClientImpl;
     class Client {
     private:
-      boost::shared_ptr<ClientImpl> m_ptr;
+      std::shared_ptr<ClientImpl> m_ptr;
       std::string m_jobcol;
       std::string m_fscol;
       std::string m_db;

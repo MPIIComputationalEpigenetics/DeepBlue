@@ -9,7 +9,6 @@
 #include <map>
 
 #include <boost/bind.hpp>
-#include <boost/enable_shared_from_this.hpp>
 #include <boost/ref.hpp>
 
 #include <mongo/bson/bson.h>

@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "stringbuilder.hpp"
 
@@ -40,15 +40,15 @@ namespace epidb {
 
       virtual void set_type(Type type);
 
-      virtual bool add_child(const boost::shared_ptr<Parameter>& p);
+      virtual bool add_child(const std::shared_ptr<Parameter>& p);
 
-      virtual bool add_child(const std::string& name, const boost::shared_ptr<Parameter>&);
+      virtual bool add_child(const std::string& name, const std::shared_ptr<Parameter>&);
 
-      virtual bool children(std::vector<boost::shared_ptr<Parameter> >& results);
+      virtual bool children(std::vector<std::shared_ptr<Parameter> >& results);
 
-      virtual bool children(std::map<std::string, boost::shared_ptr<Parameter> >& results);
+      virtual bool children(std::map<std::string, std::shared_ptr<Parameter> >& results);
 
-      virtual bool children(std::vector<std::pair<std::string, boost::shared_ptr<Parameter> > >& results);
+      virtual bool children(std::vector<std::pair<std::string, std::shared_ptr<Parameter> > >& results);
 
       virtual const std::string value() const = 0;
 
@@ -74,7 +74,7 @@ namespace epidb {
       bool as_boolean() const;
     };
 
-    typedef boost::shared_ptr<Parameter> ParameterPtr;
+    typedef std::shared_ptr<Parameter> ParameterPtr;
 
 
     class SimpleParameter

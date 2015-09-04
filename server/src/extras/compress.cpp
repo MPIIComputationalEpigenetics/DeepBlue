@@ -11,7 +11,7 @@
 #include <iostream>
 #include <minilzo.h>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "log.hpp"
 
@@ -45,7 +45,7 @@ namespace epidb {
     }
 
     // TODO : Return smart pointer
-    boost::shared_ptr<char> compress(const char *in, const size_t in_size, size_t &out_size, bool &compress)
+    std::shared_ptr<char> compress(const char *in, const size_t in_size, size_t &out_size, bool &compress)
     {
       char *ptr = const_cast<char *>(in);
       lzo_bytep lzo_ptr = reinterpret_cast<lzo_bytep &>(ptr);
@@ -55,10 +55,10 @@ namespace epidb {
       if (!r) {
         free(lzo_out);
         compress = false;
-        return boost::shared_ptr<char>();
+        return std::shared_ptr<char>();
       }
       compress = true;
-      return boost::shared_ptr<char>( (char *) lzo_out);
+      return std::shared_ptr<char>( (char *) lzo_out);
     }
 
     lzo_bytep decompress(const lzo_bytep data, const lzo_uint compressed_size, const size_t uncompressed_size, size_t &out_size)

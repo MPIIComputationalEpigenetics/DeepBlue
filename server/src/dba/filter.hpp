@@ -230,9 +230,9 @@ namespace epidb {
         // TODO: move to utils directory
       public:
         template<typename T>
-        operator boost::shared_ptr<T>()
+        operator std::shared_ptr<T>()
         {
-          return boost::shared_ptr<T>();
+          return std::shared_ptr<T>();
         }
       } nullPtr;
 
@@ -243,7 +243,7 @@ namespace epidb {
         return instance;
       }
 
-      typedef boost::shared_ptr<Filter> FilterPtr;
+      typedef std::shared_ptr<Filter> FilterPtr;
 
     private:
 
@@ -339,12 +339,12 @@ namespace epidb {
 
         if (op == "==") {
           error = false;
-          return boost::shared_ptr<Filter>(new EqualsFilter(value));
+          return std::shared_ptr<Filter>(new EqualsFilter(value));
         }
 
         if (op == "!=") {
           error = false;
-          return boost::shared_ptr<Filter>(new NotEqualsFilter(value));
+          return std::shared_ptr<Filter>(new NotEqualsFilter(value));
         }
 
         error = true;
@@ -362,32 +362,32 @@ namespace epidb {
 
         if (op == "==") {
           error = false;
-          return boost::shared_ptr<Filter>(new  EqualsFilter(value));
+          return std::shared_ptr<Filter>(new  EqualsFilter(value));
         }
 
         if (op == "!=") {
           error = false;
-          return boost::shared_ptr<Filter>(new  NotEqualsFilter(value));
+          return std::shared_ptr<Filter>(new  NotEqualsFilter(value));
         }
 
         if (op == ">") {
           error = false;
-          return boost::shared_ptr<Filter>(new  GreaterFilter(value));
+          return std::shared_ptr<Filter>(new  GreaterFilter(value));
         }
 
         if (op == ">=") {
           error = false;
-          return boost::shared_ptr<Filter>(new  GreaterEqualsFilter(value));
+          return std::shared_ptr<Filter>(new  GreaterEqualsFilter(value));
         }
 
         if (op == "<") {
           error = false;
-          return boost::shared_ptr<Filter>(new  LessFilter(value));
+          return std::shared_ptr<Filter>(new  LessFilter(value));
         }
 
         if (op == "<=") {
           error = false;
-          return boost::shared_ptr<Filter>(new  LessEqualsFilter(value));
+          return std::shared_ptr<Filter>(new  LessEqualsFilter(value));
         }
 
         error = true;

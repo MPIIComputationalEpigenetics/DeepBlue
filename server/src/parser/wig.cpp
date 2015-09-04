@@ -17,22 +17,22 @@ namespace epidb {
 
     TrackPtr build_fixed_track(std::string &chr, Position start, Length step, Length span)
     {
-      return boost::shared_ptr<Track>(new Track(chr, start, step, span));
+      return std::shared_ptr<Track>(new Track(chr, start, step, span));
     }
 
     TrackPtr build_variable_track(std::string &chr, Length span)
     {
-      return boost::shared_ptr<Track>(new Track(chr, span));
+      return std::shared_ptr<Track>(new Track(chr, span));
     }
 
     TrackPtr build_bedgraph_track(std::string &chr, Length start, Length end)
     {
-      return boost::shared_ptr<Track>(new Track(chr, start, end));
+      return std::shared_ptr<Track>(new Track(chr, start, end));
     }
 
     TrackPtr build_bedgraph_track(std::string &chr)
     {
-      return boost::shared_ptr<Track>(new Track(chr));
+      return std::shared_ptr<Track>(new Track(chr));
     }
 
 
@@ -116,7 +116,7 @@ namespace epidb {
       _scores.push_back(score);
     }
 
-    boost::shared_ptr<char> Track::data() const
+    std::shared_ptr<char> Track::data() const
     {
       size_t _starts_size = _starts.size() * sizeof(Position);
       size_t _ends_size = _ends.size() * sizeof(Position);
@@ -125,13 +125,13 @@ namespace epidb {
       if (_type == FIXED_STEP) {
         char *data = (char *) malloc(_scores_size);
         memcpy(data, _scores.data(), _scores_size);
-        return boost::shared_ptr<char>(data);
+        return std::shared_ptr<char>(data);
 
       } else if (_type == VARIABLE_STEP) {
         char *data = (char *) malloc(_starts_size + _scores_size);
         memcpy(data, _starts.data(), _starts_size);
         memcpy(data + _starts_size, _scores.data(), _scores_size);
-        return boost::shared_ptr<char>(data);
+        return std::shared_ptr<char>(data);
 
 
       } else { /* ENCODE_BEDGRAPH or MISC_BEDGRAPH */
@@ -139,7 +139,7 @@ namespace epidb {
         memcpy(data, _starts.data(), _starts_size);
         memcpy(data + _starts_size, _ends.data(), _ends_size);
         memcpy(data + _starts_size + _ends_size, _scores.data(), _scores_size);
-        return boost::shared_ptr<char>(data);
+        return std::shared_ptr<char>(data);
       }
     }
 
@@ -184,7 +184,7 @@ namespace epidb {
       }
     }
 
-    void WigFile::add_track(boost::shared_ptr<Track> track)
+    void WigFile::add_track(std::shared_ptr<Track> track)
     {
       content.push_back(track);
     }

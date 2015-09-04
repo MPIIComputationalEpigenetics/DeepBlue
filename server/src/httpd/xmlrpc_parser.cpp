@@ -40,7 +40,7 @@ namespace epidb {
       return !error_;
     }
 
-    bool XMLRPCParser::done(boost::shared_ptr<XmlrpcRequest>& req) {
+    bool XMLRPCParser::done(std::shared_ptr<XmlrpcRequest>& req) {
       if (error_) {
         return false;
       }
@@ -181,7 +181,7 @@ namespace epidb {
           self->error_ = true;
           return;
         }
-        self->request_ = boost::shared_ptr<XmlrpcRequest>(new XmlrpcRequest(self->buf_));
+        self->request_ = std::shared_ptr<XmlrpcRequest>(new XmlrpcRequest(self->buf_));
         self->buf_.clear();
       }
       else if (strcmp("methodCall", name) == 0) {

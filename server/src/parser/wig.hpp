@@ -13,7 +13,7 @@
 #include <string>
 #include <vector>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <boost/utility.hpp>
 
 #include <boost/icl/split_interval_map.hpp>
@@ -36,7 +36,7 @@ namespace epidb {
     typedef std::vector<Score>  DataFixed;
 
     class Track;
-    typedef boost::shared_ptr<Track> TrackPtr;
+    typedef std::shared_ptr<Track> TrackPtr;
 
     class Track {
     private:
@@ -79,7 +79,7 @@ namespace epidb {
         return _span;
       }
       size_t features() const;
-      boost::shared_ptr<char> data() const;
+      std::shared_ptr<char> data() const;
       size_t data_size() const;
       TrackPtr split();
       void add_feature(Score _score);
@@ -105,7 +105,7 @@ namespace epidb {
       void add_track(TrackPtr track);
     };
 
-    typedef boost::shared_ptr<WigFile> WigPtr;
+    typedef std::shared_ptr<WigFile> WigPtr;
   }
 }
 

@@ -13,8 +13,6 @@
 
 #include <mongo/bson/bson.h>
 
-#include <boost/enable_shared_from_this.hpp>
-
 #include "../dba/retrieve.hpp"
 
 #include "../datatypes/regions.hpp"

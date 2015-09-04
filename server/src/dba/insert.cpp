@@ -162,7 +162,7 @@ namespace epidb {
         ab.append(*it);
       }
 
-      boost::shared_ptr<char> compressed_data;
+      std::shared_ptr<char> compressed_data;
       size_t compressed_size = 0;
       bool compressed = false;
       mongo::BSONObj o = ab.arr();
@@ -394,10 +394,10 @@ namespace epidb {
         region_builder.append(KeyMapper::FEATURES(), (int) track->features());
         region_builder.append(KeyMapper::WIG_DATA_SIZE(), (int) track->data_size());
 
-        boost::shared_ptr<char> data = track->data();
+        std::shared_ptr<char> data = track->data();
         size_t data_size = track->data_size();
 
-        boost::shared_ptr<char> compressed_data;
+        std::shared_ptr<char> compressed_data;
         size_t compressed_size = 0;
         bool compressed = false;
         compressed_data = epidb::compress::compress(data.get(), data_size, compressed_size, compressed);

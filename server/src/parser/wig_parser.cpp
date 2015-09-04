@@ -19,7 +19,7 @@
 
 #include <boost/algorithm/string.hpp>
 #include <boost/tokenizer.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include <strtk.hpp>
 
@@ -169,10 +169,10 @@ namespace epidb {
 
     bool WIGParser::check_feature(const std::string &chromosome, const size_t start, const size_t span, const size_t &line, std::string &msg)
     {
-      boost::shared_ptr<boost::icl::interval_set<int> > overlap_counter;
+      std::shared_ptr<boost::icl::interval_set<int> > overlap_counter;
 
       if (map_overlap_counter.find(chromosome) == map_overlap_counter.end()) {
-        overlap_counter = boost::shared_ptr<boost::icl::interval_set<int> >( new boost::icl::interval_set<int>());
+        overlap_counter = std::shared_ptr<boost::icl::interval_set<int> >( new boost::icl::interval_set<int>());
         map_overlap_counter[chromosome] = overlap_counter;
       } else {
         overlap_counter = map_overlap_counter[chromosome];
@@ -202,7 +202,7 @@ namespace epidb {
     {
       clock_t init = clock();
 
-      wig = boost::shared_ptr<WigFile>(new WigFile());
+      wig = std::shared_ptr<WigFile>(new WigFile());
       strtk::for_each_line_conditional(*input_, [&](std::string & line) -> bool {
         actual_line_++;
         if (line.empty())

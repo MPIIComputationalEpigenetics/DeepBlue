@@ -13,7 +13,7 @@
 #include <vector>
 #include <utility>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include <mongo/bson/bson.h>
 
@@ -91,7 +91,7 @@ namespace epidb {
         virtual ~AbstractColumnType() {}
       };
 
-      typedef boost::shared_ptr<AbstractColumnType> ColumnTypePtr;
+      typedef std::shared_ptr<AbstractColumnType> ColumnTypePtr;
 
       template< class Type>
       class ColumnType : public AbstractColumnType {

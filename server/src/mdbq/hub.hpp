@@ -8,7 +8,7 @@
 #ifndef __MDBQ_HUB_HPP__
 #     define __MDBQ_HUB_HPP__
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include "../mdbq/common.hpp"
 
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -40,7 +40,7 @@ namespace epidb {
     class Hub {
     private:
       /// pointer to implementation
-      boost::shared_ptr<HubImpl> m_ptr;
+      std::shared_ptr<HubImpl> m_ptr;
 
       /// database plus queue prefix (db.queue)
       const std::string m_prefix;

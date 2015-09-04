@@ -2,7 +2,7 @@
 #include <sstream>
 #include <vector>
 #include <map>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "utils.hpp"
 #include "serialize.hpp"
@@ -100,22 +100,22 @@ namespace epidb {
       std::cerr << "Nothing." << std::endl;
     }
 
-    bool Parameter::add_child(const boost::shared_ptr<Parameter> &p)
+    bool Parameter::add_child(const std::shared_ptr<Parameter> &p)
     {
       return false;
     }
 
-    bool Parameter::add_child(const std::string &name, const boost::shared_ptr<Parameter> &)
+    bool Parameter::add_child(const std::string &name, const std::shared_ptr<Parameter> &)
     {
       return false;
     }
 
-    bool Parameter::children(std::vector<boost::shared_ptr<Parameter> > &results)
+    bool Parameter::children(std::vector<std::shared_ptr<Parameter> > &results)
     {
       return false;
     }
 
-    bool Parameter::children(std::map<std::string, boost::shared_ptr<Parameter> > &results)
+    bool Parameter::children(std::map<std::string, std::shared_ptr<Parameter> > &results)
     {
       return false;
     }

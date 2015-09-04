@@ -10,13 +10,13 @@
 #define EPIDB_HTTPD_NETWORK_HPP
 
 #include <vector>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace epidb {
   namespace httpd {
 
-    typedef boost::shared_ptr<std::vector<char> > vector_ptr;
-    typedef boost::shared_ptr<std::string> ContentPtr;
+    typedef std::shared_ptr<std::vector<char> > vector_ptr;
+    typedef std::shared_ptr<std::string> ContentPtr;
 
   } // namespace httpd
 } // namespace epidb

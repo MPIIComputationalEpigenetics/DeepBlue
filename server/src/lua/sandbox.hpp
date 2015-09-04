@@ -31,7 +31,7 @@ namespace epidb {
       processing::StatusPtr status;
 
     public:
-      typedef boost::shared_ptr<Sandbox> LuaPtr;
+      typedef std::shared_ptr<Sandbox> LuaPtr;
       static LuaPtr new_instance(processing::StatusPtr status);
 
       Sandbox(processing::StatusPtr status);

@@ -7,7 +7,6 @@
 //
 #include <exception>
 
-#include <boost/shared_ptr.hpp>
 #include <boost/foreach.hpp>
 
 #include "xmlrpc_request.hpp"

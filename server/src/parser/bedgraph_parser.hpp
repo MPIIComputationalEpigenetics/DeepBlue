@@ -12,7 +12,7 @@
 #include <sstream>
 #include <list>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "wig_parser.hpp"
 #include "wig.hpp"

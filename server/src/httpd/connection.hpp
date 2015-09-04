@@ -23,8 +23,7 @@
 #include <boost/asio.hpp>
 #include <boost/array.hpp>
 #include <boost/noncopyable.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/enable_shared_from_this.hpp>
+#include <memory>
 
 #include "network.hpp"
 #include "reply.hpp"
@@ -40,7 +39,7 @@ namespace epidb {
 
     /// Represents a single connection from a client.
     class Connection
-      : public boost::enable_shared_from_this<Connection>,
+      : public std::enable_shared_from_this<Connection>,
         private boost::noncopyable {
     public:
       /// Construct a connection with the given io_service.
@@ -100,7 +99,7 @@ namespace epidb {
 
     };
 
-    typedef boost::shared_ptr<Connection> connection_ptr;
+    typedef std::shared_ptr<Connection> connection_ptr;
 
   } // namespace httpd
 } // namespace epidb
