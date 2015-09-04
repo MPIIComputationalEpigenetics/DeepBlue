@@ -112,7 +112,7 @@ namespace epidb {
               mongo::fromjson("{\"norm_name\": \"" + norm_biosource_name + "\", \"type\": \"biosources\"}"));
 
           if (!cursor->more()) {
-            std::string s = Error::m(ERR_DATABASE_INVALID_BIOSOURCE, norm_biosource_name.c_str());
+            std::string s = Error::m(ERR_DATABASE_INVALID_BIOSOURCE, norm_biosource_name);
             EPIDB_LOG_TRACE(s);
             msg = s;
             c.done();

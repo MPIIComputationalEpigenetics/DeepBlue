@@ -269,7 +269,7 @@ namespace epidb {
         bool is_syn = exists::biosource_synonym(norm_biosource_name);
 
         if (!(is_biosource || is_syn)) {
-          msg = Error::m(ERR_INVALID_BIOSOURCE_NAME, biosource_name.c_str());
+          msg = Error::m(ERR_INVALID_BIOSOURCE_NAME, biosource_name);
           return false;
         }
 
@@ -280,7 +280,7 @@ namespace epidb {
         bool syn_is_syn = exists::biosource_synonym(norm_synoynm_name);
 
         if (syn_is_biosource || syn_is_syn) {
-          msg = Error::m(ERR_INVALID_BIOSOURCE_SYNONYM, synonym_name.c_str());
+          msg = Error::m(ERR_INVALID_BIOSOURCE_SYNONYM, synonym_name);
           return false;
         }
 
@@ -402,7 +402,7 @@ namespace epidb {
 
         if (is_connected) {
           std::string e = Error::m(ERR_ALREADY_CONECTED_BIOSOURCE_NAME,
-                                   biosource_more_embracing.c_str(), biosource_less_embracing.c_str());
+                                   biosource_more_embracing, biosource_less_embracing);
           EPIDB_LOG_TRACE(e);
           msg = e;
           return false;
@@ -414,7 +414,7 @@ namespace epidb {
 
         if (is_connected) {
           std::string e = Error::m(ERR_ALREADY_CONECTED_BIOSOURCE_NAME,
-                                   biosource_more_embracing.c_str(), biosource_less_embracing.c_str());
+                                   biosource_more_embracing, biosource_less_embracing);
           EPIDB_LOG_TRACE(e);
           msg = e;
           return false;

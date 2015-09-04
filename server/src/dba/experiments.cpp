@@ -31,7 +31,7 @@ namespace epidb {
       {
         const std::string norm_name = utils::normalize_name(name);
         if (!helpers::get_one(Collections::EXPERIMENTS(), BSON("norm_name" << norm_name), experiment, msg)) {
-          msg = Error::m(ERR_INVALID_EXPERIMENT_NAME, name.c_str());
+          msg = Error::m(ERR_INVALID_EXPERIMENT_NAME, name);
           return false;
         }
         return true;
@@ -40,7 +40,7 @@ namespace epidb {
       bool by_id(const std::string &id, mongo::BSONObj &experiment, std::string &msg)
       {
         if (!helpers::get_one(Collections::EXPERIMENTS(), BSON("_id" << id), experiment, msg)) {
-          msg = Error::m(ERR_INVALID_EXPERIMENT_ID, id.c_str());
+          msg = Error::m(ERR_INVALID_EXPERIMENT_ID, id);
           return false;
         }
         return true;
@@ -232,4 +232,3 @@ namespace epidb {
     }
   }
 }
-

@@ -343,7 +343,7 @@ namespace epidb {
         if (found) {
           file_format.add(column_type);
         } else {
-          msg = Error::m(ERR_INVALID_COLUMN_NAME, field_string.c_str());
+          msg = Error::m(ERR_INVALID_COLUMN_NAME, field_string);
           return false;
         }
       }
@@ -399,7 +399,7 @@ namespace epidb {
       std::string command = op.substr(0, op.find(open_parenthesis));
       std::string type = dba::Metafield::command_type(command);
       if (type.empty()) {
-        msg = Error::m(ERR_INVALID_META_COLUMN_NAME, command.c_str());
+        msg = Error::m(ERR_INVALID_META_COLUMN_NAME, command);
         return false;
       }
       return dba::columns::column_type_simple(op, type, column_type, msg);

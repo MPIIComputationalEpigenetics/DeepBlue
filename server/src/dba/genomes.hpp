@@ -56,7 +56,7 @@ namespace epidb {
         const std::vector<std::string> chromosomes() const;
       };
 
-      typedef boost::shared_ptr<GenomeInfo> GenomeInfoPtr;
+      typedef std::shared_ptr<GenomeInfo> GenomeInfoPtr;
 
       bool get_chromosomes(const std::string &genome,
                            std::set<std::string> &chromosomes, std::string &msg);

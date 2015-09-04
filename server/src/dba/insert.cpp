@@ -111,7 +111,7 @@ namespace epidb {
           }
           builder.append(name, s);
         } else {
-          std::string err = Error::m(ERR_COLUMN_TYPE_NAME_MISSING, column_type->str().c_str());
+          std::string err = Error::m(ERR_COLUMN_TYPE_NAME_MISSING, column_type->str());
           EPIDB_LOG_ERR(err);
           msg = err;
           return false;

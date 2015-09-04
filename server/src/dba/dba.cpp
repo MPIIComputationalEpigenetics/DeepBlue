@@ -859,14 +859,14 @@ namespace epidb {
     bool is_valid_biosource_name(const std::string &name, const std::string &norm_name, std::string &msg)
     {
       if (exists::biosource(norm_name)) {
-        std::string e = Error::m(ERR_DUPLICATED_BIOSOURCE_NAME, name.c_str());
+        std::string e = Error::m(ERR_DUPLICATED_BIOSOURCE_NAME, name);
         EPIDB_LOG_TRACE(e);
         msg = e;
         return false;
       }
 
       if (exists::biosource_synonym(norm_name)) {
-        std::string e = Error::m(ERR_DUPLICATED_BIOSOURCE_NAME, name.c_str());
+        std::string e = Error::m(ERR_DUPLICATED_BIOSOURCE_NAME, name);
         EPIDB_LOG_TRACE(e);
         msg = e;
         return false;
@@ -878,7 +878,7 @@ namespace epidb {
     bool is_valid_technique_name(const std::string &name, const std::string &norm_name, std::string &msg)
     {
       if (exists::technique(norm_name)) {
-        std::string s = Error::m(ERR_DUPLICATED_TECHNIQUE_NAME, name.c_str());
+        std::string s = Error::m(ERR_DUPLICATED_TECHNIQUE_NAME, name);
         EPIDB_LOG_TRACE(s);
         msg = s;
         return false;
@@ -889,7 +889,7 @@ namespace epidb {
     bool is_valid_epigenetic_mark(const std::string &name, const std::string &norm_name, std::string &msg)
     {
       if (exists::epigenetic_mark(norm_name)) {
-        std::string s = Error::m(ERR_DUPLICATED_EPIGENETIC_MARK_NAME, name.c_str());
+        std::string s = Error::m(ERR_DUPLICATED_EPIGENETIC_MARK_NAME, name);
         EPIDB_LOG_TRACE(s);
         msg = s;
         return false;
@@ -900,7 +900,7 @@ namespace epidb {
     bool is_project_valid(const std::string &name, const std::string &norm_name, std::string &msg)
     {
       if (exists::project(norm_name)) {
-        std::string s = Error::m(ERR_DUPLICATED_PROJECT_NAME, name.c_str());
+        std::string s = Error::m(ERR_DUPLICATED_PROJECT_NAME, name);
         EPIDB_LOG_TRACE(s);
         msg = s;
         return false;
@@ -911,7 +911,7 @@ namespace epidb {
     bool is_valid_genome(const std::string &genome, const std::string &norm_genome, std::string &msg)
     {
       if (exists::genome(norm_genome)) {
-        std::string s = Error::m(ERR_DUPLICATED_GENOME_NAME, genome.c_str());
+        std::string s = Error::m(ERR_DUPLICATED_GENOME_NAME, genome);
         EPIDB_LOG_TRACE(s);
         msg = s;
         return false;

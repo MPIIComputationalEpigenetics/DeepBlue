@@ -128,7 +128,7 @@ namespace epidb {
       {
         mongo::BSONObj query;
         if (!helpers::get_one(Collections::QUERIES(), BSON("_id" << query_id), query, msg)) {
-          msg = Error::m(ERR_INVALID_QUERY_ID, query_id.c_str());
+          msg = Error::m(ERR_INVALID_QUERY_ID, query_id);
           return false;
         }
 
@@ -580,7 +580,7 @@ namespace epidb {
         mongo::BSONObj query_a;
         const std::string query_a_id = args["qid_1"].str();
         if (!helpers::get_one(Collections::QUERIES(), BSON("_id" << query_a_id), query_a, msg)) {
-          msg = Error::m(ERR_INVALID_QUERY_ID, query_a_id.c_str());
+          msg = Error::m(ERR_INVALID_QUERY_ID, query_a_id);
           return false;
         }
         std::string query_a_type = query_a["type"].str();

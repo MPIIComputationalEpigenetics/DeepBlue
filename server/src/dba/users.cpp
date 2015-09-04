@@ -179,7 +179,7 @@ namespace epidb {
 
         mongo::BSONObj obj;
         if (!dba::helpers::get_one(dba::Collections::USERS(), BSON("name" << user), obj, msg)) {
-          msg = Error::m(ERR_INVALID_USER_NAME, user.c_str());
+          msg = Error::m(ERR_INVALID_USER_NAME, user);
           return false;
         }
 

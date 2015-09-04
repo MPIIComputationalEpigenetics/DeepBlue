@@ -30,7 +30,7 @@ namespace epidb {
       }
 
       catch (const mongo::UserException& e) {
-        std::string err = Error::m(ERR_DATABASE_EXCEPTION, request.method_name().c_str(), e.what());
+        std::string err = Error::m(ERR_DATABASE_EXCEPTION, request.method_name(), e.what());
         EPIDB_LOG_ERR(err);
         okay = false;
         // overwrite with clear result

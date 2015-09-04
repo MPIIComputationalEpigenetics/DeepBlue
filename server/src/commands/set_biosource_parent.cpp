@@ -74,14 +74,14 @@ namespace epidb {
         bool smaller_scope_is_syn = dba::exists::biosource_synonym(norm_smaller_scope);
 
         if (!(bigger_scope_is_biosource || bigger_scope_is_syn)) {
-          std::string s = Error::m(ERR_INVALID_BIOSOURCE_NAME, bigger_scope.c_str());
+          std::string s = Error::m(ERR_INVALID_BIOSOURCE_NAME, bigger_scope);
           EPIDB_LOG_TRACE(s);
           result.add_error(s);
           return false;
         }
 
         if (!(smaller_scope_is_biosource || smaller_scope_is_syn)) {
-          std::string s = Error::m(ERR_INVALID_BIOSOURCE_NAME, smaller_scope.c_str());
+          std::string s = Error::m(ERR_INVALID_BIOSOURCE_NAME, smaller_scope);
           EPIDB_LOG_TRACE(s);
           result.add_error(s);
           return false;

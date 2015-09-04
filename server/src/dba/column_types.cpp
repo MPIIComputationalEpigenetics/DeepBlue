@@ -282,7 +282,7 @@ namespace epidb {
           column_type = boost::shared_ptr<ColumnType<Score> >(new ColumnType<Score>(name, 0.0, -1));
           return true;
         } else {
-          msg = Error::m(ERR_COLUMN_TYPE_NAME_MISSING, type.c_str());
+          msg = Error::m(ERR_COLUMN_TYPE_NAME_MISSING, type);
           return false;
         }
       }
@@ -291,7 +291,7 @@ namespace epidb {
                                      std::string &msg)
       {
         if (exists::column_type(norm_name)) {
-          msg = Error::m(ERR_DUPLICATED_COLUMN_NAME, name.c_str());
+          msg = Error::m(ERR_DUPLICATED_COLUMN_NAME, name);
           return false;
         }
         return true;

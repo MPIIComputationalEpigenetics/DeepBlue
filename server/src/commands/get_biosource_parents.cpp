@@ -73,7 +73,7 @@ namespace epidb {
         bool is_syn = dba::exists::biosource_synonym(norm_biosource_name);
 
         if (!(is_biosource || is_syn)) {
-          std::string s = Error::m(ERR_INVALID_BIOSOURCE_NAME, biosource_name.c_str());
+          std::string s = Error::m(ERR_INVALID_BIOSOURCE_NAME, biosource_name);
           EPIDB_LOG_TRACE(s);
           result.add_error(s);
           return false;

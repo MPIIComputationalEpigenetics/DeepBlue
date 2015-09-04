@@ -11,6 +11,7 @@
 #define EPIDB_ERRORS_HPP
 
 #include <string>
+#include <format.h>
 
 namespace epidb {
 
@@ -23,7 +24,16 @@ namespace epidb {
       code_value(c),
       err_fmt(f) {}
 
-    static std::string m(const Error e, ...);
+    template<typename... Args>
+    static std::string m(const Error e, const Args & ... args)
+    {
+      std::stringstream ss;
+      //ss << e.code_value;
+      //ss << ":";
+      ss << fmt::format("{}:" + e.err_fmt, e.code_value, args...);
+      return ss.str();
+    }
+
   };
 
   extern Error ERR_USER_USER_MISSING;

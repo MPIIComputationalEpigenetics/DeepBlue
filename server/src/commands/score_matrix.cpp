@@ -75,7 +75,7 @@ namespace epidb {
 
         if (!dba::exists::query(regions_query_id, user_key, msg)) {
           if (msg.empty()) {
-            result.add_error(Error::m(ERR_INVALID_QUERY_ID, regions_query_id.c_str()));
+            result.add_error(Error::m(ERR_INVALID_QUERY_ID, regions_query_id));
           } else {
             result.add_error(msg);
           }

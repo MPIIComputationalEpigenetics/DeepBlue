@@ -186,7 +186,7 @@ namespace epidb {
           names_pairs[norm_name] = name;
         }
 
-        gi = boost::shared_ptr<GenomeInfo>(new GenomeInfo(name, data, names_pairs));
+        gi = std::shared_ptr<GenomeInfo>(new GenomeInfo(name, data, names_pairs));
         return true;
       }
 

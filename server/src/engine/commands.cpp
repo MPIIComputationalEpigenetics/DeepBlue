@@ -63,7 +63,7 @@ namespace epidb {
     }
 
     if (!user.has_permission(permission)) {
-      msg = Error::m(ERR_INSUFFICIENT_PERMISSION, datatypes::permission_level_to_string(permission).c_str());
+      msg = Error::m(ERR_INSUFFICIENT_PERMISSION, datatypes::permission_level_to_string(permission));
       return false;
     }
     return true;
