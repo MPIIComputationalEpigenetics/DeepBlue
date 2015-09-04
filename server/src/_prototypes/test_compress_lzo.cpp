@@ -26,10 +26,10 @@ r == LZO_E_OK
 #include <iostream>
 #include <string>
 #include <ctime>
+#include <memory>
 
 #include <minilzo.h>
 
-#include <boost/shared_ptr.hpp>
 
 #include <mongo/bson/bson.h>
 
@@ -73,7 +73,7 @@ int main()
 
   std::cerr << "not compressed: " << o2.objsize() << std::endl;
 
-  boost::shared_ptr<char> out;
+  std::shared_ptr<char> out;
   size_t out_len(0);
   const long double sysTime = clock();
   bool c = false;
@@ -119,7 +119,7 @@ int main()
 
   size_t v_len = sizeof(int) * v.size();
   size_t v_out_len;
-  boost::shared_ptr<char> out_2;
+  std::shared_ptr<char> out_2;
   out_2 = epidb::compress::compress((char *) v.data(), v_len, v_out_len, c);
   std::cerr << c << std::endl;
 
