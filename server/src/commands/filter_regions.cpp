@@ -6,12 +6,13 @@
 //  Copyright (c) 2013,2014 Max Planck Institute for Computer Science. All rights reserved.
 //
 
-#include "../dba/dba.hpp"
-#include "../dba/exists.hpp"
-#include "../dba/filter.hpp"
-#include "../dba/queries.hpp"
+#include "../algorithms/filter.hpp"
 
 #include "../datatypes/user.hpp"
+
+#include "../dba/dba.hpp"
+#include "../dba/exists.hpp"
+#include "../dba/queries.hpp"
 
 #include "../engine/commands.hpp"
 

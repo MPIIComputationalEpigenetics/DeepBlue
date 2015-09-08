@@ -20,6 +20,7 @@
 #include "../log.hpp"
 
 #include "../algorithms/aggregate.hpp"
+#include "../algorithms/filter.hpp"
 #include "../algorithms/intersection.hpp"
 #include "../algorithms/merge.hpp"
 
@@ -34,7 +35,6 @@
 
 #include "collections.hpp"
 #include "dba.hpp"
-#include "filter.hpp"
 #include "genomes.hpp"
 #include "helpers.hpp"
 #include "key_mapper.hpp"
