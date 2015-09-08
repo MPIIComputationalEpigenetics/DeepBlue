@@ -22,7 +22,7 @@ namespace epidb {
       static bool is_valid_search_collection(const std::string &name);
 
       static const std::vector<std::string> &valid_search_Collections();
-      
+
       static const bool get_collection_for_id(const std::string& id, std::string& collection);
 
       static const std::string &EXPERIMENTS();
@@ -34,6 +34,7 @@ namespace epidb {
       static const std::string &EPIGENETIC_MARKS();
       static const std::string &REGIONS();
       static const std::string &ANNOTATIONS();
+      static const std::string &GENE_SETS();
       static const std::string &QUERIES();
       static const std::string &SAMPLES();
       static const std::string &SEQUENCES();

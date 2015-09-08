@@ -205,6 +205,10 @@ class EpidbClient:
     def find_pattern(self, pattern, genome, overlap, user_key):
         return self.server.find_pattern(pattern, genome, overlap, user_key)
 
+    ## Genes
+    def add_gene_set(self, name, description, data, format, extra_metadata, user_key):
+        return self.server.add_gene_set(name, description, data, format, extra_metadata, user_key)
+
     ## Operations
     def select_regions(self, experiment_name, genome, epigenetic_mark,
                        sample, technique, project, chromosome, start, end,

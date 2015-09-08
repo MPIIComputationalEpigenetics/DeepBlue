@@ -55,6 +55,11 @@ namespace epidb {
         return helpers::check_exist(Collections::EXPERIMENTS(), "norm_name", name);
       }
 
+      bool gene_set(const std::string &name)
+      {
+        return helpers::check_exist(Collections::GENE_SETS(), "norm_name", name);
+      }
+
       bool annotation(const std::string &name, const std::string &genome)
       {
         mongo::BSONObj query = BSON("norm_name" << name << "norm_genome" << genome);

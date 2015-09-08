@@ -3,7 +3,7 @@ include ../Makefile.inc
 CXXFLAGS	= $(DEFCXXFLAGS) -I..
 
 OBJLIBS	= ../libparser.a
-OBJS	= parser_factory.o genome_data.o wig.o bedgraph_parser.o wig_parser.o fasta_parser.o
+OBJS	= parser_factory.o genome_data.o gtf.o gtf_parser.o wig.o bedgraph_parser.o wig_parser.o fasta_parser.o
 
 all : $(OBJLIBS)
 
