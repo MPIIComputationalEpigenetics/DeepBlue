@@ -37,7 +37,7 @@ namespace epidb {
         Parameter p[] = {
           Parameter("query_id", serialize::STRING, "id of the query to be filtered"),
           Parameter("field", serialize::STRING, "field that is filtered by"),
-          Parameter("operation", serialize::STRING, "operation used for filtering. For 'string' must be '==' or '!=' and for 'number' must be one of these: " + utils::vector_to_string(dba::FilterBuilder::operations())),
+          Parameter("operation", serialize::STRING, "operation used for filtering. For 'string' must be '==' or '!=' and for 'number' must be one of these: " + utils::vector_to_string(algorithms::FilterBuilder::operations())),
           Parameter("value", serialize::STRING, "value the operator is applied to"),
           Parameter("type", serialize::STRING, "type of the value: 'number' or 'string' "),
           parameters::UserKey
@@ -90,8 +90,8 @@ namespace epidb {
           result.add_error("Only equals (==) or not equals (!=) are available for type 'string'");
           return false;
         } else {
-          if (!dba::FilterBuilder::is_valid_operations(operation)) {
-            result.add_error("Invalid operation: '" + operation + "'. The operation for type 'number' must be one of these: " + utils::vector_to_string(dba::FilterBuilder::operations()));
+          if (!algorithms::FilterBuilder::is_valid_operations(operation)) {
+            result.add_error("Invalid operation: '" + operation + "'. The operation for type 'number' must be one of these: " + utils::vector_to_string(algorithms::FilterBuilder::operations()));
             return false;
           }
         }

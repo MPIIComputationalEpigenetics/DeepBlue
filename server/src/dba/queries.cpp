@@ -723,7 +723,7 @@ namespace epidb {
       }
 
 
-      bool filter_region(const AbstractRegion * region_ref, const std::string & field, const dba::columns::ColumnTypePtr column, Metafield & metafield, const std::string & chrom, FilterBuilder::FilterPtr filter, processing::StatusPtr status)
+      bool filter_region(const AbstractRegion * region_ref, const std::string & field, const dba::columns::ColumnTypePtr column, Metafield & metafield, const std::string & chrom, algorithms::FilterBuilder::FilterPtr filter, processing::StatusPtr status)
       {
         if (field == "START") {
           return filter->is(region_ref->start());
@@ -769,15 +769,15 @@ namespace epidb {
         std::string field = args["field"].str();
 
         bool error;
-        FilterBuilder::FilterPtr filter;
+        algorithms::FilterBuilder::FilterPtr filter;
 
         if (type.compare("string") == 0) {
-          filter = FilterBuilder::getInstance().build(field, operation, value, error, msg);
+          filter = algorithms::FilterBuilder::getInstance().build(field, operation, value, error, msg);
           if (error) {
             return false;
           }
         } else if (type.compare("number") == 0 || type.compare("integer") == 0 || type.compare("double") == 0) {
-          filter = FilterBuilder::getInstance().build(field, operation, atof(value.c_str()), error, msg);
+          filter = algorithms::FilterBuilder::getInstance().build(field, operation, atof(value.c_str()), error, msg);
           if (error) {
             return false;
           }

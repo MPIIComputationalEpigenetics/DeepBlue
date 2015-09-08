@@ -19,7 +19,7 @@
 #include "../extras/utils.hpp"
 
 namespace epidb {
-  namespace dba {
+  namespace algorithms {
 
     class Filter {
     public:
