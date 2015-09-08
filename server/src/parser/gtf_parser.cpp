@@ -7,6 +7,7 @@
 //
 
 #include <ctime>
+#include <limits>
 #include <string>
 
 #include <strtk.hpp>
@@ -34,8 +35,8 @@ namespace epidb {
       Position start;
       Position end;
       std::string score;
-      std::string strand;
-      std::string frame;               // frame - One of '0', '1' or '2'. '0' indicates that the first base of the feature is the first base of a codon, '1' that the second base is the first base of a codon, and so on..
+      char strand;
+      char frame;               // frame - One of '0', '1' or '2'. '0' indicates that the first base of the feature is the first base of a codon, '1' that the second base is the first base of a codon, and so on..
       std::string s_attributes; // attribute - A semicolon-separated list of tag-value pairs, providing additional information about each feature.
 
     };
@@ -43,9 +44,6 @@ namespace epidb {
     bool GTFParser::parse_attributes(const std::string& line, const std::string& s_attributes, GTFRow::Attributes& attributes, std::string& msg)
     {
       // gene_id "ENSG00000223972"; gene_name "DDX11L1"; gene_source "havana"; gene_biotype "transcribed_unprocessed_pseudogene";
-
-      std::cerr << "s_attributes: " << s_attributes << std::endl;
-
       std::string separator1("");//dont let quoted arguments escape themselves
       std::string separator2(";");//split on semilcolon
       std::string separator3("\"\'");//let it have quoted arguments
@@ -64,7 +62,7 @@ namespace epidb {
         }
         size_t pos = pair.find_first_of(" ");
         if (pos == std::string::npos) {
-          msg = "The track seems to have an invalid <track> header line: " + *beg;
+          msg = "The track seems to have an invalid attribute value: '" + *beg + "' in the line: " + line;
           return false;
         }
         std::string key = pair.substr(0, pos);
@@ -100,7 +98,16 @@ namespace epidb {
           return false;
         }
 
-        // gtf->add_row(row.toGTFRow());
+        Score score;
+        if (row.score == ".") {
+          score = std::numeric_limits<Score>::min();
+        } else {
+          if (!utils::string_to_score(row.score, score)) {
+            msg = "The score value " + row.score + " is invalid. Line: " + line_str();
+          }
+        }
+
+        gtf->add_row(row.seqname, row.source, row.feature, row.start, row.end, score, row.strand, row.frame, attributes);
 
         return true;
       });

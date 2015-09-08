@@ -36,19 +36,20 @@ namespace epidb {
       Score _score;
       char _strand;
       char _frame;  // frame - One of '0', '1' or '2'. '0' indicates that the first base of the feature is the first base of a codon, '1' that the second base is the first base of a codon, and so on..
-      std::string _gene_id;
-      std::string _transcript_id;
       Attributes _attributes;
 
     public:
       GTFRow(const std::string &seqname, const std::string &source, const std::string &feature,
              Position start, Position end, Score score,
-             char strand, char frame,
-             const std::string gene_id, const std::string transcript_id, Attributes&& attributes);
+             char strand, char frame, const Attributes& attributes);
 
       std::string chromosome() const { return _seqname; }
       Position start() const { return _start; }
       Position end() const { return _end; }
+      Score score() const { return _score; }
+      Score strand() const { return _strand; }
+      Score frame() const { return _frame; }
+      Attributes attributes() const { return _attributes; }
     };
 
     typedef std::vector<GTFRow> GTFContent;
@@ -60,7 +61,9 @@ namespace epidb {
     public:
       GTFContent::const_iterator rows_iterator() const;
       GTFContent::const_iterator rows_iterator_end() const;
-      void add_row(GTFRow &&row);
+      void add_row(const std::string &seqname, const std::string &source, const std::string &feature,
+                   Position start, Position end, Score score,
+                   char strand, char frame, const GTFRow::Attributes& attributes);
       size_t size() const;
     };
 
