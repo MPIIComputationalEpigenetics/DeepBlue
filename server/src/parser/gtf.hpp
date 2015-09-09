@@ -43,13 +43,15 @@ namespace epidb {
              Position start, Position end, Score score,
              char strand, char frame, const Attributes& attributes);
 
-      std::string chromosome() const { return _seqname; }
-      Position start() const { return _start; }
-      Position end() const { return _end; }
-      Score score() const { return _score; }
-      Score strand() const { return _strand; }
-      Score frame() const { return _frame; }
-      Attributes attributes() const { return _attributes; }
+      const std::string& seqname() const { return _seqname; }
+      const std::string& source() const { return _source; }
+      const std::string& feature() const { return _feature; }
+      const Position start() const { return _start; }
+      const Position end() const { return _end; }
+      const Score score() const { return _score; }
+      const Score strand() const { return _strand; }
+      const Score frame() const { return _frame; }
+      const Attributes& attributes() const { return _attributes; }
     };
 
     typedef std::vector<GTFRow> GTFContent;

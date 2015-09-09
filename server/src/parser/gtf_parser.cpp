@@ -52,8 +52,6 @@ namespace epidb {
       boost::tokenizer<boost::escaped_list_separator<char> > tok(s_attributes, els);
 
       attributes["gene_id"] = "";
-      attributes["transcript_id"] = "";
-
       for (boost::tokenizer<boost::escaped_list_separator<char> >::iterator beg = tok.begin(); beg != tok.end(); ++beg) {
         std::string pair = *beg;
         boost::trim(pair);
@@ -92,6 +90,11 @@ namespace epidb {
           return false;
         }
 
+        // Ignore if the feature is not gene
+        if (row.feature != "gene") {
+          return true;
+        }
+
         GTFRow::Attributes attributes;
         if (!parse_attributes(line, row.s_attributes, attributes, msg))
         {
@@ -116,6 +119,7 @@ namespace epidb {
       if (!msg.empty()) {
         return false;
       }
+      std::cerr << "done" << std::endl;
 
       return true;
     }
