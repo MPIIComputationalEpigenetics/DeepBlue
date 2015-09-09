@@ -33,14 +33,9 @@ namespace epidb {
       _content.emplace_back(seqname, source, feature, start, end, score, strand, frame, attributes);
     }
 
-    GTFContent::const_iterator GTFFile::rows_iterator() const
+    const GTFContent& GTFFile::rows() const
     {
-      return _content.begin();
-    }
-
-    GTFContent::const_iterator GTFFile::rows_iterator_end() const
-    {
-      return _content.end();
+      return _content;
     }
 
     size_t GTFFile::size() const

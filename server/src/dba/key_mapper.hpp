@@ -29,6 +29,7 @@ namespace epidb {
       static const std::string& DATASET();
       static const std::string& END();
       static const std::string& FEATURES();
+      static const std::string& GENE_SET_ID();
       static const std::string& START();
       static const std::string& VALUE();
       static const std::string& WIG_STEP();

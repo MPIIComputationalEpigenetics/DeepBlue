@@ -119,6 +119,39 @@ namespace epidb {
         return true;
       }
 
+      bool gene_set(const std::string &id, const std::string &user_key, std::string &msg)
+      {
+        mongo::BSONObj gene_set;
+        if (!data::gene_set(id, gene_set, msg)) {
+          msg = "Gene set " + id + " not found";
+          return false;
+        }
+
+        if (!has_permission(gene_set, user_key, true, msg)) {
+          return false;
+        }
+
+        if (!helpers::remove_all(Collections::GENE_SETS(), BSON(KeyMapper::GENE_SET_ID() << id), msg)) {
+          return false;
+        }
+
+        // delete from full text search
+        if (!search::remove(id, msg)) {
+          return false;
+        }
+
+        // Delete from collection
+        if (!helpers::remove_one(helpers::collection_name(Collections::GENE_SETS()), id, msg)) {
+          return false;
+        }
+
+        if (!helpers::notify_change_occurred(Collections::GENE_SETS(), msg)) {
+          return false;
+        }
+
+        return true;
+      }
+
       bool experiment(const std::string &id, const std::string &user_key, std::string &msg)
       {
         std::vector<utils::IdName> user_projects_id_names;

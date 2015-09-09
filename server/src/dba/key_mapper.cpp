@@ -137,6 +137,12 @@ namespace epidb {
       return VALUE;
     }
 
+    const std::string& KeyMapper::GENE_SET_ID()
+    {
+      static std::string VALUE = epidb::dba::KeyMapper::build_default("GENE_SET_ID");
+      return VALUE;
+    }
+
     const std::string &KeyMapper::VALUE()
     {
       static std::string VALUE = epidb::dba::KeyMapper::build_default("VALUE");

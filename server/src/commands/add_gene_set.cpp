@@ -11,11 +11,16 @@
 
 #include "../dba/dba.hpp"
 #include "../dba/exists.hpp"
+#include "../dba/genes.hpp"
 #include "../dba/insert.hpp"
+
 #include "../datatypes/user.hpp"
+
 #include "../engine/commands.hpp"
+
 #include "../extras/utils.hpp"
 #include "../extras/serialize.hpp"
+
 #include "../parser/gtf_parser.hpp"
 
 #include "../errors.hpp"
@@ -104,17 +109,16 @@ namespace epidb {
           return false;
         }
 
-        /*
         std::string id;
-        bool ret = dba::insert_annotation(name, norm_name, genome, norm_genome, description, norm_description, extra_metadata,
-                                          user_key, ip, map_regions, fileFormat, id, msg);
+        bool ret = dba::gene_set::insert(name, norm_name, description, norm_description,
+                                         extra_metadata, gtf, user_key, ip, id, msg);
 
         if (ret) {
           result.add_string(id);
         } else {
           result.add_error(msg);
         }
-        */
+
         return true;
       }
 

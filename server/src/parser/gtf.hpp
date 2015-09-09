@@ -59,8 +59,7 @@ namespace epidb {
       GTFContent _content;
 
     public:
-      GTFContent::const_iterator rows_iterator() const;
-      GTFContent::const_iterator rows_iterator_end() const;
+      const GTFContent& rows() const;
       void add_row(const std::string &seqname, const std::string &source, const std::string &feature,
                    Position start, Position end, Score score,
                    char strand, char frame, const GTFRow::Attributes& attributes);

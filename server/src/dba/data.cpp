@@ -95,6 +95,16 @@ namespace epidb {
         }
       }
 
+      bool gene_set(const std::string &id, mongo::BSONObj &result, std::string &msg)
+      {
+        if (helpers::get_one(Collections::GENE_SETS(), mongo::Query(BSON("_id" << id)), result, msg)) {
+          return true;
+        } else {
+          msg = "Gene set ID '" + id + "' not found.";
+          return false;
+        }
+      }
+
       bool experiment(const std::string &id, const std::vector<std::string>& user_projects,
                       mongo::BSONObj &result, std::string &msg)
       {

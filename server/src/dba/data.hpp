@@ -32,6 +32,8 @@ namespace epidb {
 
       bool annotation(const std::string &id, mongo::BSONObj &result, std::string &msg);
 
+      bool gene_set(const std::string &id, mongo::BSONObj &result, std::string &msg);
+
       bool experiment(const std::string &id, const std::vector<std::string>& user_projects,
                       mongo::BSONObj &result, std::string &msg);
 
