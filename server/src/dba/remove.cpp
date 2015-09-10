@@ -131,7 +131,9 @@ namespace epidb {
           return false;
         }
 
-        if (!helpers::remove_all(Collections::GENE_SETS(), BSON(KeyMapper::GENE_SET_ID() << id), msg)) {
+        int dataset_id = gene_set[KeyMapper::DATASET()].Int();
+
+        if (!helpers::remove_all(Collections::GENES(), BSON(KeyMapper::DATASET() << dataset_id), msg)) {
           return false;
         }
 
@@ -146,6 +148,10 @@ namespace epidb {
         }
 
         if (!helpers::notify_change_occurred(Collections::GENE_SETS(), msg)) {
+          return false;
+        }
+
+        if (!helpers::notify_change_occurred(Collections::GENES(), msg)) {
           return false;
         }
 
