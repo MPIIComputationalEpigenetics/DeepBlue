@@ -64,6 +64,9 @@ namespace epidb {
       bool retrieve_annotation_select_query(const std::string &user_key, const mongo::BSONObj &query,
                                             processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg);
 
+      bool retrieve_genes_select_query(const std::string &user_key, const mongo::BSONObj &query,
+                                       processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg);
+
       bool retrieve_intersection_query(const std::string &user_key, const mongo::BSONObj &query,
                                        processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg);
 

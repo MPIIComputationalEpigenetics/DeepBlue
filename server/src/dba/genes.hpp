@@ -38,6 +38,9 @@ namespace epidb {
                   const std::string &user_key, const std::string &ip,
                   std::string &gene_set_id, std::string &msg);
 
+      bool get_genes_from_database(const std::vector<std::string>& genes, const std::string& gene_set,
+                                   ChromosomeRegionsList& chromosomeRegionsList, std::string& msg );
+
     }
   }
 }

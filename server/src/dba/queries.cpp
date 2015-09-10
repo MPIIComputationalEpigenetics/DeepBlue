@@ -35,6 +35,7 @@
 
 #include "collections.hpp"
 #include "dba.hpp"
+#include "genes.hpp"
 #include "genomes.hpp"
 #include "helpers.hpp"
 #include "key_mapper.hpp"
@@ -150,6 +151,11 @@ namespace epidb {
           if (!retrieve_annotation_select_query(user_key, query, status, regions, msg)) {
             return false;
           }
+        } else if (type == "genes_select") {
+          if (!retrieve_genes_select_query(user_key, query, status, regions, msg)) {
+            return false;
+          }
+
         } else if (type == "filter") {
           if (!retrieve_filter_query(user_key, query, status, regions, msg)) {
             return false;
@@ -566,6 +572,28 @@ namespace epidb {
 
         return true;
       }
+
+      bool retrieve_genes_select_query(const std::string &user_key, const mongo::BSONObj &query,
+                                       processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg)
+      {
+        processing::RunningOp runningOp = status->start_operation(processing::RETRIEVE_ANNOTATION_SELECT_QUERY, query);
+        if (is_canceled(status, msg)) {
+          return false;
+        }
+
+        mongo::BSONObj args = query["args"].Obj();
+        const std::vector<std::string> genes = helpers::build_vector(args["genes"].Array());
+        const std::string gene_set = args["gene_set"].str();
+
+
+        if (!genes::get_genes_from_database(genes, gene_set, regions, msg)) {
+          return false;
+        }
+
+        msg = "ops";
+        return false;
+      }
+
 
       bool retrieve_intersection_query(const std::string &user_key, const mongo::BSONObj &query,
                                        processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg)

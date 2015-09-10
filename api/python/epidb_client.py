@@ -209,6 +209,10 @@ class EpidbClient:
     def add_gene_set(self, name, description, data, format, extra_metadata, user_key):
         return self.server.add_gene_set(name, description, data, format, extra_metadata, user_key)
 
+    def select_genes(self, genes_name, gene_set, user_key):
+        return self.server.select_genes(genes_name, gene_set, user_key)
+
+
     ## Operations
     def select_regions(self, experiment_name, genome, epigenetic_mark,
                        sample, technique, project, chromosome, start, end,
