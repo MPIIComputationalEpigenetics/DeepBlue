@@ -33,7 +33,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::GENES, "Inserts a new set of genes in the GTF format.");
+        return CommandDescription(categories::GENES, "Inserts a new set of genes in the GTF format. Important: It will only include the rows that have 'gene' as feature.");
       }
 
       static Parameters parameters_()
