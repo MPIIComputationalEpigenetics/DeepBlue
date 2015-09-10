@@ -26,6 +26,7 @@ namespace epidb {
       v.push_back(EXPERIMENTS());
       v.push_back(GENOMES());
       v.push_back(GENE_SETS());
+      v.push_back(GENES());
       v.push_back(PROJECTS());
       v.push_back(SAMPLES());
       v.push_back(TECHNIQUES());
@@ -63,6 +64,8 @@ namespace epidb {
             collection = EPIGENETIC_MARKS();
         } else if ("gs" == collection_prefix) {
             collection = GENE_SETS();
+        } else if ("gn" == collection_prefix) {
+            collection = GENES();
         } else if ("e" == collection_prefix) {
             collection = EXPERIMENTS();
         } else if ("g" == collection_prefix) {
@@ -145,6 +148,11 @@ namespace epidb {
       return genomes;
     }
 
+    const std::string &Collections::GENES()
+    {
+      static std::string genomes("genes");
+      return genomes;
+    }
 
     const std::string &Collections::QUERIES()
     {
