@@ -58,10 +58,33 @@ namespace epidb {
                           const std::string &format,
                           const mongo::BSONObj& extra_metadata_obj,
                           const std::string &user_key, const std::string &ip,
+                          int &dataset_id,
                           std::string &gene_set_id,
                           mongo::BSONObj &gene_set_metadata,
                           std::string &msg)
       {
+        if (!helpers::get_increment_counter("datasets", dataset_id, msg) ||
+            !helpers::notify_change_occurred("datasets", msg))  {
+          return false;
+        }
+
+        int _id;
+        if (!helpers::get_increment_counter(Collections::GENE_SETS(), _id, msg) ||
+            !helpers::notify_change_occurred(Collections::GENE_SETS(), msg))  {
+          return false;
+        }
+        gene_set_id = "gs" + utils::integer_to_string(_id);
+
+        mongo::BSONObjBuilder gene_set_metadata_builder;
+        gene_set_metadata_builder.append("_id", gene_set_id);
+        gene_set_metadata_builder.append(KeyMapper::DATASET(), dataset_id);
+        gene_set_metadata_builder.append("name", name);
+        gene_set_metadata_builder.append("norm_name", norm_name);
+        gene_set_metadata_builder.append("description", description);
+        gene_set_metadata_builder.append("norm_description", norm_description);
+        gene_set_metadata_builder.append("extra_metadata", extra_metadata_obj);
+
+        gene_set_metadata = gene_set_metadata_builder.obj();
         return true;
       }
 
@@ -82,10 +105,35 @@ namespace epidb {
         return true;
       }
 
-      mongo::BSONObj to_bson(const parser::GTFRow& row)
+      mongo::BSONObj to_bson(const int dataset_id, const std::string& gene_set_id, const std::string& gene_id, const parser::GTFRow& row)
       {
         mongo::BSONObjBuilder bob;
 
+        bob.append("_id", gene_id);
+        bob.append(KeyMapper::DATASET(), dataset_id);
+        bob.append(KeyMapper::CHROMOSOME(), row.seqname());
+        bob.append(KeyMapper::SOURCE(), row.source());
+        bob.append(KeyMapper::FEATURE(), row.feature());
+        bob.append(KeyMapper::START(), row.start());
+        bob.append(KeyMapper::END(), row.end());
+        bob.append(KeyMapper::SCORE(), row.score());
+        bob.append(KeyMapper::STRAND(), row.strand());
+        bob.append(KeyMapper::FRAME(), row.frame());
+
+        const parser::GTFRow::Attributes& attributes = row.attributes();
+        auto it = attributes.find("gene_id");
+        if (it != attributes.end()) {
+          const std::string ensembl_gene_id = it->second;
+        }
+
+        mongo::BSONObjBuilder attributes_bob;
+        for (const auto& kv : attributes) {
+          attributes_bob.append(kv.first, kv.second);
+        }
+
+        bob.append(KeyMapper::ATTRIBUTES(), attributes_bob.obj());
+
+        // TODO: include in full text
 
         return bob.obj();
       }
@@ -100,14 +148,15 @@ namespace epidb {
       {
         mongo::BSONObj gene_set_metadata;
         mongo::BSONObj extra_metadata_obj = datatypes::extra_metadata_to_bson(extra_metadata);
+        int dataset_id;
 
         if (!build_metadata(name, norm_name, description, norm_description, "GTF", extra_metadata_obj,
-                            user_key, ip, gene_set_id, gene_set_metadata, msg)) {
+                            user_key, ip, dataset_id, gene_set_id, gene_set_metadata, msg)) {
           return false;
         }
 
         mongo::BSONObj upload_info;
-        if (!build_upload_info(user_key, ip, "signal", upload_info, msg)) {
+        if (!build_upload_info(user_key, ip, "GTF", upload_info, msg)) {
           return false;
         }
         mongo::BSONObjBuilder gene_set_builder;
@@ -137,49 +186,22 @@ namespace epidb {
 
         for (const auto& row :  gtf->rows()) {
 
-          mongo::BSONObj row_obj = to_bson(row);
-
-          // row to bson
-          /*
-          mongo::BSONObj r = region_builder.obj();
-          std::string collection = helpers::region_collection_name(genome, internal_chromosome);
-
-          if (prev_collection != collection) {
-            if (!prev_collection.empty() && bulk.size() > 0) {
-              c->insert(prev_collection, bulk);
-              if (!c->getLastError().empty()) {
-                msg = c->getLastError();
-                c.done();
-                std::string new_msg;
-                if (!remove::experiment(experiment_id, user_key, new_msg)) {
-                  msg = msg + " " + new_msg;
-                }
-                return false;
-              }
-              bulk.clear();
-            }
-            prev_collection = collection;
-            actual_size = 0;
+          int _id;
+          if (!helpers::get_increment_counter("genes", _id, msg) ||
+              !helpers::notify_change_occurred(Collections::GENES(), msg))  {
+            return false;
           }
 
-          total_size += r.objsize();
-          bulk.push_back(r);
+          std::string gene_id = "gn" + utils::integer_to_string(_id);
+          mongo::BSONObj row_obj = to_bson(dataset_id, gene_set_id, gene_id, row);
 
-          if (bulk.size() % BULK_SIZE == 0 || actual_size > MAXIMUM_SIZE) {
-            c->insert(collection, bulk);
-            if (!c->getLastError().empty()) {
-              msg = c->getLastError();
-              c.done();
-              std::string new_msg;
-              if (!remove::experiment(experiment_id, user_key, new_msg)) {
-                msg = msg + " " + new_msg;
-              }
-              return false;
-            }
-            bulk.clear();
-            actual_size = 0;
+          c->insert(helpers::collection_name(Collections::GENES()), row_obj);
+          if (!c->getLastError().empty()) {
+            msg = c->getLastError();
+            c.done();
+            return false;
           }
-          */
+
           total_genes++;
         }
 
@@ -189,6 +211,43 @@ namespace epidb {
             msg = msg + " " + new_msg;
           }
           return false;
+        }
+
+        c.done();
+        return true;
+      }
+
+      bool get_genes_from_database(const std::vector<std::string>& genes, const std::string& gene_set,
+                                   ChromosomeRegionsList& chromosomeRegionsList, std::string& msg )
+      {
+        Connection c;
+        mongo::BSONObjBuilder bob;
+        mongo::BSONArray genes_array = dba::helpers::build_array(genes);
+
+        std::cerr << gene_set << std::endl;
+        mongo::BSONObj gene_set_obj = c->findOne(dba::helpers::collection_name(dba::Collections::GENE_SETS()), BSON("norm_name" << gene_set));
+
+        if (gene_set_obj.isEmpty()) {
+          msg = "gene set " + gene_set + " does not exists";
+          c.done();
+          return false;
+        }
+
+        auto dataset_id = gene_set_obj[KeyMapper::DATASET()].Int();
+
+        //full_query = BSON("$or" << BSON_ARRAY(public_projects << BSON("_id" << BSON("$in" << helpers::build_array(ps)))));
+
+        mongo::BSONObj b_in_gene_name = BSON("I.gene_name" << BSON("$in" << genes_array));
+        mongo::BSONObj b_in_gene_id = BSON("I.gene_id" << BSON("$in" << genes_array));
+        mongo::BSONObj or_query = BSON("$or" << BSON_ARRAY(b_in_gene_name << b_in_gene_id));
+        mongo::BSONObj query = BSON("$and" << BSON_ARRAY(BSON(KeyMapper::DATASET() << dataset_id) << or_query));
+
+        std::string collection = dba::helpers::collection_name(dba::Collections::GENES());
+        std::auto_ptr<mongo::DBClientCursor> data_cursor = c->query(collection, query);
+
+        while (data_cursor->more()) {
+          mongo::BSONObj result = data_cursor->next().getOwned();
+          std::cerr << result.toString() << std::endl;
         }
 
         c.done();
