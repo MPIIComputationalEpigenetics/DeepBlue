@@ -48,6 +48,8 @@ namespace epidb {
   extern Error ERR_USER_DATA_MISSING;
   extern Error ERR_USER_FORMAT_MISSING;
   extern Error ERR_USER_GENOME_MISSING;
+  extern Error ERR_USER_GENE_MISSING;
+  extern Error ERR_USER_GENE_SET_MISSING;
 
   extern Error ERR_FORMAT_CHROMOSOME_MISSING;
   extern Error ERR_FORMAT_START_MISSING;
@@ -84,6 +86,8 @@ namespace epidb {
   extern Error ERR_DUPLICATED_PROJECT_NAME;
   extern Error ERR_DUPLICATED_GENOME_NAME;
   extern Error ERR_DUPLICATED_TECHNIQUE_NAME;
+
+  extern Error ERR_UNKNOW_QUERY_TYPE;
 
   extern Error ERR_COLUMN_TYPE_MISSING;
   extern Error ERR_COLUMN_TYPE_NAME_MISSING;

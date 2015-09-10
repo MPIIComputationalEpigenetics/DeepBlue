@@ -36,7 +36,9 @@
  * 09 - Format
  * 10 - Query
  * 11 - Genome
- * 12 - ..
+ * 12 - Gene
+ * 13 - Gene Set
+ * 14 - ...
  * 20 - Chromosome
  * 21 - Start
  * 22 - End
@@ -53,6 +55,7 @@
  * 001 - Duplicated
  * 002 - Missing
  * 003 - Invalid ID
+ * 004 - Unknown type
  *
  * 100 - Do not have permission
  *
@@ -85,6 +88,8 @@ namespace epidb {
   Error ERR_USER_DATA_MISSING("108002", "The Data is missing. Please, specify the Data.");
   Error ERR_USER_FORMAT_MISSING("109002", "The Format is missing. Please, specify the Format.");
   Error ERR_USER_GENOME_MISSING("111002", "The Genome is missing. Please, specify the Genome.");
+  Error ERR_USER_GENE_MISSING("112002", "The Gene is missing. Please, specify the Gene.");
+  Error ERR_USER_GENE_SET_MISSING("113002", "The Gene Set is missing. Please, specify the Gene Set.");
 
   Error ERR_FORMAT_CHROMOSOME_MISSING("120002", "The CHROMOSOME is missing in the format. Please, inform the CHROMOSOME column in the Format.");
   Error ERR_FORMAT_START_MISSING("121002", "The START is missing in the format. Please, inform the START column in the Format.");
@@ -125,6 +130,8 @@ namespace epidb {
   Error ERR_INVALID_META_COLUMN_NAME("125000", "The meta-column '{}' does not exist.");
 
   Error ERR_REQUEST_CANCELED("130300", "The request was canceled.");
+
+  Error ERR_UNKNOW_QUERY_TYPE("310004", "Unknown query type '{}'");
 
   Error ERR_COLUMN_TYPE_MISSING("323002", "The Column Type '{}' does not exist.");
   Error ERR_COLUMN_TYPE_NAME_MISSING("323003", "The Column Type '{}' does not exist.");

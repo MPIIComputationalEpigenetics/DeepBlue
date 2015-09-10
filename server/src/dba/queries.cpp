@@ -169,7 +169,7 @@ namespace epidb {
           }
 
         } else {
-          msg = "Unknown query type";
+          msg = Error::m(ERR_UNKNOW_QUERY_TYPE, type);
           return false;
         }
 
