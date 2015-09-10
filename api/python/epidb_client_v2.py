@@ -268,6 +268,13 @@ class DeepBlueClient(object):
     def find_pattern(self, pattern, genome, overlap):
         return self.server.find_pattern(pattern, genome, overlap, self.key)
 
+        # Genes
+    @key_required
+    def add_gene_set(self, name, description, data, _format,
+                     extra_metadata):
+        return self.server.add_gene_set(name, description, data, _format,
+                                        extra_metadata, self.key)
+
     # Operations
     @key_required
     def select_regions(self, experiment_name, genome, epigenetic_mark,
