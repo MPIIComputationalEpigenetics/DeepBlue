@@ -19,7 +19,7 @@
 
 namespace epidb {
   namespace dba {
-    namespace gene_set {
+    namespace genes {
 
       bool build_metadata(const std::string &name, const std::string &norm_name,
                           const std::string &description, const std::string &norm_description,

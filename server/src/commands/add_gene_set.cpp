@@ -110,7 +110,7 @@ namespace epidb {
         }
 
         std::string id;
-        bool ret = dba::gene_set::insert(name, norm_name, description, norm_description,
+        bool ret = dba::genes::insert(name, norm_name, description, norm_description,
                                          extra_metadata, gtf, user_key, ip, id, msg);
 
         if (ret) {

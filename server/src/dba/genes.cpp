@@ -28,7 +28,7 @@
 
 namespace epidb {
   namespace dba {
-    namespace gene_set {
+    namespace genes {
 
       bool build_upload_info(const std::string &user_key, const std::string &client_address, const std::string &content_format,
                              mongo::BSONObj &upload_info, std::string &msg)
