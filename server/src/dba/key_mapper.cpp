@@ -137,12 +137,6 @@ namespace epidb {
       return VALUE;
     }
 
-    const std::string& KeyMapper::GENE_SET_ID()
-    {
-      static std::string VALUE = epidb::dba::KeyMapper::build_default("GENE_SET_ID");
-      return VALUE;
-    }
-
     const std::string &KeyMapper::VALUE()
     {
       static std::string VALUE = epidb::dba::KeyMapper::build_default("VALUE");
@@ -183,6 +177,59 @@ namespace epidb {
     const std::string &KeyMapper::WIG_DATA()
     {
       static std::string VALUE = epidb::dba::KeyMapper::build_default("DATA_WIG");
+      return VALUE;
+    }
+
+    const std::string& KeyMapper::SEQNAME()
+    {
+      static std::string VALUE = epidb::dba::KeyMapper::build_default("SEQNAME");
+      return VALUE;
+    }
+
+    const std::string& KeyMapper::SOURCE()
+    {
+      static std::string VALUE = epidb::dba::KeyMapper::build_default("SOURCE");
+      return VALUE;
+    }
+
+    const std::string& KeyMapper::CHROMOSOME()
+    {
+      static std::string VALUE = epidb::dba::KeyMapper::build_default("CHROMOSOME");
+      return VALUE;
+    }
+
+    const std::string& KeyMapper::FEATURE()
+    {
+      static std::string VALUE = epidb::dba::KeyMapper::build_default("DATA_WIG");
+      return VALUE;
+    }
+    const std::string& KeyMapper::SCORE()
+    {
+      static std::string VALUE = epidb::dba::KeyMapper::build_default("SCORE");
+      return VALUE;
+    }
+
+    const std::string& KeyMapper::STRAND()
+    {
+      static std::string VALUE = epidb::dba::KeyMapper::build_default("STRAND");
+      return VALUE;
+    }
+
+    const std::string& KeyMapper::FRAME()
+    {
+      static std::string VALUE = epidb::dba::KeyMapper::build_default("FRAME");
+      return VALUE;
+    }
+
+    const std::string& KeyMapper::ATTRIBUTES()
+    {
+      static std::string VALUE = epidb::dba::KeyMapper::build_default("ATTRIBUTES");
+      return VALUE;
+    }
+
+    const std::string& KeyMapper::GENE_ID()
+    {
+      static std::string VALUE = epidb::dba::KeyMapper::build_default("ATTRIBUTES");
       return VALUE;
     }
 

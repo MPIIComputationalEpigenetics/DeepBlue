@@ -29,7 +29,6 @@ namespace epidb {
       static const std::string& DATASET();
       static const std::string& END();
       static const std::string& FEATURES();
-      static const std::string& GENE_SET_ID();
       static const std::string& START();
       static const std::string& VALUE();
       static const std::string& WIG_STEP();
@@ -38,6 +37,16 @@ namespace epidb {
       static const std::string& WIG_COMPRESSED();
       static const std::string& WIG_TRACK_TYPE();
       static const std::string& WIG_DATA();
+
+      static const std::string& SEQNAME();
+      static const std::string& SOURCE();
+      static const std::string& CHROMOSOME();
+      static const std::string& FEATURE();
+      static const std::string& SCORE();
+      static const std::string& STRAND();
+      static const std::string& FRAME();
+      static const std::string& ATTRIBUTES();
+      static const std::string& GENE_ID();
 
     private:
       static bool set_shortcut(const std::string &s, const std::string &l, std::string &err);
