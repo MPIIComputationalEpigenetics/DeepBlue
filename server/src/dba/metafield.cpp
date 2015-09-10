@@ -51,6 +51,7 @@ namespace epidb {
       m["@COUNT.OVERLAP"] = &Metafield::count_overlap;
       m["@COUNT.NON-OVERLAP"] = &Metafield::count_non_overlap;
       m["@CALCULATED"] = &Metafield::calculated;
+      m["@GENE_ATTRIBUTE"] = &Metafield::gene_attribute;
 
       return m;
     }
@@ -75,6 +76,7 @@ namespace epidb {
       m["@COUNT.OVERLAP"] = "integer";
       m["@COUNT.NON-OVERLAP"] = "integer";
       m["@CALCULATED"] = "string";
+      m["@GENE_ATTRIBUTE"] = "string";
 
       return m;
     }
@@ -416,6 +418,21 @@ namespace epidb {
 
       return lua->execute_row_code(result, msg);
     }
+
+    bool Metafield::gene_attribute(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion *region_ref,
+                                   processing::StatusPtr status, std::string &result, std::string &msg)
+    {
+      unsigned int s = op.find("(") + 1;
+      unsigned int e = op.find_last_of(")");
+      unsigned int length = e - s;
+
+      std::string attribute_name = op.substr(s, length);
+
+      result = region_ref->attribute(attribute_name);
+
+      return true;
+    }
+
   }
 }
 
