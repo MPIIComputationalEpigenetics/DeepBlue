@@ -1118,6 +1118,15 @@ namespace epidb {
           return true;
         }
 
+        cursor = c->query(helpers::collection_name(Collections::GENE_SETS()), o);
+        if (cursor->more()) {
+          for (const auto& column : parser::FileFormat::default_format()) {
+            columns.push_back(column->BSONObj());
+          }
+          c.done();
+          return true;
+        }
+
         c.done();
 
         if (found) {

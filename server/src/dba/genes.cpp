@@ -219,7 +219,6 @@ namespace epidb {
         mongo::BSONObjBuilder bob;
         mongo::BSONArray genes_array = dba::helpers::build_array(genes);
 
-        std::cerr << gene_set << std::endl;
         mongo::BSONObj gene_set_obj = c->findOne(dba::helpers::collection_name(dba::Collections::GENE_SETS()), BSON("norm_name" << gene_set));
 
         if (gene_set_obj.isEmpty()) {

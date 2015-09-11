@@ -225,7 +225,7 @@ class TestSearch(helpers.TestCase):
     epidb = EpidbClient()
     self.init(epidb)
     s, e = epidb.search("hg19", "genome", self.admin_key)
-    self.assertEqual("genome is not a valid type. The valid types are: 'annotations,biosources,column_types,epigenetic_marks,experiments,genomes,projects,samples,techniques,tilings'", e)
+    self.assertEqual("genome is not a valid type. The valid types are: 'annotations,biosources,column_types,epigenetic_marks,experiments,genomes,gene_sets,genes,projects,samples,techniques,tilings'", e)
 
   def test_search_synonyms(self):
     epidb = EpidbClient()
