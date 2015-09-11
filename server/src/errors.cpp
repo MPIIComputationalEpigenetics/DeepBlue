@@ -136,7 +136,7 @@ namespace epidb {
   Error ERR_COLUMN_TYPE_MISSING("323002", "The Column Type '{}' does not exist.");
   Error ERR_COLUMN_TYPE_NAME_MISSING("323003", "The Column Type '{}' does not exist.");
 
-  Error ERR_DATASET_NOT_FOUND("350000", "Dataset '%ld' not found.");
+  Error ERR_DATASET_NOT_FOUND("350000", "Dataset id {} not found.");
 
   Error ERR_DATABASE_CONNECTION("466555", "MongoDB connection error: '{}'.");
   Error ERR_DATABASE_EXCEPTION("466666", "MongoDB exception at operation '{}': '{}'.");
