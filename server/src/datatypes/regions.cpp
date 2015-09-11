@@ -172,7 +172,7 @@ namespace epidb {
     static size_t pre_size = sizeof(BedRegion) + sizeof(void *);
     size_t size = pre_size + (_numeric_data.size() * sizeof(int));
     for (const auto& s : _string_data) {
-      size += (s.length() + 1 * sizeof(char));
+      size += s.capacity();
     }
     return size;
   }
