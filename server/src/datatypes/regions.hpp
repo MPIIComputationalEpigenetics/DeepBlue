@@ -59,7 +59,8 @@ namespace epidb {
     virtual void insert(const int value);
     virtual const std::string  &get_string(const size_t pos) const;
     virtual Score value(const size_t pos) const;
-    virtual const std::string attribute(const std::string key) const;
+    virtual const datatypes::Metadata& attributes() const;
+
     virtual bool has_stats() const;
     virtual size_t size() const;
     virtual RegionPtr clone() const = 0;
@@ -139,7 +140,7 @@ namespace epidb {
       _attributes(attributes)
     {}
 
-    virtual const std::string attribute(const std::string key) const;
+    virtual const datatypes::Metadata& attributes() const;
     virtual size_t size() const;
     virtual RegionPtr clone() const;
   };

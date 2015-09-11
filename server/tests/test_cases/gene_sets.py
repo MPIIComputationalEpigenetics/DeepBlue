@@ -19,6 +19,16 @@ class TestGenes(helpers.TestCase):
     regions = self.get_regions_request(r_id)
     self.assertEquals("chr1\t11869\t14409", regions)
 
+    (s, r_id) = epidb.get_regions(query_id, "CHROMOSOME,START,END,@GENE_ATTRIBUTE(gene_id),@GENE_ATTRIBUTE(gene_name),@NAME", self.admin_key)
+    regions = self.get_regions_request(r_id)
+    self.assertEquals("chr1\t11869\t14409\tENSG00000223972.5\tDDX11L1\tTest One", regions)
+
+
     (s, r_id) = epidb.get_regions(query_id, "CHROMOSOME,START,END,@GENE_ATTRIBUTE(gene_id),@GENE_ATTRIBUTE(gene_name),@NAME,@GENE_ATTRIBUTE(noooo)", self.admin_key)
     regions = self.get_regions_request(r_id)
     self.assertEquals("chr1\t11869\t14409\tENSG00000223972.5\tDDX11L1\tTest One\t", regions)
+
+
+    (s, r_id) = epidb.get_regions(query_id, "CHROMOSOME,START,END,@GENE_GTF_ATTRIBUTES", self.admin_key)
+    regions = self.get_regions_request(r_id)
+    self.assertEquals('chr1\t11869\t14409\tgene_id "ENSG00000223972.5"; gene_name "DDX11L1"gene_status "KNOWN"gene_type "transcribed_unprocessed_pseudogene"havana_gene "OTTHUMG00000000961.2"level "2"', regions)

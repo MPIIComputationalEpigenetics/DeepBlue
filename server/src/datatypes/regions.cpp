@@ -31,7 +31,7 @@ namespace epidb {
     return v;
   }
 
-  static const std::string empty_string = "";
+  static const std::string empty_string("");
 
   Length AbstractRegion::length() const
   {
@@ -99,10 +99,10 @@ namespace epidb {
     return std::numeric_limits<Score>::min();
   }
 
-  static std::string EMPTY_STRING;
-  const std::string AbstractRegion::attribute(const std::string key) const
+  static const datatypes::Metadata EMPTY_ATTRIBUTES;
+  const datatypes::Metadata& AbstractRegion::attributes() const
   {
-    return EMPTY_STRING;
+    return EMPTY_ATTRIBUTES;
   }
 
   const std::string &AbstractRegion::get_string(const size_t pos) const
@@ -209,13 +209,9 @@ namespace epidb {
   // -----------------------------------
   // GeneRegion
   // -----------------------------------
-  const std::string GeneRegion::attribute(const std::string key) const
+  const datatypes::Metadata& GeneRegion::attributes() const
   {
-    auto it = _attributes.find(key);
-    if (it == _attributes.end()) {
-      return EMPTY_STRING;
-    }
-    return it->second;
+    return _attributes;
   }
 
   size_t GeneRegion::size() const
