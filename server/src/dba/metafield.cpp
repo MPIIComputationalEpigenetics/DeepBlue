@@ -109,8 +109,7 @@ namespace epidb {
       data_cursor = c->query(helpers::collection_name(Collections::EXPERIMENTS()),
                              mongo::Query(BSON(KeyMapper::DATASET() << dataset_id)));
       if (data_cursor->more()) {
-        obj = data_cursor->next().getOwned();
-        obj_by_dataset_id[dataset_id] = obj;
+        obj_by_dataset_id[dataset_id] = data_cursor->next().getOwned();
         c.done();
         return true;
       }
@@ -118,8 +117,7 @@ namespace epidb {
       data_cursor = c->query(helpers::collection_name(Collections::ANNOTATIONS()),
                              mongo::Query(BSON(KeyMapper::DATASET() << dataset_id)));
       if (data_cursor->more()) {
-        obj = data_cursor->next().getOwned();
-        obj_by_dataset_id[dataset_id] = obj;
+        obj_by_dataset_id[dataset_id] = data_cursor->next().getOwned();
         c.done();
         return true;
       }
@@ -128,8 +126,7 @@ namespace epidb {
       data_cursor = c->query(helpers::collection_name(Collections::TILINGS()),
                              mongo::Query(BSON(KeyMapper::DATASET() << dataset_id)));
       if (data_cursor->more()) {
-        obj = data_cursor->next().getOwned();
-        obj_by_dataset_id[dataset_id] = obj;
+        obj_by_dataset_id[dataset_id] = data_cursor->next().getOwned();
         c.done();
         return true;
       }
@@ -137,15 +134,24 @@ namespace epidb {
       data_cursor = c->query(helpers::collection_name(Collections::QUERIES()),
                              BSON("type" << "input_regions" << "args.dataset_id" << dataset_id));
       if (data_cursor->more()) {
-        mongo::BSONObj query = data_cursor->next().getOwned();
+        mongo::BSONObj query_obj = data_cursor->next().getOwned();
 
-        obj = BSON("name" << ("Query " + query["_id"].String() + " regions set") <<
-                   "genome" << query["args"]["genome"].String()
+        obj = BSON("name" << ("Query " + query_obj["_id"].String() + " regions set") <<
+                   "genome" << query_obj["args"]["genome"].String()
                   );
         obj_by_dataset_id[dataset_id] = obj;
         c.done();
         return true;
       }
+
+      data_cursor = c->query(helpers::collection_name(Collections::GENE_SETS()),
+                             mongo::Query(BSON(KeyMapper::DATASET() << dataset_id)));
+      if (data_cursor->more()) {
+        obj_by_dataset_id[dataset_id] = data_cursor->next().getOwned();
+        c.done();
+        return true;
+      }
+
 
       c.done();
       msg = Error::m(ERR_DATASET_NOT_FOUND, dataset_id);
