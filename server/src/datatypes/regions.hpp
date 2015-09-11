@@ -124,11 +124,20 @@ namespace epidb {
   // GeneRegion
   // -----------------------------------
   class GeneRegion : public AbstractRegion {
-    datatypes::Metadata attributes;
+    std::string _source;
+    Score _score;
+    char _strand;
+    char _frame;
+    datatypes::Metadata _attributes;
 
   public:
-    GeneRegion(Position s, Position e, DatasetId _id, std::string _source, Score _score, char _strand, char _frame, datatypes::Metadata& attributes):
-      AbstractRegion(s, e, _id) {}
+    GeneRegion(Position s, Position e, DatasetId _id, std::string source, Score score, char strand, char frame, datatypes::Metadata& attributes):
+      AbstractRegion(s, e, _id),
+      _source(source),
+      _strand(strand),
+      _frame(frame),
+      _attributes(attributes)
+    {}
 
     virtual const std::string attribute(const std::string key) const;
     virtual size_t size() const;

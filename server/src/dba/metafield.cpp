@@ -427,7 +427,6 @@ namespace epidb {
       unsigned int length = e - s;
 
       std::string attribute_name = op.substr(s, length);
-
       result = region_ref->attribute(attribute_name);
 
       return true;

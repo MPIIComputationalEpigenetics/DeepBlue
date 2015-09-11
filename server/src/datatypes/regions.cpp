@@ -211,8 +211,8 @@ namespace epidb {
   // -----------------------------------
   const std::string GeneRegion::attribute(const std::string key) const
   {
-    auto it = attributes.find(key);
-    if (it == attributes.end()) {
+    auto it = _attributes.find(key);
+    if (it == _attributes.end()) {
       return EMPTY_STRING;
     }
     return it->second;
@@ -220,7 +220,7 @@ namespace epidb {
 
   size_t GeneRegion::size() const
   {
-    static size_t size = sizeof(WigRegion) + sizeof(attributes);
+    static size_t size = sizeof(WigRegion) + sizeof(_attributes) + + sizeof(void *);
     return size;
   }
 
