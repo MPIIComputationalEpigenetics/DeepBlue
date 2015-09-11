@@ -121,11 +121,6 @@ namespace epidb {
         bob.append(KeyMapper::FRAME(), row.frame());
 
         const parser::GTFRow::Attributes& attributes = row.attributes();
-        auto it = attributes.find("gene_id");
-        if (it != attributes.end()) {
-          const std::string ensembl_gene_id = it->second;
-        }
-
         mongo::BSONObjBuilder attributes_bob;
         for (const auto& kv : attributes) {
           attributes_bob.append(kv.first, kv.second);
@@ -147,7 +142,7 @@ namespace epidb {
                   std::string &gene_set_id, std::string &msg)
       {
         mongo::BSONObj gene_set_metadata;
-        mongo::BSONObj extra_metadata_obj = datatypes::extra_metadata_to_bson(extra_metadata);
+        mongo::BSONObj extra_metadata_obj = datatypes::metadata_to_bson(extra_metadata);
         int dataset_id;
 
         if (!build_metadata(name, norm_name, description, norm_description, "GTF", extra_metadata_obj,
@@ -240,15 +235,45 @@ namespace epidb {
         mongo::BSONObj b_in_gene_name = BSON("I.gene_name" << BSON("$in" << genes_array));
         mongo::BSONObj b_in_gene_id = BSON("I.gene_id" << BSON("$in" << genes_array));
         mongo::BSONObj or_query = BSON("$or" << BSON_ARRAY(b_in_gene_name << b_in_gene_id));
-        mongo::BSONObj query = BSON("$and" << BSON_ARRAY(BSON(KeyMapper::DATASET() << dataset_id) << or_query));
+        mongo::BSONObj filter = BSON("$and" << BSON_ARRAY(BSON(KeyMapper::DATASET() << dataset_id) << or_query));
+
+        mongo::Query query = mongo::Query(filter).sort(BSON(KeyMapper::CHROMOSOME() << 1 << KeyMapper::START() << 1));
 
         std::string collection = dba::helpers::collection_name(dba::Collections::GENES());
         std::auto_ptr<mongo::DBClientCursor> data_cursor = c->query(collection, query);
 
+        std::string actual_chromosome;
+        Regions actual_regions;
+
         while (data_cursor->more()) {
-          mongo::BSONObj result = data_cursor->next().getOwned();
-          std::cerr << result.toString() << std::endl;
+          mongo::BSONObj gene = data_cursor->next().getOwned();
+          mongo::BSONObj::iterator e_it = gene.begin();
+
+          std::string gene_id = e_it.next().str();
+          DatasetId dataset_id = e_it.next()._numberInt();
+          std::string chromosome = e_it.next().str();
+          std::string source = e_it.next().str();
+          std::string feature = e_it.next().str();
+          Position start = e_it.next()._numberInt();
+          Position end = e_it.next()._numberInt();
+          Position score = e_it.next()._numberDouble();
+          char strand = e_it.next().str()[0];
+          char frame = e_it.next().str()[0];
+          datatypes::Metadata attributes = datatypes::bson_to_metadata(gene[KeyMapper::ATTRIBUTES()].Obj());
+
+          if (chromosome != actual_chromosome) {
+            if (!chromosome.empty() && !actual_regions.empty()) {
+              chromosomeRegionsList.emplace_back(std::move(chromosome), std::move(actual_regions));
+            }
+            actual_chromosome = chromosome;
+            actual_regions = build_regions();
+          }
+
+          RegionPtr region = build_gene_region(start, end, dataset_id, source, score, strand, frame, attributes);
+          actual_regions.push_back(std::move(region));
         }
+
+        chromosomeRegionsList.emplace_back(std::move(actual_chromosome), std::move(actual_regions));
 
         c.done();
         return true;

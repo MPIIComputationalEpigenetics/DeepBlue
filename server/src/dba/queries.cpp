@@ -590,8 +590,7 @@ namespace epidb {
           return false;
         }
 
-        msg = "ops";
-        return false;
+        return true;
       }
 
 
