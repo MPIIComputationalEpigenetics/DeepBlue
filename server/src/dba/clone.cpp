@@ -228,7 +228,7 @@ namespace epidb {
       // Check if the extra_metadata should be replaced
       mongo::BSONObj extra_metadata_obj;
       if (!extra_metadata.empty()) {
-        extra_metadata_obj = datatypes::extra_metadata_to_bson(extra_metadata);
+        extra_metadata_obj = datatypes::metadata_to_bson(extra_metadata);
       } else {
         extra_metadata_obj = original["extra_metadata"].Obj();
       }

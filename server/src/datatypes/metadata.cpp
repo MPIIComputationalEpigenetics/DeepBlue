@@ -8,11 +8,13 @@
 
 #include <mongo/bson/bson.h>
 
+#include "../extras/utils.hpp"
+
 #include "metadata.hpp"
 
 namespace epidb {
   namespace datatypes {
-    mongo::BSONObj extra_metadata_to_bson(const Metadata &extra_metadata)
+    mongo::BSONObj metadata_to_bson(const Metadata &extra_metadata)
     {
       mongo::BSONObjBuilder extra_metadata_builder;
       Metadata::const_iterator cit;
@@ -20,6 +22,20 @@ namespace epidb {
         extra_metadata_builder.append(cit->first, cit->second);
       }
       return extra_metadata_builder.obj();
+    }
+
+
+    Metadata bson_to_metadata(const mongo::BSONObj& obj)
+    {
+      Metadata extra_metadata;
+
+      mongo::BSONObj::iterator i = obj.begin();
+      while (i.more() ) {
+        const mongo::BSONElement &e = i.next();
+        extra_metadata[e.fieldName()] = utils::bson_to_string(e);
+      }
+
+      return extra_metadata;
     }
   }
 }

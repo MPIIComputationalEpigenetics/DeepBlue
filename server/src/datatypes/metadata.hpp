@@ -17,7 +17,8 @@ namespace epidb {
   namespace datatypes {
     typedef std::map<std::string, std::string> Metadata;
 
-    mongo::BSONObj extra_metadata_to_bson(const Metadata &extra_metadata);
+    mongo::BSONObj metadata_to_bson(const Metadata &extra_metadata);
+    Metadata bson_to_metadata(const mongo::BSONObj& obj);
   }
 }
 

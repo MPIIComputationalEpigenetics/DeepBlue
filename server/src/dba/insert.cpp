@@ -304,7 +304,7 @@ namespace epidb {
                            std::string &experiment_id, std::string &msg)
     {
       mongo::BSONObj experiment_metadata;
-      mongo::BSONObj extra_metadata_obj = datatypes::extra_metadata_to_bson(extra_metadata);
+      mongo::BSONObj extra_metadata_obj = datatypes::metadata_to_bson(extra_metadata);
 
       bool ignore_unknow_chromosomes = extra_metadata.find("__ignore_unknow_chromosomes__") != extra_metadata.end();
 
@@ -503,7 +503,7 @@ namespace epidb {
                            std::string &experiment_id, std::string &msg)
     {
       mongo::BSONObj experiment_metadata;
-      mongo::BSONObj extra_metadata_obj = datatypes::extra_metadata_to_bson(extra_metadata);
+      mongo::BSONObj extra_metadata_obj = datatypes::metadata_to_bson(extra_metadata);
       int dataset_id;
       if (!experiments::build_metadata(name, norm_name, genome, norm_genome,
                                        epigenetic_mark, norm_epigenetic_mark,
@@ -658,7 +658,7 @@ namespace epidb {
     {
       int dataset_id;
       mongo::BSONObj annotation_metadata;
-      mongo::BSONObj extra_metadata_obj = datatypes::extra_metadata_to_bson(extra_metadata);
+      mongo::BSONObj extra_metadata_obj = datatypes::metadata_to_bson(extra_metadata);
       if (!annotations::build_metadata(name, norm_name, genome, norm_genome,
                                        description, norm_description, extra_metadata_obj,
                                        user_key, ip, format,
@@ -802,7 +802,7 @@ namespace epidb {
     {
       int dataset_id;
       mongo::BSONObj annotation_metadata;
-      mongo::BSONObj extra_metadata_obj = datatypes::extra_metadata_to_bson(extra_metadata);
+      mongo::BSONObj extra_metadata_obj = datatypes::metadata_to_bson(extra_metadata);
       if (!annotations::build_metadata(name, norm_name, genome, norm_genome,
                                        description, norm_description, extra_metadata_obj,
                                        user_key, ip, format,
