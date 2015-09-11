@@ -99,6 +99,12 @@ namespace epidb {
     return std::numeric_limits<Score>::min();
   }
 
+  static std::string EMPTY_STRING;
+  const std::string AbstractRegion::attribute(const std::string key) const
+  {
+    return EMPTY_STRING;
+  }
+
   const std::string &AbstractRegion::get_string(const size_t pos) const
   {
     return empty_string;
@@ -165,7 +171,7 @@ namespace epidb {
   {
     static size_t pre_size = sizeof(BedRegion) + sizeof(void *);
     size_t size = pre_size + (_numeric_data.size() * sizeof(int));
-    for (const auto& s: _string_data) {
+    for (const auto& s : _string_data) {
       size += (s.length() + 1 * sizeof(char));
     }
     return size;
@@ -197,6 +203,30 @@ namespace epidb {
   RegionPtr WigRegion::clone() const
   {
     return RegionPtr(new WigRegion(*this));
+  }
+
+
+  // -----------------------------------
+  // GeneRegion
+  // -----------------------------------
+  const std::string GeneRegion::attribute(const std::string key) const
+  {
+    auto it = attributes.find(key);
+    if (it == attributes.end()) {
+      return EMPTY_STRING;
+    }
+    return it->second;
+  }
+
+  size_t GeneRegion::size() const
+  {
+    static size_t size = sizeof(WigRegion) + sizeof(attributes);
+    return size;
+  }
+
+  RegionPtr GeneRegion::clone() const
+  {
+    return RegionPtr(new GeneRegion(*this));
   }
 
   // -----------------------------------
@@ -270,6 +300,11 @@ namespace epidb {
   RegionPtr build_wig_region(Position s, Position e, DatasetId _id, Score value)
   {
     return std::unique_ptr<WigRegion>(new WigRegion(s, e, _id, value));
+  }
+
+  RegionPtr build_gene_region(Position s, Position e, DatasetId _id, std::string _source, Score _score, char _strand, char _frame, datatypes::Metadata& attributes)
+  {
+    return std::unique_ptr<GeneRegion>(new GeneRegion(s, e, _id, _source, _score, _strand, _frame, attributes));
   }
 
   RegionPtr build_aggregte_region(Position s, Position e, DatasetId _id, Score min, Score max, Score median, Score mean, Score var, Score sd, Score count)

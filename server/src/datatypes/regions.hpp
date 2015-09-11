@@ -59,7 +59,7 @@ namespace epidb {
     virtual void insert(const int value);
     virtual const std::string  &get_string(const size_t pos) const;
     virtual Score value(const size_t pos) const;
-    virtual std::string attribute(const std::string key) const;
+    virtual const std::string attribute(const std::string key) const;
     virtual bool has_stats() const;
     virtual size_t size() const;
     virtual RegionPtr clone() const = 0;
@@ -124,18 +124,13 @@ namespace epidb {
   // GeneRegion
   // -----------------------------------
   class GeneRegion : public AbstractRegion {
-    std::vector<std::string> _string_data;
+    datatypes::Metadata attributes;
 
   public:
     GeneRegion(Position s, Position e, DatasetId _id, std::string _source, Score _score, char _strand, char _frame, datatypes::Metadata& attributes):
       AbstractRegion(s, e, _id) {}
 
-    virtual void insert(const std::string &value);
-    virtual void insert(std::string &&value);
-    virtual void insert(const float value);
-    virtual void insert(const int value);
-    virtual const std::string  &get_string(const size_t pos) const;
-    virtual Score value(const size_t pos) const;
+    virtual const std::string attribute(const std::string key) const;
     virtual size_t size() const;
     virtual RegionPtr clone() const;
   };
@@ -184,7 +179,7 @@ namespace epidb {
   RegionPtr build_simple_region(Position s, Position e, DatasetId _id);
   RegionPtr build_bed_region(Position s, Position e, DatasetId _id);
   RegionPtr build_wig_region(Position s, Position e, DatasetId _id, Score value);
-  RegionPtr build_gene_region(Position s, Position e, DatasetId _id, Score min, Score max, Score median, Score mean, Score var, Score sd, Score count);
+  RegionPtr build_gene_region(Position s, Position e, DatasetId _id, std::string _source, Score _score, char _strand, char _frame, datatypes::Metadata& attributes);
   RegionPtr build_aggregte_region(Position s, Position e, DatasetId _id, Score min, Score max, Score median, Score mean, Score var, Score sd, Score count);
 
 
