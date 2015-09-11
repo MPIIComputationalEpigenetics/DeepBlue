@@ -220,7 +220,13 @@ namespace epidb {
 
   size_t GeneRegion::size() const
   {
-    static size_t size = sizeof(WigRegion) + sizeof(_attributes) + + sizeof(void *);
+    size_t attributes_size = 0;
+    for(auto attribute : _attributes){
+        attributes_size += attribute.first.capacity();
+        attributes_size += attribute.second.capacity();
+    }
+
+    static size_t size = sizeof(WigRegion) + attributes_size + + sizeof(void *);
     return size;
   }
 
