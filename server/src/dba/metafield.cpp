@@ -114,7 +114,8 @@ namespace epidb {
       data_cursor = c->query(helpers::collection_name(Collections::EXPERIMENTS()),
                              mongo::Query(BSON(KeyMapper::DATASET() << dataset_id)));
       if (data_cursor->more()) {
-        obj_by_dataset_id[dataset_id] = data_cursor->next().getOwned();
+        obj = data_cursor->next().getOwned();
+        obj_by_dataset_id[dataset_id] = obj;
         c.done();
         return true;
       }
@@ -122,7 +123,8 @@ namespace epidb {
       data_cursor = c->query(helpers::collection_name(Collections::ANNOTATIONS()),
                              mongo::Query(BSON(KeyMapper::DATASET() << dataset_id)));
       if (data_cursor->more()) {
-        obj_by_dataset_id[dataset_id] = data_cursor->next().getOwned();
+        obj = data_cursor->next().getOwned();
+        obj_by_dataset_id[dataset_id] = obj;
         c.done();
         return true;
       }
@@ -131,7 +133,8 @@ namespace epidb {
       data_cursor = c->query(helpers::collection_name(Collections::TILINGS()),
                              mongo::Query(BSON(KeyMapper::DATASET() << dataset_id)));
       if (data_cursor->more()) {
-        obj_by_dataset_id[dataset_id] = data_cursor->next().getOwned();
+        obj = data_cursor->next().getOwned();
+        obj_by_dataset_id[dataset_id] = obj;
         c.done();
         return true;
       }
@@ -140,7 +143,6 @@ namespace epidb {
                              BSON("type" << "input_regions" << "args.dataset_id" << dataset_id));
       if (data_cursor->more()) {
         mongo::BSONObj query_obj = data_cursor->next().getOwned();
-
         obj = BSON("name" << ("Query " + query_obj["_id"].String() + " regions set") <<
                    "genome" << query_obj["args"]["genome"].String()
                   );
@@ -152,7 +154,8 @@ namespace epidb {
       data_cursor = c->query(helpers::collection_name(Collections::GENE_SETS()),
                              mongo::Query(BSON(KeyMapper::DATASET() << dataset_id)));
       if (data_cursor->more()) {
-        obj_by_dataset_id[dataset_id] = data_cursor->next().getOwned();
+        obj = data_cursor->next().getOwned();
+        obj_by_dataset_id[dataset_id] = obj;
         c.done();
         return true;
       }
@@ -188,8 +191,9 @@ namespace epidb {
       return false;
     }
 
-    const std::string get_by_region_set(const mongo::BSONObj &obj, const std::string &field)
+      const std::string get_by_region_set(const mongo::BSONObj &obj, const std::string &field)
     {
+      std::cerr << obj.toString() << std::endl;
       if (!obj.hasField(field)) {
         return "";
       }
@@ -207,7 +211,9 @@ namespace epidb {
     bool Metafield::name(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion *region_ref,
                          processing::StatusPtr status, std::string &result, std::string &msg)
     {
-      result = get_by_region_set(obj, "name");
+      std::string name = get_by_region_set(obj, "name");
+      std::cerr << name  << std::endl;
+      result = name;
       return true;
     }
 
