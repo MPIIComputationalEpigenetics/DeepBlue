@@ -229,8 +229,6 @@ namespace epidb {
 
         auto dataset_id = gene_set_obj[KeyMapper::DATASET()].Int();
 
-        //full_query = BSON("$or" << BSON_ARRAY(public_projects << BSON("_id" << BSON("$in" << helpers::build_array(ps)))));
-
         mongo::BSONObj b_in_gene_name = BSON("I.gene_name" << BSON("$in" << genes_array));
         mongo::BSONObj b_in_gene_id = BSON("I.gene_id" << BSON("$in" << genes_array));
         mongo::BSONObj or_query = BSON("$or" << BSON_ARRAY(b_in_gene_name << b_in_gene_id));
@@ -238,10 +236,12 @@ namespace epidb {
 
         mongo::Query query = mongo::Query(filter).sort(BSON(KeyMapper::CHROMOSOME() << 1 << KeyMapper::START() << 1));
 
+        //std::cerr << query.toString() << std::endl;
+
         std::string collection = dba::helpers::collection_name(dba::Collections::GENES());
         std::auto_ptr<mongo::DBClientCursor> data_cursor = c->query(collection, query);
 
-        std::string actual_chromosome;
+        std::string actual_chromosome("");
         Regions actual_regions;
 
         while (data_cursor->more()) {
