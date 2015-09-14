@@ -133,8 +133,8 @@ namespace epidb {
 
     const std::string &KeyMapper::FEATURES()
     {
-      static std::string VALUE = epidb::dba::KeyMapper::build_default("FEATURES");
-      return VALUE;
+      static std::string FEATURES = epidb::dba::KeyMapper::build_default("FEATURES");
+      return FEATURES;
     }
 
     const std::string &KeyMapper::VALUE()
@@ -146,91 +146,85 @@ namespace epidb {
 
     const std::string &KeyMapper::WIG_STEP()
     {
-      static std::string VALUE = epidb::dba::KeyMapper::build_default("STEP_WIG");
-      return VALUE;
+      static std::string WIG_STEP = epidb::dba::KeyMapper::build_default("STEP_WIG");
+      return WIG_STEP;
     }
 
     const std::string &KeyMapper::WIG_SPAN()
     {
-      static std::string VALUE = epidb::dba::KeyMapper::build_default("SPAN_WIG");
-      return VALUE;
+      static std::string WIG_SPAN = epidb::dba::KeyMapper::build_default("SPAN_WIG");
+      return WIG_SPAN;
     }
 
     const std::string &KeyMapper::WIG_DATA_SIZE()
     {
-      static std::string VALUE = epidb::dba::KeyMapper::build_default("DATA_SIZE_WIG");
-      return VALUE;
+      static std::string WIG_DATA_SIZE = epidb::dba::KeyMapper::build_default("DATA_SIZE_WIG");
+      return WIG_DATA_SIZE;
     }
 
     const std::string &KeyMapper::WIG_COMPRESSED()
     {
-      static std::string VALUE = epidb::dba::KeyMapper::build_default("COMPRESSED_DATA");
-      return VALUE;
+      static std::string WIG_COMPRESSED = epidb::dba::KeyMapper::build_default("COMPRESSED_DATA");
+      return WIG_COMPRESSED;
     }
 
     const std::string &KeyMapper::WIG_TRACK_TYPE()
     {
-      static std::string VALUE = epidb::dba::KeyMapper::build_default("TRACK_TYPE_WIG");
-      return VALUE;
+      static std::string WIG_TRACK_TYPE = epidb::dba::KeyMapper::build_default("TRACK_TYPE_WIG");
+      return WIG_TRACK_TYPE;
     }
 
     const std::string &KeyMapper::WIG_DATA()
     {
-      static std::string VALUE = epidb::dba::KeyMapper::build_default("DATA_WIG");
-      return VALUE;
+      static std::string WIG_DATA = epidb::dba::KeyMapper::build_default("DATA_WIG");
+      return WIG_DATA;
     }
 
     const std::string& KeyMapper::SEQNAME()
     {
-      static std::string VALUE = epidb::dba::KeyMapper::build_default("SEQNAME");
-      return VALUE;
+      static std::string SEQNAME = epidb::dba::KeyMapper::build_default("SEQNAME");
+      return SEQNAME;
     }
 
     const std::string& KeyMapper::SOURCE()
     {
-      static std::string VALUE = epidb::dba::KeyMapper::build_default("SOURCE");
-      return VALUE;
+      static std::string SOURCE = epidb::dba::KeyMapper::build_default("SOURCE");
+      return SOURCE;
     }
 
     const std::string& KeyMapper::CHROMOSOME()
     {
-      static std::string VALUE = epidb::dba::KeyMapper::build_default("CHROMOSOME");
-      return VALUE;
+      static std::string CHROMOSOME = epidb::dba::KeyMapper::build_default("CHROMOSOME");
+      return CHROMOSOME;
     }
 
     const std::string& KeyMapper::FEATURE()
     {
-      static std::string VALUE = epidb::dba::KeyMapper::build_default("DATA_WIG");
-      return VALUE;
+      static std::string FEATURE = epidb::dba::KeyMapper::build_default("DATA_WIG");
+      return FEATURE;
     }
     const std::string& KeyMapper::SCORE()
     {
-      static std::string VALUE = epidb::dba::KeyMapper::build_default("SCORE");
-      return VALUE;
+      static std::string SCORE = epidb::dba::KeyMapper::build_default("SCORE");
+      return SCORE;
     }
 
     const std::string& KeyMapper::STRAND()
     {
-      static std::string VALUE = epidb::dba::KeyMapper::build_default("STRAND");
-      return VALUE;
+      static std::string STRAND = epidb::dba::KeyMapper::build_default("STRAND");
+      return STRAND;
     }
 
     const std::string& KeyMapper::FRAME()
     {
-      static std::string VALUE = epidb::dba::KeyMapper::build_default("FRAME");
-      return VALUE;
+      static std::string FRAME = epidb::dba::KeyMapper::build_default("FRAME");
+      return FRAME;
     }
 
     const std::string& KeyMapper::ATTRIBUTES()
     {
-      static std::string VALUE = epidb::dba::KeyMapper::build_default("ATTRIBUTES");
-      return VALUE;
-    }
-
-    const std::string& KeyMapper::GENE_ID()
-    {
-      static std::string VALUE = epidb::dba::KeyMapper::build_default("ATTRIBUTES");
-      return VALUE;
+      static std::string ATTRIBUTES = epidb::dba::KeyMapper::build_default("ATTRIBUTES");
+      return ATTRIBUTES;
     }
 
     std::string KeyMapper::build_default(const std::string &s)

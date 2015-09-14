@@ -204,8 +204,8 @@ namespace epidb {
 
     const std::string &Collections::WEB_ACCESS()
     {
-      static std::string users("web_access");
-      return users;
+      static std::string web_access("web_access");
+      return web_access;
     }
 
     const std::string &Collections::TEXT_SEARCH()
@@ -240,14 +240,14 @@ namespace epidb {
 
     const std::string &Collections::PROCESSING()
     {
-      static std::string settings("processing");
-      return settings;
+      static std::string processing("processing");
+      return processing;
     }
 
     const std::string &Collections::PROCESSING_OPS()
     {
-      static std::string settings("processing_ops");
-      return settings;
+      static std::string processing_ops("processing_ops");
+      return processing_ops;
     }
 
   }

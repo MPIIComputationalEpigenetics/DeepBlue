@@ -230,16 +230,28 @@ namespace epidb {
 
         auto dataset_id = gene_set_obj[KeyMapper::DATASET()].Int();
 
-        mongo::BSONObj b_in_gene_name = BSON("I.gene_name" << BSON("$in" << genes_array));
-        mongo::BSONObj b_in_gene_id = BSON("I.gene_id" << BSON("$in" << genes_array_2));
-        mongo::BSONObj or_query = BSON("$or" << BSON_ARRAY(b_in_gene_name << b_in_gene_id));
-        mongo::BSONObj filter = BSON("$and" << BSON_ARRAY(BSON(KeyMapper::DATASET() << dataset_id) << or_query));
+        mongo::BSONObj b_in_gene_name = BSON((KeyMapper::ATTRIBUTES() + ".gene_name") << BSON("$in" << genes_array));
+        mongo::BSONObj b_in_gene_id = BSON((KeyMapper::ATTRIBUTES() + ".gene_id") << BSON("$in" << genes_array_2));
+
+        mongo::BSONObjBuilder bob;
+        bob.append(KeyMapper::DATASET(), dataset_id);
+        bob.append("$or", BSON_ARRAY(b_in_gene_name << b_in_gene_id));
+        //bob.append("$or", BSON_ARRAY(b_in_gene_name));
+        mongo::BSONObj filter = bob.obj();
 
         mongo::Query query = mongo::Query(filter).sort(BSON(KeyMapper::CHROMOSOME() << 1 << KeyMapper::START() << 1));
+        std::cerr << mongo::Query(filter).explain() << std::endl;
 
-        std::cerr << query.toString() << std::endl;
-
+        std::cerr << "QUERY:" << query.toString() << std::endl;
         std::string collection = dba::helpers::collection_name(dba::Collections::GENES());
+        std::cerr << c->count(collection) << std::endl;
+        std::cerr << "collection:" << collection << std::endl;
+        std::cerr << "count:" << std::endl;
+        std::cerr << c->count(collection) << std::endl;
+        std::cerr << c->count(collection, BSON(KeyMapper::DATASET() << dataset_id)) << std::endl;
+        std::cerr << c->count(collection, filter) << std::endl;
+        std::cerr << c->count(collection, query) << std::endl;
+
         std::auto_ptr<mongo::DBClientCursor> data_cursor = c->query(collection, query);
 
         std::string actual_chromosome("");
