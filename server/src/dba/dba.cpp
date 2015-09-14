@@ -119,27 +119,57 @@ namespace epidb {
       std::string column_id;
 
       if (!dba::columns::create_column_type_simple("CHROMOSOME", utils::normalize_name("CHROMOSOME"),
-          "Chromosome name column",
-          "This column should be used to store the Chromosome value in all experiments and annotations",
+          "Chromosome name column. This column should be used to store the Chromosome value in all experiments and annotations",
+          utils::normalize_name("Chromosome name column. This column should be used to store the Chromosome value in all experiments and annotations"),
           "string", user_key, column_id, msg)) {
         return false;
       }
       if (!dba::columns::create_column_type_simple("START", utils::normalize_name("START"),
-          "Region Start column",
-          "This column should be used to store the Region Start position all experiments and annotations",
+          "Region Start column. This column should be used to store the Region Start position all experiments and annotations",
+          utils::normalize_name("Region Start column. This column should be used to store the Region Start position all experiments and annotations"),
           "integer", user_key, column_id, msg)) {
         return false;
       }
       if (!dba::columns::create_column_type_simple("END", utils::normalize_name("END"),
-          "Region End column",
-          "This column should be used to store the Region End position all experiments and annotations",
+          "Region End column. This column should be used to store the Region End position all experiments and annotations",
+          utils::normalize_name("Region End column. This column should be used to store the Region End position all experiments and annotations"),
           "integer", user_key, column_id, msg)) {
         return false;
       }
       if (!dba::columns::create_column_type_simple("VALUE", utils::normalize_name("VALUE"),
-          "Region Value",
-          "This column should be used to store the Wig Files Region Values",
+          "Region Value. This column should be used to store the Wig Files Region Values",
+          utils::normalize_name("Region Value. This column should be used to store the Wig Files Region Values"),
           "double", user_key, column_id, msg)) {
+        return false;
+      }
+      if (!dba::columns::create_column_type_simple("GTF_SCORE", utils::normalize_name("GTF_SCORE"),
+          "A floating point score. The type is a string because the value '.' is also acceptable.",
+          utils::normalize_name("A floating point score. The type is a string because the value '.' is also acceptable."),
+          "string", user_key, column_id, msg)) {
+        return false;
+      }
+      if (!dba::columns::create_column_type_simple("FEATURE", utils::normalize_name("FEATURE"),
+          "A floating point score. The type is a string because the value '.' is also acceptable.",
+          utils::normalize_name("A floating point score. The type is a string because the value '.' is also acceptable."),
+          "string", user_key, column_id, msg)) {
+        return false;
+      }
+      if (!dba::columns::create_column_type_simple("SOURCE", utils::normalize_name("SOURCE"),
+          "Name of the program that generated this feature, or the data source (database or project name).",
+          utils::normalize_name("Name of the program that generated this feature, or the data source (database or project name)."),
+          "string", user_key, column_id, msg)) {
+        return false;
+      }
+      if (!dba::columns::create_column_type_simple("FRAME", utils::normalize_name("FRAME"),
+          "One of '0', '1' or '2'. '0' indicates that the first base of the feature is the first base of a codon, '1' that the second base is the first base of a codon, and so on.. The type is a string because the value '.' is also acceptable.",
+          utils::normalize_name("One of '0', '1' or '2'. '0' indicates that the first base of the feature is the first base of a codon, '1' that the second base is the first base of a codon, and so on.. The type is a string because the value '.' is also acceptable."),
+          "string", user_key, column_id, msg)) {
+        return false;
+      }
+      if (!dba::columns::create_column_type_simple("GTF_ATTRIBUTES", utils::normalize_name("GTF_ATTRIBUTES"),
+          "A semicolon-separated list of tag-value pairs, providing additional information about each feature.",
+          utils::normalize_name("A semicolon-separated list of tag-value pairs, providing additional information about each feature."),
+          "string", user_key, column_id, msg)) {
         return false;
       }
 

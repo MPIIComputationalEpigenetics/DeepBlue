@@ -1120,15 +1120,20 @@ namespace epidb {
 
         cursor = c->query(helpers::collection_name(Collections::GENE_SETS()), o);
         if (cursor->more()) {
-          for (const auto& column : parser::FileFormat::default_format()) {
-            columns.push_back(column->BSONObj());
+          int pos = 0;
+          for (const auto& column : parser::FileFormat::gtf_format()) {
+            mongo::BSONObjBuilder bob;
+            const std::string &column_name = column->name();
+            if (column_name != "CHROMOSOME" && column_name != "START" &&  column_name != "END") {
+              bob.appendElements(column->BSONObj());
+              bob.append("pos", pos++);
+              columns.emplace_back(bob.obj());
+            }
           }
-          c.done();
-          return true;
+          found = true;
         }
 
         c.done();
-
         if (found) {
           return true;
         } else {

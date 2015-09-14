@@ -53,7 +53,6 @@ namespace epidb {
       m["@COUNT.NON-OVERLAP"] = &Metafield::count_non_overlap;
       m["@CALCULATED"] = &Metafield::calculated;
       m["@GENE_ATTRIBUTE"] = &Metafield::gene_attribute;
-      m["@GENE_GTF_ATTRIBUTES"] = &Metafield::gene_gtf_attributes;
 
       return m;
     }
@@ -79,7 +78,6 @@ namespace epidb {
       m["@COUNT.NON-OVERLAP"] = "integer";
       m["@CALCULATED"] = "string";
       m["@GENE_ATTRIBUTE"] = "string";
-      m["@GENE_GTF_ATTRIBUTES"] = "string";
 
       return m;
     }
@@ -454,31 +452,6 @@ namespace epidb {
 
       return true;
     }
-
-    bool Metafield::gene_gtf_attributes(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion *region_ref,
-                                   processing::StatusPtr status, std::string &result, std::string &msg)
-    {
-      unsigned int s = op.find("(") + 1;
-      unsigned int e = op.find_last_of(")");
-      unsigned int length = e - s;
-
-      std::string attribute_name = op.substr(s, length);
-      const datatypes::Metadata& attributes = region_ref->attributes();
-
-      bool first = true;
-      std::stringstream ss;
-      for (auto &kv: attributes) {
-        ss << kv.first << " \"" << kv.second << "\"";
-        if (first) {
-          ss << "; ";
-          first = false;
-        }
-      }
-
-      result = ss.str();
-      return true;
-    }
-
   }
 }
 

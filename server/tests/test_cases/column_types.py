@@ -63,12 +63,12 @@ class TestColumnTypes(helpers.TestCase):
     self.assertEqual(column_types[1][1], "column type name: 'START' type: 'integer'")
     self.assertEqual(column_types[2][1], "column type name: 'END' type: 'integer'")
     self.assertEqual(column_types[3][1], "column type name: 'VALUE' type: 'double'")
-    self.assertEqual(column_types[4][1], "column type name: 'name' type: 'string'")
-    self.assertEqual(column_types[5][1], "column type name: 'string_column' type: 'string'")
-    self.assertEqual(column_types[6][1], "column type name: 'integer_column' type: 'integer'")
-    self.assertEqual(column_types[7][1], "column type name: 'double_column' type: 'double'")
-    self.assertEqual(column_types[8][1], "column type name: 'score' type: 'range' : 0.0000,1.0000")
-    self.assertEqual(column_types[9][1], "column type name: 'STRAND' type: 'category' values: +,-")
+    self.assertEqual(column_types[4][1], "column type name: 'GTF_SCORE' type: 'string'")
+    self.assertEqual(column_types[5][1], "column type name: 'FEATURE' type: 'string'")
+    self.assertEqual(column_types[6][1], "column type name: 'SOURCE' type: 'string'")
+    self.assertEqual(column_types[7][1], "column type name: 'FRAME' type: 'string'")
+    self.assertEqual(column_types[8][1], "column type name: 'GTF_ATTRIBUTES' type: 'string'")
+    self.assertEqual(column_types[9][1], "column type name: 'name' type: 'string'")
 
 
   def test_no_ignore_if(self):
@@ -87,8 +87,8 @@ class TestColumnTypes(helpers.TestCase):
     self.assertEqual(column_types[1][1], "column type name: 'START' type: 'integer'")
     self.assertEqual(column_types[2][1], "column type name: 'END' type: 'integer'")
     self.assertEqual(column_types[3][1], "column type name: 'VALUE' type: 'double'")
-    self.assertEqual(column_types[4][1], "column type name: 'name' type: 'string'")
-    self.assertEqual(column_types[5][1], "column type name: 'string_column' type: 'string'")
+    self.assertEqual(column_types[4][1], "column type name: 'GTF_SCORE' type: 'string'")
+    self.assertEqual(column_types[5][1], "column type name: 'FEATURE' type: 'string'")
 
 
   def test_insert_experiment_fail(self):

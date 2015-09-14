@@ -126,21 +126,29 @@ namespace epidb {
   // -----------------------------------
   class GeneRegion : public AbstractRegion {
     std::string _source;
-    Score _score;
-    char _strand;
-    char _frame;
+    std::string _feature;
+    std::string _strand;
+    std::string _frame;
     datatypes::Metadata _attributes;
+    mutable std::string _attributes_cache;
+    Score _score;
+    mutable std::string _score_cache;
 
   public:
-    GeneRegion(Position s, Position e, DatasetId _id, std::string source, Score score, char strand, char frame, datatypes::Metadata& attributes):
+    GeneRegion(Position s, Position e, DatasetId _id, std::string source, Score score, std::string feature, std::string strand, std::string frame, datatypes::Metadata& attributes):
       AbstractRegion(s, e, _id),
       _source(source),
+      _feature(feature),
       _strand(strand),
       _frame(frame),
-      _attributes(attributes)
+      _attributes(attributes),
+      _attributes_cache(""),
+      _score(score),
+      _score_cache("")
     {}
 
     virtual const datatypes::Metadata& attributes() const;
+    virtual const std::string  &get_string(const size_t pos) const;
     virtual size_t size() const;
     virtual RegionPtr clone() const;
   };
@@ -189,7 +197,7 @@ namespace epidb {
   RegionPtr build_simple_region(Position s, Position e, DatasetId _id);
   RegionPtr build_bed_region(Position s, Position e, DatasetId _id);
   RegionPtr build_wig_region(Position s, Position e, DatasetId _id, Score value);
-  RegionPtr build_gene_region(Position s, Position e, DatasetId _id, std::string _source, Score _score, char _strand, char _frame, datatypes::Metadata& attributes);
+  RegionPtr build_gene_region(Position s, Position e, DatasetId _id, std::string source, Score score, std::string feature, std::string strand, std::string frame, datatypes::Metadata& attributes);
   RegionPtr build_aggregte_region(Position s, Position e, DatasetId _id, Score min, Score max, Score median, Score mean, Score var, Score sd, Score count);
 
 

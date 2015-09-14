@@ -12,6 +12,7 @@
 #include <vector>
 
 #include "../types.hpp"
+#include "../extras/utils.hpp"
 
 #include "regions.hpp"
 
@@ -214,12 +215,50 @@ namespace epidb {
     return _attributes;
   }
 
+  const std::string &GeneRegion::get_string(const size_t pos) const
+  {
+    switch (pos) {
+    case 0: return _source;
+    case 1: return _feature;
+    case 2: {
+      if (_score_cache.empty()) {
+        if (_score == std::numeric_limits<Score>::min()) {
+          _score_cache = ".";
+        } else {
+          _score_cache = utils::score_to_string(_score);
+        }
+      }
+      return _score_cache;
+    }
+    case 3: return _strand;
+    case 4: return _frame;
+    case 5: {
+      if (_attributes_cache.empty()) {
+        bool first = true;
+        std::stringstream ss;
+        for (auto &kv : _attributes) {
+          if (first) {
+            first = false;
+          } else {
+            ss << "; ";
+            first = false;
+          }
+          ss << kv.first << " \"" << kv.second << "\"";
+        }
+        _attributes_cache = ss.str();
+      }
+      return _attributes_cache;
+    }
+    default: return empty_string;
+    }
+  }
+
   size_t GeneRegion::size() const
   {
     size_t attributes_size = 0;
-    for(auto attribute : _attributes){
-        attributes_size += attribute.first.capacity();
-        attributes_size += attribute.second.capacity();
+    for (auto attribute : _attributes) {
+      attributes_size += attribute.first.capacity();
+      attributes_size += attribute.second.capacity();
     }
 
     static size_t size = sizeof(WigRegion) + attributes_size + + sizeof(void *);
@@ -304,9 +343,9 @@ namespace epidb {
     return std::unique_ptr<WigRegion>(new WigRegion(s, e, _id, value));
   }
 
-  RegionPtr build_gene_region(Position s, Position e, DatasetId _id, std::string _source, Score _score, char _strand, char _frame, datatypes::Metadata& attributes)
+  RegionPtr build_gene_region(Position s, Position e, DatasetId _id, std::string source, Score score, std::string feature, std::string strand, std::string frame, datatypes::Metadata& attributes)
   {
-    return std::unique_ptr<GeneRegion>(new GeneRegion(s, e, _id, _source, _score, _strand, _frame, attributes));
+    return std::unique_ptr<GeneRegion>(new GeneRegion(s, e, _id, source, score, feature, strand, frame, attributes));
   }
 
   RegionPtr build_aggregte_region(Position s, Position e, DatasetId _id, Score min, Score max, Score median, Score mean, Score var, Score sd, Score count)

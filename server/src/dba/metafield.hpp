@@ -77,8 +77,6 @@ namespace epidb {
 
       bool gene_attribute(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion *region_ref, processing::StatusPtr status, std::string &result, std::string &msg);
 
-      bool gene_gtf_attributes(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion *region_ref, processing::StatusPtr status, std::string &result, std::string &msg);
-
     public:
       static bool is_meta(const std::string &s);
       static std::string command_type(const std::string &command);

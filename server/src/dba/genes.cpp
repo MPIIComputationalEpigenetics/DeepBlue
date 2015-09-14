@@ -256,9 +256,9 @@ namespace epidb {
           std::string feature = e_it.next().String();
           Position start = e_it.next().numberInt();
           Position end = e_it.next().numberInt();
-          Position score = e_it.next().numberDouble();
-          char strand = e_it.next().String()[0];
-          char frame = e_it.next().String()[0];
+          Score score = e_it.next().numberDouble();
+          std::string strand = e_it.next().String();
+          std::string frame = e_it.next().String();
           datatypes::Metadata attributes = datatypes::bson_to_metadata(gene[KeyMapper::ATTRIBUTES()].Obj());
 
           if (chromosome != actual_chromosome) {
@@ -269,7 +269,7 @@ namespace epidb {
             actual_regions = build_regions();
           }
 
-          RegionPtr region = build_gene_region(start, end, dataset_id, source, score, strand, frame, attributes);
+          RegionPtr region = build_gene_region(start, end, dataset_id, source, score, feature,  strand, frame, attributes);
           actual_regions.push_back(std::move(region));
         }
 

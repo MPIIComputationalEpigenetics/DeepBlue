@@ -213,6 +213,12 @@ namespace epidb {
       return WIG_FORMAT;
     }
 
+    const FileFormat FileFormat::gtf_format()
+    {
+      static FileFormat GTF_FORMAT = FileFormat::gtf_format_builder();
+      return GTF_FORMAT;
+    }
+
     const FileFormat FileFormat::default_format_builder()
     {
       FileFormat format;
@@ -277,6 +283,66 @@ namespace epidb {
       format.add(end);
       format.add(value);
 
+      return format;
+    }
+
+    const FileFormat FileFormat::gtf_format_builder()
+    {
+      FileFormat format;
+
+      dba::columns::ColumnTypePtr chromosome;
+      dba::columns::ColumnTypePtr source;
+      dba::columns::ColumnTypePtr feature;
+      dba::columns::ColumnTypePtr start;
+      dba::columns::ColumnTypePtr end;
+      dba::columns::ColumnTypePtr score;
+      dba::columns::ColumnTypePtr strand;
+      dba::columns::ColumnTypePtr frame;
+      dba::columns::ColumnTypePtr attributes;
+
+      std::string msg;
+
+      format.set_format("CHROMOSOME,SOURCE,FEATURE,START,END,GTF_SCORE,STRAND,FRAME,GTF_ATTRIBUTES");
+
+      processing::StatusPtr status = processing::build_dummy_status();
+
+      if (!dba::columns::load_column_type("CHROMOSOME", status, chromosome, msg)) {
+        EPIDB_LOG_ERR(msg);
+      }
+      if (!dba::columns::load_column_type("SOURCE", status, source, msg)) {
+        EPIDB_LOG_ERR(msg);
+      }
+      if (!dba::columns::load_column_type("FEATURE", status, feature, msg)) {
+        EPIDB_LOG_ERR(msg);
+      }
+      if (!dba::columns::load_column_type("START", status, start, msg)) {
+        EPIDB_LOG_ERR(msg);
+      }
+      if (!dba::columns::load_column_type("END", status, end, msg)) {
+        EPIDB_LOG_ERR(msg);
+      }
+      if (!dba::columns::load_column_type("GTF_SCORE", status, score, msg)) {
+        EPIDB_LOG_ERR(msg);
+      }
+      if (!dba::columns::load_column_type("STRAND", status, strand, msg)) {
+        EPIDB_LOG_ERR(msg);
+      }
+      if (!dba::columns::load_column_type("FRAME", status, frame, msg)) {
+        EPIDB_LOG_ERR(msg);
+      }
+      if (!dba::columns::load_column_type("GTF_ATTRIBUTES", status, attributes, msg)) {
+        EPIDB_LOG_ERR(msg);
+      }
+
+      format.add(chromosome);
+      format.add(source);
+      format.add(feature);
+      format.add(start);
+      format.add(end);
+      format.add(score);
+      format.add(strand);
+      format.add(frame);
+      format.add(attributes);
       return format;
     }
 
