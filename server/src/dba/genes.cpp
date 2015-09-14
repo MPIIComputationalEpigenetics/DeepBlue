@@ -236,22 +236,10 @@ namespace epidb {
         mongo::BSONObjBuilder bob;
         bob.append(KeyMapper::DATASET(), dataset_id);
         bob.append("$or", BSON_ARRAY(b_in_gene_name << b_in_gene_id));
-        //bob.append("$or", BSON_ARRAY(b_in_gene_name));
         mongo::BSONObj filter = bob.obj();
 
         mongo::Query query = mongo::Query(filter).sort(BSON(KeyMapper::CHROMOSOME() << 1 << KeyMapper::START() << 1));
-        std::cerr << mongo::Query(filter).explain() << std::endl;
-
-        std::cerr << "QUERY:" << query.toString() << std::endl;
         std::string collection = dba::helpers::collection_name(dba::Collections::GENES());
-        std::cerr << c->count(collection) << std::endl;
-        std::cerr << "collection:" << collection << std::endl;
-        std::cerr << "count:" << std::endl;
-        std::cerr << c->count(collection) << std::endl;
-        std::cerr << c->count(collection, BSON(KeyMapper::DATASET() << dataset_id)) << std::endl;
-        std::cerr << c->count(collection, filter) << std::endl;
-        std::cerr << c->count(collection, query) << std::endl;
-
         std::auto_ptr<mongo::DBClientCursor> data_cursor = c->query(collection, query);
 
         std::string actual_chromosome("");
@@ -259,7 +247,6 @@ namespace epidb {
 
         while (data_cursor->more()) {
           mongo::BSONObj gene = data_cursor->next().getOwned();
-          std::cerr << "shit" << gene.toString() << std::endl;
           mongo::BSONObj::iterator e_it = gene.begin();
 
           std::string gene_id = e_it.next().String();
