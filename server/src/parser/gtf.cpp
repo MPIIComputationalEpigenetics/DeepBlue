@@ -14,7 +14,7 @@ namespace epidb {
 
     GTFRow::GTFRow(const std::string &seqname, const std::string &source, const std::string &feature,
                    Position start, Position end, Score score,
-                   char strand, char frame, const Attributes& attributes):
+                   std::string strand, std::string frame, const Attributes& attributes):
       _seqname(seqname),
       _source(source),
       _feature(feature),
@@ -28,7 +28,7 @@ namespace epidb {
 
     void GTFFile::add_row(const std::string &seqname, const std::string &source, const std::string &feature,
                    Position start, Position end, Score score,
-                   char strand, char frame, const GTFRow::Attributes& attributes)
+                   std::string strand, std::string frame, const GTFRow::Attributes& attributes)
     {
       _content.emplace_back(seqname, source, feature, start, end, score, strand, frame, attributes);
     }

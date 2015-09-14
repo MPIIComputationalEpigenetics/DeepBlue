@@ -34,14 +34,14 @@ namespace epidb {
       Position _start;
       Position _end;
       Score _score;
-      char _strand;
-      char _frame;  // frame - One of '0', '1' or '2'. '0' indicates that the first base of the feature is the first base of a codon, '1' that the second base is the first base of a codon, and so on..
+      std::string _strand;
+      std::string _frame;  // frame - One of '0', '1' or '2'. '0' indicates that the first base of the feature is the first base of a codon, '1' that the second base is the first base of a codon, and so on..
       Attributes _attributes;
 
     public:
       GTFRow(const std::string &seqname, const std::string &source, const std::string &feature,
              Position start, Position end, Score score,
-             char strand, char frame, const Attributes& attributes);
+             std::string strand, std::string frame, const Attributes& attributes);
 
       const std::string& seqname() const { return _seqname; }
       const std::string& source() const { return _source; }
@@ -49,8 +49,8 @@ namespace epidb {
       const Position start() const { return _start; }
       const Position end() const { return _end; }
       const Score score() const { return _score; }
-      const Score strand() const { return _strand; }
-      const Score frame() const { return _frame; }
+      const std::string strand() const { return _strand; }
+      const std::string frame() const { return _frame; }
       const Attributes& attributes() const { return _attributes; }
     };
 
@@ -64,7 +64,7 @@ namespace epidb {
       const GTFContent& rows() const;
       void add_row(const std::string &seqname, const std::string &source, const std::string &feature,
                    Position start, Position end, Score score,
-                   char strand, char frame, const GTFRow::Attributes& attributes);
+                   std::string strand, std::string frame, const GTFRow::Attributes& attributes);
       size_t size() const;
     };
 

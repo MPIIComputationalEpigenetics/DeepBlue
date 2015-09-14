@@ -144,14 +144,14 @@ namespace epidb {
 
     const std::string &Collections::GENE_SETS()
     {
-      static std::string genomes("gene_sets");
-      return genomes;
+      static std::string gene_sets("gene_sets");
+      return gene_sets;
     }
 
     const std::string &Collections::GENES()
     {
-      static std::string genomes("genes");
-      return genomes;
+      static std::string genes("genes");
+      return genes;
     }
 
     const std::string &Collections::QUERIES()

@@ -35,8 +35,8 @@ namespace epidb {
       Position start;
       Position end;
       std::string score;
-      char strand;
-      char frame;               // frame - One of '0', '1' or '2'. '0' indicates that the first base of the feature is the first base of a codon, '1' that the second base is the first base of a codon, and so on..
+      std::string strand;
+      std::string frame;               // frame - One of '0', '1' or '2'. '0' indicates that the first base of the feature is the first base of a codon, '1' that the second base is the first base of a codon, and so on..
       std::string s_attributes; // attribute - A semicolon-separated list of tag-value pairs, providing additional information about each feature.
 
     };
