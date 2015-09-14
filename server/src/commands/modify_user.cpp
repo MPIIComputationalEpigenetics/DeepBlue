@@ -63,6 +63,13 @@ namespace epidb {
           result.add_error(msg);
           return false;
         }
+
+        if (user.get_name() == datatypes::User::ANONYMOUS_USER()) {
+          msg = "It is not allowed to change the attributes of the anonymous user";
+          result.add_error(msg);
+          return false;
+        }
+
         if (field == "email") {
           user.set_email(value);
         } else if (field == "name") {

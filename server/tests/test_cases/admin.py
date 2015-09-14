@@ -22,6 +22,17 @@ class TestAdminCommands(helpers.TestCase):
     self.assertTrue("user1" in user_names)
 
 
+  def test_anonymous(self):
+    epidb = EpidbClient()
+    self.init(epidb)
+
+    res, user = epidb.add_user("anonymous", "test1@example.com", "test", self.admin_key)
+    self.assertSuccess(res, user)
+
+    res, msg = epidb.modify_user("password", "123456", user[1])
+    self.assertFailure(res, msg)
+    self.assertEquals(msg,  'It is not allowed to change the attributes of the anonymous user')
+
   def test_echo(self):
     epidb = EpidbClient()
     self.init(epidb)

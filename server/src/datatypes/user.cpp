@@ -217,5 +217,10 @@ namespace epidb {
     {
       return get_permission_level() == PermissionLevel::ADMIN;
     }
+
+    const std::string& User::ANONYMOUS_USER() {
+      static std::string anonymous("anonymous");
+      return anonymous;
+    }
   }
 }

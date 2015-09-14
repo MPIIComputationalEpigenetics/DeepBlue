@@ -82,6 +82,7 @@ namespace epidb {
 
       bool has_permission(PermissionLevel permission);
 
+      static const std::string& ANONYMOUS_USER();
     private:
       void set_permission_level(int permission_level);
 
