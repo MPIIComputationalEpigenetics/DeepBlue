@@ -80,9 +80,10 @@ namespace epidb {
           std::vector<serialize::ParameterPtr>::iterator it;
           for (it = genomes.begin(); it != genomes.end(); ++it) {
             std::string genome = (**it).as_string();
+            std::string norm_genome = utils::normalize_name(genome);
 
             std::vector<utils::IdName> res;
-            if (!dba::list::annotations(genome, user_key, res, msg)) {
+            if (!dba::list::annotations(norm_genome, user_key, res, msg)) {
               result.add_error(msg);
             }
             names.insert(names.end(), res.begin(), res.end());
