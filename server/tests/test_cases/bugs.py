@@ -357,7 +357,21 @@ chrX 100000"""
     self.assertEqual(info_e2, ['okay', [{'name': 'user', 'institution': 'institution', 'id': 'u2', 'permission_level': 'NONE', 'type': 'user', 'email': 'email'}]])
 
 
+  def test_include_invalid_regions(self):
+    epidb = EpidbClient()
+    self.init_base(epidb)
 
+    data = """chr1\t1\t100000000000000000
+chr10\t666\t66610000
+chrY\t12345\t1234567"""
+    (s, a) = epidb.add_annotation("test annotation", "hg19", "testing", data, "CHROMOSOME,START,END", {"HI": "HOW ARE YOU?"}, self.admin_key)
+    self.assertFailure(s, a)
+    self.assertEquals(a, "Error while reading the BED file. Line: 0. - '100000000000000000 is not a valid end position'")
+
+    data = """chr1\t2147483647\t2147483648"""
+    (s, a) = epidb.add_annotation("test annotation", "hg19", "testing", data, "CHROMOSOME,START,END", {"HI": "HOW ARE YOU?"}, self.admin_key)
+    self.assertFailure(s, a)
+    self.assertEquals(a, "Invalid region: 2147483647 - 2147483648. It is beyond the length of the chromosome chr1 .")
 
 
 

@@ -75,14 +75,25 @@ namespace epidb {
       bool neg((*p == '-') ? 1 : 0);
       T num(0);
       size_t pos(strlen(p + neg) - 1);
+
+      if (pos > std::numeric_limits<T>::digits10) {
+        return false;
+      }
+
       if (neg)  {
         ++p;
       }
+      T prev(0);
       while (*p) {
         if (!std::isdigit(*p)) {
           return false;
         }
         num += decdigits[(*p++ - '0') * 10 + pos--];
+        // Check for overflow
+        if (num < prev) {
+          return false;
+        }
+        prev = num;
       }
       i = (neg ? -num : num);
       return true;
