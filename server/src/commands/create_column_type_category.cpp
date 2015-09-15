@@ -70,7 +70,7 @@ namespace epidb {
 
         std::string msg;
         datatypes::User user;
-        if (!check_permissions(user_key, datatypes::INCLUDE_COLLECTION_TERMS, user, msg )) {
+        if (!check_permissions(user_key, datatypes::INCLUDE_ANNOTATIONS, user, msg )) {
           result.add_error(msg);
           return false;
         }
