@@ -220,7 +220,7 @@ namespace epidb {
             case mongo::String : region->insert(e.str()); break;
             case mongo::NumberDouble : region->insert((float) e._numberDouble()); break;
             case mongo::NumberInt : region->insert(e._numberInt()); break;
-            default: region->insert(std::move(e.toString(false)));
+            default: region->insert(e.toString(false));
             }
           }
           _it_size += region->size();
