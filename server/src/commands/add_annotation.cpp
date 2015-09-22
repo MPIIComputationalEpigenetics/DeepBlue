@@ -98,67 +98,72 @@ namespace epidb {
           return false;
         }
 
-        parser::FileFormat fileFormat;
-        if (!parser::FileFormatBuilder::build(format, fileFormat, msg)) {
-          result.add_error(msg);
-          return false;
-        }
+        bool ret;
+        std::string id;
 
-        std::unique_ptr<std::istream> _input = std::unique_ptr<std::istream>(new std::stringstream(data));
-        parser::Parser parser(std::move(_input), fileFormat);
-        if (!parser.check_format(msg)) {
-          result.add_error(msg);
-          return false;
-        }
+        {
 
-        parser::ChromosomeRegionsMap map_regions;
+          parser::FileFormat fileFormat;
+          if (!parser::FileFormatBuilder::build(format, fileFormat, msg)) {
+            result.add_error(msg);
+            return false;
+          }
 
-        while (!parser.eof()) {
-          parser::BedLine bed_line;
+          std::unique_ptr<std::istream> _input = std::unique_ptr<std::istream>(new std::stringstream(data));
+          parser::Parser parser(std::move(_input), fileFormat);
+          if (!parser.check_format(msg)) {
+            result.add_error(msg);
+            return false;
+          }
 
-          if (!parser.parse_line(bed_line, msg)) {
-            // Ignore Empty Line Error
-            if (msg != "Empty line") {
+          parser::ChromosomeRegionsMap map_regions;
+
+          while (!parser.eof()) {
+            parser::BedLine bed_line;
+
+            if (!parser.parse_line(bed_line, msg)) {
+              // Ignore Empty Line Error
+              if (msg != "Empty line") {
+                std::stringstream m;
+                m << "Error while reading the BED file. Line: ";
+                m << parser.actual_line();
+                m << ". - '";
+                m << msg;
+                m << "'";
+                result.add_error(m.str());
+                return false;
+              }
+            }
+
+            // Ignore empty line
+            if (msg == "Empty line") {
+              continue;
+            }
+
+            if (!parser.check_length(bed_line)) {
               std::stringstream m;
               m << "Error while reading the BED file. Line: ";
               m << parser.actual_line();
               m << ". - '";
-              m << msg;
-              m << "'";
+              m << parser.actual_line_content();
+              m << "'. The number of tokens (" ;
+              m << bed_line.size() ;
+              m << ") is different from the format size (" ;
+              m << parser.count_fields();
+              m << ") - ";
+              m << fileFormat.format();
               result.add_error(m.str());
               return false;
+            } else {
+              map_regions.insert(std::move(bed_line));
             }
           }
 
-          // Ignore empty line
-          if (msg == "Empty line") {
-            continue;
-          }
+          map_regions.finish();
 
-          if (!parser.check_length(bed_line)) {
-            std::stringstream m;
-            m << "Error while reading the BED file. Line: ";
-            m << parser.actual_line();
-            m << ". - '";
-            m << parser.actual_line_content();
-            m << "'. The number of tokens (" ;
-            m << bed_line.size() ;
-            m << ") is different from the format size (" ;
-            m << parser.count_fields();
-            m << ") - ";
-            m << fileFormat.format();
-            result.add_error(m.str());
-            return false;
-          } else {
-            map_regions.insert(std::move(bed_line));
-          }
+          ret = dba::insert_annotation(name, norm_name, genome, norm_genome, description, norm_description, extra_metadata,
+                                       user_key, ip, map_regions, fileFormat, id, msg);
         }
-
-        map_regions.finish();
-
-        std::string id;
-        bool ret = dba::insert_annotation(name, norm_name, genome, norm_genome, description, norm_description, extra_metadata,
-                                          user_key, ip, map_regions, fileFormat, id, msg);
 
         if (ret) {
           result.add_string(id);
