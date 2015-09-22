@@ -57,7 +57,19 @@ class TestSelectRegions(helpers.TestCase):
     self.insert_experiment(epidb, "hg19_chr1_1", sample_id)
 
     # none of them: should fail
-    res = epidb.select_regions(None, "hg19", None, None, None, None, None, None, None, self.admin_key)
+    res = epidb.select_regions(None, None, None, None, None, None, None, None, None, self.admin_key)
+    self.assertFailure(res)
+
+    res = epidb.select_regions(None, None, "Methylation", None, None, None, None, None, None, self.admin_key)
+    self.assertFailure(res)
+
+    res = epidb.select_regions(None, None, None, sample_id, None, None, None, None, None, self.admin_key)
+    self.assertFailure(res)
+
+    res = epidb.select_regions(None, None, None, None, "ENCODE", None, None, None, None, self.admin_key)
+    self.assertFailure(res)
+
+    res = epidb.select_regions(None, None, None, None, None, "tech1", None, None, None, self.admin_key)
     self.assertFailure(res)
 
     # at least one: should pass
@@ -219,7 +231,7 @@ class TestSelectRegions(helpers.TestCase):
                                None, None, None, None, self.admin_key)
 
     self.assertFailure(res, msg)
-    self.assertTrue("at least one of the following fields must be provided: 'experiment_name', 'epigenetic_mark', 'sample_id', 'project', 'technique'." in msg.lower())
+    self.assertEqual("At least one experiment_name or one genome must be informed.", msg)
 
   def test_unknown_parameters(self):
     epidb = EpidbClient()
