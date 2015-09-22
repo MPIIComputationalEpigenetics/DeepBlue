@@ -327,9 +327,12 @@ chrX 100000"""
     epidb = EpidbClient()
     self.init(epidb)
 
-    epidb.add_technique("chip-seq", "", None, self.admin_key)
+    s, g1 = epidb.add_genome("hg19", "", "chr1  10000\nchr2   30000", self.admin_key)
+    self.assertSuccess(s, g1)
+    s, t1 = epidb.add_technique("chip-seq", "", None, self.admin_key)
+    self.assertSuccess(s, t1)
 
-    (s, q) = epidb.select_regions(None, None, None, None, "chip-seq", None, None, 1000, 2000, self.admin_key)
+    (s, q) = epidb.select_regions(None, "hg19", None, None, "chip-seq", None, None, 1000, 2000, self.admin_key)
     self.assertSuccess(s, q)
     (s, req) = epidb.get_regions(q, "CHROMOSOME,START,END", self.admin_key)
     self.assertSuccess(s, q)

@@ -99,7 +99,7 @@ namespace epidb {
           return false;
         }
 
-        bool has_filter = false;
+        bool has_exp_or_genome = false;
         mongo::BSONObjBuilder args_builder;
 
         std::vector<std::string> names;
@@ -117,7 +117,7 @@ namespace epidb {
             result.add_error("Experiment " + msg + " does not exists.");
             return false;
           }
-          has_filter = true;
+          has_exp_or_genome = true;
         }
         // epigenetic mark
         if (epigenetic_marks.size() > 0) {
@@ -127,7 +127,6 @@ namespace epidb {
           }
           args_builder.append("epigenetic_mark", dba::helpers::build_array(epigenetic_marks));
           args_builder.append("norm_epigenetic_mark", dba::helpers::build_epigenetic_normalized_array(epigenetic_marks));
-          has_filter = true;
         }
         // sample id
         if (sample_ids.size() > 0) {
@@ -136,7 +135,6 @@ namespace epidb {
             return false;
           }
           args_builder.append("sample_id", dba::helpers::build_array(sample_ids));
-          has_filter = true;
         }
 
         std::vector<utils::IdName> user_projects;
@@ -169,7 +167,6 @@ namespace epidb {
 
           args_builder.append("project", dba::helpers::build_array(filtered_projects));
           args_builder.append("norm_project", dba::helpers::build_normalized_array(filtered_projects));
-          has_filter = true;
         } else {
           std::vector<std::string> user_projects_names;
           for (const auto& project : user_projects) {
@@ -186,15 +183,7 @@ namespace epidb {
           }
           args_builder.append("technique", dba::helpers::build_array(techniques));
           args_builder.append("norm_technique", dba::helpers::build_normalized_array(techniques));
-          has_filter = true;
         }
-
-        if (!has_filter) {
-          result.add_error("At least one of the following fields must be provided: 'experiment_name', 'epigenetic_mark', 'sample_id', 'project', 'technique'.");
-          return false;
-        }
-
-        args_builder.append("has_filter", has_filter);
 
         if (start >= 0) {
           args_builder.append("start", (int) start);
@@ -213,6 +202,12 @@ namespace epidb {
           std::string norm_genome = utils::normalize_name(genome);
           genomes_s.insert(genome);
           norm_genomes_s.insert(norm_genome);
+          has_exp_or_genome = true;
+        }
+
+        if (!has_exp_or_genome) {
+          result.add_error("At least one experiment_name or one genome must be informed.");
+          return false;
         }
 
         // We have to load the genomes from the experiments if the user did not specify the genome in the query

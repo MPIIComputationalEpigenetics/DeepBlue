@@ -387,24 +387,20 @@ namespace epidb {
 
         mongo::BSONArrayBuilder datasets_array_builder;
 
-        if (args["has_filter"].Bool()) {
-          const mongo::BSONObj query = build_query(args);
-          Connection c;
-          std::auto_ptr<mongo::DBClientCursor> cursor = c->query(helpers::collection_name(Collections::EXPERIMENTS()), query);
-          while (cursor->more()) {
-            mongo::BSONObj p = cursor->next();
-            mongo::BSONElement dataset_id = p.getField(KeyMapper::DATASET());
-            datasets_array_builder.append(dataset_id.Int());
-          }
-          c.done();
+        const mongo::BSONObj args_query = build_query(args);
+        Connection c;
+        std::auto_ptr<mongo::DBClientCursor> cursor = c->query(helpers::collection_name(Collections::EXPERIMENTS()), args_query);
+        while (cursor->more()) {
+          mongo::BSONObj p = cursor->next();
+          mongo::BSONElement dataset_id = p.getField(KeyMapper::DATASET());
+          datasets_array_builder.append(dataset_id.Int());
         }
+        c.done();
 
         mongo::BSONArray datasets_array = datasets_array_builder.arr();
 
         mongo::BSONObjBuilder regions_query_builder;
-        if (args["has_filter"].Bool()) {
-          regions_query_builder.append(KeyMapper::DATASET(), BSON("$in" << datasets_array));
-        }
+        regions_query_builder.append(KeyMapper::DATASET(), BSON("$in" << datasets_array));
 
         if (args.hasField("start") && args.hasField("end")) {
           regions_query_builder.append(KeyMapper::START(), BSON("$lte" << args["end"].Int()));
@@ -631,17 +627,16 @@ namespace epidb {
           mongo::BSONObj args = query_a["args"].Obj();
 
           mongo::BSONArrayBuilder datasets_array_builder;
-          if (args["has_filter"].Bool()) {
-            const mongo::BSONObj query = build_query(args);
-            Connection c;
-            std::auto_ptr<mongo::DBClientCursor> cursor = c->query(helpers::collection_name(Collections::EXPERIMENTS()), query);
-            while (cursor->more()) {
-              mongo::BSONObj p = cursor->next();
-              mongo::BSONElement dataset_id = p.getField(KeyMapper::DATASET());
-              datasets_array_builder.append(dataset_id.Int());
-            }
-            c.done();
+          const mongo::BSONObj query = build_query(args);
+          Connection c;
+          std::auto_ptr<mongo::DBClientCursor> cursor = c->query(helpers::collection_name(Collections::EXPERIMENTS()), query);
+          while (cursor->more()) {
+            mongo::BSONObj p = cursor->next();
+            mongo::BSONElement dataset_id = p.getField(KeyMapper::DATASET());
+            datasets_array_builder.append(dataset_id.Int());
           }
+          c.done();
+
           mongo::BSONArray datasets_array = datasets_array_builder.arr();
 
           std::set<std::string> genomes = helpers::build_set(args["norm_genomes"].Array());
