@@ -139,3 +139,69 @@ chr2\t2\t20000\t\tQuery q1 regions set\t\t19998.000000
 chr3\t3\t30000\t\tQuery q1 regions set\t\t29997.000000"""
 
     self.assertEqual(regions, output)
+
+  def test_select_only_signal(self):
+    epidb = EpidbClient()
+    self.init_base(epidb)
+
+    sample_id = self.sample_ids[0]
+
+    files = ["reference_example"]
+
+    for filename in files:
+      wig_data = helpers.load_bedgraph(filename)
+      res = epidb.add_experiment(filename, "hg19", "Methylation", sample_id, "tech1",
+                                 "ENCODE", "desc1", wig_data, "bedgraph", None, self.admin_key)
+      self.assertSuccess(res)
+
+    self.insert_experiment(epidb, "hg19_chr1_1", sample_id)
+
+    (s, q) = epidb.select_regions("", "hg19", None, None, None, None, None, None, None, self.admin_key)
+
+    (s, req) = epidb.count_regions(q, self.admin_key)
+    self.assertSuccess(s, req)
+    count = self.count_request(req)
+
+    ## Total amount of regions
+    self.assertEqual(30, count)
+
+    (s, q) = epidb.select_regions("", "hg19", None, None, None, None, None, None, None, self.admin_key)
+
+    (s, new_query_peaks) = epidb.query_experiment_type(q, "peaks", self.admin_key)
+    self.assertSuccess(s, new_query_peaks)
+    (s, req) = epidb.count_regions(new_query_peaks, self.admin_key)
+    count = self.count_request(req)
+    ## Only peaks
+    self.assertEqual(21, count)
+
+    (s, new_query_signal) = epidb.query_experiment_type(q, "signal", self.admin_key)
+    self.assertSuccess(s, new_query_signal)
+    (s, req) = epidb.count_regions(new_query_signal, self.admin_key)
+    count = self.count_request(req)
+    ## Only signal
+    self.assertEqual(9, count)
+
+    (s, new_peaks_new_query_signal) = epidb.query_experiment_type(new_query_signal, "peaks", self.admin_key)
+    self.assertSuccess(s, new_peaks_new_query_signal)
+    (s, req) = epidb.count_regions(new_peaks_new_query_signal, self.admin_key)
+    count = self.count_request(req)
+    ## Only peaks again, but deriving from an signal query
+    self.assertEqual(21, count)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
