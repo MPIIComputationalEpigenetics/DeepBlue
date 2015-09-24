@@ -89,6 +89,7 @@ namespace epidb {
         experiment_name_dataset_id_cache.invalidate();
       }
 
+
       bool store_query(const std::string &type, const mongo::BSONObj &args, const std::string &user_key,
                        std::string &query_id, std::string &msg)
       {
@@ -114,6 +115,60 @@ namespace epidb {
 
         Connection c;
 
+        c->insert(helpers::collection_name(Collections::QUERIES()), stored_query_builder.obj());
+        if (!c->getLastError().empty()) {
+          msg = c->getLastError();
+          c.done();
+          return false;
+        }
+        c.done();
+        return true;
+      }
+
+      bool modify_query(const std::string &query_id, const std::string &key, const std::string &value, const std::string &user_key,
+                        std::string &new_query_id, std::string &msg)
+      {
+        mongo::BSONObj old_query;
+        if (!helpers::get_one(Collections::QUERIES(), BSON("_id" << query_id), old_query, msg)) {
+          msg = Error::m(ERR_INVALID_QUERY_ID, query_id);
+          return false;
+        }
+
+        datatypes::User user;
+        if (!users::get_user_by_key(user_key, user, msg)) {
+          return false;
+        }
+
+        if (old_query["user"].String() != user.get_id()) {
+          msg = "You do not have permission to change this query.";
+          return false;
+        }
+
+        int query_counter;
+        if (!helpers::get_increment_counter(Collections::QUERIES(), query_counter, msg)) {
+          return false;
+        }
+        new_query_id = "q" + utils::integer_to_string(query_counter);
+        time_t time_;
+        time(&time_);
+
+        mongo::BSONObj old_args = old_query["args"].Obj();
+        mongo::BSONObjBuilder new_args_builder;
+
+        new_args_builder.append(key, value);
+        new_args_builder.appendElementsUnique(old_args);
+
+        mongo::BSONObj new_args = new_args_builder.obj();
+
+        mongo::BSONObjBuilder stored_query_builder;
+        stored_query_builder.append("_id", new_query_id);
+        stored_query_builder.append("user", user.get_id());
+        stored_query_builder.appendTimeT("time", time_);
+        stored_query_builder.append("type", old_query["type"].String());
+        stored_query_builder.append("derived_from", query_id);
+        stored_query_builder.append("args", new_args);
+
+        Connection c;
         c->insert(helpers::collection_name(Collections::QUERIES()), stored_query_builder.obj());
         if (!c->getLastError().empty()) {
           msg = c->getLastError();
@@ -326,6 +381,9 @@ namespace epidb {
         }
         if (args.hasField("upload_info.upload_end")) {
           experiments_query_builder.append(args["upload_info.upload_end"]);
+        }
+        if (args.hasField("upload_info.content_format")) {
+          experiments_query_builder.append(args["upload_info.content_format"]);
         }
         experiments_query_builder.append("upload_info.done", true);
         return experiments_query_builder.obj();

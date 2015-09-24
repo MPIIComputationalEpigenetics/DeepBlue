@@ -227,6 +227,9 @@ class EpidbClient:
         return self.server.select_annotations(annotations_name, genome,
                                               chromosomes, start, end, user)
 
+    def query_experiment_type(self, query_id, type, user_key):
+        return self.server.query_experiment_type(query_id, type, user_key)
+
     def intersection(self, query_a_id, query_b_id, user_key):
         return self.server.intersection(query_a_id, query_b_id, user_key)
 

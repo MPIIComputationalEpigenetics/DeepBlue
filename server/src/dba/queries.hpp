@@ -30,6 +30,9 @@ namespace epidb {
                        const mongo::BSONObj &args, const std::string &user_key,
                        std::string &query_id, std::string &msg);
 
+      bool modify_query(const std::string &query_id, const std::string &key, const std::string &value, const std::string &user_key,
+                        std::string &new_query_id, std::string &msg);
+
       bool retrieve_query(const std::string &user_key, const std::string &query_id,
                           processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg);
 
