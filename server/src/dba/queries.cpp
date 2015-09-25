@@ -681,6 +681,8 @@ namespace epidb {
 
         ChromosomeRegionsList regions_a;
 
+        // The "fast" is in fact very slow!
+        use_fast = false;
         if (use_fast) {
           mongo::BSONObj args = query_a["args"].Obj();
 
