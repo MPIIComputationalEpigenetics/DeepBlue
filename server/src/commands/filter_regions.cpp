@@ -87,8 +87,10 @@ namespace epidb {
         }
 
         if (type == "string") {
-          result.add_error("Only equals (==) or not equals (!=) are available for type 'string'");
-          return false;
+          if (operation != "==" && operation != "!=") {
+            result.add_error("It is only possible to filter by equality (==) or differently (!=) in 'string'");
+            return false;
+          }
         } else {
           if (!algorithms::FilterBuilder::is_valid_operations(operation)) {
             result.add_error("Invalid operation: '" + operation + "'. The operation for type 'number' must be one of these: " + utils::vector_to_string(algorithms::FilterBuilder::operations()));
