@@ -814,6 +814,10 @@ namespace epidb {
           return filter->is(region_ref->end());
         }
 
+        if (field == "CHROMOSOME") {
+          return filter->is(chrom);
+        }
+
         // TODO: optimize for "@AGG." values
         if (field[0] == '@') {
           std::string value;
