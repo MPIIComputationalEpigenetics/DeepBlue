@@ -95,7 +95,7 @@ namespace epidb {
 
       bool is(const std::string &value)
       {
-        if (check(STRING) && value == s_value) {
+        if (check(STRING) && value != s_value) {
           return true;
         } else if (check(NUMBER)) {
           Score s;
