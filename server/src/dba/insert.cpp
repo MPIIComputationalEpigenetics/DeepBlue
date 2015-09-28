@@ -929,6 +929,195 @@ namespace epidb {
       return true;
     }
 
+    bool insert_annotation(const std::string &name, const std::string &norm_name,
+                           const std::string &genome, const std::string &norm_genome,
+                           const std::string &description, const std::string &norm_description,
+                           const datatypes::Metadata &extra_metadata,
+                           const std::string &user_key, const std::string &ip,
+                           const parser::WigPtr &wig,
+                           std::string &annotation_id, std::string &msg)
+    {
+      mongo::BSONObj annotation_metadata;
+      mongo::BSONObj extra_metadata_obj = datatypes::metadata_to_bson(extra_metadata);
+
+      int dataset_id;
+      if (!annotations::build_metadata(name, norm_name, genome, norm_genome,
+                                       description, norm_description, extra_metadata_obj,
+                                       user_key, ip, parser::FileFormat::wig_format(),
+                                       dataset_id, annotation_id, annotation_metadata, msg)) {
+        return false;
+      }
+
+      mongo::BSONObj upload_info;
+      if (!build_upload_info(user_key, ip, "signal", upload_info, msg)) {
+        return false;
+      }
+      mongo::BSONObjBuilder annotation_builder;
+      annotation_builder.appendElements(annotation_metadata);
+      annotation_builder.append("upload_info", upload_info);
+
+      mongo::BSONObj e = annotation_builder.obj();
+      Connection c;
+      c->insert(helpers::collection_name(Collections::ANNOTATIONS()), e);
+      if (!c->getLastError().empty()) {
+        msg = c->getLastError();
+        c.done();
+        return false;
+      }
+
+      if (!search::insert_full_text(Collections::ANNOTATIONS(), annotation_id, annotation_metadata, msg)) {
+        c.done();
+        std::string new_msg;
+        if (!remove::annotation(annotation_id, user_key, new_msg)) {
+          msg = msg + " " + new_msg;
+        }
+        return false;
+      }
+
+      genomes::GenomeInfoPtr genome_info;
+      if (!genomes::get_genome_info(genome, genome_info, msg)) {
+        c.done();
+        std::string new_msg;
+        if (!remove::annotation(annotation_id, user_key, new_msg)) {
+          msg = msg + " " + new_msg;
+        }
+        return false;
+      }
+
+      size_t count = 0;
+      std::vector<mongo::BSONObj> bulk;
+      std::string prev_collection;
+      size_t actual_size = 0;
+      size_t total_size = 0;
+      size_t total_regions = 0;
+
+      parser::WigContent::const_iterator end = wig->tracks_iterator_end();
+      for (parser::WigContent::const_iterator it = wig->tracks_iterator(); it != end; it++) {
+
+        parser::TrackPtr track = *it;
+
+        std::string internal_chromosome;
+        if (!genome_info->internal_chromosome(track->chromosome(), internal_chromosome, msg)) {
+          c.done();
+          std::string new_msg;
+          if (!remove::annotation(annotation_id, user_key, new_msg)) {
+            msg = msg + " " + new_msg;
+          }
+          return false;
+        }
+
+        mongo::BSONObjBuilder region_builder;
+        region_builder.append("_id", (long long) dataset_id << 32 | (long long) count++);
+        region_builder.append(KeyMapper::DATASET(), (int) dataset_id);
+
+        region_builder.append(KeyMapper::WIG_TRACK_TYPE(), (int) track->type());
+        region_builder.append(KeyMapper::START(), (int) track->start());
+        region_builder.append(KeyMapper::END(), (int) track->end());
+        if (track->step()) {
+          region_builder.append(KeyMapper::WIG_STEP(), (int) track->step());
+        }
+        if (track->span()) {
+          region_builder.append(KeyMapper::WIG_SPAN(), (int) track->span());
+        }
+        region_builder.append(KeyMapper::FEATURES(), (int) track->features());
+        region_builder.append(KeyMapper::WIG_DATA_SIZE(), (int) track->data_size());
+
+        std::shared_ptr<char> data = track->data();
+        size_t data_size = track->data_size();
+
+        std::shared_ptr<char> compressed_data;
+        size_t compressed_size = 0;
+        bool compressed = false;
+        compressed_data = epidb::compress::compress(data.get(), data_size, compressed_size, compressed);
+
+        if (compressed) {
+          region_builder.append(KeyMapper::WIG_COMPRESSED(), true);
+          region_builder.appendBinData(KeyMapper::WIG_DATA(), compressed_size, mongo::BinDataGeneral, (void *) compressed_data.get());
+          actual_size += compressed_size;
+        } else {
+          region_builder.appendBinData(KeyMapper::WIG_DATA(), data_size, mongo::BinDataGeneral, data.get());
+          actual_size += data_size;
+        }
+
+        total_regions +=  track->features();
+
+        size_t size;
+        // TODO: check regions and positions regards the chromosome size!
+        if (!genome_info->chromosome_size(internal_chromosome, size, msg)) {
+          c.done();
+          std::string new_msg;
+          if (!remove::annotation(annotation_id, user_key, new_msg)) {
+            msg = msg + " " + new_msg;
+          }
+          return false;
+        }
+
+        mongo::BSONObj r = region_builder.obj();
+        std::string collection = helpers::region_collection_name(genome, internal_chromosome);
+
+        if (prev_collection != collection) {
+          if (!prev_collection.empty() && bulk.size() > 0) {
+            c->insert(prev_collection, bulk);
+            if (!c->getLastError().empty()) {
+              msg = c->getLastError();
+              c.done();
+              std::string new_msg;
+              if (!remove::annotation(annotation_id, user_key, new_msg)) {
+                msg = msg + " " + new_msg;
+              }
+              return false;
+            }
+            bulk.clear();
+          }
+          prev_collection = collection;
+          actual_size = 0;
+        }
+
+        total_size += r.objsize();
+        bulk.push_back(r);
+
+        if (bulk.size() % BULK_SIZE == 0 || actual_size > MAXIMUM_SIZE) {
+          c->insert(collection, bulk);
+          if (!c->getLastError().empty()) {
+            msg = c->getLastError();
+            c.done();
+            std::string new_msg;
+            if (!remove::annotation(annotation_id, user_key, new_msg)) {
+              msg = msg + " " + new_msg;
+            }
+            return false;
+          }
+          bulk.clear();
+          actual_size = 0;
+        }
+      }
+
+      if (bulk.size() > 0) {
+        c->insert(prev_collection, bulk);
+        if (!c->getLastError().empty()) {
+          msg = c->getLastError();
+          c.done();
+          std::string new_msg;
+          if (!remove::annotation(annotation_id, user_key, new_msg)) {
+            msg = msg + " " + new_msg;
+          }
+          return false;
+        }
+        bulk.clear();
+      }
+
+      if (!update_upload_info(Collections::ANNOTATIONS(), annotation_id, total_size, msg)) {
+        std::string new_msg;
+        if (!remove::annotation(annotation_id, user_key, new_msg)) {
+          msg = msg + " " + new_msg;
+        }
+        return false;
+      }
+
+      c.done();
+      return true;
+    }
+
     bool insert_query_region_set(const std::string &genome, const std::string &norm_genome,
                                  const std::string &user_key, const std::string &ip,
                                  const parser::ChromosomeRegionsMap &map_regions,

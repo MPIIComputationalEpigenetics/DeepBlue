@@ -9,14 +9,21 @@
 #include <string>
 #include <sstream>
 
+#include "../datatypes/user.hpp"
+
 #include "../dba/dba.hpp"
 #include "../dba/exists.hpp"
 #include "../dba/insert.hpp"
-#include "../datatypes/user.hpp"
+
 #include "../engine/commands.hpp"
+
 #include "../extras/utils.hpp"
 #include "../extras/serialize.hpp"
+
 #include "../parser/parser_factory.hpp"
+#include "../parser/bedgraph_parser.hpp"
+#include "../parser/wig_parser.hpp"
+#include "../parser/wig.hpp"
 
 #include "../errors.hpp"
 
@@ -101,15 +108,42 @@ namespace epidb {
         bool ret;
         std::string id;
 
-        {
+        std::unique_ptr<std::istream> _input = std::unique_ptr<std::istream>(new std::stringstream(data));
 
+        if (format == "wig" || format == "bedgraph") {
+          parser::WigPtr wig;
+          if (format == "wig") {
+            parser::WIGParser wig_parser(std::move(_input));
+            if (!wig_parser.get(wig, msg)) {
+              result.add_error(msg);
+              return false;
+            }
+          } else {
+            parser::BedGraphParser bedgraph_parser(std::move(_input));
+            if (!bedgraph_parser.get(wig, msg)) {
+              result.add_error(msg);
+              return false;
+            }
+          }
+
+          std::string id;
+
+          ret = dba::insert_annotation(name, norm_name, genome, norm_genome, description, norm_description, extra_metadata,
+                                       user_key, ip, wig, id, msg);
+          if (ret) {
+            result.add_string(id);
+            return true;
+          } else {
+            result.add_error(msg);
+            return false;
+          }
+        } else {
           parser::FileFormat fileFormat;
           if (!parser::FileFormatBuilder::build(format, fileFormat, msg)) {
             result.add_error(msg);
             return false;
           }
 
-          std::unique_ptr<std::istream> _input = std::unique_ptr<std::istream>(new std::stringstream(data));
           parser::Parser parser(std::move(_input), fileFormat);
           if (!parser.check_format(msg)) {
             result.add_error(msg);

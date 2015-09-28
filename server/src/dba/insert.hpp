@@ -42,6 +42,14 @@ namespace epidb {
                            const parser::FileFormat &format,
                            std::string &annotation_id, std::string &msg);
 
+    bool insert_annotation(const std::string &name, const std::string &norm_name,
+                           const std::string &genome, const std::string &norm_genome,
+                           const std::string &description, const std::string &norm_description,
+                           const datatypes::Metadata &extra_metadata,
+                           const std::string &user_key, const std::string &ip,
+                           const parser::WigPtr &wig,
+                           std::string &annotation_id, std::string &msg);
+
     bool insert_experiment(const std::string &name, const std::string &norm_name,
                            const std::string &genome, const std::string &norm_genome,
                            const std::string &epigenetic_mark, const std::string &norm_epigenetic_mark,
@@ -49,7 +57,8 @@ namespace epidb {
                            const std::string &project, const std::string &norm_project,
                            const std::string &description, const std::string &norm_description,
                            const datatypes::Metadata &extra_metadata,
-                           const std::string &user_key, const std::string &ip, const parser::WigPtr &wig,
+                           const std::string &user_key, const std::string &ip,
+                           const parser::WigPtr &wig,
                            std::string &experiment_id, std::string &msg);
 
     bool insert_experiment(const std::string &name, const std::string &norm_name,
