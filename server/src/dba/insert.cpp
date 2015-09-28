@@ -515,6 +515,7 @@ namespace epidb {
       }
 
       bool ignore_unknow_chromosomes = extra_metadata.find("__ignore_unknow_chromosomes__") != extra_metadata.end();
+      bool trim_to_chromosome_size = extra_metadata.find("__trim_to_chromosome_size__") != extra_metadata.end();
 
       mongo::BSONObj upload_info;
       if (!build_upload_info(user_key, ip, "peaks", upload_info, msg)) {
@@ -590,15 +591,10 @@ namespace epidb {
         size_t bulk_size = 0;
         std::vector<mongo::BSONObj> block;
         std::vector<mongo::BSONObj> blocks_bulk;
-        BOOST_FOREACH(const parser::BedLine & bed_line, chrom_lines.second) {
-          mongo::BSONObjBuilder region_builder;
-          if (!fill_region_builder(region_builder, bed_line, format, msg)) {
-            c.done();
-            std::string new_msg;
-            if (!remove::experiment(experiment_id, user_key, new_msg)) {
-              msg = msg + " " + new_msg;
-            }
-            return false;
+        BOOST_FOREACH(parser::BedLine & bed_line, chrom_lines.second) {
+
+          if (trim_to_chromosome_size && bed_line.end > size) {
+            bed_line.end = size;
           }
 
           if (bed_line.start > size || bed_line.end > size) {
@@ -610,6 +606,17 @@ namespace epidb {
             }
             return false;
           }
+
+          mongo::BSONObjBuilder region_builder;
+          if (!fill_region_builder(region_builder, bed_line, format, msg)) {
+            c.done();
+            std::string new_msg;
+            if (!remove::experiment(experiment_id, user_key, new_msg)) {
+              msg = msg + " " + new_msg;
+            }
+            return false;
+          }
+
           mongo::BSONObj r = region_builder.obj();
           std::string collection = helpers::region_collection_name(genome, internal_chromosome);
 
@@ -735,7 +742,6 @@ namespace epidb {
         std::string collection = helpers::region_collection_name(genome, internal_chromosome);
 
         BOOST_FOREACH(const parser::BedLine & bed_line, chrom_lines.second) {
-          mongo::BSONObjBuilder region_builder;
 
           if (bed_line.start > size || bed_line.end > size) {
             msg = out_of_range_message(bed_line.start, bed_line.end, bed_line.chromosome);
@@ -747,6 +753,7 @@ namespace epidb {
             return false;
           }
 
+          mongo::BSONObjBuilder region_builder;
           if (!fill_region_builder(region_builder, bed_line, format, msg)) {
             c.done();
             std::string new_msg;
@@ -1168,7 +1175,6 @@ namespace epidb {
         std::string collection = helpers::region_collection_name(genome, internal_chromosome);
 
         BOOST_FOREACH(const parser::BedLine & bed_line, chrom_lines.second) {
-          mongo::BSONObjBuilder region_builder;
 
           if (bed_line.start > size || bed_line.end > size) {
             msg = out_of_range_message(bed_line.start, bed_line.end, bed_line.chromosome);
@@ -1180,6 +1186,7 @@ namespace epidb {
             return false;
           }
 
+          mongo::BSONObjBuilder region_builder;
           if (!fill_region_builder(region_builder, bed_line, format, msg)) {
             c.done();
             std::string new_msg;
