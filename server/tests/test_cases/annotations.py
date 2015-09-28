@@ -176,3 +176,56 @@ class TestAnnotationCommands(helpers.TestCase):
     self.assertEqual(regions_shuffle, regions)
 
     self.assertEqual(regions, regions_shuffle)
+
+  def test_annotation_signal_bedgraph(self):
+    epidb = EpidbClient()
+    self.init_base(epidb)
+
+    sample_id = self.sample_ids[0]
+
+    files = ["test1"]
+
+    for filename in files:
+      wig_data = helpers.load_bedgraph(filename)
+      res = epidb.add_annotation(filename, "hg19", "Test data", wig_data, "bedgraph", None, self.admin_key)
+      self.assertSuccess(res)
+
+    (s, q) = epidb.select_annotations(files, "hg19", None, None, None, self.admin_key)
+
+    (s, req) = epidb.count_regions(q, self.admin_key)
+    self.assertSuccess(s, req)
+    count = self.count_request(req)
+
+    self.assertEqual(1000, count)
+
+    (s, q_filtered_down) = epidb.filter_regions(q, "VALUE", ">", "0.75", "number", self.admin_key)
+    (s, q_filtered_up) = epidb.filter_regions(q_filtered_down, "VALUE", "<", "0.8", "number", self.admin_key)
+    (s, q_chr_x) = epidb.filter_regions(q_filtered_up, "CHROMOSOME", "!=", "chrX", "string", self.admin_key)
+    (s, q_chr_7) = epidb.filter_regions(q_chr_x, "CHROMOSOME", "!=", "chr7", "string", self.admin_key)
+
+    (s, req) = epidb.get_regions(q_chr_7, "CHROMOSOME,START,END,VALUE,@NAME,@EPIGENETIC_MARK", self.admin_key)
+    regions = self.get_regions_request(req)
+
+    self.assertEqual(regions, 'chr1\t104372258\t104372293\t0.7767\ttest1\t\nchr10\t126498141\t126498176\t0.7695\ttest1\t\nchr11\t66110277\t66110312\t0.7613\ttest1\t\nchr15\t38653026\t38653061\t0.7720\ttest1\t\nchr15\t87725326\t87725361\t0.7727\ttest1\t\nchr16\t2119419\t2119454\t0.7696\ttest1\t\nchr16\t63360719\t63360754\t0.7740\ttest1\t\nchr19\t46369215\t46369250\t0.7727\ttest1\t\nchr8\t21923667\t21923702\t0.7930\ttest1\t')
+
+
+  def test_annotation_signal_wig(self):
+    epidb = EpidbClient()
+    self.init_base(epidb)
+
+    sample_id = self.sample_ids[0]
+
+    files = ["scores1", "scores2", "scores3", "scores4", "scores5",
+             "scores6", "scores7", "yeast_pol2", "yeast_rap1"]
+
+    for filename in files:
+      wig_data = helpers.load_wig(filename)
+      res = epidb.add_annotation(filename, "hg19", "Test data", wig_data, "wig", None, self.admin_key)
+      self.assertSuccess(res)
+
+    (s, r) = epidb.select_annotations(files, "hg19", None, None, None, self.admin_key)
+
+    (s, req) = epidb.count_regions(r, self.admin_key)
+    count = self.count_request(req)
+    self.assertEqual(5667, count)
+
