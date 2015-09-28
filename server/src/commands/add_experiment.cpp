@@ -13,11 +13,13 @@
 
 #include <boost/foreach.hpp>
 
+#include "../datatypes/user.hpp"
+
 #include "../dba/dba.hpp"
 #include "../dba/exists.hpp"
 #include "../dba/insert.hpp"
 #include "../dba/list.hpp"
-#include "../datatypes/user.hpp"
+
 #include "../engine/commands.hpp"
 
 #include "../extras/utils.hpp"
