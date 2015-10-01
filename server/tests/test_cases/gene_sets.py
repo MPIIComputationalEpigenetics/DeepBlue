@@ -32,3 +32,29 @@ class TestGenes(helpers.TestCase):
 
     regions = self.get_regions_request(r_id)
     self.assertEquals('chr1\tHAVANA\tgene\t11869\t14409\t.\t+\t.\tgene_id "ENSG00000223972.5"; gene_name "DDX11L1"; gene_status "KNOWN"; gene_type "transcribed_unprocessed_pseudogene"; havana_gene "OTTHUMG00000000961.2"; level "2"\tDDX11L1', regions)
+
+  def test_gene_re(self):
+    epidb = EpidbClient()
+    self.init_base(epidb)
+
+    data = open("data/gtf/gencode.v23.basic.annotation_head.gtf").read()
+
+    (s, ss) = epidb.add_gene_set("Test One", "Test One Description", data, "GTF", {}, self.admin_key)
+    self.assertSuccess(s, ss)
+
+    (s, query_id) = epidb.select_genes(["RP11-34P13.7"], "Test One", self.admin_key)
+    (s, req) = epidb.count_regions(query_id, self.admin_key)
+    count = self.count_request(req)
+    self.assertEquals(count, 1)
+
+    (s, query_id) = epidb.select_genes(["RP11-34P13.234"], "Test One", self.admin_key)
+    (s, req) = epidb.count_regions(query_id, self.admin_key)
+    count = self.count_request(req)
+    self.assertEquals(count, 0)
+
+    (s, query_id) = epidb.select_genes(["RP11-34P13"], "Test One", self.admin_key)
+    (s, req) = epidb.count_regions(query_id, self.admin_key)
+    count = self.count_request(req)
+    self.assertEquals(count, 8)
+
+
