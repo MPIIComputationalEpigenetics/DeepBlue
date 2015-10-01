@@ -630,7 +630,7 @@ namespace epidb {
       bool retrieve_genes_select_query(const std::string &user_key, const mongo::BSONObj &query,
                                        processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg)
       {
-        processing::RunningOp runningOp = status->start_operation(processing::RETRIEVE_ANNOTATION_SELECT_QUERY, query);
+        processing::RunningOp runningOp = status->start_operation(processing::RETRIEVE_GENES_DATA, query);
         if (is_canceled(status, msg)) {
           return false;
         }
