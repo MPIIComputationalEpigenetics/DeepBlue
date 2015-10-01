@@ -233,8 +233,6 @@ class TestExperiments(helpers.TestCase):
 
     data = self.get_regions_request(req)
 
-    print data
-
     regions_data_okay = helpers.load_bed("hg18_out_of_bounds_okay")
 
     self.assertEqual(data, regions_data_okay)
