@@ -11,7 +11,9 @@
 
 #include <map>
 
-#include <mongo/bson/bson.h>
+namespace mongo {
+  class BSONObj;
+}
 
 namespace epidb {
   namespace datatypes {
