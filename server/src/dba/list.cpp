@@ -205,7 +205,7 @@ namespace epidb {
       bool annotations(const std::string &genome, const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg)
       {
         std::vector<mongo::BSONObj> objects;
-        if (!helpers::get(Collections::ANNOTATIONS(), "genome", genome, objects, msg)) {
+        if (!helpers::get(Collections::ANNOTATIONS(), "norm_genome", genome, objects, msg)) {
           return false;
         }
 

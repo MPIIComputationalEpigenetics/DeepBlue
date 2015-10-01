@@ -229,3 +229,14 @@ class TestAnnotationCommands(helpers.TestCase):
     count = self.count_request(req)
     self.assertEqual(5667, count)
 
+  def test_list_annotations2(self):
+    epidb = EpidbClient()
+    self.init(epidb)
+
+
+    res = epidb.add_genome("GRCh38", "GRCh38", "chr1 1000000\nchr2 2000000", self.admin_key)
+    self.assertSuccess(res)
+
+
+    status, anns = epidb.list_annotations("GRCh38", self.admin_key)
+    self.assertEqual(anns, [['a1', 'Chromosomes size for GRCh38']])
