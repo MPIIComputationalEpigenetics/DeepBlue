@@ -72,11 +72,13 @@ namespace epidb {
 
         // TODO: check if pattern already exists
 
-        std::string id;
-        bool ret =  dba::process_pattern(genome, pattern, overlap, user_key, ip, id, msg);
+        utils::IdName idName;
+        bool ret =  dba::process_pattern(genome, pattern, overlap, user_key, ip, idName, msg);
 
         if (ret) {
-          result.add_string(id);
+          result.set_as_array(true);
+          result.add_string(idName.id);
+          result.add_string(idName.name);
         } else {
           result.add_error(msg);
         }
