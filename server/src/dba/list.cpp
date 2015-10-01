@@ -49,7 +49,7 @@ namespace epidb {
         mongo::BSONObjBuilder query_builder;
         datatypes::Metadata::const_iterator it;
         for (const auto& p : metadata) {
-          query_builder.append("extra_metadata."+p.first, p.second);
+          query_builder.append("extra_metadata." + p.first, p.second);
         }
         return helpers::get(Collections::BIOSOURCES(), query_builder.obj(), result, msg);
       }
@@ -252,37 +252,37 @@ namespace epidb {
       bool similar_biosources(const std::string &name, const std::string &user_key,
                               std::vector<utils::IdName> &result, std::string &msg)
       {
-        return similar(Collections::BIOSOURCES(), name, user_key, result, msg);
+        return similar(Collections::BIOSOURCES(), utils::normalize_name(name), user_key, result, msg);
       }
 
       bool similar_techniques(const std::string &name, const std::string &user_key,
                               std::vector<utils::IdName> &result, std::string &msg)
       {
-        return similar(Collections::TECHNIQUES(), name, user_key, result, msg);
+        return similar(Collections::TECHNIQUES(), utils::normalize_name(name), user_key, result, msg);
       }
 
       bool similar_projects(const std::string &name, const std::string &user_key,
                             std::vector<utils::IdName> &result, std::string &msg)
       {
-        return similar(Collections::PROJECTS(), name, user_key, result, msg);
+        return similar(Collections::PROJECTS(), utils::normalize_name(name), user_key, result, msg);
       }
 
       bool similar_epigenetic_marks(const std::string &name, const std::string &user_key,
                                     std::vector<utils::IdName> &result, std::string &msg)
       {
-        return similar(Collections::EPIGENETIC_MARKS(), name, user_key, result, msg);
+        return similar(Collections::EPIGENETIC_MARKS(),  utils::normalize_epigenetic_mark(name), user_key, result, msg);
       }
 
       bool similar_genomes(const std::string &name, const std::string &user_key,
                            std::vector<utils::IdName> &result, std::string &msg)
       {
-        return similar(Collections::GENOMES(), name, user_key, result, msg);
+        return similar(Collections::GENOMES(), utils::normalize_epigenetic_mark(name), user_key, result, msg);
       }
 
       bool similar_experiments(const std::string &name, const std::string &genome, const std::string &user_key,
                                std::vector<utils::IdName> &result, std::string &msg)
       {
-        return similar(Collections::EXPERIMENTS(), "name", name, "genome", genome, user_key, result, msg);
+        return similar(Collections::EXPERIMENTS(), "norm_name", utils::normalize_name(name), "norm_genome", utils::normalize_name(genome), user_key, result, msg);
       }
 
       bool similar(const std::string &where, const std::string &what,
@@ -297,8 +297,14 @@ namespace epidb {
         std::vector<std::string> names;
         std::map<std::string, std::string> id_name_map;
         for (const utils::IdName & id_name : id_names) {
-          id_name_map[id_name.name] = id_name.id;
-          names.push_back(id_name.name);
+          std::string norm_name;
+          if (where == Collections::EPIGENETIC_MARKS()) {
+            norm_name = utils::normalize_epigenetic_mark(id_name.name);
+          } else {
+            norm_name = utils::normalize_name(id_name.name);
+          }
+          id_name_map[norm_name] = id_name.id;
+          names.push_back(norm_name);
         }
         std::vector<std::string> ordered = epidb::algorithms::Levenshtein::order_by_score(what, names);
 
