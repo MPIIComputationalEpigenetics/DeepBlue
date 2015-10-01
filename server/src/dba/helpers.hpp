@@ -127,6 +127,7 @@ namespace epidb {
       mongo::BSONArray build_array(const std::vector<std::string> &params);
       mongo::BSONArray build_array(const std::vector<int> &params);
       mongo::BSONArray build_array(const std::vector<serialize::ParameterPtr> &params);
+      mongo::BSONArray build_regex_array(const std::vector<std::string> &params);
       mongo::BSONArray build_normalized_array(const std::vector<std::string> &params);
       mongo::BSONArray build_normalized_array(const std::vector<serialize::ParameterPtr> &params);
       mongo::BSONArray build_epigenetic_normalized_array(const std::vector<serialize::ParameterPtr> &params);

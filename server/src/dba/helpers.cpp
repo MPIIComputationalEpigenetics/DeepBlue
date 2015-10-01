@@ -425,6 +425,15 @@ namespace epidb {
         return ab.arr();
       }
 
+      mongo::BSONArray build_regex_array(const std::vector<std::string> &params)
+      {
+        mongo::BSONArrayBuilder ab;
+        for (const auto& param : params) {
+          ab.appendRegex(param);
+        }
+        return ab.arr();
+      }
+
       mongo::BSONArray build_normalized_array(const std::vector<std::string> &params)
       {
         mongo::BSONArrayBuilder ab;
