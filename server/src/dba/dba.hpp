@@ -105,7 +105,7 @@ namespace epidb {
      **/
     bool process_pattern(const std::string &genome, const std::string &pattern, const bool overlap,
                          const std::string &user_key, const std::string &ip,
-                         std::string &annotation_id, std::string &msg);
+                         utils::IdName &annotation_id_name, std::string &msg);
 
     bool find_annotation_pattern(const std::string &genome, const std::string &pattern, const bool overlap,
                                  DatasetId &dataset_id, std::string &msg);

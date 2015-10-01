@@ -1012,7 +1012,7 @@ namespace epidb {
 
     bool process_pattern(const std::string &genome, const std::string &pattern, const bool overlap,
                          const std::string &user_key, const std::string &ip,
-                         std::string &annotation_id, std::string &msg)
+                         utils::IdName &annotation_id_name, std::string &msg)
     {
       std::string norm_genome = utils::normalize_name(genome);
       std::string name = build_pattern_annotation_name(pattern, genome, overlap);
@@ -1029,7 +1029,8 @@ namespace epidb {
       }
 
       if (!results.empty()) {
-        annotation_id = results[0]["_id"].str();
+        annotation_id_name.id = results[0]["_id"].str();
+        annotation_id_name.name = results[0]["name"].str();
         return true;
       }
 
@@ -1078,11 +1079,15 @@ namespace epidb {
         extra_metadata["overlap-style"] = "non-overlap";
       }
 
+      std::string annotation_id;
       if (!insert_annotation(name, norm_name, genome, norm_genome, description, norm_description, extra_metadata,
                              user_key, ip, pattern_regions, parser::FileFormat::default_format(),
                              annotation_id, msg)) {
         return false;
       }
+
+      annotation_id_name.name = name;
+      annotation_id_name.id = annotation_id;
 
       return true;
     }
