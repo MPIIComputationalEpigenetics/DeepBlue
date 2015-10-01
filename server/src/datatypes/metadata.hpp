@@ -10,6 +10,7 @@
 #define METADATA_HPP
 
 #include <map>
+#include <string>
 
 namespace mongo {
   class BSONObj;
