@@ -120,7 +120,7 @@ namespace epidb {
       std::vector<std::pair<std::string, float> > ps;
 
       BOOST_FOREACH(const std::string & tm, tms) {
-        float value = calculate_score(term, tm);
+        float value = calculate_score(term, utils::normalize_name(tm));
         std::pair<std::string, float> score_pair(tm, value);
         ps.push_back(score_pair);
       }

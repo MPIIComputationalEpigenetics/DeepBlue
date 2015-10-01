@@ -282,7 +282,7 @@ namespace epidb {
       bool similar_experiments(const std::string &name, const std::string &genome, const std::string &user_key,
                                std::vector<utils::IdName> &result, std::string &msg)
       {
-        return similar(Collections::EXPERIMENTS(), "norm_name", utils::normalize_name(name), "norm_genome", utils::normalize_name(genome), user_key, result, msg);
+        return similar(Collections::EXPERIMENTS(), "name", name, "genome", genome, user_key, result, msg);
       }
 
       bool similar(const std::string &where, const std::string &what,
@@ -297,14 +297,8 @@ namespace epidb {
         std::vector<std::string> names;
         std::map<std::string, std::string> id_name_map;
         for (const utils::IdName & id_name : id_names) {
-          std::string norm_name;
-          if (where == Collections::EPIGENETIC_MARKS()) {
-            norm_name = utils::normalize_epigenetic_mark(id_name.name);
-          } else {
-            norm_name = utils::normalize_name(id_name.name);
-          }
-          id_name_map[norm_name] = id_name.id;
-          names.push_back(norm_name);
+          id_name_map[id_name.name] = id_name.id;
+          names.push_back(id_name.name);
         }
         std::vector<std::string> ordered = epidb::algorithms::Levenshtein::order_by_score(what, names);
 
