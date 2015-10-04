@@ -188,6 +188,12 @@ chr3\t3\t30000\t\tQuery q1 regions set\t\t29997.000000"""
     ## Only peaks again, but deriving from an signal query
     self.assertEqual(21, count)
 
+    (s, req2) = epidb.count_regions(new_peaks_new_query_signal, self.admin_key)
+    count = self.count_request(req2)
+    ## Only peaks again, but deriving from an signal query
+    self.assertEqual(21, count)
+
+    self.assertEqual(req, req2)
 
 
 
