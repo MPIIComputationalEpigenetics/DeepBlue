@@ -115,15 +115,8 @@ namespace epidb {
       if (ret.isEmpty()) {
         return false;
       } else {
-        mongo::Date_t time = ret["create_time"].Date();
-        boost::posix_time::ptime ptime = epidb::extras::to_ptime(time);
-        std::cerr << ptime << std::endl;
-        std::cerr << epidb::extras::universal_date_time() << std::endl;
-        if (epidb::extras::universal_date_time() < ptime + boost::posix_time::minutes(1)) {
-          id = ret["_id"].String();
-          return true;
-        }
-        return false;
+        id = ret["_id"].String();
+        return true;
       }
     }
 
