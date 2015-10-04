@@ -119,7 +119,6 @@ namespace epidb {
       if (!msg.empty()) {
         return false;
       }
-      std::cerr << "done" << std::endl;
 
       return true;
     }

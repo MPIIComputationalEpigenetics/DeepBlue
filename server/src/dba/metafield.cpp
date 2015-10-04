@@ -191,7 +191,6 @@ namespace epidb {
 
       const std::string get_by_region_set(const mongo::BSONObj &obj, const std::string &field)
     {
-      std::cerr << obj.toString() << std::endl;
       if (!obj.hasField(field)) {
         return "";
       }
@@ -210,7 +209,6 @@ namespace epidb {
                          processing::StatusPtr status, std::string &result, std::string &msg)
     {
       std::string name = get_by_region_set(obj, "name");
-      std::cerr << name  << std::endl;
       result = name;
       return true;
     }

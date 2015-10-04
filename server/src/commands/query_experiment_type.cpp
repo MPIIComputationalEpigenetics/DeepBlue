@@ -76,7 +76,6 @@ namespace epidb {
           err_msg = msg;
         }
 
-        std::cerr << type << std::endl;
         if (type != "signal" && type != "peaks") {
           result.add_error("The type must be 'peaks' or signal'");
           return false;
