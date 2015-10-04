@@ -93,6 +93,23 @@ namespace epidb {
       bool store_query(const std::string &type, const mongo::BSONObj &args, const std::string &user_key,
                        std::string &query_id, std::string &msg)
       {
+        utils::IdName user;
+        if (!users::get_user(user_key, user, msg)) {
+          return false;
+        }
+
+        mongo::BSONObjBuilder search_query_builder;
+        search_query_builder.append("type", type);
+        search_query_builder.append("args", args);
+        search_query_builder.append("user", user.id);
+        mongo::BSONObj search_query = search_query_builder.obj();
+
+        mongo::BSONObj result;
+        if (helpers::get_one(Collections::QUERIES(), search_query, result, msg)) {
+          query_id = result["_id"].String();
+          return true;
+        }
+
         int query_counter;
         if (!helpers::get_increment_counter(Collections::QUERIES(), query_counter, msg)) {
           return false;
@@ -104,10 +121,6 @@ namespace epidb {
         mongo::BSONObjBuilder stored_query_builder;
 
         stored_query_builder.append("_id", query_id);
-        utils::IdName user;
-        if (!users::get_user(user_key, user, msg)) {
-          return false;
-        }
         stored_query_builder.append("user", user.id);
         stored_query_builder.appendTimeT("time", time_);
         stored_query_builder.append("type", type);
