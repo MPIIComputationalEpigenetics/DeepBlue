@@ -37,7 +37,7 @@ namespace epidb {
       static Parameters parameters_()
       {
         Parameter p[] = {
-          Parameter("genes_name", serialize::STRING, "name(s) of selected genes(s)", true),
+          Parameter("genes_name", serialize::STRING, "genes(s) (ENSB ID or ENSB name)", true),
           Parameter("gene_set", serialize::STRING, "gene set name"),
           parameters::UserKey
         };
