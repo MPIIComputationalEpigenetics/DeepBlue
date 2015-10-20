@@ -44,7 +44,7 @@ namespace epidb {
       static Parameters results_()
       {
         Parameter p[] = {
-          Parameter("request_id", serialize::STRING, "Request ID - Use it to retrieve the result with get_request_status and get_request_data")
+          Parameter("request_id", serialize::STRING, "Request ID - Use it to retrieve the result with info() and get_request_data()")
         };
         Parameters results(&p[0], &p[0] + 1);
         return results;
