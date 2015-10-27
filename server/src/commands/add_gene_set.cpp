@@ -90,6 +90,12 @@ namespace epidb {
         std::string norm_description = utils::normalize_name(description);
 
         if (dba::exists::gene_set(norm_name)) {
+          std::string s = Error::m(ERR_DUPLICATED_GENE_SET_NAME, name);
+          result.add_error(s);
+          return false;
+        }
+
+        if (dba::exists::gene_set(norm_name)) {
           std::string s = "The gene set name " + name + " is already being used.";
           result.add_error(s);
           return false;
