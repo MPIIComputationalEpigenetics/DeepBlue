@@ -262,8 +262,8 @@ namespace epidb {
           datatypes::Metadata attributes = datatypes::bson_to_metadata(gene[KeyMapper::ATTRIBUTES()].Obj());
 
           if (chromosome != actual_chromosome) {
-            if (!chromosome.empty() && !actual_regions.empty()) {
-              chromosomeRegionsList.emplace_back(std::move(chromosome), std::move(actual_regions));
+            if (!actual_chromosome.empty() && !actual_regions.empty()) {
+              chromosomeRegionsList.emplace_back(std::move(actual_chromosome), std::move(actual_regions));
             }
             actual_chromosome = chromosome;
             actual_regions = build_regions();
