@@ -101,6 +101,8 @@ namespace epidb {
 
   Error ERR_DUPLICATED_EXPERIMENT_NAME("102001", "The experiment name '{}' is already being used.");
 
+  Error ERR_DUPLICATED_GENE_SET_NAME("113001", "The gene set '{}' is already being used.");
+
   Error ERR_INVALID_BIOSOURCE_NAME("104000", "Invalid BioSource Name '{}'. No BioSource or Synonym was defined with this name.");
   Error ERR_DUPLICATED_BIOSOURCE_NAME("104001", "Duplicated BioSource Name '{}'. BioSource or Synonym with this name already exists.");
   Error ERR_MORE_EMBRACING_BIOSOURCE_NAME("104901", "'{}' is already more embracing than '{}'.");
