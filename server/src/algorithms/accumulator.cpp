@@ -74,6 +74,11 @@ namespace epidb {
       return values.size();
     }
 
+    Score Accumulator::boolean() const
+    {
+      return !values.empty();
+    }
+
     void Accumulator::calculate() const
     {
       std::vector<Score> calculated_values = values;
@@ -136,6 +141,10 @@ namespace epidb {
 
       if (function_name == "count") {
         return &Accumulator::count;
+      }
+
+      if (function_name == "boolean") {
+        return &Accumulator::boolean;
       }
 
       return nullptr;

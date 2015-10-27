@@ -40,6 +40,7 @@ namespace epidb {
       Score sd() const;
       Score median() const;
       Score count() const;
+      Score boolean() const;
       const std::string string(std::string sep) const;
     };
 
