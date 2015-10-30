@@ -25,7 +25,7 @@ class TestExperiments(helpers.TestCase):
               "ENCODE", "desc1", regions_data, format, None, self.admin_key)
     self.assertSuccess(res)
 
-    res, experiments = epidb.list_experiments("hg19", None, None, None, None, self.admin_key)
+    res, experiments = epidb.list_experiments("hg19", "peaks", None, "K562", None, None, None, self.admin_key)
     self.assertSuccess(res, experiments)
     self.assertEqual(len(experiments), 2)
 
@@ -49,7 +49,7 @@ class TestExperiments(helpers.TestCase):
               "ENCODE", "desc1", "", "wig", {"__local_file__": "inexistent_file.wig"}, self.admin_key)
     self.assertFailure(res)
 
-    res, experiments = epidb.list_experiments("hg19", None, None, None, None, self.admin_key)
+    res, experiments = epidb.list_experiments("hg19", "signal", None, "K562", None, None, None, self.admin_key)
     self.assertSuccess(res, experiments)
     self.assertEqual(len(experiments), 1)
 

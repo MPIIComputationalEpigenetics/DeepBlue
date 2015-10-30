@@ -392,11 +392,23 @@ namespace epidb {
             experiments_query_builder.append("norm_technique", args["norm_technique"].str());
           }
         }
-        if (args.hasField("upload_info.upload_end")) {
-          experiments_query_builder.append(args["upload_info.upload_end"]);
+        if (args.hasField("sample_info.biosource_name")) {
+          if (args["sample_info.biosource_name"].type() == mongo::Array) {
+            experiments_query_builder.append("sample_info.norm_biosource_name", BSON("$in" << args["sample_info.norm_biosource_name"]));
+          } else {
+            experiments_query_builder.append("sample_info.norm_biosource_name", args["sample_info.norm_biosource_name"].str());
+          }
         }
         if (args.hasField("upload_info.content_format")) {
-          experiments_query_builder.append(args["upload_info.content_format"]);
+          std::cerr <<  "type: " << args["upload_info.content_format"].type() << std::endl;
+          if (args["upload_info.content_format"].type() == mongo::Array) {
+            experiments_query_builder.append("upload_info.content_format", BSON("$in" << args["upload_info.content_format"]));
+         } else {
+            experiments_query_builder.append("upload_info.content_format", args["upload_info.content_format"].str());
+         }
+        }
+        if (args.hasField("upload_info.upload_end")) {
+          experiments_query_builder.append(args["upload_info.upload_end"]);
         }
         experiments_query_builder.append("upload_info.done", true);
         return experiments_query_builder.obj();

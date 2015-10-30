@@ -17,6 +17,6 @@ project = 'Blueprint Epigenetics'
 project = "ENCODE"
 
 sample = "s1"
-(s, e) = server.list_experiments(genome, epigenetic_mark, sample, technique, project, uk)
+(s, e) = server.list_experiments(genome, "", epigenetic_mark, "", sample, technique, project, uk)
 
 print len(e)

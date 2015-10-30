@@ -37,13 +37,15 @@ namespace epidb {
       {
         Parameter p[] = {
           parameters::GenomeMultiple,
+          Parameter("type", serialize::STRING, "type of the experiment: peaks or signal", true),
           Parameter("epigenetic_mark", serialize::STRING, "name(s) of selected epigenetic mark(s)", true),
+          Parameter("biosource", serialize::STRING, "name(s) of selected biosource(s)", true),
           Parameter("sample", serialize::STRING, "id(s) of selected sample(s)", true),
-          Parameter("technique", serialize::STRING, "name(s) of selected technique(es)", true),
+          Parameter("technique", serialize::STRING, "name(s) of selected technique(s)", true),
           Parameter("project", serialize::STRING, "name(s) of selected projects", true),
           parameters::UserKey
         };
-        Parameters params(&p[0], &p[0] + 6);
+        Parameters params(&p[0], &p[0] + 8);
         return params;
       }
 
@@ -63,18 +65,22 @@ namespace epidb {
                        const serialize::Parameters &parameters, serialize::Parameters &result) const
       {
         std::vector<serialize::ParameterPtr> genomes;
+        std::vector<serialize::ParameterPtr> types;
         std::vector<serialize::ParameterPtr> epigenetic_marks;
+        std::vector<serialize::ParameterPtr> biosources;
         std::vector<serialize::ParameterPtr> sample_ids;
         std::vector<serialize::ParameterPtr> techniques;
         std::vector<serialize::ParameterPtr> projects;
 
         parameters[0]->children(genomes);
-        parameters[1]->children(epigenetic_marks);
-        parameters[2]->children(sample_ids);
-        parameters[3]->children(techniques);
-        parameters[4]->children(projects);
+        parameters[1]->children(types);
+        parameters[2]->children(epigenetic_marks);
+        parameters[3]->children(biosources);
+        parameters[4]->children(sample_ids);
+        parameters[5]->children(techniques);
+        parameters[6]->children(projects);
 
-        const std::string user_key = parameters[5]->as_string();
+        const std::string user_key = parameters[7]->as_string();
 
         std::string msg;
         datatypes::User user;
@@ -85,10 +91,22 @@ namespace epidb {
         }
 
         mongo::BSONObjBuilder args_builder;
+
+        if (!types.empty()) {
+          args_builder.append("upload_info.content_format", dba::helpers::build_normalized_array(types));
+        }
+
         if (!genomes.empty()) {
           args_builder.append("genome", dba::helpers::build_array(genomes));
           args_builder.append("norm_genome", dba::helpers::build_normalized_array(genomes));
         }
+
+
+        if (!biosources.empty()) {
+          args_builder.append("sample_info.biosource_name", dba::helpers::build_array(biosources));
+          args_builder.append("sample_info.norm_biosource_name", dba::helpers::build_normalized_array(biosources));
+        }
+
         // epigenetic mark
         if (!epigenetic_marks.empty()) {
           args_builder.append("epigenetic_mark", dba::helpers::build_array(epigenetic_marks));
@@ -147,6 +165,7 @@ namespace epidb {
         }
 
         const mongo::BSONObj query = dba::query::build_query(args_builder.obj());
+        std::cerr << "XXX" << query.toString() << std::endl;
         std::vector<utils::IdName> names;
         if (!dba::list::experiments(query, names, msg)) {
           result.add_error(msg);

@@ -177,10 +177,11 @@ class EpidbClient:
     def get_experiments_by_query(self, qid, user_key):
         return self.server.get_experiments_by_query(qid, user_key)
 
-    def list_experiments(self, genome, epigenetic_mark, sample, technique,
-                         project, user_key):
-        return self.server.list_experiments(genome, epigenetic_mark, sample,
-                                            technique, project, user_key)
+    def list_experiments(self, genome, type, epigenetic_mark, biosources, sample,
+                         technique, project, user_key):
+        return self.server.list_experiments(genome, type, epigenetic_mark,
+                                            biosources, sample, technique, project,
+                                            user_key)
 
     def list_similar_experiments(self, name, genome, user_key):
         return self.server.list_similar_experiments(name, genome, user_key)
