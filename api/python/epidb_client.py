@@ -234,6 +234,9 @@ class EpidbClient:
     def intersection(self, query_a_id, query_b_id, user_key):
         return self.server.intersection(query_a_id, query_b_id, user_key)
 
+    def flank(self, query_id, start, length, use_strand, user_key):
+        return self.server.flank(query_id, start, length, use_strand, user_key)
+
     def aggregate(self, regions_data_id, regions_range_id, field, user_key):
         return self.server.aggregate(regions_data_id,
                                      regions_range_id, field, user_key)
