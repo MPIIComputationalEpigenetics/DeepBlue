@@ -35,6 +35,7 @@ namespace epidb {
       RETRIEVE_TILING_QUERY = 35,
       RETRIEVE_QUERY_REGION_SET = 36,
       RETRIEVE_GENES_DATA = 37,
+      RETRIEVE_FLANK_QUERY = 38,
       PROCESS_AGGREGATE = 50
     };
 

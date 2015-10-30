@@ -11,7 +11,6 @@
 #include <set>
 #include <vector>
 
-#include "aggregate.hpp"
 #include "accumulator.hpp"
 
 #include "../datatypes/column_types_def.hpp"

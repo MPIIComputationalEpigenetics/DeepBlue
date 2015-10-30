@@ -12,8 +12,6 @@
 
 #include <iostream>
 
-#include "merge.hpp"
-
 #include "../datatypes/regions.hpp"
 
 namespace epidb {

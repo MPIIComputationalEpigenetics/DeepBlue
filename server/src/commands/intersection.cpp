@@ -69,7 +69,7 @@ namespace epidb {
 
         if (!dba::exists::query(query_a_id, user_key, msg)) {
           if (msg.empty()) {
-            result.add_error("Invalid first query ID: " + query_a_id);
+            result.add_error(Error::m(ERR_INVALID_QUERY_ID, query_a_id));
           } else {
             result.add_error(msg);
           }
@@ -78,7 +78,7 @@ namespace epidb {
 
         if (!dba::exists::query(query_b_id, user_key, msg)) {
           if (msg.empty()) {
-            result.add_error("Invalid second query ID: " + query_b_id);
+            result.add_error(Error::m(ERR_INVALID_QUERY_ID, query_b_id));
           } else {
             result.add_error(msg);
           }

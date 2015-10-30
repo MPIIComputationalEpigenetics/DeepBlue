@@ -12,6 +12,7 @@ import complex_queries
 import epigenetic_marks
 import experiments
 import filters
+import flank
 import gene_sets
 import genomes
 import info

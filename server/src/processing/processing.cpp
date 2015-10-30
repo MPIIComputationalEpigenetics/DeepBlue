@@ -40,6 +40,7 @@ namespace epidb {
       m[RETRIEVE_GENES_DATA] = "Getting genes data";
       m[PROCESS_AGGREGATE] = "Aggregate";
       m[RETRIEVE_QUERY_REGION_SET] = "Retrieve query regions set";
+      m[RETRIEVE_FLANK_QUERY] = "Flanking";
 
       return m;
     }

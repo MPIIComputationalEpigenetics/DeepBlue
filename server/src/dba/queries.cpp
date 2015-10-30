@@ -16,13 +16,8 @@
 
 #include <mongo/bson/bson.h>
 
-#include "../errors.hpp"
-#include "../log.hpp"
-
-#include "../algorithms/aggregate.hpp"
+#include "../algorithms/algorithms.hpp"
 #include "../algorithms/filter.hpp"
-#include "../algorithms/intersection.hpp"
-#include "../algorithms/merge.hpp"
 
 #include "../connection/connection.hpp"
 
@@ -44,6 +39,9 @@
 #include "users.hpp"
 
 #include "queries.hpp"
+
+#include "../errors.hpp"
+#include "../log.hpp"
 
 namespace epidb {
   namespace dba {
@@ -211,6 +209,10 @@ namespace epidb {
           if (!retrieve_intersection_query(user_key, query, status, regions, msg)) {
             return false;
           }
+        } else if (type == "flank") {
+          if (!retrieve_flank_query(user_key, query, status, regions, msg)) {
+            return false;
+          }
         } else if (type == "merge") {
           if (!retrieve_merge_query(user_key, query, status, regions, msg)) {
             return false;
@@ -223,7 +225,6 @@ namespace epidb {
           if (!retrieve_genes_select_query(user_key, query, status, regions, msg)) {
             return false;
           }
-
         } else if (type == "filter") {
           if (!retrieve_filter_query(user_key, query, status, regions, msg)) {
             return false;
@@ -403,9 +404,9 @@ namespace epidb {
           std::cerr <<  "type: " << args["upload_info.content_format"].type() << std::endl;
           if (args["upload_info.content_format"].type() == mongo::Array) {
             experiments_query_builder.append("upload_info.content_format", BSON("$in" << args["upload_info.content_format"]));
-         } else {
+          } else {
             experiments_query_builder.append("upload_info.content_format", args["upload_info.content_format"].str());
-         }
+          }
         }
         if (args.hasField("upload_info.upload_end")) {
           experiments_query_builder.append(args["upload_info.upload_end"]);
@@ -798,6 +799,28 @@ namespace epidb {
         }
       }
 
+      bool retrieve_flank_query(const std::string &user_key, const mongo::BSONObj &query,
+                                processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg)
+      {
+        processing::RunningOp runningOp = status->start_operation(processing::RETRIEVE_FLANK_QUERY, query);
+        if (is_canceled(status, msg)) {
+          return false;
+        }
+
+        mongo::BSONObj args = query["args"].Obj();
+        const std::string query_id = args["query_id"].str();
+        const Offset start = args["start"].Int();
+        const Length length = args["length"].Int();
+        const bool use_strand = args["use_strand"].Bool();
+
+        ChromosomeRegionsList query_regions;
+        if (!retrieve_query(user_key, query_id, status, query_regions, msg)) {
+          msg = "Cannot retrieve first region set: " + msg;
+          return false;
+        }
+
+        return algorithms::flank(query_regions, start, length, use_strand, regions, msg);
+      }
 
       bool retrieve_merge_query(const std::string & user_key, const mongo::BSONObj & query,
                                 processing::StatusPtr status, ChromosomeRegionsList & regions, std::string & msg)

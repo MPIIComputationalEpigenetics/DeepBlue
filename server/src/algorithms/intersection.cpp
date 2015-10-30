@@ -10,8 +10,6 @@
 #include <set>
 #include <iostream>
 
-#include "intersection.hpp"
-
 #include "utils/interval_tree.hpp"
 
 #include "../datatypes/regions.hpp"

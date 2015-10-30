@@ -3,7 +3,7 @@ include ../Makefile.inc
 CXXFLAGS	= $(DEFCXXFLAGS) -I..
 
 OBJLIBS	= ../libalgorithms.a
-OBJS    = accumulator.o intersection.o merge.o levenshtein.o aggregate.o patterns.o
+OBJS    = accumulator.o aggregate.o flank.o intersection.o merge.o levenshtein.o patterns.o
 
 all : $(OBJLIBS)
 
