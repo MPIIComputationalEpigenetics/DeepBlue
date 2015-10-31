@@ -37,7 +37,6 @@ namespace epidb {
             return false;
           }
           std::string strand = region->get_string(column_type->pos());
-          std::cerr << "strand: " << strand << std::endl;
           if (strand == "-") {
             positve_strand = false;
           }
@@ -48,24 +47,18 @@ namespace epidb {
 
         RegionPtr flank = region->clone();
         if (positve_strand) {
-          std::cerr << " positive " ;
           if (start >= 0) {
-            std::cerr << " >= 0";
             a = region->end() + start;
             b = region->end() + start + length;
           } else {
-            std::cerr << " < 0";
             a = region->start() + start + length;
             b = region->start() + start;
           }
         } else {
-          std::cerr << " negative " ;
           if (start >= 0) {
-            std::cerr << " >= 0";
             a = region->start() - start - length;
             b = region->start()  - start;
           } else {
-            std::cerr << " < 0";
             a = region->end() - start;
             b = region->end() - start + length;
           }
