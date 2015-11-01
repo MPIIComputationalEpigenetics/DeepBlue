@@ -37,6 +37,8 @@ namespace epidb {
       DatasetId dataset_id = -1;
       dba::columns::ColumnTypePtr column;
 
+      auto it_data_begin = data.begin();
+
       while (it_ranges != ranges.end()) {
 
         // Check if processing was canceled
@@ -50,9 +52,16 @@ namespace epidb {
         }
         // ***
 
+        while ( it_data_begin != data.end()
+              && (*it_data_begin)->end() < (*it_ranges)->start() )  {
+          it_data_begin++;
+        }
+
         Accumulator acc;
-        auto it_data = data.begin();
-        while (it_data != data.end()) {
+        auto it_data = it_data_begin;
+        while (it_data != data.end() &&
+               (*it_data)->start() <= (*it_ranges)->end() ) {
+
           if (((*it_ranges)->start() <= (*it_data)->end()) && ((*it_ranges)->end() >= (*it_data)->end())) {
             if (field[0] == '@') {
               std::string value;
