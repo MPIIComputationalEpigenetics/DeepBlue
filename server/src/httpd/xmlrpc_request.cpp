@@ -49,7 +49,7 @@ namespace epidb {
         okay = false;
         // overwrite with clear result
         result = serialize::Parameters();
-        result.add_string("internal server error" + ex);
+        result.add_string("internal server error: " + ex);
       }
 
       if (okay) {
