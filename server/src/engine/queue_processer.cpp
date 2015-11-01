@@ -21,7 +21,10 @@
 
 #include <mongo/client/dbclient.h>
 
+#include "../datatypes/user.hpp"
+
 #include "../dba/config.hpp"
+#include "../dba/users.hpp"
 
 #include "../extras/stringbuilder.hpp"
 #include "../extras/utils.hpp"
@@ -51,7 +54,14 @@ namespace epidb {
 
     void QueueHandler::handle_task(const std::string& id, const mongo::BSONObj &o)
     {
-      processing::StatusPtr status = processing::build_status(id, dba::config::get_processing_max_memory()); // TODO: get from user.
+      datatypes::User user;
+      std::string user_key = o["user_id"].str();
+      std::string msg;
+      if (!dba::users::get_user_by_id(user_key, user, msg)) {
+        finish(BSON("error" << msg), false);
+      }
+
+      processing::StatusPtr status = processing::build_status(id, user.get_memory_limit());
       mongo::BSONObj result;
       bool success = process(o, status, result);
       finish(result, success);
@@ -245,8 +255,6 @@ namespace epidb {
     void queue_processer_run(size_t num)
     {
       boost::asio::io_service io;
-
-      std::cerr << "queue_processer_run(" << num << ")" << std::endl;
 
       std::string server = dba::config::get_mongodb_server();
       std::string collection = dba::config::DATABASE_NAME();
