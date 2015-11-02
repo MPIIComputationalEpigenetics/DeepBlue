@@ -21,6 +21,8 @@
 
 #include "../extras/date_time.hpp"
 
+#include "../errors.hpp"
+
 namespace epidb {
 
   namespace processing {
@@ -192,7 +194,8 @@ namespace epidb {
         mongo::BSONObj result;
 
         if (!dba::helpers::get_one(dba::Collections::PROCESSING(),
-                mongo::Query(BSON("_id" << _processing_id)), result, msg)) {
+                mongo::Query(BSON("_id" << _processing_id)), result)) {
+          msg = Error::m(ERR_REQUEST_CANCELED);
           return false;
         }
         _canceled = (result["state"].Int() == mdbq::TS_CANCELLED);
