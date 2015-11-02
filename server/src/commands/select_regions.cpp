@@ -229,9 +229,8 @@ namespace epidb {
             return false;
           }
         } else {
-          std::vector<serialize::ParameterPtr>::iterator it;
-          for (it = chromosomes.begin(); it != chromosomes.end(); ++it) {
-            chroms.insert((**it).as_string());
+          for (auto parameter_ptr : chromosomes) {
+            chroms.insert(parameter_ptr->as_string());
           }
         }
         args_builder.append("chromosomes", chroms);
