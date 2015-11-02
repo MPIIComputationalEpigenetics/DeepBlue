@@ -38,7 +38,7 @@ class TestOutput(helpers.TestCase):
 
     res, req = epidb.get_regions(qid_1, "chr:start:end:name:length:cpgNum:gcNum:perCpg:perGc:obsExp", self.admin_key)
     msg = self.get_regions_request_error(req)
-    self.assertEquals(msg, "123000:Unable to find the column 'chr:start:end:name:length:cpgNum:gcNum:perCpg:perGc:obsExp' in the dataset format or in the DeepBlue columns.")
+    self.assertEquals(msg, "123000:Unable to find the column name 'chr:start:end:name:length:cpgNum:gcNum:perCpg:perGc:obsExp' in the dataset format or in the DeepBlue columns.")
 
     res, req = epidb.get_regions(qid_1, "CHROMOSOME,START,END,name,length,cpgNum,gcNum,perCpg,perGc,obsExp", self.admin_key)
     regions = self.get_regions_request(req)

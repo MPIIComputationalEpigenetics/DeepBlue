@@ -92,7 +92,7 @@ class TestSequence(helpers.TestCase):
 
     res = epidb.upload_chromosome("hg19", "chrInvalid", sequence, self.admin_key)
     self.assertFailure(res)
-    self.assertEquals(res[1], 'Chromosome chrInvalid not found.')
+    self.assertEquals(res[1], "120000:Unable to find the chromosome 'chrinvalid'.")
 
   def test_result(self):
     epidb = EpidbClient()
