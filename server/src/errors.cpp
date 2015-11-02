@@ -46,6 +46,7 @@
  * 24 - Column Type
  * 25 - Metacolumn
  * 30 - Request
+ * 40 - Tiling region
  * 50 - Dataset
  * 66 - Internal
  */
@@ -60,6 +61,7 @@
  * 100 - Do not have permission
  *
  * 200 - Invalid User Key
+ * 250 - Invalid email and password combination
  *
  * 300 - Canceled
  *
@@ -96,14 +98,18 @@ namespace epidb {
   Error ERR_FORMAT_END_MISSING("122002", "The END is missing in the format. Please, inform the END column in the Format.");
   Error ERR_FORMAT_COLUMN_NAME_MISSING("123002", "The Column Name is missing in the format. Please, inform the column name in the Format.");
 
-  Error ERR_INVALID_USER_KEY("100200", "Invalid User Key.");
   Error ERR_INVALID_USER_NAME("100000", "Invalid User name '{}'.");
+  Error ERR_INVALID_USER_ID("100003", "Invalid User ID '{}'.");
+  Error ERR_INVALID_USER_KEY("100200", "Invalid User Key.");
+  Error ERR_INVALID_USER_EMAIL_PASSWORD("100200", "Invalid User email and password combination.");
 
   Error ERR_DUPLICATED_EXPERIMENT_NAME("102001", "The experiment name '{}' is already being used.");
 
   Error ERR_DUPLICATED_GENE_SET_NAME("113001", "The gene set '{}' is already being used.");
+  Error ERR_INVALID_GENE_SET_ID("113003", "Unable to find gene set ID '{}'.");
 
-  Error ERR_INVALID_BIOSOURCE_NAME("104000", "Invalid BioSource Name '{}'. No BioSource or Synonym was defined with this name.");
+  Error ERR_INVALID_BIOSOURCE_NAME("104000", "Unable to find BioSource '{}'. No BioSource or Synonym was defined with this name.");
+  Error ERR_INVALID_BIOSOURCE_ID("104003", "Uable to find BioSource ID '{}'. No BioSource or Synonym was defined with this ID.");
   Error ERR_DUPLICATED_BIOSOURCE_NAME("104001", "Duplicated BioSource Name '{}'. BioSource or Synonym with this name already exists.");
   Error ERR_MORE_EMBRACING_BIOSOURCE_NAME("104901", "'{}' is already more embracing than '{}'.");
   Error ERR_ALREADY_PARENT_BIOSOURCE_NAME("104902", "'{}' is already parent of '{}'.");
@@ -112,22 +118,37 @@ namespace epidb {
   Error ERR_INVALID_BIOSOURCE_SYNONYM("104400", "Invalid BioSource Synonym '{}'. A BioSource or a synonym with this name already exists.");
 
   Error ERR_DUPLICATED_EPIGENETIC_MARK_NAME("105001", "Duplicated Epigenetic Mark Name '{}'." );
+  Error ERR_INVALID_EPIGENETIC_MARK_ID("105003", "Unable to find Epigenetic Mark ID '{}'." );
 
   Error ERR_INVALID_PROJECT_NAME("107000", "Unable to find the project '{}'.");
   Error ERR_DUPLICATED_PROJECT_NAME("107001", "Duplicated Project Name '{}'.");
   Error ERR_INVALID_PROJECT_ID("107003", "Unable to find the project ID '{}'.");
   Error ERR_PROJECT_PERMISSION("107100", "You are not the project '{}' owner and neither an administrator.");
 
-  Error ERR_DUPLICATED_GENOME_NAME("111001", "Duplicated Genome Name '{}'.");
+  Error ERR_DUPLICATED_GENOME_NAME("111001", "Duplicated Genome name '{}'.");
+  Error ERR_INVALID_GENOME_NAME("111000", "Unable to find the genome '{}'.");
+  Error ERR_INVALID_GENOME_ID("111003", "Unable to find the genome ID '{}'.");
 
+  Error ERR_INVALID_CHROMOSOME_NAME("120000", "Unable to find the chromosome '{}'.");
+  Error ERR_INVALID_CHROMOSOME_NAME_GENOME("120002", "Unable to find the chromosome '{}' in the genome '{}'.");
+
+  Error ERR_INVALID_TECHNIQUE_ID("106003", "Unable to find the technique ID '{}'.");
   Error ERR_DUPLICATED_TECHNIQUE_NAME("106001", "Duplicated Genome Name '{}'.");
 
   Error ERR_INVALID_EXPERIMENT_NAME("101000", "Unable to find the experiment '{}'.");
-  Error ERR_INVALID_EXPERIMENT_ID("101000", "Unable to find the experiment ID '{}'.");
+  Error ERR_INVALID_EXPERIMENT_ID("101003", "Unable to find the experiment ID '{}'.");
 
-  Error ERR_INVALID_QUERY_ID("110000", "Unable to find the query ID '{}'.");
-  Error ERR_INVALID_COLUMN_NAME("123000", "Unable to find the column '{}' in the dataset format or in the DeepBlue columns.");
+  Error ERR_INVALID_SAMPLE_ID("103000", "Unable to find the sample ID '{}'.");
+
+  Error ERR_INVALID_QUERY_ID("110003", "Unable to find the query ID '{}'.");
+
+  Error ERR_INVALID_ANNOTATION_ID("102003", "Unable to find the annotation ID '{}'.");
+
+  Error ERR_INVALID_COLUMN_NAME("123000", "Unable to find the column name '{}' in the dataset format or in the DeepBlue columns.");
+  Error ERR_INVALID_COLUMN_ID("123003", "Unable to find the column ID '{}'.");
   Error ERR_DUPLICATED_COLUMN_NAME("123001", "Duplicated column name '{}'.");
+
+  Error ERR_INVALID_COLUMN_TYPE_ID("124003", "Unable to find the column type ID '{}'." );
 
   Error ERR_INVALID_META_COLUMN_NAME("125000", "The meta-column '{}' does not exist.");
 
@@ -139,6 +160,8 @@ namespace epidb {
   Error ERR_COLUMN_TYPE_NAME_MISSING("323003", "The Column Type '{}' does not exist.");
 
   Error ERR_DATASET_NOT_FOUND("350000", "Dataset id {} not found.");
+
+  Error  ERR_INVALID_TILING_REGIONS_ID("140003", "Unable to find tiling regions ID '{}'.");
 
   Error ERR_DATABASE_CONNECTION("466555", "MongoDB connection error: '{}'.");
   Error ERR_DATABASE_EXCEPTION("466666", "MongoDB exception at operation '{}': '{}'.");
