@@ -9,8 +9,7 @@ class TestMerge(helpers.TestCase):
     epidb = EpidbClient()
     self.init_full(epidb)
 
-    res, qid_1 = epidb.select_regions("hg19_chr1_1", "hg19", None, None, None,
-                                 None, None, 760000, 860000, self.admin_key)
+    res, qid_1 = epidb.select_experiments("hg19_chr1_1", None, 760000, 860000, self.admin_key)
     self.assertSuccess(res, qid_1)
 
     res, qid_2 = epidb.select_regions("hg19_chr1_2", "hg19", None, None, None,

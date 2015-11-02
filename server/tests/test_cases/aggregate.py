@@ -91,7 +91,7 @@ class TestAggregateCommand(helpers.TestCase):
       file_data = f.read()
       (res, exp) = epidb.add_experiment("wgEncodeBroadHistoneH1hescH3k4me3StdPk.bed", "hg19", "H3k4me3", "s1", "ChIPseq", "ENCODE", "wgEncodeBroadHistoneH1hescH3k4me3StdPk.bed from ENCODE",  file_data, broad_peak_format, None, self.admin_key)
       self.assertSuccess(res, exp)
-      res, q_exp = epidb.select_regions("wgEncodeBroadHistoneH1hescH3k4me3StdPk.bed", "hg19", None, None, None, None, "chr1", None, None,self.admin_key)
+      res, q_exp = epidb.select_experiments("wgEncodeBroadHistoneH1hescH3k4me3StdPk.bed", "chr1", None, None,self.admin_key)
       self.assertSuccess(res, q_exp)
 
     # Insert annotation
@@ -154,7 +154,7 @@ class TestAggregateCommand(helpers.TestCase):
       file_data = f.read()
       (res, a_1) = epidb.add_experiment("wgEncodeBroadHistoneH1hescH3k27me3StdPk.bed", "hg19", "H3k4me3", "s1", "ChIPseq", "ENCODE", "wgEncodeBroadHistoneH1hescH3k27me3StdPk.bed from ENCODE",  file_data, broad_peak_format, None, self.admin_key)
       self.assertSuccess(res, a_1)
-      res, q_exp = epidb.select_regions("wgEncodeBroadHistoneH1hescH3k27me3StdPk.bed", "hg19", None, None, None, None, "chr1", None, None, self.admin_key)
+      res, q_exp = epidb.select_experiments("wgEncodeBroadHistoneH1hescH3k27me3StdPk.bed", "chr1", None, None, self.admin_key)
       self.assertSuccess(res, q_exp)
 
     # Insert annotation

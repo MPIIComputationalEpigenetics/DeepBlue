@@ -317,8 +317,7 @@ class TestSelectRegions(helpers.TestCase):
     self.insert_experiment(epidb, "hg19_chr1_2", sample_id)
     multiple_experiments_regions = helpers.get_result("multiple_experiments")
 
-    res, qid = epidb.select_regions(["hg19_chr1_1", "hg19_chr1_2"], "hg19", None, None, None, None, None,
-                                    None, None, self.admin_key)
+    res, qid = epidb.select_experiments(["hg19_chr1_1", "hg19_chr1_2"], None, None, None, self.admin_key)
     self.assertSuccess(res, qid)
 
     res, req = epidb.get_regions(qid, format, self.admin_key)

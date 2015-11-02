@@ -223,6 +223,10 @@ class EpidbClient:
                                           project, chromosome, start, end,
                                           user)
 
+    def select_experiments(self, experiment_name, chromosome, start, end, user):
+        return self.server.select_experiments(experiment_name, chromosome,
+                                              start, end, user)
+
     def select_annotations(self, annotations_name, genome, chromosomes,
                            start, end, user):
         return self.server.select_annotations(annotations_name, genome,
