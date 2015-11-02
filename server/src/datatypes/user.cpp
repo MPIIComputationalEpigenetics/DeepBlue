@@ -6,6 +6,7 @@
 #include <string>
 #include <sstream>
 #include <iostream>
+#include <vector>
 
 #include <boost/random.hpp>
 
@@ -27,6 +28,7 @@ namespace epidb {
     const std::string User::FIELD_PASSWORD = "password";
     const std::string User::FIELD_MEMORY_LIMIT = "memory_limit";
     const std::string User::FIELD_PERMISSION_LEVEL = "permission_level";
+    const std::string User::FIELD_PROJECTS = "projects";
     const size_t User::KEY_LENGTH = 16;
 
     std::string permission_level_to_string(PermissionLevel pl)
@@ -57,19 +59,22 @@ namespace epidb {
       generate_key();
     }
 
-    User::User(std::vector<mongo::BSONObj> bsonobj)
+    User::User(mongo::BSONObj bsonobj)
     {
-      set_name(bsonobj[0][FIELD_NAME].str());
-      set_email(bsonobj[0][FIELD_EMAIL].str());
-      set_institution(bsonobj[0][FIELD_INSTITUTION].str());
-      set_id(bsonobj[0][FIELD_ID].str());
-      set_key(bsonobj[0][FIELD_KEY].str());
-      set_password(bsonobj[0][FIELD_PASSWORD].str());
-      if (bsonobj[0].hasElement(FIELD_PERMISSION_LEVEL)) {
-        set_permission_level(bsonobj[0][FIELD_PERMISSION_LEVEL].safeNumberLong());
+      set_name(bsonobj[FIELD_NAME].str());
+      set_email(bsonobj[FIELD_EMAIL].str());
+      set_institution(bsonobj[FIELD_INSTITUTION].str());
+      set_id(bsonobj[FIELD_ID].str());
+      set_key(bsonobj[FIELD_KEY].str());
+      set_password(bsonobj[FIELD_PASSWORD].str());
+      if (bsonobj.hasElement(FIELD_PERMISSION_LEVEL)) {
+        set_permission_level(bsonobj[FIELD_PERMISSION_LEVEL].safeNumberLong());
       }
-      if (bsonobj[0].hasElement(FIELD_MEMORY_LIMIT)) {
-        memory_limit = bsonobj[0][FIELD_MEMORY_LIMIT].safeNumberLong();
+      if (bsonobj.hasElement(FIELD_MEMORY_LIMIT)) {
+        memory_limit = bsonobj[FIELD_MEMORY_LIMIT].safeNumberLong();
+      }
+      if (bsonobj.hasElement(FIELD_PROJECTS)) {
+        set_projects(utils::build_vector(bsonobj[FIELD_PROJECTS].Array()));
       }
     }
 
@@ -93,6 +98,9 @@ namespace epidb {
       }
       if (permission_level != NOT_SET) {
         builder.append(FIELD_PERMISSION_LEVEL, get_permission_level());
+      }
+      if (!projects.empty()) {
+        builder.append(FIELD_PROJECTS, utils::build_array(get_projects()));
       }
     }
 
@@ -160,6 +168,11 @@ namespace epidb {
       set_permission_level(static_cast<PermissionLevel>(permission_level));
     }
 
+    void User::set_projects(std::vector<std::string> projects)
+    {
+      this->projects = projects;
+    }
+
     std::string User::get_id() const
     {
       return id;
@@ -211,6 +224,11 @@ namespace epidb {
       } else {
         return permission_level;
       }
+    }
+
+    std::vector<std::string> User::get_projects() const
+    {
+      return projects;
     }
 
     bool User::is_admin() const

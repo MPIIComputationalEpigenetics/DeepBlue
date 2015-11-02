@@ -37,7 +37,7 @@ namespace epidb {
       User(std::string _id, std::string key, std::string name, std::string email,
            std::string institution);
       User(std::string name, std::string email, std::string institution);
-      User(std::vector<mongo::BSONObj> bsonobj);
+      User(mongo::BSONObj bsonobj);
       User(const User& orig);
       virtual ~User();
 
@@ -52,6 +52,7 @@ namespace epidb {
       static const std::string FIELD_ADMIN;
       static const std::string FIELD_MEMORY_LIMIT;
       static const std::string FIELD_PERMISSION_LEVEL;
+      static const std::string FIELD_PROJECTS;
 
       static const size_t KEY_LENGTH;
 
@@ -66,6 +67,7 @@ namespace epidb {
       std::string get_password() const;
       long long get_memory_limit() const;
       PermissionLevel get_permission_level() const;
+      std::vector<std::string> get_projects() const;
       bool is_admin() const;
 
       void set_id(std::string id_);
@@ -76,6 +78,7 @@ namespace epidb {
       void set_password(std::string password_);
       void set_memory_limit(long long memory_limit);
       void set_permission_level(PermissionLevel permission_level);
+      void set_projects(std::vector<std::string> projects);
 
       void generate_key();
       bool generate_id(std::string msg);
@@ -95,6 +98,7 @@ namespace epidb {
       bool admin = false;
       long long memory_limit = -1;
       PermissionLevel permission_level = NOT_SET;
+      std::vector<std::string> projects;
 
       static int seed;
 

@@ -123,10 +123,9 @@ namespace epidb {
 
       bool get_user_by_key(const std::string& key, datatypes::User& user, std::string& msg)
       {
-        std::vector<mongo::BSONObj> result;
-        dba::helpers::get(datatypes::User::COLLECTION, datatypes::User::FIELD_KEY, key, result, msg);
-        if (result.size() == 0) {
-          msg = "Unable to retrieve user with key " + key;
+        mongo::BSONObj result;
+        if (!dba::helpers::get_one(datatypes::User::COLLECTION, BSON(datatypes::User::FIELD_KEY << key), result)) {
+          msg = Error::m(ERR_INVALID_USER_KEY);
           return false;
         }
         user = datatypes::User(result);
@@ -135,12 +134,11 @@ namespace epidb {
 
       bool get_user_by_email(const std::string& email, const std::string& password, datatypes::User& user, std::string& msg)
       {
-        std::vector<mongo::BSONObj> result;
-        dba::helpers::get(datatypes::User::COLLECTION,
-                          BSON(datatypes::User::FIELD_EMAIL << email << datatypes::User::FIELD_PASSWORD << password),
-                          result, msg);
-        if (result.size() == 0) {
-          msg = "Invalid Email-password combination.";
+        mongo::BSONObj result;
+        if (!dba::helpers::get_one(datatypes::User::COLLECTION,
+                                   BSON(datatypes::User::FIELD_EMAIL << email << datatypes::User::FIELD_PASSWORD << password),
+                                   result)) {
+          msg = Error::m(ERR_INVALID_USER_EMAIL_PASSWORD);
           return false;
         }
         user = datatypes::User(result);
@@ -149,10 +147,9 @@ namespace epidb {
 
       bool get_user_by_id(const std::string& id, datatypes::User& user, std::string& msg)
       {
-        std::vector<mongo::BSONObj> result;
-        dba::helpers::get(datatypes::User::COLLECTION, datatypes::User::FIELD_ID, id, result, msg);
-        if (result.size() == 0) {
-          msg = "Unable to retrieve user with id: " + id;
+        mongo::BSONObj result;
+        if (!dba::helpers::get_one(datatypes::User::COLLECTION, BSON(datatypes::User::FIELD_ID << id), result)) {
+          msg = Error::m(ERR_INVALID_USER_ID, id);
           return false;
         }
         user = datatypes::User(result);
@@ -178,7 +175,7 @@ namespace epidb {
         }
 
         mongo::BSONObj obj;
-        if (!dba::helpers::get_one(dba::Collections::USERS(), BSON("name" << user), obj, msg)) {
+        if (!dba::helpers::get_one(dba::Collections::USERS(), BSON("name" << user), obj)) {
           msg = Error::m(ERR_INVALID_USER_NAME, user);
           return false;
         }
@@ -198,14 +195,12 @@ namespace epidb {
           user_name = name_cache.get_user_name(user_id);
           return true;
         } else {
-          std::vector<mongo::BSONObj> results;
-          if (!helpers::get(Collections::USERS(), "_id",  user_id, results, msg)) {
-            return false;
+          mongo::BSONObj result;
+          if (!helpers::get_one(Collections::USERS(), BSON("_id" <<  user_id), result)) {
+            msg = Error::m(ERR_INVALID_USER_ID, user_id);
           }
-          if (results.size() == 0) {
-            return false;
-          }
-          user_name = results[0]["name"].str();
+
+          user_name = result["name"].str();
           name_cache.set_user_name(user_id, user_name);
         }
         return true;
@@ -216,30 +211,31 @@ namespace epidb {
         name_cache.invalidate();
       }
 
-      bool get_owner(const std::string& id, datatypes::User& user, std::string& msg) {
-          std::string collection;
-          if (!dba::Collections::get_collection_for_id(id, collection)){
-              msg = "Datatype not accepted for this function";
-              return false;
-          }
-          std::cout << collection << std::endl;
-          mongo::BSONObj result;
-          if (!helpers::get_one(collection, mongo::Query(BSON("_id" << id)), result, msg)) {
-              msg = "Could not get data from database";
-              return false;
-          }
-          std::string user_id;
-          if (result.hasField("user")) {
-              user_id = result["user"].str();
-          } else if (result.hasField("upload_info")) {
-              user_id = result["upload_info"]["user"].str();
-          } else {
-              return false;
-          }
-          if (!get_user_by_id(user_id, user, msg)) {
-            return false;
-          }
-          return true;
+      bool get_owner(const std::string& id, datatypes::User& user, std::string& msg)
+      {
+        std::string collection;
+        if (!dba::Collections::get_collection_for_id(id, collection)) {
+          msg = "Datatype not accepted for this function";
+          return false;
+        }
+        std::cout << collection << std::endl;
+        mongo::BSONObj result;
+        if (!helpers::get_one(collection, mongo::Query(BSON("_id" << id)), result)) {
+          msg = "Could not get data from database";
+          return false;
+        }
+        std::string user_id;
+        if (result.hasField("user")) {
+          user_id = result["user"].str();
+        } else if (result.hasField("upload_info")) {
+          user_id = result["upload_info"]["user"].str();
+        } else {
+          return false;
+        }
+        if (!get_user_by_id(user_id, user, msg)) {
+          return false;
+        }
+        return true;
       }
     }
   }
