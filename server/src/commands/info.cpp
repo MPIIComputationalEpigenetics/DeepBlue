@@ -198,6 +198,10 @@ namespace epidb {
               type = "experiment";
             } else if (id.compare(0, 1, "q") == 0) {
               ok = dba::info::get_query(id, metadata, msg);
+              if (!user.is_admin() && metadata["user"] != user.get_id()) {
+                msg = Error::m(ERR_PERMISSION_QUERY, id);
+                ok = false;
+              }
               ok = ok && dba::info::id_to_name(metadata, msg);
               type = "query";
             } else if (id.compare(0, 2, "tr") == 0) {

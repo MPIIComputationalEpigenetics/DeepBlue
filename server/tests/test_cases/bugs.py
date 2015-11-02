@@ -376,5 +376,29 @@ chrY\t12345\t1234567"""
     self.assertFailure(s, a)
     self.assertEquals(a, "Invalid region: 2147483647 - 2147483648. It is beyond the length of the chromosome chr1 .")
 
+  #info() on user queries #91
+  def test_info_on_user_queries(self):
+    epidb = EpidbClient()
+    self.init_base(epidb)
+
+    res, user_one = epidb.add_user("user1", "test1@example.com", "test", self.admin_key)
+    self.assertSuccess(res, user_one)
+    s, tmp_user = epidb.modify_user_admin(user_one[0], "permission_level", "GET_DATA", self.admin_key)
+    self.assertSuccess(s)
+
+    res, user_two = epidb.add_user("user2", "test2@example.com", "test", self.admin_key)
+    self.assertSuccess(res, user_two)
+    s, tmp_user = epidb.modify_user_admin(user_two[0], "permission_level", "GET_DATA", self.admin_key)
+    self.assertSuccess(s)
+
+    (s, t1) = epidb.tiling_regions(100, "hg19", "chr1", user_one[1])
+    s = epidb.info(t1, user_one[1])
+    self.assertEquals(s,  ['okay', [{'_id': 'q1', 'type': 'tiling', 'user': 'user1', 'args': '{ "genome" : "hg19", "size" : 100, "chromosomes" : [ "chr1" ] }'}]])
+    s = epidb.info(t1, user_two[1])
+    self.assertEquals(s,  ['error', ["111003:You are not the query ID 'q1' owner and neither an administrator."]])
+    s = epidb.info(t1, self.admin_key)
+    self.assertEquals(s,  ['okay', [{'_id': 'q1', 'type': 'tiling', 'user': 'user1', 'args': '{ "genome" : "hg19", "size" : 100, "chromosomes" : [ "chr1" ] }'}]])
+
+
 
 
