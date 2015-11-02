@@ -123,7 +123,7 @@ namespace epidb {
   Error ERR_INVALID_PROJECT_NAME("107000", "Unable to find the project '{}'.");
   Error ERR_DUPLICATED_PROJECT_NAME("107001", "Duplicated Project Name '{}'.");
   Error ERR_INVALID_PROJECT_ID("107003", "Unable to find the project ID '{}'.");
-  Error ERR_PROJECT_PERMISSION("107100", "You are not the project '{}' owner and neither an administrator.");
+  Error ERR_PERMISSION_PROJECT("107100", "You are not the project '{}' owner and neither an administrator.");
 
   Error ERR_DUPLICATED_GENOME_NAME("111001", "Duplicated Genome name '{}'.");
   Error ERR_INVALID_GENOME_NAME("111000", "Unable to find the genome '{}'.");

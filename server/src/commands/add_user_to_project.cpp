@@ -121,7 +121,7 @@ namespace epidb {
 
         // Is the command operator admin or project owner ?
         if ((user.is_admin()) && (working_user.id != owner_id)) {
-          result.add_error(Error::m(ERR_PROJECT_PERMISSION, project));
+          result.add_error(Error::m(ERR_PERMISSION_PROJECT, project));
           return false;
         }
 

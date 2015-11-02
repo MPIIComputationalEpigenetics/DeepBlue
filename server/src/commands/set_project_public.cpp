@@ -104,7 +104,7 @@ namespace epidb {
         std::string owner = project_res["user"];
 
         if (!user.is_admin() && user.get_id() != owner) {
-          result.add_error(Error::m(ERR_PROJECT_PERMISSION, project));
+          result.add_error(Error::m(ERR_PERMISSION_PROJECT, project));
           return false;
         }
 
