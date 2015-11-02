@@ -14,7 +14,6 @@
 #include <boost/foreach.hpp>
 
 #include "../dba/dba.hpp"
-#include "../dba/helpers.hpp"
 #include "../dba/insert.hpp"
 #include "../dba/queries.hpp"
 
@@ -151,7 +150,7 @@ namespace epidb {
         args_builder.append("dataset_id", dataset_id);
         args_builder.append("genome", genome);
         args_builder.append("norm_genome", norm_genome);
-        args_builder.append("chromosomes", dba::helpers::build_array(chromosomes));
+        args_builder.append("chromosomes", utils::build_array(chromosomes));
 
         std::string query_id;
         if (!dba::query::store_query("input_regions", args_builder.obj(), user_key, query_id, msg)) {

@@ -559,8 +559,8 @@ namespace epidb {
 
         mongo::BSONObj args = query["args"].Obj();
 
-        std::vector<std::string> chromosomes = helpers::build_vector(args["chromosomes"].Array());
-        std::set<std::string> genomes = helpers::build_set(args["norm_genomes"].Array());
+        std::vector<std::string> chromosomes = utils::build_vector(args["chromosomes"].Array());
+        std::set<std::string> genomes = utils::build_set(args["norm_genomes"].Array());
 
         std::vector<ChromosomeRegionsList> genome_regions;
 
@@ -601,7 +601,7 @@ namespace epidb {
 
         mongo::BSONObj regions_query = BSON(KeyMapper::DATASET() << args["dataset_id"].Int());
 
-        std::vector<std::string> chromosomes = helpers::build_vector(args["chromosomes"].Array());
+        std::vector<std::string> chromosomes = utils::build_vector(args["chromosomes"].Array());
         std::string genome = args["norm_genome"].String();
 
         if (!retrieve::get_regions(genome, chromosomes, regions_query, true, status, regions, msg)) {
@@ -625,7 +625,7 @@ namespace epidb {
         }
 
         mongo::BSONObj args = query["args"].Obj();
-        std::vector<std::string> chromosomes = helpers::build_vector(args["chromosomes"].Array());
+        std::vector<std::string> chromosomes = utils::build_vector(args["chromosomes"].Array());
 
         std::vector<ChromosomeRegionsList> genome_regions;
 
@@ -661,7 +661,7 @@ namespace epidb {
         }
 
         mongo::BSONObj args = query["args"].Obj();
-        const std::vector<std::string> genes = helpers::build_vector(args["genes"].Array());
+        const std::vector<std::string> genes = utils::build_vector(args["genes"].Array());
         const std::string gene_set = args["gene_set"].str();
 
 
@@ -724,7 +724,7 @@ namespace epidb {
 
           mongo::BSONArray datasets_array = datasets_array_builder.arr();
 
-          std::set<std::string> genomes = helpers::build_set(args["norm_genomes"].Array());
+          std::set<std::string> genomes = utils::build_set(args["norm_genomes"].Array());
 
           std::vector<ChromosomeRegionsList> genome_regions;
 

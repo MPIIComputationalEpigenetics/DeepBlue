@@ -92,8 +92,8 @@ namespace epidb {
 
         mongo::BSONObjBuilder args_builder;
         if (annotations.size() > 0) {
-          args_builder.append("annotation", dba::helpers::build_array(annotations));
-          args_builder.append("norm_annotation", dba::helpers::build_annotation_normalized_array(annotations));
+          args_builder.append("annotation", utils::build_array(annotations));
+          args_builder.append("norm_annotation", utils::build_annotation_normalized_array(annotations));
         }
 
         const int start = parameters[3]->isNull() ? -1 : parameters[3]->as_long();

@@ -117,7 +117,7 @@ namespace epidb {
           return false;
         }
 
-        results = bsons_to_id_names(r);
+        results = utils::bsons_to_id_names(r);
 
         return true;
       }
@@ -134,23 +134,9 @@ namespace epidb {
           return false;
         }
 
-        results = bsons_to_id_names(r);
+        results = utils::bsons_to_id_names(r);
 
         return true;
-      }
-
-      std::vector<utils::IdName> bsons_to_id_names(const std::vector<mongo::BSONObj> &bsons)
-      {
-        std::vector<utils::IdName> v;
-        BOOST_FOREACH(const mongo::BSONObj & o, bsons) {
-          v.push_back(bson_to_id_name(o));
-        }
-        return v;
-      }
-
-      utils::IdName bson_to_id_name(const mongo::BSONObj& bson)
-      {
-        return utils::IdName(bson["_id"].str(), bson["name"].str());
       }
 
       // Get content where the field content match with the query object and the fields.
@@ -176,16 +162,18 @@ namespace epidb {
         return true;
       }
 
+      // Return true and one element that match the given query.
+      // Return false if does not find any element.
       bool get_one(const std::string &where, const mongo::BSONObj &query,
-                   mongo::BSONObj &result, std::string &msg)
+                   mongo::BSONObj &result)
       {
-        return get_one(where, mongo::Query(query), result, msg);
+        return get_one(where, mongo::Query(query), result);
       }
 
-      // Get content where the field content match with the query object and the fields.
-      // Return all elements if fields is empty.
+      // Return true and one element that match the given query.
+      // Return false if does not find any element.
       bool get_one(const std::string &where, const mongo::Query &query,
-                   mongo::BSONObj &result, std::string &msg)
+                   mongo::BSONObj &result)
       {
         Connection c;
         const std::string collection = collection_name(where);
@@ -220,7 +208,7 @@ namespace epidb {
           return false;
         }
 
-        id_name = bson_to_id_name(results[0]);
+        id_name = utils::bson_to_id_name(results[0]);
 
         return true;
       }
@@ -403,128 +391,6 @@ namespace epidb {
         int tmp;
         return get_increment_counter(name + "_operations", tmp, msg);
       }
-
-      // TODO: Use template
-      mongo::BSONArray build_array(const std::vector<int> &params)
-      {
-        mongo::BSONArrayBuilder ab;
-        for (const auto& param : params) {
-          ab.append(param);
-        }
-        return ab.arr();
-      }
-
-      // TODO: move to arrays.cpp
-      // TODO: Use template
-      mongo::BSONArray build_array(const std::vector<std::string> &params)
-      {
-        mongo::BSONArrayBuilder ab;
-        for (const auto& param : params) {
-          ab.append(param);
-        }
-        return ab.arr();
-      }
-
-      mongo::BSONArray build_regex_array(const std::vector<std::string> &params)
-      {
-        mongo::BSONArrayBuilder ab;
-        for (const auto& param : params) {
-          ab.appendRegex(param);
-        }
-        return ab.arr();
-      }
-
-      mongo::BSONArray build_normalized_array(const std::vector<std::string> &params)
-      {
-        mongo::BSONArrayBuilder ab;
-        for (const auto& param : params) {
-          ab.append(utils::normalize_name(param));
-        }
-        return ab.arr();
-      }
-
-
-      mongo::BSONArray build_array(const std::vector<serialize::ParameterPtr> &params)
-      {
-        mongo::BSONArrayBuilder ab;
-        for (const auto& param : params) {
-          ab.append(param->as_string());
-        }
-        return ab.arr();
-      }
-
-      mongo::BSONArray build_normalized_array(const std::vector<serialize::ParameterPtr> &params)
-      {
-        mongo::BSONArrayBuilder ab;
-        for (const auto& param : params) {
-          ab.append(utils::normalize_name(param->as_string()));
-        }
-        return ab.arr();
-      }
-
-      mongo::BSONArray build_epigenetic_normalized_array(const std::vector<serialize::ParameterPtr> &params)
-      {
-        mongo::BSONArrayBuilder ab;
-        for (const auto& param : params) {
-          ab.append(utils::normalize_epigenetic_mark(param->as_string()));
-        }
-        return ab.arr();
-      }
-
-      mongo::BSONArray build_annotation_normalized_array(const std::vector<serialize::ParameterPtr> &params)
-      {
-        mongo::BSONArrayBuilder ab;
-        for (const auto& param : params) {
-          ab.append(utils::normalize_annotation_name(param->as_string()));
-        }
-        return ab.arr();
-      }
-
-      std::vector<std::string> build_vector(const std::vector<serialize::ParameterPtr> &params)
-      {
-        std::vector<std::string> vector;
-        for (const auto& param : params) {
-          vector.push_back(param->as_string());
-        }
-        return vector;
-      }
-
-      std::vector<std::string> build_vector(const std::vector<mongo::BSONElement> &params)
-      {
-        std::vector<std::string> vector;
-        for (auto be : params) {
-          vector.push_back(be.str());
-        }
-        return vector;
-      }
-
-      std::set<std::string> build_set(const std::vector<mongo::BSONElement> &params)
-      {
-        std::set<std::string> set;
-        for (auto be : params) {
-          set.insert(be.str());
-        }
-        return set;
-      }
-
-      bool check_parameters(const std::vector<serialize::ParameterPtr> &params, const std::function<std::string(const std::string&)> &normalizer, const std::function<bool(const std::string&)> &checker, std::string &wrong)
-      {
-        std::vector<std::string> names = build_vector(params);
-        return check_parameters(names, normalizer, checker, wrong);
-      }
-
-      bool check_parameters(const std::vector<std::string> &names, const std::function<std::string(const std::string&)> &normalizer, const std::function<bool(const std::string&)> &checker, std::string &wrong)
-      {
-        for (auto  name : names) {
-          std::string norm_name = normalizer(name);
-          if (!checker(norm_name)) {
-            wrong = name;
-            return false;
-          }
-        }
-        return true;
-      }
-
     }
   }
 }

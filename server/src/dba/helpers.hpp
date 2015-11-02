@@ -14,7 +14,6 @@
 #include <mongo/bson/bson.h>
 #include <mongo/client/dbclient.h>
 
-#include "../extras/serialize.hpp"
 #include "../extras/utils.hpp"
 
 namespace epidb {
@@ -51,13 +50,15 @@ namespace epidb {
       bool get(const std::string &where, const mongo::Query &query,
                std::vector<mongo::BSONObj> &results, std::string &msg);
 
-      // Get **all** content where the fields match the query parameter, using mongo::Query
+      // Return true and one element that match the given query.
+      // Return false if does not find any element.
       bool get_one(const std::string &where, const mongo::BSONObj &query,
-                   mongo::BSONObj &result, std::string &msg);
+                   mongo::BSONObj &result);
 
-      // Get **all** content where the fields match the query parameter, using mongo::Query
+      // Return true and one element that match the given query.
+      // Return false if does not find any element.
       bool get_one(const std::string &where, const mongo::Query &query,
-                   mongo::BSONObj &result, std::string &msg);
+                   mongo::BSONObj &result);
 
       // Get Id and Name from the given collection documents and a filter BSon
       bool get(const std::string &where, mongo::BSONObj filter,
@@ -122,27 +123,6 @@ namespace epidb {
       * \param  name  Type of data
       */
       bool notify_change_occurred(const std::string &name, std::string &msg);
-
-
-      mongo::BSONArray build_array(const std::vector<std::string> &params);
-      mongo::BSONArray build_array(const std::vector<int> &params);
-      mongo::BSONArray build_array(const std::vector<serialize::ParameterPtr> &params);
-      mongo::BSONArray build_regex_array(const std::vector<std::string> &params);
-      mongo::BSONArray build_normalized_array(const std::vector<std::string> &params);
-      mongo::BSONArray build_normalized_array(const std::vector<serialize::ParameterPtr> &params);
-      mongo::BSONArray build_epigenetic_normalized_array(const std::vector<serialize::ParameterPtr> &params);
-      mongo::BSONArray build_annotation_normalized_array(const std::vector<serialize::ParameterPtr> &params);
-
-      std::vector<std::string> build_vector(const std::vector<serialize::ParameterPtr> &params);
-      std::vector<std::string> build_vector(const std::vector<mongo::BSONElement> &params);
-      std::set<std::string> build_set(const std::vector<mongo::BSONElement> &params);
-
-      std::vector<utils::IdName> bsons_to_id_names(const std::vector<mongo::BSONObj> &bsons);
-      utils::IdName bson_to_id_name(const mongo::BSONObj& bson);
-
-      bool check_parameters(const std::vector<serialize::ParameterPtr> &params, const std::function<std::string(const std::string&)> &normalizer, const std::function<bool(const std::string&)> &checker, std::string &wrong);
-
-      bool check_parameters(const std::vector<std::string> &params, const std::function<std::string(const std::string&)> &normalizer, const std::function<bool(const std::string&)> &checker, std::string &wrong);
     }
   }
 }

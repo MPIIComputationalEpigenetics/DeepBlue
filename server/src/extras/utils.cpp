@@ -36,7 +36,22 @@ namespace epidb {
       return os;
     }
 
-    std::vector<IdName> bson_to_id_name(const mongo::BSONObj &o)
+    IdName bson_to_id_name(const mongo::BSONObj& bson)
+    {
+        return utils::IdName(bson["_id"].str(), bson["name"].str());
+    }
+
+
+    std::vector<utils::IdName> bsons_to_id_names(const std::vector<mongo::BSONObj> &bsons)
+    {
+      std::vector<utils::IdName> v;
+      for(const mongo::BSONObj & o: bsons) {
+        v.push_back(bson_to_id_name(o));
+      }
+      return v;
+    }
+
+    std::vector<IdName> request_bson_to_id_name(const mongo::BSONObj &o)
     {
       std::vector<IdName> v;
       for (mongo::BSONObj::iterator it = o.begin(); it.more(); ) {
@@ -47,6 +62,7 @@ namespace epidb {
       }
       return v;
     }
+
 
     std::ostream &operator<<(std::ostream &os, const IdNameCount &o)
     {
@@ -414,6 +430,128 @@ namespace epidb {
 
       return is_number(id.substr(prefix.size()));
     }
+
+// TODO: Use template
+    mongo::BSONArray build_array(const std::vector<int> &params)
+    {
+      mongo::BSONArrayBuilder ab;
+      for (const auto& param : params) {
+        ab.append(param);
+      }
+      return ab.arr();
+    }
+
+    // TODO: move to arrays.cpp
+    // TODO: Use template
+    mongo::BSONArray build_array(const std::vector<std::string> &params)
+    {
+      mongo::BSONArrayBuilder ab;
+      for (const auto& param : params) {
+        ab.append(param);
+      }
+      return ab.arr();
+    }
+
+    mongo::BSONArray build_regex_array(const std::vector<std::string> &params)
+    {
+      mongo::BSONArrayBuilder ab;
+      for (const auto& param : params) {
+        ab.appendRegex(param);
+      }
+      return ab.arr();
+    }
+
+    mongo::BSONArray build_normalized_array(const std::vector<std::string> &params)
+    {
+      mongo::BSONArrayBuilder ab;
+      for (const auto& param : params) {
+        ab.append(utils::normalize_name(param));
+      }
+      return ab.arr();
+    }
+
+
+    mongo::BSONArray build_array(const std::vector<serialize::ParameterPtr> &params)
+    {
+      mongo::BSONArrayBuilder ab;
+      for (const auto& param : params) {
+        ab.append(param->as_string());
+      }
+      return ab.arr();
+    }
+
+    mongo::BSONArray build_normalized_array(const std::vector<serialize::ParameterPtr> &params)
+    {
+      mongo::BSONArrayBuilder ab;
+      for (const auto& param : params) {
+        ab.append(utils::normalize_name(param->as_string()));
+      }
+      return ab.arr();
+    }
+
+    mongo::BSONArray build_epigenetic_normalized_array(const std::vector<serialize::ParameterPtr> &params)
+    {
+      mongo::BSONArrayBuilder ab;
+      for (const auto& param : params) {
+        ab.append(utils::normalize_epigenetic_mark(param->as_string()));
+      }
+      return ab.arr();
+    }
+
+    mongo::BSONArray build_annotation_normalized_array(const std::vector<serialize::ParameterPtr> &params)
+    {
+      mongo::BSONArrayBuilder ab;
+      for (const auto& param : params) {
+        ab.append(utils::normalize_annotation_name(param->as_string()));
+      }
+      return ab.arr();
+    }
+
+    std::vector<std::string> build_vector(const std::vector<serialize::ParameterPtr> &params)
+    {
+      std::vector<std::string> vector;
+      for (const auto& param : params) {
+        vector.push_back(param->as_string());
+      }
+      return vector;
+    }
+
+    std::vector<std::string> build_vector(const std::vector<mongo::BSONElement> &params)
+    {
+      std::vector<std::string> vector;
+      for (auto be : params) {
+        vector.push_back(be.str());
+      }
+      return vector;
+    }
+
+    std::set<std::string> build_set(const std::vector<mongo::BSONElement> &params)
+    {
+      std::set<std::string> set;
+      for (auto be : params) {
+        set.insert(be.str());
+      }
+      return set;
+    }
+
+    bool check_parameters(const std::vector<serialize::ParameterPtr> &params, const std::function<std::string(const std::string&)> &normalizer, const std::function<bool(const std::string&)> &checker, std::string &wrong)
+    {
+      std::vector<std::string> names = build_vector(params);
+      return check_parameters(names, normalizer, checker, wrong);
+    }
+
+    bool check_parameters(const std::vector<std::string> &names, const std::function<std::string(const std::string&)> &normalizer, const std::function<bool(const std::string&)> &checker, std::string &wrong)
+    {
+      for (auto  name : names) {
+        std::string norm_name = normalizer(name);
+        if (!checker(norm_name)) {
+          wrong = name;
+          return false;
+        }
+      }
+      return true;
+    }
+
 
   }
 }

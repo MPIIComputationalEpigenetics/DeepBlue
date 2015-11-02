@@ -12,12 +12,12 @@
 
 #include "../dba/dba.hpp"
 #include "../dba/queries.hpp"
-#include "../dba/helpers.hpp"
 #include "../dba/list.hpp"
 
 #include "../datatypes/user.hpp"
 
 #include "../extras/serialize.hpp"
+#include "../extras/utils.hpp"
 #include "../errors.hpp"
 
 namespace epidb {
@@ -86,27 +86,27 @@ namespace epidb {
 
         mongo::BSONObjBuilder args_builder;
         if (genomes.size() > 0) {
-          args_builder.append("genome", dba::helpers::build_array(genomes));
-          args_builder.append("norm_genome", dba::helpers::build_normalized_array(genomes));
+          args_builder.append("genome", utils::build_array(genomes));
+          args_builder.append("norm_genome", utils::build_normalized_array(genomes));
         }
         // epigenetic mark
         if (epigenetic_marks.size() > 0) {
-          args_builder.append("epigenetic_mark", dba::helpers::build_array(epigenetic_marks));
-          args_builder.append("norm_epigenetic_mark", dba::helpers::build_epigenetic_normalized_array(epigenetic_marks));
+          args_builder.append("epigenetic_mark", utils::build_array(epigenetic_marks));
+          args_builder.append("norm_epigenetic_mark", utils::build_epigenetic_normalized_array(epigenetic_marks));
         }
         // sample id
         if (sample_ids.size() > 0) {
-          args_builder.append("sample_id", dba::helpers::build_array(sample_ids));
+          args_builder.append("sample_id", utils::build_array(sample_ids));
         }
         // project
         if (projects.size() > 0) {
-          args_builder.append("project", dba::helpers::build_array(projects));
-          args_builder.append("norm_project", dba::helpers::build_normalized_array(projects));
+          args_builder.append("project", utils::build_array(projects));
+          args_builder.append("norm_project", utils::build_normalized_array(projects));
         }
         // technique
         if (techniques.size() > 0) {
-          args_builder.append("technique", dba::helpers::build_array(techniques));
-          args_builder.append("norm_technique", dba::helpers::build_normalized_array(techniques));
+          args_builder.append("technique", utils::build_array(techniques));
+          args_builder.append("norm_technique", utils::build_normalized_array(techniques));
         }
 
         time_t time_;

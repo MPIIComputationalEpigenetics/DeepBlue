@@ -85,7 +85,7 @@ namespace epidb {
         }
 
         mongo::BSONObjBuilder args_builder;
-        args_builder.append("genes", dba::helpers::build_array(genes));
+        args_builder.append("genes", utils::build_array(genes));
         args_builder.append("gene_set", utils::normalize_name(gene_set));
 
         std::string query_id;

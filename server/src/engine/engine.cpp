@@ -223,7 +223,7 @@ namespace epidb {
 
     if (result.hasField("__id_names__")) {
       mongo::BSONObj id_names = result["__id_names__"].Obj();
-      data.set_id_names(utils::bson_to_id_name(id_names));
+      data.set_id_names(utils::request_bson_to_id_name(id_names));
       type = request::ID_NAMES;
       return true;
     }

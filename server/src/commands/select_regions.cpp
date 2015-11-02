@@ -3,7 +3,7 @@
 //  epidb
 //
 //  Created by Felipe Albrecht on 12.06.13.
-//  Copyright (c) 2013,2014 Max Planck Institute for Computer Science. All rights reserved.
+//  Copyright (c) 2013,2014,2015 Max Planck Institute for Computer Science. All rights reserved.
 //
 
 #include <sstream>
@@ -105,15 +105,15 @@ namespace epidb {
         std::vector<std::string> names;
         std::vector<std::string> norm_names;
         if (experiment_names.size() > 0) {
-          std::vector<std::string> exp_names_string = dba::helpers::build_vector(experiment_names);
+          std::vector<std::string> exp_names_string = utils::build_vector(experiment_names);
           if (!dba::experiments::get_experiments_names(exp_names_string, names, norm_names, msg)) {
             result.add_error(msg);
             return false;
           }
-          args_builder.append("experiment_name", dba::helpers::build_array(names));
-          args_builder.append("norm_experiment_name", dba::helpers::build_array(norm_names));
+          args_builder.append("experiment_name", utils::build_array(names));
+          args_builder.append("norm_experiment_name", utils::build_array(norm_names));
 
-          if (!dba::helpers::check_parameters(names, utils::normalize_name, dba::exists::experiment, msg)) {
+          if (!utils::check_parameters(names, utils::normalize_name, dba::exists::experiment, msg)) {
             result.add_error("Experiment " + msg + " does not exists.");
             return false;
           }
@@ -121,20 +121,20 @@ namespace epidb {
         }
         // epigenetic mark
         if (epigenetic_marks.size() > 0) {
-          if (!dba::helpers::check_parameters(epigenetic_marks, utils::normalize_epigenetic_mark, dba::exists::epigenetic_mark, msg)) {
+          if (!utils::check_parameters(epigenetic_marks, utils::normalize_epigenetic_mark, dba::exists::epigenetic_mark, msg)) {
             result.add_error("Epigenetic mark " + msg + " does not exists.");
             return false;
           }
-          args_builder.append("epigenetic_mark", dba::helpers::build_array(epigenetic_marks));
-          args_builder.append("norm_epigenetic_mark", dba::helpers::build_epigenetic_normalized_array(epigenetic_marks));
+          args_builder.append("epigenetic_mark", utils::build_array(epigenetic_marks));
+          args_builder.append("norm_epigenetic_mark", utils::build_epigenetic_normalized_array(epigenetic_marks));
         }
         // sample id
         if (sample_ids.size() > 0) {
-          if (!dba::helpers::check_parameters(sample_ids, utils::normalize_name, dba::exists::sample, msg)) {
+          if (!utils::check_parameters(sample_ids, utils::normalize_name, dba::exists::sample, msg)) {
             result.add_error("Sample ID " + msg + " does not exists.");
             return false;
           }
-          args_builder.append("sample_id", dba::helpers::build_array(sample_ids));
+          args_builder.append("sample_id", utils::build_array(sample_ids));
         }
 
         std::vector<utils::IdName> user_projects;
@@ -165,24 +165,24 @@ namespace epidb {
             }
           }
 
-          args_builder.append("project", dba::helpers::build_array(filtered_projects));
-          args_builder.append("norm_project", dba::helpers::build_normalized_array(filtered_projects));
+          args_builder.append("project", utils::build_array(filtered_projects));
+          args_builder.append("norm_project", utils::build_normalized_array(filtered_projects));
         } else {
           std::vector<std::string> user_projects_names;
           for (const auto& project : user_projects) {
             user_projects_names.push_back(project.name);
           }
-          args_builder.append("project", dba::helpers::build_array(user_projects_names));
-          args_builder.append("norm_project", dba::helpers::build_normalized_array(user_projects_names));
+          args_builder.append("project", utils::build_array(user_projects_names));
+          args_builder.append("norm_project", utils::build_normalized_array(user_projects_names));
         }
         // technique
         if (techniques.size() > 0) {
-          if (!dba::helpers::check_parameters(techniques, utils::normalize_name, dba::exists::technique, msg)) {
+          if (!utils::check_parameters(techniques, utils::normalize_name, dba::exists::technique, msg)) {
             result.add_error("Technique " + msg + " does not exists.");
             return false;
           }
-          args_builder.append("technique", dba::helpers::build_array(techniques));
-          args_builder.append("norm_technique", dba::helpers::build_normalized_array(techniques));
+          args_builder.append("technique", utils::build_array(techniques));
+          args_builder.append("norm_technique", utils::build_normalized_array(techniques));
         }
 
         if (start >= 0) {

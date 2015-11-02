@@ -149,7 +149,7 @@ namespace epidb {
         query_builder.append("epidb_id", id_name.id);
         mongo::BSONObj query = query_builder.obj();
 
-        mongo::BSONArray related_terms_arr = helpers::build_array(related_terms);
+        mongo::BSONArray related_terms_arr = utils::build_array(related_terms);
         mongo::BSONObj append_value = BSON("$addToSet" << BSON("related_terms" << BSON("$each" << related_terms_arr)));
 
         // Update the biosource term (that were informed in the id_names.name)

@@ -217,7 +217,7 @@ namespace epidb {
       {
         Connection c;
 
-        mongo::BSONArray genes_array = dba::helpers::build_regex_array(genes);
+        mongo::BSONArray genes_array = utils::build_regex_array(genes);
         mongo::BSONArray genes_array_2 = genes_array;
 
         mongo::BSONObj gene_set_obj = c->findOne(dba::helpers::collection_name(dba::Collections::GENE_SETS()), BSON("norm_name" << gene_set));

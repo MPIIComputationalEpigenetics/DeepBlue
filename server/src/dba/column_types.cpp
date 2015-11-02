@@ -192,7 +192,7 @@ namespace epidb {
         mongo::BSONObjBuilder builder;
         builder.appendElements(super);
         builder.append("column_type", "category");
-        mongo::BSONArray arr = helpers::build_array(_content);
+        mongo::BSONArray arr = utils::build_array(_content);
         builder.append("items", arr);
 
         return builder.obj();
@@ -429,7 +429,7 @@ namespace epidb {
         mongo::BSONObjBuilder create_column_type_category_builder;
         create_column_type_category_builder.appendElements(obj);
 
-        mongo::BSONArray arr = helpers::build_array(items);
+        mongo::BSONArray arr = utils::build_array(items);
         create_column_type_category_builder.append("items", arr);
 
         Connection c;

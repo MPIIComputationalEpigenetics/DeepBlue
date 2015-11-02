@@ -11,7 +11,6 @@
 #include "../engine/commands.hpp"
 
 #include "../dba/dba.hpp"
-#include "../dba/helpers.hpp"
 #include "../dba/list.hpp"
 #include "../dba/queries.hpp"
 
@@ -93,28 +92,28 @@ namespace epidb {
         mongo::BSONObjBuilder args_builder;
 
         if (!types.empty()) {
-          args_builder.append("upload_info.content_format", dba::helpers::build_normalized_array(types));
+          args_builder.append("upload_info.content_format", utils::build_normalized_array(types));
         }
 
         if (!genomes.empty()) {
-          args_builder.append("genome", dba::helpers::build_array(genomes));
-          args_builder.append("norm_genome", dba::helpers::build_normalized_array(genomes));
+          args_builder.append("genome", utils::build_array(genomes));
+          args_builder.append("norm_genome", utils::build_normalized_array(genomes));
         }
 
 
         if (!biosources.empty()) {
-          args_builder.append("sample_info.biosource_name", dba::helpers::build_array(biosources));
-          args_builder.append("sample_info.norm_biosource_name", dba::helpers::build_normalized_array(biosources));
+          args_builder.append("sample_info.biosource_name", utils::build_array(biosources));
+          args_builder.append("sample_info.norm_biosource_name", utils::build_normalized_array(biosources));
         }
 
         // epigenetic mark
         if (!epigenetic_marks.empty()) {
-          args_builder.append("epigenetic_mark", dba::helpers::build_array(epigenetic_marks));
-          args_builder.append("norm_epigenetic_mark", dba::helpers::build_epigenetic_normalized_array(epigenetic_marks));
+          args_builder.append("epigenetic_mark", utils::build_array(epigenetic_marks));
+          args_builder.append("norm_epigenetic_mark", utils::build_epigenetic_normalized_array(epigenetic_marks));
         }
         // sample id
         if (!sample_ids.empty()) {
-          args_builder.append("sample_id", dba::helpers::build_array(sample_ids));
+          args_builder.append("sample_id", utils::build_array(sample_ids));
         }
 
         std::vector<utils::IdName> user_projects;
@@ -145,8 +144,8 @@ namespace epidb {
               return false;
             }
           }
-          args_builder.append("project", dba::helpers::build_array(filtered_projects));
-          args_builder.append("norm_project", dba::helpers::build_normalized_array(filtered_projects));
+          args_builder.append("project", utils::build_array(filtered_projects));
+          args_builder.append("norm_project", utils::build_normalized_array(filtered_projects));
         } else {
 
           std::vector<std::string> user_projects_names;
@@ -154,14 +153,14 @@ namespace epidb {
             user_projects_names.push_back(project.name);
           }
 
-          args_builder.append("project", dba::helpers::build_array(user_projects_names));
-          args_builder.append("norm_project", dba::helpers::build_normalized_array(user_projects_names));
+          args_builder.append("project", utils::build_array(user_projects_names));
+          args_builder.append("norm_project", utils::build_normalized_array(user_projects_names));
         }
 
         // technique
         if (!techniques.empty()) {
-          args_builder.append("technique", dba::helpers::build_array(techniques));
-          args_builder.append("norm_technique", dba::helpers::build_normalized_array(techniques));
+          args_builder.append("technique", utils::build_array(techniques));
+          args_builder.append("norm_technique", utils::build_normalized_array(techniques));
         }
 
         const mongo::BSONObj query = dba::query::build_query(args_builder.obj());
