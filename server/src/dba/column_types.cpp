@@ -487,7 +487,7 @@ namespace epidb {
       bool list_column_types(const std::string &user_key, std::vector<utils::IdName> &content, std::string  &msg)
       {
         Connection c;
-        std::auto_ptr<mongo::DBClientCursor> data_cursor = c->query(helpers::collection_name(Collections::COLUMN_TYPES()), mongo::BSONObj());
+        auto data_cursor = c->query(helpers::collection_name(Collections::COLUMN_TYPES()), mongo::BSONObj());
 
         processing::StatusPtr status = processing::build_dummy_status();
         while (data_cursor->more()) {
@@ -553,7 +553,7 @@ namespace epidb {
         Connection c;
         const std::string norm_name = utils::normalize_name(name);
         mongo::BSONObj query = BSON("norm_name" << norm_name);
-        std::auto_ptr<mongo::DBClientCursor> data_cursor = c->query(helpers::collection_name(Collections::COLUMN_TYPES()), query, 1);
+        auto data_cursor = c->query(helpers::collection_name(Collections::COLUMN_TYPES()), query, 1);
         if (!data_cursor->more()) {
           msg = "Column type " + name + " not found";
           c.done();

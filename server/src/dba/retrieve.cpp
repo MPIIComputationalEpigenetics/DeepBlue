@@ -265,7 +265,7 @@ namespace epidb {
         }
 
         regions.reserve(count);
-        std::auto_ptr<mongo::DBClientCursor> cursor( c->query(collection, query, 0, 0, NULL, queryOptions) );
+        auto cursor( c->query(collection, query, 0, 0, NULL, queryOptions) );
         cursor->setBatchSize(BULK_SIZE);
         RegionProcess rp(regions, start, end, full_overlap);
         while ( cursor->more() ) {
@@ -472,7 +472,7 @@ namespace epidb {
         std::string filename = norm_genome + "." + chromosome;
 
         Connection c;
-        std::auto_ptr<mongo::DBClientCursor> data_cursor = c->query(helpers::collection_name(Collections::SEQUENCES()) + ".files",
+        auto data_cursor = c->query(helpers::collection_name(Collections::SEQUENCES()) + ".files",
             mongo::Query(BSON("filename" << filename)));
 
         bool r = data_cursor->more();
@@ -492,7 +492,7 @@ namespace epidb {
         Connection c;
 
         mongo::BSONObj projection = BSON("chunkSize" << 1);
-        std::auto_ptr<mongo::DBClientCursor> data_cursor = c->query(helpers::collection_name(Collections::SEQUENCES()) + ".files",
+        auto data_cursor = c->query(helpers::collection_name(Collections::SEQUENCES()) + ".files",
             mongo::Query(BSON("filename" << filename)), 0, 0, &projection);
 
         if (data_cursor->more()) {
@@ -515,7 +515,7 @@ namespace epidb {
         Connection c;
 
         mongo::BSONObj projection = BSON("_id" << 1);
-        std::auto_ptr<mongo::DBClientCursor> data_cursor = c->query(helpers::collection_name(Collections::SEQUENCES()) + ".files",
+        auto data_cursor = c->query(helpers::collection_name(Collections::SEQUENCES()) + ".files",
             mongo::Query(BSON("filename" << filename)), 0, 0, &projection);
 
         if (data_cursor->more()) {
@@ -557,7 +557,7 @@ namespace epidb {
         Connection c;
 
         mongo::BSONObj projection = BSON("data" << 1);
-        std::auto_ptr<mongo::DBClientCursor> data_cursor = c->query(helpers::collection_name(Collections::SEQUENCES()) + ".chunks",
+        auto data_cursor = c->query(helpers::collection_name(Collections::SEQUENCES()) + ".chunks",
             mongo::Query(BSON("files_id" << oid << "n" << (int) chunk_number)), 0, 0, &projection);
 
         if (data_cursor->more()) {

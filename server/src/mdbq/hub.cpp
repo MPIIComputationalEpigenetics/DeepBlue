@@ -61,7 +61,7 @@ namespace epidb {
         mongo::BSONObj ret = BSON("_id" << 1 <<
                                   "owner" << 1 <<
                                   "nfailed" << 1);
-        std::auto_ptr<mongo::DBClientCursor> p =
+        auto p =
           m_con->query( dba::helpers::collection_name(dba::Collections::JOBS()),
                         BSON(
                           "state" << TS_FAILED <<
@@ -199,20 +199,25 @@ namespace epidb {
 
     std::list<mongo::BSONObj> Hub::get_jobs(const mdbq::TaskState& state, const std::string &user_id)
     {
-      std::auto_ptr<mongo::DBClientCursor> cursor;
+      std::list<mongo::BSONObj> ret;
+
       if (state == mdbq::_TS_END) {
-        cursor = m_ptr->m_con->query(dba::helpers::collection_name(dba::Collections::JOBS()),
-                                     BSON("misc.user_id" << user_id));
+        auto cursor = m_ptr->m_con->query(dba::helpers::collection_name(dba::Collections::JOBS()),
+                                          BSON("misc.user_id" << user_id));
+        while (cursor->more()) {
+          mongo::BSONObj o = cursor->next().getOwned();
+          ret.push_back(o);
+        }
+
       } else {
-        cursor = m_ptr->m_con->query(dba::helpers::collection_name(dba::Collections::JOBS()),
-                                     BSON("state" << state << "misc.user_id" << user_id));
+        auto cursor = m_ptr->m_con->query(dba::helpers::collection_name(dba::Collections::JOBS()),
+                                          BSON("state" << state << "misc.user_id" << user_id));
+        while (cursor->more()) {
+          mongo::BSONObj o = cursor->next().getOwned();
+          ret.push_back(o);
+        }
       }
 
-      std::list<mongo::BSONObj> ret;
-      while (cursor->more()) {
-        mongo::BSONObj o = cursor->next().getOwned();
-        ret.push_back(o);
-      }
       return ret;
     }
 
@@ -324,7 +329,7 @@ namespace epidb {
 
     bool Hub::get_file_info(const std::string &filename, mongo::OID &oid, size_t &chunk_size, size_t &file_size, std::string &msg)
     {
-      std::auto_ptr<mongo::DBClientCursor> data_cursor = m_ptr->m_con->query(m_ptr->m_prefix + ".fs.files", mongo::Query(BSON("filename" << filename)));
+      auto data_cursor = m_ptr->m_con->query(m_ptr->m_prefix + ".fs.files", mongo::Query(BSON("filename" << filename)));
 
       if (data_cursor->more()) {
         auto fileinfo = data_cursor->next();
@@ -356,7 +361,7 @@ namespace epidb {
 
       while (remaining > 0) {
         mongo::Query q(BSON("files_id" << oid << "n" << (long long) n));
-        std::auto_ptr<mongo::DBClientCursor> data_cursor = m_ptr->m_con->query(m_ptr->m_prefix + ".fs.chunks", q, 0, 0, &projection);
+        auto data_cursor = m_ptr->m_con->query(m_ptr->m_prefix + ".fs.chunks", q, 0, 0, &projection);
         if (data_cursor->more()) {
           int read;
           char* compressed_data = (char *) data_cursor->next().getField("data").binData(read);

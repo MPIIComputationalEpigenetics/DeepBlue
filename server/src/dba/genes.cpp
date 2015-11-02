@@ -240,7 +240,7 @@ namespace epidb {
 
         mongo::Query query = mongo::Query(filter).sort(BSON(KeyMapper::CHROMOSOME() << 1 << KeyMapper::START() << 1));
         std::string collection = dba::helpers::collection_name(dba::Collections::GENES());
-        std::auto_ptr<mongo::DBClientCursor> data_cursor = c->query(collection, query);
+        auto data_cursor = c->query(collection, query);
 
         std::string actual_chromosome("");
         Regions actual_regions;

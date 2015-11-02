@@ -45,7 +45,7 @@ namespace epidb {
       index.append("s", 1);
       c->createIndex(helpers::collection_name(Collections::KEY_MAPPER()), index.obj());
 
-      std::auto_ptr<mongo::DBClientCursor> cursor =
+      auto cursor =
         c->query(helpers::collection_name(Collections::KEY_MAPPER()), mongo::BSONObj());
 
       if (!(c->getLastErrorDetailed().getField("err").isNull())) {

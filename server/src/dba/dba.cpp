@@ -793,7 +793,7 @@ namespace epidb {
       Connection c;
 
       // If we already have a sample with exactly the same information
-      std::auto_ptr<mongo::DBClientCursor> cursor = c->query(helpers::collection_name(Collections::SAMPLES()), data);
+      auto cursor = c->query(helpers::collection_name(Collections::SAMPLES()), data);
       if (cursor->more()) {
         mongo::BSONObj o = cursor->next();
         sample_id = o["_id"].str();
@@ -844,7 +844,7 @@ namespace epidb {
       Connection c;
 
       // check for possible duplicate
-      std::auto_ptr<mongo::DBClientCursor> data_cursor =
+      auto data_cursor =
         c->query(helpers::collection_name(Collections::SEQUENCES()) + ".files",
                  BSON("filename" << filename), 1);
 
@@ -1118,7 +1118,7 @@ namespace epidb {
       Connection c;
 
       mongo::BSONObj annotation_query = annotations_query_builder.obj();
-      std::auto_ptr<mongo::DBClientCursor> cursor = c->query(helpers::collection_name(Collections::ANNOTATIONS()), annotation_query);
+      auto cursor = c->query(helpers::collection_name(Collections::ANNOTATIONS()), annotation_query);
 
       if (cursor->more()) {
         mongo::BSONObj p = cursor->next();

@@ -117,7 +117,7 @@ namespace epidb {
         bool b(false);
 
         mongo::Query q = mongo::Query().sort("_id");
-        std::auto_ptr<mongo::DBClientCursor> cursor  = c->query("config.shards", q);
+        auto cursor  = c->query("config.shards", q);
         while  (cursor->more()) {
           mongo::BSONObj o = cursor->next();
           std::string shard = o["_id"].str();

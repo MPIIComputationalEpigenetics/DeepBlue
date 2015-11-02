@@ -52,7 +52,7 @@ namespace epidb {
         syn_query_builder.append("norm_name", norm_biosource_name);
         mongo::BSONObj query_obj = syn_query_builder.obj();
         mongo::Query query = mongo::Query(query_obj);
-        std::auto_ptr<mongo::DBClientCursor> syns_cursor = c->query(helpers::collection_name(Collections::BIOSOURCE_SYNONYMS()), query);
+        auto syns_cursor = c->query(helpers::collection_name(Collections::BIOSOURCE_SYNONYMS()), query);
 
         if (!syns_cursor->more()) {
           c.done();
@@ -68,7 +68,7 @@ namespace epidb {
           syn_query.append("norm_synonym", norm_synonym);
           mongo::Query query = mongo::Query(syn_query.obj());
 
-          std::auto_ptr<mongo::DBClientCursor> syns_names_cursor = c->query(helpers::collection_name(Collections::BIOSOURCE_SYNONYM_NAMES()), query);
+          auto syns_names_cursor = c->query(helpers::collection_name(Collections::BIOSOURCE_SYNONYM_NAMES()), query);
 
           if (!syns_names_cursor->more()) {
             msg = "It was not possible to find the name of " + norm_synonym + " .";
@@ -97,7 +97,7 @@ namespace epidb {
 
         mongo::BSONObj query_obj = syn_query_builder.obj();
         mongo::Query query = mongo::Query(query_obj).sort("synonym");
-        std::auto_ptr<mongo::DBClientCursor> syns_cursor = c->query(helpers::collection_name(Collections::BIOSOURCE_SYNONYM_NAMES()), query);
+        auto syns_cursor = c->query(helpers::collection_name(Collections::BIOSOURCE_SYNONYM_NAMES()), query);
 
         if (!syns_cursor->more()) {
           msg = "It was not possible to find the biosources synonyms for " + synonym + " .";
@@ -170,7 +170,7 @@ namespace epidb {
 
         mongo::BSONObj query_obj = syn_query_builder.obj();
         mongo::Query query = mongo::Query(query_obj).sort("synonym");
-        std::auto_ptr<mongo::DBClientCursor> syns_cursor = c->query(helpers::collection_name(Collections::BIOSOURCE_SYNONYM_NAMES()), query);
+        auto syns_cursor = c->query(helpers::collection_name(Collections::BIOSOURCE_SYNONYM_NAMES()), query);
 
         if (!syns_cursor->more()) {
           msg = "It was not possible to find the biosource root for " + synonym + " .";
@@ -315,7 +315,7 @@ namespace epidb {
 
         mongo::BSONObj query_obj = syn_query_builder.obj();
         mongo::Query query = mongo::Query(query_obj);
-        std::auto_ptr<mongo::DBClientCursor> syns_cursor = c->query(helpers::collection_name(Collections::BIOSOURCE_EMBRACING()), query);
+        auto syns_cursor = c->query(helpers::collection_name(Collections::BIOSOURCE_EMBRACING()), query);
 
         if (!syns_cursor->more()) {
           c.done();
@@ -460,7 +460,7 @@ namespace epidb {
 
         mongo::BSONObj query_obj = query_builder.obj();
         mongo::Query query = mongo::Query(query_obj);
-        std::auto_ptr<mongo::DBClientCursor> syns_cursor = c->query(helpers::collection_name(Collections::BIOSOURCE_EMBRACING()), query);
+        auto syns_cursor = c->query(helpers::collection_name(Collections::BIOSOURCE_EMBRACING()), query);
 
         if (!syns_cursor->more()) {
           c.done();
@@ -513,7 +513,7 @@ namespace epidb {
         query_builder.append("subs", norm_s1);
         mongo::BSONObj query_obj = query_builder.obj();
         mongo::Query query = mongo::Query(query_obj);
-        std::auto_ptr<mongo::DBClientCursor> upper_cursor = c->query(helpers::collection_name(Collections::BIOSOURCE_EMBRACING()), query);
+        auto upper_cursor = c->query(helpers::collection_name(Collections::BIOSOURCE_EMBRACING()), query);
 
         while (upper_cursor->more()) {
           mongo::BSONObj upper_bson = upper_cursor->next();

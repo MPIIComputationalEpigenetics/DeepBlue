@@ -166,7 +166,7 @@ namespace epidb {
         }
         mongo::BSONObj projection = b.obj();
         const std::string collection = collection_name(where);
-        std::auto_ptr<mongo::DBClientCursor> data_cursor = c->query(collection, query, 0, 0, &projection);
+        auto data_cursor = c->query(collection, query, 0, 0, &projection);
         while (data_cursor->more()) {
           mongo::BSONObj obj = data_cursor->next().getOwned();
           results.push_back(obj);
@@ -189,7 +189,7 @@ namespace epidb {
       {
         Connection c;
         const std::string collection = collection_name(where);
-        std::auto_ptr<mongo::DBClientCursor> data_cursor = c->query(collection, query);
+        auto data_cursor = c->query(collection, query);
         if (data_cursor->more()) {
           result = data_cursor->next().getOwned();
           c.done();

@@ -122,7 +122,7 @@ namespace epidb {
         collection = Collections::ANNOTATIONS();
       }
 
-      std::auto_ptr<mongo::DBClientCursor> data_cursor = c->query(helpers::collection_name(collection), query, 1);
+      auto data_cursor = c->query(helpers::collection_name(collection), query, 1);
       mongo::BSONObj original;
       if (data_cursor->more()) {
         original = data_cursor->next().getOwned();

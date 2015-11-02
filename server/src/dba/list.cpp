@@ -232,7 +232,7 @@ namespace epidb {
       bool column_types(const std::string &user_key, std::vector<std::string> &content, std::string  &msg)
       {
         Connection c;
-        std::auto_ptr<mongo::DBClientCursor> data_cursor = c->query(helpers::collection_name(Collections::COLUMN_TYPES()), mongo::BSONObj());
+        auto data_cursor = c->query(helpers::collection_name(Collections::COLUMN_TYPES()), mongo::BSONObj());
 
         processing::StatusPtr status = processing::build_dummy_status();
 

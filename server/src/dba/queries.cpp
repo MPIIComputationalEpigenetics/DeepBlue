@@ -278,10 +278,9 @@ namespace epidb {
         experiments_query_builder << KeyMapper::DATASET() << helpers::build_condition_array<DatasetId>(datasets_it, "$in");
 
         mongo::BSONObj o = experiments_query_builder.obj();
-        std::auto_ptr<mongo::DBClientCursor> cursor;
 
         Connection c;
-        cursor = c->query(helpers::collection_name(Collections::EXPERIMENTS()), o);
+        auto cursor = c->query(helpers::collection_name(Collections::EXPERIMENTS()), o);
         while (cursor->more()) {
           mongo::BSONObj experiment = cursor->next();
           std::string exp_id = experiment["_id"].str();
@@ -425,7 +424,7 @@ namespace epidb {
         if (experiment_name_dataset_id_cache.exists_dataset_id(norm_name)) {
           dataset_id = experiment_name_dataset_id_cache.get_dataset_id(norm_name);
         } else {
-          std::auto_ptr<mongo::DBClientCursor> cursor =
+          auto cursor =
             c->query(helpers::collection_name(Collections::EXPERIMENTS()), BSON("norm_name" << norm_name));
 
           if (!cursor->more()) {
@@ -473,7 +472,7 @@ namespace epidb {
 
         const mongo::BSONObj args_query = build_query(args);
         Connection c;
-        std::auto_ptr<mongo::DBClientCursor> cursor = c->query(helpers::collection_name(Collections::EXPERIMENTS()), args_query);
+        auto cursor = c->query(helpers::collection_name(Collections::EXPERIMENTS()), args_query);
         while (cursor->more()) {
           mongo::BSONObj p = cursor->next();
           mongo::BSONElement dataset_id = p.getField(KeyMapper::DATASET());
@@ -518,7 +517,7 @@ namespace epidb {
 
         Connection c;
         mongo::BSONObj annotation_query = annotations_query_builder.obj();
-        std::auto_ptr<mongo::DBClientCursor> cursor = c->query(helpers::collection_name(Collections::ANNOTATIONS()), annotation_query);
+        auto cursor = c->query(helpers::collection_name(Collections::ANNOTATIONS()), annotation_query);
         while (cursor->more()) {
           mongo::BSONObj p = cursor->next();
           mongo::BSONElement dataset_id = p.getField(KeyMapper::DATASET());
@@ -715,7 +714,7 @@ namespace epidb {
           mongo::BSONArrayBuilder datasets_array_builder;
           const mongo::BSONObj query = build_query(args);
           Connection c;
-          std::auto_ptr<mongo::DBClientCursor> cursor = c->query(helpers::collection_name(Collections::EXPERIMENTS()), query);
+          auto cursor = c->query(helpers::collection_name(Collections::EXPERIMENTS()), query);
           while (cursor->more()) {
             mongo::BSONObj p = cursor->next();
             mongo::BSONElement dataset_id = p.getField(KeyMapper::DATASET());
@@ -965,7 +964,7 @@ namespace epidb {
 
         std::string norm_genome = utils::normalize_name(genome);
 
-        std::auto_ptr<mongo::DBClientCursor> data_cursor =
+        auto data_cursor =
           c->query(helpers::collection_name(Collections::TILINGS()),
                    BSON("norm_genome" << norm_genome << "tiling_size" << (int) tiling_size), 0, 1);
 
@@ -1104,10 +1103,9 @@ namespace epidb {
         experiments_query_builder << KeyMapper::DATASET() << dataset_id;
 
         mongo::BSONObj o = experiments_query_builder.obj();
-        std::auto_ptr<mongo::DBClientCursor> cursor;
 
         Connection c;
-        cursor = c->query(helpers::collection_name(Collections::EXPERIMENTS()), o);
+        auto cursor = c->query(helpers::collection_name(Collections::EXPERIMENTS()), o);
 
         bool found = false;
         while (cursor->more()) {

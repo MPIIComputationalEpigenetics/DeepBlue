@@ -108,7 +108,7 @@ namespace epidb {
           } else {
             norm_biosource_name = data["norm_biosource_name"].str();
           }
-          std::auto_ptr<mongo::DBClientCursor> cursor = c->query(helpers::collection_name(Collections::TEXT_SEARCH()),
+          auto cursor = c->query(helpers::collection_name(Collections::TEXT_SEARCH()),
               mongo::fromjson("{\"norm_name\": \"" + norm_biosource_name + "\", \"type\": \"biosources\"}"));
 
           if (!cursor->more()) {

@@ -108,8 +108,7 @@ namespace epidb {
 
       Connection c;
 
-      std::auto_ptr<mongo::DBClientCursor> data_cursor;
-      data_cursor = c->query(helpers::collection_name(Collections::EXPERIMENTS()),
+      auto data_cursor = c->query(helpers::collection_name(Collections::EXPERIMENTS()),
                              mongo::Query(BSON(KeyMapper::DATASET() << dataset_id)));
       if (data_cursor->more()) {
         obj = data_cursor->next().getOwned();
