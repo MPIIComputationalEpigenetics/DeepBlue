@@ -163,7 +163,7 @@ namespace epidb {
       {
         mongo::BSONObj result;
 
-        if (id_name[0] == 'g') {
+        if (utils::is_id(id_name, "g")) {
           if (!helpers::get_one(Collections::GENOMES(), BSON("_id" << id_name), result)) {
             return false;
           }
