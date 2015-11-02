@@ -82,6 +82,8 @@ namespace epidb {
 
   extern Error ERR_INVALID_BIOSOURCE_NAME;
   extern Error ERR_INVALID_QUERY_ID;
+  extern Error ERR_PERMISSION_QUERY;
+
   extern Error ERR_INVALID_COLUMN_NAME;
   extern Error ERR_DUPLICATED_COLUMN_NAME;
 
