@@ -70,7 +70,7 @@ namespace epidb {
       bool get_chromosomes(const std::string &genome,
                            std::vector<ChromosomeInfo> &chromosomes, std::string &msg);
 
-      bool get_genome_info(const std::string &name, GenomeInfoPtr &, std::string &msg);
+      bool get_genome_info(const std::string &id_name, GenomeInfoPtr &, std::string &msg);
 
       bool chromosome_size(const std::string &genome, const std::string &chromosome, size_t &size, std::string &msg);
     }

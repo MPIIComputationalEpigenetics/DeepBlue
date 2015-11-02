@@ -13,27 +13,27 @@
 #include <string>
 #include <utility>
 
-
 #include <boost/foreach.hpp>
 
+#include "collections.hpp"
 #include "genomes.hpp"
 #include "helpers.hpp"
 
 #include "../extras/utils.hpp"
 
+#include "../errors.hpp"
+
 namespace epidb {
   namespace dba {
     namespace genomes {
-
-
       bool GenomeInfo::chromosome_size(const std::string &intern_chromosome, size_t &size, std::string &msg) const
       {
-        GenomeData::const_iterator it = data_.find(intern_chromosome);
+        auto it = data_.find(intern_chromosome);
         if (it != data_.end()) {
           size = it->second;
           return true;
         } else {
-          msg = "Chromosome '" + intern_chromosome + "' not found.";
+          msg = Error::m(ERR_INVALID_CHROMOSOME_NAME, intern_chromosome);
           return false;
         }
       }
@@ -57,7 +57,7 @@ namespace epidb {
         }
 
         // Check if the name contains extra "chr". Remove it and check.
-        if ((chromosome.size() > 3) && (chromosome.compare(0, 3, "chr") == 0)) {
+        if ((norm_chromosome.size() > 3) && (norm_chromosome.compare(0, 3, "chr") == 0)) {
           std::string tmp = norm_chromosome.substr(3);
           p = names_pair_.find(tmp);
           if (p != names_pair_.end()) {
@@ -74,20 +74,20 @@ namespace epidb {
           return true;
         }
 
-        msg = "Chromosome " + chromosome + " not found in the genome assembly " + name_;
+        msg = Error::m(ERR_INVALID_CHROMOSOME_NAME_GENOME, chromosome, name_);
         return false;
-
       }
 
       bool GenomeInfo::get_chromosome(const std::string &name, ChromosomeInfo &chromosome_info, std::string &msg) const
       {
-        GenomeData::const_iterator it = data_.find(name);
+        std::string norm_chromosome = utils::normalize_name(name);
+        auto it = data_.find(name);
         if (it != data_.end()) {
           chromosome_info.name = it->first;
           chromosome_info.size = it->second;
           return true;
         }
-        msg = "Chromosome " + name + " not found.";
+        msg = Error::m(ERR_INVALID_CHROMOSOME_NAME, norm_chromosome);
         return false;
       }
 
@@ -101,12 +101,11 @@ namespace epidb {
         return r;
       }
 
-
       template <class T>
       bool get_chromosomes(const T &genomes,
                            std::set<std::string> &chromosomes, std::string &msg)
       {
-        for (const auto &genome: genomes) {
+        for (const auto &genome : genomes) {
           if (!get_chromosomes(genome, chromosomes, msg)) {
             return false;
           }
@@ -115,12 +114,14 @@ namespace epidb {
       }
 
       bool get_chromosomes(const std::set<std::string> &genomes,
-                           std::set<std::string> &chromosomes, std::string &msg) {
+                           std::set<std::string> &chromosomes, std::string &msg)
+      {
         return get_chromosomes<std::set<std::string>>(genomes, chromosomes, msg);
       }
 
       bool get_chromosomes(const std::vector<std::string> &genomes,
-                           std::set<std::string> &chromosomes, std::string &msg) {
+                           std::set<std::string> &chromosomes, std::string &msg)
+      {
         return get_chromosomes<std::vector<std::string>>(genomes, chromosomes, msg);
       }
 
@@ -158,27 +159,28 @@ namespace epidb {
         return true;
       }
 
-      bool get_genome_info(const std::string &name, GenomeInfoPtr &gi, std::string &msg)
+      bool get_genome_info(const std::string &id_name, GenomeInfoPtr &gi, std::string &msg)
       {
-        std::string norm_genome = utils::normalize_name(name);
+        mongo::BSONObj result;
 
-        std::vector<mongo::BSONObj> result;
-        if (!helpers::get("genomes", "norm_name", norm_genome, result, msg)) {
-          return false;
+        if (id_name[0] == 'g') {
+          if (!helpers::get_one(Collections::GENOMES(), BSON("_id" << id_name), result)) {
+            return false;
+          }
+        } else {
+          std::string norm_genome = utils::normalize_name(id_name);
+          if (!helpers::get_one(Collections::GENOMES(), BSON("norm_name" << norm_genome), result)) {
+            msg = Error::m(ERR_INVALID_GENOME_NAME, id_name);
+            return false;
+          }
         }
 
-        if (result.size() == 0) {
-          msg = "Genome '" + name +  "' not found";
-          return false;
-        }
-
-        mongo::BSONObj o = result[0];
-        std::vector<mongo::BSONElement> c = o["chromosomes"].Array();
+        std::vector<mongo::BSONElement> c = result["chromosomes"].Array();
+        std::string genome_name = result["name"].String();
 
         GenomeData data;
         NamesPairs names_pairs;
-        for (std::vector<mongo::BSONElement>::iterator it = c.begin(); it != c.end(); it++) {
-          mongo::BSONElement e = *it;
+        for (auto&  e : c) {
           std::string name = e["name"].String();
           std::string norm_name = utils::normalize_name(name);
           int size = e["size"].Int();
@@ -186,7 +188,7 @@ namespace epidb {
           names_pairs[norm_name] = name;
         }
 
-        gi = std::shared_ptr<GenomeInfo>(new GenomeInfo(name, data, names_pairs));
+        gi = std::shared_ptr<GenomeInfo>(new GenomeInfo(genome_name, data, names_pairs));
         return true;
       }
 
