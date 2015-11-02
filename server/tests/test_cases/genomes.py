@@ -21,6 +21,13 @@ class TestGenomeCommands(helpers.TestCase):
     self.assertEqual(len(genomes), 1)
     self.assertEqual(genomes[0][1], "hg19")
 
+    r1 = epidb.chromosomes("hg19", self.admin_key)
+    r2 = epidb.chromosomes("g1", self.admin_key)
+
+    self.assertEqual(len(r1[1]), 93)
+    self.assertEqual(r1[1][0][0], "chr1")
+    self.assertEqual(r1[1][0][1], 249250621)
+
   def test_chromosomes(self):
     epidb = EpidbClient()
     self.init(epidb)
