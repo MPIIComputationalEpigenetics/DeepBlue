@@ -165,6 +165,7 @@ namespace epidb {
 
         if (utils::is_id(id_name, "g")) {
           if (!helpers::get_one(Collections::GENOMES(), BSON("_id" << id_name), result)) {
+            msg = Error::m(ERR_INVALID_GENOME_ID, id_name);
             return false;
           }
         } else {
