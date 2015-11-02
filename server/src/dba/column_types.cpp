@@ -580,7 +580,8 @@ namespace epidb {
       bool get_column_type(const std::string &id, std::map<std::string, std::string> &res, std::string &msg)
       {
         mongo::BSONObj o;
-        if (!helpers::get_one(Collections::COLUMN_TYPES(), mongo::Query(BSON("_id" << id)), o, msg)) {
+        if (!helpers::get_one(Collections::COLUMN_TYPES(), mongo::Query(BSON("_id" << id)), o)) {
+          msg = Error::m(ERR_INVALID_COLUMN_TYPE_ID, id);
           return false;
         }
 

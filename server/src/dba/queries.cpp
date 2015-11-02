@@ -103,7 +103,7 @@ namespace epidb {
         mongo::BSONObj search_query = search_query_builder.obj();
 
         mongo::BSONObj result;
-        if (helpers::get_one(Collections::QUERIES(), search_query, result, msg)) {
+        if (helpers::get_one(Collections::QUERIES(), search_query, result)) {
           query_id = result["_id"].String();
           return true;
         }
@@ -140,7 +140,7 @@ namespace epidb {
                         std::string &new_query_id, std::string &msg)
       {
         mongo::BSONObj old_query;
-        if (!helpers::get_one(Collections::QUERIES(), BSON("_id" << query_id), old_query, msg)) {
+        if (!helpers::get_one(Collections::QUERIES(), BSON("_id" << query_id), old_query)) {
           msg = Error::m(ERR_INVALID_QUERY_ID, query_id);
           return false;
         }
@@ -194,7 +194,7 @@ namespace epidb {
                           processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg)
       {
         mongo::BSONObj query;
-        if (!helpers::get_one(Collections::QUERIES(), BSON("_id" << query_id), query, msg)) {
+        if (!helpers::get_one(Collections::QUERIES(), BSON("_id" << query_id), query)) {
           msg = Error::m(ERR_INVALID_QUERY_ID, query_id);
           return false;
         }
@@ -685,7 +685,7 @@ namespace epidb {
 
         mongo::BSONObj query_a;
         const std::string query_a_id = args["qid_1"].str();
-        if (!helpers::get_one(Collections::QUERIES(), BSON("_id" << query_a_id), query_a, msg)) {
+        if (!helpers::get_one(Collections::QUERIES(), BSON("_id" << query_a_id), query_a)) {
           msg = Error::m(ERR_INVALID_QUERY_ID, query_a_id);
           return false;
         }
