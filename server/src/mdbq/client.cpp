@@ -16,23 +16,26 @@
 #include <mongo/client/dbclient.h>
 #include <mongo/client/gridfs.h>
 
-#include "../dba/config.hpp"
-#include "../dba/collections.hpp"
-#include "../dba/helpers.hpp"
-
-#include "../engine/engine.hpp"
-#include "../extras/date_time.hpp"
-
 #include "client.hpp"
 #include "common.hpp"
 
 #include "../connection/connection.hpp"
 
+#include "../dba/collections.hpp"
+#include "../dba/config.hpp"
+#include "../dba/helpers.hpp"
+
+#include "../engine/engine.hpp"
+
+#include "../extras/date_time.hpp"
+
+#include "../errors.hpp"
+
 #define CHECK_DB_ERR(CON)\
   {\
     std::string e = (CON)->getLastError();\
     if(!e.empty()){\
-      throw std::runtime_error("MDBQC: error_code!=0, failing: " + e + "\n" + (CON)->getLastErrorDetailed().toString() );\
+      EPIDB_LOG_ERR("MDBQC: error_code!=0, failing: " << e << "\n" << (CON)->getLastErrorDetailed().toString() );\
     }\
   }
 
@@ -53,8 +56,22 @@ namespace epidb {
       {
         std::string _id;
         mongo::BSONObj task;
-        if (c->get_next_task(_id, task))
-          c->handle_task(_id, task);
+
+        try {
+          if (c->get_next_task(_id, task)) {
+            c->handle_task(_id, task);
+          }
+        } catch (const mongo::SocketException& e) {
+          EPIDB_LOG_ERR(Error::m(ERR_DATABASE_EXCEPTION, "Client::update_check()", e.what()));
+        } catch (const mongo::UserException& e) {
+          EPIDB_LOG_ERR(Error::m(ERR_DATABASE_EXCEPTION, "Client::update_check()", e.what()));
+        } catch (const std::exception& e) {
+          std::string s(e.what());
+          EPIDB_LOG_ERR(__FILE__ << ":" << __LINE__ << " - exception at Client::update_check()" << ": " << s);
+        } catch (const std::string& ex) {
+          EPIDB_LOG_ERR(__FILE__ << ":" << __LINE__ << " - exception at Client::update_check()" << ": " << ex);
+        }
+
         if (!error) {
           unsigned int ms;
           if (m_interval <= 1.f)
