@@ -17,6 +17,7 @@ namespace epidb {
       TS_FAILED,
       TS_CANCELLED,
       TS_REMOVED,
+      TS_RENEW,
       _TS_END,
       _TS_FIRST = TS_NEW
     };

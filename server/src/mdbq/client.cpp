@@ -43,7 +43,6 @@ namespace epidb {
   namespace mdbq {
 
     struct ClientImpl {
-      epidb::Connection    m_con;
       mongo::BSONObj            m_current_task;
       mongo::BSONObj            m_task_selector;
       boost::posix_time::ptime  m_current_task_timeout_time;
@@ -90,8 +89,6 @@ namespace epidb {
       , m_verbose(false)
     {
       m_ptr.reset(new ClientImpl());
-      CHECK_DB_ERR(m_ptr->m_con);
-
       m_db = prefix;
     }
 
@@ -102,15 +99,44 @@ namespace epidb {
     {
       m_ptr.reset(new ClientImpl());
       m_ptr->m_task_selector = query;
-      CHECK_DB_ERR(m_ptr->m_con);
 
       m_db = prefix;
     }
 
+    bool Client::renew_current_task()
+    {
+      const mongo::BSONObj &ct = m_ptr->m_current_task;
+      int version = ct["version"].Int();
+
+      mongo::BSONObj o = BSON("findandmodify" << dba::Collections::JOBS() <<
+                              "query"  << BSON("_id" << ct["_id"] << "version" << version) <<
+                              "update" << BSON("$set" << BSON(
+                                    "state" << TS_RENEW <<
+                                    "version" << version + 1
+                              )));
+      mongo::BSONObj info;
+      Connection c;
+      bool result = c->runCommand(dba::config::DATABASE_NAME(), o, info);
+      c.done();
+
+      EPIDB_LOG_TRACE("Task " << ct["_id"] << " renewed.");
+
+      if (!result) {
+        EPIDB_LOG_ERR(info["errmsg"].toString() << " - " << __FILE__ << ":" << __LINE__);
+        return false;
+      }
+
+      m_ptr->m_current_task = mongo::BSONObj(); // empty, call get_next_task.
+
+      return true;
+    }
+
+
     bool Client::get_next_task(std::string& _id, mongo::BSONObj &o)
     {
       if (!m_ptr->m_current_task.isEmpty()) {
-        throw std::runtime_error("MDBQC: do tasks one by one, please!");
+        EPIDB_LOG_ERR("Renewing task: " << m_ptr->m_current_task);
+        renew_current_task();
       }
       boost::posix_time::ptime now = epidb::extras::universal_date_time();
 
@@ -120,7 +146,7 @@ namespace epidb {
 
       mongo::BSONObjBuilder queryb;
       mongo::BSONObj res, cmd, query;
-      queryb.append("state", TS_NEW);
+      queryb.append("state", BSON("$in" << BSON_ARRAY(TS_NEW << TS_RENEW)));
       if (! m_ptr->m_task_selector.isEmpty())
         queryb.appendElements(m_ptr->m_task_selector);
       query = queryb.obj();
@@ -133,8 +159,10 @@ namespace epidb {
                                     << "refresh_time" << epidb::extras::to_mongo_date(now)
                                     << "owner" << hostname_pid)));
 
-      m_ptr->m_con->runCommand(m_db, cmd, res);
-      CHECK_DB_ERR(m_ptr->m_con);
+      Connection c;
+      c->runCommand(m_db, cmd, res);
+      CHECK_DB_ERR(c);
+      c.done();
 
       if (!res["value"].isABSONObj()) {
         if (m_verbose)
@@ -239,17 +267,20 @@ namespace epidb {
 
       std::string filename = ct["_id"].str();
 
-      mongo::GridFS gridfs((*m_ptr).m_con.conn(), m_db, "fs");
+      Connection c;
+      mongo::GridFS gridfs(c.conn(), m_db, "fs");
       gridfs.setChunkSize(2 << 22); // 8MB
       mongo::BSONObj ret = gridfs.storeFile(ptr, len, filename);
 
       mongo::BSONObjBuilder bob;
       bob.appendElements(ret);
-      m_ptr->m_con->update(m_fscol + ".files",
+      c->update(m_fscol + ".files",
                            BSON("filename" << ret.getField("filename")),
                            bob.obj(), false, false);
 
-      CHECK_DB_ERR(m_ptr->m_con);
+      CHECK_DB_ERR(c);
+
+      c.done();
 
       return filename;
     }

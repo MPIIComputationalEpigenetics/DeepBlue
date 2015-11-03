@@ -63,6 +63,11 @@ namespace epidb {
       bool get_next_task(std::string &_id, mongo::BSONObj &o);
 
       /**
+       * put the current task back in the queue
+       */
+      bool renew_current_task();
+
+      /**
        * finish the task.
        * @param result a description of the result
        * @param ok if false, task may be rescheduled by hub

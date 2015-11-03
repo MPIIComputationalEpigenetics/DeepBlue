@@ -247,6 +247,8 @@ namespace epidb {
         return TS_CANCELLED;
       } else if (name == "removed") {
         return TS_REMOVED;
+      } else if (name == "renew") {
+        return TS_RENEW;
       } else {
         return _TS_END;
       }
@@ -272,6 +274,8 @@ namespace epidb {
         return "canceled";
       case TS_REMOVED:
         return "removed";
+      case TS_RENEW:
+        return "renew";
       default :
         return "Invalid State: " + epidb::utils::integer_to_string(state);
       }
@@ -287,6 +291,7 @@ namespace epidb {
       case TS_DONE:
       case TS_CANCELLED:
       case TS_REMOVED:
+      case TS_RENEW:
         return "";
       case TS_FAILED:
         return o["error"].str();
