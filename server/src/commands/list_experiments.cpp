@@ -164,7 +164,6 @@ namespace epidb {
         }
 
         const mongo::BSONObj query = dba::query::build_query(args_builder.obj());
-        std::cerr << "XXX" << query.toString() << std::endl;
         std::vector<utils::IdName> names;
         if (!dba::list::experiments(query, names, msg)) {
           result.add_error(msg);
