@@ -49,8 +49,6 @@
 namespace epidb {
   namespace mdbq {
     struct HubImpl {
-      epidb::Connection m_con;
-
       unsigned int m_interval;
       std::string  m_prefix;
       std::auto_ptr<boost::asio::deadline_timer> m_timer;
@@ -61,13 +59,13 @@ namespace epidb {
         mongo::BSONObj ret = BSON("_id" << 1 <<
                                   "owner" << 1 <<
                                   "nfailed" << 1);
-        auto p =
-          m_con->query( dba::helpers::collection_name(dba::Collections::JOBS()),
+        Connection conn;
+        auto p = conn->query( dba::helpers::collection_name(dba::Collections::JOBS()),
                         BSON(
                           "state" << TS_FAILED <<
                           "nfailed" << mongo::LT << 1), /* first time failure only */
                         0, 0, &ret);
-        CHECK_DB_ERR_LOG(m_con);
+        CHECK_DB_ERR_LOG(conn);
         while (p->more()) {
           mongo::BSONObj f = p->next();
           if (!f.hasField("nfailed"))
@@ -77,7 +75,7 @@ namespace epidb {
                     << f["_id"] << "' on `"
                     << f["owner"].String() << "' failed, rescheduling" << std::endl;
 
-          m_con->update(dba::helpers::collection_name(dba::Collections::JOBS()),
+          conn->update(dba::helpers::collection_name(dba::Collections::JOBS()),
                         BSON("_id" << f["_id"]),
                         BSON(
                           "$inc" << BSON("nfailed" << 1) <<
@@ -85,9 +83,10 @@ namespace epidb {
                             "state"         << TS_NEW
                             << "book_time"   << mongo::Undefined
                             << "refresh_time" << mongo::Undefined)));
-          CHECK_DB_ERR_LOG(m_con);
+          CHECK_DB_ERR_LOG(conn);
         }
 
+        conn.done();
         if (!error) {
           m_timer->expires_at(m_timer->expires_at() + boost::posix_time::seconds(m_interval));
           m_timer->async_wait(boost::bind(&HubImpl::update_check, this, c, boost::asio::placeholders::error));
@@ -102,8 +101,12 @@ namespace epidb {
       : m_prefix(prefix)
     {
       m_ptr.reset(new HubImpl());
-      m_ptr->m_con->createCollection(dba::helpers::collection_name(dba::Collections::JOBS()));
       m_ptr->m_prefix = prefix;
+
+      // Move out from the ctor
+      Connection c;
+      c->createCollection(dba::helpers::collection_name(dba::Collections::JOBS()));
+      c.done();
     }
 
     bool Hub::exists_job(const mongo::BSONObj &job, std::string &id)
@@ -130,7 +133,8 @@ namespace epidb {
       id = "r" + epidb::utils::integer_to_string(r_id);
 
       boost::posix_time::ptime ctime = epidb::extras::universal_date_time();
-      m_ptr->m_con->insert(dba::helpers::collection_name(dba::Collections::JOBS()),
+      Connection c;
+      c->insert(dba::helpers::collection_name(dba::Collections::JOBS()),
                            BSON( "_id" << id
                                  << "timeout"     << timeout
                                  << "version"     << version_value
@@ -144,40 +148,55 @@ namespace epidb {
                                  << "version"     << (int)0
                                )
                           );
-      CHECK_DB_ERR_RETURN(m_ptr->m_con, msg);
-
+      CHECK_DB_ERR_RETURN(c, msg);
+      c.done();
       return true;
     }
 
     size_t Hub::get_n_open()
     {
-      return m_ptr->m_con->count(dba::helpers::collection_name(dba::Collections::JOBS()), BSON( "state" << TS_NEW));
+      Connection c;
+      size_t count = c->count(dba::helpers::collection_name(dba::Collections::JOBS()), BSON( "state" << TS_NEW));
+      c.done();
+      return count;
     }
 
     size_t Hub::get_n_assigned()
     {
-      return m_ptr->m_con->count(dba::helpers::collection_name(dba::Collections::JOBS()), BSON( "state" << TS_RUNNING));
+      Connection c;
+      size_t count = c->count(dba::helpers::collection_name(dba::Collections::JOBS()), BSON( "state" << TS_RUNNING));
+      c.done();
+      return count;
     }
 
     size_t Hub::get_n_ok()
     {
-      return m_ptr->m_con->count(dba::helpers::collection_name(dba::Collections::JOBS()), BSON( "state" << TS_DONE));
+      Connection c;
+      size_t count = c->count(dba::helpers::collection_name(dba::Collections::JOBS()), BSON( "state" << TS_DONE));
+      c.done();
+      return count;
     }
 
     size_t Hub::get_n_failed()
     {
-      return m_ptr->m_con->count(dba::helpers::collection_name(dba::Collections::JOBS()), BSON( "state" << TS_FAILED));
+      Connection c;
+      size_t count = c->count(dba::helpers::collection_name(dba::Collections::JOBS()), BSON( "state" << TS_FAILED));
+      c.done();
+      return count;
     }
 
     void Hub::clear_all()
     {
-      m_ptr->m_con->dropCollection(dba::helpers::collection_name(dba::Collections::JOBS()));
-      m_ptr->m_con->dropCollection(m_prefix + ".log");
-      m_ptr->m_con->dropCollection(m_prefix + ".fs.chunks");
-      m_ptr->m_con->dropCollection(m_prefix + ".fs.files");
+      Connection c;
+      c->dropCollection(dba::helpers::collection_name(dba::Collections::JOBS()));
+      c->dropCollection(m_prefix + ".log");
+      c->dropCollection(m_prefix + ".fs.chunks");
+      c->dropCollection(m_prefix + ".fs.files");
 
       // this is from https://jira.mongodb.org/browse/SERVER-5323
-      // m_ptr->m_con->createIndex(m_prefix + ".fs.chunks", BSON("files_id" << 1 << "n" << 1));
+      // c->createIndex(m_prefix + ".fs.chunks", BSON("files_id" << 1 << "n" << 1));
+
+      c.done();
     }
 
     void Hub::got_new_results()
@@ -194,15 +213,19 @@ namespace epidb {
 
     mongo::BSONObj Hub::get_job(const std::string &id)
     {
-      return m_ptr->m_con->findOne(dba::helpers::collection_name(dba::Collections::JOBS()), BSON("_id" << id));
+      Connection c;
+      mongo::BSONObj o = c->findOne(dba::helpers::collection_name(dba::Collections::JOBS()), BSON("_id" << id));
+      c.done();
+      return o;
     }
 
     std::list<mongo::BSONObj> Hub::get_jobs(const mdbq::TaskState& state, const std::string &user_id)
     {
       std::list<mongo::BSONObj> ret;
 
+      Connection c;
       if (state == mdbq::_TS_END) {
-        auto cursor = m_ptr->m_con->query(dba::helpers::collection_name(dba::Collections::JOBS()),
+        auto cursor = c->query(dba::helpers::collection_name(dba::Collections::JOBS()),
                                           BSON("misc.user_id" << user_id));
         while (cursor->more()) {
           mongo::BSONObj o = cursor->next().getOwned();
@@ -210,7 +233,7 @@ namespace epidb {
         }
 
       } else {
-        auto cursor = m_ptr->m_con->query(dba::helpers::collection_name(dba::Collections::JOBS()),
+        auto cursor = c->query(dba::helpers::collection_name(dba::Collections::JOBS()),
                                           BSON("state" << state << "misc.user_id" << user_id));
         while (cursor->more()) {
           mongo::BSONObj o = cursor->next().getOwned();
@@ -218,19 +241,27 @@ namespace epidb {
         }
       }
 
+      c.done();
       return ret;
     }
 
     bool Hub::job_has_user_id(const std::string& request_id, const std::string& user_id)
     {
-      return m_ptr->m_con->count(dba::helpers::collection_name(dba::Collections::JOBS()),
+
+      Connection c;
+      bool b = c->count(dba::helpers::collection_name(dba::Collections::JOBS()),
                                  BSON("_id" << request_id << "misc.user_id" << user_id)) > 0;
+      c.done();
+      return b;
     }
 
     mongo::BSONObj Hub::get_newest_finished()
     {
-      return m_ptr->m_con->findOne(dba::helpers::collection_name(dba::Collections::JOBS()),
+      Connection c;
+      mongo::BSONObj o = c->findOne(dba::helpers::collection_name(dba::Collections::JOBS()),
                                    mongo::Query(BSON("state" << TS_DONE)).sort("finish_time"));
+      c.done();
+      return o;
     }
 
     mdbq::TaskState Hub::state_number(const std::string& name)
@@ -334,17 +365,20 @@ namespace epidb {
 
     bool Hub::get_file_info(const std::string &filename, mongo::OID &oid, size_t &chunk_size, size_t &file_size, std::string &msg)
     {
-      auto data_cursor = m_ptr->m_con->query(m_ptr->m_prefix + ".fs.files", mongo::Query(BSON("filename" << filename)));
+      Connection c;
+      auto data_cursor = c->query(m_ptr->m_prefix + ".fs.files", mongo::Query(BSON("filename" << filename)));
 
       if (data_cursor->more()) {
         auto fileinfo = data_cursor->next();
         oid = fileinfo["_id"].OID();
         chunk_size = fileinfo["chunkSize"].numberLong();
         file_size = fileinfo["length"].numberLong();
+        c.done();
         return true;
       }
 
       msg = "The result data under the request '" + filename + "'' was not found";
+      c.done();
       return false;
     }
 
@@ -364,9 +398,10 @@ namespace epidb {
 
       std::stringstream ss;
 
+      Connection c;
       while (remaining > 0) {
         mongo::Query q(BSON("files_id" << oid << "n" << (long long) n));
-        auto data_cursor = m_ptr->m_con->query(m_ptr->m_prefix + ".fs.chunks", q, 0, 0, &projection);
+        auto data_cursor = c->query(m_ptr->m_prefix + ".fs.chunks", q, 0, 0, &projection);
         if (data_cursor->more()) {
           int read;
           char* compressed_data = (char *) data_cursor->next().getField("data").binData(read);
@@ -376,9 +411,11 @@ namespace epidb {
           remaining -= read;
         } else {
           msg = "Chunk for file " + filename + " not found.";
+          c.done();
           return false;
         }
       }
+      c.done();
       content = ss.str();
       return true;
     }
@@ -405,6 +442,7 @@ namespace epidb {
       mongo::BSONObj res;
       c->runCommand(m_ptr->m_prefix, cmd, res);
       if (!res["value"].isABSONObj()) {
+        c.done();
         msg =  "No request available, cmd:" + cmd.toString();
         return false;
       }
@@ -414,7 +452,7 @@ namespace epidb {
       mongo::BSONObj query = BSON("request_id" << request_id);
       mongo::BSONObj update = BSON("$set" << BSON("status" << TS_REMOVED));
       c->update(epidb::dba::helpers::collection_name(dba::Collections::PROCESSING()), query, update, false, true);
-      if (!m_ptr->m_con->getLastError().empty()) {
+      if (!c->getLastError().empty()) {
         msg = c->getLastError();
         c.done();
         return false;
@@ -423,6 +461,7 @@ namespace epidb {
       // 3.
       remove_result(request_id);
 
+      c.done();
       return true;
     }
 
