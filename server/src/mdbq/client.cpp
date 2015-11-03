@@ -106,7 +106,7 @@ namespace epidb {
     bool Client::renew_current_task()
     {
       const mongo::BSONObj &ct = m_ptr->m_current_task;
-      int version = ct["version"].Int();
+      int version = ct["version"].numberInt();
 
       mongo::BSONObj o = BSON("findandmodify" << dba::Collections::JOBS() <<
                               "query"  << BSON("_id" << ct["_id"] << "version" << version) <<
@@ -174,7 +174,7 @@ namespace epidb {
 
       int timeout_s = INT_MAX;
       if (m_ptr->m_current_task.hasField("timeout"))
-        timeout_s = m_ptr->m_current_task["timeout"].Int();
+        timeout_s = m_ptr->m_current_task["timeout"].numberInt();
 
       m_ptr->m_current_task_timeout_time = now + boost::posix_time::seconds(timeout_s);
       m_ptr->m_running_nr = 0;
@@ -194,7 +194,7 @@ namespace epidb {
         throw std::runtime_error("MDBQC: get a task first before you finish!");
       }
       boost::posix_time::ptime finish_time = epidb::extras::universal_date_time();
-      int version = ct["version"].Int();
+      int version = ct["version"].numberInt();
 
       Connection c;
       mongo::BSONObj o;
@@ -218,9 +218,9 @@ namespace epidb {
         mongo::BSONObj ret;
         ret = c->findOne(m_jobcol, BSON("_id" << ct["_id"]));
         if (ret.hasField("state") &&
-            (ret["state"].Int() == mdbq::TS_CANCELLED ||
-             ret["state"].Int() == mdbq::TS_REMOVED)) {
-          epidb::Engine::instance().remove_request_data(ct["_id"], static_cast<TaskState>(ret["state"].Int()), tmp);
+            (ret["state"].numberInt() == mdbq::TS_CANCELLED ||
+             ret["state"].numberInt() == mdbq::TS_REMOVED)) {
+          epidb::Engine::instance().remove_request_data(ct["_id"], static_cast<TaskState>(ret["state"].numberInt()), tmp);
         } else {
           mongo::BSONObj o = BSON("findandmodify" << dba::Collections::JOBS() <<
                                   "query"  << BSON("_id" << ct["_id"] << "version" << version) <<

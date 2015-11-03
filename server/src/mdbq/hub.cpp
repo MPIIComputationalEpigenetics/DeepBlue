@@ -287,7 +287,7 @@ namespace epidb {
 
     std::string Hub::state_name(const mongo::BSONObj &o)
     {
-      return state_name(o["state"].Int());
+      return state_name(o["state"].numberInt());
     }
 
     std::string Hub::state_name(const int state)
@@ -314,7 +314,7 @@ namespace epidb {
 
     std::string Hub::state_message(const mongo::BSONObj &o)
     {
-      int state = o["state"].Int();
+      int state = o["state"].numberInt();
 
       switch (state) {
       case TS_NEW:
@@ -353,13 +353,13 @@ namespace epidb {
 
     bool Hub::is_done(const mongo::BSONObj &o)
     {
-      TaskState task_state = (TaskState) o["state"].Int();
+      TaskState task_state = (TaskState) o["state"].numberInt();
       return task_state == TS_DONE;
     }
 
     bool Hub::is_failed(const mongo::BSONObj &o)
     {
-      TaskState task_state = (TaskState) o["state"].Int();
+      TaskState task_state = (TaskState) o["state"].numberInt();
       return task_state == TS_FAILED;
     }
 
@@ -496,7 +496,7 @@ namespace epidb {
       }
 
       mongo::BSONObj task_info = res["value"].Obj();
-      TaskState task_state = static_cast<TaskState>(task_info["state"].Int());
+      TaskState task_state = static_cast<TaskState>(task_info["state"].numberInt());
 
       if (task_state == TS_DONE || task_state == TS_FAILED) {
         remove_request_data(request_id, TS_REMOVED, msg);
