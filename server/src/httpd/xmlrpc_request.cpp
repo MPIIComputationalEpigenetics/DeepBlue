@@ -7,7 +7,7 @@
 //
 #include <exception>
 
-#include <boost/foreach.hpp>
+#include <mongo/client/dbclient.h>
 
 #include "xmlrpc_request.hpp"
 
@@ -28,6 +28,14 @@ namespace epidb {
         okay = epidb::Engine::instance().execute(request.method_name(), request.ip(), request.id(), params, result);
       }
 
+      catch (const mongo::SocketException& se) {
+        std::string err = Error::m(ERR_DATABASE_EXCEPTION, request.method_name(), se.what());
+        EPIDB_LOG_ERR(err);
+        okay = false;
+        // overwrite with clear result
+        result = serialize::Parameters();
+        result.add_string(err);
+      }
       catch (const mongo::UserException& e) {
         std::string err = Error::m(ERR_DATABASE_EXCEPTION, request.method_name(), e.what());
         EPIDB_LOG_ERR(err);
