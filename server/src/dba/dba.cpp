@@ -592,6 +592,7 @@ namespace epidb {
 
     bool add_epigenetic_mark(const std::string &name, const std::string &norm_name,
                              const std::string &description, const std::string &norm_description,
+                             const datatypes::Metadata &extra_metadata,
                              const std::string &user_key,
                              std::string &epigenetic_mark_id, std::string &msg)
     {
@@ -610,6 +611,12 @@ namespace epidb {
       search_data_builder.append("norm_name", norm_name);
       search_data_builder.append("description", description);
       search_data_builder.append("norm_description", norm_description);
+
+      mongo::BSONObjBuilder metadata_builder;
+      for (auto cit = extra_metadata.begin(); cit != extra_metadata.end(); ++cit) {
+        metadata_builder.append(cit->first, cit->second);
+      }
+      search_data_builder.append("extra_metadata", metadata_builder.obj());
 
       mongo::BSONObj search_data = search_data_builder.obj();
       mongo::BSONObjBuilder create_epi_mark_builder;
@@ -661,12 +668,10 @@ namespace epidb {
       search_data_builder.append("norm_description", norm_description);
 
       mongo::BSONObjBuilder metadata_builder;
-      datatypes::Metadata::const_iterator cit;
-      for (cit = extra_metadata.begin(); cit != extra_metadata.end(); ++cit) {
+      for (auto cit = extra_metadata.begin(); cit != extra_metadata.end(); ++cit) {
         metadata_builder.append(cit->first, cit->second);
       }
       search_data_builder.append("extra_metadata", metadata_builder.obj());
-
 
       mongo::BSONObj search_data = search_data_builder.obj();
       mongo::BSONObjBuilder create_biosource_builder;

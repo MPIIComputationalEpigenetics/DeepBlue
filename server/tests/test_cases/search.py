@@ -12,7 +12,7 @@ class TestSearch(helpers.TestCase):
     res, pid = epidb.add_project("ENCODE", "desc", self.admin_key)
     self.assertSuccess(res, pid)
 
-    res, emid = epidb.add_epigenetic_mark("Methylation", "desc", self.admin_key)
+    res, emid = epidb.add_epigenetic_mark("Methylation", "desc", {"category": "DNA Methylation"}, self.admin_key)
     self.assertSuccess(res, emid)
 
     res, bsid = epidb.add_biosource("K562", "desc", {}, self.admin_key)
@@ -63,16 +63,16 @@ class TestSearch(helpers.TestCase):
     epidb = EpidbClient()
     self.init(epidb)
 
-    res, emid1 = epidb.add_epigenetic_mark("Methylation", "DNA Methylation", self.admin_key)
+    res, emid1 = epidb.add_epigenetic_mark("Methylation", "DNA Methylation", {"category": "DNA Methylation"}, self.admin_key)
     self.assertSuccess(res, emid1)
 
-    res, emid2 = epidb.add_epigenetic_mark("Methyl450", "DNA Methylation Infinium HumanMethylation450 BeadChip", self.admin_key)
+    res, emid2 = epidb.add_epigenetic_mark("Methyl450", "DNA Methylation Infinium HumanMethylation450 BeadChip", {"category": "DNA Methylation"}, self.admin_key)
     self.assertSuccess(res, emid2)
 
-    res, emid3 = epidb.add_epigenetic_mark("OpenChromDnase", "Open Chromatin DNaseI", self.admin_key)
+    res, emid3 = epidb.add_epigenetic_mark("OpenChromDnase", "Open Chromatin DNaseI", {"category": "open chromatin"}, self.admin_key)
     self.assertSuccess(res, emid3)
 
-    res, emid4 = epidb.add_epigenetic_mark("DNaseI", "DNaseI hypersensitive sites ", self.admin_key)
+    res, emid4 = epidb.add_epigenetic_mark("DNaseI", "DNaseI hypersensitive sites ", {"category": "open chromatin"}, self.admin_key)
     self.assertSuccess(res, emid4)
 
     self.assertEqual(res, "okay")

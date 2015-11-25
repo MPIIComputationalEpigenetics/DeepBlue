@@ -209,7 +209,7 @@ class TestCase(unittest.TestCase):
 
   def insert_epigenetic_mark(self, epidb, name):
     mark = data.EPIGENETIC_MARKS[name]
-    res, emid = epidb.add_epigenetic_mark(name, mark["description"], self.admin_key)
+    res, emid = epidb.add_epigenetic_mark(name, mark["description"], mark["extra_metadata"], self.admin_key)
     self.assertSuccess(res, emid)
 
     return emid

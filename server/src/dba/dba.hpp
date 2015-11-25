@@ -47,6 +47,7 @@ namespace epidb {
 
     bool add_epigenetic_mark(const std::string &name, const std::string &norm_name,
                              const std::string &description, const std::string &norm_description,
+                             const datatypes::Metadata &extra_metadata,
                              const std::string &user_key,
                              std::string &epigenetic_mark_id, std::string &msg);
 

@@ -31,9 +31,10 @@ namespace epidb {
         Parameter p[] = {
           Parameter("name", serialize::STRING, "name of the epigenetic mark"),
           Parameter("description", serialize::STRING, "description of the epigenetic mark"),
+          Parameter("extra_metadata", serialize::MAP, "additional metadata"),
           parameters::UserKey
         };
-        Parameters params(&p[0], &p[0] + 3);
+        Parameters params(&p[0], &p[0] + 4);
         return params;
       }
 
@@ -55,12 +56,18 @@ namespace epidb {
         // TODO: Check user
         const std::string name = parameters[0]->as_string();
         const std::string description = parameters[1]->as_string();
-        const std::string user_key = parameters[2]->as_string();
+        const std::string user_key = parameters[3]->as_string();
 
         std::string msg;
         datatypes::User user;
 
         if (!check_permissions(user_key, datatypes::INCLUDE_COLLECTION_TERMS, user, msg )) {
+          result.add_error(msg);
+          return false;
+        }
+
+        datatypes::Metadata extra_metadata;
+        if (!read_metadata(parameters[2], extra_metadata, msg)) {
           result.add_error(msg);
           return false;
         }
@@ -74,7 +81,7 @@ namespace epidb {
         const std::string norm_description = utils::normalize_name(description);
 
         std::string id;
-        bool ret = dba::add_epigenetic_mark(name, norm_name, description, norm_description, user_key, id, msg);
+        bool ret = dba::add_epigenetic_mark(name, norm_name, description, norm_description, extra_metadata, user_key, id, msg);
 
         if (!ret) {
           result.add_error(msg);

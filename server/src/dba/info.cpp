@@ -142,7 +142,9 @@ namespace epidb {
         return true;
       }
 
-      bool get_epigenetic_mark(const std::string &id, std::map<std::string, std::string> &res, std::string &msg, bool full = false)
+      bool get_epigenetic_mark(const std::string &id, std::map<std::string, std::string> &res,
+                               std::map<std::string, std::string> &metadata,
+                               std::string &msg, bool full = false)
       {
         mongo::BSONObj result;
         if (!data::epigenetic_mark(id, result, msg))  {
@@ -151,7 +153,13 @@ namespace epidb {
 
         for (mongo::BSONObj::iterator it = result.begin(); it.more(); ) {
           mongo::BSONElement e = it.next();
-          if (full || (strncmp("norm_", e.fieldName(), 5) != 0)) {
+          if (std::string(e.fieldName()) == "extra_metadata") {
+            mongo::BSONObj::iterator itt = e.Obj().begin();
+            while (itt.more()) {
+              mongo::BSONElement ee = itt.next();
+              metadata[ee.fieldName()] = utils::bson_to_string(ee);
+            }
+          } else if (full || (strncmp("norm_", e.fieldName(), 5) != 0)) {
             res[e.fieldName()] = utils::bson_to_string(e);
           }
         }

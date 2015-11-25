@@ -28,12 +28,13 @@ class TestGetInfoCommand(helpers.TestCase):
     epidb = EpidbClient()
     self.init(epidb)
 
-    res, emid = epidb.add_epigenetic_mark("Methylation", "DNA Methylation", self.admin_key)
+    res, emid = epidb.add_epigenetic_mark("Methylation", "DNA Methylation", {"category":"DNA Methylation"}, self.admin_key)
     self.assertSuccess(res, emid)
 
     res, data = epidb.info(emid, self.admin_key)
     self.assertEqual(data[0]['name'], "Methylation")
     self.assertEqual(data[0]['description'], "DNA Methylation")
+    self.assertEqual(data[0]['extra_metadata']['category'], "DNA Methylation")
     self.assertEqual(data[0]['user'], "test_admin")
     self.assertEqual(data[0]['_id'], emid)
 
@@ -177,7 +178,7 @@ class TestGetInfoCommand(helpers.TestCase):
     s, _id = epidb.modify_user_admin(id, "permission_level", "INCLUDE_COLLECTION_TERMS", self.admin_key)
     self.assertSuccess(s, _id)
 
-    s, id = epidb.add_epigenetic_mark("DNA Methylation", "", user_key)
+    s, id = epidb.add_epigenetic_mark("DNA Methylation", "", {}, user_key)
     self.assertSuccess(s, id)
     s, query_id = epidb.select_regions(None, "hg19", "DNA Methylation", None, None, None, "chr1", None, None, user_key)
     self.assertSuccess(s, query_id)

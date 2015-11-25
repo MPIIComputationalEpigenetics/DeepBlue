@@ -124,8 +124,8 @@ class DeepBlueClient(object):
 
         # Epigenetic Marks
     @key_required
-    def add_epigenetic_mark(self, name, description):
-        return self.server.add_epigenetic_mark(name, description, self.key)
+    def add_epigenetic_mark(self, name, description, extra_metadata):
+        return self.server.add_epigenetic_mark(name, description, extra_metadata, self.key)
 
     @key_required
     def list_epigenetic_marks(self):

@@ -35,7 +35,9 @@ namespace epidb {
 
       bool get_sample_by_id(const std::string &id, std::map<std::string, std::string> &, std::string &msg, bool full = false);
 
-      bool get_epigenetic_mark(const std::string &id, std::map<std::string, std::string> &, std::string &msg, bool full = false);
+      bool get_epigenetic_mark(const std::string &id, std::map<std::string, std::string> &,
+                               std::map<std::string, std::string> &metadata,
+                               std::string &msg, bool full = false);
 
       bool get_annotation(const std::string &id,
                           std::map<std::string, std::string> &metadata,

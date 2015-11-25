@@ -232,7 +232,7 @@ class TestRemoveCommands(helpers.TestCase):
     regions_data = helpers.load_bed("hg19_chr1_1")
     format = data_info.EXPERIMENTS["hg19_chr1_1"]["format"]
 
-    (res, epigenetic_mark_id) = epidb.add_epigenetic_mark("H3K666ac3", "acetil metal \,,,/", self.admin_key)
+    (res, epigenetic_mark_id) = epidb.add_epigenetic_mark("H3K666ac3", "acetil metal \,,,/", {"category": "heavy histone metal"}, self.admin_key)
     self.assertSuccess(res, epigenetic_mark_id)
 
     # adding two experiments with the same data should work

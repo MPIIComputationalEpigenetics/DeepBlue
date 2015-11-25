@@ -85,8 +85,9 @@ class EpidbClient:
         return self.server.list_samples(biosource, metadata, user_key)
 
   ## Epigenetic Marks
-    def add_epigenetic_mark(self, name, description, user_key):
-        return self.server.add_epigenetic_mark(name, description, user_key)
+    def add_epigenetic_mark(self, name, description, extra_metadata, user_key):
+        return self.server.add_epigenetic_mark(name, description,
+                                               extra_metadata, user_key)
 
     def list_epigenetic_marks(self, user_key):
         return self.server.list_epigenetic_marks(user_key)

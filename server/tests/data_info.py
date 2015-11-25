@@ -62,10 +62,12 @@ PROJECTS = {
 
 EPIGENETIC_MARKS = {
   "Methylation": {
-    "description": "DNA Methylation"
+    "description": "DNA Methylation",
+    "extra_metadata": {"category":"DNA Methylation"}
   },
   "H3K4me3": {
-    "description": "lysine methylation"
+    "description": "lysine methylation",
+    "extra_metadata": {"category":"Histone Modification"}
   }
 }
 

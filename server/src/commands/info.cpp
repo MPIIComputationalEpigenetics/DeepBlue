@@ -189,7 +189,7 @@ namespace epidb {
               ok = ok && dba::info::id_to_name(metadata, msg);
               type = "sample";
             } else if (id.compare(0, 2, "em") == 0) {
-              ok = dba::info::get_epigenetic_mark(id, metadata, msg);
+              ok = dba::info::get_epigenetic_mark(id, metadata, extra_metadata, msg);
               ok = ok && dba::info::id_to_name(metadata, msg);
               type = "epigenetic_mark";
             } else if (id.compare(0, 1, "e") == 0) {
