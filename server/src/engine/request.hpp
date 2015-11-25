@@ -36,6 +36,8 @@ namespace epidb {
       std::string _id;
       Status status;
       boost::posix_time::ptime create_time;
+      std::string command;
+      std::string user_id;
       /*
       * \brief Time at which the job was finished. Only to be set, if status == TS_DONE
       */

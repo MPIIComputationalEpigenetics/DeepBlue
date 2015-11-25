@@ -164,6 +164,8 @@ namespace epidb {
     if (status.state == mdbq::Hub::state_name(mdbq::TS_DONE)) {
       job.finish_time = mdbq::Hub::get_finish_time(o);
     }
+    job.command = mdbq::Hub::get_misc(o)["command"].String();
+    job.user_id = mdbq::Hub::get_misc(o)["user_id"].String();
     job.query_id = mdbq::Hub::get_misc(o)["query_id"].String();
     job._id = mdbq::Hub::get_id(o);
 

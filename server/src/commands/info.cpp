@@ -79,6 +79,8 @@ namespace epidb {
         map["_id"] = job._id;
         map["state"] = job.status.state;
         map["message"] = job.status.message;
+        map["command"] = job.command;
+        map["user_id"] = job.command;
         std::stringstream ss;
         ss << job.create_time;
         map["create_time"] = ss.str();
