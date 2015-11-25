@@ -146,8 +146,6 @@ namespace epidb {
         std::vector<serialize::ParameterPtr> ids_param;
         parameters[0]->children(ids_param);
 
-        result.set_as_array(true);
-
         std::vector<std::string> synonyms;
         BOOST_FOREACH(const serialize::ParameterPtr & id_param, ids_param) {
           std::string id = id_param->as_string();
@@ -230,6 +228,7 @@ namespace epidb {
             }
           }
 
+          result.set_as_array(true);
           serialize::ParameterPtr info(new serialize::MapParameter());
 
           serialize::ParameterPtr pt(new serialize::SimpleParameter(serialize::STRING, type));
