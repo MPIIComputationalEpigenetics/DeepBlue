@@ -236,6 +236,9 @@ class EpidbClient:
     def query_experiment_type(self, query_id, type, user_key):
         return self.server.query_experiment_type(query_id, type, user_key)
 
+    def query_cache(self, query_id, to_cache, user_key):
+        return self.server.query_cache(query_id, to_cache, user_key)
+
     def intersection(self, query_a_id, query_b_id, user_key):
         return self.server.intersection(query_a_id, query_b_id, user_key)
 

@@ -89,12 +89,13 @@ class TestComplexQueries(helpers.TestCase):
     res, qid_4_2 = epidb.select_regions("hg19_big_2", "hg19", None, None, None,
                                       None, ["chr1", "chrX"], None, None, self.admin_key)
     self.assertSuccess(res, qid_4_2)
-    res, req = epidb.count_regions(qid_4_2, self.admin_key)
+    (res, qid_4_2_cached) = epidb.query_cache(qid_4_2, True, self.admin_key)
+    res, req = epidb.count_regions(qid_4_2_cached, self.admin_key)
     self.assertSuccess(res, req)
     c = self.count_request(req)
     self.assertEqual(c, 8961)
 
-    res, qid_5_1 = epidb.intersection(qid_4_1, qid_4_2, self.admin_key)
+    res, qid_5_1 = epidb.intersection(qid_4_1, qid_4_2_cached, self.admin_key)
     self.assertSuccess(res, qid_5_1)
     res, req = epidb.count_regions(qid_5_1, self.admin_key)
     self.assertSuccess(res, req)
@@ -105,6 +106,7 @@ class TestComplexQueries(helpers.TestCase):
     res, qid_6_1 = epidb.filter_regions(qid_5_1, "END",  "<", "2200000", "number", self.admin_key)
     self.assertSuccess(res, qid_6_1)
 
+    (res, qid_6_1_cached) = epidb.query_cache(qid_6_1, True, self.admin_key)
     res, req = epidb.count_regions(qid_6_1, self.admin_key)
     self.assertSuccess(res, req)
     count = self.count_request(req)
@@ -196,18 +198,52 @@ chr3\t3\t30000\t\tQuery q1 regions set\t\t29997.000000"""
     self.assertEqual(req, req2)
 
 
+  def test_select_only_peaks_not_cached(self):
+    epidb = EpidbClient()
+    self.init_base(epidb)
+
+    sample_id = self.sample_ids[0]
+
+    files = ["reference_example", "test1"]
+    for filename in files:
+      wig_data = helpers.load_bedgraph(filename)
+      res = epidb.add_experiment(filename, "hg19", "Methylation", sample_id, "tech1",
+                                 "ENCODE", "desc1", wig_data, "bedgraph", None, self.admin_key)
+
+    (s, q) = epidb.select_experiments(files, "", None, None, self.admin_key)
+    (s, req) = epidb.count_regions(q, self.admin_key)
+    count = self.count_request(req)
+    self.assertEqual(1009, count)
+
+    (s, req2) = epidb.count_regions(q, self.admin_key)
+    count = self.count_request(req2)
+    self.assertEqual(1009, count)
+
+    self.assertEqual(req, req2)
 
 
+  def test_select_only_peaks_cached(self):
+    epidb = EpidbClient()
+    self.init_base(epidb)
 
+    sample_id = self.sample_ids[0]
 
+    files = ["reference_example", "test1"]
+    for filename in files:
+      wig_data = helpers.load_bedgraph(filename)
+      res = epidb.add_experiment(filename, "hg19", "Methylation", sample_id, "tech1",
+                                 "ENCODE", "desc1", wig_data, "bedgraph", None, self.admin_key)
 
+    (s, q) = epidb.select_experiments(files, "", None, None, self.admin_key)
+    (s, q_cache) = epidb.query_cache(q, True, self.admin_key)
 
+    (s, req) = epidb.count_regions(q_cache, self.admin_key)
+    count = self.count_request(req)
+    self.assertEqual(1009, count)
 
+    (s, req2) = epidb.count_regions(q_cache, self.admin_key)
+    count = self.count_request(req2)
+    self.assertEqual(1009, count)
 
-
-
-
-
-
-
+    self.assertEqual(req, req2)
 

@@ -39,7 +39,7 @@
 #include "users.hpp"
 
 #include "queries.hpp"
-//#include "queries_cache.hpp"
+#include "queries_cache.hpp"
 
 #include "../errors.hpp"
 #include "../log.hpp"
@@ -202,12 +202,10 @@ namespace epidb {
 
         const std::string& type = query["type"].str();
 
-        /*
         const mongo::BSONObj& args = query["args"].Obj();
-        if (args.hasField("cache") && args["cache"].Bool()) {
+        if (args.hasField("cache") && args["cache"].String() == "yes") {
           return cache::get_query_cache(user_key, query["derived_from"].String(), status, regions, msg);
         }
-        */
 
         if (type == "experiment_select") {
           if (!retrieve_experiment_select_query(query, status, regions, msg)) {
@@ -408,7 +406,6 @@ namespace epidb {
           }
         }
         if (args.hasField("upload_info.content_format")) {
-          std::cerr <<  "type: " << args["upload_info.content_format"].type() << std::endl;
           if (args["upload_info.content_format"].type() == mongo::Array) {
             experiments_query_builder.append("upload_info.content_format", BSON("$in" << args["upload_info.content_format"]));
           } else {

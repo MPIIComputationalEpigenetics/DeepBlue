@@ -214,18 +214,15 @@ namespace epidb {
 
     Regions(const Regions& other)
     {
-      std::cerr << "copy constructor" << std::endl;
-
       _regions.reserve(other._regions.size());
       for (const auto& r : other._regions) {
         _regions.emplace_back(r->clone());
       }
     }
 
-    Regions(Regions&& r) noexcept : _regions(std::move(r._regions))
-    {
-      std::cerr << "move constructor" << std::endl;
-    }
+    Regions(Regions&& r) noexcept :
+      _regions(std::move(r._regions))
+      { }
 
 
     Regions& operator=(const Regions& other)
@@ -233,7 +230,6 @@ namespace epidb {
       if (&other == this) {
         return *this;
       }
-      std::cerr << "assignment constructor" << std::endl;
 
       _regions.reserve(other._regions.size());
       for (const auto& r : other._regions) {
