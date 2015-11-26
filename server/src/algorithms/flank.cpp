@@ -25,7 +25,7 @@ namespace epidb {
     {
       const std::string& chromosome = chr_regions.first;
       const Regions& regions = chr_regions.second;
-      Regions result_regions = build_regions(regions.size());
+      Regions result_regions = Regions(regions.size());
 
 
       for (const RegionPtr& region : regions) {
@@ -73,7 +73,7 @@ namespace epidb {
           flank->set_end(a);
         }
 
-        result_regions.push_back(std::move(flank));
+        result_regions.emplace_back(std::move(flank));
       }
 
       result.emplace_back(chromosome, std::move(result_regions));

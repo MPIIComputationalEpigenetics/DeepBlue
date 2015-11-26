@@ -27,6 +27,8 @@ namespace epidb {
   class AbstractRegion;
   typedef std::unique_ptr<AbstractRegion> RegionPtr;
 
+
+
   extern DatasetId DATASET_EMPTY_ID;
 
   class AbstractRegion {
@@ -189,17 +191,113 @@ namespace epidb {
     virtual RegionPtr clone() const;
   };
 
-  typedef std::vector<RegionPtr> Regions;
-
-  Regions build_regions();
-  Regions build_regions(size_t s);
-
   RegionPtr build_simple_region(Position s, Position e, DatasetId _id);
   RegionPtr build_bed_region(Position s, Position e, DatasetId _id);
   RegionPtr build_wig_region(Position s, Position e, DatasetId _id, Score value);
   RegionPtr build_gene_region(Position s, Position e, DatasetId _id, std::string source, Score score, std::string feature, std::string strand, std::string frame, datatypes::Metadata& attributes);
   RegionPtr build_aggregte_region(Position s, Position e, DatasetId _id, Score min, Score max, Score median, Score mean, Score var, Score sd, Score count);
 
+  class Regions {
+  private:
+    std::vector<RegionPtr> _regions;
+
+  public:
+    Regions()
+    {
+
+    }
+
+    Regions(size_t s)
+    {
+      _regions.reserve(s);
+    }
+
+    Regions(const Regions& other)
+    {
+      std::cerr << "copy constructor" << std::endl;
+
+      _regions.reserve(other._regions.size());
+      for (const auto& r : other._regions) {
+        _regions.emplace_back(r->clone());
+      }
+    }
+
+    Regions(Regions&& r) noexcept : _regions(std::move(r._regions))
+    {
+      std::cerr << "move constructor" << std::endl;
+    }
+
+
+    Regions& operator=(const Regions& other)
+    {
+      if (&other == this) {
+        return *this;
+      }
+      std::cerr << "assignment constructor" << std::endl;
+
+      _regions.reserve(other._regions.size());
+      for (const auto& r : other._regions) {
+        _regions.emplace_back(r->clone());
+      }
+
+      // copy elements
+      return *this;
+    }
+
+
+    template<typename RegionPtr>
+    void emplace_back(RegionPtr && value)
+    {
+      _regions.emplace_back(std::forward<RegionPtr>(value));
+    }
+
+    RegionPtr& operator[] (const size_t pos)
+    {
+      return _regions[pos];
+    }
+
+    bool empty() const
+    {
+      return _regions.empty();
+    }
+
+    size_t size() const
+    {
+      return _regions.size();
+    }
+
+    std::vector<RegionPtr>::iterator begin()
+    {
+      return _regions.begin();
+    }
+
+    std::vector<RegionPtr>::iterator end()
+    {
+      return _regions.end();
+    }
+
+    std::vector<RegionPtr>::const_iterator begin() const
+    {
+      return _regions.cbegin();
+    }
+
+    std::vector<RegionPtr>::const_iterator end() const
+    {
+      return _regions.cend();
+    }
+
+    void reserve(size_t new_cap)
+    {
+      _regions.reserve(new_cap);
+    }
+
+    void insert(std::vector<RegionPtr>::iterator it_end,
+                std::move_iterator<std::vector<RegionPtr>::iterator> begin,
+                std::move_iterator<std::vector<RegionPtr>::iterator> end)
+    {
+      _regions.insert(it_end, begin, end);
+    }
+  };
 
   typedef std::pair<std::string, Regions> ChromosomeRegions;
   typedef std::vector<ChromosomeRegions> ChromosomeRegionsList;

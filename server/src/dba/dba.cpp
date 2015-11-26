@@ -568,8 +568,8 @@ namespace epidb {
 
       ChromosomeRegionsList chromosome_regions_list;
       for (const auto &chr : genome_info) {
-        Regions regions = build_regions(1);
-        regions.push_back(build_bed_region(0, chr.second, id));
+        Regions regions = Regions(1);
+        regions.emplace_back(build_simple_region(0, chr.second, id));
         ChromosomeRegions chromosome_regions(chr.first, std::move(regions));
         chromosome_regions_list.push_back(std::move(chromosome_regions));
       }

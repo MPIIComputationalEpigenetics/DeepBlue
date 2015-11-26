@@ -266,11 +266,10 @@ namespace epidb {
               chromosomeRegionsList.emplace_back(std::move(actual_chromosome), std::move(actual_regions));
             }
             actual_chromosome = chromosome;
-            actual_regions = build_regions();
+            actual_regions = Regions();
           }
 
-          RegionPtr region = build_gene_region(start, end, dataset_id, source, score, feature,  strand, frame, attributes);
-          actual_regions.push_back(std::move(region));
+          actual_regions.emplace_back(build_gene_region(start, end, dataset_id, source, score, feature,  strand, frame, attributes));
         }
 
         if (!actual_chromosome.empty()) {

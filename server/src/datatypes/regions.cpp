@@ -20,18 +20,6 @@ namespace epidb {
 
   DatasetId DATASET_EMPTY_ID = std::numeric_limits<DatasetId>::min();
 
-  Regions build_regions()
-  {
-    return std::vector<RegionPtr>();
-  }
-
-  Regions build_regions(size_t s)
-  {
-    Regions v =  build_regions();
-    v.reserve(s);
-    return v;
-  }
-
   static const std::string empty_string("");
 
   Length AbstractRegion::length() const

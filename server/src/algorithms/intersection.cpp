@@ -66,14 +66,14 @@ namespace epidb {
         }
         IntervalTree<RegionPtr> tree(intervals);
 
-        Regions chr_intersections = build_regions();
+        Regions chr_intersections = Regions();
         // find all overlaps of regions from set A in the tree
         for (auto &region_a : chr_regions_a) {
           std::vector<RegionPtr> overlaps;
           tree.findOverlapping(region_a->start(), region_a->end(), overlaps);
 
           if (!overlaps.empty()) {
-            chr_intersections.push_back(std::move(region_a));
+            chr_intersections.emplace_back(std::move(region_a));
           }
         }
         // add found intersections to query result

@@ -31,7 +31,7 @@ namespace epidb {
     bool aggregate_regions(const std::string &chrom, Regions &data, const Regions &ranges, const std::string &field,
                            dba::Metafield &metafield, processing::StatusPtr status, Regions &chr_regions, std::string &msg)
     {
-      chr_regions = build_regions();
+      chr_regions = Regions();
       auto it_ranges = ranges.begin();
 
       DatasetId dataset_id = -1;
@@ -53,7 +53,7 @@ namespace epidb {
         // ***
 
         while ( it_data_begin != data.end()
-              && (*it_data_begin)->end() < (*it_ranges)->start() )  {
+                && (*it_data_begin)->end() < (*it_ranges)->start() )  {
           it_data_begin++;
         }
 
@@ -86,8 +86,8 @@ namespace epidb {
           it_data++;
         }
 
-        chr_regions.push_back(build_aggregte_region((*it_ranges)->start(), (*it_ranges)->end(), DATASET_EMPTY_ID,
-                              acc.min(), acc.max(), acc.median(), acc.mean(), acc.var(), acc.sd(), acc.count()));
+        chr_regions.emplace_back(build_aggregte_region((*it_ranges)->start(), (*it_ranges)->end(), DATASET_EMPTY_ID,
+                                 acc.min(), acc.max(), acc.median(), acc.mean(), acc.var(), acc.sd(), acc.count()));
         it_ranges++;
       }
 

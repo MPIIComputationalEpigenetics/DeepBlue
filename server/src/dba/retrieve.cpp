@@ -114,7 +114,7 @@ namespace epidb {
                 }
                 RegionPtr region = build_wig_region(start + (i * step), start + (i * step) + span, dataset_id, scores[i]);
                 _it_size += region->size();
-                _regions.push_back(std::move(region));
+                _regions.emplace_back(std::move(region));
                 _it_count++;
               }
 
@@ -132,7 +132,7 @@ namespace epidb {
                 }
                 RegionPtr region = build_wig_region(starts[i], starts[i] + span, dataset_id, scores[i]);
                 _it_size += region->size();
-                _regions.push_back(std::move(region));
+                _regions.emplace_back(std::move(region));
                 _it_count++;
               }
 
@@ -152,7 +152,7 @@ namespace epidb {
                 }
                 RegionPtr region = build_wig_region(starts[i], ends[i], dataset_id, scores[i]);
                 _it_size += region->size();
-                _regions.push_back(std::move(region));
+                _regions.emplace_back(std::move(region));
                 _it_count++;
               }
             }
@@ -224,7 +224,7 @@ namespace epidb {
             }
           }
           _it_size += region->size();
-          _regions.push_back(std::move(region));
+          _regions.emplace_back(std::move(region));
           _it_count++;
         }
       }
@@ -312,7 +312,7 @@ namespace epidb {
 
         for (std::vector<std::string>::const_iterator chrom_it = chromosomes->begin(); chrom_it != chromosomes->end(); chrom_it++) {
           std::string collection = helpers::region_collection_name(genome, *chrom_it);
-          Regions regions = build_regions();
+          Regions regions = Regions();
           std::string msg;
           if (!get_regions_from_collection(collection, regions_query, full_overlap, status, regions, msg)) {
             return std::make_tuple(false, msg);
@@ -333,7 +333,7 @@ namespace epidb {
                        Regions &regions, std::string &msg)
       {
         std::string collection = helpers::region_collection_name(genome, chromosome);
-        regions = build_regions();
+        regions = Regions();
         if (!get_regions_from_collection(collection, regions_query, full_overlap, status, regions, msg)) {
           EPIDB_LOG_ERR(msg);
           return false;
@@ -396,7 +396,7 @@ namespace epidb {
       {
         std::string collection_name = helpers::region_collection_name(genome, chromosome);
         std::string msg;
-        Regions regions = build_regions();
+        Regions regions = Regions();
         if (!get_regions_from_collection(collection_name, regions_query, full_overlap, status, regions, msg)) {
           EPIDB_LOG_ERR(msg);
           count = 0;
@@ -412,7 +412,7 @@ namespace epidb {
         size_t size = 0;
         for (std::vector<std::string>::const_iterator it = chromosomes->begin(); it != chromosomes->end(); ++it) {
           std::string collection_name = helpers::region_collection_name(genome, *it);
-          Regions regions = build_regions();
+          Regions regions = Regions();
           std::string msg;
           if (!get_regions_from_collection(collection_name, regions_query, full_overlap, status, regions, msg)) {
             EPIDB_LOG_ERR(msg);

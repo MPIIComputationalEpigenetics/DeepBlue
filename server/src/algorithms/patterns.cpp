@@ -21,14 +21,14 @@ namespace epidb {
   namespace algorithms {
     void PatternFinder::non_overlap_regex_callback(const boost::match_results<std::string::const_iterator> &what)
     {
-      non_overlap_localizations.push_back(
+      non_overlap_localizations.emplace_back(
         build_simple_region(what.position(), what.position() + what.str().size(), DATASET_EMPTY_ID)
       );
     }
 
     bool PatternFinder::non_overlap_pattern_location(const std::string &chromosome, const std::string &pattern)
     {
-      non_overlap_localizations = build_regions();
+      non_overlap_localizations = Regions();
       boost::regex expression(pattern);
       boost::sregex_iterator m1(chromosome.begin(), chromosome.end(), expression);
       boost::sregex_iterator m2;
@@ -48,7 +48,7 @@ namespace epidb {
 
     bool PatternFinder::overlap_pattern_location(const std::string &chromosome, const std::string &pattern)
     {
-      overlap_localizations = build_regions();
+      overlap_localizations = Regions();
       std::string::const_iterator start, end;
       start = chromosome.begin();
       end = chromosome.end();
@@ -57,7 +57,7 @@ namespace epidb {
       boost::match_flag_type flags = boost::match_default;
       int pos = 0;
       while (boost::regex_search(start, end, what, expression, flags)) {
-        overlap_localizations.push_back(
+        overlap_localizations.emplace_back(
           build_simple_region(pos, pos + what.str().size(), DATASET_EMPTY_ID)
         );
         start = what[0].first + 1;

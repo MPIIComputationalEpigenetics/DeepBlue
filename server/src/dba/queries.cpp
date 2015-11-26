@@ -39,6 +39,7 @@
 #include "users.hpp"
 
 #include "queries.hpp"
+//#include "queries_cache.hpp"
 
 #include "../errors.hpp"
 #include "../log.hpp"
@@ -199,7 +200,14 @@ namespace epidb {
           return false;
         }
 
-        std::string type = query["type"].str();
+        const std::string& type = query["type"].str();
+
+        /*
+        const mongo::BSONObj& args = query["args"].Obj();
+        if (args.hasField("cache") && args["cache"].Bool()) {
+          return cache::get_query_cache(user_key, query["derived_from"].String(), status, regions, msg);
+        }
+        */
 
         if (type == "experiment_select") {
           if (!retrieve_experiment_select_query(query, status, regions, msg)) {
@@ -743,7 +751,7 @@ namespace epidb {
           for (const auto& genome : genomes) {
             ChromosomeRegionsList chromosome_region_list;
             for (auto &chromosome : range_regions) {
-              Regions chromosome_regions = build_regions();
+              Regions chromosome_regions = Regions();
               for (auto &region : chromosome.second) {
                 if (region->start() >= selection_start && region->end() <= selection_end) {
                   mongo::BSONObj regions_query;
@@ -929,7 +937,7 @@ namespace epidb {
         Metafield metafield;
         for (auto& chromosome_regions_list : regions) {
           const std::string &chromosome = chromosome_regions_list.first;
-          Regions saved = build_regions();
+          Regions saved = Regions();
           for (auto& region : chromosome_regions_list.second) {
             if (!dba::Metafield::is_meta(field)) {
               if (region->dataset_id() != dataset_id) {
@@ -944,7 +952,7 @@ namespace epidb {
 
             // TODO: use column_type for better filtering. i.e. type conversion
             if (filter_region(region.get(), field, column, metafield, chromosome, filter, status)) {
-              saved.push_back(std::move(region));
+              saved.emplace_back(std::move(region));
               keep++;
             } else {
               removed++;
@@ -1054,9 +1062,9 @@ namespace epidb {
             msg = "Chromosome " + *cit + " does not exist on genome " + genome + ".";
             return false;
           }
-          Regions regs = build_regions();
+          Regions regs = Regions();
           for (size_t i = 0; i + tiling_size < chromosome_info.size; i += tiling_size) {
-            regs.push_back(build_simple_region(i, i + tiling_size, tiling_id));
+            regs.emplace_back(build_simple_region(i, i + tiling_size, tiling_id));
           }
           regions.push_back(ChromosomeRegions(*cit, std::move(regs)));
         }

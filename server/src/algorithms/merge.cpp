@@ -20,23 +20,23 @@ namespace epidb {
     Regions merge_regions(Regions &regions_a, Regions &regions_b)
     {
       size_t size = regions_a.size() + regions_b.size();
-      Regions results = build_regions(size);
       if (size == 0) {
-        return results;
+        return Regions();
       }
 
-      Regions sorted = build_regions(regions_a.size() + regions_b.size());
+      Regions results = Regions(size);
+      Regions sorted = Regions(size);
       sorted.insert(sorted.end(), std::make_move_iterator(regions_a.begin()), std::make_move_iterator(regions_a.end()));
       sorted.insert(sorted.end(), std::make_move_iterator(regions_b.begin()), std::make_move_iterator(regions_b.end()));
       std::sort(sorted.begin(), sorted.end(), RegionPtrComparer);
 
       // fill results and remove duplicates
-      results.push_back(std::move(sorted[0]));
+      results.emplace_back(std::move(sorted[0]));
 
       for (auto it = sorted.begin() + 1; it != sorted.end(); ++it) {
         const AbstractRegion* last = results[results.size()-1].get();
         if ( (*it)->start() != last->start() || (*it)->end() != last->end() || (*it)->dataset_id() != last->dataset_id()) {
-          results.push_back(std::move(*it));
+          results.emplace_back(std::move(*it));
         }
       }
 
