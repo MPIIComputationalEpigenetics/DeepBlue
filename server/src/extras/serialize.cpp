@@ -150,11 +150,6 @@ namespace epidb {
       return type() == INTEGER;
     }
 
-    bool Parameter::isNumber() const
-    {
-      return isInt() || isDouble();
-    }
-
     bool Parameter::isList() const
     {
       return type() == LIST;
@@ -470,7 +465,14 @@ namespace epidb {
           params_ss << "<string data>";
         } else if ((**it).isNull()) {
           params_ss << "<null>";
-        } else if ((**it).isString() && truncate_strings) {
+        } else if ((**it).isBool()) {
+          params_ss << (**it).as_boolean();
+        } else if ((**it).isDouble()) {
+          params_ss << (**it).as_double();
+        } else if ((**it).isInt()) {
+          params_ss << (**it).as_number();
+        }
+        else if ((**it).isString() && truncate_strings) {
           std::string s = (**it).as_string();
           if (s.length() > 256) {
             params_ss << s.substr(0, 256);
@@ -485,6 +487,8 @@ namespace epidb {
             if (l > 256) {
               params_ss << tmp_string.substr(0, 256);
               params_ss << " ... [" << l - 256 << " more characters]";
+            } else {
+              params_ss << tmp_string;
             }
           } else {
             params_ss << (**it).as_string();

@@ -57,7 +57,6 @@ namespace epidb {
       bool isString() const;
       bool isDouble() const;
       bool isInt() const;
-      bool isNumber() const;
       bool isList() const;
       bool isMap() const;
       bool isDatastring() const;
