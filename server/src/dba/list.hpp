@@ -40,7 +40,8 @@ namespace epidb {
 
       bool projects(const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg);
 
-      bool epigenetic_marks(const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg);
+      bool epigenetic_marks(const datatypes::Metadata &metadata,
+                            std::vector<utils::IdName> &result, std::string &msg);
 
       bool experiments(const mongo::BSONObj query, std::vector<utils::IdName> &result, std::string &msg);
 

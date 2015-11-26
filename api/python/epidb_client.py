@@ -89,8 +89,8 @@ class EpidbClient:
         return self.server.add_epigenetic_mark(name, description,
                                                extra_metadata, user_key)
 
-    def list_epigenetic_marks(self, user_key):
-        return self.server.list_epigenetic_marks(user_key)
+    def list_epigenetic_marks(self, metadata, user_key):
+        return self.server.list_epigenetic_marks(metadata, user_key)
 
     def list_similar_epigenetic_marks(self, term_name, user_key):
         return self.server.list_similar_epigenetic_marks(term_name, user_key)
