@@ -240,7 +240,6 @@ namespace epidb {
         _regions.emplace_back(r->clone());
       }
 
-      // copy elements
       return *this;
     }
 
