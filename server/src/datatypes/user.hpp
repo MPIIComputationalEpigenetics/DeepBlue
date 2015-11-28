@@ -39,7 +39,7 @@ namespace epidb {
       User(std::string name, std::string email, std::string institution);
       User(mongo::BSONObj bsonobj);
       User(const User& orig);
-      virtual ~User();
+      ~User();
 
       static const std::string PREFIX;
       static const std::string COLLECTION;
