@@ -3,9 +3,18 @@ import settings
 
 from client import EpidbClient
 
-
 class TestGetInfoCommand(helpers.TestCase):
   maxDiff = None
+
+  def test_empty_info(self):
+    epidb = EpidbClient()
+    self.init(epidb)
+    (s, rs) = epidb.info("", self.admin_key)
+    self.assertEquals(rs, [])
+
+    (s, rs) = epidb.info([], self.admin_key)
+    self.assertEquals(rs, [])
+
   def test_genome_info(self):
     epidb = EpidbClient()
     self.init(epidb)
