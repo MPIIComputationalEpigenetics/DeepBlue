@@ -48,6 +48,7 @@ namespace epidb {
       _start(s),
       _end(e) {}
 
+    virtual ~AbstractRegion() { }
 
     DatasetId dataset_id() const;
     Length length() const;
