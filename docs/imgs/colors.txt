@@ -1,3 +1,0 @@
-Deep: #3F4A9F
-Blue: 005DAC
-Epigenetic Database: 59616C
