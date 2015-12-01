@@ -89,81 +89,14 @@ namespace epidb {
           return false;
         }
 
-        mongo::BSONObjBuilder args_builder;
+        mongo::BSONObj query;
 
-        if (!types.empty()) {
-          args_builder.append("upload_info.content_format", utils::build_normalized_array(types));
-        }
-
-        if (!genomes.empty()) {
-          args_builder.append("genome", utils::build_array(genomes));
-          args_builder.append("norm_genome", utils::build_normalized_array(genomes));
-        }
-
-
-        if (!biosources.empty()) {
-          args_builder.append("sample_info.biosource_name", utils::build_array(biosources));
-          args_builder.append("sample_info.norm_biosource_name", utils::build_normalized_array(biosources));
-        }
-
-        // epigenetic mark
-        if (!epigenetic_marks.empty()) {
-          args_builder.append("epigenetic_mark", utils::build_array(epigenetic_marks));
-          args_builder.append("norm_epigenetic_mark", utils::build_epigenetic_normalized_array(epigenetic_marks));
-        }
-        // sample id
-        if (!sample_ids.empty()) {
-          args_builder.append("sample_id", utils::build_array(sample_ids));
-        }
-
-        std::vector<utils::IdName> user_projects;
-        if (!dba::list::projects(user_key, user_projects, msg)) {
+        if (!dba::list::build_list_experiments_query(genomes, types, epigenetic_marks, biosources, sample_ids, techniques,
+                                          projects, user_key, query, msg)) {
           result.add_error(msg);
           return false;
         }
 
-        // project.
-        if (!projects.empty()) {
-
-          // Filter the projects that are available to the user
-          std::vector<serialize::ParameterPtr> filtered_projects;
-          for (const auto& project : projects) {
-            std::string norm_project = utils::normalize_name(project->as_string());
-            bool found = false;
-            for (const auto& user_project : user_projects) {
-              std::string norm_user_project = utils::normalize_name(user_project.name);
-              if (norm_project == norm_user_project) {
-                filtered_projects.push_back(project);
-                found = true;
-                break;
-              }
-            }
-
-            if (!found) {
-              result.add_error("Project " + project->as_string() + " does not exists.");
-              return false;
-            }
-          }
-          args_builder.append("project", utils::build_array(filtered_projects));
-          args_builder.append("norm_project", utils::build_normalized_array(filtered_projects));
-        } else {
-
-          std::vector<std::string> user_projects_names;
-          for (const auto& project : user_projects) {
-            user_projects_names.push_back(project.name);
-          }
-
-          args_builder.append("project", utils::build_array(user_projects_names));
-          args_builder.append("norm_project", utils::build_normalized_array(user_projects_names));
-        }
-
-        // technique
-        if (!techniques.empty()) {
-          args_builder.append("technique", utils::build_array(techniques));
-          args_builder.append("norm_technique", utils::build_normalized_array(techniques));
-        }
-
-        const mongo::BSONObj query = dba::query::build_query(args_builder.obj());
         std::vector<utils::IdName> names;
         if (!dba::list::experiments(query, names, msg)) {
           result.add_error(msg);

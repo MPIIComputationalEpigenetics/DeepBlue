@@ -22,12 +22,15 @@
 
 #include "../connection/connection.hpp"
 
+#include "../dba/users.hpp"
+#include "../dba/queries.hpp"
+
 #include "../datatypes/metadata.hpp"
 #include "../datatypes/user.hpp"
 
-#include "../dba/users.hpp"
-
 #include "../extras/utils.hpp"
+
+#include "../errors.hpp"
 
 namespace epidb {
   namespace dba {
@@ -332,6 +335,91 @@ namespace epidb {
 
         return true;
       }
+
+      bool build_list_experiments_query(const std::vector<serialize::ParameterPtr> genomes, const std::vector<serialize::ParameterPtr> types,
+                                       const std::vector<serialize::ParameterPtr> epigenetic_marks, const std::vector<serialize::ParameterPtr> biosources,
+                                       const std::vector<serialize::ParameterPtr> sample_ids, const std::vector<serialize::ParameterPtr> techniques,
+                                       const std::vector<serialize::ParameterPtr> projects, const std::string user_key,
+                                       mongo::BSONObj query, std::string msg)
+      {
+        mongo::BSONObjBuilder args_builder;
+
+        if (!types.empty()) {
+          args_builder.append("upload_info.content_format", utils::build_normalized_array(types));
+        }
+
+        if (!genomes.empty()) {
+          args_builder.append("genome", utils::build_array(genomes));
+          args_builder.append("norm_genome", utils::build_normalized_array(genomes));
+        }
+
+
+        if (!biosources.empty()) {
+          args_builder.append("sample_info.biosource_name", utils::build_array(biosources));
+          args_builder.append("sample_info.norm_biosource_name", utils::build_normalized_array(biosources));
+        }
+
+        // epigenetic mark
+        if (!epigenetic_marks.empty()) {
+          args_builder.append("epigenetic_mark", utils::build_array(epigenetic_marks));
+          args_builder.append("norm_epigenetic_mark", utils::build_epigenetic_normalized_array(epigenetic_marks));
+        }
+        // sample id
+        if (!sample_ids.empty()) {
+          args_builder.append("sample_id", utils::build_array(sample_ids));
+        }
+
+        std::vector<utils::IdName> user_projects;
+        if (!dba::list::projects(user_key, user_projects, msg)) {
+          return false;
+        }
+
+        // project.
+        if (!projects.empty()) {
+
+          // Filter the projects that are available to the user
+          std::vector<serialize::ParameterPtr> filtered_projects;
+          for (const auto& project : projects) {
+            std::string project_name = project->as_string();
+            std::string norm_project = utils::normalize_name(project_name);
+            bool found = false;
+            for (const auto& user_project : user_projects) {
+              std::string norm_user_project = utils::normalize_name(user_project.name);
+              if (norm_project == norm_user_project) {
+                filtered_projects.push_back(project);
+                found = true;
+                break;
+              }
+            }
+
+            if (!found) {
+              msg = Error::m(ERR_INVALID_PROJECT_NAME, project_name);
+              return false;
+            }
+          }
+          args_builder.append("project", utils::build_array(filtered_projects));
+          args_builder.append("norm_project", utils::build_normalized_array(filtered_projects));
+        } else {
+          std::vector<std::string> user_projects_names;
+          for (const auto& project : user_projects) {
+            user_projects_names.push_back(project.name);
+          }
+
+          args_builder.append("project", utils::build_array(user_projects_names));
+          args_builder.append("norm_project", utils::build_normalized_array(user_projects_names));
+        }
+
+        // technique
+        if (!techniques.empty()) {
+          args_builder.append("technique", utils::build_array(techniques));
+          args_builder.append("norm_technique", utils::build_normalized_array(techniques));
+        }
+
+        query = dba::query::build_query(args_builder.obj());
+
+        return true;
+      }
+
 
       bool in_use(const std::string &collection, const std::string &key_name, const std::string &user_key,
                   std::vector<utils::IdNameCount> &names, std::string &msg)

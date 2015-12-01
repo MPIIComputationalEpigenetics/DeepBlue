@@ -90,6 +90,13 @@ namespace epidb {
                    const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg,
                    const size_t total = 20);
 
+
+      bool build_list_experiments_query(const std::vector<serialize::ParameterPtr> genomes, const std::vector<serialize::ParameterPtr> types,
+                                       const std::vector<serialize::ParameterPtr> epigenetic_marks, const std::vector<serialize::ParameterPtr> biosources,
+                                       const std::vector<serialize::ParameterPtr> sample_ids, const std::vector<serialize::ParameterPtr> techniques,
+                                       const std::vector<serialize::ParameterPtr> projects, const std::string user_key,
+                                       mongo::BSONObj query, std::string msg);
+
       /**
        * List in use
        */
