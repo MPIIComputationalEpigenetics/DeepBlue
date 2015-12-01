@@ -10,6 +10,7 @@
 #define EPIDB_DBA_LIST_HPP
 
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include <mongo/bson/bson.h>
@@ -92,10 +93,10 @@ namespace epidb {
 
 
       bool build_list_experiments_query(const std::vector<serialize::ParameterPtr> genomes, const std::vector<serialize::ParameterPtr> types,
-                                       const std::vector<serialize::ParameterPtr> epigenetic_marks, const std::vector<serialize::ParameterPtr> biosources,
-                                       const std::vector<serialize::ParameterPtr> sample_ids, const std::vector<serialize::ParameterPtr> techniques,
-                                       const std::vector<serialize::ParameterPtr> projects, const std::string user_key,
-                                       mongo::BSONObj query, std::string msg);
+                                        const std::vector<serialize::ParameterPtr> epigenetic_marks, const std::vector<serialize::ParameterPtr> biosources,
+                                        const std::vector<serialize::ParameterPtr> sample_ids, const std::vector<serialize::ParameterPtr> techniques,
+                                        const std::vector<serialize::ParameterPtr> projects, const std::string user_key,
+                                        mongo::BSONObj query, std::string msg);
 
       /**
        * List in use
@@ -103,6 +104,11 @@ namespace epidb {
 
       bool in_use(const std::string &collection, const std::string &field_name, const std::string &user_key,
                   std::vector<utils::IdNameCount> &names, std::string &msg);
+
+
+      bool faceting(const mongo::BSONObj experimentsq_uery, const std::string &user_key,
+                    std::unordered_map<std::string, std::vector<utils::IdNameCount> > &result,
+                    std::string &msg);
     }
   }
 }

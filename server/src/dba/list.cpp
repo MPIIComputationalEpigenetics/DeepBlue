@@ -337,10 +337,10 @@ namespace epidb {
       }
 
       bool build_list_experiments_query(const std::vector<serialize::ParameterPtr> genomes, const std::vector<serialize::ParameterPtr> types,
-                                       const std::vector<serialize::ParameterPtr> epigenetic_marks, const std::vector<serialize::ParameterPtr> biosources,
-                                       const std::vector<serialize::ParameterPtr> sample_ids, const std::vector<serialize::ParameterPtr> techniques,
-                                       const std::vector<serialize::ParameterPtr> projects, const std::string user_key,
-                                       mongo::BSONObj query, std::string msg)
+                                        const std::vector<serialize::ParameterPtr> epigenetic_marks, const std::vector<serialize::ParameterPtr> biosources,
+                                        const std::vector<serialize::ParameterPtr> sample_ids, const std::vector<serialize::ParameterPtr> techniques,
+                                        const std::vector<serialize::ParameterPtr> projects, const std::string user_key,
+                                        mongo::BSONObj query, std::string msg)
       {
         mongo::BSONObjBuilder args_builder;
 
@@ -478,6 +478,86 @@ namespace epidb {
             inc = utils::IdNameCount(id_name.id, id_name.name, count);
           }
           names.push_back(inc);
+        }
+
+        c.done();
+        return true;
+      }
+
+      bool faceting(const mongo::BSONObj experimentsq_uery, const std::string &user_key,
+                    std::unordered_map<std::string, std::vector<utils::IdNameCount>> &faceting_result,
+                    std::string &msg)
+      {
+        std::vector<utils::IdName> user_projects;
+        if (!projects(user_key, user_projects, msg)) {
+          return false;
+        }
+        std::vector<std::string> project_names;
+        for (const auto& project : user_projects) {
+          project_names.push_back(project.name);
+        }
+        mongo::BSONArray projects_array = utils::build_array(project_names);
+
+        std::vector<std::pair<std::string, std::string> > collums = {
+          {"epigenetic_marks", "$norm_epigenetic_mark"},
+          {"genomes", "$norm_genome"},
+          {"biosources", "$sample_info.norm_biosource_name"},
+          {"samples", "$sample_id"},
+          {"techniques", "$norm_technique"},
+          {"projects", "$norm_project"}
+        };
+
+        Connection c;
+
+        for (const auto& column : collums) {
+          std::vector<utils::IdNameCount> names;
+
+          std::string collection = column.first;
+          std::string key_name = column.second;
+
+          // Select experiments that are uploaded and from πublic projects or that the user has permission
+          mongo::BSONObj done = BSON("upload_info.done" << true);
+          mongo::BSONObj user_projects_bson = BSON("project" << BSON("$in" << projects_array));
+          mongo::BSONObj query = BSON("$and" << BSON_ARRAY(done <<  user_projects_bson));
+          mongo::BSONObj match = BSON("$match" << query);
+
+          // Group by count
+          mongo::BSONObj group = BSON( "$group" << BSON( "_id" << key_name << "total" << BSON( "$sum" << 1 ) ) );
+
+          mongo::BSONArray pipeline = BSON_ARRAY( match << group );
+
+          mongo::BSONObj agg_command = BSON( "aggregate" << Collections::EXPERIMENTS() << "pipeline" << pipeline);
+
+
+          mongo::BSONObj res;
+          c->runCommand(config::DATABASE_NAME(), agg_command, res);
+
+          if (!res.getField("ok").trueValue()) {
+            msg = res.getStringField("errmsg");
+            c.done();
+            return false;
+          }
+
+          std::vector<mongo::BSONElement> result = res["result"].Array();
+
+          for (const mongo::BSONElement & be : result) {
+            std::string norm_name = utils::normalize_name(be["_id"].String());
+            long count = be["total"].safeNumberLong();
+
+            utils::IdNameCount inc;
+            if (collection == Collections::SAMPLES()) {
+              inc = utils::IdNameCount(norm_name, "", count);
+            } else {
+              utils::IdName id_name;
+              if (!helpers::get_name(collection, norm_name, id_name, msg)) {
+                c.done();
+                return false;
+              }
+              inc = utils::IdNameCount(id_name.id, id_name.name, count);
+            }
+            names.push_back(inc);
+          }
+          faceting_result[collection] = names;
         }
 
         c.done();
