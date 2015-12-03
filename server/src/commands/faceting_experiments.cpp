@@ -103,7 +103,28 @@ namespace epidb {
           result.add_error(msg);
         }
 
-        //set_id_names_return(names, result);
+
+        serialize::ParameterPtr faces(new serialize::MapParameter());
+
+        for (const auto& face : faceting_result) {
+          const auto& key = face.first;
+          const auto& values = face.second;
+
+          serialize::ParameterPtr face_values(new serialize::SimpleParameter(serialize::LIST));
+          faces->add_child(key, face_values);
+
+          for (const auto& value: values) {
+            serialize::ParameterPtr item = std::make_shared<serialize::ListParameter>();
+
+            //item->add_string(value.id);
+            //item->add_string(value.name);
+            //item->add_int(value.id);
+
+            face_values->add_child(item);
+          }
+        }
+
+        result.add_param(faces);
 
         return true;
       }

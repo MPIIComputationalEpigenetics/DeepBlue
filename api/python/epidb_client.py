@@ -194,6 +194,12 @@ class EpidbClient:
                                                    technique, project,
                                                    user_key)
 
+    def faceting_experiments(self, genome, type, epigenetic_mark, biosources, sample,
+                         technique, project, user_key):
+        return self.server.faceting_experiments(genome, type, epigenetic_mark,
+                                            biosources, sample, technique, project,
+                                            user_key)
+
     ## Annotations
     def add_annotation(self, name, genome, description, data, frmt,
                        extra_metadata, user_key):
