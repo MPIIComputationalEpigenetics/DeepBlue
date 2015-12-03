@@ -97,6 +97,8 @@ namespace epidb {
           return false;
         }
 
+        std::cerr << query.toString() << std::endl;
+
         std::unordered_map<std::string, std::vector<utils::IdNameCount>> faceting_result;
 
         if (!dba::list::faceting(query, user_key, faceting_result, msg)) {

@@ -340,7 +340,7 @@ namespace epidb {
                                         const std::vector<serialize::ParameterPtr> epigenetic_marks, const std::vector<serialize::ParameterPtr> biosources,
                                         const std::vector<serialize::ParameterPtr> sample_ids, const std::vector<serialize::ParameterPtr> techniques,
                                         const std::vector<serialize::ParameterPtr> projects, const std::string user_key,
-                                        mongo::BSONObj query, std::string msg)
+                                        mongo::BSONObj& query, std::string msg)
       {
         mongo::BSONObjBuilder args_builder;
 
@@ -417,6 +417,9 @@ namespace epidb {
 
         query = dba::query::build_query(args_builder.obj());
 
+        std::cerr << "query.toString()" << std::endl;
+        std::cerr << query.toString() << std::endl;
+
         return true;
       }
 
@@ -484,7 +487,7 @@ namespace epidb {
         return true;
       }
 
-      bool faceting(const mongo::BSONObj experimentsq_uery, const std::string &user_key,
+      bool faceting(const mongo::BSONObj experiments_query, const std::string &user_key,
                     std::unordered_map<std::string, std::vector<utils::IdNameCount>> &faceting_result,
                     std::string &msg)
       {
@@ -518,7 +521,7 @@ namespace epidb {
           // Select experiments that are uploaded and from πublic projects or that the user has permission
           mongo::BSONObj done = BSON("upload_info.done" << true);
           mongo::BSONObj user_projects_bson = BSON("project" << BSON("$in" << projects_array));
-          mongo::BSONObj query = BSON("$and" << BSON_ARRAY(done <<  user_projects_bson));
+          mongo::BSONObj query = BSON("$and" << BSON_ARRAY(done <<  user_projects_bson << experiments_query));
           mongo::BSONObj match = BSON("$match" << query);
 
           // Group by count
