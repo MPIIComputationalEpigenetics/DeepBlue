@@ -29,7 +29,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::EXPERIMENTS, "Lists all existing experiments.");
+        return CommandDescription(categories::EXPERIMENTS, "Experiments faceting.");
       }
 
       static Parameters parameters_()
@@ -51,7 +51,7 @@ namespace epidb {
       static Parameters results_()
       {
         Parameter p[] = {
-          Parameter("experiments", serialize::LIST, "experiment names")
+          Parameter("faceting", serialize::MAP, "Map with the mandatory fields of the experiments metadata, where each contains a list of terms that appears.")
         };
         Parameters results(&p[0], &p[0] + 1);
         return results;
@@ -110,18 +110,19 @@ namespace epidb {
           const auto& key = face.first;
           const auto& values = face.second;
 
-          serialize::ParameterPtr face_values(new serialize::SimpleParameter(serialize::LIST));
-          faces->add_child(key, face_values);
+          serialize::ParameterPtr face_values = std::make_shared<serialize::ListParameter>();
 
           for (const auto& value: values) {
             serialize::ParameterPtr item = std::make_shared<serialize::ListParameter>();
 
-            //item->add_string(value.id);
-            //item->add_string(value.name);
-            //item->add_int(value.id);
+            item->add_child(serialize::ParameterPtr(new serialize::SimpleParameter(value.id)));
+            item->add_child(serialize::ParameterPtr(new serialize::SimpleParameter(value.name)));
+            item->add_child(serialize::ParameterPtr(new serialize::SimpleParameter(static_cast<long long>(value.count))));
 
             face_values->add_child(item);
           }
+
+          faces->add_child(key, face_values);
         }
 
         result.add_param(faces);
