@@ -417,9 +417,6 @@ namespace epidb {
 
         query = dba::query::build_query(args_builder.obj());
 
-        std::cerr << "query.toString()" << std::endl;
-        std::cerr << query.toString() << std::endl;
-
         return true;
       }
 
@@ -507,7 +504,9 @@ namespace epidb {
           {"biosources", "$sample_info.norm_biosource_name"},
           {"samples", "$sample_id"},
           {"techniques", "$norm_technique"},
-          {"projects", "$norm_project"}
+          {"projects", "$norm_project"},
+          {"types", "$upload_info.content_format"}
+
         };
 
         Connection c;
@@ -548,8 +547,10 @@ namespace epidb {
             long count = be["total"].safeNumberLong();
 
             utils::IdNameCount inc;
-            if (collection == Collections::SAMPLES()) {
+            if (collection == Collections::SAMPLES())
               inc = utils::IdNameCount(norm_name, "", count);
+            else if (collection == "types") {
+              inc = utils::IdNameCount("", norm_name, count);
             } else {
               utils::IdName id_name;
               if (!helpers::get_name(collection, norm_name, id_name, msg)) {
