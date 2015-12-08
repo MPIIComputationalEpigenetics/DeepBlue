@@ -340,7 +340,7 @@ namespace epidb {
                                         const std::vector<serialize::ParameterPtr> epigenetic_marks, const std::vector<serialize::ParameterPtr> biosources,
                                         const std::vector<serialize::ParameterPtr> sample_ids, const std::vector<serialize::ParameterPtr> techniques,
                                         const std::vector<serialize::ParameterPtr> projects, const std::string user_key,
-                                        mongo::BSONObj query, std::string msg)
+                                        mongo::BSONObj& query, std::string msg)
       {
         mongo::BSONObjBuilder args_builder;
 
@@ -484,7 +484,7 @@ namespace epidb {
         return true;
       }
 
-      bool faceting(const mongo::BSONObj experimentsq_uery, const std::string &user_key,
+      bool faceting(const mongo::BSONObj experiments_query, const std::string &user_key,
                     std::unordered_map<std::string, std::vector<utils::IdNameCount>> &faceting_result,
                     std::string &msg)
       {
@@ -504,7 +504,9 @@ namespace epidb {
           {"biosources", "$sample_info.norm_biosource_name"},
           {"samples", "$sample_id"},
           {"techniques", "$norm_technique"},
-          {"projects", "$norm_project"}
+          {"projects", "$norm_project"},
+          {"types", "$upload_info.content_format"}
+
         };
 
         Connection c;
@@ -518,7 +520,7 @@ namespace epidb {
           // Select experiments that are uploaded and from πublic projects or that the user has permission
           mongo::BSONObj done = BSON("upload_info.done" << true);
           mongo::BSONObj user_projects_bson = BSON("project" << BSON("$in" << projects_array));
-          mongo::BSONObj query = BSON("$and" << BSON_ARRAY(done <<  user_projects_bson));
+          mongo::BSONObj query = BSON("$and" << BSON_ARRAY(done <<  user_projects_bson << experiments_query));
           mongo::BSONObj match = BSON("$match" << query);
 
           // Group by count
@@ -541,12 +543,21 @@ namespace epidb {
           std::vector<mongo::BSONElement> result = res["result"].Array();
 
           for (const mongo::BSONElement & be : result) {
-            std::string norm_name = utils::normalize_name(be["_id"].String());
+            const mongo::BSONElement& _id = be["_id"];
+            std::string norm_name;
+            if (_id.isNull()) {
+              norm_name = "null";
+            } else {
+              norm_name = utils::normalize_name(_id.String());
+            }
+
             long count = be["total"].safeNumberLong();
 
             utils::IdNameCount inc;
-            if (collection == Collections::SAMPLES()) {
+            if (collection == Collections::SAMPLES())
               inc = utils::IdNameCount(norm_name, "", count);
+            else if (collection == "types") {
+              inc = utils::IdNameCount("", norm_name, count);
             } else {
               utils::IdName id_name;
               if (!helpers::get_name(collection, norm_name, id_name, msg)) {

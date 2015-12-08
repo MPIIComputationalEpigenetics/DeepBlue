@@ -11,6 +11,7 @@ import column_types
 import complex_queries
 import epigenetic_marks
 import experiments
+import faceting
 import filters
 import flank
 import gene_sets
