@@ -1107,11 +1107,11 @@ namespace epidb {
         mongo::BSONObj o = BSON(KeyMapper::DATASET() << dataset_id);
 
         Connection c;
-
         auto cursor = c->query(helpers::collection_name(Collections::EXPERIMENTS()), o);
+
+        bool found = false;
         while (cursor->more()) {
           mongo::BSONObj experiment = cursor->next();
-
           int s_count = 0;
           int n_count = 0;
 
@@ -1149,6 +1149,10 @@ namespace epidb {
             mongo::BSONObj o = bob.obj();
             columns.push_back(o);
           }
+          found = true;
+        }
+
+        if (found) {
           c.done();
           return true;
         }
@@ -1190,6 +1194,10 @@ namespace epidb {
             }
             columns.push_back(bob.obj());
           }
+          found = true;
+        }
+
+        if (found) {
           c.done();
           return true;
         }
@@ -1226,13 +1234,17 @@ namespace epidb {
               columns.emplace_back(bob.obj());
             }
           }
-          return true;
-          c.done();
+          found = true;
         }
 
         c.done();
-        msg = Error::m(ERR_DATASET_NOT_FOUND, dataset_id);
-        return false;
+        if (found) {
+          return true;
+        } else {
+          msg = Error::m(ERR_DATASET_NOT_FOUND, dataset_id);
+          std::cerr << "ERR_DATASET_NOT_FOUND" << std::endl;
+          return false;
+        }
       }
 
       bool is_canceled(processing::StatusPtr status, std::string msg)
