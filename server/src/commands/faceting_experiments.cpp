@@ -1,5 +1,5 @@
 //
-//  list_experiments.cpp
+//  faceti_experiments.cpp
 //  epidb
 //
 //  Created by Felipe Albrecht on 25.06.13.
@@ -24,7 +24,7 @@
 namespace epidb {
   namespace command {
 
-    class ListExperimentsCommand: public Command {
+    class FacetingExperimentsCommand: public Command {
 
     private:
       static CommandDescription desc_()
@@ -58,7 +58,7 @@ namespace epidb {
       }
 
     public:
-      ListExperimentsCommand() : Command("list_experiments", parameters_(), results_(), desc_()) {}
+      FacetingExperimentsCommand() : Command("faceting_experiments", parameters_(), results_(), desc_()) {}
 
       virtual bool run(const std::string &ip,
                        const serialize::Parameters &parameters, serialize::Parameters &result) const
@@ -97,15 +97,16 @@ namespace epidb {
           return false;
         }
 
-        std::vector<utils::IdName> names;
-        if (!dba::list::experiments(query, names, msg)) {
+        std::unordered_map<std::string, std::vector<utils::IdNameCount>> faceting_result;
+
+        if (!dba::list::faceting(query, user_key, faceting_result, msg)) {
           result.add_error(msg);
         }
 
-        set_id_names_return(names, result);
+        //set_id_names_return(names, result);
 
         return true;
       }
-    } listExperimentsCommand;
+    } facetingExperimentsCommand;
   }
 }

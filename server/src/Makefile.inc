@@ -52,7 +52,7 @@ ifeq ($(host),ubuntu)
  LDFLAGS   = -pthread
  MONGOLIBS = /opt/mongo/lib/libmongoclient.a
  BOOST_DIR = /opt/boost/lib
- DEFCXXFLAGS = -std=c++11 -Wall -O3 -ffast-math -march=native -Ofast -I/opt/mongo/include/ -I/opt/boost/include/ -I$(MINILZO) -I$(URDL) -I$(CPPFORMAT) -I$(STRTK) -I$(LUA) -DURDL_HEADER_ONLY=1 -DURDL_DISABLE_SSL=1
+ DEFCXXFLAGS = -std=c++11 -Wall -O3 -ffast-math -march=native -Ofast -I/opt/mongo/include/ -I/opt/boost/include/ -I$(MINILZO) -I$(URDL) -I$(CPPFORMAT) -I$(STRTK) -I$(LUA) -DURDL_HEADER_ONLY=1 -DURDL_DISABLE_SSL=1 -Wno-deprecated-declarations -Wno-unused-variable -Wno-unused-parameter -Wno-ignored-qualifiers -Wno-deprecated-declarations
  BOOSTLIBS = $(BOOST_DIR)/libboost_filesystem.a $(BOOST_DIR)/libboost_thread.a $(BOOST_DIR)/libboost_system.a $(BOOST_DIR)/libboost_regex.a $(BOOST_DIR)/libboost_log.a  $(BOOST_DIR)/libboost_timer.a  $(BOOST_DIR)/libboost_chrono.a $(BOOST_DIR)/libboost_program_options.a $(BOOST_DIR)/libboost_iostreams.a /home/albrecht/DeepBlue/DeepBlue/server/third_party/bzip2/lib/linux/libbz2.a -lrt
  THIRDLIBS = ../third_party/libexpat_linux.a
 endif
