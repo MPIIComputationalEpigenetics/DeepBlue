@@ -227,10 +227,11 @@ namespace epidb {
               result.add_error("Invalid identifier: " + id);
               return false;
             }
-            if (!ok) {
-              result.add_error(msg);
-              return false;
-            }
+          }
+
+          if (!ok) {
+            result.add_error(msg);
+            return false;
           }
 
           result.set_as_array(true);
