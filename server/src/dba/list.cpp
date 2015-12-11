@@ -578,10 +578,10 @@ namespace epidb {
 
           std::cerr << collection + " " + key_name << std::endl;
 
-          auto t = std::async(&__collection_experiments_count,
+          auto t = std::async(std::launch::async,
+                              &__collection_experiments_count,
                               std::ref(experiments_query), std::ref(projects_array),
-                              collection, key_name,
-                              std::ref(faceting_result));
+                              collection, key_name, std::ref(faceting_result));
           threads.push_back(std::move(t));
         }
 
