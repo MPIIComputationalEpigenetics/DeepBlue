@@ -364,7 +364,10 @@ namespace epidb {
           std::shared_ptr<std::vector<std::string> > chrs(new std::vector<std::string>(start, end));
           std::shared_ptr<ChromosomeRegionsList> result_part(new ChromosomeRegionsList);
 
-          auto t = std::async(&get_regions_job, std::ref(genome), chrs, std::ref(regions_query), full_overlap, status, result_part);
+          auto t = std::async(std::launch::async,
+                              &get_regions_job,
+                              std::ref(genome), chrs, std::ref(regions_query),
+                              full_overlap, status, result_part);
 
           threads.push_back(std::move(t));
           result_parts.push_back(result_part);
@@ -473,7 +476,7 @@ namespace epidb {
 
         Connection c;
         auto data_cursor = c->query(helpers::collection_name(Collections::SEQUENCES()) + ".files",
-            mongo::Query(BSON("filename" << filename)));
+                                    mongo::Query(BSON("filename" << filename)));
 
         bool r = data_cursor->more();
 
@@ -493,7 +496,7 @@ namespace epidb {
 
         mongo::BSONObj projection = BSON("chunkSize" << 1);
         auto data_cursor = c->query(helpers::collection_name(Collections::SEQUENCES()) + ".files",
-            mongo::Query(BSON("filename" << filename)), 0, 0, &projection);
+                                    mongo::Query(BSON("filename" << filename)), 0, 0, &projection);
 
         if (data_cursor->more()) {
           chunk_size = data_cursor->next().getField("chunkSize").numberLong();
@@ -516,7 +519,7 @@ namespace epidb {
 
         mongo::BSONObj projection = BSON("_id" << 1);
         auto data_cursor = c->query(helpers::collection_name(Collections::SEQUENCES()) + ".files",
-            mongo::Query(BSON("filename" << filename)), 0, 0, &projection);
+                                    mongo::Query(BSON("filename" << filename)), 0, 0, &projection);
 
         if (data_cursor->more()) {
           oid = data_cursor->next().getField("_id").OID();
@@ -558,7 +561,7 @@ namespace epidb {
 
         mongo::BSONObj projection = BSON("data" << 1);
         auto data_cursor = c->query(helpers::collection_name(Collections::SEQUENCES()) + ".chunks",
-            mongo::Query(BSON("files_id" << oid << "n" << (int) chunk_number)), 0, 0, &projection);
+                                    mongo::Query(BSON("files_id" << oid << "n" << (int) chunk_number)), 0, 0, &projection);
 
         if (data_cursor->more()) {
           int i_chuck_size = (int) chunk_size;
