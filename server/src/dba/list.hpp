@@ -106,7 +106,7 @@ namespace epidb {
                   std::vector<utils::IdNameCount> &names, std::string &msg);
 
 
-      bool faceting(const mongo::BSONObj experimentsq_uery, const std::string &user_key,
+      bool faceting(const mongo::BSONObj& experimentsq_uery, const std::string &user_key,
                     std::unordered_map<std::string, std::vector<utils::IdNameCount> > &result,
                     std::string &msg);
     }

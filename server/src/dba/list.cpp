@@ -6,7 +6,10 @@
 //  Copyright (c) 2014 Max Planck Institute for Computer Science. All rights reserved.
 //
 
+#include <future>
 #include <string>
+#include <thread>
+#include <tuple>
 #include <vector>
 
 #include <mongo/bson/bson.h>
@@ -484,7 +487,71 @@ namespace epidb {
         return true;
       }
 
-      bool faceting(const mongo::BSONObj experiments_query, const std::string &user_key,
+      std::tuple<bool, std::string> __collection_experiments_count(const mongo::BSONObj & experiments_query, const mongo::BSONArray & projects_array,
+          const std::string collection, const std::string key_name,
+          std::unordered_map<std::string, std::vector<utils::IdNameCount> > &faceting_result)
+      {
+        // Select experiments that are uploaded and from πublic projects or that the user has permission
+        mongo::BSONObj done = BSON("upload_info.done" << true);
+        mongo::BSONObj user_projects_bson = BSON("project" << BSON("$in" << projects_array));
+        mongo::BSONObj query = BSON("$and" << BSON_ARRAY(done <<  user_projects_bson << experiments_query));
+        mongo::BSONObj match = BSON("$match" << query);
+
+        // Group by count
+        mongo::BSONObj group = BSON( "$group" << BSON( "_id" << key_name << "total" << BSON( "$sum" << 1 ) ) );
+        mongo::BSONArray pipeline = BSON_ARRAY( match << group );
+
+        mongo::BSONObj agg_command = BSON( "aggregate" << Collections::EXPERIMENTS() << "pipeline" << pipeline);
+
+
+        Connection c;
+        mongo::BSONObj res;
+        c->runCommand(config::DATABASE_NAME(), agg_command, res);
+
+        if (!res.getField("ok").trueValue()) {
+          c.done();
+          return std::make_tuple(false, res.getStringField("errmsg"));
+        }
+
+        std::vector<mongo::BSONElement> result = res["result"].Array();
+        std::vector<utils::IdNameCount> names;
+
+        for (const mongo::BSONElement & be : result) {
+          const mongo::BSONElement& _id = be["_id"];
+          std::string norm_name;
+          if (_id.isNull()) {
+            norm_name = "null";
+          } else {
+            norm_name = utils::normalize_name(_id.String());
+          }
+
+          long count = be["total"].safeNumberLong();
+
+          utils::IdNameCount inc;
+          if (collection == Collections::SAMPLES())
+            inc = utils::IdNameCount(norm_name, "", count);
+          else if (collection == "types") {
+            inc = utils::IdNameCount("", norm_name, count);
+          } else {
+            utils::IdName id_name;
+            std::string msg;
+            if (!helpers::get_name(collection, norm_name, id_name, msg)) {
+              c.done();
+              return std::make_tuple(false, msg);
+            }
+            inc = utils::IdNameCount(id_name.id, id_name.name, count);
+          }
+          names.push_back(inc);
+        }
+
+        c.done();
+        std::cerr << collection << std::endl;
+        faceting_result[collection] = names;
+        return std::make_tuple(true, std::string(""));
+      }
+
+
+      bool faceting(const mongo::BSONObj& experiments_query, const std::string &user_key,
                     std::unordered_map<std::string, std::vector<utils::IdNameCount>> &faceting_result,
                     std::string &msg)
       {
@@ -509,69 +576,32 @@ namespace epidb {
 
         };
 
-        Connection c;
 
+        std::vector<std::future<std::tuple<bool, std::string> > > threads;
         for (const auto& column : collums) {
-          std::vector<utils::IdNameCount> names;
-
           std::string collection = column.first;
           std::string key_name = column.second;
 
-          // Select experiments that are uploaded and from πublic projects or that the user has permission
-          mongo::BSONObj done = BSON("upload_info.done" << true);
-          mongo::BSONObj user_projects_bson = BSON("project" << BSON("$in" << projects_array));
-          mongo::BSONObj query = BSON("$and" << BSON_ARRAY(done <<  user_projects_bson << experiments_query));
-          mongo::BSONObj match = BSON("$match" << query);
+          std::cerr << collection + " " + key_name << std::endl;
 
-          // Group by count
-          mongo::BSONObj group = BSON( "$group" << BSON( "_id" << key_name << "total" << BSON( "$sum" << 1 ) ) );
-
-          mongo::BSONArray pipeline = BSON_ARRAY( match << group );
-
-          mongo::BSONObj agg_command = BSON( "aggregate" << Collections::EXPERIMENTS() << "pipeline" << pipeline);
-
-
-          mongo::BSONObj res;
-          c->runCommand(config::DATABASE_NAME(), agg_command, res);
-
-          if (!res.getField("ok").trueValue()) {
-            msg = res.getStringField("errmsg");
-            c.done();
-            return false;
-          }
-
-          std::vector<mongo::BSONElement> result = res["result"].Array();
-
-          for (const mongo::BSONElement & be : result) {
-            const mongo::BSONElement& _id = be["_id"];
-            std::string norm_name;
-            if (_id.isNull()) {
-              norm_name = "null";
-            } else {
-              norm_name = utils::normalize_name(_id.String());
-            }
-
-            long count = be["total"].safeNumberLong();
-
-            utils::IdNameCount inc;
-            if (collection == Collections::SAMPLES())
-              inc = utils::IdNameCount(norm_name, "", count);
-            else if (collection == "types") {
-              inc = utils::IdNameCount("", norm_name, count);
-            } else {
-              utils::IdName id_name;
-              if (!helpers::get_name(collection, norm_name, id_name, msg)) {
-                c.done();
-                return false;
-              }
-              inc = utils::IdNameCount(id_name.id, id_name.name, count);
-            }
-            names.push_back(inc);
-          }
-          faceting_result[collection] = names;
+          auto t = std::async(&__collection_experiments_count,
+                              std::ref(experiments_query), std::ref(projects_array),
+                              collection, key_name,
+                              std::ref(faceting_result));
+          threads.push_back(std::move(t));
         }
 
-        c.done();
+        size_t thread_count = threads.size();
+        for (size_t i = 0; i < thread_count; ++i) {
+          std::cerr << i << std::endl;
+          threads[i].wait();
+          auto result = threads[i].get();
+          if (!std::get<0>(result)) {
+            msg = std::get<1>(result);
+            return false;
+          }
+        }
+
         return true;
       }
     }
