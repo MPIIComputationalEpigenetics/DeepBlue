@@ -505,18 +505,12 @@ namespace epidb {
 
 
         Connection c;
-        mongo::BSONObj res;
-        c->runCommand(config::DATABASE_NAME(), agg_command, res);
+        auto cursor = c->aggregate(helpers::collection_name(Collections::EXPERIMENTS()), pipeline);
 
-        if (!res.getField("ok").trueValue()) {
-          c.done();
-          return std::make_tuple(false, res.getStringField("errmsg"));
-        }
-
-        std::vector<mongo::BSONElement> result = res["result"].Array();
         std::vector<utils::IdNameCount> names;
 
-        for (const mongo::BSONElement & be : result) {
+        while  (cursor->more()) {
+          mongo::BSONObj be = cursor->next();
           const mongo::BSONElement& _id = be["_id"];
           std::string norm_name;
           if (_id.isNull()) {
