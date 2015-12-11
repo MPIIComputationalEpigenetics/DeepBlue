@@ -14,8 +14,6 @@
 #include <time.h>
 #include <math.h>
 
-#include <boost/foreach.hpp>
-
 #include <mongo/bson/bson.h>
 
 #include "../connection/connection.hpp"

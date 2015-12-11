@@ -12,8 +12,6 @@
 #include <iterator>
 #include <utility>
 
-#include <boost/foreach.hpp>
-
 #include <mongo/bson/bson.h>
 
 #include "../algorithms/algorithms.hpp"
@@ -1116,7 +1114,7 @@ namespace epidb {
           int n_count = 0;
 
           std::vector<mongo::BSONElement> tmp_columns = experiment["columns"].Array();
-          BOOST_FOREACH(const mongo::BSONElement & e, tmp_columns) {
+          for(const mongo::BSONElement & e: tmp_columns) {
             mongo::BSONObj column = e.Obj();
             const std::string &column_type = column["column_type"].str();
             const std::string &column_name = column["name"].str();
@@ -1163,7 +1161,7 @@ namespace epidb {
           int s_count = 0;
           int n_count = 0;
           std::vector<mongo::BSONElement> tmp_columns = annotation["columns"].Array();
-          BOOST_FOREACH(const mongo::BSONElement & e, tmp_columns) {
+          for(const mongo::BSONElement & e: tmp_columns) {
             mongo::BSONObj column = e.Obj();
             const std::string &column_type = column["column_type"].str();
             const std::string &column_name = column["name"].str();
@@ -1206,7 +1204,7 @@ namespace epidb {
         while (cursor->more()) {
           mongo::BSONObj tiling = cursor->next().getOwned();
           std::vector<mongo::BSONElement> tmp_columns = tiling["columns"].Array();
-          BOOST_FOREACH(const mongo::BSONElement & e, tmp_columns) {
+          for(const mongo::BSONElement & e: tmp_columns) {
             columns.push_back(e.Obj().getOwned());
           }
           c.done();

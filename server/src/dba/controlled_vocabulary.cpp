@@ -8,8 +8,6 @@
 
 #include <map>
 
-#include <boost/foreach.hpp>
-
 #include <mongo/bson/bson.h>
 
 #include "../connection/connection.hpp"
@@ -62,7 +60,7 @@ namespace epidb {
         mongo::BSONObj syn_bson = syns_cursor->next();
         std::vector<mongo::BSONElement> e = syn_bson["synonyms"].Array();
 
-        BOOST_FOREACH(const mongo::BSONElement & be, e) {
+        for (const mongo::BSONElement & be : e) {
           std::string norm_synonym = be.str();
           mongo::BSONObjBuilder syn_query;
           syn_query.append("norm_synonym", norm_synonym);
@@ -130,7 +128,7 @@ namespace epidb {
         }
 
         std::vector<std::string> synonyms_terms;
-        BOOST_FOREACH(const utils::IdName & syn, syns) {
+        for (const utils::IdName & syn : syns) {
           synonyms_terms.push_back(syn.name);
           synonyms_terms.push_back(utils::normalize_name(syn.name));
         }
@@ -142,7 +140,7 @@ namespace epidb {
           return false;
         }
         std::vector<utils::IdName> id_names;
-        BOOST_FOREACH(const std::string & norm_sub, norm_subs) {
+        for (const std::string & norm_sub : norm_subs) {
           std::string biosource_id;
           if (!helpers::get_id(Collections::BIOSOURCES(), norm_sub, biosource_id, msg)) {
             return false;
@@ -189,8 +187,8 @@ namespace epidb {
 
 
       bool __set_biosource_synonym(const std::string &input_biosource_name, const std::string &synonym,
-                                 bool is_biosource, const bool is_syn, const std::string &user_key,
-                                 std::string &msg)
+                                   bool is_biosource, const bool is_syn, const std::string &user_key,
+                                   std::string &msg)
       {
         std::string biosource_name;
         std::string norm_biosource_name;
@@ -330,7 +328,7 @@ namespace epidb {
 
         std::list<std::string> subs;
 
-        BOOST_FOREACH(const mongo::BSONElement & be, e) {
+        for (const mongo::BSONElement & be : e) {
           std::string sub = be.str();
           if (sub == norm_s2) {
             r = true;
@@ -342,7 +340,7 @@ namespace epidb {
         }
 
         if (recursive) {
-          BOOST_FOREACH(const std::string & norm_sub, subs) {
+          for (const std::string & norm_sub : subs) {
             bool rr;
             if (!__is_connected(norm_sub, norm_s2, recursive, rr, msg)) {
               return false;
@@ -472,7 +470,7 @@ namespace epidb {
 
         c.done();
 
-        BOOST_FOREACH(const mongo::BSONElement & be, e) {
+        for (const mongo::BSONElement & be : e) {
           std::string sub = be.str();
           if (!__get_down_connected(sub, norm_names, msg)) {
             return false;

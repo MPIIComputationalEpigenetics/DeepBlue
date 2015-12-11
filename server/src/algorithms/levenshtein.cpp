@@ -11,8 +11,6 @@
 #include <limits>
 #include <vector>
 
-#include <boost/foreach.hpp>
-
 #include "../extras/utils.hpp"
 
 #include "levenshtein.hpp"
@@ -119,7 +117,7 @@ namespace epidb {
       float threshould(0.60);
       std::vector<std::pair<std::string, float> > ps;
 
-      BOOST_FOREACH(const std::string & tm, tms) {
+      for(const std::string & tm: tms) {
         float value = calculate_score(term, utils::normalize_name(tm));
         std::pair<std::string, float> score_pair(tm, value);
         ps.push_back(score_pair);

@@ -11,8 +11,6 @@
 #include <string>
 #include <sstream>
 
-#include <boost/foreach.hpp>
-
 #include "../dba/dba.hpp"
 #include "../dba/insert.hpp"
 #include "../dba/queries.hpp"

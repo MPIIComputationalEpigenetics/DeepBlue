@@ -11,6 +11,7 @@
 #include <future>
 #include <limits>
 #include <numeric>
+#include <memory>
 #include <string>
 #include <thread>
 #include <tuple>
@@ -18,7 +19,6 @@
 
 #include <boost/ref.hpp>
 #include <boost/thread.hpp>
-#include <memory>
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
 

@@ -539,7 +539,6 @@ namespace epidb {
         }
 
         c.done();
-        std::cerr << collection << std::endl;
         faceting_result[collection] = names;
         return std::make_tuple(true, std::string(""));
       }
@@ -576,8 +575,6 @@ namespace epidb {
           std::string collection = column.first;
           std::string key_name = column.second;
 
-          std::cerr << collection + " " + key_name << std::endl;
-
           auto t = std::async(std::launch::async,
                               &__collection_experiments_count,
                               std::ref(experiments_query), std::ref(projects_array),
@@ -587,7 +584,6 @@ namespace epidb {
 
         size_t thread_count = threads.size();
         for (size_t i = 0; i < thread_count; ++i) {
-          std::cerr << i << std::endl;
           threads[i].wait();
           auto result = threads[i].get();
           if (!std::get<0>(result)) {

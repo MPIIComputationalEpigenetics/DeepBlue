@@ -15,8 +15,6 @@
 #include <time.h>
 #include <math.h>
 
-#include <boost/foreach.hpp>
-
 #include <mongo/bson/bson.h>
 
 #include "../connection/connection.hpp"
@@ -67,7 +65,7 @@ namespace epidb {
       builder.append(KeyMapper::END(), bed_line.end);
 
       size_t i(0);
-      BOOST_FOREACH(const dba::columns::ColumnTypePtr & column_type, file_format) {
+      for(const dba::columns::ColumnTypePtr & column_type: file_format) {
         std::string field_name = column_type->name();
 
         if ((field_name == "CHROMOSOME") || (field_name == "START") || (field_name == "END")) {
@@ -558,7 +556,7 @@ namespace epidb {
       size_t count = 0;
       size_t total_size = 0;
 
-      BOOST_FOREACH(parser::ChromosomeBedLines chrom_lines, map_regions) {
+      for(parser::ChromosomeBedLines chrom_lines: map_regions) {
 
         std::string internal_chromosome;
         if (!genome_info->internal_chromosome(chrom_lines.first, internal_chromosome, msg)) {
@@ -591,7 +589,7 @@ namespace epidb {
         size_t bulk_size = 0;
         std::vector<mongo::BSONObj> block;
         std::vector<mongo::BSONObj> blocks_bulk;
-        BOOST_FOREACH(parser::BedLine & bed_line, chrom_lines.second) {
+        for(parser::BedLine & bed_line: chrom_lines.second) {
 
           if (trim_to_chromosome_size && bed_line.end > size) {
             bed_line.end = size;
@@ -717,7 +715,7 @@ namespace epidb {
       std::vector<mongo::BSONObj> block;
       std::vector<mongo::BSONObj> blocks_bulk;
 
-      BOOST_FOREACH(parser::ChromosomeBedLines chrom_lines, map_regions) {
+      for(parser::ChromosomeBedLines chrom_lines: map_regions) {
 
         std::string internal_chromosome;
         if (!genome_info->internal_chromosome(chrom_lines.first, internal_chromosome, msg)) {
@@ -741,7 +739,7 @@ namespace epidb {
 
         std::string collection = helpers::region_collection_name(genome, internal_chromosome);
 
-        BOOST_FOREACH(const parser::BedLine & bed_line, chrom_lines.second) {
+        for(const parser::BedLine & bed_line: chrom_lines.second) {
 
           if (bed_line.start > size || bed_line.end > size) {
             msg = out_of_range_message(bed_line.start, bed_line.end, bed_line.chromosome);
@@ -861,7 +859,7 @@ namespace epidb {
       std::vector<mongo::BSONObj> block;
       std::vector<mongo::BSONObj> blocks_bulk;
 
-      BOOST_FOREACH(const ChromosomeRegions & chromosome_regions, regions) {
+      for(const ChromosomeRegions & chromosome_regions: regions) {
         std::string chromosome = chromosome_regions.first;
         std::string internal_chromosome;
         size_t chromosome_size;
@@ -1150,7 +1148,7 @@ namespace epidb {
       std::vector<mongo::BSONObj> block;
       std::vector<mongo::BSONObj> blocks_bulk;
 
-      BOOST_FOREACH(parser::ChromosomeBedLines chrom_lines, map_regions) {
+      for(parser::ChromosomeBedLines chrom_lines: map_regions) {
 
         std::string internal_chromosome;
         if (!genome_info->internal_chromosome(chrom_lines.first, internal_chromosome, msg)) {
@@ -1174,7 +1172,7 @@ namespace epidb {
 
         std::string collection = helpers::region_collection_name(genome, internal_chromosome);
 
-        BOOST_FOREACH(const parser::BedLine & bed_line, chrom_lines.second) {
+        for(const parser::BedLine & bed_line: chrom_lines.second) {
 
           if (bed_line.start > size || bed_line.end > size) {
             msg = out_of_range_message(bed_line.start, bed_line.end, bed_line.chromosome);

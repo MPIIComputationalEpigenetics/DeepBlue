@@ -369,7 +369,7 @@ namespace epidb {
       std::vector<std::string> fields_string;
       boost::split(fields_string, format, boost::is_any_of(","));
 
-      BOOST_FOREACH(std::string & field_string, fields_string) {
+      for(std::string & field_string: fields_string) {
         boost::trim(field_string);
 
         if (field_string.empty()) {
@@ -381,7 +381,7 @@ namespace epidb {
         bool found = false;
 
         // Look into experiment columns
-        BOOST_FOREACH(const mongo::BSONObj & column, experiment_columns) {
+        for(const mongo::BSONObj & column: experiment_columns) {
           if (found) {
             break;
           }
@@ -429,7 +429,7 @@ namespace epidb {
       std::vector<std::string> fields_string;
       boost::split(fields_string, format, boost::is_any_of(","));
 
-      BOOST_FOREACH(const std::string & field_string, fields_string) {
+      for(const std::string & field_string: fields_string) {
         std::vector<std::string> field_info;
         boost::split(field_info, field_string, boost::is_any_of(":"));
 
