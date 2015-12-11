@@ -6,7 +6,10 @@
 //  Copyright (c) 2013,2014 Max Planck Institute for Computer Science. All rights reserved.
 //
 
-#include <boost/foreach.hpp>
+#include <future>
+#include <string>
+#include <thread>
+#include <tuple>
 
 #include "../engine/commands.hpp"
 
@@ -57,6 +60,23 @@ namespace epidb {
         return results;
       }
 
+      static std::tuple<std::string, serialize::ParameterPtr> __build_face_result(const std::string& key, const std::vector<utils::IdNameCount>& values)
+      {
+        serialize::ParameterPtr face_values = std::make_shared<serialize::ListParameter>();
+
+        for (const auto& value : values) {
+          serialize::ParameterPtr item = std::make_shared<serialize::ListParameter>();
+
+          item->add_child(serialize::ParameterPtr(new serialize::SimpleParameter(value.id)));
+          item->add_child(serialize::ParameterPtr(new serialize::SimpleParameter(value.name)));
+          item->add_child(serialize::ParameterPtr(new serialize::SimpleParameter(static_cast<long long>(value.count))));
+
+          face_values->add_child(item);
+        }
+
+        return std::make_tuple(key, face_values);
+      }
+
     public:
       FacetingExperimentsCommand() : Command("faceting_experiments", parameters_(), results_(), desc_()) {}
 
@@ -92,7 +112,7 @@ namespace epidb {
         mongo::BSONObj query;
 
         if (!dba::list::build_list_experiments_query(genomes, types, epigenetic_marks, biosources, sample_ids, techniques,
-                                          projects, user_key, query, msg)) {
+            projects, user_key, query, msg)) {
           result.add_error(msg);
           return false;
         }
@@ -103,26 +123,21 @@ namespace epidb {
           result.add_error(msg);
         }
 
-
         serialize::ParameterPtr faces(new serialize::MapParameter());
 
+        std::vector<std::future<std::tuple<std::string, serialize::ParameterPtr> > > threads;
         for (const auto& face : faceting_result) {
           const auto& key = face.first;
           const auto& values = face.second;
+          auto t = std::async(std::launch::async, &__build_face_result, std::ref(key), std::ref(values));
+          threads.push_back(std::move(t));
+        }
 
-          serialize::ParameterPtr face_values = std::make_shared<serialize::ListParameter>();
-
-          for (const auto& value: values) {
-            serialize::ParameterPtr item = std::make_shared<serialize::ListParameter>();
-
-            item->add_child(serialize::ParameterPtr(new serialize::SimpleParameter(value.id)));
-            item->add_child(serialize::ParameterPtr(new serialize::SimpleParameter(value.name)));
-            item->add_child(serialize::ParameterPtr(new serialize::SimpleParameter(static_cast<long long>(value.count))));
-
-            face_values->add_child(item);
-          }
-
-          faces->add_child(key, face_values);
+        size_t thread_count = threads.size();
+        for (size_t i = 0; i < thread_count; ++i) {
+          threads[i].wait();
+          auto result = threads[i].get();
+          faces->add_child(std::get<0>(result), std::get<1>(result));
         }
 
         result.add_param(faces);
