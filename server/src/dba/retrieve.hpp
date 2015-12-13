@@ -23,7 +23,7 @@ namespace epidb {
   namespace dba {
     namespace retrieve {
 
-      bool get_regions(const std::string &genome, std::string &chromosome,
+      bool get_regions(const std::string &genome, const std::string &chromosome,
                        const mongo::BSONObj &regions_query, const bool full_overlap,
                        processing::StatusPtr status,
                        Regions &regions, std::string &msg);
