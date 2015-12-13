@@ -32,46 +32,47 @@
 namespace epidb {
   namespace processing {
 
-    std::tuple<bool, std::string, std::string, std::shared_ptr<std::vector<algorithms::Accumulator>>> summarize_experiment(const std::string& norm_genome,
-        const std::pair<std::string, dba::columns::ColumnTypePtr>& experiment_format,
-        const ChromosomeRegionsList& range_regions,
-        processing::StatusPtr status)
+    //         Okay,    msg,   experiment name, chromosome,  regions
+    std::tuple<bool, std::string, std::string, std::string, std::shared_ptr<std::vector<algorithms::Accumulator>>>
+    summarize_experiment(const std::string& norm_genome,
+                         const std::pair<std::string, dba::columns::ColumnTypePtr>& experiment_format,
+                         const ChromosomeRegions& chromosome,
+                         processing::StatusPtr status)
     {
       std::string msg;
       std::shared_ptr<std::vector<algorithms::Accumulator>> regions_accs = std::make_shared<std::vector<algorithms::Accumulator>>();
 
-      for (auto &chromosome : range_regions) {
-        for (auto &region : chromosome.second) {
+      for (auto &region : chromosome.second) {
 
-          // Check if processing was canceled
-          bool is_canceled = false;
-          if (!status->is_canceled(is_canceled, msg)) {
-            return std::make_tuple(true, msg, "", regions_accs);
-          }
-          if (is_canceled) {
-            msg = Error::m(ERR_REQUEST_CANCELED);
-            return std::make_tuple(false, msg, "", regions_accs);
-          }
-
-          // ***
-          mongo::BSONObj regions_query;
-          if (!dba::query::build_experiment_query(region->start(), region->end(), experiment_format.first, regions_query, msg)) {
-            return std::make_tuple(false, msg, "", regions_accs);
-          }
-
-          Regions regions;
-          if (!dba::retrieve::get_regions(norm_genome, chromosome.first, regions_query, true, status, regions, msg)) {
-            return std::make_tuple(false, msg, "", regions_accs);
-          }
-
-          algorithms::Accumulator acc;
-          for (auto &experiment_region : regions) {
-            acc.push(experiment_region->value(experiment_format.second->pos()));
-          }
-          regions_accs->push_back(acc);
+        // Check if processing was canceled
+        bool is_canceled = false;
+        if (!status->is_canceled(is_canceled, msg)) {
+          return std::make_tuple(true, msg, "", "", regions_accs);
         }
+        if (is_canceled) {
+          msg = Error::m(ERR_REQUEST_CANCELED);
+          return std::make_tuple(false, msg, "", "", regions_accs);
+        }
+
+        // ***
+        mongo::BSONObj regions_query;
+        if (!dba::query::build_experiment_query(region->start(), region->end(), experiment_format.first, regions_query, msg)) {
+          return std::make_tuple(false, msg, "", "", regions_accs);
+        }
+
+        Regions regions;
+        if (!dba::retrieve::get_regions(norm_genome, chromosome.first, regions_query, true, status, regions, msg)) {
+          return std::make_tuple(false, msg, "", "", regions_accs);
+        }
+
+        algorithms::Accumulator acc;
+        for (auto &experiment_region : regions) {
+          acc.push(experiment_region->value(experiment_format.second->pos()));
+        }
+        regions_accs->push_back(acc);
       }
-      return std::make_tuple(true, "", experiment_format.first, regions_accs);
+
+      return std::make_tuple(true, "", experiment_format.first, chromosome.first, regions_accs);
     }
 
     bool score_matrix(const std::vector<std::pair<std::string, std::string>> &experiments_formats, const std::string & aggregation_function, const std::string & regions_query_id, const std::string & user_key, processing::StatusPtr status, std::string & matrix, std::string & msg)
@@ -118,12 +119,14 @@ namespace epidb {
         norm_genome = experiment["norm_genome"].String();
       }
 
-      std::map<std::string, std::shared_ptr<std::vector<algorithms::Accumulator>>> chromosome_accs;
+      std::map<std::string, std::map<std::string, std::shared_ptr<std::vector<algorithms::Accumulator>>>> chromosome_accs;
 
-      std::vector<std::future<std::tuple<bool, std::string, std::string, std::shared_ptr<std::vector<algorithms::Accumulator>>>>> threads;
+      std::vector<std::future<std::tuple<bool, std::string, std::string, std::string, std::shared_ptr<std::vector<algorithms::Accumulator>>>>> threads;
       for (auto &experiment_format : norm_experiments_formats) {
-        auto t = std::async(&summarize_experiment, std::ref(norm_genome), std::ref(experiment_format),std::ref(range_regions), status);
-        threads.push_back(std::move(t));
+        for (auto &chromosome : range_regions) {
+          auto t = std::async(&summarize_experiment, std::ref(norm_genome), std::ref(experiment_format), std::ref(chromosome), status);
+          threads.push_back(std::move(t));
+        }
       }
 
       size_t thread_count = threads.size();
@@ -135,7 +138,7 @@ namespace epidb {
           msg = std::get<1>(result);
           return false;
         }
-        chromosome_accs[std::get<2>(result)] = std::get<3>(result);
+        chromosome_accs[std::get<2>(result)][std::get<3>(result)] = std::get<4>(result);
       }
 
       std::stringstream ss;
@@ -151,8 +154,9 @@ namespace epidb {
         first = false;
       }
       ss << std::endl;
-      size_t pos = 0;
+
       for (auto &chromosome : range_regions) {
+        size_t pos = 0;
         const auto &chromosome_name = chromosome.first;
         const auto &regions = chromosome.second;
 
@@ -174,7 +178,7 @@ namespace epidb {
 
           bool first = true;
           for (auto &experiment_format : norm_experiments_formats) {
-            auto *acc = &chromosome_accs[experiment_format.first]->at(pos);
+            auto *acc = &chromosome_accs[experiment_format.first][chromosome_name]->at(pos);
             if (!first) {
               ss << "\t";
             } else {
