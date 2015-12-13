@@ -6,7 +6,6 @@
 //  Copyright (c) 2015 Max Planck Institute for Computer Science. All rights reserved.
 //
 
-#include <boost/foreach.hpp>
 #include <boost/algorithm/string/join.hpp>
 
 #include "../datatypes/user.hpp"

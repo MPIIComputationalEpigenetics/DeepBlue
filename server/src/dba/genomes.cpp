@@ -13,8 +13,6 @@
 #include <string>
 #include <utility>
 
-#include <boost/foreach.hpp>
-
 #include "collections.hpp"
 #include "genomes.hpp"
 #include "helpers.hpp"

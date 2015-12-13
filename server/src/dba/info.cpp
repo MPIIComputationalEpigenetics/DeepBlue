@@ -10,8 +10,6 @@
 #include <string>
 #include <vector>
 
-#include <boost/foreach.hpp>
-
 #include <mongo/bson/bson.h>
 
 #include "../datatypes/metadata.hpp"
@@ -134,7 +132,7 @@ namespace epidb {
         if (!get_biosource_synonyms(biosource_name, norm_biosource_name, true, "", syns, msg)) {
           return false;
         }
-        BOOST_FOREACH(const utils::IdName & id_name, syns) {
+        for(const utils::IdName & id_name: syns) {
           synonyms.push_back(id_name.name);
         }
         */

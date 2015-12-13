@@ -14,8 +14,6 @@
 #include <string>
 #include <vector>
 
-#include <boost/foreach.hpp>
-
 #include "../extras/utils.hpp"
 
 namespace epidb {
@@ -292,7 +290,7 @@ namespace epidb {
             return false;
           }
         } else if (type == "number") {
-          BOOST_FOREACH(const std::string & op, operations()) {
+          for(const std::string & op: operations()) {
             if (operation == op) {
               return true;
             }

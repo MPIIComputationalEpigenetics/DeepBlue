@@ -152,7 +152,7 @@ namespace epidb {
         }
 
         std::vector<std::string> synonyms;
-        BOOST_FOREACH(const serialize::ParameterPtr & id_param, ids_param) {
+        for (const serialize::ParameterPtr & id_param : ids_param) {
           std::string id = id_param->as_string();
           std::string type;
           std::map<std::string, std::string> metadata;
@@ -227,10 +227,11 @@ namespace epidb {
               result.add_error("Invalid identifier: " + id);
               return false;
             }
-            if (!ok) {
-              result.add_error(msg);
-              return false;
-            }
+          }
+
+          if (!ok) {
+            result.add_error(msg);
+            return false;
           }
 
           result.set_as_array(true);

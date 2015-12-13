@@ -11,8 +11,6 @@
 #include <string>
 #include <sstream>
 
-#include <boost/foreach.hpp>
-
 #include "../datatypes/user.hpp"
 
 #include "../dba/dba.hpp"

@@ -48,7 +48,7 @@ namespace epidb {
     void QueueHandler::run()
     {
       EPIDB_LOG_TRACE("Starting QueueHandler - " << utils::integer_to_string(_id));
-      this->reg(ios, 0.1);
+      this->reg(ios, 1);
       ios.run();
     }
 

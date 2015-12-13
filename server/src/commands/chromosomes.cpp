@@ -5,8 +5,6 @@
 //  Created by Felipe Albrecht on 10.10.14.
 //  Copyright (c) 2014 Max Planck Institute for Computer Science. All rights reserved.
 //
-#include <boost/foreach.hpp>
-
 #include "../dba/dba.hpp"
 #include "../dba/genomes.hpp"
 #include "../dba/helpers.hpp"
@@ -71,7 +69,7 @@ namespace epidb {
         }
 
         result.set_as_array(true);
-        BOOST_FOREACH(const dba::genomes::ChromosomeInfo & info, chromosomes) {
+        for (const dba::genomes::ChromosomeInfo & info : chromosomes) {
           std::vector<serialize::ParameterPtr> list;
           list.push_back(serialize::ParameterPtr(new serialize::SimpleParameter(info.name)));
           list.push_back(serialize::ParameterPtr(new serialize::SimpleParameter((long long) info.size)));

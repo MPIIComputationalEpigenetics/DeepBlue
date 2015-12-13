@@ -18,8 +18,6 @@
 #include <time.h>
 #include <math.h>
 
-#include <boost/foreach.hpp>
-
 #include <mongo/bson/bson.h>
 
 #include "../extras/utils.hpp"

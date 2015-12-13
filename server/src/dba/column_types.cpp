@@ -523,7 +523,7 @@ namespace epidb {
         } else if (type == "category") {
           Category category;
           std::vector<mongo::BSONElement> e = obj["items"].Array();
-          BOOST_FOREACH(const mongo::BSONElement & be, e) {
+          for(const mongo::BSONElement & be: e) {
             category.push_back(be.str());
           }
           column_type = std::shared_ptr<ColumnType<Category > >(new ColumnType<Category>(name, category, pos));

@@ -9,7 +9,6 @@
 #include <sstream>
 #include <set>
 
-#include <boost/foreach.hpp>
 #include <boost/thread/mutex.hpp>
 
 #include <mongo/bson/bson.h>
@@ -69,7 +68,7 @@ namespace epidb {
           return false;
         }
 
-        BOOST_FOREACH(const mongo::BSONObj & o, objs) {
+        for(const mongo::BSONObj & o: objs) {
           result.push_back(o[returned_field].String());
         }
 
@@ -81,7 +80,7 @@ namespace epidb {
                std::vector<mongo::BSONObj> &results, std::string &msg)
       {
         mongo::BSONObjBuilder query_builder;
-        BOOST_FOREACH(const QueryPair & p, conditions) {
+        for(const QueryPair & p: conditions) {
           query_builder.append(p.first, p.second);
         }
         mongo::BSONObj query = query_builder.obj();
@@ -147,7 +146,7 @@ namespace epidb {
         Connection c;
 
         mongo::BSONObjBuilder b;
-        BOOST_FOREACH(const std::string & f, fields) {
+        for(const std::string & f: fields) {
           b.append(f, 1);
         }
         mongo::BSONObj projection = b.obj();
