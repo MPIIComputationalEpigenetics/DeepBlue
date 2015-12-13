@@ -69,7 +69,6 @@ namespace epidb {
         datatypes::User user;
 
         std::string err_msg;
-        bool has_list_collections_permissions = false;
         if (!check_permissions(user_key, datatypes::GET_DATA, user, msg )) {
           result.add_error(msg);
           return false;
