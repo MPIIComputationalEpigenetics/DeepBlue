@@ -73,27 +73,26 @@ namespace epidb {
         norm_genome = experiment["norm_genome"].String();
       }
 
-      std::map<std::string, std::vector<std::pair<RegionPtr, std::vector<algorithms::Accumulator>>>> chromosome_accs;
-      for (auto &chromosome : range_regions) {
-        // Get the accumulators from each region
-        std::vector<std::pair<RegionPtr, std::vector<algorithms::Accumulator>>> regions_accs;
-        for (auto &region : chromosome.second) {
+      std::map<std::string, std::vector<algorithms::Accumulator>> chromosome_accs;
 
+      for (auto &experiment_format : norm_experiments_formats) {
 
-           // Check if processing was canceled
-          bool is_canceled = false;
-          if (!status->is_canceled(is_canceled, msg)) {
-            return true;
-          }
-          if (is_canceled) {
-            msg = Error::m(ERR_REQUEST_CANCELED);
-            return false;
-          }
-          // ***
+        std::vector<algorithms::Accumulator> regions_accs;
+        for (auto &chromosome : range_regions) {
 
-          // Get the accumulator from each experiment
-          std::vector<algorithms::Accumulator> experiments_accs;
-          for (auto &experiment_format : norm_experiments_formats) {
+          for (auto &region : chromosome.second) {
+
+            // Check if processing was canceled
+            bool is_canceled = false;
+            if (!status->is_canceled(is_canceled, msg)) {
+              return true;
+            }
+            if (is_canceled) {
+              msg = Error::m(ERR_REQUEST_CANCELED);
+              return false;
+            }
+
+            // ***
             mongo::BSONObj regions_query;
             if (!dba::query::build_experiment_query(region->start(), region->end(), experiment_format.first, regions_query, msg)) {
               return false;
@@ -103,16 +102,15 @@ namespace epidb {
             if (!dba::retrieve::get_regions(norm_genome, chromosome.first, regions_query, true, status, regions, msg)) {
               return false;
             }
+
             algorithms::Accumulator acc;
             for (auto &experiment_region : regions) {
               acc.push(experiment_region->value(experiment_format.second->pos()));
             }
-            experiments_accs.push_back(acc);
+            regions_accs.push_back(acc);
           }
-          std::pair<RegionPtr, std::vector<algorithms::Accumulator> > region_accs(std::move(region), experiments_accs);
-          regions_accs.push_back(std::move(region_accs));
         }
-        chromosome_accs[chromosome.first] = std::move(regions_accs);
+        chromosome_accs[experiment_format.first] = regions_accs;
       }
 
 
@@ -129,11 +127,12 @@ namespace epidb {
         first = false;
       }
       ss << std::endl;
-      for (auto chromosome_accs_it = chromosome_accs.begin(); chromosome_accs_it != chromosome_accs.end(); chromosome_accs_it++ ) {
-        const std::string &chromosome = chromosome_accs_it->first;
-        auto &region_accs = chromosome_accs_it->second;
-        for (auto regions_accs_it = region_accs.begin(); regions_accs_it != region_accs.end(); regions_accs_it++) {
+      size_t pos = 0;
+      for (auto &chromosome : range_regions) {
+        const auto &chromosome_name = chromosome.first;
+        const auto &regions = chromosome.second;
 
+        for (const auto& region : regions) {
           // Check if processing was canceled
           bool is_canceled = false;
           if (!status->is_canceled(is_canceled, msg)) {
@@ -143,18 +142,15 @@ namespace epidb {
             msg = Error::m(ERR_REQUEST_CANCELED);
             return false;
           }
+
           // ***
-
-          RegionPtr region = std::move(regions_accs_it->first);
-          std::vector<algorithms::Accumulator> &experiments_accs = regions_accs_it->second;
-
-          ss << chromosome << "\t";
+          ss << chromosome_name << "\t";
           ss << region->start() << "\t";
           ss << region->end() << "\t";
 
           bool first = true;
-          for (std::vector<algorithms::Accumulator>::iterator accs_it = experiments_accs.begin();
-               accs_it != experiments_accs.end(); accs_it++) {
+          for (auto &experiment_format : norm_experiments_formats) {
+            auto *acc = &chromosome_accs[experiment_format.first][pos];
 
             if (!first) {
               ss << "\t";
@@ -162,21 +158,21 @@ namespace epidb {
               first = false;
             }
 
-            std::string value = accs_it->string("|");
+            std::string value = acc->string("|");
             if (!value.empty()) {
               if (data_ptr) {
-                ss << ((*accs_it).*data_ptr)();
+                ss << (*acc.*data_ptr)();
               } else {
-                ss << accs_it->string("|");
+                ss << acc->string("|");
               }
             }
           }
           ss << std::endl;
+          pos++;
         }
       }
 
       matrix = ss.str();
-
       return true;
     }
   }
