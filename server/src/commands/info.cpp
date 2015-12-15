@@ -77,10 +77,14 @@ namespace epidb {
         }
 
         map["_id"] = job._id;
+        map["query_id"] = job.query_id;
         map["state"] = job.status.state;
         map["message"] = job.status.message;
         map["command"] = job.command;
-        map["user_id"] = job.command;
+        map["user_id"] = job.user_id;
+        for (const auto& kv : job.misc) {
+          map[kv.first] = kv.second;
+        }
         std::stringstream ss;
         ss << job.create_time;
         map["create_time"] = ss.str();
@@ -89,7 +93,6 @@ namespace epidb {
         if (job.status.state == "done") {
           map["finish_time"] = ss.str();
         }
-        map["query_id"] = job.query_id;
 
         return true;
       }

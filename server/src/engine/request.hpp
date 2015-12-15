@@ -11,6 +11,7 @@
 
 #include <vector>
 
+#include "../datatypes/metadata.hpp"
 #include "../extras/utils.hpp"
 
 namespace epidb {
@@ -38,6 +39,7 @@ namespace epidb {
       boost::posix_time::ptime create_time;
       std::string command;
       std::string user_id;
+      datatypes::Metadata misc;
       /*
       * \brief Time at which the job was finished. Only to be set, if status == TS_DONE
       */

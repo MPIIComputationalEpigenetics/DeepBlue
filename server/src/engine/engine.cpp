@@ -167,12 +167,30 @@ namespace epidb {
     job.command = mdbq::Hub::get_misc(o)["command"].String();
     job.user_id = mdbq::Hub::get_misc(o)["user_id"].String();
     job.query_id = mdbq::Hub::get_misc(o)["query_id"].String();
+
+
+    if (mdbq::Hub::get_misc(o).hasElement("format")) {
+      job.misc["format"] = mdbq::Hub::get_misc(o)["format"].String();
+    }
+
+    if (mdbq::Hub::get_misc(o).hasElement("aggregation_function")) {
+      job.misc["aggregation_functioń"] = mdbq::Hub::get_misc(o)["aggregation_functioń"].String();
+    }
+
+    if (mdbq::Hub::get_misc(o).hasElement("experiments_formats")) {
+      mongo::BSONObj experiments_formats = mdbq::Hub::get_misc(o)["experiments_formats"].Obj();
+      for ( auto i = experiments_formats.begin(); i.more(); ) {
+        auto e = i.next();
+        job.misc[std::string("exp.") + e.fieldName()] = e.String();
+      }
+    }
+
     job._id = mdbq::Hub::get_id(o);
 
     return job;
   }
 
-  bool Engine::request_job(const std::string& request_id, request::Job& job, std::string &msg)
+  bool Engine::request_job(const std::string & request_id, request::Job & job, std::string & msg)
   {
     mongo::BSONObj o = _hub.get_job(request_id);
     if (o.isEmpty()) {
@@ -184,7 +202,7 @@ namespace epidb {
     return true;
   }
 
-  bool Engine::request_jobs(const std::string &status_find, const std::string &user_key, std::vector<request::Job>& ret, std::string& msg)
+  bool Engine::request_jobs(const std::string & status_find, const std::string & user_key, std::vector<request::Job>& ret, std::string & msg)
   {
     utils::IdName user;
     if (!dba::users::get_user(user_key, user, msg)) {
@@ -199,7 +217,7 @@ namespace epidb {
     return true;
   }
 
-  bool Engine::request_data(const std::string &request_id, const std::string &user_key, request::Data &data, std::string &content, request::DataType& type,  std::string &msg)
+  bool Engine::request_data(const std::string & request_id, const std::string & user_key, request::Data & data, std::string & content, request::DataType & type,  std::string & msg)
   {
     utils::IdName user;
     if (!dba::users::get_user(user_key, user, msg)) {
@@ -243,7 +261,7 @@ namespace epidb {
     return true;
   }
 
-  bool Engine::user_owns_request(const std::string& request_id, const std::string& user_id)
+  bool Engine::user_owns_request(const std::string & request_id, const std::string & user_id)
   {
     if (_hub.job_has_user_id(request_id, user_id)) {
       return true;
@@ -251,12 +269,12 @@ namespace epidb {
     return false;
   }
 
-  bool Engine::cancel_request(const std::string& request_id, std::string& msg)
+  bool Engine::cancel_request(const std::string & request_id, std::string & msg)
   {
     return _hub.cancel_request(request_id, msg);
   }
 
-  bool Engine::remove_request_data(const std::string& request_id, mdbq::TaskState state, std::string& msg)
+  bool Engine::remove_request_data(const std::string & request_id, mdbq::TaskState state, std::string & msg)
   {
     return _hub.remove_request_data(request_id, state, msg);
   }
