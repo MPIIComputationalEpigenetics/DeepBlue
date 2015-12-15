@@ -9,13 +9,12 @@
 #include <string>
 
 #include "../datatypes/user.hpp"
-
 #include "../dba/users.hpp"
 #include "../dba/remove.hpp"
-
+#include "../engine/commands.hpp"
 #include "../extras/serialize.hpp"
 
-#include "../engine/commands.hpp"
+#include "../errors.hpp"
 
 namespace epidb {
   namespace command {
@@ -84,7 +83,7 @@ namespace epidb {
         } else if (id.compare(0, 2, "ct") == 0) {
           ok = dba::remove::column_type(id, user_key, msg);
         } else {
-          result.add_error("Invalid identifier: " + id);
+          result.add_error(Error::m(ERR_INVALID_IDENTIFIER, id));
           return false;
         }
         if (!ok) {

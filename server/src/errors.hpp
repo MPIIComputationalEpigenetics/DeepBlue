@@ -114,6 +114,9 @@ namespace epidb {
   extern Error ERR_COLUMN_TYPE_MISSING;
   extern Error ERR_COLUMN_TYPE_NAME_MISSING;
 
+  extern Error ERR_INVALID_IDENTIFIER;
+  extern Error ERR_INVALID_GSM_IDENTIFIER;
+
   extern Error ERR_DATASET_NOT_FOUND;
 
   extern Error ERR_DATABASE_CONNECTION;

@@ -18,6 +18,7 @@
 
 #include "url_loader.hpp"
 
+#include "../errors.hpp"
 
 namespace epidb {
   namespace external {
@@ -91,7 +92,7 @@ namespace epidb {
         }
 
         if (!parse_gsm(content, metadata, msg)) {
-          msg = gsm_id + " is an invalid identifier.";
+          msg = Error::m(ERR_INVALID_GSM_IDENTIFIER, gsm_id);
           return false;
         }
 

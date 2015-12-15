@@ -204,8 +204,8 @@ namespace epidb {
             } else if (id.compare(0, 1, "q") == 0) {
               ok = dba::info::get_query(id, metadata, msg);
               if (!user.is_admin() && metadata["user"] != user.get_id()) {
-                msg = Error::m(ERR_PERMISSION_QUERY, id);
-                ok = false;
+                result.add_error(Error::m(ERR_PERMISSION_QUERY, id));
+                return false;
               }
               ok = ok && dba::info::id_to_name(metadata, msg);
               type = "query";
@@ -224,7 +224,7 @@ namespace epidb {
               ok = get_request(id, user_key, metadata, msg);
               type = "request";
             } else {
-              result.add_error("Invalid identifier: " + id);
+              result.add_error(Error::m(ERR_INVALID_IDENTIFIER, id));
               return false;
             }
           }

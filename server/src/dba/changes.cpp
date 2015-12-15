@@ -17,6 +17,8 @@
 #include "helpers.hpp"
 #include "full_text.hpp"
 
+#include "../errors.hpp"
+
 namespace epidb {
   namespace dba {
     namespace changes {
@@ -37,7 +39,8 @@ namespace epidb {
         } else if (id.compare(0, 1, "e") == 0) {
           collection = Collections::EXPERIMENTS();
         } else {
-          msg = "Invalid identifier: " + id + ". It is accepted only data ID from experiments, annotations, biosources, and samples";
+          msg = Error::m(ERR_INVALID_IDENTIFIER, id);
+          msg += ". It is accepted only data ID from experiments, annotations, biosources, and samples";
           return false;
         }
 

@@ -48,7 +48,9 @@
  * 30 - Request
  * 40 - Tiling region
  * 50 - Dataset
+ * 51 - GSM Identifier
  * 66 - Internal
+ * 99 - Identifier
  */
 
 /** Error :
@@ -162,9 +164,14 @@ namespace epidb {
 
   Error ERR_DATASET_NOT_FOUND("350000", "Dataset id {} not found.");
 
-  Error  ERR_INVALID_TILING_REGIONS_ID("140003", "Unable to find tiling regions ID '{}'.");
+  Error ERR_INVALID_TILING_REGIONS_ID("140003", "Unable to find tiling regions ID '{}'.");
+
+  Error ERR_INVALID_IDENTIFIER("19900", "Invalid identifier '{}'.");
+
+  Error ERR_INVALID_GSM_IDENTIFIER("15100", "Invalid GSM identifier '{}'.");
 
   Error ERR_DATABASE_CONNECTION("466555", "MongoDB connection error: '{}'.");
   Error ERR_DATABASE_EXCEPTION("466666", "MongoDB exception at operation '{}': '{}'.");
   Error ERR_DATABASE_INVALID_BIOSOURCE("404666", "BioSource '{}' not found.");
+
 };
