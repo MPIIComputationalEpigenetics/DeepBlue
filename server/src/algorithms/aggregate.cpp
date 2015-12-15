@@ -60,9 +60,9 @@ namespace epidb {
         Accumulator acc;
         auto it_data = it_data_begin;
         while (it_data != data.end() &&
-               (*it_data)->start() <= (*it_ranges)->end() ) {
+              (*it_ranges)->end() >= (*it_data)->start()) {
 
-          if (((*it_ranges)->start() <= (*it_data)->end()) && ((*it_ranges)->end() >= (*it_data)->end())) {
+          if (((*it_ranges)->start() <= (*it_data)->end()) && ((*it_ranges)->end() >= (*it_data)->start())) {
             if (field[0] == '@') {
               std::string value;
               if (!metafield.process(field, chrom, it_data->get(), status, value, msg)) {
