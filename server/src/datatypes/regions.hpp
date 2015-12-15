@@ -252,6 +252,11 @@ namespace epidb {
       return _regions[pos];
     }
 
+    const RegionPtr& operator[] (const size_t pos) const
+    {
+      return _regions[pos];
+    }
+
     bool empty() const
     {
       return _regions.empty();
