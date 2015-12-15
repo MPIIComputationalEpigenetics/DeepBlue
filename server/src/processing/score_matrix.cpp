@@ -84,7 +84,7 @@ namespace epidb {
 
           auto it_data = it_data_begin;
           while (it_data != data.end() &&
-            (*it_ranges)->end() >= (*it_data)->start() ) {
+                 (*it_ranges)->end() >= (*it_data)->start() ) {
 
             if (((*it_ranges)->start() <= (*it_data)->end()) && ((*it_ranges)->end() >= (*it_data)->start())) {
               acc.push((*it_data)->value(experiment_format.second->pos()));
@@ -147,7 +147,8 @@ namespace epidb {
       std::vector<std::future<std::tuple<bool, std::string, std::string, std::string, std::shared_ptr<std::vector<algorithms::Accumulator>>>>> threads;
       for (auto &experiment_format : norm_experiments_formats) {
         for (auto &chromosome : range_regions) {
-          auto t = std::async(&summarize_experiment, std::ref(norm_genome), std::ref(experiment_format), std::ref(chromosome), status);
+          auto t = std::async(std::launch::async, &summarize_experiment,
+                              std::ref(norm_genome), std::ref(experiment_format), std::ref(chromosome), status);
           threads.push_back(std::move(t));
         }
       }
