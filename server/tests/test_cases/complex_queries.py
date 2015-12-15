@@ -36,7 +36,7 @@ class TestComplexQueries(helpers.TestCase):
     regions = self.get_regions_request(req)
 
     expected_regions = helpers.get_result("complex1")
-    self.assertEqual(regions, expected_regions)
+    self.assertEqual(regions.split("\n").sort(), expected_regions.split("\n").sort())
 
   def test_complex2(self):
     epidb = EpidbClient()
