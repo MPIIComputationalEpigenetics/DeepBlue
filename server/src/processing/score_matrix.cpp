@@ -42,36 +42,59 @@ namespace epidb {
       std::string msg;
       std::shared_ptr<std::vector<algorithms::Accumulator>> regions_accs = std::make_shared<std::vector<algorithms::Accumulator>>();
 
-      for (auto &region : chromosome.second) {
-
-        // Check if processing was canceled
-        bool is_canceled = false;
-        if (!status->is_canceled(is_canceled, msg)) {
-          return std::make_tuple(true, msg, "", "", regions_accs);
-        }
-        if (is_canceled) {
-          msg = Error::m(ERR_REQUEST_CANCELED);
-          return std::make_tuple(false, msg, "", "", regions_accs);
-        }
-
-        // ***
-        mongo::BSONObj regions_query;
-        if (!dba::query::build_experiment_query(region->start(), region->end(), experiment_format.first, regions_query, msg)) {
-          return std::make_tuple(false, msg, "", "", regions_accs);
-        }
-
-        Regions regions;
-        if (!dba::retrieve::get_regions(norm_genome, chromosome.first, regions_query, true, status, regions, msg)) {
-          return std::make_tuple(false, msg, "", "", regions_accs);
-        }
-
-        algorithms::Accumulator acc;
-        for (auto &experiment_region : regions) {
-          acc.push(experiment_region->value(experiment_format.second->pos()));
-        }
-        regions_accs->push_back(acc);
+      // Check if processing was canceled
+      bool is_canceled = false;
+      if (!status->is_canceled(is_canceled, msg)) {
+        return std::make_tuple(true, msg, "", "", regions_accs);
+      }
+      if (is_canceled) {
+        msg = Error::m(ERR_REQUEST_CANCELED);
+        return std::make_tuple(false, msg, "", "", regions_accs);
       }
 
+      const int BLOCK_SIZE = 100;
+      size_t region_pos = 0;
+      while (region_pos < chromosome.second.size()) {
+
+        Regions ranges;
+        for (size_t i = 0; i < BLOCK_SIZE && region_pos < chromosome.second.size(); i++, region_pos++) {
+          ranges.emplace_back(chromosome.second[region_pos]->clone());
+        }
+
+        mongo::BSONObj regions_query;
+        if (!dba::query::build_experiment_query(ranges[0]->start(), ranges[ranges.size() - 1]->end(), experiment_format.first, regions_query, msg)) {
+          return std::make_tuple(false, msg, "", "", regions_accs);
+        }
+
+        Regions data;
+        if (!dba::retrieve::get_regions(norm_genome, chromosome.first, regions_query, false, status, data, msg)) {
+          return std::make_tuple(false, msg, "", "", regions_accs);
+        }
+
+        auto it_ranges = ranges.begin();
+        auto it_data_begin = data.begin();
+
+        while (it_ranges != ranges.end()) {
+          algorithms::Accumulator acc;
+
+          while ( it_data_begin != data.end()
+                  && (*it_data_begin)->end() < (*it_ranges)->start() )  {
+            it_data_begin++;
+          }
+
+          auto it_data = it_data_begin;
+          while (it_data != data.end() &&
+            (*it_ranges)->end() >= (*it_data)->start() ) {
+
+            if (((*it_ranges)->start() <= (*it_data)->end()) && ((*it_ranges)->end() >= (*it_data)->start())) {
+              acc.push((*it_data)->value(experiment_format.second->pos()));
+            }
+            it_data++;
+          }
+          regions_accs->push_back(acc);
+          it_ranges++;
+        }
+      }
       return std::make_tuple(true, "", experiment_format.first, chromosome.first, regions_accs);
     }
 
