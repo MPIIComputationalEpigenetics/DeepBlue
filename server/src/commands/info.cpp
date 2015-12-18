@@ -58,7 +58,9 @@ namespace epidb {
       }
 
       bool get_request(const std::string& id, const std::string& user_key,
-                       std::map<std::string, std::string>& map, std::string& msg) const
+                       std::map<std::string, std::string>& map,
+                       std::map<std::string, std::string>& extra_metadata,
+                       std::string& msg) const
       {
 
         datatypes::User user;
@@ -83,7 +85,11 @@ namespace epidb {
         map["command"] = job.command;
         map["user_id"] = job.user_id;
         for (const auto& kv : job.misc) {
-          map[kv.first] = kv.second;
+          if (kv.first.substr(0, 11).compare("experiment:") == 0) {
+            extra_metadata[kv.first.substr(11, kv.first.size())] = kv.second;
+          } else {
+            map[kv.first] = kv.second;
+          }
         }
         std::stringstream ss;
         ss << job.create_time;
@@ -224,7 +230,7 @@ namespace epidb {
               ok = dba::info::get_column_type(id, metadata, msg);
               type = "column_type";
             } else if (id.compare(0, 1, "r") == 0) {
-              ok = get_request(id, user_key, metadata, msg);
+              ok = get_request(id, user_key, metadata, extra_metadata, msg);
               type = "request";
             } else {
               result.add_error(Error::m(ERR_INVALID_IDENTIFIER, id));

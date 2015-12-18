@@ -164,24 +164,25 @@ namespace epidb {
     if (status.state == mdbq::Hub::state_name(mdbq::TS_DONE)) {
       job.finish_time = mdbq::Hub::get_finish_time(o);
     }
-    job.command = mdbq::Hub::get_misc(o)["command"].String();
-    job.user_id = mdbq::Hub::get_misc(o)["user_id"].String();
-    job.query_id = mdbq::Hub::get_misc(o)["query_id"].String();
 
+    const mongo::BSONObj &misc = mdbq::Hub::get_misc(o);
+    job.command = misc["command"].String();
+    job.user_id = misc["user_id"].String();
+    job.query_id = misc["query_id"].String();
 
-    if (mdbq::Hub::get_misc(o).hasElement("format")) {
-      job.misc["format"] = mdbq::Hub::get_misc(o)["format"].String();
+    if (misc.hasElement("format")) {
+      job.misc["format"] = misc["format"].String();
     }
 
-    if (mdbq::Hub::get_misc(o).hasElement("aggregation_function")) {
-      job.misc["aggregation_functioń"] = mdbq::Hub::get_misc(o)["aggregation_functioń"].String();
+    if (misc.hasElement("aggregation_function")) {
+      job.misc["aggregation_function"] = misc["aggregation_function"].String();
     }
 
-    if (mdbq::Hub::get_misc(o).hasElement("experiments_formats")) {
-      mongo::BSONObj experiments_formats = mdbq::Hub::get_misc(o)["experiments_formats"].Obj();
+    if (misc.hasElement("experiments_formats")) {
+      const mongo::BSONObj& experiments_formats = misc["experiments_formats"].Obj();
       for ( auto i = experiments_formats.begin(); i.more(); ) {
         auto e = i.next();
-        job.misc[std::string("exp.") + e.fieldName()] = e.String();
+        job.misc[std::string("experiment:") + e.fieldName()] = e.String();
       }
     }
 
