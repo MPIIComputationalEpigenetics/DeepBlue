@@ -1,3 +1,4 @@
+server/third_party/expat/
 *.slo
 *.lo
 *.o
