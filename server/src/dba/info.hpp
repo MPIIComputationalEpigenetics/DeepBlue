@@ -18,7 +18,7 @@ namespace epidb {
   namespace dba {
     namespace info {
 
-      bool get_genome(const std::string &id, std::map<std::string, std::string> &, std::string &msg, bool full = false);
+      bool get_genome(const std::string &id, datatypes::Metadata &res, mongo::BSONObj& chromosomes, std::string &msg, bool full = false);
 
       bool get_project(const std::string &id, const std::vector<std::string>& user_projects,
                        datatypes::Metadata &res, std::string &msg, bool full = false);

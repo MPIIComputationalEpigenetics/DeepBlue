@@ -10,7 +10,10 @@
 #include <sstream>
 #include <iostream>
 
+#include <mongo/bson/bson.h>
+
 #include "../datatypes/user.hpp"
+#include "../datatypes/metadata.hpp"
 
 #include "../dba/dba.hpp"
 #include "../dba/info.hpp"
@@ -164,11 +167,12 @@ namespace epidb {
         for (const serialize::ParameterPtr & id_param : ids_param) {
           std::string id = id_param->as_string();
           std::string type;
-          std::map<std::string, std::string> metadata;
-          std::map<std::string, std::string> extra_metadata;
-          std::map<std::string, std::string> sample_info;
-          std::map<std::string, std::string> upload_info;
-          std::vector<std::map<std::string, std::string> > columns;
+          datatypes::Metadata metadata;
+          datatypes::Metadata extra_metadata;
+          datatypes::Metadata sample_info;
+          datatypes::Metadata upload_info;
+          mongo::BSONObj chromosomes;
+          std::vector<datatypes::Metadata> columns;
           bool ok;
 
           // Any user can request information about himself
@@ -187,7 +191,7 @@ namespace epidb {
               ok = ok && dba::info::id_to_name(upload_info, msg);
               type = "annotation";
             } else if (id.compare(0, 1, "g") == 0) {
-              ok = dba::info::get_genome(id, metadata, msg);
+              ok = dba::info::get_genome(id, metadata, chromosomes, msg);
               ok = ok && dba::info::id_to_name(metadata, msg);
               type = "genome";
             } else if (id.compare(0, 1, "p") == 0) {
@@ -274,6 +278,19 @@ namespace epidb {
               extra_metadata_parameter->add_child(it->first, p);
             }
             info->add_child("extra_metadata", extra_metadata_parameter);
+          }
+
+          if (!chromosomes.isEmpty()) {
+            serialize::ParameterPtr chromosomes_parameter(new serialize::ListParameter());
+            std::map<std::string, std::string>::iterator it;
+            for (mongo::BSONObj::iterator it = chromosomes.begin(); it.more(); ) {
+              mongo::BSONElement e = it.next();
+              serialize::ParameterPtr chromosome_parameter(new serialize::MapParameter());
+              chromosome_parameter->add_child("name", serialize::ParameterPtr(new serialize::SimpleParameter(e["name"].String())));
+              chromosome_parameter->add_child("size", serialize::ParameterPtr(new serialize::SimpleParameter((long long) e["size"].Number())));
+              chromosomes_parameter->add_child(chromosome_parameter);
+            }
+            info->add_child("chromosomes", chromosomes_parameter);
           }
 
           if (!sample_info.empty()) {

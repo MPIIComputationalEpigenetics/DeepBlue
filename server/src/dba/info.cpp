@@ -42,7 +42,7 @@ namespace epidb {
         return true;
       }
 
-      bool get_genome(const std::string &id, std::map<std::string, std::string> &res, std::string &msg, bool full = false)
+      bool get_genome(const std::string &id, datatypes::Metadata &res, mongo::BSONObj& chromosomes, std::string &msg, bool full = false)
       {
         mongo::BSONObj result;
         if (!data::genome(id, result, msg))  {
@@ -51,7 +51,9 @@ namespace epidb {
 
         for (mongo::BSONObj::iterator it = result.begin(); it.more(); ) {
           mongo::BSONElement e = it.next();
-          if (full || (strncmp("norm_", e.fieldName(), 5) != 0)) {
+          if (e.fieldName() == std::string("chromosomes")) {
+            chromosomes = e.Obj().getOwned();
+          } else  if (full || (strncmp("norm_", e.fieldName(), 5) != 0)) {
             res[e.fieldName()] = utils::bson_to_string(e);
           }
         }
