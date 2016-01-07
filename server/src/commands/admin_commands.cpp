@@ -1,10 +1,9 @@
 //
-//  commands.cpp
+//  list_commands.cpp
 //  epidb
 //
-//  Created by Fabian Reinartz on 17.12.13.
-//  Refactored by Felipe Albrecht on 07.01.16.
-//  Copyright (c) 2013,2014,2015,2016 Max Planck Institute for Computer Science. All rights reserved.
+//  Created by Felipe Albrecht on 07.01.16.
+//  Copyright (c) 2016 Max Planck Institute for Computer Science. All rights reserved.
 //
 
 #include "../dba/dba.hpp"
@@ -17,12 +16,12 @@
 namespace epidb {
   namespace command {
 
-    class CommandsCommand: public Command {
+    class AdminCommandsCommand: public Command {
 
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::STATUS, "Lists all existing commands.");
+        return CommandDescription(categories::ADMINISTRATION, "Lists all existing commands.");
       }
 
       static Parameters parameters_()
@@ -35,14 +34,14 @@ namespace epidb {
       static Parameters results_()
       {
         Parameter p[] = {
-          Parameter("commands", serialize::MAP, "command descriptions")
+          Parameter("admin_commands", serialize::MAP, "command descriptions")
         };
         Parameters results(&p[0], &p[0] + 1);
         return results;
       }
 
     public:
-      CommandsCommand() : Command("commands", parameters_(), results_(), desc_()) {}
+      AdminCommandsCommand() : Command("admin_commands", parameters_(), results_(), desc_()) {}
 
       virtual bool run(const std::string &ip,
                        const serialize::Parameters &parameters, serialize::Parameters &result) const
@@ -52,21 +51,17 @@ namespace epidb {
         // add information about every command
         std::map<std::string, Command *>::const_iterator it;
         for (it = commands_->begin(); it != commands_->end(); ++it) {
-
-          // Occult "administration" commands
           CommandDescription desc = it->second->description();
           if (desc.category == categories::ADMINISTRATION) {
-            continue;
+            auto cmd_info = build_command_info(it->second);
+            commands_info->add_child(it->first, cmd_info);
           }
-
-          auto cmd_info = build_command_info(it->second);
-          commands_info->add_child(it->first, cmd_info);
         }
 
         result.add_param(commands_info);
         return true;
       }
 
-    } commandsCommand;
+    } adminCommandsCommand;
   }
 }

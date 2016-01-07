@@ -3,7 +3,7 @@
 //  epidb
 //
 //  Created by Felipe Albrecht on 29.05.13.
-//  Copyright (c) 2013,2014 Max Planck Institute for Computer Science. All rights reserved.
+//  Copyright (c) 2013,2014,2015,2016 Max Planck Institute for Computer Science. All rights reserved.
 //
 
 #include <string>
@@ -92,7 +92,7 @@ namespace epidb {
   void Command::set_id_names_return(const std::vector<utils::IdName> &id_names, serialize::Parameters &result) const
   {
     result.set_as_array(true);
-    for(const utils::IdName & id_name: id_names) {
+    for (const utils::IdName & id_name : id_names) {
       std::vector<serialize::ParameterPtr> list;
       list.push_back(serialize::ParameterPtr(new serialize::SimpleParameter(serialize::STRING, id_name.id)));
       list.push_back(serialize::ParameterPtr(new serialize::SimpleParameter(serialize::STRING, id_name.name)));
@@ -103,7 +103,7 @@ namespace epidb {
   void Command::set_id_names_count_return(const std::vector<utils::IdNameCount> &id_name_counts, serialize::Parameters &result) const
   {
     result.set_as_array(true);
-    for(const utils::IdNameCount & id_name_count: id_name_counts) {
+    for (const utils::IdNameCount & id_name_count : id_name_counts) {
       std::vector<serialize::ParameterPtr> list;
       list.push_back(serialize::ParameterPtr(new serialize::SimpleParameter(serialize::STRING, id_name_count.id)));
       list.push_back(serialize::ParameterPtr(new serialize::SimpleParameter(serialize::STRING, id_name_count.name)));
@@ -205,5 +205,110 @@ namespace epidb {
       metadata[mit->first] = mit->second->as_string();
     }
     return true;
+  }
+
+
+  bool extract_items(std::vector<serialize::ParameterPtr> input_list, size_t position, serialize::Type type,
+                     serialize::Parameters &result)
+  {
+    result.set_as_array(true);
+
+    for (auto input : input_list) {
+      if (input->type() != serialize::LIST) {
+        result.add_error(Error::m(ERR_INVALID_INPUT_TYPE, serialize::type_name(input->type()), serialize::type_name(serialize::LIST)));
+        return false;
+      }
+
+      std::vector<serialize::ParameterPtr> input_items;
+      input->children(input_items);
+
+      if (input_items.size() != 2 && input_items.size() != 3) {
+        result.add_error(Error::m(ERR_INVALID_INPUT_SUB_ITEM_SIZE, input_items.size(), "2 or 3"));
+        return false;
+      }
+
+      if (input_items[position]->type() != type) {
+        result.add_error(Error::m(ERR_INVALID_INPUT_SUB_ITEM_TYPE, position, serialize::type_name(input_items[position]->type()), serialize::type_name(type)));
+        return false;
+      }
+
+      if (type == serialize::STRING) {
+        result.add_string(input_items[position]->as_string());
+      } else {
+        result.add_error("invalid type... TODO: it must be implemented");
+        return false;
+      }
+    }
+    return true;
+  }
+
+  serialize::ParameterPtr build_command_info(const Command* command)
+  {
+    // Occult "administration" commands
+    CommandDescription desc = command->description();
+
+
+    serialize::ParameterPtr cmd_info(new serialize::MapParameter);
+
+    // add parameter info
+    serialize::ParameterPtr params_info(new serialize::ListParameter());
+    const Parameters command_params = command->parameters();
+
+    // add information about each parameter of the command
+    Parameters::const_iterator pit;
+    for (pit = command_params.begin(); pit != command_params.end(); ++pit) {
+      serialize::ParameterPtr param_info(new serialize::ListParameter);
+
+      param_info->add_child(serialize::ParameterPtr(
+                              new serialize::SimpleParameter(pit->name()) ));
+
+      param_info->add_child(serialize::ParameterPtr(
+                              new serialize::SimpleParameter(xmlrpc::type_string(serialize::to_xml_type(pit->type()))) ));
+      param_info->add_child(serialize::ParameterPtr(
+                              new serialize::SimpleParameter(pit->multiple()) ));
+      param_info->add_child(serialize::ParameterPtr(
+                              new serialize::SimpleParameter(pit->description()) ));
+
+      params_info->add_child(param_info);
+    }
+    cmd_info->add_child("parameters", params_info);
+
+
+    // add result info
+    serialize::ParameterPtr results_info(new serialize::ListParameter());
+    const Parameters command_results = command->results();
+
+    // add information about each resultof the command
+    Parameters::const_iterator rit;
+    for (rit = command_results.begin(); rit != command_results.end(); ++rit) {
+      serialize::ParameterPtr result_info(new serialize::ListParameter);
+
+      result_info->add_child(serialize::ParameterPtr(
+                               new serialize::SimpleParameter(rit->name()) ));
+
+      result_info->add_child(serialize::ParameterPtr(
+                               new serialize::SimpleParameter(xmlrpc::type_string(serialize::to_xml_type(rit->type()))) ));
+      result_info->add_child(serialize::ParameterPtr(
+                               new serialize::SimpleParameter(rit->multiple()) ));
+      result_info->add_child(serialize::ParameterPtr(
+                               new serialize::SimpleParameter(rit->description()) ));
+
+      results_info->add_child(result_info);
+    }
+    cmd_info->add_child("results", results_info);
+
+
+    // add description
+    serialize::ParameterPtr description(new serialize::ListParameter);
+    description->add_child(serialize::ParameterPtr(
+                             new serialize::SimpleParameter(serialize::STRING, desc.category.name)) );
+    description->add_child(serialize::ParameterPtr(
+                             new serialize::SimpleParameter(serialize::STRING, desc.category.description)) );
+    description->add_child(serialize::ParameterPtr(
+                             new serialize::SimpleParameter(serialize::STRING, desc.description)) );
+
+    cmd_info->add_child("description", description);
+
+    return cmd_info;
   }
 }

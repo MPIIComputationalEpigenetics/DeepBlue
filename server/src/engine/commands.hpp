@@ -29,6 +29,9 @@ namespace epidb {
   bool read_metadata(const serialize::ParameterPtr &map,
                      datatypes::Metadata &metadata, std::string &msg);
 
+  bool extract_items(std::vector<serialize::ParameterPtr> input_list, size_t position, serialize::Type type,
+                     serialize::Parameters &result);
+
   struct CommandCategory {
     CommandCategory(const std::string &n, const std::string &d)
       : name(n), description(d)
@@ -59,6 +62,7 @@ namespace epidb {
     static const CommandCategory SAMPLES("Samples", "Inserting and listing samples");
     static const CommandCategory STATUS("Status", "Checking DeepBlue status");
     static const CommandCategory TECHNIQUES("Techniques", "Inserting and listing techniques");
+    static const CommandCategory UTILITIES("Utilities", "Utilities for connecting operations");
   }
 
   struct CommandDescription {
@@ -121,6 +125,8 @@ namespace epidb {
 
     static const Command *get_command(const std::string &name);
   };
+
+  serialize::ParameterPtr build_command_info(const Command* command);
 } // namespace epidb
 
 #endif
