@@ -35,7 +35,7 @@ namespace epidb {
       static Parameters results_()
       {
         Parameter p[] = {
-          Parameter("id", serialize::LIST, "list containing the extracted names")
+          Parameter("names", serialize::LIST, "list containing the extracted names")
         };
         Parameters results(&p[0], &p[0] + 1);
         return results;
