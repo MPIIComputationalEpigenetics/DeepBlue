@@ -16,7 +16,7 @@ class TestAdminCommands(helpers.TestCase):
     res, users = epidb.list_users(self.admin_key)
     self.assertSuccess(res, users)
 
-    user_names = [x[1] for x in users]
+    user_names = epidb.extract_names(users)[1]
     self.assertEqual(len(users), 2) # the admin and the newly created user
     self.assertTrue(EPIDB_TEST_ADMIN[0] in user_names)
     self.assertTrue("user1" in user_names)
@@ -60,7 +60,7 @@ class TestAdminCommands(helpers.TestCase):
     res, users = epidb.list_users(self.admin_key)
     self.assertSuccess(res, users)
 
-    user_names = [x[1] for x in users]
+    user_names = epidb.extract_names(users)[1]
 
     self.assertEqual(len(users), 4)
     self.assertTrue(EPIDB_TEST_ADMIN[0] in user_names)

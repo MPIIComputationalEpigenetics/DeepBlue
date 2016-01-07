@@ -15,7 +15,7 @@ class TestBioSourceCommands(helpers.TestCase):
     res, biosources = epidb.list_biosources(None, self.admin_key)
     self.assertSuccess(res, biosources)
 
-    biosources_names = [x[1] for x in biosources]
+    biosources_names = epidb.extract_names(biosources)[1]
 
     self.assertEqual(len(biosources), 3)
     self.assertTrue("K562" in biosources_names)
@@ -49,7 +49,7 @@ class TestBioSourceCommands(helpers.TestCase):
     res, biosources = epidb.list_biosources(None, self.admin_key)
     self.assertSuccess(res, biosources)
 
-    biosources_names = [x[1] for x in biosources]
+    biosources_names = epidb.extract_names(biosources)[1]
 
     self.assertEqual(len(biosources), 5)
     self.assertTrue("GM12878" in biosources_names)
@@ -71,7 +71,7 @@ class TestBioSourceCommands(helpers.TestCase):
 
     res, scope = epidb.get_biosource_children("mesoderm", self.admin_key)
     self.assertSuccess(res, scope)
-    scope_names = [x[1] for x in scope]
+    scope_names = epidb.extract_names(scope)[1]
     self.assertEquals(scope_names, ['mesoderm', 'blood', 'GM12878', 'K562', 'Adult_CD4_naive'])
 
   def test_biosource_related(self):

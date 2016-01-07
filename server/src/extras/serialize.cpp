@@ -515,7 +515,7 @@ namespace epidb {
 
     void Parameters::add_string(const std::string &str)
     {
-      params_.push_back(ParameterPtr(new SimpleParameter(STRING, utils::sanitize(str))));
+      params_.push_back(ParameterPtr(new SimpleParameter(STRING, str)));
     }
 
     void Parameters::add_string(int i)
