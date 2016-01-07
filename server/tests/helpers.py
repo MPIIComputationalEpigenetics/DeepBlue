@@ -8,7 +8,7 @@ import time
 import sys
 
 from pymongo import MongoClient
-from client import EpidbClient
+from deepblue_client import DeepBlueClient
 
 import settings
 import data_info as data
@@ -270,7 +270,7 @@ class TestCase(unittest.TestCase):
 
   def init(self, epidb=None):
     if not epidb:
-      epidb = EpidbClient()
+      epidb = DeepBlueClient(address="localhost", port=31415)
 
     res, key = epidb.init_system(*settings.EPIDB_TEST_ADMIN)
     self.assertSuccess(res, key)
@@ -280,7 +280,7 @@ class TestCase(unittest.TestCase):
 
   def init_base(self, epidb=None):
     if not epidb:
-      epidb = EpidbClient()
+      epidb = DeepBlueClient(address="localhost", port=31415)
 
     self.init(epidb)
 
@@ -309,7 +309,7 @@ class TestCase(unittest.TestCase):
 
   def init_full(self, epidb=None):
     if not epidb:
-      epidb = EpidbClient()
+      epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     for user in data.USERS:
@@ -327,7 +327,7 @@ class TestCase(unittest.TestCase):
       print "Invalid request " + req
       return
 
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     sleep = 0.1
     (s, ss) = epidb.info(req, self.admin_key)
     while ss[0]["state"] != "done":
@@ -346,7 +346,7 @@ class TestCase(unittest.TestCase):
       print "Invalid request " + req
       return
 
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     sleep = 0.1
     (s, ss) = epidb.info(req, self.admin_key)
     while ss[0]["state"] not in status:
