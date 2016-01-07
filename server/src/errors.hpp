@@ -117,6 +117,11 @@ namespace epidb {
   extern Error ERR_INVALID_IDENTIFIER;
   extern Error ERR_INVALID_GSM_IDENTIFIER;
 
+  extern Error ERR_INVALID_INPUT_TYPE;
+
+  extern Error ERR_INVALID_INPUT_SUB_ITEM_SIZE;
+  extern Error ERR_INVALID_INPUT_SUB_ITEM_TYPE;
+
   extern Error ERR_DATASET_NOT_FOUND;
 
   extern Error ERR_DATABASE_CONNECTION;

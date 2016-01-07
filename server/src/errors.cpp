@@ -49,6 +49,8 @@
  * 40 - Tiling region
  * 50 - Dataset
  * 51 - GSM Identifier
+ * 60 - Input
+ * 61 - Input sub-item
  * 66 - Internal
  * 99 - Identifier
  */
@@ -59,6 +61,8 @@
  * 002 - Missing
  * 003 - Invalid ID
  * 004 - Unknown type
+ * 005 - Invalid type
+ * 006 - Invalid type
  *
  * 100 - Do not have permission
  *
@@ -169,6 +173,11 @@ namespace epidb {
   Error ERR_INVALID_IDENTIFIER("19900", "Invalid identifier '{}'.");
 
   Error ERR_INVALID_GSM_IDENTIFIER("15100", "Invalid GSM identifier '{}'.");
+
+  Error ERR_INVALID_INPUT_TYPE("160005", "Invalid input type. It is '{}' but must be a '{}'");
+
+  Error ERR_INVALID_INPUT_SUB_ITEM_SIZE("161006", "Invalid sub-item size {}. It must be of size {}");
+  Error ERR_INVALID_INPUT_SUB_ITEM_TYPE("161005", "Invalid sub-item type at position {}. Its type is '{}' but must be a '{}'");
 
   Error ERR_DATABASE_CONNECTION("466555", "MongoDB connection error: '{}'.");
   Error ERR_DATABASE_EXCEPTION("466666", "MongoDB exception at operation '{}': '{}'.");
