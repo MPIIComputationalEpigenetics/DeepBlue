@@ -361,7 +361,7 @@ namespace epidb {
     const std::string MapParameter::as_string() const
     {
       std::stringstream ss;
-      ss << "[";
+      ss << "{";
       if (ordered_) {
         std::vector<std::string>::const_iterator it;
         for (it = key_order_.begin(); it != key_order_.end(); ++it) {
@@ -379,7 +379,7 @@ namespace epidb {
           ss << it->first << ":" << it->second->as_string();
         }
       }
-      ss << "]";
+      ss << "}";
 
       return ss.str();
     }
