@@ -1,11 +1,11 @@
 import helpers
 
-from client import EpidbClient
+from deepblue_client import DeepBlueClient
 
 
 class TestBioSourceCommands(helpers.TestCase):
   def test_biosource(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init(epidb)
 
     self.assertSuccess(epidb.add_biosource("K562", "leukemia cell", {}, self.admin_key))
@@ -24,7 +24,7 @@ class TestBioSourceCommands(helpers.TestCase):
 
 
   def test_duplicated_biosource_with_synonym(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init(epidb)
 
     s = epidb.add_biosource("Ana", "Ana", {}, self.admin_key)
@@ -37,7 +37,7 @@ class TestBioSourceCommands(helpers.TestCase):
     self.assertFailure(s)
 
   def test_biosource_scope(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init(epidb)
 
     self.assertSuccess(epidb.add_biosource("GM12878", None, {}, self.admin_key))
@@ -75,7 +75,7 @@ class TestBioSourceCommands(helpers.TestCase):
     self.assertEquals(scope_names, ['mesoderm', 'blood', 'GM12878', 'K562', 'Adult_CD4_naive'])
 
   def test_biosource_related(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init(epidb)
 
     self.assertSuccess(epidb.add_biosource("A", None, {}, self.admin_key))
@@ -106,7 +106,7 @@ class TestBioSourceCommands(helpers.TestCase):
     self.assertEqual(res[1], "104903:'C D' and 'A' are already connected.")
 
   def test_check_embracing_bug(self):
-	epidb = EpidbClient()
+	epidb = DeepBlueClient(address="localhost", port=31415)
 	self.init(epidb)
 
 	res = epidb.add_biosource("A", None, {}, self.admin_key)

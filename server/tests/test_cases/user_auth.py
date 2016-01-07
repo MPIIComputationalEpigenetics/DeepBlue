@@ -1,12 +1,12 @@
 import helpers
 import settings
 
-from client import EpidbClient
+from deepblue_client import DeepBlueClient
 
 class TestUserAuthCommand(helpers.TestCase):
 
     def test_success(self):
-        epidb = EpidbClient()
+        epidb = DeepBlueClient(address="localhost", port=31415)
         self.init_base(epidb)
 
         s = epidb.modify_user("password", "password123", self.admin_key)
@@ -25,14 +25,14 @@ class TestUserAuthCommand(helpers.TestCase):
         self.assertEquals(key, user_key)
 
     def test_wrong_password(self):
-        epidb = EpidbClient()
+        epidb = DeepBlueClient(address="localhost", port=31415)
         self.init_base(epidb)
 
         s, key = epidb.user_auth(settings.EPIDB_TEST_ADMIN[1], "wrong_password")
         self.assertFailure(s, key)
 
     def test_wrong_email(self):
-        epidb = EpidbClient()
+        epidb = DeepBlueClient(address="localhost", port=31415)
         self.init_base(epidb)
 
         s, key = epidb.user_auth("wrong@email.com", self.admin_key)

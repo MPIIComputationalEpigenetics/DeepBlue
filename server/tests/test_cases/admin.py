@@ -1,13 +1,13 @@
 import helpers
 
-from client import EpidbClient
+from deepblue_client import DeepBlueClient
 from settings import EPIDB_TEST_ADMIN
 
 
 class TestAdminCommands(helpers.TestCase):
 
   def test_users(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init(epidb)
 
     res, user = epidb.add_user("user1", "test1@example.com", "test", self.admin_key)
@@ -23,7 +23,7 @@ class TestAdminCommands(helpers.TestCase):
 
 
   def test_anonymous(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init(epidb)
 
     res, user = epidb.add_user("anonymous", "test1@example.com", "test", self.admin_key)
@@ -34,13 +34,13 @@ class TestAdminCommands(helpers.TestCase):
     self.assertEquals(msg,  'It is not allowed to change the attributes of the anonymous user')
 
   def test_echo(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init(epidb)
     self.assertEquals(epidb.echo(self.admin_key), ['okay', 'DeepBlue (1.6.0) says hi to test_admin'])
     self.assertEquals(epidb.echo("invalid"), ['okay', 'DeepBlue (1.6.0) says hi to a Stranger'])
 
   def test_unequal_keys(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init(epidb)
     # Note: this test has not 100% hit chance since the problem only
     # occured when two keys were generated within one second.
@@ -70,7 +70,7 @@ class TestAdminCommands(helpers.TestCase):
 
 
   def test_add_user_by_non_admin(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init(epidb)
 
     res, u1 = epidb.add_user("user1", "test1@example.com", "test", self.admin_key)

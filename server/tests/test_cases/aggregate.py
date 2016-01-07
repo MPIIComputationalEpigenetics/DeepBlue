@@ -1,12 +1,12 @@
 import helpers
 
-from client import EpidbClient
+from deepblue_client import DeepBlueClient
 
 
 class TestAggregateCommand(helpers.TestCase):
 
   def test_aggregation(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     sample_id = self.sample_ids[0]
@@ -71,7 +71,7 @@ class TestAggregateCommand(helpers.TestCase):
     self.assertEquals(count, 12)
 
   def test_aggregation_bug_on_normalfields(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     res = epidb.add_technique("ChIP-seq", "ChIP-sequencing", {}, self.admin_key)
@@ -134,7 +134,7 @@ class TestAggregateCommand(helpers.TestCase):
     self.assertEquals(rs, expected)
 
   def test_aggregation_bug_on_normalfields_better_data(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     res = epidb.add_technique("ChIP-seq", "ChIP-sequencing", {}, self.admin_key)

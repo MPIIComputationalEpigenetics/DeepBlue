@@ -1,13 +1,13 @@
 import helpers
 import difflib
 
-from client import EpidbClient
+from deepblue_client import DeepBlueClient
 
 
 class TestScoreMatrixCommand(helpers.TestCase):
 
   def test_ascore_simple(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     res = epidb.add_technique("ChIP-seq", "ChIP-sequencing", {}, self.admin_key)

@@ -1,13 +1,13 @@
 import helpers
 
-from client import EpidbClient
+from deepblue_client import DeepBlueClient
 from settings import EPIDB_TEST_ADMIN
 
 
 class TestInitCommands(helpers.TestCase):
 
   def test_uninitialized_system(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
 
     # uninitialized system should fail
     res, msg = epidb.add_user("user1", "test@example.com", "test", "somekey")
@@ -15,7 +15,7 @@ class TestInitCommands(helpers.TestCase):
 
 
   def test_init_system(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
 
     res, admin_key = epidb.init_system(*EPIDB_TEST_ADMIN)
     self.assertSuccess(res, admin_key)

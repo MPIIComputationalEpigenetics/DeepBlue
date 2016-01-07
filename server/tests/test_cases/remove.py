@@ -2,13 +2,13 @@ import helpers
 
 import data_info
 
-from client import EpidbClient
+from deepblue_client import DeepBlueClient
 
 
 class TestRemoveCommands(helpers.TestCase):
 
   def test_remove_genome(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init(epidb)
 
     genome_info = None
@@ -54,7 +54,7 @@ class TestRemoveCommands(helpers.TestCase):
       self.assertEqual(len(anns), 0)
 
   def test_remove_annotation(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     file_data = None
@@ -125,7 +125,7 @@ class TestRemoveCommands(helpers.TestCase):
     self.assertEqual(len(anns), 0)
 
   def removeest_remove_experiment(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     eid1 = self.insert_experiment(epidb, "hg18_chr1_1")
@@ -159,7 +159,7 @@ class TestRemoveCommands(helpers.TestCase):
 
 
   def test_remove_project(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     sample_id = self.sample_ids[0]
@@ -183,7 +183,7 @@ class TestRemoveCommands(helpers.TestCase):
     self.assertSuccess(res)
 
   def test_remove_biosource(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     res, biosources = epidb.list_biosources(None, self.admin_key)
@@ -203,7 +203,7 @@ class TestRemoveCommands(helpers.TestCase):
       self.assertSuccess(res)
 
   def test_remove_sample(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     sample_id = self.sample_ids[0]
@@ -225,7 +225,7 @@ class TestRemoveCommands(helpers.TestCase):
     self.assertSuccess(res)
 
   def test_remove_epigenetic_mark(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     sample_id = self.sample_ids[0]
@@ -250,7 +250,7 @@ class TestRemoveCommands(helpers.TestCase):
     self.assertSuccess(res)
 
   def test_remove_technique(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     sample_id = self.sample_ids[0]

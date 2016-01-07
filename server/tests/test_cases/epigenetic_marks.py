@@ -1,13 +1,13 @@
 import helpers
 
-from client import EpidbClient
+from deepblue_client import DeepBlueClient
 import histones
 
 
 class TestEpigeneticMarkCommands(helpers.TestCase):
 
   def test_epigenetic_mark(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init(epidb)
 
     self.assertSuccess(epidb.add_epigenetic_mark("Methylation", "DNA Methylation", {}, self.admin_key))
@@ -28,7 +28,7 @@ class TestEpigeneticMarkCommands(helpers.TestCase):
 
 
   def test_insert_histone_modifications(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init(epidb)
 
     for i in histones.histones_ptm.split("\n"):
@@ -54,7 +54,7 @@ class TestEpigeneticMarkCommands(helpers.TestCase):
 
 
   def test_normalize_histone_modifications(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init(epidb)
 
     res = epidb.add_epigenetic_mark("H2A.Z", "H2A histone family, member Z", {}, self.admin_key)

@@ -1,11 +1,11 @@
 import helpers
 
-from client import EpidbClient
+from deepblue_client import DeepBlueClient
 
 class TestProjects(helpers.TestCase):
 
   def test_project(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init(epidb)
 
     res = epidb.add_project("ENCODE", "The ENCODE Project: ENCyclopedia Of DNA Elements", self.admin_key)
@@ -26,7 +26,7 @@ class TestProjects(helpers.TestCase):
 
 
   def test_set_project_public(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
     s, user = epidb.add_user("user", "email", "institution", self.admin_key)
     (user_id, user_key) = user
@@ -49,7 +49,7 @@ class TestProjects(helpers.TestCase):
     self.assertSuccess(res)
 
   def test_set_project_public(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     res = epidb.add_project("Other", "Some other project", self.admin_key)

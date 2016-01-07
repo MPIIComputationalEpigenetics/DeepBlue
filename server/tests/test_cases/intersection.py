@@ -1,12 +1,12 @@
 import helpers
 
-from client import EpidbClient
+from deepblue_client import DeepBlueClient
 
 
 class TestIntersection(helpers.TestCase):
 
   def test_intersection(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_full(epidb)
 
     res, qid_1 = epidb.select_regions("hg19_chr1_1", "hg19", None, None, None,
@@ -28,7 +28,7 @@ class TestIntersection(helpers.TestCase):
 
 
   def test_intersection_two_genomes(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_full(epidb)
 
     res, qid_1 = epidb.select_regions("hg19_chr1_1", ["hg19", "hg18"], None, None, None,

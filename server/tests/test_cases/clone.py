@@ -2,12 +2,12 @@ import time
 
 import helpers
 
-from client import EpidbClient
+from deepblue_client import DeepBlueClient
 
 class TestClone(helpers.TestCase):
   maxDiff = None
   def test_clone_experiment(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     eid1 = self.insert_experiment(epidb, "hg18_chr1_1")
@@ -40,7 +40,7 @@ class TestClone(helpers.TestCase):
 
 
   def test_clone_annotatation(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
     aid1 = self.insert_annotation(epidb, "Cpg Islands")
 
@@ -52,7 +52,7 @@ class TestClone(helpers.TestCase):
     self.assertEqual(info[0], {'format': 'CHROMOSOME,START,END', 'extra_metadata': {'new': 'true'}, 'upload_info': {'upload_end': '0', 'done': 'true', 'cloned_from': 'a3', 'user': 'test_admin'}, 'name': 'New CpG Islands', 'genome': 'hg19', '_id': 'a4', 'type': 'annotation', 'columns': [{'name': 'CHROMOSOME', 'column_type': 'string'}, {'name': 'START', 'column_type': 'integer'}, {'name': 'END', 'column_type': 'integer'}], 'description': 'CpG islands are associated ...'})
 
   def test_invalid_column(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
     aid1 = self.insert_annotation(epidb, "Cpg Islands")
 
@@ -66,7 +66,7 @@ class TestClone(helpers.TestCase):
 
 
   def test_invalid_format_size(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
     aid1 = self.insert_annotation(epidb, "Cpg Islands All Fields")
 
@@ -91,7 +91,7 @@ class TestClone(helpers.TestCase):
     self.assertEqual(info[0], {'description': 'CpG islands are associated ... (all fields)', 'format': 'CHROMOSOME,START,END,CPG_ISLAND_NAME,LENGTH,CPG_NUM,GC_NUM,PER_CPG,PER_CG,OBS_EXP', 'extra_metadata': {'new': 'true'}, 'upload_info': {'upload_end': '0', 'done': 'true', 'user': 'test_admin', 'cloned_from': 'a3'}, 'genome': 'hg19', '_id': 'a4', 'type': 'annotation', 'columns': [{'name': 'CHROMOSOME', 'column_type': 'string'}, {'name': 'START', 'column_type': 'integer'}, {'name': 'END', 'column_type': 'integer'}, {'name': 'CPG_ISLAND_NAME', 'column_type': 'string'}, {'name': 'LENGTH', 'column_type': 'integer'}, {'name': 'CPG_NUM', 'column_type': 'integer'}, {'name': 'GC_NUM', 'column_type': 'integer'}, {'name': 'PER_CPG', 'column_type': 'double'}, {'name': 'PER_CG', 'column_type': 'double'}, {'name': 'OBS_EXP', 'column_type': 'double'}], 'name': 'New CpG Islands'})
 
   def test_better_names(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
     aid1 = self.insert_annotation(epidb, "Cpg Islands All Fields")
 
@@ -112,7 +112,7 @@ class TestClone(helpers.TestCase):
     self.assertEqual(clone_id, "a4")
 
   def test_invalid_format_types(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
     aid1 = self.insert_annotation(epidb, "Cpg Islands All Fields")
 
@@ -180,7 +180,7 @@ class TestClone(helpers.TestCase):
     self.assertSuccess(s, clone_id)
 
   def test_wig_clone(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     sample_id = self.sample_ids[0]
@@ -207,7 +207,7 @@ class TestClone(helpers.TestCase):
 
 
   def test_wig_clone_calculated(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     sample_id = self.sample_ids[0]

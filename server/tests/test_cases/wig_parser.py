@@ -2,13 +2,13 @@ import time
 
 import helpers
 
-from client import EpidbClient
+from deepblue_client import DeepBlueClient
 
 # XXX: check the exception in the fail_files with a predefined content
 class TestWigFiles(helpers.TestCase):
 
   def test_wig_files(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     sample_id = self.sample_ids[0]
@@ -31,7 +31,7 @@ class TestWigFiles(helpers.TestCase):
     self.assertEqual(5667, count)
 
   def test_wig_files_pass(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     sample_id = self.sample_ids[0]
@@ -48,7 +48,7 @@ class TestWigFiles(helpers.TestCase):
       self.assertSuccess(res)
 
   def test_wig_files_fail(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     sample_id = self.sample_ids[0]
@@ -67,7 +67,7 @@ class TestWigFiles(helpers.TestCase):
 
   """
   def test_include_big_file(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     sample_id = self.sample_ids[0]

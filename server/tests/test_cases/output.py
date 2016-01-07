@@ -1,12 +1,12 @@
 import helpers
 
-from client import EpidbClient
+from deepblue_client import DeepBlueClient
 
 
 class TestOutput(helpers.TestCase):
 
   def test_output_format(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     file_data = open("data/cpgIslandAllFields.txt").read()

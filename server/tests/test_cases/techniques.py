@@ -1,12 +1,12 @@
 import helpers
 
-from client import EpidbClient
+from deepblue_client import DeepBlueClient
 
 
 class TestTechniques(helpers.TestCase):
 
     def test_add_techniques(self):
-        epidb = EpidbClient()
+        epidb = DeepBlueClient(address="localhost", port=31415)
         self.init(epidb)
 
         res = epidb.add_technique("ChIP-seq", "ChIP-sequencing", {}, self.admin_key)
@@ -19,7 +19,7 @@ class TestTechniques(helpers.TestCase):
 
 
     def test_list_techniques(self):
-        epidb = EpidbClient()
+        epidb = DeepBlueClient(address="localhost", port=31415)
         self.init(epidb)
 
         res = epidb.add_technique("illumina 450k", "illumina system", {"price": "low"}, self.admin_key)
@@ -42,7 +42,7 @@ class TestTechniques(helpers.TestCase):
 
 
     def test_list_similar_techniques(self):
-        epidb = EpidbClient()
+        epidb = DeepBlueClient(address="localhost", port=31415)
         self.init(epidb)
 
         res = epidb.add_technique("ChIP-seq", "ChIP-sequencing", {}, self.admin_key)
@@ -54,7 +54,7 @@ class TestTechniques(helpers.TestCase):
 
 
     def test_duplicate(self):
-        epidb = EpidbClient()
+        epidb = DeepBlueClient(address="localhost", port=31415)
         self.init(epidb)
 
         res = epidb.add_technique("ChIP-seq", "ChIP-sequencing", {}, self.admin_key)

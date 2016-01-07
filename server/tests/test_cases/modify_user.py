@@ -1,12 +1,12 @@
 import helpers
 import settings
 
-from client import EpidbClient
+from deepblue_client import DeepBlueClient
 
 class TestModifyUserCommand(helpers.TestCase):
 
     def test_success(self):
-        epidb = EpidbClient()
+        epidb = DeepBlueClient(address="localhost", port=31415)
         self.init_base(epidb)
 
         s = epidb.modify_user("password", "password123", self.admin_key)
@@ -25,7 +25,7 @@ class TestModifyUserCommand(helpers.TestCase):
         self.assertSuccess(s)
 
     def test_nonexisting_key(self):
-        epidb = EpidbClient()
+        epidb = DeepBlueClient(address="localhost", port=31415)
         self.init_base(epidb)
 
         s = epidb.modify_user("password", "password123", "nonExistingKey")

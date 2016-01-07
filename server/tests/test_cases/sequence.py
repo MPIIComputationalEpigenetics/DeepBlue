@@ -1,11 +1,11 @@
 import helpers
 
-from client import EpidbClient
+from deepblue_client import DeepBlueClient
 
 class TestSequence(helpers.TestCase):
 
   def test_upload_sequence(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     sequence = open("data/genomes/chromosomes/hg19.chr19").read().replace("\n", "")
@@ -24,7 +24,7 @@ class TestSequence(helpers.TestCase):
     regions = self.get_regions_request(req)
 
   def test_tiling_regions(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     sequence = open("data/genomes/chromosomes/hg19.chr19").read().replace("\n", "")
@@ -43,7 +43,7 @@ class TestSequence(helpers.TestCase):
     regions = self.get_regions_request(req)
 
   def test_wrong_sequence_length(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     sequence = open("data/genomes/chromosomes/hg19.chr19").read().replace("\n", "")[:-10]
@@ -52,7 +52,7 @@ class TestSequence(helpers.TestCase):
     self.assertFailure(res)
 
   def test_double_upload(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     sequence = open("data/genomes/chromosomes/hg19.chr19").read().replace("\n", "")
@@ -64,7 +64,7 @@ class TestSequence(helpers.TestCase):
     self.assertFailure(res)
 
   def test_multiple_sequences(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     sequence = open("data/genomes/chromosomes/hg19.chr19").read().replace("\n", "")
@@ -74,7 +74,7 @@ class TestSequence(helpers.TestCase):
     self.assertFailure(res)
 
   def test_nonexisting_genome(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     sequence = "BLABLABLA"
@@ -84,7 +84,7 @@ class TestSequence(helpers.TestCase):
     self.assertFailure(res)
 
   def test_nonexisting_chromosome(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     sequence = "BLABLABLA"
@@ -95,7 +95,7 @@ class TestSequence(helpers.TestCase):
     self.assertEquals(res[1], "120000:Unable to find the chromosome 'chrinvalid'.")
 
   def test_result(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     self.insert_experiment(epidb, "hg19_small")
@@ -134,7 +134,7 @@ chrM\t16\t32\thg19_small\tCCCTATTAACCACTCA\t16\tH3K4me3\tENCODE\tK562"""
     self.assertEquals(regions, expected)
 
   def test_get_sequences(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     sequence = open("data/genomes/chromosomes/chrM.fa").read()
@@ -160,7 +160,7 @@ chrM\t2340\t2377\tInteresting Regions at chrM\tGCCTGCGTCAGATCAAAACACTGAACTGACAAT
     self.assertEqual(regions, expected)
 
   def test_long_sequence_content(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     sequence = open("data/genomes/chromosomes/hg19.chr19").read()

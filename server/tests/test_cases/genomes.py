@@ -1,13 +1,13 @@
 import helpers
 
-from client import EpidbClient
+from deepblue_client import DeepBlueClient
 
 
 class TestGenomeCommands(helpers.TestCase):
 
 
   def test_genome_hg19(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init(epidb)
 
     genome_info = None
@@ -29,7 +29,7 @@ class TestGenomeCommands(helpers.TestCase):
     self.assertEqual(r1[1][0][1], 249250621)
 
   def test_chromosomes(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init(epidb)
 
     genome_info = None
@@ -62,7 +62,7 @@ class TestGenomeCommands(helpers.TestCase):
     self.assertEqual(chroms, expected)
 
   def test_genome_empty(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init(epidb)
 
     hg18_genome_info = None
@@ -86,7 +86,7 @@ class TestGenomeCommands(helpers.TestCase):
     self.assertTrue("mm9" in genome_names)
 
   def test_genome_info(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init(epidb)
 
     hg18_genome_info = None
@@ -103,7 +103,7 @@ class TestGenomeCommands(helpers.TestCase):
     self.assertEqual(info_answer, info)
 
   def test_genome_duplicate(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init(epidb)
 
     hg18_genome_info = None
@@ -184,7 +184,7 @@ chrM  16299
 chr4_JH584292_random  14945
 chr4_JH584295_random  1976'''
 
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     sample_id = self.sample_ids[0]

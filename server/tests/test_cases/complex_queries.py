@@ -1,12 +1,12 @@
 import helpers
 
-from client import EpidbClient
+from deepblue_client import DeepBlueClient
 
 
 class TestComplexQueries(helpers.TestCase):
 
   def test_complex1(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_full(epidb)
 
     res, qid_1_1 = epidb.select_regions("hg19_chr1_1", "hg19", None, None, None,
@@ -39,7 +39,7 @@ class TestComplexQueries(helpers.TestCase):
     self.assertEqual(regions.split("\n").sort(), expected_regions.split("\n").sort())
 
   def test_complex2(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_full(epidb)
 
 
@@ -121,7 +121,7 @@ class TestComplexQueries(helpers.TestCase):
     self.assertEqual(regions, expected_regions)
 
   def test_complex_input_regions(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_full(epidb)
 
     regions = "chr1\t1\t10000\nchr2\t2\t20000\nchr3\t3\t30000"
@@ -143,7 +143,7 @@ chr3\t3\t30000\t\tQuery q1 regions set\t\t29997.000000"""
     self.assertEqual(regions, output)
 
   def test_select_only_signal(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     sample_id = self.sample_ids[0]
@@ -199,7 +199,7 @@ chr3\t3\t30000\t\tQuery q1 regions set\t\t29997.000000"""
 
 
   def test_select_only_peaks_not_cached(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     sample_id = self.sample_ids[0]
@@ -223,7 +223,7 @@ chr3\t3\t30000\t\tQuery q1 regions set\t\t29997.000000"""
 
 
   def test_select_only_peaks_cached(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     sample_id = self.sample_ids[0]

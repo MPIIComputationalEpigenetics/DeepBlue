@@ -1,6 +1,6 @@
 import helpers
 
-from client import EpidbClient
+from deepblue_client import DeepBlueClient
 
 
 class TestBugs(helpers.TestCase):
@@ -30,7 +30,7 @@ class TestBugs(helpers.TestCase):
 ]
     format = ",".join(rmsk)
 
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     (r, a) = epidb.add_annotation("repeat_masker", "hg19", None, file_content, format, None, self.admin_key)
@@ -65,7 +65,7 @@ class TestBugs(helpers.TestCase):
     self.assertSuccess(r, a)
 
   def test_invalid_eamp_character(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     epidb.add_biosource("rostrolateral thalamic nucleus of Butler <methodName>Saidel", "", {}, self.admin_key)
@@ -83,7 +83,7 @@ class TestBugs(helpers.TestCase):
     self.assertEquals(biosource_names, ['K562', 'Brain', 'rostrolateral thalamic nucleus of Butler <methodName>Saidel', 'testing <b>cool', 'testing ugly &Saidel', 'testing weird <Saidel', 'testing open Saidel>', 'testing closed <Saidel>', "!'234456789<<<<><<<;;.,.,-,>"])
 
   def test_wrong_chromosomes_usage(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     cpg_island =  ",".join([
@@ -216,7 +216,7 @@ chrY"""
     self.assertEquals(size_total, c)
 
   def test_not_find_genome_and_in_order_chromosoms(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     genome_data = """chr1 1000000
@@ -229,7 +229,7 @@ chrX 100000"""
     self.assertEquals(x, ['okay', [['chr1', 1000000], ['chr2', 900000], ['chr3', 500000], ['chrX', 100000]]])
 
   def test_sample_search_from_synonym(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     s = epidb.add_biosource("Bio Source A", "", {}, self.admin_key)
@@ -260,7 +260,7 @@ chrX 100000"""
   # A is parent of B, that is parent of C that is parent of D
   # A is also parent of D
   def test_biosource_true_hierarchy(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init(epidb)
 
     self.assertSuccess(epidb.add_biosource("AAA", None, {}, self.admin_key))
@@ -300,7 +300,7 @@ chrX 100000"""
     self.assertEquals(s, expected)
 
   def test_biosource_true_hierarchy(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
     sample_id = self.sample_ids[0]
 
@@ -324,7 +324,7 @@ chrX 100000"""
     self.assertEquals(rs, "chr1\t0\t150000000\t0.0000\t1.0000\t0.5000\t4")
 
   def test_empty_result(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init(epidb)
 
     s, g1 = epidb.add_genome("hg19", "", "chr1  10000\nchr2   30000", self.admin_key)
@@ -341,7 +341,7 @@ chrX 100000"""
 
 
   def test_empty_no_permission_column_type(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     res, cid = epidb.create_column_type_category("PLUS_MINUS_DOT", "Region strand: +, -, .", ["+", "-", "."], self.admin_key)
@@ -361,7 +361,7 @@ chrX 100000"""
 
 
   def test_include_invalid_regions(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     data = """chr1\t1\t100000000000000000
@@ -378,7 +378,7 @@ chrY\t12345\t1234567"""
 
   #info() on user queries #91
   def test_info_on_user_queries(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     res, user_one = epidb.add_user("user1", "test1@example.com", "test", self.admin_key)

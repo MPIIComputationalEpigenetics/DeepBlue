@@ -1,12 +1,12 @@
 import helpers
 
-from client import EpidbClient
+from deepblue_client import DeepBlueClient
 
 
 class TestSelectRegions(helpers.TestCase):
 
   def test_select_full_experiment(self, format=None):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base()
 
     sample_id = self.sample_ids[0]
@@ -49,7 +49,7 @@ class TestSelectRegions(helpers.TestCase):
   def test_minimum_parameters(self):
     # select_regions needs at least one of
     # experiment name, epigenetic_mark, sample, technique or project
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base()
 
     sample_id = self.sample_ids[0]
@@ -96,7 +96,7 @@ class TestSelectRegions(helpers.TestCase):
       self.assertEqual(regions, expected_regions)
 
   def test_retrieve_with_defaults(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base()
 
     self.insert_experiment(epidb, "hg19_chr1_1")
@@ -113,7 +113,7 @@ class TestSelectRegions(helpers.TestCase):
     self.assertEqual(regions, expected_regions)
 
   def test_experiment_name_metacolumn(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base()
 
     self.insert_experiment(epidb, "hg19_chr1_1")
@@ -131,7 +131,7 @@ class TestSelectRegions(helpers.TestCase):
     self.assertEqual(regions, expected_regions)
 
   def test_experiment_name_metacolumn2(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base()
 
     self.insert_experiment(epidb, "hg19_chr1_1")
@@ -157,7 +157,7 @@ class TestSelectRegions(helpers.TestCase):
     # regression test: chromosome was put in the first column no matter
     # what the format string specified
 
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base()
 
     self.insert_experiment(epidb, "hg19_chr1_1")
@@ -199,7 +199,7 @@ class TestSelectRegions(helpers.TestCase):
     self.assertEqual(regions, regions_wo_chr)
 
   def test_malformed_format(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base()
 
     self.insert_experiment(epidb, "hg19_chr1_1")
@@ -224,7 +224,7 @@ class TestSelectRegions(helpers.TestCase):
       regions = self.get_regions_request_error(req)
 
   def test_select_all(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init(epidb)
 
     res, msg = epidb.select_regions(None, None, None, None, None,
@@ -234,7 +234,7 @@ class TestSelectRegions(helpers.TestCase):
     self.assertEqual("At least one experiment_name or one genome must be informed.", msg)
 
   def test_unknown_parameters(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base()
 
     sample_id = self.sample_ids[0]
@@ -266,7 +266,7 @@ class TestSelectRegions(helpers.TestCase):
 
 
   def test_argument_normalization(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base()
 
     sample_id = self.sample_ids[0]
@@ -286,7 +286,7 @@ class TestSelectRegions(helpers.TestCase):
     self.assertEqual(regions, full_experiment_regions)
 
   def test_select_range(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base()
 
     sample_id = self.sample_ids[0]
@@ -306,7 +306,7 @@ class TestSelectRegions(helpers.TestCase):
     self.assertEqual(regions, range_regions)
 
   def test_multiple_experiments(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base()
 
     sample_id = self.sample_ids[0]
@@ -327,7 +327,7 @@ class TestSelectRegions(helpers.TestCase):
     self.assertEqual(regions, multiple_experiments_regions)
 
   def test_multiple_genomes(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base()
 
     sample_id = self.sample_ids[0]
@@ -353,7 +353,7 @@ class TestSelectRegions(helpers.TestCase):
       self.assertEqual(regions, multiple_genomes_regions)
 
   def test_multiple_genomes_2(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base()
 
     sample_id = self.sample_ids[0]

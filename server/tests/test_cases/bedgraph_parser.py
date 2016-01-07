@@ -2,12 +2,12 @@ import time
 
 import helpers
 
-from client import EpidbClient
+from deepblue_client import DeepBlueClient
 
 class TestBedgraphFiles(helpers.TestCase):
 
   def test_bed_graph_files(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     sample_id = self.sample_ids[0]

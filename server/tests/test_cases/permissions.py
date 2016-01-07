@@ -1,7 +1,7 @@
 import helpers
 import data_info
 
-from client import EpidbClient
+from deepblue_client import DeepBlueClient
 
 
 class TestPermissions(helpers.TestCase):
@@ -16,7 +16,7 @@ class TestPermissions(helpers.TestCase):
         self.assertSuccess(s)
 
     def test_admin(self):
-        epidb = EpidbClient()
+        epidb = DeepBlueClient(address="localhost", port=31415)
         self.init_base(epidb)
 
         s = epidb.add_user("user", "email", "institution", self.admin_key)
@@ -28,7 +28,7 @@ class TestPermissions(helpers.TestCase):
         self.assertFailure(s)
 
     def test_include_collection_terms(self):
-        epidb = EpidbClient()
+        epidb = DeepBlueClient(address="localhost", port=31415)
         self.init_base(epidb)
 
         user_id, user_key = self.get_new_user(epidb)
@@ -42,7 +42,7 @@ class TestPermissions(helpers.TestCase):
         self.assertSuccess(s)
 
     def test_include_annotations(self):
-        epidb = EpidbClient()
+        epidb = DeepBlueClient(address="localhost", port=31415)
         self.init_base(epidb)
 
         user_id, user_key = self.get_new_user(epidb)
@@ -64,7 +64,7 @@ class TestPermissions(helpers.TestCase):
         self.assertSuccess(s)
 
     def test_get_data(self):
-        epidb = EpidbClient()
+        epidb = DeepBlueClient(address="localhost", port=31415)
         self.init_base(epidb)
 
         user_id, user_key = self.get_new_user(epidb)
@@ -78,7 +78,7 @@ class TestPermissions(helpers.TestCase):
         self.assertSuccess(s)
 
     def test_list_collections(self):
-        epidb = EpidbClient()
+        epidb = DeepBlueClient(address="localhost", port=31415)
         self.init_base(epidb)
 
         user_id, user_key = self.get_new_user(epidb)
@@ -109,7 +109,7 @@ class TestPermissions(helpers.TestCase):
         self.assertFailure(s)
 
     def test_change_extra_metadata(self):
-        epidb = EpidbClient()
+        epidb = DeepBlueClient(address="localhost", port=31415)
         self.init_base(epidb)
 
         user_id, user_key = self.get_new_user(epidb)

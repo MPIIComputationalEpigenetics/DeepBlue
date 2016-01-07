@@ -1,6 +1,7 @@
 import helpers
-import client
 import re
+
+from deepblue_client import DeepBlueClient
 
 
 class TestListRequests(helpers.TestCase):
@@ -9,7 +10,7 @@ class TestListRequests(helpers.TestCase):
         """
         Test the request-ID's returned by list_requests
         """
-        epidb = client.EpidbClient()
+        epidb = DeepBlueClient(address="localhost", port=31415)
         self.init_full(epidb)
 
         s, id = epidb.add_epigenetic_mark("DNA Methylation", "", {}, self.admin_key)
@@ -38,7 +39,7 @@ class TestListRequests(helpers.TestCase):
         """
         Test the request-ID's returned by list_requests
         """
-        epidb = client.EpidbClient()
+        epidb = DeepBlueClient(address="localhost", port=31415)
         self.init_full(epidb)
 
         s, id = epidb.add_epigenetic_mark("DNA Methylation", "", {}, self.admin_key)

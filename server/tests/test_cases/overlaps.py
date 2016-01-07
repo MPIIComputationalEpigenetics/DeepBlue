@@ -1,10 +1,10 @@
 import helpers
-from client import EpidbClient
+from deepblue_client import DeepBlueClient
 
 class TestOverlaps(helpers.TestCase):
 
   def test_overlap_experiment_annotation(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     sample_id = self.sample_ids[0]
@@ -35,7 +35,7 @@ class TestOverlaps(helpers.TestCase):
 
 
   def test_multiple_overlap(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     sample_id = self.sample_ids[0]

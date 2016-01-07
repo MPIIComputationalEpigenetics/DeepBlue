@@ -2,14 +2,14 @@ import time
 
 import helpers
 
-from client import EpidbClient
+from deepblue_client import DeepBlueClient
 import data_info
 
 
 class TestExperiments(helpers.TestCase):
 
   def test_calculated_string(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
     sample_id = self.sample_ids[0]
 
@@ -33,7 +33,7 @@ class TestExperiments(helpers.TestCase):
 
 
   def test_calculated_math(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
     sample_id = self.sample_ids[0]
 
@@ -57,7 +57,7 @@ class TestExperiments(helpers.TestCase):
 
 
   def test_calculated_metafield(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
     sample_id = self.sample_ids[0]
 
@@ -81,7 +81,7 @@ class TestExperiments(helpers.TestCase):
     self.assertEqual(r, 'EM and Name: - Methylation - test_exp1')
 
   def test_wrong_column_creation(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
     sample_id = self.sample_ids[0]
 
@@ -100,7 +100,7 @@ class TestExperiments(helpers.TestCase):
 
 
   def test_calculated_get_region(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
     sample_id = self.sample_ids[0]
 
@@ -127,7 +127,7 @@ class TestExperiments(helpers.TestCase):
     self.assertEqual(r2, 'it is methylation!')
 
   def test_error_calculated_get_region(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
     sample_id = self.sample_ids[0]
 
@@ -155,7 +155,7 @@ class TestExperiments(helpers.TestCase):
 
 
   def test_error_maximum_number_of_instructions(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
     sample_id = self.sample_ids[0]
 

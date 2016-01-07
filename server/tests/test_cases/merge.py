@@ -1,12 +1,12 @@
 import helpers
 
-from client import EpidbClient
+from deepblue_client import DeepBlueClient
 
 
 class TestMerge(helpers.TestCase):
 
   def test_merge_queries(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_full(epidb)
 
     res, qid_1 = epidb.select_experiments("hg19_chr1_1", None, 760000, 860000, self.admin_key)
@@ -28,7 +28,7 @@ class TestMerge(helpers.TestCase):
 
 
   def test_merge_different_chromosomes(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_full(epidb)
 
     res, qid_1 = epidb.select_regions("hg19_chr1_1", "hg19", None, None, None,

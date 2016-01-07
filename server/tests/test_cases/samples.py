@@ -1,12 +1,12 @@
 import helpers
 
-from client import EpidbClient
+from deepblue_client import DeepBlueClient
 
 
 class TestSamples(helpers.TestCase):
 
   def test_find_sample(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init(epidb)
 
     res = epidb.add_biosource("K562", "desc1", {}, self.admin_key)
@@ -20,7 +20,7 @@ class TestSamples(helpers.TestCase):
     self.assertEqual(sid, found_id[0][0])
 
   def test_find_samples(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init(epidb)
 
     res = epidb.add_biosource("K562", "desc1", {}, self.admin_key)
@@ -52,7 +52,7 @@ class TestSamples(helpers.TestCase):
     self.assertFalse(id4 in found_ids)
 
   def test_list_samples(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init(epidb)
 
     res = epidb.add_biosource("K562", "desc1", {}, self.admin_key)
@@ -80,7 +80,7 @@ class TestSamples(helpers.TestCase):
     self.assertEqual(['s1', {'age': '55', '_id': 's1', 'health': 'deceased', 'user': 'test_admin', 'biosource_name': 'K562'}], k562_samples[0])
 
   def test_multiple_biosources_samples(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init(epidb)
 
     (res, k562_id) = epidb.add_biosource("K562", "desc1", {}, self.admin_key)

@@ -1,12 +1,12 @@
 import helpers
 
-from client import EpidbClient
+from deepblue_client import DeepBlueClient
 
 
 class TestColumnTypes(helpers.TestCase):
 
   def test_duplicate_column_type(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init(epidb)
 
     res = epidb.create_column_type_simple("name2", "description", "string", self.admin_key)
@@ -16,7 +16,7 @@ class TestColumnTypes(helpers.TestCase):
 
 
   def test_basic_column_types(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init(epidb)
 
     res = epidb.create_column_type_simple("string_column", "description", "string", self.admin_key)
@@ -28,7 +28,7 @@ class TestColumnTypes(helpers.TestCase):
 
 
   def test_column_complex_types(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init(epidb)
 
     res = epidb.create_column_type_range("score", "description", 0.0, 1.0, self.admin_key)
@@ -39,7 +39,7 @@ class TestColumnTypes(helpers.TestCase):
 
 
   def test_list_column_types(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init(epidb)
 
     res = epidb.create_column_type_simple("name", "description", "string", self.admin_key)
@@ -72,7 +72,7 @@ class TestColumnTypes(helpers.TestCase):
 
 
   def test_no_ignore_if(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init(epidb)
 
     res = epidb.create_column_type_simple("name", "description", "string", self.admin_key)
@@ -92,7 +92,7 @@ class TestColumnTypes(helpers.TestCase):
 
 
   def test_insert_experiment_fail(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     sample_id = self.sample_ids[0]
@@ -114,7 +114,7 @@ class TestColumnTypes(helpers.TestCase):
 
 
   def test_range_fail(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     sample_id = self.sample_ids[0]
@@ -143,7 +143,7 @@ class TestColumnTypes(helpers.TestCase):
     # self.assertEqual(msg, "Invalid value '69.6' for column P_VALUE")
 
   def test_category_fail(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     sample_id = self.sample_ids[0]
@@ -171,7 +171,7 @@ class TestColumnTypes(helpers.TestCase):
     self.assertTrue("STRAND_X" in msg)
 
   def test_remove_column(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init(epidb)
 
     res, u1 = epidb.add_user("user1", "test1@example.com", "test", self.admin_key)

@@ -1,14 +1,14 @@
 import helpers
 import data_info
 
-from client import EpidbClient
+from deepblue_client import DeepBlueClient
 
 
 class TestState(helpers.TestCase):
 
     def test_state(self):
         """Tests state after insert and remove for all data-types except experiments."""
-        epidb = EpidbClient()
+        epidb = DeepBlueClient(address="localhost", port=31415)
         self.init_base(epidb)
 
         to_test = ["genomes", "annotations", "techniques", "epigenetic_marks", "projects",
@@ -25,7 +25,7 @@ class TestState(helpers.TestCase):
 
     def test_state_experiments(self):
         """Tests state after insert and remove for experiments."""
-        epidb = EpidbClient()
+        epidb = DeepBlueClient(address="localhost", port=31415)
         self.init_base(epidb)
 
         name = "experiments"

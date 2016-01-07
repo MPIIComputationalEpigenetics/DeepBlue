@@ -1,12 +1,12 @@
 import helpers
 
-from client import EpidbClient
+from deepblue_client import DeepBlueClient
 
 
 class TestFilterCommand(helpers.TestCase):
 
   def test_filter_regions(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_full(epidb)
 
     res, qid = epidb.select_regions("hg19_chr1_1", "hg19", None, None, None,
@@ -24,7 +24,7 @@ class TestFilterCommand(helpers.TestCase):
     self.assertEqual(regions, expected_regions)
 
   def test_filter_two_genomes(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_full(epidb)
 
     res, qid = epidb.select_regions(["hg19_chr1_1", "hg18_chr1_1"], ["hg19", "hg18"], None, None, None,

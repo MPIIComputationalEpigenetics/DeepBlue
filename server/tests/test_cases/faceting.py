@@ -1,11 +1,11 @@
 import helpers
 
-from client import EpidbClient
+from deepblue_client import DeepBlueClient
 
 class TestFacetingCommand(helpers.TestCase):
 
   def test_faceting(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_full(epidb)
 
     (s, v) = epidb.faceting_experiments("", "", "", "", "", "", "", self.admin_key)

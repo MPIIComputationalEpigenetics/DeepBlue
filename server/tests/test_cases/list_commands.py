@@ -1,17 +1,17 @@
 import helpers
 
-from client import EpidbClient
+from deepblue_client import DeepBlueClient
 
 
 class TestListCommandsCommand(helpers.TestCase):
 
   def test_commands(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     # explicitly no initialization. The command should always work.
 
     res, cmds = epidb.commands()
     self.assertSuccess(res, cmds)
-    self.assertEqual(len(cmds), 72)
+    self.assertEqual(len(cmds), 74)
     self.assertEqual(cmds["add_experiment"]["parameters"][0], ['name', 'string', False, 'experiment name'])
     self.assertEqual(cmds["add_experiment"]["parameters"][1], ['genome', 'string', False, 'the target genome'])
     self.assertEqual(cmds["add_experiment"]["parameters"][2], ['epigenetic_mark', 'string', False, 'epigenetic mark of the experiment'])

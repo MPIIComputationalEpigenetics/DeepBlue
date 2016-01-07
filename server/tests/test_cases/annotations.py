@@ -1,12 +1,12 @@
 import helpers
 
-from client import EpidbClient
+from deepblue_client import DeepBlueClient
 
 
 class TestAnnotationCommands(helpers.TestCase):
 
   def test_annotation(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     file_data = None
@@ -45,7 +45,7 @@ class TestAnnotationCommands(helpers.TestCase):
     self.assertEqual(regions, file_data)
 
   def test_list_annotations(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init(epidb)
 
     genome_info = None
@@ -89,7 +89,7 @@ class TestAnnotationCommands(helpers.TestCase):
     self.assertEqual(expected, result)
 
   def test_annotation_full_cpg_islands(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     cpg_island =  ",".join([
@@ -120,7 +120,7 @@ class TestAnnotationCommands(helpers.TestCase):
 
 
   def test_annotation_shuffle(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     cpg_island =  ",".join([
@@ -178,7 +178,7 @@ class TestAnnotationCommands(helpers.TestCase):
     self.assertEqual(regions, regions_shuffle)
 
   def test_annotation_signal_bedgraph(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     sample_id = self.sample_ids[0]
@@ -210,7 +210,7 @@ class TestAnnotationCommands(helpers.TestCase):
 
 
   def test_annotation_signal_wig(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     sample_id = self.sample_ids[0]
@@ -230,7 +230,7 @@ class TestAnnotationCommands(helpers.TestCase):
     self.assertEqual(5667, count)
 
   def test_list_annotations2(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init(epidb)
 
 

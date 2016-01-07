@@ -2,14 +2,14 @@ import time
 
 import helpers
 
-from client import EpidbClient
+from deepblue_client import DeepBlueClient
 import data_info
 
 
 class TestExperiments(helpers.TestCase):
 
   def test_experiments_pass(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     sample_id = self.sample_ids[0]
@@ -36,7 +36,7 @@ class TestExperiments(helpers.TestCase):
 
 
   def test_insert_local_file(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
     sample_id = self.sample_ids[0]
 
@@ -68,7 +68,7 @@ class TestExperiments(helpers.TestCase):
     self.assertEqual(data1, data2)
 
   def test_double_experiment_same_user_fail(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     uid, user_key = self.insert_user(epidb, "test_user")
@@ -92,7 +92,7 @@ class TestExperiments(helpers.TestCase):
 
 
   def test_double_experiment_fail(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     sample_id = self.sample_ids[0]
@@ -111,7 +111,7 @@ class TestExperiments(helpers.TestCase):
     self.assertFailure(res)
 
   def test_list_recent(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     sample_id = self.sample_ids[0]
@@ -149,7 +149,7 @@ class TestExperiments(helpers.TestCase):
     self.assertTrue("test_exp2" in experiments_names)
 
   def test_add_with_invalid_sample(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     sample_id = self.sample_ids[0]
@@ -162,7 +162,7 @@ class TestExperiments(helpers.TestCase):
 
 
   def test_add_with_invalid_genome(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     sample_id = self.sample_ids[0]
@@ -175,7 +175,7 @@ class TestExperiments(helpers.TestCase):
 
 
   def test_add_with_invalid_project(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     sample_id = self.sample_ids[0]
@@ -188,7 +188,7 @@ class TestExperiments(helpers.TestCase):
 
 
   def test_add_with_invalid_chromosome(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     sample_id = self.sample_ids[0]
@@ -213,7 +213,7 @@ class TestExperiments(helpers.TestCase):
     self.assertEqual(data, regions_data_okay)
 
   def test_add_with_out_of_bound_region(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     sample_id = self.sample_ids[0]
@@ -239,7 +239,7 @@ class TestExperiments(helpers.TestCase):
 
 
   def test_add_with_invalid_epigenetic_mark(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     sample_id = self.sample_ids[0]
@@ -252,7 +252,7 @@ class TestExperiments(helpers.TestCase):
 
 
   def test_get_by_query(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     eid1 = self.insert_experiment(epidb, "hg18_chr1_1")

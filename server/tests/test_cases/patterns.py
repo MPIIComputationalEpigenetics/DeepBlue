@@ -1,11 +1,11 @@
 import helpers
 
-from client import EpidbClient
+from deepblue_client import DeepBlueClient
 
 class TestPattern(helpers.TestCase):
 
   def test_pattern_chromosome(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     genome_info = "chr19 59128983"
@@ -88,7 +88,7 @@ class TestPattern(helpers.TestCase):
     self.assertEquals(c, 638969)
 
   def test_upload_sequence(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     genome_info = "chr19 59128983"
@@ -117,7 +117,7 @@ class TestPattern(helpers.TestCase):
     self.assertEquals(expected, regions)
 
   def test_pattern_duplicate(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     genome_info = "chrM 16571"

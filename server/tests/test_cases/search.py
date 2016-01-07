@@ -1,12 +1,12 @@
 import helpers
 
-from client import EpidbClient
+from deepblue_client import DeepBlueClient
 import data_info
 
 class TestSearch(helpers.TestCase):
 
   def test_type_restricted(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init(epidb)
 
     res, pid = epidb.add_project("ENCODE", "desc", self.admin_key)
@@ -37,7 +37,7 @@ class TestSearch(helpers.TestCase):
     self.assertEqual(len(ids), 2)
 
   def test_genome(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init(epidb)
 
     gid = self.insert_genome(epidb, "hg19")
@@ -60,7 +60,7 @@ class TestSearch(helpers.TestCase):
 
 
   def test_epigenetic_mark(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init(epidb)
 
     res, emid1 = epidb.add_epigenetic_mark("Methylation", "DNA Methylation", {"category": "DNA Methylation"}, self.admin_key)
@@ -98,7 +98,7 @@ class TestSearch(helpers.TestCase):
 
 
   def test_biosource(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init(epidb)
 
     res = epidb.add_biosource("K562", "leukemia cell", {}, self.admin_key)
@@ -122,7 +122,7 @@ class TestSearch(helpers.TestCase):
 
 
   def test_sample(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init(epidb)
 
     res = epidb.add_biosource("K562", "desc1", {}, self.admin_key)
@@ -139,7 +139,7 @@ class TestSearch(helpers.TestCase):
 
 
   def test_project(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init(epidb)
 
     res, pid1 = epidb.add_project("ENCODE", "The ENCODE Project: ENCyclopedia Of DNA Elements", self.admin_key)
@@ -163,7 +163,7 @@ class TestSearch(helpers.TestCase):
 
 
   def test_experiment(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     eid1 = self.insert_experiment(epidb, "hg19_chr1_1")
@@ -176,7 +176,7 @@ class TestSearch(helpers.TestCase):
 
 
   def test_experiment_metadata(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     sample_id = self.sample_ids[0]
@@ -202,7 +202,7 @@ class TestSearch(helpers.TestCase):
 
 
   def test_exclude(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init(epidb)
 
     res, bsid1 = epidb.add_biosource("K562", "leukemia cell", {}, self.admin_key)
@@ -222,13 +222,13 @@ class TestSearch(helpers.TestCase):
     self.assertTrue(ids[0][0], bsid3)
 
   def test_invalid_search(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init(epidb)
     s, e = epidb.search("hg19", "genome", self.admin_key)
     self.assertEqual("genome is not a valid type. The valid types are: 'annotations,biosources,column_types,epigenetic_marks,experiments,genomes,gene_sets,genes,projects,samples,techniques,tilings'", e)
 
   def test_search_synonyms(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     res, bsid1 = epidb.add_biosource("Bio Source A", "bio source A", {}, self.admin_key)
@@ -254,7 +254,7 @@ class TestSearch(helpers.TestCase):
     self.assertEquals(info[0], {'description': 'bio source A', 'user': 'test_admin', '_id': 'bs3', 'type': 'biosource', 'name': 'Bio Source A'})
 
   def test_search_embracing(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init(epidb)
 
     s = epidb.add_biosource("Ana", "Ana", {}, self.admin_key)
@@ -312,7 +312,7 @@ class TestSearch(helpers.TestCase):
     self.assertEquals(sorted(expected_three), sorted(r3))
 
   def test_search_sample_related(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init(epidb)
 
     s = epidb.add_biosource("Ana", "Ana", {}, self.admin_key)
@@ -350,7 +350,7 @@ class TestSearch(helpers.TestCase):
 
 
   def test_search_experiment_related(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     s = epidb.add_biosource("Ana", "Ana", {}, self.admin_key)
@@ -385,7 +385,7 @@ class TestSearch(helpers.TestCase):
     self.assertEqual([['bs5', 'Carolina', 'biosources'], ['s3', '', 'samples'], ['e1', 'las chicas', 'experiments']], r2)
 
   def test_column_types_search(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init(epidb)
 
     res = epidb.create_column_type_simple("name", "description", "string", self.admin_key)

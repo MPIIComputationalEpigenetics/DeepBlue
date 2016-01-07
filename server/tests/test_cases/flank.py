@@ -1,12 +1,12 @@
 import helpers
 
-from client import EpidbClient
+from deepblue_client import DeepBlueClient
 
 
 class TestFlank(helpers.TestCase):
 
   def test_flank_genes(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     data = open("data/gtf/gencode.v23.basic.annotation_head.gtf").read()

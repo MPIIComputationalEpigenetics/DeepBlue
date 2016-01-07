@@ -1,13 +1,13 @@
 import helpers
 import settings
 
-from client import EpidbClient
+from deepblue_client import DeepBlueClient
 
 class TestGetInfoCommand(helpers.TestCase):
   maxDiff = None
 
   def test_empty_info(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init(epidb)
     (s, rs) = epidb.info("", self.admin_key)
     self.assertEquals(rs, [])
@@ -16,7 +16,7 @@ class TestGetInfoCommand(helpers.TestCase):
     self.assertEquals(rs, [])
 
   def test_genome_info(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init(epidb)
 
     genome_info = None
@@ -34,7 +34,7 @@ class TestGetInfoCommand(helpers.TestCase):
 
 
   def test_epigenetic_mark_info(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init(epidb)
 
     res, emid = epidb.add_epigenetic_mark("Methylation", "DNA Methylation", {"category":"DNA Methylation"}, self.admin_key)
@@ -49,7 +49,7 @@ class TestGetInfoCommand(helpers.TestCase):
 
 
   def test_annotation_info(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     aid = None
@@ -71,7 +71,7 @@ class TestGetInfoCommand(helpers.TestCase):
 
 
   def test_experiment_info(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     sample_id = self.sample_ids[0]
@@ -117,7 +117,7 @@ class TestGetInfoCommand(helpers.TestCase):
     self.assertEqual(data[0]['_id'], eid)
 
   def test_query_info(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
     sample_id = self.sample_ids[0]
@@ -136,7 +136,7 @@ class TestGetInfoCommand(helpers.TestCase):
 
 
   def test_biosource_info(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init(epidb)
 
     res, bsid = epidb.add_biosource("K562", "desc1", {}, self.admin_key)
@@ -150,7 +150,7 @@ class TestGetInfoCommand(helpers.TestCase):
     self.assertEqual(data[0]['_id'], bsid)
 
   def test_sample_info(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init(epidb)
 
     res, bsid = epidb.add_biosource("K562", "desc1", {}, self.admin_key)
@@ -167,7 +167,7 @@ class TestGetInfoCommand(helpers.TestCase):
     self.assertEqual(data[0]['_id'], sid)
 
   def test_me_info(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init(epidb)
 
     s, info = epidb.info("me", self.admin_key)
@@ -179,7 +179,7 @@ class TestGetInfoCommand(helpers.TestCase):
     self.assertTrue("permission_level" in info and info["permission_level"] == "ADMIN")
 
   def test_request_info_permission(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_full(epidb)
 
     s, user = epidb.add_user("user1", "test1@example.com", "test", self.admin_key)

@@ -1,12 +1,12 @@
 import helpers
 
-from client import EpidbClient
+from deepblue_client import DeepBlueClient
 
 
 class TestTilingRegions(helpers.TestCase):
 
   def test_full_genome(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base()
 
     res, qid = epidb.tiling_regions(1000000, "hg19", None, self.admin_key)
@@ -18,7 +18,7 @@ class TestTilingRegions(helpers.TestCase):
 
 
   def test_chromosomes(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base()
 
     res, qid = epidb.tiling_regions(1000000, "hg19", ["chr15", "chrX", "chr3"], self.admin_key)
@@ -36,7 +36,7 @@ class TestTilingRegions(helpers.TestCase):
 
 
   def test_filter_tiling(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base()
 
     res, qid = epidb.tiling_regions(10000, "hg19", "chr1", self.admin_key)
@@ -54,7 +54,7 @@ class TestTilingRegions(helpers.TestCase):
 
 
   def test_intersect_tiling(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_full(epidb)
 
     res, qid1 = epidb.tiling_regions(1000, "hg19", "chr1", self.admin_key)
@@ -75,7 +75,7 @@ class TestTilingRegions(helpers.TestCase):
 
 
   def test_merge_tiling(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_full(epidb)
 
     res, qid1 = epidb.tiling_regions(10000, "hg19", "chr1", self.admin_key)
@@ -101,7 +101,7 @@ class TestTilingRegions(helpers.TestCase):
     self.assertEqual(regions, expected_regions)
 
   def test_metacolumn_experiment_name(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base()
 
     res, qid = epidb.tiling_regions(1000000, "hg19", "chrY", self.admin_key)
@@ -126,7 +126,7 @@ class TestTilingRegions(helpers.TestCase):
 
 
   def test_metacolumn_sequence(self):
-    epidb = EpidbClient()
+    epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base()
 
     sequence = open("data/genomes/chromosomes/chrM.fa").read()
