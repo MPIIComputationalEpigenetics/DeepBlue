@@ -2,6 +2,7 @@ DeepBlue Epigenomic Data Server
 ========
 
 Copyright (c) 2016 Max Planck Institute for Informatics. All rights reserved.
+
 Author: Felipe Albrecht (felipe.albrecht@mpi-inf.mpg.de)
 
 DeepBlue Epigenomic Data Server is a data server for epigenomic data that allows users to find, operate, and retrieve epigenomic data.
