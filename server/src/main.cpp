@@ -3,7 +3,7 @@
 //  epidb
 //
 //  Created by Felipe Albrecht on 27.05.13.
-//  Copyright (c) 2013,2014 Max Planck Institute for Computer Science. All rights reserved.
+//  Copyright (c) 2016 Max Planck Institute for Informatics. All rights reserved.
 //
 //
 // based on:
@@ -51,6 +51,7 @@ int main(int argc, char *argv[])
   po::options_description desc("DeepBlue parameters");
   desc.add_options()
   ("help,H", "Help message")
+  ("licence_terms,LT", "License terms of this software")
   ("address,A", po::value<std::string>(&address)->default_value("localhost"), "Local address")
   ("port,P", po::value<std::string>(&port)->default_value("31415"), "Local port")
   ("threads,T", po::value<size_t>(&threads)->default_value(10), "Number of concurrent http data listeners")
@@ -58,7 +59,6 @@ int main(int argc, char *argv[])
   ("database_name,D", po::value<std::string>(&database_name)->default_value("epidb"), "Database name")
   ("processing_threads,R", po::value<size_t>(&processing_threads)->default_value(4), "Number of concurrent threads for processing request data")
   ("processing_max_memory,O", po::value<long long>(&processing_max_memory)->default_value(8ll * 1024 * 1024 * 1024), "Maximum memory available for request data processing (in bytes) ")
-  ("sharding,S", "Use DeepBlue with sharding in the MongoDB")
   ;
 
   po::variables_map vm;
@@ -72,7 +72,13 @@ int main(int argc, char *argv[])
 
   if (vm.count("help")) {
     std::cout << desc << "\n";
-    return 1;
+    return 0;
+  }
+
+  if (vm.count("licence_terms")) {
+    std::cout << epidb::Version::terms << std::endl;
+    std::cout << epidb::Version::license << std::endl;
+    return 0;
   }
 
   EPIDB_LOG("Executing DeepBlue at " << address << ":" << port << " with " << threads << " threads.");

@@ -3,7 +3,7 @@
 //  epidb
 //
 //  Created by Fabian Reinartz on 29.08.13.
-//  Copyright (c) 2013,2014 Max Planck Institute for Computer Science. All rights reserved.
+//  Copyright (c) 2016 Max Planck Institute for Informatics. All rights reserved.
 //
 //  based on: https://github.com/arq5x/intervaltree
 //

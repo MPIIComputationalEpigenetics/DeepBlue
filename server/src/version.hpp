@@ -3,7 +3,7 @@
 //  epidb
 //
 //  Created by Felipe Albrecht on 13.06.13.
-//  Copyright (c) 2013,2014 Max Planck Institute for Computer Science. All rights reserved.
+//  Copyright (c) 2016 Max Planck Institute for Informatics. All rights reserved.
 //
 
 #ifndef EPIDB_VERSION_HPP
@@ -22,6 +22,8 @@ namespace epidb {
   public:
     static const std::string name;
     static const std::string copyright;
+    static const std::string license;
+    static const std::string terms;
     static const std::string author;
     static const std::string coauthors;
     static const size_t major_version;

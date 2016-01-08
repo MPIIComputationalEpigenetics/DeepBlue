@@ -4,7 +4,7 @@
 //
 //  Created by Fabian Reinartz on 17.12.13.
 //  Refactored by Felipe Albrecht on 07.01.16.
-//  Copyright (c) 2013,2014,2015,2016 Max Planck Institute for Computer Science. All rights reserved.
+//  Copyright (c) 2016 Max Planck Institute for Informatics. All rights reserved.
 //
 
 #include "../dba/dba.hpp"

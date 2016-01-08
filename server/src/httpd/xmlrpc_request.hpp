@@ -3,7 +3,7 @@
 //  epidb
 //
 //  Created by Felipe Albrecht on 27.05.13.
-//  Copyright (c) 2013,2014 Max Planck Institute for Computer Science. All rights reserved.
+//  Copyright (c) 2016 Max Planck Institute for Informatics. All rights reserved.
 //
 #ifndef EPIDB_HTTPD_XMLRPC_REQUEST_HPP
 #define EPIDB_HTTPD_XMLRPC_REQUEST_HPP

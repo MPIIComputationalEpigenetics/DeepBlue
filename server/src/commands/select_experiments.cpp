@@ -3,7 +3,7 @@
 //  epidb
 //
 //  Created by Felipe Albrecht on 01.11.15.
-//  Copyright (c) 2015 Max Planck Institute for Computer Science. All rights reserved.
+//  Copyright (c) 2016 Max Planck Institute for Informatics. All rights reserved.
 //
 
 #include <sstream>

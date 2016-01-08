@@ -3,7 +3,7 @@
 //  epidb
 //
 //  Created by Felipe Albrecht on 10.12.13.
-//  Copyright (c) 2013,2014 Max Planck Institute for Computer Science. All rights reserved.
+//  Copyright (c) 2016 Max Planck Institute for Informatics. All rights reserved.
 //
 
 #ifndef EPIDB_EXTERNA_GEO_HPP

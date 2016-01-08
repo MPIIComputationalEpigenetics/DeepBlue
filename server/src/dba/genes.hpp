@@ -3,7 +3,7 @@
 //  epidb
 //
 //  Created by Felipe Albrecht on 09.09.2015
-//  Copyright (c) 2015 Max Planck Institute for Computer Science. All rights reserved.
+//  Copyright (c) 2016 Max Planck Institute for Informatics. All rights reserved.
 //
 
 #ifndef DBA_GENES_HPP

@@ -3,7 +3,7 @@
 //  epidb
 //
 //  Created by Felipe Albrecht on 03.11.14.
-//  Copyright (c) 2013,2014 Max Planck Institute for Computer Science. All rights reserved.
+//  Copyright (c) 2016 Max Planck Institute for Informatics. All rights reserved.
 //
 
 #ifndef EPIDB_DBA_USERS_HPP
@@ -58,7 +58,7 @@ namespace epidb {
       * \brief Cleans cache
       */
       void invalidate_cache();
-      
+
       bool get_owner(const std::string& id, datatypes::User& user, std::string& msg);
     }
   }
