@@ -1,5 +1,0 @@
-UseTab: Never
-TabWidth: 4
-BreakBeforeBraces: Stroustrup
-NamespaceIndentation: All
-ColumnLimit: 0
