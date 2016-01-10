@@ -1,8 +1,7 @@
 //
 //  gtf.hpp
-//  epidb
-//
-//  Created by Felipe Albrecht on 04.09.15.
+//  DeepBlue Epigenomic Data Server
+//  File created by Felipe Albrecht on 04.09.15.
 //  Copyright (c) 2015 Max Planck Institute for Computer Science. All rights
 //  reserved.
 //
