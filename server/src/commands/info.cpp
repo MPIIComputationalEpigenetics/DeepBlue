@@ -277,7 +277,13 @@ namespace epidb {
               serialize::ParameterPtr p(new serialize::SimpleParameter(it->second));
               extra_metadata_parameter->add_child(it->first, p);
             }
-            info->add_child("extra_metadata", extra_metadata_parameter);
+            std::string key_name;
+            if (id.compare(0, 1, "r") == 0) {
+              key_name = "parameters";
+            } else {
+              key_name = "extra_metadata";
+            }
+            info->add_child(key_name, extra_metadata_parameter);
           }
 
           if (!chromosomes.isEmpty()) {
