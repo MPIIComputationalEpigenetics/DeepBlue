@@ -300,7 +300,6 @@ namespace epidb {
 
           if (!chromosomes.isEmpty()) {
             serialize::ParameterPtr chromosomes_parameter(new serialize::ListParameter());
-            std::map<std::string, std::string>::iterator it;
             for (mongo::BSONObj::iterator it = chromosomes.begin(); it.more(); ) {
               mongo::BSONElement e = it.next();
               serialize::ParameterPtr chromosome_parameter(new serialize::MapParameter());
