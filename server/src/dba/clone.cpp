@@ -284,12 +284,21 @@ namespace epidb {
         return false;
       }
 
-      mongo::BSONObjBuilder upload_info_builder;
-      upload_info_builder.append("user", user.id);
-      upload_info_builder.append("cloned_from", dataset_id);
-      upload_info_builder.append("done", true);
-      upload_info_builder.append("upload_end", mongo::jsTime());
+      mongo::BSONObj original_upload_info = original["upload_info"].Obj();
 
+      mongo::BSONObjBuilder upload_info_builder;
+      for (mongo::BSONObj::iterator it = original_upload_info.begin(); it.more(); ) {
+        mongo::BSONElement e = it.next();
+        if (strncmp(e.fieldName(), "user", strlen("user")) == 0) {
+          upload_info_builder.append("user", user.id);
+        } else if (strncmp(e.fieldName(), "upload_end", strlen("upload_end")) == 0) {
+          upload_info_builder.append("upload_end", mongo::jsTime());
+        } else if (strncmp(e.fieldName(), "client_address", strlen("client_address")) == 0) {
+          upload_info_builder.append("client_address", ip);
+        } else {
+          upload_info_builder.append(e);
+        }
+      }
       clone_final_builder.append("upload_info", upload_info_builder.obj());
       mongo::BSONObj clone = clone_final_builder.obj();
 
