@@ -57,4 +57,25 @@ class TestGenes(helpers.TestCase):
     count = self.count_request(req)
     self.assertEquals(count, 8)
 
+    (s, query_id) = epidb.select_genes(["RP1?"], "Test One", self.admin_key)
+    (s, req) = epidb.count_regions(query_id, self.admin_key)
+    count = self.count_request(req)
+    self.assertEquals(count, 8)
+
+  def test_gene_case_insensitive(self):
+    epidb = DeepBlueClient(address="localhost", port=31415)
+    self.init_base(epidb)
+
+    data = open("data/gtf/gencode.v23.basic.annotation_head.gtf").read()
+
+    (s, ss) = epidb.add_gene_set("Test One", "Test One Description", data, "GTF", {}, self.admin_key)
+    self.assertSuccess(s, ss)
+
+    (s, query_id) = epidb.select_genes(["Rp11-34p13.7"], "Test One", self.admin_key)
+    (s, req) = epidb.count_regions(query_id, self.admin_key)
+    count = self.count_request(req)
+    self.assertEquals(count, 1)
+
+
+
 

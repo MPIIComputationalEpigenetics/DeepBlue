@@ -468,7 +468,7 @@ namespace epidb {
     {
       mongo::BSONArrayBuilder ab;
       for (const auto& param : params) {
-        ab.appendRegex(param);
+        ab.appendRegex(param, "i");
       }
       return ab.arr();
     }
