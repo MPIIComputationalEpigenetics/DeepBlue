@@ -21,7 +21,7 @@ ANNOTATIONS = {
   "Cpg Islands All Fields": {
     "data_file": "data/cpgIslandAllFields.txt",
     "description": "CpG islands are associated ... (all fields)",
-    "format": "CHROMOSOME,START,END,NAME,length:Integer,cpgNum:Integer,gcNum:Integer,perCpg:Double,perGc:Double,obsExp:Double",
+    "format": "CHROMOSOME,START,END,NAME,LENGTH,NUM_CPG,NUM_GC,PER_CPG,PER_CG,OBS_EXP",
     "metadata": {"url":"genome.ucsc.edu/cgi-bin/hgTables?db=hg19&hgta_group=regulation&hgta_track=cpgIslandExt&hgta_table=cpgIslandExt&hgta_doSchema=describe+table+schema"},
     "genome": "hg19"
   }
@@ -256,6 +256,7 @@ EXPERIMENTS = {
 
 COLUMNS = [
   ("AVG_METHYL_LEVEL", "Average methylation level in region", "double"),
+  ("BIN", "Bin", "integer"),
   ("NAME", "Region name", "string"),
   ("SCORE", "Region score", "double"),
   ("SIGNAL_VALUE", "Signal value", "double"),
@@ -279,6 +280,7 @@ COLUMNS = [
   ("MEDIAN_TOTAL_CPG", "Median number of total reads at CpGs in region", "integer"),
   ("PER_CPG", "Per CPG", "double"),
   ("PER_GC", "Per GC", "double"),
+  ("PER_CG", "Per CG", "double"),
   ("OBS_EXP", "Obs Exp", "double"),
   ("GENE_ID_ENSEMBL", "Gene Ensemble ID", "string"),
   ("SPAN", "span", "integer"),

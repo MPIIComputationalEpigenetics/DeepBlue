@@ -44,12 +44,12 @@ class TestScoreMatrixCommand(helpers.TestCase):
       "START",
       "END",
       "NAME",
-      "length:Integer",
-      "cpgNum:Integer",
-      "gcNum:Integer",
-      "perCpg:Double",
-      "perGc:Double",
-      "obsExp:Double"
+      "LENGTH",
+      "NUM_CPG",
+      "NUM_GC",
+      "PER_CPG",
+      "PER_CG",
+      "OBS_EXP"
       ])
 
     (s, q_tiling) = epidb.tiling_regions(10000000, "hg19", "chr1", self.admin_key)

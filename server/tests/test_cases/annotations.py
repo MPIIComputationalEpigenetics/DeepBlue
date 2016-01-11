@@ -97,12 +97,12 @@ class TestAnnotationCommands(helpers.TestCase):
       "START",
       "END",
       "NAME",
-      "length:Integer",
-      "cpgNum:Integer",
-      "gcNum:Integer",
-      "perCpg:Double",
-      "perGc:Double",
-      "obsExp:Double"
+      "LENGTH",
+      "NUM_CPG",
+      "NUM_GC",
+      "PER_CPG",
+      "PER_CG",
+      "OBS_EXP"
       ])
 
     with open("data/cpgIslandExtFull.txt", 'r') as f:
@@ -128,12 +128,12 @@ class TestAnnotationCommands(helpers.TestCase):
       "START",
       "END",
       "NAME",
-      "length:Integer",
-      "cpgNum:Integer",
-      "gcNum:Integer",
-      "perCpg:Double",
-      "perGc:Double",
-      "obsExp:Double"
+      "LENGTH",
+      "NUM_CPG",
+      "NUM_GC",
+      "PER_CPG",
+      "PER_CG",
+      "OBS_EXP"
       ])
 
     file_data = None

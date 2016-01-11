@@ -144,7 +144,7 @@ class TestExperiments(helpers.TestCase):
     self.assertSuccess(s, req)
 
     msg = self.get_regions_request_error(req)
-    self.assertEqual(msg, "123000:Unable to find the column name 'calculated' in the dataset format or in the DeepBlue columns.")
+    self.assertEqual(msg, "123000:Column name 'calculated' does not exist.")
 
     # missing math. before log
     (s, req) = epidb.get_regions(qid1, "CHROMOSOME,START,END,VALUE,@CALCULATED(return log(value_of('VALUE'))), @CALCULATED(em = value_of('@EPIGENETIC_MARK') if em == 'Methylation' then return 'it is methylation!' else return 'it is not methylation' end)", self.admin_key)

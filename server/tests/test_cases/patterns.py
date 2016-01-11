@@ -146,5 +146,30 @@ class TestPattern(helpers.TestCase):
     self.assertEquals(rgs, 'chrM\t91\t95\nchrM\t1439\t1443\nchrM\t1553\t1557\nchrM\t1643\t1647\nchrM\t1885\t1889\nchrM\t2144\t2148\nchrM\t3137\t3141\nchrM\t3880\t3884\nchrM\t5758\t5762\nchrM\t6580\t6584\nchrM\t7321\t7325\nchrM\t8340\t8344\nchrM\t8517\t8521\nchrM\t9394\t9398\nchrM\t11889\t11893\nchrM\t12054\t12058\nchrM\t12207\t12211\nchrM\t12767\t12771\nchrM\t12923\t12927\nchrM\t14601\t14605\nchrM\t14958\t14962\nchrM\t15928\t15932\nchrM\t15959\t15963')
 
 
+  def __test_missing_preprocessed(self):
+    epidb = DeepBlueClient(address="localhost", port=31415)
+    self.init_base(epidb)
 
+    genome_info = "chr19 59128983"
+    res = epidb.add_genome("hg19_only_chr19", "hg19 with only the chr19", genome_info, self.admin_key)
+    self.assertSuccess(res)
+
+    sequence = open("data/genomes/chromosomes/hg19.chr19").read().replace("\n", "")
+    res = epidb.upload_chromosome("hg19_only_chr19", "chr19", sequence, self.admin_key)
+    self.assertSuccess(res)
+
+    res, qid = epidb.select_annotations("Chromosomes size for hg19_only_chr19", "hg19_only_chr19", None, None, None, self.admin_key)
+    fmt = "CHROMOSOME,START,END,@NAME,@LENGTH,@COUNT.NON-OVERLAP(TATA)"
+    res, req = epidb.get_regions(qid, fmt, self.admin_key)
+    self.get_regions_request_error(req)
+
+    res = epidb.find_pattern("TATA", "hg19_only_chr19", False, self.admin_key)
+    self.assertSuccess(res)
+
+    res, qid = epidb.select_annotations("Chromosomes size for hg19_only_chr19", "hg19_only_chr19", None, None, None, self.admin_key)
+    fmt = "CHROMOSOME,START,END,@NAME,@LENGTH,@COUNT.NON-OVERLAP(TATA)"
+    res, req = epidb.get_regions(qid, fmt, self.admin_key)
+    rgs = self.get_regions_request(req)
+    expected = "chr19\t0\t59128983\tChromosomes size for hg19_only_chr19\t59128983\t159464\t336889\t496353"
+    self.assertEquals(expected, regions)
 

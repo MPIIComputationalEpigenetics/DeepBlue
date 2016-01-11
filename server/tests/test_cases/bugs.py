@@ -10,23 +10,23 @@ class TestBugs(helpers.TestCase):
     file_content = """1036\t1146\t43\t0\t18\tchr19\t59118819\t1000\t-10000\t+\t(TTAGGG)n\tSimple_repeat\tSimple_repeat\t5\t165\t0\t1\n585\t1080\t161\t1\t0\tchr19_gl000208_random\t0\t719\t-91970\t-\tALR/Alpha\tSatellite\tcentr\t-41\t719\t1\t4"""
 
     rmsk = [
-  "bin:string",
+  "BIN",
   "swSCORE",
-  "milliDiv:Integer",
-  "milliDel:Integer",
-  "milliIns:Integer",
-  "chromosome:String",
-  "start:Integer",
-  "end:Integer",
-  "genoLeft:Integer",
+  "MILLI_DIV",
+  "MILLI_DEL",
+  "MILLI_INS",
+  "NAME",
+  "START",
+  "END",
+  "GENO_LEFT",
   "STRAND",
   "repNAME",
-  "repClass:String",
-  "repFamily:String",
-  "repStart:Integer",
-  "repEnd:Integer",
-  "repLeft:Integer",
-  "id:String"
+  "REP_CLASS",
+  "REP_FAMILY",
+  "REP_START",
+  "REP_END",
+  "REP_LEFT",
+  "ID"
 ]
     format = ",".join(rmsk)
 
@@ -40,23 +40,23 @@ class TestBugs(helpers.TestCase):
     self.assertEquals(a, "120002:The CHROMOSOME is missing in the format. Please, inform the CHROMOSOME column in the Format.")
 
     rmsk2 = [
-  "bin:string",
+  "BIN",
   "swSCORE",
-  "milliDiv:Integer",
-  "milliDel:Integer",
-  "milliIns:Integer",
-  "CHROMOSOME:String",
-  "START:Integer",
-  "END:Integer",
-  "genoLeft:Integer",
+  "MILLI_DIV",
+  "MILLI_DEL",
+  "MILLI_INS",
+  "CHROMOSOME",
+  "START",
+  "END",
+  "GENO_LEFT",
   "STRAND",
   "repNAME",
-  "repClass:String",
-  "repFamily:String",
-  "repStart:Integer",
-  "repEnd:Integer",
-  "repLeft:Integer",
-  "id:String"
+  "REP_CLASS",
+  "REP_FAMILY",
+  "REP_START",
+  "REP_END",
+  "REP_LEFT",
+  "ID"
 ]
     format2 = ",".join(rmsk2)
 
@@ -91,12 +91,12 @@ class TestBugs(helpers.TestCase):
       "START",
       "END",
       "NAME",
-      "length:Integer",
-      "cpgNum:Integer",
-      "gcNum:Integer",
-      "perCpg:Double",
-      "perGc:Double",
-      "obsExp:Double"
+      "LENGTH",
+      "NUM_CPG",
+      "NUM_GC",
+      "PER_CPG",
+      "PER_CG",
+      "OBS_EXP"
       ])
 
     file_data = None

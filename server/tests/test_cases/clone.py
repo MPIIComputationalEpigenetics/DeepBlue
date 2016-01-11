@@ -63,7 +63,7 @@ class TestClone(helpers.TestCase):
     aid1 = self.insert_annotation(epidb, "Cpg Islands")
 
     (s, msg) = epidb.clone_dataset(aid1, "New CpG Islands", "", "", "", "", "", "CHROMOSOME,START,END,INVALID_COLUMN", {"new":"true"}, self.admin_key)
-    self.assertEqual(msg, "Error loading column type: 'INVALID_COLUMN'")
+    self.assertEqual(msg, "123000:Column name 'INVALID_COLUMN' does not exist.")
 
     (s, m) = epidb.create_column_type_simple("NICE_COLUMN", "",  "string", self.admin_key)
     self.assertSuccess(s,m)
@@ -79,16 +79,7 @@ class TestClone(helpers.TestCase):
     (s, m) = epidb.create_column_type_simple("CPG_ISLAND_NAME", "", "string", self.admin_key)
     self.assertSuccess(s,m)
 
-    (s, m) = epidb.create_column_type_simple("CPG_NUM", "", "integer", self.admin_key)
-    self.assertSuccess(s,m)
-
-    (s, m) = epidb.create_column_type_simple("GC_NUM", "", "integer", self.admin_key)
-    self.assertSuccess(s,m)
-
-    (s, m) = epidb.create_column_type_simple("PER_CG", "", "double", self.admin_key)
-    self.assertSuccess(s,m)
-
-    (s, clone_id) = epidb.clone_dataset(aid1, "New CpG Islands", "", "", "", "", "", "CHROMOSOME,START,END,CPG_ISLAND_NAME,LENGTH,CPG_NUM,GC_NUM,PER_CPG,PER_CG,OBS_EXP", {"new":"true"}, self.admin_key)
+    (s, clone_id) = epidb.clone_dataset(aid1, "New CpG Islands", "", "", "", "", "", "CHROMOSOME,START,END,CPG_ISLAND_NAME,LENGTH,NUM_CPG,NUM_GC,PER_CPG,PER_CG,OBS_EXP", {"new":"true"}, self.admin_key)
     self.assertSuccess(s, clone_id)
 
     s, info = epidb.info(clone_id, self.admin_key)
@@ -97,7 +88,7 @@ class TestClone(helpers.TestCase):
     info[0]['upload_info']['upload_start'] = '0'
     info[0]['upload_info']['total_size'] = '0'
 
-    self.assertEqual(info[0], {'description': 'CpG islands are associated ... (all fields)', 'format': 'CHROMOSOME,START,END,CPG_ISLAND_NAME,LENGTH,CPG_NUM,GC_NUM,PER_CPG,PER_CG,OBS_EXP', 'extra_metadata': {'new': 'true'}, 'upload_info': {'total_size': '0', 'content_format': 'peaks', 'done': 'true', 'user': 'test_admin', 'upload_end': '0', 'upload_start': '0', 'client_address': '127.0.0.1'}, 'genome': 'hg19', '_id': 'a4', 'type': 'annotation', 'columns': [{'name': 'CHROMOSOME', 'column_type': 'string'}, {'name': 'START', 'column_type': 'integer'}, {'name': 'END', 'column_type': 'integer'}, {'name': 'CPG_ISLAND_NAME', 'column_type': 'string'}, {'name': 'LENGTH', 'column_type': 'integer'}, {'name': 'CPG_NUM', 'column_type': 'integer'}, {'name': 'GC_NUM', 'column_type': 'integer'}, {'name': 'PER_CPG', 'column_type': 'double'}, {'name': 'PER_CG', 'column_type': 'double'}, {'name': 'OBS_EXP', 'column_type': 'double'}], 'name': 'New CpG Islands'})
+    self.assertEqual(info[0], {'description': 'CpG islands are associated ... (all fields)', 'format': 'CHROMOSOME,START,END,CPG_ISLAND_NAME,LENGTH,NUM_CPG,NUM_GC,PER_CPG,PER_CG,OBS_EXP', 'extra_metadata': {'new': 'true'}, 'upload_info': {'total_size': '0', 'content_format': 'peaks', 'done': 'true', 'user': 'test_admin', 'upload_end': '0', 'upload_start': '0', 'client_address': '127.0.0.1'}, 'genome': 'hg19', '_id': 'a4', 'type': 'annotation', 'columns': [{'name': 'CHROMOSOME', 'column_type': 'string'}, {'name': 'START', 'column_type': 'integer'}, {'name': 'END', 'column_type': 'integer'}, {'name': 'CPG_ISLAND_NAME', 'column_type': 'string'}, {'name': 'LENGTH', 'column_type': 'integer'}, {'name': 'NUM_CPG', 'column_type': 'integer'}, {'name': 'NUM_GC', 'column_type': 'integer'}, {'name': 'PER_CPG', 'column_type': 'double'}, {'name': 'PER_CG', 'column_type': 'double'}, {'name': 'OBS_EXP', 'column_type': 'double'}], 'name': 'New CpG Islands'})
 
   def test_better_names(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
@@ -107,16 +98,7 @@ class TestClone(helpers.TestCase):
     (s, m) = epidb.create_column_type_simple("CPG_ISLAND_NAME", "", "string", self.admin_key)
     self.assertSuccess(s,m)
 
-    (s, m) = epidb.create_column_type_simple("CPG_NUM", "", "integer", self.admin_key)
-    self.assertSuccess(s,m)
-
-    (s, m) = epidb.create_column_type_simple("GC_NUM", "", "integer", self.admin_key)
-    self.assertSuccess(s,m)
-
-    (s, m) = epidb.create_column_type_simple("PER_CG", "", "double", self.admin_key)
-    self.assertSuccess(s,m)
-
-    (s, clone_id) = epidb.clone_dataset(aid1, "New CpG Islands", "", "", "", "", "", "CHROMOSOME,START,END,CPG_ISLAND_NAME,LENGTH,CPG_NUM,GC_NUM,PER_CPG,PER_CG,OBS_EXP", {"new":"true"}, self.admin_key)
+    (s, clone_id) = epidb.clone_dataset(aid1, "New CpG Islands", "", "", "", "", "", "CHROMOSOME,START,END,CPG_ISLAND_NAME,LENGTH,NUM_CPG,NUM_GC,PER_CPG,PER_CG,OBS_EXP", {"new":"true"}, self.admin_key)
     self.assertSuccess(s, clone_id)
     self.assertEqual(clone_id, "a4")
 
@@ -128,10 +110,10 @@ class TestClone(helpers.TestCase):
     (s, m) = epidb.create_column_type_simple("CPG_ISLAND_NAME", "", "string", self.admin_key)
     self.assertSuccess(s,m)
 
-    (s, m) = epidb.create_column_type_simple("CPG_NUM_S", "", "string", self.admin_key)
+    (s, m) = epidb.create_column_type_simple("NUM_CPG_S", "", "string", self.admin_key)
     self.assertSuccess(s,m)
 
-    (s, m) = epidb.create_column_type_simple("GC_NUM_S", "", "string", self.admin_key)
+    (s, m) = epidb.create_column_type_simple("NUM_GC_S", "", "string", self.admin_key)
     self.assertSuccess(s,m)
 
     (s, m) = epidb.create_column_type_simple("PER_CG_S", "", "string", self.admin_key)
@@ -146,46 +128,37 @@ class TestClone(helpers.TestCase):
     (s, m) = epidb.create_column_type_simple("LENGTH_S", "", "string", self.admin_key)
     self.assertSuccess(s,m)
 
-    (s, clone_id) = epidb.clone_dataset(aid1, "New CpG Islands", "", "", "", "", "", "CHROMOSOME,START,END,CPG_ISLAND_NAME,LENGTH_S,CPG_NUM_S,GC_NUM_S,PER_CPG_S,PER_CG_S,OBS_EXP_S", {"new":"true"}, self.admin_key)
+    (s, clone_id) = epidb.clone_dataset(aid1, "New CpG Islands", "", "", "", "", "", "CHROMOSOME,START,END,CPG_ISLAND_NAME,LENGTH_S,NUM_CPG_S,NUM_GC_S,PER_CPG_S,PER_CG_S,OBS_EXP_S", {"new":"true"}, self.admin_key)
     self.assertFailure(s, clone_id)
-    self.assertEqual(clone_id, "The column 'LENGTH_S' (type: string) is incompatible with the original column 'length' (type: integer)")
+    self.assertEqual(clone_id, "The column 'LENGTH_S' (type: string) is incompatible with the original column 'LENGTH' (type: integer)")
 
     # --
-
-    (s, m) = epidb.create_column_type_simple("CPG_NUM", "", "integer", self.admin_key)
-    self.assertSuccess(s,m)
-
-    (s, m) = epidb.create_column_type_simple("GC_NUM", "", "integer", self.admin_key)
-    self.assertSuccess(s,m)
 
     (s, m) = epidb.create_column_type_simple("OBS_EXP_INT", "", "integer", self.admin_key)
     self.assertSuccess(s,m)
 
-    (s, m) = epidb.create_column_type_simple("PER_CG", "", "double", self.admin_key)
-    self.assertSuccess(s,m)
-
-    (s, clone_id) = epidb.clone_dataset(aid1, "New CpG Islands", "", "", "", "", "", "CHROMOSOME,START,END,CPG_ISLAND_NAME,LENGTH,CPG_NUM,GC_NUM,PER_CPG,PER_CG,OBS_EXP_INT", {"new":"true"}, self.admin_key)
+    (s, clone_id) = epidb.clone_dataset(aid1, "New CpG Islands", "", "", "", "", "", "CHROMOSOME,START,END,CPG_ISLAND_NAME,LENGTH,NUM_CPG,NUM_GC,PER_CPG,PER_CG,OBS_EXP_INT", {"new":"true"}, self.admin_key)
     self.assertFailure(s, clone_id)
-    self.assertEqual(clone_id, "The column 'OBS_EXP_INT' (type: integer) is incompatible with the original column 'obsExp' (type: double)")
+    self.assertEqual(clone_id, "The column 'OBS_EXP_INT' (type: integer) is incompatible with the original column 'OBS_EXP' (type: double)")
 
     # --
     (s, m) = epidb.create_column_type_range("OBS_EXP_RANGE", "", -1.0, 1.0, self.admin_key)
     self.assertSuccess(s,m)
 
-    (s, clone_id) = epidb.clone_dataset(aid1, "New CpG Islands", "", "", "", "", "", "CHROMOSOME,START,END,CPG_ISLAND_NAME,LENGTH,CPG_NUM,GC_NUM,PER_CPG,PER_CG,OBS_EXP_RANGE", {"new":"true"}, self.admin_key)
+    (s, clone_id) = epidb.clone_dataset(aid1, "New CpG Islands", "", "", "", "", "", "CHROMOSOME,START,END,CPG_ISLAND_NAME,LENGTH,NUM_CPG,NUM_GC,PER_CPG,PER_CG,OBS_EXP_RANGE", {"new":"true"}, self.admin_key)
     self.assertFailure(s, clone_id)
-    self.assertEqual(clone_id, "The column 'OBS_EXP_RANGE' (type: range) is incompatible with the original column 'obsExp' (type: double)")
+    self.assertEqual(clone_id, "The column 'OBS_EXP_RANGE' (type: range) is incompatible with the original column 'OBS_EXP' (type: double)")
 
     # --
     (s, m) = epidb.create_column_type_category("OBS_EXP_CATEGORY", "", ["+", "-"], self.admin_key)
     self.assertSuccess(s,m)
 
-    (s, clone_id) = epidb.clone_dataset(aid1, "New CpG Islands", "", "", "", "", "", "CHROMOSOME,START,END,CPG_ISLAND_NAME,LENGTH,CPG_NUM,GC_NUM,PER_CPG,PER_CG,OBS_EXP_CATEGORY", {"new":"true"}, self.admin_key)
+    (s, clone_id) = epidb.clone_dataset(aid1, "New CpG Islands", "", "", "", "", "", "CHROMOSOME,START,END,CPG_ISLAND_NAME,LENGTH,NUM_CPG,NUM_GC,PER_CPG,PER_CG,OBS_EXP_CATEGORY", {"new":"true"}, self.admin_key)
     self.assertFailure(s, clone_id)
-    self.assertEqual(clone_id, "The column 'OBS_EXP_CATEGORY' (type: category) is incompatible with the original column 'obsExp' (type: double)")
+    self.assertEqual(clone_id, "The column 'OBS_EXP_CATEGORY' (type: category) is incompatible with the original column 'OBS_EXP' (type: double)")
 
     # --
-    (s, clone_id) = epidb.clone_dataset(aid1, "New CpG Islands", "", "", "", "", "", "CHROMOSOME,START,END,CPG_ISLAND_NAME,LENGTH,CPG_NUM,GC_NUM,PER_CPG,PER_CG,OBS_EXP", {"new":"true"}, self.admin_key)
+    (s, clone_id) = epidb.clone_dataset(aid1, "New CpG Islands", "", "", "", "", "", "CHROMOSOME,START,END,CPG_ISLAND_NAME,LENGTH,NUM_CPG,NUM_GC,PER_CPG,PER_CG,OBS_EXP", {"new":"true"}, self.admin_key)
     self.assertSuccess(s, clone_id)
 
   def test_wig_clone(self):

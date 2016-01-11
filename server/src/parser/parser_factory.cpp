@@ -442,30 +442,15 @@ namespace epidb {
       boost::split(fields_string, format, boost::is_any_of(","));
 
       for(const std::string & field_string: fields_string) {
-        std::vector<std::string> field_info;
-        boost::split(field_info, field_string, boost::is_any_of(":"));
-
         processing::StatusPtr status = processing::build_dummy_status();
 
-        size_t s = field_info.size();
-        if (s == 1) {
-          dba::columns::ColumnTypePtr column_type;
-          // Load from database
-          if (!dba::columns::load_column_type(field_info[0], status, column_type, msg)) {
-            msg = "Error loading column type: '" + field_info[0] + "'";
-            return false;
-          }
-          file_format.add(column_type);
-        } else if (s == 2) {
-          dba::columns::ColumnTypePtr column_type;
-          if (!dba::columns::column_type_simple(field_info[0], field_info[1], column_type, msg)) {
-            return false;
-          }
-          file_format.add(column_type);
-        } else {
-          msg = "File Format Error: Invalid field '" + field_string + "'";
+        dba::columns::ColumnTypePtr column_type;
+        // Load from database
+        if (!dba::columns::load_column_type(field_string, status, column_type, msg)) {
+          msg = Error::m(ERR_INVALID_COLUMN_NAME, field_string);
           return false;
         }
+        file_format.add(column_type);
       }
       return true;
     }

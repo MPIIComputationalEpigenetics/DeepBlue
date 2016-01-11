@@ -166,7 +166,7 @@ namespace epidb {
 
   Error ERR_INVALID_PRA_PROCESSED_ANNOTATION_NAME("114000", "There is not {} annotation for the patterns '{}' for the genome '{}'.");
 
-  Error ERR_INVALID_COLUMN_NAME("123000", "Unable to find the column name '{}' in the dataset format or in the DeepBlue columns.");
+  Error ERR_INVALID_COLUMN_NAME("123000", "Column name '{}' does not exist.");
   Error ERR_INVALID_COLUMN_ID("123003", "Unable to find the column ID '{}'.");
   Error ERR_DUPLICATED_COLUMN_NAME("123001", "Duplicated column name '{}'.");
 
