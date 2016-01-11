@@ -50,7 +50,8 @@
  * 11 - Genome
  * 12 - Gene
  * 13 - Gene Set
- * 14 - ...
+ * 14 - Pre-processed annotation
+ * 15 - ...
  * 20 - Chromosome
  * 21 - Start
  * 22 - End
@@ -162,6 +163,8 @@ namespace epidb {
   Error ERR_PERMISSION_QUERY("111003", "You are not the query ID '{}' owner and neither an administrator.");
 
   Error ERR_INVALID_ANNOTATION_ID("102003", "Unable to find the annotation ID '{}'.");
+
+  Error ERR_INVALID_PRA_PROCESSED_ANNOTATION_NAME("114000", "There is not {} annotation for the patterns '{}' for the genome '{}'.");
 
   Error ERR_INVALID_COLUMN_NAME("123000", "Unable to find the column name '{}' in the dataset format or in the DeepBlue columns.");
   Error ERR_INVALID_COLUMN_ID("123003", "Unable to find the column ID '{}'.");

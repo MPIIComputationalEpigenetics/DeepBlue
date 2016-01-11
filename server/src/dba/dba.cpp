@@ -1143,13 +1143,11 @@ namespace epidb {
         c.done();
         return true;
       } else {
-        msg = "There is not pre-processed annotation for the";
         if (overlap) {
-          msg = msg + " overlapped patterns.";
+          msg = Error::m(ERR_INVALID_PRA_PROCESSED_ANNOTATION_NAME, "overlapped pattern", pattern, genome);
         } else {
-          msg = msg + " non-overlapped patterns '";
+          msg = Error::m(ERR_INVALID_PRA_PROCESSED_ANNOTATION_NAME, "non-overlapped pattern", pattern, genome);
         }
-        msg = msg + pattern + "' for the genome '" + genome + "'.";
         c.done();
         return false;
       }

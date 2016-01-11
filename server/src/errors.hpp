@@ -25,6 +25,8 @@
 #include <string>
 #include <format.h>
 
+#include <boost/algorithm/string.hpp>
+
 namespace epidb {
 
   class Error {
@@ -36,6 +38,11 @@ namespace epidb {
       code_value(c),
       err_fmt(f) {}
 
+
+    std::string code() const {
+      return code_value;
+    }
+
     template<typename... Args>
     static std::string m(const Error e, const Args & ... args)
     {
@@ -44,6 +51,12 @@ namespace epidb {
       //ss << ":";
       ss << fmt::format("{}:" + e.err_fmt, e.code_value, args...);
       return ss.str();
+    }
+
+    static std::string code(const std::string &msg) {
+      std::vector<std::string> strs;
+      boost::split(strs, msg, boost::is_any_of("\t"));
+      return strs[0];
     }
 
   };
@@ -72,6 +85,8 @@ namespace epidb {
   extern Error ERR_INVALID_EXPERIMENT_ID;
 
   extern Error ERR_INVALID_ANNOTATION_ID;
+
+  extern Error ERR_INVALID_PRA_PROCESSED_ANNOTATION_NAME;
 
   extern Error ERR_INVALID_PROJECT_NAME;
   extern Error ERR_INVALID_PROJECT_ID;
