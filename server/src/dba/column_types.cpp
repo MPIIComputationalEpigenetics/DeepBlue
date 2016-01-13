@@ -535,7 +535,7 @@ namespace epidb {
         } else if (type == "category") {
           Category category;
           std::vector<mongo::BSONElement> e = obj["items"].Array();
-          for(const mongo::BSONElement & be: e) {
+          for (const mongo::BSONElement & be : e) {
             category.push_back(be.str());
           }
           column_type = std::shared_ptr<ColumnType<Category > >(new ColumnType<Category>(name, category, pos));
@@ -559,6 +559,13 @@ namespace epidb {
         return true;
       }
 
+      bool exists_column_type(const std::string &name, std::string &msg)
+      {
+        Connection c;
+        const std::string norm_name = utils::normalize_name(name);
+        mongo::BSONObj query = BSON("norm_name" << norm_name);
+        return c->count(helpers::collection_name(Collections::COLUMN_TYPES()), query) > 0;
+      }
 
       bool load_column_type(const std::string &name, mongo::BSONObj &obj_column_type, std::string &msg)
       {
