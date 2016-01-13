@@ -20,7 +20,6 @@
 
 #include "../dba/dba.hpp"
 #include "../dba/exists.hpp"
-
 #include "../datatypes/user.hpp"
 
 #include "../engine/commands.hpp"
@@ -29,6 +28,9 @@
 #include "../extras/serialize.hpp"
 
 #include "../errors.hpp"
+
+#include "../parser/parser_factory.hpp"
+
 #include "../log.hpp"
 
 namespace epidb {
@@ -76,6 +78,11 @@ namespace epidb {
         datatypes::User user;
 
         if (!check_permissions(user_key, datatypes::GET_DATA, user, msg )) {
+          result.add_error(msg);
+          return false;
+        }
+
+        if (!parser::FileFormatBuilder::check_outout(output_format, msg)) {
           result.add_error(msg);
           return false;
         }
