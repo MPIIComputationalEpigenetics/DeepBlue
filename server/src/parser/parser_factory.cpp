@@ -369,6 +369,50 @@ namespace epidb {
       return ab.arr();
     }
 
+    bool FileFormatBuilder::check_outout(const std::string &format, std::string &msg )
+    {
+      if (format.empty()) {
+        return true;
+      }
+
+      std::vector<std::string> fields_string;
+      boost::split(fields_string, format, boost::is_any_of(","));
+
+      for(std::string & field_string: fields_string) {
+        boost::trim(field_string);
+
+        if (field_string.empty()) {
+          msg = Error::m(ERR_FORMAT_COLUMN_NAME_MISSING);
+          return false;
+        }
+
+        dba::columns::ColumnTypePtr column_type;
+        bool found = false;
+
+        // Check if it is metafield
+        if (dba::Metafield::is_meta(field_string)) {
+          if (!build_metafield_column(field_string, column_type, msg)) {
+            return false;
+          }
+          found = true;
+        }
+
+        std::cerr << field_string << "  " << dba::columns::exists_column_type(field_string, msg) << std::endl;
+        // Load from database
+        if (!found && dba::columns::exists_column_type(field_string, msg)) {
+          found = true;
+        }
+
+        if (!found) {
+          msg = Error::m(ERR_INVALID_COLUMN_NAME, field_string);
+          return false;
+        }
+      }
+
+      return true;
+    }
+
+
     bool FileFormatBuilder::build_for_outout(const std::string &format, const std::vector<mongo::BSONObj> &experiment_columns, processing::StatusPtr status, FileFormat &file_format, std::string &msg )
     {
       if (format.empty()) {
@@ -460,6 +504,7 @@ namespace epidb {
     {
       static const std::string open_parenthesis("(");
       std::string command = op.substr(0, op.find(open_parenthesis));
+      std::cerr << "command: " << command << std::endl;
       std::string type = dba::Metafield::command_type(command);
       if (type.empty()) {
         msg = Error::m(ERR_INVALID_META_COLUMN_NAME, command);
