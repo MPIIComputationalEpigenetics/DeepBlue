@@ -19,7 +19,7 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from epidb_client import EpidbClient
+from deepblue_client import DeepBlueClient
 from config import Config
 
 
@@ -39,7 +39,7 @@ class Context:
 
     @property
     def epidb(self):
-        epidb = EpidbClient("deepblue.mpi-inf.mpg.de/xmlrpc", None)
+        epidb = DeepBlueClient("deepblue.mpi-inf.mpg.de/xmlrpc")
         return epidb
 
     @property

@@ -1,5 +1,5 @@
 #
-#  epidb_client.py
+#  deepblue_client.py
 #  DeepBlue Epigenomic Data Server - CLI
 #
 #  Created by Felipe Albrecht
