@@ -200,6 +200,8 @@ namespace epidb {
     public:
       static bool build(const std::string &format, FileFormat &file_format, std::string &msg);
       static bool build_for_outout(const std::string &format, const std::vector<mongo::BSONObj> &experiment_columns, processing::StatusPtr status, FileFormat &file_format, std::string &msg);
+      static bool check_outout(const std::string &format, std::string &msg);
+
     private:
       static bool build_metafield_column(const std::string &name, epidb::dba::columns::ColumnTypePtr &column_type, std::string &msg);
     };

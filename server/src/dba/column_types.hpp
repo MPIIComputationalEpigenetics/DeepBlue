@@ -241,6 +241,8 @@ namespace epidb {
 
       bool column_type_bsonobj_to_class(const mongo::BSONObj &obj, processing::StatusPtr status, ColumnTypePtr &column_type, std::string &msg);
 
+      bool exists_column_type(const std::string &name, std::string &msg);
+
       bool get_column_type(const std::string &id, mongo::BSONObj &result, std::string &msg);
 
       bool get_column_type(const std::string &id, std::map<std::string, std::string> &res, std::string &msg);

@@ -43,15 +43,15 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::OPERATIONS, "Gets the regions for the given query in the requested BED format.");
+        return CommandDescription(categories::OPERATIONS, "Build a matrix containing the aggregation result of the the experiments data by aggregation regions.");
       }
 
       static Parameters parameters_()
       {
         Parameter p[] = {
-          Parameter("experiments_format", serialize::MAP, "map with experiments names and columns to be processed. Example (python): {'wgEncodeBroadHistoneDnd41H3k27acSig.wig':'VALUE', 'wgEncodeBroadHistoneCd20ro01794H3k27acSig.wig':'VALUE'}"),
+          Parameter("experiments_columns", serialize::MAP, "map with experiments names and columns to be processed. Example : {'wgEncodeBroadHistoneDnd41H3k27acSig.wig':'VALUE', 'wgEncodeBroadHistoneCd20ro01794H3k27acSig.wig':'VALUE'}"),
           Parameter("aggregation_function", serialize::STRING, "aggregation function name: min, max, mean, var, sd, median, count, boolean"),
-          Parameter("query_id", serialize::STRING, "regions query id"),
+          Parameter("aggregation_regions_id", serialize::STRING, "query ID of the regions that will be used as the aggregation boundaries"),
           parameters::UserKey
         };
         Parameters params(&p[0], &p[0] + 4);
