@@ -400,5 +400,25 @@ chrY\t12345\t1234567"""
     self.assertEquals(s,  ['okay', [{'_id': 'q1', 'type': 'tiling', 'user': 'user1', 'args': '{ "genome" : "hg19", "size" : 100, "chromosomes" : [ "chr1" ] }'}]])
 
 
+  def test_bug_do_not_reuse_existing_query(self):
+    epidb = DeepBlueClient(address="localhost", port=31415)
+    self.init_base(epidb)
+
+    sample_id = self.sample_ids[0]
+
+    data = "chr1\t100\t110\t1\nchr1\t200\t400\t0\nchr1\t400\t500\t1\nchr1\t200\t400\t0\n"
+    format = "CHROMOSOME,START,END,SCORE"
+
+    (res, a_1) = epidb.add_experiment("test", "hg19", "H3K4me3", sample_id, "tech1", "ENCODE", "wgEncodeBroadHistoneH1hescH3k27me3StdPk.bed from ENCODE",  data, format, None, self.admin_key)
+    self.assertSuccess(res, a_1)
+
+    (s, q0) = epidb.select_regions("test", "hg19", None, None, None, None, "chr1", None, None, self.admin_key)
+    (s, q1) = epidb.query_experiment_type(q0, "peaks", self.admin_key)
+
+    (s, q00) = epidb.select_regions("test", "hg19", None, None, None, None, "chr1", None, None, self.admin_key)
+    (s, q11) = epidb.query_experiment_type(q0, "peaks", self.admin_key)
+
+    self.assertEqual(q0, q00)
+    self.assertEqual(q1, q11)
 
 
