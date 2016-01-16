@@ -564,7 +564,9 @@ namespace epidb {
         Connection c;
         const std::string norm_name = utils::normalize_name(name);
         mongo::BSONObj query = BSON("norm_name" << norm_name);
-        return c->count(helpers::collection_name(Collections::COLUMN_TYPES()), query) > 0;
+        bool exists = c->count(helpers::collection_name(Collections::COLUMN_TYPES()), query) > 0;
+        c.done();
+        return exists;
       }
 
       bool load_column_type(const std::string &name, mongo::BSONObj &obj_column_type, std::string &msg)
