@@ -166,14 +166,6 @@ namespace epidb {
           return false;
         }
 
-        int query_counter;
-        if (!helpers::get_increment_counter(Collections::QUERIES(), query_counter, msg)) {
-          return false;
-        }
-        new_query_id = "q" + utils::integer_to_string(query_counter);
-        time_t time_;
-        time(&time_);
-
         mongo::BSONObj old_args = old_query["args"].Obj();
         mongo::BSONObjBuilder new_args_builder;
 
@@ -181,6 +173,34 @@ namespace epidb {
         new_args_builder.appendElementsUnique(old_args);
 
         mongo::BSONObj new_args = new_args_builder.obj();
+
+        // Check if the modified query document already exists
+        mongo::BSONObjBuilder search_query_builder;
+        search_query_builder.append("user", user.get_id());
+        search_query_builder.append("type", old_query["type"].String());
+        search_query_builder.append("derived_from", query_id);
+        search_query_builder.append("args", new_args);
+
+        mongo::BSONObj search_obj = search_query_builder.obj();
+
+        Connection c;
+        mongo::BSONObj query_obj = c->findOne(dba::helpers::collection_name(dba::Collections::QUERIES()), search_obj);
+
+        if (!query_obj.isEmpty()) {
+          c.done();
+          new_query_id = query_obj["_id"].String();
+          return true;
+        }
+
+        // Create a new query document
+        int query_counter;
+        if (!helpers::get_increment_counter(Collections::QUERIES(), query_counter, msg)) {
+          c.done();
+          return false;
+        }
+        new_query_id = "q" + utils::integer_to_string(query_counter);
+        time_t time_;
+        time(&time_);
 
         mongo::BSONObjBuilder stored_query_builder;
         stored_query_builder.append("_id", new_query_id);
@@ -190,7 +210,6 @@ namespace epidb {
         stored_query_builder.append("derived_from", query_id);
         stored_query_builder.append("args", new_args);
 
-        Connection c;
         c->insert(helpers::collection_name(Collections::QUERIES()), stored_query_builder.obj());
         if (!c->getLastError().empty()) {
           msg = c->getLastError();
