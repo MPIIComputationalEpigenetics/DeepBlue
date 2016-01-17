@@ -221,7 +221,7 @@ class TestSelectRegions(helpers.TestCase):
 
     for fmt in bad_formats:
       res, req = epidb.get_regions(qid, fmt, self.admin_key)
-      regions = self.get_regions_request_error(req)
+      self.assertFailure(res, req)
 
   def test_select_all(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
