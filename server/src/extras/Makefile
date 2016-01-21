@@ -1,5 +1,6 @@
 include ../Makefile.inc
 
+ROOT		= $(shell pwd)/../..
 CXXFLAGS	= $(DEFCXXFLAGS) -I..
 
 OBJLIBS	= ../libextras.a
