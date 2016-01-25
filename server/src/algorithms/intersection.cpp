@@ -24,8 +24,6 @@
 #include <vector>
 #include <thread>
 
-#include "utils/interval_tree.hpp"
-
 #include "../datatypes/regions.hpp"
 
 namespace epidb {
