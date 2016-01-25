@@ -87,7 +87,7 @@ namespace epidb {
 
     bool intersect(ChromosomeRegionsList &regions_data, ChromosomeRegionsList &regions_overlap, ChromosomeRegionsList &intersectionsi)
     {
-      long times = clock();
+      // long times = clock();
 
       std::set<std::string> chromosomes;
       merge_chromosomes(regions_data, regions_overlap, chromosomes);
@@ -118,7 +118,7 @@ namespace epidb {
       }
 
       long diffticks = clock() - times;
-      std::cerr << "INTERSECT: " << ((diffticks) / (CLOCKS_PER_SEC / 1000)) << std::endl;
+      // "INTERSECT: " << ((diffticks) / (CLOCKS_PER_SEC / 1000)) << std::endl;
       return true;
     }
   }
