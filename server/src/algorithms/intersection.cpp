@@ -117,7 +117,7 @@ namespace epidb {
         }
       }
 
-      long diffticks = clock() - times;
+      // long diffticks = clock() - times;
       // "INTERSECT: " << ((diffticks) / (CLOCKS_PER_SEC / 1000)) << std::endl;
       return true;
     }
