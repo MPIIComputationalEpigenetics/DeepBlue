@@ -103,12 +103,12 @@ namespace epidb {
           return false;
         }
 
-        for (auto param_genome: genomes) {
+        for (auto param_genome : genomes) {
           auto genome_name = param_genome->as_string();
-          for (auto param_annotation: annotations) {
-            auto annotation_name = param_annotation->as_string();
+          for (auto param_annotation : annotations) {
+            auto annotation_name =  param_annotation->as_string();
 
-            if (!dba::exists::annotation(annotation_name, genome_name)) {
+            if (!dba::exists::annotation(utils::normalize_annotation_name(annotation_name), utils::normalize_name(genome_name))) {
               result.add_error(Error::m(ERR_INVALID_ANNOTATION_NAME, annotation_name, genome_name));
               return false;
             }
