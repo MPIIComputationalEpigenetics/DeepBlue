@@ -7,7 +7,6 @@ url = "http://localhost:31415"
 server = xmlrpclib.Server(url, allow_none=True)
 uk= "lsUz0a5NbqXbmXaj"
 
-"""
 mongo = MongoClient("localhost", 27017)
 mongo.drop_database("tests_suite")
 
@@ -45,7 +44,6 @@ print server.create_column_type_simple("COUNT5", 'len', "double", uk)
 
 data = open("cpgIslandExtFull.bed").read()
 (status, a2) = server.add_annotation("cpg", "hg19", "bla", data, cpg_island, None, uk)
-"""
 
 (status, q1) = server.select_annotations("exp_wig", "hg19", None, None, None, uk)
 print q1
@@ -55,7 +53,7 @@ print q2
 (status, q3) = server.intersection(q1, q2, uk)
 print q3
 
-(status, r1) = server.get_regions(q3, "CHROMOSOME,START,END", uk)
+(status, r1) = server.count_regions(q3, uk)
 print r1
 
 # Wait the processing
@@ -65,13 +63,13 @@ while info[0]["state"] != "done" and info[0]["state"] != "error":
     (status, info) = server.info(r1, uk)
 
 (status, regions) = server.get_request_data(r1, uk)
-
+print regions
 
 
 (status, q3) = server.intersection(q2, q1, uk)
 print q3
 
-(status, r1) = server.get_regions(q3, "CHROMOSOME,START,END", uk)
+(status, r1) = server.count_regions(q3, uk)
 print r1
 
 # Wait the processing
@@ -81,12 +79,12 @@ while info[0]["state"] != "done" and info[0]["state"] != "error":
     (status, info) = server.info(r1, uk)
 
 (status, regions) = server.get_request_data(r1, uk)
-
+print regions
 
 (status, q3) = server.intersection(q2, q2, uk)
 print q3
 
-(status, r1) = server.get_regions(q3, "CHROMOSOME,START,END", uk)
+(status, r1) = server.count_regions(q3, uk)
 print r1
 
 # Wait the processing
@@ -94,13 +92,13 @@ print r1
 while info[0]["state"] != "done" and info[0]["state"] != "error":
     time.sleep(5)
     (status, info) = server.info(r1, uk)
-
 (status, regions) = server.get_request_data(r1, uk)
+print regions
 
 (status, q3) = server.intersection(q1, q1, uk)
 print q3
 
-(status, r1) = server.get_regions(q3, "CHROMOSOME,START,END", uk)
+(status, r1) = server.count_regions(q3, uk)
 print r1
 
 # Wait the processing
@@ -110,12 +108,14 @@ while info[0]["state"] != "done" and info[0]["state"] != "error":
     (status, info) = server.info(r1, uk)
 
 (status, regions) = server.get_request_data(r1, uk)
-
+print regions
 
 """
-453, 453, 453
-1210, 1128, 1277
-21, 24 , 19
-2101, 2249 , 2247
+            old code (intersect)        -> iterators  -> check end data -> fixing bug (clone) -> remove data it -> multithread
+32,107      453, 453, 453               -> 264        -> 257            -> 370, 324, 320      -> 301             -> 287,281
+3,904       1210, 1128, 1277            -> 282        -> 267            -> 367, 355, 371      -> 280             -> 300, 294
+28,691      21, 24 , 19                 -> 11         -> 11             -> 19, 19, 25         -> 10              -> 28, 19
+3,996,097 - 2101, 2249 , 2247           -> 546        -> 536            -> 895, 1095, 857     -> 620             -> 570, 535
 """
+
 
