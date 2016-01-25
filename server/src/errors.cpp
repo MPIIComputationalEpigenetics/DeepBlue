@@ -162,6 +162,7 @@ namespace epidb {
   Error ERR_INVALID_QUERY_ID("110003", "Unable to find the query ID '{}'.");
   Error ERR_PERMISSION_QUERY("111003", "You are not the query ID '{}' owner and neither an administrator.");
 
+  Error ERR_INVALID_ANNOTATION_NAME("102000", "Unable to find the annotation '{}' in the genome {}.");
   Error ERR_INVALID_ANNOTATION_ID("102003", "Unable to find the annotation ID '{}'.");
 
   Error ERR_INVALID_PRA_PROCESSED_ANNOTATION_NAME("114000", "There is not {} annotation for the patterns '{}' for the genome '{}'.");

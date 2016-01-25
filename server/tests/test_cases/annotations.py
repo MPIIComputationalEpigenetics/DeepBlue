@@ -5,7 +5,7 @@ from deepblue_client import DeepBlueClient
 
 class TestAnnotationCommands(helpers.TestCase):
 
-  def test_annotation(self):
+  def _test_annotation(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
@@ -44,7 +44,20 @@ class TestAnnotationCommands(helpers.TestCase):
     regions = self.get_regions_request(req)
     self.assertEqual(regions, file_data)
 
-  def test_list_annotations(self):
+  def test_invalid_annotation(self):
+    epidb = DeepBlueClient(address="localhost", port=31415)
+    self.init_base(epidb)
+    res, qid = epidb.select_annotations("Cpg Islands", "hg19", None, None, None, self.admin_key)
+    print res, qid
+    self.assertFailure(res, qid)
+
+  def test_missing_annotation_name(self):
+    epidb = DeepBlueClient(address="localhost", port=31415)
+    self.init_base(epidb)
+    res, qid = epidb.select_annotations([], "hg19", None, None, None, self.admin_key)
+    self.assertFailure(res, qid)
+
+  def _test_list_annotations(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init(epidb)
 
@@ -88,7 +101,7 @@ class TestAnnotationCommands(helpers.TestCase):
 
     self.assertEqual(expected, result)
 
-  def test_annotation_full_cpg_islands(self):
+  def _test_annotation_full_cpg_islands(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
@@ -119,7 +132,7 @@ class TestAnnotationCommands(helpers.TestCase):
       self.assertEqual(regions_count, count)
 
 
-  def test_annotation_shuffle(self):
+  def _test_annotation_shuffle(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
@@ -177,7 +190,7 @@ class TestAnnotationCommands(helpers.TestCase):
 
     self.assertEqual(regions, regions_shuffle)
 
-  def test_annotation_signal_bedgraph(self):
+  def _test_annotation_signal_bedgraph(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
@@ -209,7 +222,7 @@ class TestAnnotationCommands(helpers.TestCase):
     self.assertEqual(regions, 'chr1\t104372258\t104372293\t0.7767\ttest1\t\nchr10\t126498141\t126498176\t0.7695\ttest1\t\nchr11\t66110277\t66110312\t0.7613\ttest1\t\nchr15\t38653026\t38653061\t0.7720\ttest1\t\nchr15\t87725326\t87725361\t0.7727\ttest1\t\nchr16\t2119419\t2119454\t0.7696\ttest1\t\nchr16\t63360719\t63360754\t0.7740\ttest1\t\nchr19\t46369215\t46369250\t0.7727\ttest1\t\nchr8\t21923667\t21923702\t0.7930\ttest1\t')
 
 
-  def test_annotation_signal_wig(self):
+  def _test_annotation_signal_wig(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
@@ -229,7 +242,7 @@ class TestAnnotationCommands(helpers.TestCase):
     count = self.count_request(req)
     self.assertEqual(5667, count)
 
-  def test_list_annotations2(self):
+  def _test_list_annotations2(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init(epidb)
 

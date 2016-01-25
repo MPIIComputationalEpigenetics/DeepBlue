@@ -30,7 +30,7 @@
  === Execute tests ===
  	- Optional: use a ram disk, the tests will be much faster:
  		- sudo mkdir /mnt/ramdisk
-		- sudo mount -t tmpfs -o size=512m tmpfs /mnt/ramdisk
+		- sudo mount -t tmpfs -o size=2048m tmpfs /mnt/ramdisk
 		- mongod --dbpath /mnt/ramdisk
 
 	- start DeepBlue:
