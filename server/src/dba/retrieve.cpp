@@ -331,8 +331,8 @@ namespace epidb {
           }
 
           if (regions.size() > 0) {
-            ChromosomeRegions chromossomeRegions(*chrom_it, std::move(regions));
-            result->push_back(std::move(chromossomeRegions));
+            ChromosomeRegions chromosomeRegions(*chrom_it, std::move(regions));
+            result->push_back(std::move(chromosomeRegions));
           }
         }
 
