@@ -30,6 +30,7 @@
 #include "../engine/engine.hpp"
 
 #include "../extras/serialize.hpp"
+#include "../extras/utils.hpp"
 
 #include "../errors.hpp"
 #include "../log.hpp"
@@ -103,8 +104,19 @@ namespace epidb {
         std::vector<std::pair<std::string, std::string>> experiments_formats;
         std::map<std::string, serialize::ParameterPtr>::iterator mit;
         for (mit = map_.begin(); mit != map_.end(); ++mit) {
-          std::pair<std::string, std::string> p(mit->first, mit->second->as_string());
-          experiments_formats.push_back(p);
+          std::string experiment_name = mit->first;
+          std::string column_name = mit->second->as_string();
+
+          if (!dba::exists::experiment(utils::normalize_name(experiment_name))) {
+            result.add_error(Error::m(ERR_INVALID_EXPERIMENT_NAME, experiment_name));
+            return false;
+          }
+
+          if (!dba::exists::experiment_column(utils::normalize_name(experiment_name), column_name)) {
+            result.add_error(Error::m(ERR_INVALID_EXPERIMENT_COLUMN, experiment_name, column_name));
+            return false;
+          }
+          experiments_formats.emplace_back(experiment_name, column_name);
         }
 
         std::string request_id;

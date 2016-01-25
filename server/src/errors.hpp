@@ -83,6 +83,7 @@ namespace epidb {
 
   extern Error ERR_INVALID_EXPERIMENT_NAME;
   extern Error ERR_INVALID_EXPERIMENT_ID;
+  extern Error ERR_INVALID_EXPERIMENT_COLUMN;
 
   extern Error ERR_INVALID_ANNOTATION_NAME;
   extern Error ERR_INVALID_ANNOTATION_ID;
