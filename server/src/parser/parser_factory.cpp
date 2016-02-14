@@ -504,7 +504,6 @@ namespace epidb {
     {
       static const std::string open_parenthesis("(");
       std::string command = op.substr(0, op.find(open_parenthesis));
-      std::cerr << "command: " << command << std::endl;
       std::string type = dba::Metafield::command_type(command);
       if (type.empty()) {
         msg = Error::m(ERR_INVALID_META_COLUMN_NAME, command);

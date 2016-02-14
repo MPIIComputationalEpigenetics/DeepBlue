@@ -18,11 +18,11 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include <vector>
-#include <set>
+#include <future>
 #include <iostream>
-
-#include "utils/interval_tree.hpp"
+#include <set>
+#include <vector>
+#include <thread>
 
 #include "../datatypes/regions.hpp"
 
@@ -55,45 +55,71 @@ namespace epidb {
       return true;
     }
 
-    bool intersect(ChromosomeRegionsList &regions_a, ChromosomeRegionsList &regions_b, ChromosomeRegionsList &intersections)
+    ChromosomeRegions intersect_regions(Regions &&regions_data, Regions &&regions_overlap, const std::string& chromosome)
     {
-      // get intersection of regions on equal ChromosomeRegions
+      Regions regions = Regions();
+
+      size_t data_size = regions_data.size();
+      size_t data_pos = 0;
+
+      auto it_ranges = regions_overlap.begin();
+
+      while (it_ranges != regions_overlap.end()) {
+        while ((data_pos < data_size) &&
+               (regions_data[data_pos]->end() < (*it_ranges)->start()) )  {
+          data_pos++;
+        }
+
+        while ((data_pos < data_size) &&
+               ((*it_ranges)->end() >= regions_data[data_pos]->start()) )  {
+
+          if (((*it_ranges)->start() <= regions_data[data_pos]->end()) &&
+              ((*it_ranges)->end() >= regions_data[data_pos]->start())) {
+            regions.emplace_back(std::move(regions_data[data_pos]));
+          }
+          data_pos++;
+        }
+        it_ranges++;
+      }
+
+      return ChromosomeRegions(chromosome, std::move(regions));
+    }
+
+    bool intersect(ChromosomeRegionsList &regions_data, ChromosomeRegionsList &regions_overlap, ChromosomeRegionsList &intersectionsi)
+    {
+      // long times = clock();
+
       std::set<std::string> chromosomes;
-      merge_chromosomes(regions_a, regions_b, chromosomes);
+      merge_chromosomes(regions_data, regions_overlap, chromosomes);
 
-      for (const auto& chr: chromosomes) {
+      std::vector<std::future<ChromosomeRegions > > threads;
+      std::vector<std::shared_ptr<ChromosomeRegionsList> > result_parts;
 
-        Regions chr_regions_a, chr_regions_b;
-        if (!get_chromosome_regions(regions_a, chr, chr_regions_a) ||
-            !get_chromosome_regions(regions_b, chr, chr_regions_b)) {
-          // XXX: is this an error?
+      for (const auto& chr : chromosomes) {
+        Regions chr_regions_data;
+        Regions chr_regions_overlap;
+        if (!get_chromosome_regions(regions_data, chr, chr_regions_data) ||
+            !get_chromosome_regions(regions_overlap, chr, chr_regions_overlap)) {
           continue;
         }
 
-        // build an interval tree of region set B
-        std::vector<Interval<RegionPtr> > intervals;
-        for (auto &region_b : chr_regions_b) {
-          Interval<RegionPtr> interval(region_b->start(), region_b->end(), std::move(region_b));
-          intervals.push_back(std::move(interval));
-        }
-        IntervalTree<RegionPtr> tree(intervals);
+        auto t = std::async(std::launch::async, &intersect_regions,
+                            std::move(chr_regions_data), std::move(chr_regions_overlap), std::ref(chr));
 
-        Regions chr_intersections = Regions();
-        // find all overlaps of regions from set A in the tree
-        for (auto &region_a : chr_regions_a) {
-          std::vector<RegionPtr> overlaps;
-          tree.findOverlapping(region_a->start(), region_a->end(), overlaps);
-
-          if (!overlaps.empty()) {
-            chr_intersections.emplace_back(std::move(region_a));
-          }
-        }
-        // add found intersections to query result
-        intersections.push_back(ChromosomeRegions(chr, std::move(chr_intersections)));
+        threads.emplace_back(std::move(t));
       }
 
+      for (size_t i = 0; i < threads.size(); ++i) {
+        threads[i].wait();
+        auto result = threads[i].get();
+        if (!result.second.empty()) {
+          intersectionsi.emplace_back(std::move(result));
+        }
+      }
+
+      // long diffticks = clock() - times;
+      // "INTERSECT: " << ((diffticks) / (CLOCKS_PER_SEC / 1000)) << std::endl;
       return true;
     }
-
-  } // namespace algorithms
-} // namespace epidb
+  }
+}

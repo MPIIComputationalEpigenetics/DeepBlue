@@ -44,6 +44,19 @@ class TestAnnotationCommands(helpers.TestCase):
     regions = self.get_regions_request(req)
     self.assertEqual(regions, file_data)
 
+  def test_invalid_annotation(self):
+    epidb = DeepBlueClient(address="localhost", port=31415)
+    self.init_base(epidb)
+    res, qid = epidb.select_annotations("Cpg Islands", "hg19", None, None, None, self.admin_key)
+    self.assertFailure(res, qid)
+    self.assertEqual(qid, "102000:Unable to find the annotation 'Cpg Islands' in the genome hg19.")
+
+  def test_missing_annotation_name(self):
+    epidb = DeepBlueClient(address="localhost", port=31415)
+    self.init_base(epidb)
+    res, qid = epidb.select_annotations([], "hg19", None, None, None, self.admin_key)
+    self.assertFailure(res, qid)
+
   def test_list_annotations(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init(epidb)

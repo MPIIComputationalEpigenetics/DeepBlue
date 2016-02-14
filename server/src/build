@@ -1,0 +1,43 @@
+
+== DeepBlue Server Install Guide ==
+
+ - git clone https://github.com/MPIIComputationalEpigenetics/DeepBlue.git
+
+ - git submodule update --init --recursive
+
+  === Install mongodb driver ==
+    - Install the boost libraries: (ubuntu) sudo apt-get install libboost-all-dev , or you can download and compile by yourself.
+    - cd server/third_party/mongo-cxx-driver
+    - mkdir -p /opt/mongodb/drivers
+    - scons  -j 64 --extrapath=/local/data/libraries/boost/ --dbg=off --opt=on --disable-warnings-as-errors=DISABLE-WARNINGS-AS-ERRORS --prefix=/opt/mongodb/drivers/ install
+
+ === Compile luajit ===
+ 	- cd server/third_party/luajit-2.0
+ 	- make
+ 	- cd src
+ 	- ln -s libluajit.so libluajit-5.1.so.2
+
+ ===  Compile DeepBlue ===
+ 	- cd server/src
+ 	- make
+
+ === Executing DeepBlue ===
+ 	- cd server/src
+ 	- export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../third_party/luajit-2.0/src/
+ 	- Start mongodb
+ 	- ./server
+
+ === Execute tests ===
+ 	- Optional: use a ram disk, the tests will be much faster:
+ 		- sudo mkdir /mnt/ramdisk
+		- sudo mount -t tmpfs -o size=2048m tmpfs /mnt/ramdisk
+		- mongod --dbpath /mnt/ramdisk
+
+	- start DeepBlue:
+	 	- export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../third_party/luajit-2.0/src/
+		- ./server -D tests_suite
+
+	- cd server/tests
+	- python tests.py
+
+	- wait :-)

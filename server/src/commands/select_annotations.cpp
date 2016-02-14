@@ -26,6 +26,7 @@
 #include "../dba/genomes.hpp"
 #include "../dba/helpers.hpp"
 #include "../dba/queries.hpp"
+#include "../dba/exists.hpp"
 
 #include "../datatypes/user.hpp"
 
@@ -100,6 +101,18 @@ namespace epidb {
         if (genomes.size() == 0) {
           result.add_error(Error::m(ERR_USER_GENOME_MISSING));
           return false;
+        }
+
+        for (auto param_genome : genomes) {
+          auto genome_name = param_genome->as_string();
+          for (auto param_annotation : annotations) {
+            auto annotation_name =  param_annotation->as_string();
+
+            if (!dba::exists::annotation(utils::normalize_annotation_name(annotation_name), utils::normalize_name(genome_name))) {
+              result.add_error(Error::m(ERR_INVALID_ANNOTATION_NAME, annotation_name, genome_name));
+              return false;
+            }
+          }
         }
 
         mongo::BSONObjBuilder args_builder;

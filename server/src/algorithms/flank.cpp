@@ -75,7 +75,6 @@ namespace epidb {
             b = region->end() - start + length;
           }
         }
-        std::cerr << std::endl;
 
         if (a < b) {
           flank->set_start(a);

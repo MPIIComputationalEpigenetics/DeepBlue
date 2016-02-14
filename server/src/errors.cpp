@@ -76,7 +76,7 @@
  * 004 - Unknown type
  * 005 - Invalid type
  * 006 - Invalid type
- *
+ * 007 - Invalid column name
  * 100 - Do not have permission
  *
  * 200 - Invalid User Key
@@ -156,12 +156,14 @@ namespace epidb {
 
   Error ERR_INVALID_EXPERIMENT_NAME("101000", "Unable to find the experiment '{}'.");
   Error ERR_INVALID_EXPERIMENT_ID("101003", "Unable to find the experiment ID '{}'.");
+  Error ERR_INVALID_EXPERIMENT_COLUMN("101007", "The experiment '{}' does not have the column '{}'.");
 
   Error ERR_INVALID_SAMPLE_ID("103000", "Unable to find the sample ID '{}'.");
 
   Error ERR_INVALID_QUERY_ID("110003", "Unable to find the query ID '{}'.");
   Error ERR_PERMISSION_QUERY("111003", "You are not the query ID '{}' owner and neither an administrator.");
 
+  Error ERR_INVALID_ANNOTATION_NAME("102000", "Unable to find the annotation '{}' in the genome {}.");
   Error ERR_INVALID_ANNOTATION_ID("102003", "Unable to find the annotation ID '{}'.");
 
   Error ERR_INVALID_PRA_PROCESSED_ANNOTATION_NAME("114000", "There is not {} annotation for the patterns '{}' for the genome '{}'.");

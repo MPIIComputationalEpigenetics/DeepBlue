@@ -1311,7 +1311,6 @@ namespace epidb {
           return true;
         } else {
           msg = Error::m(ERR_DATASET_NOT_FOUND, dataset_id);
-          std::cerr << "ERR_DATASET_NOT_FOUND" << std::endl;
           return false;
         }
       }
