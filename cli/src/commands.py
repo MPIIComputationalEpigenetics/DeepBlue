@@ -50,7 +50,8 @@ def from_email(context):
 
     (s, u) = epidb.add_user(user_name, email, affiliation, context.user_key)
     if s == "error":
-        print user_key
+        print u
+        return
 
     _id, user_key = u
     (s, _id) = epidb.modify_user("password", password, user_key)
