@@ -1152,5 +1152,21 @@ namespace epidb {
         return false;
       }
     }
+
+    bool datatable(const std::string collection,
+                   const long long start, const long long length,
+                   const std::string global_search, const std::string sort_column, const std::string sort_direction,
+                   const std::string has_filter, const std::string user_key)
+    {
+
+      Connection c;
+
+      mongo::BSONObjBuilder query_builder;
+      mongo::Query query(query_builder.obj());
+      auto cursor = c->query(helpers::collection_name(collection), query, length, start);
+
+      return true;
+    }
+
   }
 }

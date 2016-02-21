@@ -286,6 +286,46 @@ namespace epidb {
         return true;
       }
 
+      /*
+      bool get_possible_experiments_by_query(const std::string &user_key, const std::string &query_id,
+                                    processing::StatusPtr status, std::vector<utils::IdName> &experiments_name, std::string &msg) {
+
+
+                mongo::BSONObj query;
+        if (!helpers::get_one(Collections::QUERIES(), BSON("_id" << query_id), query)) {
+          msg = Error::m(ERR_INVALID_QUERY_ID, query_id);
+          return false;
+        }
+
+        const std::string& type = query["type"].str();
+
+        const mongo::BSONObj& args = query["args"].Obj();
+        if (args.hasField("cache") && args["cache"].String() == "yes") {
+          return cache::get_query_cache(user_key, query["derived_from"].String(), status, regions, msg);
+        }
+
+        if (type == "experiment_select") {
+          // get genome directly
+        } else if (type == "annotation_select") {
+          // get genome directly
+        } else if (type == "genes_select") {
+          // get genome from gene set
+        } else if (type == "tiling") {
+          // get genome directly
+        } else if (type == "input_regions") {
+          // get genome directly
+        } else {
+
+        get args
+       qid_1
+       qid_2
+       query_id
+        }
+
+      }
+
+      */
+
       bool get_experiments_by_query(const std::string &user_key, const std::string &query_id,
                                     processing::StatusPtr status, std::vector<utils::IdName> &experiments_name, std::string &msg)
       {
