@@ -5,8 +5,14 @@
  *      Author: pieter
  */
 
-#include "connection_pool.hpp"
+#include <chrono>
+#include <random>
 #include <iostream>
+#include <thread>
+
+#include "connection_pool.hpp"
+
+#include "../log.hpp"
 
 using std::cout;
 using std::cerr;
@@ -56,11 +62,22 @@ namespace epidb {
       return client;
     }
 
-    std::string errMessage;
-    client = host.connect(errMessage);
-    if (!client) {
-      cerr << "Could not connect to " << host.getServers()[0].toString() << ": " << errMessage << endl;
-      return 0;
+    std::default_random_engine random;
+
+    while (!client) {
+      std::string errMessage;
+
+      try {
+        client = host.connect(errMessage);
+      } catch (const std::exception& e) {
+        EPIDB_LOG_ERR(e.what());
+        continue;
+      }
+
+      if (!client) {
+        EPIDB_LOG_ERR("Could not connect to " << host.getServers()[0].toString() << ": " << errMessage);
+        std::this_thread::sleep_for(std::chrono::milliseconds( (random() % 1000) + 500)); // Sleep from 0.5 to 1.5 seconds
+      }
     }
     {
       lock_guard<mutex> lock(m_Mutex);
