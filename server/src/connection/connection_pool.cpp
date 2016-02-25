@@ -76,7 +76,7 @@ namespace epidb {
 
       if (!client) {
         EPIDB_LOG_ERR("Could not connect to " << host.getServers()[0].toString() << ": " << errMessage);
-        std::this_thread::sleep_for(std::chrono::milliseconds( (random() % 1000) + 500)); // Sleep from 0.5 to 1.5 seconds
+        std::this_thread::sleep_for(std::chrono::milliseconds( (random() % 2000) + 2000)); // Sleep from 2 to 4 seconds
       }
     }
     {
