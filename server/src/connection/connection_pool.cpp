@@ -51,41 +51,45 @@ namespace epidb {
   DBClientBase *MongoConnectionPool::get(const ConnectionString &host)
   {
     DBClientBase *client = 0;
-    {
-      lock_guard<mutex> lock(m_Mutex);
-      MongoHostConnectionPool &pool = m_Pools[BuildHostString(host)];
-      pool.setMaxPoolSize(m_MaxPoolSize);
-      pool.setConnString(host);
-      client = pool.get();
-    }
-    if (client) {
-      return client;
-    }
-
-    std::default_random_engine random;
 
     while (!client) {
-      std::string errMessage;
-
-      try {
-        client = host.connect(errMessage);
-      } catch (const std::exception& e) {
-        EPIDB_LOG_ERR(e.what());
-        continue;
+      {
+        // Try to load from the pool
+        lock_guard<mutex> lock(m_Mutex);
+        MongoHostConnectionPool &pool = m_Pools[BuildHostString(host)];
+        pool.setMaxPoolSize(m_MaxPoolSize);
+        pool.setConnString(host);
+        client = pool.get();
       }
 
+      // Not client found
       if (!client) {
-        EPIDB_LOG_ERR("Could not connect to " << host.getServers()[0].toString() << ": " << errMessage);
-        std::this_thread::sleep_for(std::chrono::milliseconds( (random() % 2000) + 2000)); // Sleep from 2 to 4 seconds
+        std::string errMessage;
+
+        // Try to connect
+        try {
+          client = host.connect(errMessage);
+        } catch (const std::exception& e) {
+          EPIDB_LOG_ERR(e.what());
+        }
+
+        // Did not connect, log and sleep.
+        if (!client) {
+          EPIDB_LOG_ERR("Could not connect to " << host.getServers()[0].toString() << ": " << errMessage);
+          std::default_random_engine random;
+          std::this_thread::sleep_for(std::chrono::milliseconds( (random() % 3000) + 1000)); // Sleep from 1 to 4 seconds
+
+        // Save the status in the pool
+        } else {
+          lock_guard<mutex> lock(m_Mutex);
+          MongoHostConnectionPool &pool = m_Pools[BuildHostString(host)];
+          pool.setMaxPoolSize(m_MaxPoolSize);
+          pool.setConnString(host);
+          pool.m_Created++;
+        }
       }
     }
-    {
-      lock_guard<mutex> lock(m_Mutex);
-      MongoHostConnectionPool &pool = m_Pools[BuildHostString(host)];
-      pool.setMaxPoolSize(m_MaxPoolSize);
-      pool.setConnString(host);
-      pool.m_Created++;
-    }
+    // Must never be here
     return client;
   }
 
