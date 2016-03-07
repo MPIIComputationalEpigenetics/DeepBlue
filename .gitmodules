@@ -4,7 +4,3 @@
 [submodule "server/third_party/luajit-2.0"]
 	path = server/third_party/luajit-2.0
 	url = http://luajit.org/git/luajit-2.0.git
-[submodule "server/third_party/mongo-cxx-driver"]
-	path = server/third_party/mongo-cxx-driver
-	url = https://github.com/mongodb/mongo-cxx-driver.git
-	branch = legacy
