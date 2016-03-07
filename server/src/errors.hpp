@@ -101,6 +101,8 @@ namespace epidb {
   extern Error ERR_INVALID_TILING_REGIONS_ID;
   extern Error ERR_INVALID_COLUMN_TYPE_ID;
 
+  extern Error ERR_INVALID_COLLECTION_NAME;
+
   extern Error ERR_INVALID_CHROMOSOME_NAME;
   extern Error ERR_INVALID_CHROMOSOME_NAME_GENOME;
 

@@ -94,7 +94,8 @@ namespace epidb {
         for (std::vector<serialize::ParameterPtr>::iterator it = types.begin(); it != types.end(); ++it) {
           std::string type = (**it).as_string();
           if (!dba::Collections::is_valid_search_collection(type)) {
-            result.add_error(type + " is not a valid type. The valid types are: '" + utils::vector_to_string(dba::Collections::valid_search_Collections()) + "'");
+            msg = Error::m(ERR_INVALID_COLLECTION_NAME, type, utils::vector_to_string(dba::Collections::valid_search_Collections()));
+            result.add_error(msg);
             return false;
           }
           types_s.push_back(type);

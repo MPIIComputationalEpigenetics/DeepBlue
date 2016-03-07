@@ -51,7 +51,8 @@
  * 12 - Gene
  * 13 - Gene Set
  * 14 - Pre-processed annotation
- * 15 - ...
+ * 15 - Collection
+ * 16 - ..
  * 20 - Chromosome
  * 21 - Start
  * 22 - End
@@ -163,6 +164,8 @@ namespace epidb {
   Error ERR_INVALID_QUERY_ID("110003", "Unable to find the query ID '{}'.");
   Error ERR_PERMISSION_QUERY("111003", "You are not the query ID '{}' owner and neither an administrator.");
 
+  Error ERR_INVALID_COLLECTION_NAME("115000", "Invalid collection '{}'. The valid types are: {}.");
+
   Error ERR_INVALID_ANNOTATION_NAME("102000", "Unable to find the annotation '{}' in the genome {}.");
   Error ERR_INVALID_ANNOTATION_ID("102003", "Unable to find the annotation ID '{}'.");
 
@@ -189,7 +192,7 @@ namespace epidb {
 
   Error ERR_INVALID_IDENTIFIER("19900", "Invalid identifier '{}'.");
 
-  Error ERR_INVALID_GSM_IDENTIFIER("15100", "Invalid GSM identifier '{}'.");
+  Error ERR_INVALID_GSM_IDENTIFIER("151000", "Invalid GSM identifier '{}'.");
 
   Error ERR_INVALID_INPUT_TYPE("160005", "Invalid input type. It is '{}' but must be a '{}'");
 
