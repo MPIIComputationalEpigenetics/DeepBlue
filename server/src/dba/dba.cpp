@@ -112,6 +112,15 @@ namespace epidb {
         return false;
       }
 
+      {
+        datatypes::User anon_user = datatypes::User("anonymous", "anonymous@deepblue-epigenomic-data-server.com", "DeepBlue Epigenomic Data Server");
+        anon_user.set_key("anonymous_key");
+        anon_user.set_permission_level(datatypes::PermissionLevel::GET_DATA);
+        if (!dba::users::add_user(anon_user, msg)) {
+          return false;
+        }
+      }
+
       mongo::BSONObjBuilder create_settings_builder;
       mongo::OID s_id = mongo::OID::gen();
       create_settings_builder.append("_id", s_id);
@@ -1153,17 +1162,114 @@ namespace epidb {
       }
     }
 
-    bool datatable(const std::string collection,
+    bool datatable(const std::string collection, const std::vector<std::string> columns,
                    const long long start, const long long length,
-                   const std::string global_search, const std::string sort_column, const std::string sort_direction,
-                   const std::string has_filter, const std::string user_key)
+                   const std::string& global_search, const std::string& sort_column, const std::string& sort_direction,
+                   const bool has_filter, const std::vector<std::string>& columns_filters,
+                   const std::string& user_key,
+                   std::vector<std::vector<std::string>>& results, std::string& msg)
     {
+
+      if (!dba::Collections::is_valid_search_collection(collection)) {
+        msg = Error::m(ERR_INVALID_COLLECTION_NAME, collection, utils::vector_to_string(dba::Collections::valid_search_Collections()));
+        return false;
+      }
+
+      std::cerr << "collection: " << collection << std::endl;
+      std::cerr << "columns: ";
+      for (const auto &c : columns)
+        std::cerr << c << ",";
+      std::cerr << std::endl;
+      std::cerr << "start: " << start << std::endl;
+      std::cerr << "length: " << length << std::endl;
+      std::cerr << "global_search: " << global_search << std::endl;
+      std::cerr << "sort_column: " << sort_column << std::endl;
+      std::cerr << "sort_direction: " << sort_direction << std::endl;
+      std::cerr << "has_filter: " << has_filter << std::endl;
+      std::cerr << "columns filters: ";
+      for (const auto &c : columns_filters)
+        std::cerr << c << ",";
+      std::cerr << std::endl;
+      std::cerr << "user_key: " << user_key << std::endl;
+
+
+      if (start < 0) {
+        // TODO: Create erroror
+        msg = "Invalid start position: " + utils::long_to_string(start);
+        return false;
+      }
+
+      if (length <= 0) {
+        msg = "Invalid length: " + utils::long_to_string(start);
+        return false;
+      }
+
+      mongo::BSONObjBuilder b;
+      for (const std::string & c : columns) {
+        if (c == "data_type") {
+          b.append("upload_info.content_format", 1);
+        } else if (c == "biosource") {
+          b.append("sample_info.biosource_name", 1);
+        } else {
+          b.append(c, 1);
+        }
+
+      }
+      mongo::BSONObj projection = b.obj();
+
+      // global search = full text search
 
       Connection c;
 
       mongo::BSONObjBuilder query_builder;
       mongo::Query query(query_builder.obj());
-      auto cursor = c->query(helpers::collection_name(collection), query, length, start);
+
+      std::cerr << projection.toString() << std::endl;
+
+
+      int sort = 1;
+      if (sort_direction == "desc") {
+        sort = -1;
+      }
+
+      if (!sort_column.empty()) {
+        if (sort_column == "data_type") {
+          query.sort(std::string("upload_info.content_format"), sort);
+        } else if (sort_column == "biosource") {
+          query.sort(std::string("sample_info.biosource_name"), sort);
+        } else {
+          query.sort(sort_column, sort);
+        }
+
+      }
+
+      auto cursor = c->query(helpers::collection_name(collection), query, length, start, &projection);
+
+      std::vector<std::vector<std::string>> rows;
+
+      while (cursor->more()) {
+        std::vector<std::string> row;
+        mongo::BSONObj obj = cursor->next().getOwned();
+
+
+        for (const auto& field : columns) {
+          std::cerr << field << " : ";
+          std::string s;
+          if (field.compare("data_type") == 0) {
+            s = obj["upload_info"]["content_format"].String();
+          } else if (field.compare("biosource") == 0) {
+            std::cerr << obj["sample_info"].toString() << std::endl;
+            s = obj["sample_info"]["biosource_name"].String();
+          } else {
+            s = utils::bson_to_string(obj[field]);
+          }
+          std::cerr << s << std::endl;
+          row.push_back(s);
+        }
+        results.push_back(row);
+      }
+
+      c.done();
 
       return true;
     }
