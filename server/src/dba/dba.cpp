@@ -1165,7 +1165,7 @@ namespace epidb {
     bool datatable(const std::string collection, const std::vector<std::string> columns,
                    const long long start, const long long length,
                    const std::string& global_search, const std::string& sort_column, const std::string& sort_direction,
-                   const bool has_filter, const std::vector<std::string>& columns_filters,
+                   const bool has_filter, const datatypes::Metadata& columns_filters,
                    const std::string& user_key,
                    std::vector<std::vector<std::string>>& results, std::string& msg)
     {
@@ -1188,7 +1188,7 @@ namespace epidb {
       std::cerr << "has_filter: " << has_filter << std::endl;
       std::cerr << "columns filters: ";
       for (const auto &c : columns_filters)
-        std::cerr << c << ",";
+        std::cerr << "  " << c.first << " : " << c.second << std::endl;
       std::cerr << std::endl;
       std::cerr << "user_key: " << user_key << std::endl;
 
@@ -1213,8 +1213,8 @@ namespace epidb {
         } else {
           b.append(c, 1);
         }
-
       }
+
       mongo::BSONObj projection = b.obj();
 
       // global search = full text search
@@ -1222,7 +1222,12 @@ namespace epidb {
       Connection c;
 
       mongo::BSONObjBuilder query_builder;
+      for (const auto& filter : columns_filters) {
+        query_builder.appendRegex(filter.first, filter.second, "ix"); // case insensitivity and ignore spaces and special characters
+      }
       mongo::Query query(query_builder.obj());
+
+      std::cerr << query.toString() << std::endl;
 
       std::cerr << projection.toString() << std::endl;
 
@@ -1236,7 +1241,7 @@ namespace epidb {
         if (sort_column == "data_type") {
           query.sort(std::string("upload_info.content_format"), sort);
         } else if (sort_column == "biosource") {
-          query.sort(std::string("sample_info.biosource_name"), sort);
+          query.sort(std::string("sample_infob.iosource_name"), sort);
         } else {
           query.sort(sort_column, sort);
         }
@@ -1253,7 +1258,6 @@ namespace epidb {
 
 
         for (const auto& field : columns) {
-          std::cerr << field << " : ";
           std::string s;
           if (field.compare("data_type") == 0) {
             s = obj["upload_info"]["content_format"].String();
@@ -1263,7 +1267,6 @@ namespace epidb {
           } else {
             s = utils::bson_to_string(obj[field]);
           }
-          std::cerr << s << std::endl;
           row.push_back(s);
         }
         results.push_back(row);
