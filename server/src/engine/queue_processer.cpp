@@ -81,7 +81,6 @@ namespace epidb {
 
     bool QueueHandler::process(const mongo::BSONObj &job, processing::StatusPtr status, mongo::BSONObj& result)
     {
-      std::string _id = job["_id"];
       std::string command = job["command"].str();
       std::string user_key = job["user_key"].str();
 
