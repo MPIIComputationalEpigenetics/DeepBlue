@@ -265,7 +265,7 @@ namespace epidb {
 
 
         mongo::Query query = mongo::Query(regions_query)
-                             .sort(BSON(KeyMapper::START() << 1 << KeyMapper::END() << 1))
+                             .sort(BSON(KeyMapper::DATASET() << 1 << KeyMapper::START() << 1 << KeyMapper::END() << 1))
                              .hint("D_1_S_1_E_1");
 
         int queryOptions = (int)( mongo::QueryOption_NoCursorTimeout | mongo::QueryOption_SlaveOk );
