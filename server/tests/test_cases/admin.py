@@ -17,9 +17,10 @@ class TestAdminCommands(helpers.TestCase):
     self.assertSuccess(res, users)
 
     user_names = epidb.extract_names(users)[1]
-    self.assertEqual(len(users), 2) # the admin and the newly created user
+    self.assertEqual(len(users), 3) # the admin and the newly created user
     self.assertTrue(EPIDB_TEST_ADMIN[0] in user_names)
     self.assertTrue("user1" in user_names)
+    self.assertTrue("anonymous" in user_names)
 
 
   def test_anonymous(self):
@@ -62,11 +63,12 @@ class TestAdminCommands(helpers.TestCase):
 
     user_names = epidb.extract_names(users)[1]
 
-    self.assertEqual(len(users), 4)
+    self.assertEqual(len(users), 5)
     self.assertTrue(EPIDB_TEST_ADMIN[0] in user_names)
     self.assertTrue("user1" in user_names)
     self.assertTrue("user2" in user_names)
     self.assertTrue("user3" in user_names)
+    self.assertTrue("anonymous" in user_names)
 
 
   def test_add_user_by_non_admin(self):

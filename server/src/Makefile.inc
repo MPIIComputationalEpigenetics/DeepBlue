@@ -35,8 +35,8 @@ CPPFORMAT=$(ROOT)/third_party/cppformat
 URDL=$(ROOT)/third_party/urdl-0.1/include
 
 ifeq ($(host),ubuntu)
- CXX = g++ -DBOOST_LOG_DYN_LINK
- LD  = g++
+ CXX = g++ -DBOOST_LOG_DYN_LINK -g
+ LD  = g++ -g
  LDFLAGS   = -pthread
  MONGOLIBS = /opt/mongodb/drivers/lib/libmongoclient.a
  MONGO_INCLUDE = /opt/mongodb/drivers/include/

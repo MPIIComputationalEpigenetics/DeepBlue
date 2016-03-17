@@ -48,7 +48,8 @@ namespace epidb {
       RETRIEVE_QUERY_REGION_SET = 36,
       RETRIEVE_GENES_DATA = 37,
       RETRIEVE_FLANK_QUERY = 38,
-      PROCESS_AGGREGATE = 50
+      PROCESS_AGGREGATE = 50,
+      FORMAT_OUTPUT = 80
     };
 
     extern std::map<OP, std::string> OP_names;

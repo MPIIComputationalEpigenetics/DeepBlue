@@ -81,6 +81,19 @@ namespace epidb {
           continue;
         }
 
+        // TODO: use the generic version that will be put in processing.cpp
+        processing::RunningOp runningOp = status->start_operation(processing::FORMAT_OUTPUT,
+                                          BSON("format" << output_format << "chromosome" << chromosome << "regions" << (long long) regions.size()));
+        bool is_canceled = false;
+        if (!status->is_canceled(is_canceled, msg)) {
+          return true;
+        }
+        if (is_canceled) {
+          msg = Error::m(ERR_REQUEST_CANCELED);
+          return true;
+        }
+        return false;
+
         if (it != chromosomeRegionsList.begin()) {
           sb.endLine();
         }

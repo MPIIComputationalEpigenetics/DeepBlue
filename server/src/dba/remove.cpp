@@ -282,8 +282,8 @@ namespace epidb {
         // Check if the genome regions collections are empty.
         for (const std::string &internal_chromosome : chromosomes ) {
           std::string collection = helpers::region_collection_name(genome_name, internal_chromosome);
-          unsigned long long size;
-          if (!helpers::collection_size(collection, size, msg)) {
+          size_t size;
+          if (!helpers::collection_size(collection, mongo::BSONObj(), size, msg)) {
             return false;
           }
           if (size > 0) {

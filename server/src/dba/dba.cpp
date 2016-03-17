@@ -432,8 +432,74 @@ namespace epidb {
 
       {
         mongo::BSONObjBuilder index_name;
+        index_name.append("$**", "text");
+        c->createIndex(helpers::collection_name(Collections::EXPERIMENTS()), index_name.obj());
+        if (!c->getLastError().empty()) {
+          msg = c->getLastError();
+          c.done();
+          return false;
+        }
+      }
+
+      {
+        mongo::BSONObjBuilder index_name;
         index_name.append("key", "hashed");
         c->createIndex(helpers::collection_name(Collections::USERS()), index_name.obj());
+        if (!c->getLastError().empty()) {
+          msg = c->getLastError();
+          c.done();
+          return false;
+        }
+      }
+
+      {
+        mongo::BSONObjBuilder index_name;
+        index_name.append("$**", "text");
+        c->createIndex(helpers::collection_name(Collections::ANNOTATIONS()), index_name.obj());
+        if (!c->getLastError().empty()) {
+          msg = c->getLastError();
+          c.done();
+          return false;
+        }
+      }
+
+      {
+        mongo::BSONObjBuilder index_name;
+        index_name.append("$**", "text");
+        c->createIndex(helpers::collection_name(Collections::EPIGENETIC_MARKS()), index_name.obj());
+        if (!c->getLastError().empty()) {
+          msg = c->getLastError();
+          c.done();
+          return false;
+        }
+      }
+
+      {
+        mongo::BSONObjBuilder index_name;
+        index_name.append("$**", "text");
+        c->createIndex(helpers::collection_name(Collections::BIOSOURCES()), index_name.obj());
+        if (!c->getLastError().empty()) {
+          msg = c->getLastError();
+          c.done();
+          return false;
+        }
+      }
+
+      {
+        mongo::BSONObjBuilder index_name;
+        index_name.append("$**", "text");
+        c->createIndex(helpers::collection_name(Collections::SAMPLES()), index_name.obj());
+        if (!c->getLastError().empty()) {
+          msg = c->getLastError();
+          c.done();
+          return false;
+        }
+      }
+
+      {
+        mongo::BSONObjBuilder index_name;
+        index_name.append("$**", "text");
+        c->createIndex(helpers::collection_name(Collections::PROJECTS()), index_name.obj());
         if (!c->getLastError().empty()) {
           msg = c->getLastError();
           c.done();
@@ -907,11 +973,6 @@ namespace epidb {
       return true;
     }
 
-    bool count_experiments(unsigned long long &size, const std::string &user_key, std::string &msg)
-    {
-      return helpers::collection_size(Collections::EXPERIMENTS(), size, msg);
-    }
-
     bool is_valid_biosource_name(const std::string &name, const std::string &norm_name, std::string &msg)
     {
       if (exists::biosource(norm_name)) {
@@ -1167,9 +1228,9 @@ namespace epidb {
                    const std::string& global_search, const std::string& sort_column, const std::string& sort_direction,
                    const bool has_filter, const datatypes::Metadata& columns_filters,
                    const std::string& user_key,
-                   std::vector<std::vector<std::string>>& results, std::string& msg)
+                   size_t& total_elements, std::vector<std::vector<std::string>>& results,
+                   std::string& msg)
     {
-
       if (!dba::Collections::is_valid_search_collection(collection)) {
         msg = Error::m(ERR_INVALID_COLLECTION_NAME, collection, utils::vector_to_string(dba::Collections::valid_search_Collections()));
         return false;
@@ -1210,6 +1271,10 @@ namespace epidb {
           b.append("upload_info.content_format", 1);
         } else if (c == "biosource") {
           b.append("sample_info.biosource_name", 1);
+        } else if (c == "extra_metadata") {
+          b.append("extra_metadata", 1);
+          b.append("sample_info", 1);
+          b.append("upload_info", 1);
         } else {
           b.append(c, 1);
         }
@@ -1223,9 +1288,20 @@ namespace epidb {
 
       mongo::BSONObjBuilder query_builder;
       for (const auto& filter : columns_filters) {
-        query_builder.appendRegex(filter.first, filter.second, "ix"); // case insensitivity and ignore spaces and special characters
+        if (filter.first == "extra_metadata") {
+          mongo::BSONObjBuilder text_builder;
+          text_builder.append("$search", filter.second);
+          query_builder.append("$text", text_builder.obj());
+        } else if (filter.first == "data_type") {
+          query_builder.appendRegex("upload_info.content_format", filter.second, "ix");
+        } else if (filter.first == "biosource") {
+          query_builder.appendRegex("sample_info.biosource_name", filter.second, "ix");
+        } else {
+          query_builder.appendRegex(filter.first, filter.second, "ix"); // case insensitivity and ignore spaces and special characters
+        }
       }
-      mongo::Query query(query_builder.obj());
+      mongo::BSONObj query_obj = query_builder.obj();
+      mongo::Query query(query_obj);
 
       std::cerr << query.toString() << std::endl;
 
@@ -1241,7 +1317,7 @@ namespace epidb {
         if (sort_column == "data_type") {
           query.sort(std::string("upload_info.content_format"), sort);
         } else if (sort_column == "biosource") {
-          query.sort(std::string("sample_infob.iosource_name"), sort);
+          query.sort(std::string("sample_info.biosource_name"), sort);
         } else {
           query.sort(sort_column, sort);
         }
@@ -1262,8 +1338,33 @@ namespace epidb {
           if (field.compare("data_type") == 0) {
             s = obj["upload_info"]["content_format"].String();
           } else if (field.compare("biosource") == 0) {
-            std::cerr << obj["sample_info"].toString() << std::endl;
             s = obj["sample_info"]["biosource_name"].String();
+          } else if (field.compare("extra_metadata") == 0) {
+            StringBuilder sb;
+
+            sb.append("<div class='exp-metadata'>");
+            sb.append(utils::format_extra_metadata(obj["extra_metadata"].Obj()));
+            sb.append("<br/>");
+
+            if (obj.hasField("upload_info")) {
+              sb.append("<b>Upload information</b>:<br/><br/>");
+              sb.append("<b>data size</b>: ");
+              sb.append(utils::bson_to_string(obj["upload_info"]["total_size"]));
+              sb.append("kbytes<br/>");
+              sb.append("<b>data inserted</b>: ");
+              sb.append(utils::bson_to_string(obj["upload_info"]["upload_end"]));
+              sb.append("<br/>");
+              sb.append("<br/>");
+            }
+
+            if (obj.hasField("sample_info")) {
+              sb.append("<b>Sample metadata</b><br/><br />");
+              sb.append(utils::format_extra_metadata(obj["sample_info"].Obj()));
+            }
+            sb.append("</div><div class='exp-metadata-more-view'>-- View metadata --</div>");
+
+            s = sb.to_string();
+
           } else {
             s = utils::bson_to_string(obj[field]);
           }
@@ -1271,6 +1372,12 @@ namespace epidb {
         }
         results.push_back(row);
       }
+
+      if (!helpers::collection_size(collection, query_obj, total_elements, msg )) {
+        return false;
+      }
+
+      std::cerr << total_elements << std::endl;
 
       c.done();
 

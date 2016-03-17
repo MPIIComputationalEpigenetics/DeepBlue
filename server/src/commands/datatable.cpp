@@ -55,6 +55,7 @@ namespace epidb {
       static Parameters results_()
       {
         Parameter p[] = {
+          // TODO: update it
           Parameter("message", serialize::STRING, "echo message including version")
         };
         Parameters results(&p[0], &p[0] + 1);
@@ -84,7 +85,7 @@ namespace epidb {
 
         // Here we use Metadata typedef just for simplicity
         datatypes::Metadata columns_filters;
-          if (!read_metadata(parameters[8], columns_filters, msg)) {
+        if (!read_metadata(parameters[8], columns_filters, msg)) {
           result.add_error(msg);
           return false;
         }
@@ -97,26 +98,32 @@ namespace epidb {
         } else {
           if (!dba::users::get_user(user_key, user, msg)) {
             result.add_error(msg);
+            return false;
           }
         }
 
+        size_t size;
         std::vector<std::vector<std::string>> results;
 
-        dba::datatable(collection, columns, start, length,
-                       global_search, sort_column, sort_direction,
-                       has_filter,  columns_filters,
-                       user_key, results, msg);
+        if (!dba::datatable(collection, columns, start, length,
+                            global_search, sort_column, sort_direction,
+                            has_filter,  columns_filters,
+                            user_key, size, results, msg)) {
+          result.add_error(msg);
+          return false;
+        }
 
-
-        result.set_as_array(true);
-
+        serialize::ParameterPtr table_data(new serialize::ListParameter());
         for (const auto& result_row : results) {
           std::vector<serialize::ParameterPtr> row;
           for (const auto& cell : result_row) {
             row.push_back(serialize::ParameterPtr(new serialize::SimpleParameter(serialize::STRING, std::move(cell))));
           }
-          result.add_list(row);
+          table_data->add_child(serialize::ParameterPtr(new serialize::ListParameter(row)));
         }
+
+        result.add_int(size);
+        result.add_list(table_data);
 
         return true;
       }

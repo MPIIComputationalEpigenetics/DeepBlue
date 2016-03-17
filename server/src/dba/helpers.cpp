@@ -35,6 +35,8 @@
 #include "dba.hpp"
 #include "helpers.hpp"
 
+#include "../errors.hpp"
+
 namespace epidb {
   namespace dba {
     namespace helpers {
@@ -80,7 +82,7 @@ namespace epidb {
           return false;
         }
 
-        for(const mongo::BSONObj & o: objs) {
+        for (const mongo::BSONObj & o : objs) {
           result.push_back(o[returned_field].String());
         }
 
@@ -92,7 +94,7 @@ namespace epidb {
                std::vector<mongo::BSONObj> &results, std::string &msg)
       {
         mongo::BSONObjBuilder query_builder;
-        for(const QueryPair & p: conditions) {
+        for (const QueryPair & p : conditions) {
           query_builder.append(p.first, p.second);
         }
         mongo::BSONObj query = query_builder.obj();
@@ -158,7 +160,7 @@ namespace epidb {
         Connection c;
 
         mongo::BSONObjBuilder b;
-        for(const std::string & f: fields) {
+        for (const std::string & f : fields) {
           b.append(f, 1);
         }
         mongo::BSONObj projection = b.obj();
@@ -308,11 +310,15 @@ namespace epidb {
         return true;
       }
 
-      bool collection_size(const std::string &where, unsigned long long &size, std::string &msg)
+      bool collection_size(const std::string &collection, const mongo::BSONObj& query, size_t &size, std::string &msg)
       {
+        if (!dba::Collections::is_valid_search_collection(collection)) {
+          msg = Error::m(ERR_INVALID_COLLECTION_NAME, collection, utils::vector_to_string(dba::Collections::valid_search_Collections()));
+          return false;
+        }
+
         Connection c;
-        const std::string collection = collection_name(where);
-        size = c->count(collection);
+        size = c->count(collection_name(collection), query);
         c.done();
         return true;
       }

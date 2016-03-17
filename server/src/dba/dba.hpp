@@ -111,7 +111,7 @@ namespace epidb {
                                 bool is_biosource, const std::string &user_key,
                                 std::vector<utils::IdName> &syns, std::string &msg);
 
-    bool count_experiments(unsigned long long &size, const std::string &user_key, std::string &msg);
+    bool collection_size(const std::string collection, mongo::BSONObj query, size_t& count, std::string& msg);
 
     /**
      * Pattern
@@ -128,7 +128,8 @@ namespace epidb {
                    const long long start, const long long length,
                    const std::string& global_search, const std::string& sort_column, const std::string& sort_direction,
                    const bool has_filter, const datatypes::Metadata& columns_filters,
-                   const std::string& user_key, std::vector<std::vector<std::string>>& results,
+                   const std::string& user_key,
+                   size_t& total_elements, std::vector<std::vector<std::string>>& results,
                    std::string& msg);
 
   }

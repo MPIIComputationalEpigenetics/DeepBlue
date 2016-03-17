@@ -1315,6 +1315,7 @@ namespace epidb {
         }
       }
 
+      // TODO: Move to processing file
       bool is_canceled(processing::StatusPtr status, std::string msg)
       {
         bool is_canceled = false;

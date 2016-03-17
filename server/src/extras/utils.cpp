@@ -361,6 +361,34 @@ namespace epidb {
       return l;
     }
 
+    std::string format_extra_metadata(const mongo::BSONObj &key_value) {
+      StringBuilder sb;
+      auto it = key_value.begin();
+
+      while(it.more() )
+      {
+        auto const &e = it.next();
+        std::string field_name = std::string(e.fieldName());
+
+        if (field_name.compare(0, 2, "__") == 0) {
+          continue;
+        }
+
+        if (field_name.compare(0, 5, "norm_") == 0) {
+          continue;
+        }
+
+        std::string content = std::string(bson_to_string(e));
+        sb.append("<b>");
+        sb.append(field_name);
+        sb.append("</b>: ");
+        sb.append(content);
+        sb.append("<br/>");
+      }
+
+      return sb.to_string();
+    }
+
     // FROM https://github.com/mongodb/mongo-cxx-driver/blob/6dc65e99af9979152deb0940b2313c560e61e2d9/src/mongo/bson/bsonelement.cpp
     std::string bson_to_string(const mongo::BSONElement &e)
     {
