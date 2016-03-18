@@ -283,7 +283,7 @@ namespace epidb {
         for (const std::string &internal_chromosome : chromosomes ) {
           std::string collection = helpers::region_collection_name(genome_name, internal_chromosome);
           size_t size;
-          if (!helpers::collection_size(collection, mongo::BSONObj(), size, msg)) {
+          if (!helpers::collection_size(collection, mongo::BSONObj(), size, msg, false)) {
             return false;
           }
           if (size > 0) {
