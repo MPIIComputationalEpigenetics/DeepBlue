@@ -101,7 +101,7 @@ namespace epidb {
 
       bool remove_collection(const std::string &collection, std::string &msg);
 
-      bool collection_size(const std::string &where, const mongo::BSONObj& query, size_t &size, std::string &msg);
+      bool collection_size(const std::string &where, const mongo::BSONObj& query, size_t &size, std::string &msg, const bool check=true);
 
       template<typename T>
       mongo::BSONObj build_condition_array(const std::vector<T> &params, const std::string &condition)

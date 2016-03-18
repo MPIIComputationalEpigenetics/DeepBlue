@@ -310,11 +310,13 @@ namespace epidb {
         return true;
       }
 
-      bool collection_size(const std::string &collection, const mongo::BSONObj& query, size_t &size, std::string &msg)
+      bool collection_size(const std::string &collection, const mongo::BSONObj& query, size_t &size, std::string &msg, const bool check)
       {
-        if (!dba::Collections::is_valid_search_collection(collection)) {
-          msg = Error::m(ERR_INVALID_COLLECTION_NAME, collection, utils::vector_to_string(dba::Collections::valid_search_Collections()));
-          return false;
+        if (check) {
+          if (!dba::Collections::is_valid_search_collection(collection)) {
+            msg = Error::m(ERR_INVALID_COLLECTION_NAME, collection, utils::vector_to_string(dba::Collections::valid_search_Collections()));
+            return false;
+          }
         }
 
         Connection c;
