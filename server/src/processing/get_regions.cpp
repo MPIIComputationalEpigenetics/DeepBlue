@@ -92,7 +92,6 @@ namespace epidb {
           msg = Error::m(ERR_REQUEST_CANCELED);
           return true;
         }
-        return false;
 
         if (it != chromosomeRegionsList.begin()) {
           sb.endLine();
