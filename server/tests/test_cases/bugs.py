@@ -357,7 +357,7 @@ chrX 100000"""
     info_e1 = epidb.info("e1", u_key)
     self.assertEqual(info_e1, ['error', '100100:Insufficient permission. Permission LIST_COLLECTIONS is required.'])
     info_e2 = epidb.info("me", u_key)
-    self.assertEqual(info_e2, ['okay', [{'name': 'user', 'institution': 'institution', 'id': 'u2', 'permission_level': 'NONE', 'type': 'user', 'email': 'email'}]])
+    self.assertEqual(info_e2, ['okay', [{'name': 'user', 'institution': 'institution', 'id': 'u3', 'permission_level': 'NONE', 'type': 'user', 'email': 'email'}]])
 
 
   def test_include_invalid_regions(self):
