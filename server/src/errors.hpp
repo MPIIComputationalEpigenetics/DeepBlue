@@ -140,6 +140,9 @@ namespace epidb {
   extern Error ERR_DUPLICATED_GENOME_NAME;
   extern Error ERR_DUPLICATED_TECHNIQUE_NAME;
 
+  extern Error ERR_INVALID_START;
+  extern Error ERR_INVALID_LENGTH;
+
   extern Error ERR_UNKNOW_QUERY_TYPE;
 
   extern Error ERR_COLUMN_TYPE_MISSING;

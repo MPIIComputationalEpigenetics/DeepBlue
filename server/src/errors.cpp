@@ -59,6 +59,7 @@
  * 23 - Column Name
  * 24 - Column Type
  * 25 - Metacolumn
+*  26 - Length
  * 30 - Request
  * 40 - Tiling region
  * 50 - Dataset
@@ -191,6 +192,9 @@ namespace epidb {
   Error ERR_INVALID_TILING_REGIONS_ID("140003", "Unable to find tiling regions ID '{}'.");
 
   Error ERR_INVALID_IDENTIFIER("19900", "Invalid identifier '{}'.");
+
+  Error ERR_INVALID_START("121003", "Invalid starting position '{}'.");
+  Error ERR_INVALID_LENGTH("126003", "Invalid length '{}'.");
 
   Error ERR_INVALID_GSM_IDENTIFIER("151000", "Invalid GSM identifier '{}'.");
 
