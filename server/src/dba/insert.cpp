@@ -754,6 +754,7 @@ namespace epidb {
         for(const parser::BedLine & bed_line: chrom_lines.second) {
 
           if (bed_line.start > size || bed_line.end > size) {
+            // TODO: Include the right message (the region's start can be after the region's end)
             msg = out_of_range_message(bed_line.start, bed_line.end, bed_line.chromosome);
             c.done();
             std::string new_msg;
