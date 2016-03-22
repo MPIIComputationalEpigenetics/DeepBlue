@@ -576,7 +576,7 @@ namespace epidb {
         mongo::BSONObj query = BSON("norm_name" << norm_name);
         auto data_cursor = c->query(helpers::collection_name(Collections::COLUMN_TYPES()), query, 1);
         if (!data_cursor->more()) {
-          msg = "Column type " + name + " not found";
+          msg = Error::m(ERR_INVALID_COLUMN_NAME, name);
           c.done();
           return false;
         }
