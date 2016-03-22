@@ -123,15 +123,6 @@ namespace epidb {
     bool find_annotation_pattern(const std::string &genome, const std::string &pattern, const bool overlap,
                                  DatasetId &dataset_id, std::string &msg);
 
-    // TODO: Move to its own file
-    bool datatable(const std::string collection, const std::vector<std::string> columns,
-                   const long long start, const long long length,
-                   const std::string& global_search, const std::string& sort_column, const std::string& sort_direction,
-                   const bool has_filter, const datatypes::Metadata& columns_filters,
-                   const std::string& user_key,
-                   size_t& total_elements, std::vector<std::vector<std::string>>& results,
-                   std::string& msg);
-
   }
 }
 

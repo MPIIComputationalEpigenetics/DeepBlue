@@ -17,8 +17,11 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
+
+#include "../dba/datatable.hpp"
 #include "../dba/exists.hpp"
 #include "../dba/users.hpp"
+
 #include "../extras/serialize.hpp"
 
 #include "../engine/commands.hpp"
@@ -105,7 +108,7 @@ namespace epidb {
         size_t size;
         std::vector<std::vector<std::string>> results;
 
-        if (!dba::datatable(collection, columns, start, length,
+        if (!dba::datatable::datatable(collection, columns, start, length,
                             global_search, sort_column, sort_direction,
                             has_filter,  columns_filters,
                             user_key, size, results, msg)) {
