@@ -37,8 +37,8 @@ class TestAdminCommands(helpers.TestCase):
   def test_echo(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init(epidb)
-    self.assertEquals(epidb.echo(self.admin_key), ['okay', 'DeepBlue (1.6.7) says hi to test_admin'])
-    self.assertEquals(epidb.echo("invalid"), ['okay', 'DeepBlue (1.6.7) says hi to a Stranger'])
+    self.assertEquals(epidb.echo(self.admin_key), ['okay', 'DeepBlue (1.6.11) says hi to test_admin'])
+    self.assertEquals(epidb.echo("invalid"), ['okay', 'DeepBlue (1.6.11) says hi to a Stranger'])
 
   def test_unequal_keys(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
