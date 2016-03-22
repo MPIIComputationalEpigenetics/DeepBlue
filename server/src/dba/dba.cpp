@@ -41,6 +41,8 @@
 #include "../parser/parser_factory.hpp"
 #include "../parser/wig_parser.hpp"
 
+#include "../processing/processing.hpp"
+
 #include "../version.hpp"
 
 #include "dba.hpp"
@@ -1223,6 +1225,115 @@ namespace epidb {
       }
     }
 
+    // <-- Cut here -->
+
+    bool format_row(const std::string collection, const std::vector<std::string>& fields, const mongo::BSONObj& obj,
+                    std::vector<std::string>& row, std::string& msg)
+    {
+      for (const auto& field : fields) {
+        std::string s;
+        if (field.compare("data_type") == 0) {
+          s = obj["upload_info"]["content_format"].String();
+        } else if (field.compare("biosource") == 0) {
+          s = obj["sample_info"]["biosource_name"].String();
+        } else if (field.compare("extra_metadata") == 0) {
+          StringBuilder sb;
+
+          if (collection == "experiments") {
+            sb.append("<div class='exp-metadata'>");
+          }
+
+          std::string extra_metadata = utils::format_extra_metadata(obj["extra_metadata"].Obj());
+          if (!extra_metadata.empty()) {
+            sb.append(extra_metadata);
+            sb.append("<br/>");
+          }
+
+          if (obj.hasField("upload_info")) {
+            sb.append("<b>Upload information</b>:<br/><br/>");
+            sb.append("<b>data size</b>: ");
+            sb.append(utils::bson_to_string(obj["upload_info"]["total_size"]));
+            sb.append("kbytes<br/>");
+            sb.append("<b>data inserted</b>: ");
+            sb.append(utils::bson_to_string(obj["upload_info"]["upload_end"]));
+            sb.append("<br/>");
+          }
+
+          if (obj.hasField("sample_info")) {
+            sb.append("<br/>");
+            sb.append("<b>Sample metadata</b><br/><br />");
+            sb.append(utils::format_extra_metadata(obj["sample_info"].Obj()));
+          }
+          if (collection == "experiments") {
+            sb.append("</div><div class='exp-metadata-more-view'>-- View metadata --</div>");
+          }
+
+          s = sb.to_string();
+
+        } else {
+          s = utils::bson_to_string(obj[field]);
+        }
+        row.emplace_back(std::move(s));
+      }
+
+      return true;
+    }
+
+
+
+    bool format_column_type(const mongo::BSONObj& obj, std::vector<std::string> &row, std::string& msg)
+    {
+      processing::StatusPtr sp = processing::build_dummy_status();
+
+      std::map<std::string, std::string> res = columns::dataset_column_to_map(obj);
+      row.emplace_back(res["_id"]);
+      row.emplace_back(res["name"]);
+      row.emplace_back(res["description"]);
+
+      std::string column_type = res["column_type"];
+
+      row.emplace_back(column_type);
+
+      std::string information;
+      if (column_type == "category") {
+        information = "Acceptable items: " + res["items"];
+      } else if (column_type == "range") {
+        information = res["minimum"] + " " + res["maximum"];
+      } else if (column_type == "calculated") {
+        information = res["code"];
+      }
+      row.emplace_back(information);
+
+      return true;
+    }
+
+    bool format_sample(const mongo::BSONObj& obj, std::vector<std::string> &row, std::string& msg)
+    {
+      auto it = obj.begin();
+
+      row.emplace_back(obj["_id"].String());
+      row.emplace_back(obj["biosource_name"].String());
+
+      StringBuilder sb;
+      while (it.more()) {
+        const auto& e = it.next();
+        std::string elem_name(e.fieldName());
+        if (elem_name.compare("type") && elem_name.compare("_id") && elem_name.compare("biosource_name") && elem_name.compare("user") &&
+            elem_name.compare(0, 2, "__")  && elem_name.compare(0, 5, "norm_")) {
+
+          std::string content = std::string(utils::bson_to_string(e));
+          sb.append("<b>");
+          sb.append(elem_name);
+          sb.append("</b>: ");
+          sb.append(content);
+          sb.append("<br/>");
+        }
+      }
+      row.emplace_back(sb.to_string());
+
+      return true;
+    }
+
     bool datatable(const std::string collection, const std::vector<std::string> columns,
                    const long long start, const long long length,
                    const std::string& global_search, const std::string& sort_column, const std::string& sort_direction,
@@ -1236,59 +1347,47 @@ namespace epidb {
         return false;
       }
 
-      std::cerr << "collection: " << collection << std::endl;
-      std::cerr << "columns: ";
-      for (const auto &c : columns)
-        std::cerr << c << ",";
-      std::cerr << std::endl;
-      std::cerr << "start: " << start << std::endl;
-      std::cerr << "length: " << length << std::endl;
-      std::cerr << "global_search: " << global_search << std::endl;
-      std::cerr << "sort_column: " << sort_column << std::endl;
-      std::cerr << "sort_direction: " << sort_direction << std::endl;
-      std::cerr << "has_filter: " << has_filter << std::endl;
-      std::cerr << "columns filters: ";
-      for (const auto &c : columns_filters)
-        std::cerr << "  " << c.first << " : " << c.second << std::endl;
-      std::cerr << std::endl;
-      std::cerr << "user_key: " << user_key << std::endl;
-
-
       if (start < 0) {
-        // TODO: Create erroror
-        msg = "Invalid start position: " + utils::long_to_string(start);
+        msg = Error::m(ERR_INVALID_START, start);
         return false;
       }
 
       if (length <= 0) {
-        msg = "Invalid length: " + utils::long_to_string(start);
+        msg = Error::m(ERR_INVALID_LENGTH, length);
         return false;
       }
 
-      mongo::BSONObjBuilder b;
-      for (const std::string & c : columns) {
-        if (c == "data_type") {
-          b.append("upload_info.content_format", 1);
-        } else if (c == "biosource") {
-          b.append("sample_info.biosource_name", 1);
-        } else if (c == "extra_metadata") {
-          b.append("extra_metadata", 1);
-          b.append("sample_info", 1);
-          b.append("upload_info", 1);
-        } else {
-          b.append(c, 1);
+      mongo::BSONObj projection;
+
+      if (collection == Collections::SAMPLES() || collection == Collections::COLUMN_TYPES()) {
+        projection = mongo::BSONObj();
+      } else {
+        mongo::BSONObjBuilder b;
+        for (const std::string & c : columns) {
+          if (c == "data_type") {
+            b.append("upload_info.content_format", 1);
+          } else if (c == "biosource") {
+            b.append("sample_info.biosource_name", 1);
+          } else if (c == "extra_metadata") {
+            b.append("extra_metadata", 1);
+            b.append("sample_info", 1);
+            b.append("upload_info", 1);
+          } else {
+            b.append(c, 1);
+          }
         }
+        projection = b.obj();
       }
 
-      mongo::BSONObj projection = b.obj();
-
-      // global search = full text search
-
-      Connection c;
-
       mongo::BSONObjBuilder query_builder;
+      if (!global_search.empty()) {
+        mongo::BSONObjBuilder text_builder;
+        text_builder.append("$search", global_search);
+        query_builder.append("$text", text_builder.obj());
+      }
+
       for (const auto& filter : columns_filters) {
-        if (filter.first == "extra_metadata") {
+        if (filter.first == "extra_metadata" && global_search.empty()) {
           mongo::BSONObjBuilder text_builder;
           text_builder.append("$search", filter.second);
           query_builder.append("$text", text_builder.obj());
@@ -1297,15 +1396,11 @@ namespace epidb {
         } else if (filter.first == "biosource") {
           query_builder.appendRegex("sample_info.biosource_name", filter.second, "ix");
         } else {
-          query_builder.appendRegex(filter.first, filter.second, "ix"); // case insensitivity and ignore spaces and special characters
+          query_builder.appendRegex(filter.first, filter.second, "i"); // case insensitivity and ignore spaces and special characters
         }
       }
       mongo::BSONObj query_obj = query_builder.obj();
       mongo::Query query(query_obj);
-
-      std::cerr << query.toString() << std::endl;
-
-      std::cerr << projection.toString() << std::endl;
 
 
       int sort = 1;
@@ -1321,9 +1416,9 @@ namespace epidb {
         } else {
           query.sort(sort_column, sort);
         }
-
       }
 
+      Connection c;
       auto cursor = c->query(helpers::collection_name(collection), query, length, start, &projection);
 
       std::vector<std::vector<std::string>> rows;
@@ -1332,54 +1427,29 @@ namespace epidb {
         std::vector<std::string> row;
         mongo::BSONObj obj = cursor->next().getOwned();
 
-
-        for (const auto& field : columns) {
-          std::string s;
-          if (field.compare("data_type") == 0) {
-            s = obj["upload_info"]["content_format"].String();
-          } else if (field.compare("biosource") == 0) {
-            s = obj["sample_info"]["biosource_name"].String();
-          } else if (field.compare("extra_metadata") == 0) {
-            StringBuilder sb;
-
-            sb.append("<div class='exp-metadata'>");
-            sb.append(utils::format_extra_metadata(obj["extra_metadata"].Obj()));
-            sb.append("<br/>");
-
-            if (obj.hasField("upload_info")) {
-              sb.append("<b>Upload information</b>:<br/><br/>");
-              sb.append("<b>data size</b>: ");
-              sb.append(utils::bson_to_string(obj["upload_info"]["total_size"]));
-              sb.append("kbytes<br/>");
-              sb.append("<b>data inserted</b>: ");
-              sb.append(utils::bson_to_string(obj["upload_info"]["upload_end"]));
-              sb.append("<br/>");
-              sb.append("<br/>");
-            }
-
-            if (obj.hasField("sample_info")) {
-              sb.append("<b>Sample metadata</b><br/><br />");
-              sb.append(utils::format_extra_metadata(obj["sample_info"].Obj()));
-            }
-            sb.append("</div><div class='exp-metadata-more-view'>-- View metadata --</div>");
-
-            s = sb.to_string();
-
-          } else {
-            s = utils::bson_to_string(obj[field]);
+        if (collection == Collections::SAMPLES()) {
+          if (!format_sample(obj, row, msg)) {
+            c.done();
+            return false;
           }
-          row.push_back(s);
+        } else if (collection == Collections::COLUMN_TYPES()) {
+          if (!format_column_type(obj, row, msg)) {
+            c.done();
+            return false;
+          }
+        } else {
+          if (!format_row(collection, columns, obj, row, msg)) {
+            c.done();
+            return false;
+          }
         }
-        results.push_back(row);
+        results.emplace_back(std::move(row));
       }
+      c.done();
 
       if (!helpers::collection_size(collection, query_obj, total_elements, msg )) {
         return false;
       }
-
-      std::cerr << total_elements << std::endl;
-
-      c.done();
 
       return true;
     }
