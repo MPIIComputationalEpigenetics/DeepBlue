@@ -34,7 +34,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::STATUS, "Echos the server's version.");
+        return CommandDescription(categories::ADMINISTRATION, "interface for using DeepBlue with Datatables.");
       }
 
       static Parameters parameters_()
@@ -58,8 +58,8 @@ namespace epidb {
       static Parameters results_()
       {
         Parameter p[] = {
-          // TODO: update it
-          Parameter("message", serialize::STRING, "echo message including version")
+          Parameter("total_size", serialize::INTEGER, "total of items that match with the given input"),
+          Parameter("rows", serialize::LIST, "list of rows")
         };
         Parameters results(&p[0], &p[0] + 1);
         return results;
