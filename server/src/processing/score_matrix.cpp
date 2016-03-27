@@ -36,7 +36,10 @@
 #include "../dba/queries.hpp"
 
 #include "../engine/commands.hpp"
+
 #include "../extras/serialize.hpp"
+
+#include "../threading/semaphore.hpp"
 
 #include "../errors.hpp"
 #include "../log.hpp"
@@ -48,7 +51,7 @@ namespace epidb {
     std::tuple<bool, std::string, std::string, std::string, std::shared_ptr<std::vector<algorithms::Accumulator>>>
     summarize_experiment(const std::string& norm_genome,
                          const std::pair<std::string, dba::columns::ColumnTypePtr>& experiment_format,
-                         const ChromosomeRegions& chromosome,
+                         const ChromosomeRegions& chromosome, threading::SemaphorePtr sem,
                          processing::StatusPtr status)
     {
       std::string msg;
@@ -57,10 +60,12 @@ namespace epidb {
       // Check if processing was canceled
       bool is_canceled = false;
       if (!status->is_canceled(is_canceled, msg)) {
+        sem->up();
         return std::make_tuple(true, msg, "", "", regions_accs);
       }
       if (is_canceled) {
         msg = Error::m(ERR_REQUEST_CANCELED);
+        sem->up();
         return std::make_tuple(false, msg, "", "", regions_accs);
       }
 
@@ -75,11 +80,13 @@ namespace epidb {
 
         mongo::BSONObj regions_query;
         if (!dba::query::build_experiment_query(ranges[0]->start(), ranges[ranges.size() - 1]->end(), experiment_format.first, regions_query, msg)) {
+          sem->up();
           return std::make_tuple(false, msg, "", "", regions_accs);
         }
 
         Regions data;
         if (!dba::retrieve::get_regions(norm_genome, chromosome.first, regions_query, false, status, data, msg)) {
+          sem->up();
           return std::make_tuple(false, msg, "", "", regions_accs);
         }
 
@@ -107,6 +114,8 @@ namespace epidb {
           it_ranges++;
         }
       }
+
+      sem->up();
       return std::make_tuple(true, "", experiment_format.first, chromosome.first, regions_accs);
     }
 
@@ -156,11 +165,15 @@ namespace epidb {
 
       std::map<std::string, std::map<std::string, std::shared_ptr<std::vector<algorithms::Accumulator>>>> chromosome_accs;
 
+      // We only allow 32 simultaneous threads
+      threading::SemaphorePtr sem = threading::build_semaphore(32);
+
       std::vector<std::future<std::tuple<bool, std::string, std::string, std::string, std::shared_ptr<std::vector<algorithms::Accumulator>>>>> threads;
       for (auto &experiment_format : norm_experiments_formats) {
         for (auto &chromosome : range_regions) {
+          sem->down();
           auto t = std::async(std::launch::async, &summarize_experiment,
-                              std::ref(norm_genome), std::ref(experiment_format), std::ref(chromosome), status);
+                              std::ref(norm_genome), std::ref(experiment_format), std::ref(chromosome), sem, status);
           threads.push_back(std::move(t));
         }
       }
