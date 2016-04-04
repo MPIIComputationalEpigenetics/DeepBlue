@@ -38,7 +38,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::OPERATIONS, "Generate flanking regions for the given regions.");
+        return CommandDescription(categories::OPERATIONS, "Generate flanking regions from the given regions.");
       }
 
       static Parameters parameters_()
@@ -111,6 +111,3 @@ namespace epidb {
     } flankCommand;
   }
 }
-
-
-
