@@ -1,7 +1,7 @@
 //
 //  flank.cpp
 //  DeepBlue Epigenomic Data Server
-//  File created by Fabian Reinartz on 29.08.15.
+//  File created by Felipe Albrecht on 29.08.15.
 //  Copyright (c) 2016 Max Planck Institute for Informatics. All rights reserved.
 
 //  This program is free software: you can redistribute it and/or modify
