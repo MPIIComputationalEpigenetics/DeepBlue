@@ -88,6 +88,9 @@ namespace epidb {
       bool retrieve_flank_query(const std::string &user_key, const mongo::BSONObj &query,
                                 processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg);
 
+      bool retrieve_extend_query(const std::string &user_key, const mongo::BSONObj &query,
+                                processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg);
+
       bool retrieve_merge_query(const std::string &user_key, const mongo::BSONObj &query,
                                 processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg);
 

@@ -248,6 +248,10 @@ namespace epidb {
           if (!retrieve_flank_query(user_key, query, status, regions, msg)) {
             return false;
           }
+        } else if (type == "extend") {
+          if (!retrieve_extend_query(user_key, query, status, regions, msg)) {
+            return false;
+          }
         } else if (type == "merge") {
           if (!retrieve_merge_query(user_key, query, status, regions, msg)) {
             return false;
@@ -872,6 +876,29 @@ namespace epidb {
         }
       }
 
+      bool retrieve_extend_query(const std::string &user_key, const mongo::BSONObj &query,
+                                processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg)
+      {
+        processing::RunningOp runningOp = status->start_operation(processing::RETRIEVE_FLANK_QUERY, query);
+        if (is_canceled(status, msg)) {
+          return false;
+        }
+
+        mongo::BSONObj args = query["args"].Obj();
+        const std::string query_id = args["query_id"].str();
+        const Length length = args["length"].Int();
+        const std::string direction = args["direction"].str();
+        const bool use_strand = args["use_strand"].Bool();
+
+        ChromosomeRegionsList query_regions;
+        if (!retrieve_query(user_key, query_id, status, query_regions, msg)) {
+          msg = "Cannot retrieve first region set: " + msg;
+          return false;
+        }
+
+        return algorithms::extend(query_regions, length, direction, use_strand, regions, msg);
+      }
+
       bool retrieve_flank_query(const std::string &user_key, const mongo::BSONObj &query,
                                 processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg)
       {
@@ -894,6 +921,7 @@ namespace epidb {
 
         return algorithms::flank(query_regions, start, length, use_strand, regions, msg);
       }
+
 
       bool retrieve_merge_query(const std::string & user_key, const mongo::BSONObj & query,
                                 processing::StatusPtr status, ChromosomeRegionsList & regions, std::string & msg)
@@ -1185,7 +1213,7 @@ namespace epidb {
           int n_count = 0;
 
           std::vector<mongo::BSONElement> tmp_columns = experiment["columns"].Array();
-          for(const mongo::BSONElement & e: tmp_columns) {
+          for (const mongo::BSONElement & e : tmp_columns) {
             mongo::BSONObj column = e.Obj();
             const std::string &column_type = column["column_type"].str();
             const std::string &column_name = column["name"].str();
@@ -1232,7 +1260,7 @@ namespace epidb {
           int s_count = 0;
           int n_count = 0;
           std::vector<mongo::BSONElement> tmp_columns = annotation["columns"].Array();
-          for(const mongo::BSONElement & e: tmp_columns) {
+          for (const mongo::BSONElement & e : tmp_columns) {
             mongo::BSONObj column = e.Obj();
             const std::string &column_type = column["column_type"].str();
             const std::string &column_name = column["name"].str();
@@ -1275,7 +1303,7 @@ namespace epidb {
         while (cursor->more()) {
           mongo::BSONObj tiling = cursor->next().getOwned();
           std::vector<mongo::BSONElement> tmp_columns = tiling["columns"].Array();
-          for(const mongo::BSONElement & e: tmp_columns) {
+          for (const mongo::BSONElement & e : tmp_columns) {
             columns.push_back(e.Obj().getOwned());
           }
           c.done();

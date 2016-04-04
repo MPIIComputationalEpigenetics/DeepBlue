@@ -30,8 +30,12 @@
 
 namespace epidb {
   namespace algorithms {
+
     bool aggregate(ChromosomeRegionsList &data, ChromosomeRegionsList &ranges, const std::string &field,
                    processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg);
+
+    bool extend(ChromosomeRegionsList &regions, const Length length, const std::string direction, const bool use_strand,
+                ChromosomeRegionsList &result, std::string &msg);
 
     bool flank(ChromosomeRegionsList &regions, const Offset start, const Length length, const bool use_strand,
                ChromosomeRegionsList &result, std::string &msg);
