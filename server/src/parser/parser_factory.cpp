@@ -397,7 +397,6 @@ namespace epidb {
           found = true;
         }
 
-        std::cerr << field_string << "  " << dba::columns::exists_column_type(field_string, msg) << std::endl;
         // Load from database
         if (!found && dba::columns::exists_column_type(field_string, msg)) {
           found = true;
