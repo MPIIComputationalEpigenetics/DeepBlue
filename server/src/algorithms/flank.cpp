@@ -68,12 +68,13 @@ namespace epidb {
           }
         } else {
           if (start >= 0) {
-            // We use signed long because otherwise the underflow will be a positive integer.
-            a = std::max<signed long>(0, region->start() - start - length);
-            b = std::max<signed long>(0, region->start()  - start);
+            // We use signed int because otherwise the underflow will be a positive integer.
+            a = std::max<signed int>(0, region->start() - start - length);
+            b = std::max<signed int>(0, region->start()  - start);
           } else {
-            a = std::max<signed long>(0, region->end() - start);
-            b = std::max<signed long>(0, region->end() - start + length);
+            // We use signed int because otherwise the underflow will be a positive integer.
+            a = std::max<signed int>(0, region->end() - start);
+            b = std::max<signed int>(0, region->end() - start + length);
           }
         }
 
