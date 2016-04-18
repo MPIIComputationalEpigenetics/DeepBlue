@@ -224,7 +224,8 @@ namespace epidb {
         return true;
       }
 
-      bool get_genes_from_database(const std::vector<std::string>& genes, const std::string& gene_set,
+      bool get_genes_from_database(const std::vector<std::string> &chromosomes, const int start, const int end,
+                                   const std::vector<std::string>& genes, const std::string& gene_set,
                                    ChromosomeRegionsList& chromosomeRegionsList, std::string& msg )
       {
         Connection c;
@@ -248,6 +249,18 @@ namespace epidb {
         mongo::BSONObjBuilder bob;
         bob.append(KeyMapper::DATASET(), dataset_id);
         bob.append("$or", BSON_ARRAY(b_in_gene_name << b_in_gene_id));
+
+        if (!chromosomes.empty()) {
+          bob.append(KeyMapper::CHROMOSOME(), BSON("$in" << utils::build_array(chromosomes)));
+        }
+
+        if (start > -1) {
+          bob.append(KeyMapper::END(), BSON("$gte" << start));
+        }
+        if (end > -1) {
+          bob.append(KeyMapper::START(), BSON("$lte" << end));
+        }
+
         mongo::BSONObj filter = bob.obj();
 
         mongo::Query query = mongo::Query(filter).sort(BSON(KeyMapper::CHROMOSOME() << 1 << KeyMapper::START() << 1));

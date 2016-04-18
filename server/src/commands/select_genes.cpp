@@ -51,9 +51,12 @@ namespace epidb {
         Parameter p[] = {
           Parameter("genes_name", serialize::STRING, "genes(s) (ENSB ID or ENSB name)", true),
           Parameter("gene_set", serialize::STRING, "gene set name"),
+          Parameter("chromosome", serialize::STRING, "chromosome name(s)", true),
+          Parameter("start", serialize::INTEGER, "minimum start region"),
+          Parameter("end", serialize::INTEGER, "maximum end region"),
           parameters::UserKey
         };
-        Parameters params(&p[0], &p[0] + 3);
+        Parameters params(&p[0], &p[0] + 6);
         return params;
       }
 
@@ -74,9 +77,12 @@ namespace epidb {
       {
         std::vector<serialize::ParameterPtr> genes;
         parameters[0]->children(genes);
-
         const std::string gene_set = parameters[1]->as_string();
-        const std::string user_key = parameters[2]->as_string();
+        std::vector<serialize::ParameterPtr> chromosomes;
+        parameters[2]->children(chromosomes);
+        const int start = parameters[3]->isNull() ? -1 : parameters[3]->as_long();
+        const int end = parameters[4]->isNull() ? -1 : parameters[4]->as_long();
+        const std::string user_key = parameters[5]->as_string();
 
         std::string msg;
         datatypes::User user;
@@ -97,6 +103,22 @@ namespace epidb {
         }
 
         mongo::BSONObjBuilder args_builder;
+        if (start > 0) {
+          args_builder.append("start", (int) start);
+        }
+        if (end > 0) {
+          args_builder.append("end", (int) end);
+        }
+
+        if (chromosomes.size() != 0) {
+          std::set<std::string> chroms;
+          std::vector<serialize::ParameterPtr>::iterator it;
+          for (it = chromosomes.begin(); it != chromosomes.end(); ++it) {
+            chroms.insert((**it).as_string());
+          }
+          args_builder.append("chromosomes", chroms);
+        }
+
         args_builder.append("genes", utils::build_array(genes));
         args_builder.append("gene_set", utils::normalize_name(gene_set));
 

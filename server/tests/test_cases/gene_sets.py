@@ -1,4 +1,5 @@
 import helpers
+import gzip
 
 from deepblue_client import DeepBlueClient
 
@@ -14,7 +15,7 @@ class TestGenes(helpers.TestCase):
     (s, ss) = epidb.add_gene_set("Test One", "Test One Description", data, "GTF", {}, self.admin_key)
     self.assertSuccess(s, ss)
 
-    (s, query_id) = epidb.select_genes(["ENSG00000223972.5", "ENSG00000223972.5", "DDX11L1"], "Test One", self.admin_key)
+    (s, query_id) = epidb.select_genes(["ENSG00000223972.5", "ENSG00000223972.5", "DDX11L1"], "Test One", None, None, None, self.admin_key)
     (s, r_id) = epidb.get_regions(query_id, "CHROMOSOME,START,END", self.admin_key)
     regions = self.get_regions_request(r_id)
     self.assertEquals("chr1\t11869\t14409", regions)
@@ -42,22 +43,22 @@ class TestGenes(helpers.TestCase):
     (s, ss) = epidb.add_gene_set("Test One", "Test One Description", data, "GTF", {}, self.admin_key)
     self.assertSuccess(s, ss)
 
-    (s, query_id) = epidb.select_genes(["RP11-34P13.7"], "Test One", self.admin_key)
+    (s, query_id) = epidb.select_genes(["RP11-34P13.7"], "Test One", None, None, None, self.admin_key)
     (s, req) = epidb.count_regions(query_id, self.admin_key)
     count = self.count_request(req)
     self.assertEquals(count, 1)
 
-    (s, query_id) = epidb.select_genes(["RP11-34P13.234"], "Test One", self.admin_key)
+    (s, query_id) = epidb.select_genes(["RP11-34P13.234"], "Test One", None, None, None, self.admin_key)
     (s, req) = epidb.count_regions(query_id, self.admin_key)
     count = self.count_request(req)
     self.assertEquals(count, 0)
 
-    (s, query_id) = epidb.select_genes(["RP11-34P13"], "Test One", self.admin_key)
+    (s, query_id) = epidb.select_genes(["RP11-34P13"], "Test One", None, None, None, self.admin_key)
     (s, req) = epidb.count_regions(query_id, self.admin_key)
     count = self.count_request(req)
     self.assertEquals(count, 8)
 
-    (s, query_id) = epidb.select_genes(["RP1?"], "Test One", self.admin_key)
+    (s, query_id) = epidb.select_genes(["RP1?"], "Test One", None, None, None, self.admin_key)
     (s, req) = epidb.count_regions(query_id, self.admin_key)
     count = self.count_request(req)
     self.assertEquals(count, 8)
@@ -71,11 +72,27 @@ class TestGenes(helpers.TestCase):
     (s, ss) = epidb.add_gene_set("Test One", "Test One Description", data, "GTF", {}, self.admin_key)
     self.assertSuccess(s, ss)
 
-    (s, query_id) = epidb.select_genes(["Rp11-34p13.7"], "Test One", self.admin_key)
+    (s, query_id) = epidb.select_genes(["Rp11-34p13.7"], "Test One", None, None, None, self.admin_key)
     (s, req) = epidb.count_regions(query_id, self.admin_key)
     count = self.count_request(req)
     self.assertEquals(count, 1)
 
+  def test_gene_chr1_retrieve(self):
+    epidb = DeepBlueClient(address="localhost", port=31415)
+    self.init_base(epidb)
 
+    data = gzip.open("data/gtf/gencode.v19.annotation.ONLY_GENES.gtf.gz").read()
 
+    (s, ss) = epidb.add_gene_set("Test One", "Test One Description", data, "GTF", {}, self.admin_key)
+    self.assertSuccess(s, ss)
+
+    (s, query_id) = epidb.select_genes(".*", "Test One", ["chr1"], 1000, 15000, self.admin_key)
+    (s, r_id) = epidb.get_regions(query_id, "CHROMOSOME,START,END", self.admin_key)
+    regions = self.get_regions_request(r_id)
+    self.assertEquals(regions, "chr1\t11869\t14412\nchr1\t14363\t29806")
+
+    (s, query_id) = epidb.select_genes(".*", "Test One", ["chr1", "chr11", "chr21"], 10000, 2000000, self.admin_key)
+    (s, r_id) = epidb.count_regions(query_id, self.admin_key)
+    count = self.get_regions_request(r_id)
+    self.assertEquals(count,  {'count': 269})
 

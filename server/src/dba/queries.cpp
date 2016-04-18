@@ -743,9 +743,29 @@ namespace epidb {
         const std::string gene_set = args["gene_set"].str();
 
 
-        if (!genes::get_genes_from_database(genes, gene_set, regions, msg)) {
-          return false;
+        std::vector<std::string> chromosomes;
+        if (args.hasField("chromosomes")) {
+          chromosomes = utils::build_vector(args["chromosomes"].Array());
         }
+
+        int start;
+        int end = std::numeric_limits<Position>::max();
+
+        if (args.hasField("start")) {
+          start = args["start"].Int();
+        } else {
+          start = std::numeric_limits<Position>::min();
+        }
+
+        if (args.hasField("end")) {
+          end = args["end"].Int();
+        } else {
+          end = std::numeric_limits<Position>::max();
+        }
+
+        if (!genes::get_genes_from_database(chromosomes, start, end, genes, gene_set, regions, msg)) {
+            return false;
+          }
 
         return true;
       }
@@ -877,7 +897,7 @@ namespace epidb {
       }
 
       bool retrieve_extend_query(const std::string &user_key, const mongo::BSONObj &query,
-                                processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg)
+                                 processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg)
       {
         processing::RunningOp runningOp = status->start_operation(processing::RETRIEVE_FLANK_QUERY, query);
         if (is_canceled(status, msg)) {
