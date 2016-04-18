@@ -72,6 +72,7 @@ namespace epidb {
         return results;
       }
 
+      // TODO: move to dba::info
       bool get_request(const std::string& id, const std::string& user_key,
                        std::map<std::string, std::string>& map,
                        std::map<std::string, std::string>& extra_metadata,
@@ -118,6 +119,7 @@ namespace epidb {
         return true;
       }
 
+      // TODO: move to dba::info
       bool get_user(const std::string& key, std::map<std::string, std::string>& metadata, std::string& msg) const
       {
         datatypes::User user;
