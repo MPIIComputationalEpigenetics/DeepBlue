@@ -49,7 +49,7 @@ namespace epidb {
       static Parameters parameters_()
       {
         Parameter p[] = {
-          Parameter("genes_name", serialize::STRING, "genes(s) (ENSB ID or ENSB name)", true),
+          Parameter("genes_name", serialize::STRING, "genes(s) - ENSB ID or ENSB name. Use the regular expression '.*' for selecting all." , true),
           Parameter("gene_set", serialize::STRING, "gene set name"),
           Parameter("chromosome", serialize::STRING, "chromosome name(s)", true),
           Parameter("start", serialize::INTEGER, "minimum start region"),
