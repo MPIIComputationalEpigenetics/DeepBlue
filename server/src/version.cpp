@@ -41,5 +41,5 @@ namespace epidb {
   const std::string Version::coauthors = "Fabian Reinartz, Natalie Wirth";
   const size_t Version::major_version = 1;
   const size_t Version::minor_version = 7;
-  const size_t Version::fix_version = 3;
+  const size_t Version::fix_version = 5;
 }
