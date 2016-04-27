@@ -38,7 +38,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::GENERAL_INFORMATION, "Returns the current state of specific data.");
+        return CommandDescription(categories::ADMINISTRATION, "Returns the current state of specific data.");
       }
 
       static Parameters parameters_()
