@@ -46,7 +46,7 @@ namespace epidb {
         Parameter p[] = {
           Parameter("name", serialize::STRING, "column type name"),
           Parameter("description", serialize::STRING, "description of the column type"),
-          Parameter("type", serialize::STRING, "type of the column type"),
+          Parameter("type", serialize::STRING, "type of the column type (string, integer, double)"),
           parameters::UserKey
         };
         Parameters params(&p[0], &p[0] + 4);
