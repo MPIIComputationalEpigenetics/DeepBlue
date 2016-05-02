@@ -45,7 +45,7 @@ namespace epidb {
       static Parameters parameters_()
       {
         Parameter p[] = {
-          Parameter("controlled_vocabulary", serialize::STRING, "id of the data"),
+          Parameter("controlled_vocabulary", serialize::STRING, "controlled vocabulary name"),
           parameters::UserKey
         };
         Parameters params(&p[0], &p[0] + 2);
