@@ -1,5 +1,5 @@
 //
-//  faceti_experiments.cpp
+//  faceting_experiments.cpp
 //  DeepBlue Epigenomic Data Server
 //  File created by Felipe Albrecht on 25.06.13.
 //  Copyright (c) 2016 Max Planck Institute for Informatics. All rights reserved.
