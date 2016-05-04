@@ -113,10 +113,15 @@ namespace epidb {
       /**
        * List in use
        */
+      bool get_controlled_vocabulary_key(const std::string& controlled_vocabulary,
+                                         std::string &collection_key, std::string &msg);
 
       bool in_use(const std::string &collection, const std::string &field_name, const std::string &user_key,
                   std::vector<utils::IdNameCount> &names, std::string &msg);
 
+      bool collection_experiments_count(const std::string controlled_vocabulary,
+                                        const mongo::BSONObj & experiments_query, const std::string &user_key,
+                                        std::vector<utils::IdNameCount> &experiments_count, std::string& msg);
 
       bool faceting(const mongo::BSONObj& experimentsq_uery, const std::string &user_key,
                     std::unordered_map<std::string, std::vector<utils::IdNameCount> > &result,
