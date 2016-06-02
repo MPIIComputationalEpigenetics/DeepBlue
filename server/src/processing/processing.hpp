@@ -99,10 +99,18 @@ namespace epidb {
 
     typedef std::shared_ptr<Status> StatusPtr;
 
+    struct CoverageInfo {
+      const std::string chromosome_name;
+      size_t chromosome_size;
+      size_t total;
+    };
+
     StatusPtr build_status(const std::string& _id, const long long maximum_memory);
     StatusPtr build_dummy_status();
 
     bool count_regions(const std::string &query_id, const std::string &user_key, processing::StatusPtr status, size_t &count, std::string &msg);
+
+    bool coverage(const std::string &query_id, const std::string &genome, const std::string &user_key, processing::StatusPtr status, std::vector<CoverageInfo> &coverage_infos, std::string &msg);
 
     bool get_regions(const std::string &query_id, const std::string &format, const std::string &user_key, processing::StatusPtr status, StringBuilder &sb, std::string &msg);
 

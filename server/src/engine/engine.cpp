@@ -100,6 +100,18 @@ namespace epidb {
     return true;
   }
 
+  bool Engine::queue_coverage(const std::string &query_id, const std::string &genome, const std::string &user_key, std::string &id, std::string &msg)
+  {
+    utils::IdName user;
+    if (!dba::users::get_user(user_key, user, msg)) {
+      return false;
+    }
+    if (!queue(BSON("command" << "coverage" << "query_id" << query_id << "genome" << genome << "user_id" << user.id), 60 * 60, id, msg)) {
+      return false;
+    }
+    return true;
+  }
+
   bool Engine::queue_get_regions(const std::string &query_id, const std::string &output_format, const std::string &user_key, std::string &id, std::string &msg)
   {
     utils::IdName user;

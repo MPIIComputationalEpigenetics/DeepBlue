@@ -86,6 +86,8 @@ namespace epidb {
 
       if (command == "count_regions") {
         return process_count(job["query_id"].str(), user_key, status, result);
+      } if (command == "coverage") {
+        return process_coverage(job["query_id"].str(), job["genome"].str(), user_key, status, result);
       } if (command == "get_regions") {
         return process_get_regions(job["query_id"].str(), job["format"].str(), user_key, status, result);
       } if (command == "score_matrix") {
@@ -125,6 +127,42 @@ namespace epidb {
       return true;
     }
 
+    bool QueueHandler::process_coverage(const std::string &query_id, const std::string &genome, const std::string &user_key, processing::StatusPtr status, mongo::BSONObj& result)
+    {
+      std::string msg;
+      mongo::BSONObjBuilder bob;
+      std::vector<processing::CoverageInfo> coverage_infos;
+
+      if (!processing::coverage(query_id, genome, user_key, status, coverage_infos, msg)) {
+        bob.append("__error__", msg);
+        result = bob.obj();
+        return false;
+      }
+
+      mongo::BSONObjBuilder coverages_bob;
+      for (const auto &coverage_info : coverage_infos) {
+        coverages_bob.append(coverage_info.chromosome_name,
+                             BSON(
+                               "size" << (long long) coverage_info.chromosome_size <<
+                               "total" << (long long) coverage_info.total <<
+                               "coverage" << (float) ((coverage_info.total * 100.0) / coverage_info.chromosome_size)
+                             )
+                            );
+      }
+
+      mongo::BSONObj o = coverages_bob.obj();
+      int size = o.objsize();
+      bob.append("coverages", o);
+      status->set_total_stored_data(size);
+      status->set_total_stored_data_compressed(size);
+      result = bob.obj();
+
+      if (is_canceled(status, msg)) {
+        return false;
+      }
+
+      return true;
+    }
 
     bool QueueHandler::process_get_regions(const std::string &query_id, const std::string &format, const std::string &user_key, processing::StatusPtr status, mongo::BSONObj& result)
     {
