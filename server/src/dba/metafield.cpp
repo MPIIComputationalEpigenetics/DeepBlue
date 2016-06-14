@@ -160,7 +160,7 @@ namespace epidb {
         return true;
       }
 
-      data_cursor = c->query(helpers::collection_name(Collections::GENE_SETS()),
+      data_cursor = c->query(helpers::collection_name(Collections::GENE_MODELS()),
                              mongo::Query(BSON(KeyMapper::DATASET() << dataset_id)));
       if (data_cursor->more()) {
         obj = data_cursor->next().getOwned();

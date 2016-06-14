@@ -11,7 +11,7 @@ class TestFlank(helpers.TestCase):
 
     data = open("data/gtf/gencode.v23.basic.annotation_head.gtf").read()
 
-    (s, ss) = epidb.add_gene_set("Test One", "Test One Description", data, "GTF", {}, self.admin_key)
+    (s, ss) = epidb.add_gene_model("Test One", "Test One Description", data, "GTF", {}, self.admin_key)
     self.assertSuccess(s, ss)
 
     (s, query_id) = epidb.select_genes(["ENSG00000223972.5", "ENSG00000223972.5", "DDX11L1", "RP11-34P13.7"], "Test One", None, None, None, self.admin_key)

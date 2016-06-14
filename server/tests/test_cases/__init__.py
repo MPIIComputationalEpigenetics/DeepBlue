@@ -16,7 +16,7 @@ import extend
 import faceting
 import filters
 import flank
-import gene_sets
+import gene_models
 import genomes
 import info
 import init

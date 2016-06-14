@@ -38,10 +38,10 @@ class TestCoverageCommand(helpers.TestCase):
     coverage = self.get_regions_request(req)
     print coverage
 
+
     self.insert_experiment(epidb, "hg19_big_1")
 
     res, qid = epidb.select_experiments("hg19_big_1", None, None, None, self.admin_key)
     self.assertSuccess(res, qid)
     status, req = epidb.coverage(qid, "hg19", self.admin_key)
     coverage = self.get_regions_request(req)
-    print coverage

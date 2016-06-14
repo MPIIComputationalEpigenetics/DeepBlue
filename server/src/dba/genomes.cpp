@@ -111,6 +111,11 @@ namespace epidb {
         return r;
       }
 
+      NamesPairs GenomeInfo::names_pairs() const 
+      {
+        return this->names_pair_;
+      }      
+
       template <class T>
       bool get_chromosomes(const T &genomes,
                            std::set<std::string> &chromosomes, std::string &msg)

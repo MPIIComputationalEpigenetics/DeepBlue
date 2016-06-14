@@ -48,10 +48,10 @@ namespace epidb {
                   datatypes::Metadata extra_metadata,
                   const parser::GTFPtr &gtf,
                   const std::string &user_key, const std::string &ip,
-                  std::string &gene_set_id, std::string &msg);
+                  std::string &gene_model_id, std::string &msg);
 
       bool get_genes_from_database(const std::vector<std::string> &chromosomes, const int start, const int end,
-                                   const std::vector<std::string>& genes, const std::string& gene_set,
+                                   const std::vector<std::string>& genes, const std::string& gene_model,
                                    ChromosomeRegionsList& chromosomeRegionsList, std::string& msg );
 
     }

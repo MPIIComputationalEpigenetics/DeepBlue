@@ -74,7 +74,7 @@ namespace epidb {
   extern Error ERR_USER_FORMAT_MISSING;
   extern Error ERR_USER_GENOME_MISSING;
   extern Error ERR_USER_GENE_MISSING;
-  extern Error ERR_USER_GENE_SET_MISSING;
+  extern Error ERR_USER_GENE_MODEL_MISSING;
 
   extern Error ERR_FORMAT_CHROMOSOME_MISSING;
   extern Error ERR_FORMAT_START_MISSING;
@@ -97,7 +97,7 @@ namespace epidb {
   extern Error ERR_INVALID_TECHNIQUE_ID;
   extern Error ERR_INVALID_BIOSOURCE_ID;
   extern Error ERR_INVALID_EPIGENETIC_MARK_ID;
-  extern Error ERR_INVALID_GENE_SET_ID;
+  extern Error ERR_INVALID_GENE_MODEL_ID;
   extern Error ERR_INVALID_TILING_REGIONS_ID;
   extern Error ERR_INVALID_COLUMN_TYPE_ID;
 
@@ -122,7 +122,7 @@ namespace epidb {
 
   extern Error ERR_DUPLICATED_BIOSOURCE_NAME;
   extern Error ERR_DUPLICATED_EXPERIMENT_NAME;
-  extern Error ERR_DUPLICATED_GENE_SET_NAME;
+  extern Error ERR_DUPLICATED_GENE_MODEL_NAME;
 
   extern Error ERR_MORE_EMBRACING_BIOSOURCE_NAME;
 

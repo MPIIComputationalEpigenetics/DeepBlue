@@ -56,7 +56,7 @@ namespace epidb {
 
       bool experiment_column(const std::string &experiment_name, const std::string &column_name);
 
-      bool gene_set(const std::string &name);
+      bool gene_model(const std::string &name);
 
       bool annotation(const std::string &name, const std::string& genome);
 

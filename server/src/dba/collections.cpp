@@ -37,7 +37,7 @@ namespace epidb {
       v.push_back(EPIGENETIC_MARKS());
       v.push_back(EXPERIMENTS());
       v.push_back(GENOMES());
-      v.push_back(GENE_SETS());
+      v.push_back(GENE_MODELS());
       v.push_back(GENES());
       v.push_back(PROJECTS());
       v.push_back(SAMPLES());
@@ -75,7 +75,7 @@ namespace epidb {
         } else if ("em" == collection_prefix) {
             collection = EPIGENETIC_MARKS();
         } else if ("gs" == collection_prefix) {
-            collection = GENE_SETS();
+            collection = GENE_MODELS();
         } else if ("gn" == collection_prefix) {
             collection = GENES();
         } else if ("e" == collection_prefix) {
@@ -154,10 +154,12 @@ namespace epidb {
       return annotations;
     }
 
-    const std::string &Collections::GENE_SETS()
+    const std::string &Collections::GENE_MODELS()
     {
-      static std::string gene_sets("gene_sets");
-      return gene_sets;
+      // Keep the old collection
+      // TODO: update/change collection name in the 
+      static std::string gene_models("gene_models");
+      return gene_models;
     }
 
     const std::string &Collections::GENES()

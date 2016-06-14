@@ -66,6 +66,8 @@ namespace epidb {
 
         bool get_chromosome(const std::string &name, ChromosomeInfo &chromosome_info, std::string &msg) const;
         const std::vector<std::string> chromosomes() const;
+
+        NamesPairs names_pairs() const;
       };
 
       typedef std::shared_ptr<GenomeInfo> GenomeInfoPtr;

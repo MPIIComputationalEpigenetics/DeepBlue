@@ -41,18 +41,19 @@ namespace epidb {
         return false;
       }
 
+      dba::genomes::NamesPairs genome_chromosomes(gi->names_pairs());
+
+      size_t total_genome = 0;
+      size_t genome_size = 0;
       for (ChromosomeRegionsList::iterator it = chromosomeRegionsList.begin();
            it != chromosomeRegionsList.end(); it++) {
         std::string &chromosome = it->first;
         Regions &regions = it->second;
 
+        genome_chromosomes.erase(chromosome);
+
         if (regions.empty()) {
           continue;
-        }
-
-        size_t chromosome_size;
-        if (!dba::genomes::chromosome_size(genome, chromosome, chromosome_size, msg)) {
-          return false;
         }
 
         size_t total = 0;
@@ -64,6 +65,14 @@ namespace epidb {
             last_pos = region->end();
           }
         }
+
+
+        size_t chromosome_size;
+        if (!dba::genomes::chromosome_size(genome, chromosome, chromosome_size, msg)) {
+          return false;
+        }
+
+        genome_size += chromosome_size;
 
         std::cerr << chromosome << " " << total << " " << last_pos << " " << std::endl;
         coverage_infos.emplace_back(CoverageInfo{chromosome, chromosome_size, total});

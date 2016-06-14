@@ -109,12 +109,12 @@ namespace epidb {
         }
       }
 
-      bool gene_set(const std::string &id, mongo::BSONObj &result, std::string &msg)
+      bool gene_model(const std::string &id, mongo::BSONObj &result, std::string &msg)
       {
-        if (helpers::get_one(Collections::GENE_SETS(), mongo::Query(BSON("_id" << id)), result)) {
+        if (helpers::get_one(Collections::GENE_MODELS(), mongo::Query(BSON("_id" << id)), result)) {
           return true;
         } else {
-          msg = Error::m(ERR_INVALID_GENE_SET_ID, id);
+          msg = Error::m(ERR_INVALID_GENE_MODEL_ID, id);
           return false;
         }
       }

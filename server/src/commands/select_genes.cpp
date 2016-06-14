@@ -50,7 +50,7 @@ namespace epidb {
       {
         Parameter p[] = {
           Parameter("genes_name", serialize::STRING, "genes(s) - ENSB ID or ENSB name. Use the regular expression '.*' for selecting all." , true),
-          Parameter("gene_set", serialize::STRING, "gene set name"),
+          Parameter("gene_model", serialize::STRING, "gene model name"),
           Parameter("chromosome", serialize::STRING, "chromosome name(s)", true),
           Parameter("start", serialize::INTEGER, "minimum start region"),
           Parameter("end", serialize::INTEGER, "maximum end region"),
@@ -77,7 +77,7 @@ namespace epidb {
       {
         std::vector<serialize::ParameterPtr> genes;
         parameters[0]->children(genes);
-        const std::string gene_set = parameters[1]->as_string();
+        const std::string gene_model = parameters[1]->as_string();
         std::vector<serialize::ParameterPtr> chromosomes;
         parameters[2]->children(chromosomes);
         const int start = parameters[3]->isNull() ? -1 : parameters[3]->as_long();
@@ -97,8 +97,8 @@ namespace epidb {
           return false;
         }
 
-        if (gene_set.empty()) {
-          result.add_error(Error::m(ERR_USER_GENE_SET_MISSING));
+        if (gene_model.empty()) {
+          result.add_error(Error::m(ERR_USER_GENE_MODEL_MISSING));
           return false;
         }
 
@@ -120,7 +120,7 @@ namespace epidb {
         }
 
         args_builder.append("genes", utils::build_array(genes));
-        args_builder.append("gene_set", utils::normalize_name(gene_set));
+        args_builder.append("gene_model", utils::normalize_name(gene_model));
 
         std::string query_id;
         if (!dba::query::store_query("genes_select", args_builder.obj(), user_key, query_id, msg)) {
