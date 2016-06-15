@@ -34,7 +34,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::ADMINISTRATION, "interface for using DeepBlue with Datatables.");
+        return CommandDescription(categories::ADMINISTRATION, "Interface for using DeepBlue with Datatables Java Script component.");
       }
 
       static Parameters parameters_()

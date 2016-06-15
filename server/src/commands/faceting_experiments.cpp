@@ -44,7 +44,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::EXPERIMENTS, "Experiments faceting.");
+        return CommandDescription(categories::EXPERIMENTS, "Aggregate the number of experiments that matches the selection criteria in each term of all controlled vocabularies in DeepBlue.");
       }
 
       static Parameters parameters_()

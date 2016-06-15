@@ -38,7 +38,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::OPERATIONS, "Generate flanking regions from the given regions.");
+        return CommandDescription(categories::OPERATIONS, "Create regions that flank the query regions. The original regions are removed from the query. Use the merge command to combine flanking regions with the original query.");
       }
 
       static Parameters parameters_()
