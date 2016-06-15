@@ -45,7 +45,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::GENES, "Inserts a new set of genes in the GTF format. Important: It will only include the rows that have 'gene' as feature.");
+        return CommandDescription(categories::GENES, "Include a Gene Model in DeepBlue. The data must be in the GTF format. Important: this command will include only the lines where the column 'feature' is 'genes'.");
       }
 
       static Parameters parameters_()

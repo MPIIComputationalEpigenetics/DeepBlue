@@ -42,7 +42,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::SAMPLES, "Import sample from an existing GSM identifier.");
+        return CommandDescription(categories::SAMPLES, "Include a Sample in DeepBlue, related to a BioSource, from an existing GSM identifier.");
       }
 
       static Parameters parameters_()

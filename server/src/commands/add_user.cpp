@@ -33,7 +33,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::ADMINISTRATION, "Inserts a new user with the given parameters.");
+        return CommandDescription(categories::ADMINISTRATION, "Include an user in DeepBlue.");
       }
 
       static  Parameters parameters_()

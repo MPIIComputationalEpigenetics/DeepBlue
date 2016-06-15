@@ -38,7 +38,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::COLUMN_TYPES, "Create a column type from a category set.");
+        return CommandDescription(categories::COLUMN_TYPES, "Create a range column type in DeepBlue.");
       }
 
       static Parameters parameters_()

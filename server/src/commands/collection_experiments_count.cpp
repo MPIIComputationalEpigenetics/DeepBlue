@@ -44,7 +44,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::EXPERIMENTS, "Count the number of elements of the given collection that contains experiments.");
+        return CommandDescription(categories::EXPERIMENTS, "Count the number of experiments for each term in each DeepBlue collection.");
       }
 
       static Parameters parameters_()
