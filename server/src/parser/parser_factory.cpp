@@ -112,7 +112,7 @@ namespace epidb {
           return false;
         }
 
-      } while ((line[0] == '#') || (line.substr(0, 5) == "track") || (line.substr(0, 7) == "browser"));
+      } while ((line[0] == '#') || (line.substr(0, 5) == "track") || (line.substr(0, 7) == "browser") || (line.compare(0, 9, "chr\tstart") == 0));
 
       if (first_) {
         std::stringstream ss(line);

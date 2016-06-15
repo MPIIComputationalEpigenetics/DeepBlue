@@ -250,6 +250,21 @@ class TestExperiments(helpers.TestCase):
               "ENCODE", "desc1", regions_data, format, None, self.admin_key)
     self.assertFailure(res)
 
+  def test_shitty_deep_file(self):
+    epidb = DeepBlueClient(address="localhost", port=31415)
+    self.init_base(epidb)
+
+    eid1 = self.insert_experiment(epidb, "deepshitty")
+    res, qid1 = epidb.select_regions("deepshitty", "hg18", None, None, None,
+        None, None, None, None, self.admin_key)
+    self.assertSuccess(res, qid1)
+
+    res, req = epidb.get_experiments_by_query(qid1, self.admin_key)
+    exps = self.get_regions_request(req)
+    self.assertEqual(len(exps), 1)
+    (res, req) = epidb.get_regions(qid1, "CHROMOSOME,START,END", self.admin_key)
+    exps = self.get_regions_request(req)
+    self.assertEqual(exps, "chr1\t62125\t62154")
 
   def test_get_by_query(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
