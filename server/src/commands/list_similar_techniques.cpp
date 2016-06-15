@@ -38,7 +38,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::TECHNIQUES, "Lists all techniques similar to the one provided.");
+        return CommandDescription(categories::TECHNIQUES, "Lists Techniques biosources that have a similar name compared to the provided name.");
       }
 
       static Parameters parameters_()

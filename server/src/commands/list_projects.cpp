@@ -38,7 +38,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::PROJECTS, "Lists all existing projects.");
+        return CommandDescription(categories::PROJECTS, "Lists the Projects included in DeepBlue.");
       }
 
       static Parameters parameters_()

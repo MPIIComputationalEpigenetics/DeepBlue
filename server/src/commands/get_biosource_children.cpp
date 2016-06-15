@@ -37,7 +37,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::BIOSOURCE_RELATIONSHIP, "Gets the scope for the biosource.");
+        return CommandDescription(categories::BIOSOURCE_RELATIONSHIP, "Obtain the children biosource terms of the specified biosource. The children terms are more specific terms that are defined in the imported ontologies.");
       }
 
       static  Parameters parameters_()

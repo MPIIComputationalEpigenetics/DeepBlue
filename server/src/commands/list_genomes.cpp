@@ -38,7 +38,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::GENOMES, "Lists all existing genomes.");
+        return CommandDescription(categories::GENOMES, "Lists the Genomes assemblies that are registered in DeepBlue.");
       }
 
       static Parameters parameters_()

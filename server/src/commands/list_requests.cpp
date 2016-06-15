@@ -40,7 +40,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::REQUESTS, "Lists all requests in given state.");
+        return CommandDescription(categories::REQUESTS, "Lists the Requests made by an user. It is possible to obtain only the requests of a given state.");
       }
 
       static Parameters parameters_()

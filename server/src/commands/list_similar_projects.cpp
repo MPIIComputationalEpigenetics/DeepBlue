@@ -38,7 +38,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::PROJECTS, "Lists all projects similar to the one provided.");
+        return CommandDescription(categories::PROJECTS, "Lists all Projects that have a similar name compared to the provided name");
       }
 
       static Parameters parameters_()

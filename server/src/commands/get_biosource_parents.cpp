@@ -40,7 +40,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::BIOSOURCE_RELATIONSHIP, "Gets the biosources that are parents of the given biosource.");
+        return CommandDescription(categories::BIOSOURCE_RELATIONSHIP, "Obtain the parents biosource terms of the specified biosource. The parent terms are more generic terms that are defined in the imported ontologies.");
       }
 
       static  Parameters parameters_()

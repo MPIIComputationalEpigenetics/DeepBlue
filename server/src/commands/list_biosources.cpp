@@ -38,7 +38,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::BIOSOURCES, "Lists all existing biosources.");
+        return CommandDescription(categories::BIOSOURCES, "Lists the BioSources included in DeepBlue. It is possible to filter the BioSources by their extra_metadata fields content.");
       }
 
       static Parameters parameters_()

@@ -38,14 +38,14 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::OPERATIONS, "Select regions from the first query that does intersect with at least one second query region.");
+        return CommandDescription(categories::OPERATIONS, "Select regions that intersect with at least one region of the second query.");
       }
 
       static Parameters parameters_()
       {
         Parameter p[] = {
-          Parameter("query_a_id", serialize::STRING, "id of the first query"),
-          Parameter("query_b_id", serialize::STRING, "id of the second query"),
+          Parameter("query_data_id", serialize::STRING, "query data that will be filtered."),
+          Parameter("query_filter_id", serialize::STRING, "query containing the regions that the regions of the query_data_id must overlap."),
           parameters::UserKey
         };
         Parameters params(&p[0], &p[0] + 3);

@@ -44,7 +44,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::OPERATIONS, "Include a region set that will be used by the follow ups operations.");
+        return CommandDescription(categories::OPERATIONS, "Upload a set of genomic regions that can be accessed by a query ID. An interesting usage case for this command is to upload a set of regions that will be used with the intersection data for selecting specif regions of interest.");
       }
 
       static Parameters parameters_()

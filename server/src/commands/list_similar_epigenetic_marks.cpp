@@ -38,7 +38,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::EPIGENETIC_MARKS, "Lists all epigenetic marks similar to the one provided.");
+        return CommandDescription(categories::EPIGENETIC_MARKS, "Lists all Epigenetic Marks that have a similar name compared to the provided name.");
       }
 
       static Parameters parameters_()
