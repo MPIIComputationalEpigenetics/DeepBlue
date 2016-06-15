@@ -22,7 +22,6 @@
 
 #include "../engine/commands.hpp"
 #include "../engine/engine.hpp"
-#include "../engine/request.hpp"
 
 #include "../dba/collections.hpp"
 #include "../datatypes/user.hpp"

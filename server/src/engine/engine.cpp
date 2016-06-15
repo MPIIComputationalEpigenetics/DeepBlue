@@ -23,6 +23,11 @@
 #include <sstream>
 #include <vector>
 
+#include <boost/iostreams/filtering_streambuf.hpp>
+#include <boost/iostreams/copy.hpp>
+#include <boost/iostreams/filter/bzip2.hpp>
+#include <boost/iostreams/stream.hpp>
+
 #include "commands.hpp"
 #include "engine.hpp"
 
@@ -242,12 +247,13 @@ namespace epidb {
     return true;
   }
 
-  bool Engine::request_data(const std::string & request_id, const std::string & user_key, request::Data & data, std::string & content, request::DataType & type,  std::string & msg)
+  bool Engine::check_request(const std::string & request_id, const std::string & user_key, std::string& msg)
   {
     utils::IdName user;
     if (!dba::users::get_user(user_key, user, msg)) {
       return false;
     }
+
     mongo::BSONObj o = _hub.get_job(request_id); //TODO still check
     if (o.isEmpty()) {
       msg = "Request ID " + request_id + " not found.";
@@ -264,26 +270,122 @@ namespace epidb {
       return false;
     }
 
+    return true;
+  }
+
+
+  bool Engine::request_download_data(const std::string & request_id, const std::string & user_key, std::string &request_data, std::string& msg)
+  {
+    if (!check_request(request_id, user_key, msg)) {
+      return false;
+    }
+
+    mongo::BSONObj o = _hub.get_job(request_id); //TODO still check
+    mongo::BSONObj result = o["result"].Obj();
+
+    if (result.hasField("__file__")) {
+      std::string file_name = result["__file__"].str();
+      std::string file_content;
+      // Get compressed file from mongo filesystem
+      return _hub.get_result(file_name, request_data, msg);
+    }
+
+    msg = "Request ID " + request_id + " does not contain a file has result.";
+    return false;
+  }
+
+
+  bool Engine::request_data(const std::string & request_id, const std::string & user_key, serialize::Parameters &request_data)
+  {
+    std::string msg;
+    if (!check_request(request_id, user_key, msg)) {
+
+      std::cerr << "msg" << std::endl;
+      std::cerr << msg << std::endl;
+      request_data.add_error(msg);
+      return false;
+    }
+
+    mongo::BSONObj o = _hub.get_job(request_id);
     mongo::BSONObj result = o["result"].Obj();
 
     if (result.hasField("__id_names__")) {
       mongo::BSONObj id_names = result["__id_names__"].Obj();
-      data.set_id_names(utils::request_bson_to_id_name(id_names));
-      type = request::ID_NAMES;
+      request_data.add_param(bson_to_parameters(id_names));
       return true;
     }
 
     if (result.hasField("__file__")) {
-      std::string filename = result["__file__"].str();
-      type = request::REGIONS;
+      std::string file_name = result["__file__"].str();
+      std::string file_content;
+      // Get compressed file from mongo filesystem
+      if (!_hub.get_result(file_name, file_content, msg)) {
+        request_data.add_error(msg);
+        return false;
+      }
 
-      return _hub.get_result(filename, content, msg);
+      // uncompress
+      std::istringstream inStream(file_content, std::ios::binary);
+      std::stringstream outStream;
+      boost::iostreams::filtering_streambuf< boost::iostreams::input> in;
+      in.push( boost::iostreams::bzip2_decompressor());
+      in.push( inStream );
+      // copy output
+      boost::iostreams::copy(in, outStream);
+
+      request_data.add_string_content(outStream.str());
+      return true;
     }
 
-    type = request::MAP;
-    data.load_from_bson(result);
-
+    request_data.add_param(bson_to_parameters(result));
     return true;
+  }
+
+  serialize::ParameterPtr element_to_parameter(const mongo::BSONElement& e)
+  {
+
+    switch ( e.type() ) {
+    case mongo::NumberDouble: {
+      return std::make_shared<serialize::SimpleParameter>(e.Double());
+    }
+    case mongo::NumberInt:
+    case mongo::NumberLong: {
+      return std::make_shared<serialize::SimpleParameter>((long long) e.Long());
+    }
+    case mongo::Object: {
+      return bson_to_parameters(e.Obj());
+    }
+    case mongo::Array: {
+      serialize::ParameterPtr p = std::make_shared<serialize::ListParameter>();
+      std::vector<mongo::BSONElement> ees = e.Array();
+      for (auto const& ee : ees) {
+        p->add_child(element_to_parameter(ee));
+      }
+      return p;
+    }
+    default: {
+      return std::make_shared<serialize::SimpleParameter>(e.String());
+    }
+    }
+  }
+
+  serialize::ParameterPtr bson_to_parameters(const mongo::BSONObj & o)
+  {
+    serialize::ParameterPtr parameter(new serialize::MapParameter());
+
+    for (mongo::BSONObj::iterator it = o.begin(); it.more(); ) {
+      mongo::BSONElement e = it.next();
+
+      std::string fieldname = e.fieldName();
+
+      if (!fieldname.compare(0, 2, "__")) {
+        continue;
+      }
+
+      parameter->add_child(fieldname, element_to_parameter(e));
+    }
+
+    return parameter;
   }
 
   bool Engine::user_owns_request(const std::string & request_id, const std::string & user_id)
