@@ -43,8 +43,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::OPERATIONS,
-                                  "Return information for the given ID (or IDs).");
+        return CommandDescription(categories::OPERATIONS, "Cache a query result in DeepBlue memory. This command is useful when the same query ID is used multiple times in different requests. The command is an advice for DeepBlue to cache the query result and there is no guarantee that this query data access will be faster.");
       }
 
       static  Parameters parameters_()

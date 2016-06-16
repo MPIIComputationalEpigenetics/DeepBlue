@@ -20,7 +20,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::ADMINISTRATION, "Checks email-password combination.");
+        return CommandDescription(categories::ADMINISTRATION, "Verify an email-password combination and obtain the user_key.");
       }
 
       static Parameters parameters_()

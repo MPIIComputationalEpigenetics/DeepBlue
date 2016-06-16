@@ -44,7 +44,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::OPERATIONS, "Build a matrix containing the aggregation result of the the experiments data by aggregation regions.");
+        return CommandDescription(categories::OPERATIONS, "Build a matrix containing the aggregation result of the the experiments data by aggregation regions boundaries.");
       }
 
       static Parameters parameters_()

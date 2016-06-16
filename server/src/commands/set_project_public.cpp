@@ -42,7 +42,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::PROJECTS, "Set a project as public. You must be the project owner to perform this operation.");
+        return CommandDescription(categories::PROJECTS, "Define a project as public, that means that all DeepBlue users can access its data. You must be the project owner to perform this operation.");
       }
 
       static  Parameters parameters_()
