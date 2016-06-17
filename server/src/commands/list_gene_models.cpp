@@ -53,7 +53,7 @@ namespace epidb {
       static Parameters results_()
       {
         Parameter p[] = {
-          Parameter("genomes", serialize::LIST, "gene models")
+          Parameter("gene_models", serialize::LIST, "gene models names and IDS")
         };
         Parameters results(&p[0], &p[0] + 1);
         return results;

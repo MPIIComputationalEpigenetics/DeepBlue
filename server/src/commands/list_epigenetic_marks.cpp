@@ -54,7 +54,7 @@ namespace epidb {
       static Parameters results_()
       {
         Parameter p[] = {
-          Parameter("epigenetic_marks", serialize::LIST, "epigenetic mark names")
+          Parameter("epigenetic_marks", serialize::LIST, "epigenetic mark names and IDS")
         };
         Parameters results(&p[0], &p[0] + 1);
         return results;

@@ -54,7 +54,7 @@ namespace epidb {
       static Parameters results_()
       {
         Parameter p[] = {
-          Parameter("biosources", serialize::LIST, "biosources")
+          Parameter("biosources", serialize::LIST, "biosources names and IDS")
         };
         Parameters results(&p[0], &p[0] + 1);
         return results;

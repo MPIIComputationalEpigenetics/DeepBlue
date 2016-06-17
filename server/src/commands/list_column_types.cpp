@@ -54,7 +54,7 @@ namespace epidb {
       static Parameters results_()
       {
         Parameter p[] = {
-          Parameter("column_types", serialize::LIST, "column types")
+          Parameter("column_types", serialize::LIST, "column types names and IDS")
         };
         Parameters results(&p[0], &p[0] + 1);
         return results;

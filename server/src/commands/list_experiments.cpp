@@ -61,7 +61,7 @@ namespace epidb {
       static Parameters results_()
       {
         Parameter p[] = {
-          Parameter("experiments", serialize::LIST, "experiment names")
+          Parameter("experiments", serialize::LIST, "experiment names and IDS")
         };
         Parameters results(&p[0], &p[0] + 1);
         return results;
