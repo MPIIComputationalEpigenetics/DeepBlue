@@ -34,7 +34,7 @@ class TestGenes(helpers.TestCase):
     regions = self.get_regions_request(r_id)
     self.assertEquals('chr1\tHAVANA\tgene\t11869\t14409\t.\t+\t.\tgene_id "ENSG00000223972.5"; gene_name "DDX11L1"; gene_status "KNOWN"; gene_type "transcribed_unprocessed_pseudogene"; havana_gene "OTTHUMG00000000961.2"; level "2"\tDDX11L1', regions)
 
-    gene_models = epidb.list_gene_models(self.admin_key)
+    status, gene_models = epidb.list_gene_models(self.admin_key)
     self.assertEquals(gene_models, [['gs1', 'Test One']])
 
   def test_gene_re(self):
@@ -66,7 +66,7 @@ class TestGenes(helpers.TestCase):
     count = self.count_request(req)
     self.assertEquals(count, 8)
 
-    gene_models = epidb.list_gene_models(self.admin_key)
+    status, gene_models = epidb.list_gene_models(self.admin_key)
     self.assertEquals(gene_models, [['gs1', 'Test One']])
 
   def test_gene_case_insensitive(self):
@@ -83,7 +83,7 @@ class TestGenes(helpers.TestCase):
     count = self.count_request(req)
     self.assertEquals(count, 1)
 
-    gene_models = epidb.list_gene_models(self.admin_key)
+    status, gene_models = epidb.list_gene_models(self.admin_key)
     self.assertEquals(gene_models, [['gs1', 'Test One']])
 
   def test_gene_chr1_retrieve(self):
