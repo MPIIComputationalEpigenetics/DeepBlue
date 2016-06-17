@@ -55,7 +55,7 @@ namespace epidb {
           Parameter("new_project", serialize::STRING, "New project"),
           Parameter("description", serialize::STRING, "description of the experiment - empty to copy from the cloned dataset"),
           Parameter("format", serialize::STRING, "format of the provided data - empty to copy from the cloned dataset"),
-          Parameters::AdditionalExtraMetadata,
+          parameters::AdditionalExtraMetadata,
           parameters::UserKey
         };
         Parameters params(&p[0], &p[0] + 10);

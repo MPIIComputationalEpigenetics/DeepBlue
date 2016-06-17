@@ -81,6 +81,7 @@ namespace epidb {
     }
 
     EPIDB_LOG("Request (" << id << ") from " << ip << ": " << name << " with (" <<  parameters.string(true) << ").");
+    std::cerr << "VAI EXECUTAR" << std::endl;
     return command->run(ip, parameters, result);
   }
 
