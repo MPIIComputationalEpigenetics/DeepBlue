@@ -71,6 +71,8 @@ namespace epidb {
 
       bool column_types(const std::string &user_key, std::vector<utils::IdName> &content, std::string  &msg);
 
+      bool gene_models(const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg);
+
       /**
        * List similars
        */

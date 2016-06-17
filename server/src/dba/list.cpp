@@ -251,6 +251,14 @@ namespace epidb {
         return true;
       }
 
+      // --
+
+      bool gene_models(const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg)
+      {
+        return helpers::get(Collections::GENE_MODELS(), result, msg);
+      }
+
+
       bool similar_biosources(const std::string &name, const std::string &user_key,
                               std::vector<utils::IdName> &result, std::string &msg)
       {
