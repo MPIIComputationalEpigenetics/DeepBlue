@@ -68,8 +68,14 @@ namespace epidb {
   typedef std::vector<Parameter> Parameters;
 
   namespace parameters {
+    const Parameter AdditionalExtraMetadata("extra_metadata", serialize::MAP, "additional metadata");
+    const Parameter BioSource("biosource", serialize::STRING, "biosource name");
+    const Parameter BioSourceMultiple("biosource", serialize::STRING, "name(s) of selected biosource(s)", );
+    const Parameter ExtraMetadata("extra_metadata", serialize::MAP, "Metadata that must be matched");
+    const Parameter GeneModels("gene_models", serialize::STRING, "the gene model", true);
     const Parameter Genome("genome", serialize::STRING, "the target genome");
     const Parameter GenomeMultiple("genome", serialize::STRING, "the target genome", true);
+    const Parameter IDs("id", serialize::STRING, "ID or an array of IDs", true);
     const Parameter UserKey("user_key", serialize::STRING, "users token key");
   }
 } // namespace epidb

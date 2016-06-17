@@ -45,8 +45,8 @@ namespace epidb {
       static Parameters parameters_()
       {
         Parameter p[] = {
-          Parameter("biosource_name", serialize::STRING, "biosource name"),
-          Parameter("extra_metadata", serialize::MAP, "sample extra metadata. You can include any key-value collection here."),
+          parameters::BioSource,
+          parameters::AdditionalExtraMetadata,
           parameters::UserKey
         };
         Parameters params(&p[0], &p[0] + 3);

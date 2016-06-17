@@ -44,7 +44,7 @@ namespace epidb {
       static Parameters parameters_()
       {
         Parameter p[] = {
-          Parameter("extra_metadata", serialize::MAP, "Key-value that must match the epigenetic marks extra_metadata."),
+          Parameters::ExtraMetadata,
           parameters::UserKey
         };
         Parameters params(&p[0], &p[0] + 2);

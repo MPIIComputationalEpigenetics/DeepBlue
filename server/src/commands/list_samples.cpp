@@ -52,7 +52,7 @@ namespace epidb {
       {
         Parameter p[] = {
           Parameter("biosource", serialize::STRING, "biosource name", true),
-          Parameter("extra_metadata", serialize::MAP, "Key-value that must match the sample extra_metadata."),
+          Parameters::ExtraMetadata,
           parameters::UserKey
         };
         Parameters params(&p[0], &p[0] + 3);

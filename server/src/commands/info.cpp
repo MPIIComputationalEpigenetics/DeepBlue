@@ -54,7 +54,7 @@ namespace epidb {
       static  Parameters parameters_()
       {
         Parameter p[] = {
-          Parameter("id", serialize::STRING, "ID or an array of IDs", true),
+          parameters::IDs,
           parameters::UserKey
         };
         Parameters params(&p[0], &p[0] + 2);

@@ -53,7 +53,7 @@ namespace epidb {
           parameters::GenomeMultiple,
           Parameter("type", serialize::STRING, "type of the experiment: peaks or signal", true),
           Parameter("epigenetic_mark", serialize::STRING, "name(s) of selected epigenetic mark(s)", true),
-          Parameter("biosource", serialize::STRING, "name(s) of selected biosource(s)", true),
+          parameters::BioSourceMultiple,
           Parameter("sample", serialize::STRING, "id(s) of selected sample(s)", true),
           Parameter("technique", serialize::STRING, "name(s) of selected technique(s)", true),
           Parameter("project", serialize::STRING, "name(s) of selected projects", true),
