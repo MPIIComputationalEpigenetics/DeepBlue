@@ -65,7 +65,7 @@ namespace epidb {
           Parameter("description", serialize::STRING, "description of the experiment"),
           Parameter("data", serialize::DATASTRING, "the BED formated data"),
           Parameter("format", serialize::STRING, "format of the provided data"),
-          Parameters::AdditionalExtraMetadata,
+          parameters::AdditionalExtraMetadata,
           parameters::UserKey
         };
         Parameters params(&p[0], &p[0] + 11);
