@@ -25,12 +25,15 @@
 #include <unordered_map>
 #include <vector>
 
-#include <mongo/bson/bson.h>
 #include <mongo/client/dbclient.h>
 
 #include "../datatypes/metadata.hpp"
 
 #include "../extras/utils.hpp"
+
+namespace mongo {
+  class BSONObj;
+}
 
 namespace epidb {
   namespace dba {
@@ -72,6 +75,9 @@ namespace epidb {
       bool column_types(const std::string &user_key, std::vector<utils::IdName> &content, std::string  &msg);
 
       bool gene_models(const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg);
+
+      bool genes(const std::string &user_key, const std::vector<std::string> &gene_models,  std::vector<mongo::BSONObj> &genes, std::string &msg);
+
 
       /**
        * List similars

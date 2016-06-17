@@ -37,6 +37,7 @@
 
 #include "../connection/connection.hpp"
 
+#include "../dba/genes.hpp"
 #include "../dba/users.hpp"
 #include "../dba/queries.hpp"
 
@@ -258,6 +259,11 @@ namespace epidb {
         return helpers::get(Collections::GENE_MODELS(), result, msg);
       }
 
+      bool genes(const std::string &user_key, const std::vector<std::string> &norm_gene_models,  std::vector<mongo::BSONObj> &genes, std::string &msg)
+      {
+
+        return dba::genes::get_genes(user_key, norm_gene_models, genes, msg);
+      }
 
       bool similar_biosources(const std::string &name, const std::string &user_key,
                               std::vector<utils::IdName> &result, std::string &msg)

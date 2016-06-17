@@ -26,6 +26,7 @@
 #include "../connection/connection.hpp"
 
 #include "../datatypes/metadata.hpp"
+#include "../dba/helpers.hpp"
 
 #include "../parser/gtf.hpp"
 
@@ -224,20 +225,20 @@ namespace epidb {
         return true;
       }
 
-      bool get_genes_from_database(const std::vector<std::string> &chromosomes, const int start, const int end,
-                                   const std::vector<std::string>& genes, const std::string& gene_model,
-                                   ChromosomeRegionsList& chromosomeRegionsList, std::string& msg )
+      bool build_genes_database_query(const std::vector<std::string> &chromosomes, const int start, const int end,
+                                      const std::vector<std::string>& genes, const std::vector<std::string>& norm_gene_models,
+                                      mongo::Query& query, std::string& msg)
       {
-        Connection c;
-
         mongo::BSONArray genes_array = utils::build_regex_array(genes);
         mongo::BSONArray genes_array_2 = genes_array;
 
-        mongo::BSONObj gene_model_obj = c->findOne(dba::helpers::collection_name(dba::Collections::GENE_MODELS()), BSON("norm_name" << gene_model));
+        Connection c;
+        mongo::BSONObj gene_model_obj = c->findOne(dba::helpers::collection_name(dba::Collections::GENE_MODELS()),
+          BSON("norm_name" << BSON("$in" << utils::build_array(norm_gene_models))));
+        c.done();
 
         if (gene_model_obj.isEmpty()) {
-          msg = "gene set " + gene_model + " does not exists";
-          c.done();
+          msg = "gene sets " + utils::vector_to_string<std::string>(norm_gene_models) + " does not exists";
           return false;
         }
 
@@ -263,7 +264,41 @@ namespace epidb {
 
         mongo::BSONObj filter = bob.obj();
 
-        mongo::Query query = mongo::Query(filter).sort(BSON(KeyMapper::CHROMOSOME() << 1 << KeyMapper::START() << 1));
+        query = mongo::Query(filter).sort(BSON(KeyMapper::CHROMOSOME() << 1 << KeyMapper::START() << 1));
+
+        return true;
+      }
+
+      bool get_genes(const std::string &user_key, const std::vector<std::string> &norm_gene_models,  std::vector<mongo::BSONObj>& genes, std::string &msg)
+      {
+        const std::vector<std::string> chromosomes;
+        const int start = -1;
+        const int end = -1;
+        const std::vector<std::string> genes_re = {".*"};
+        mongo::Query query;
+
+        if (!dba::genes::build_genes_database_query(chromosomes, start, end, genes_re, norm_gene_models, query, msg)) {
+          return false;
+        }
+
+        return helpers::get(Collections::GENES(), query, genes, msg);
+      }
+
+      bool get_genes_from_database(const std::vector<std::string> &chromosomes, const int start, const int end,
+                                   const std::vector<std::string>& genes, const std::string& norm_gene_model,
+                                   ChromosomeRegionsList& chromosomeRegionsList, std::string& msg )
+      {
+        Connection c;
+
+        std::vector<std::string> gene_models;
+        gene_models.push_back(norm_gene_model);
+
+        mongo::Query query;
+
+        if (!build_genes_database_query(chromosomes, start, end, genes, gene_models, query, msg)) {
+          return false;
+        }
+
         std::string collection = dba::helpers::collection_name(dba::Collections::GENES());
         auto data_cursor = c->query(collection, query);
 

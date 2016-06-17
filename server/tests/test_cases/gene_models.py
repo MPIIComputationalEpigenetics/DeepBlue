@@ -37,7 +37,16 @@ class TestGenes(helpers.TestCase):
     status, gene_models = epidb.list_gene_models(self.admin_key)
     self.assertEquals(gene_models, [['gs1', 'Test One']])
 
-  def test_gene_re(self):
+    (s, query_id) = epidb.select_genes(".*", "Test One", None, None, None, self.admin_key)
+    print s, query_id
+    (s, request_id) = epidb.count_regions(query_id, self.admin_key)
+    print 'count genes:'
+    print self.count_request(request_id)
+
+    print gene_models[0][1]
+    print epidb.list_genes(gene_models[0][1], self.admin_key)
+
+  def _test_gene_re(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
@@ -69,7 +78,7 @@ class TestGenes(helpers.TestCase):
     status, gene_models = epidb.list_gene_models(self.admin_key)
     self.assertEquals(gene_models, [['gs1', 'Test One']])
 
-  def test_gene_case_insensitive(self):
+  def _test_gene_case_insensitive(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
@@ -86,7 +95,7 @@ class TestGenes(helpers.TestCase):
     status, gene_models = epidb.list_gene_models(self.admin_key)
     self.assertEquals(gene_models, [['gs1', 'Test One']])
 
-  def test_gene_chr1_retrieve(self):
+  def _test_gene_chr1_retrieve(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
