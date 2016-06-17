@@ -740,9 +740,15 @@ namespace epidb {
 
         mongo::BSONObj args = query["args"].Obj();
         const std::vector<std::string> genes = utils::build_vector(args["genes"].Array());
-        const std::string gene_set = args["gene_set"].str();
-
-
+        // Honestly I dont like it, but since we changed these parameters and we already have a database with queries...
+        // TODO: manually change the database.
+        std::string gene_model;
+        if (args.hasField("gene_set")) {
+          gene_model = args["gene_set"].str();
+        } else {
+          gene_model = args["gene_model"].str();
+        }
+        
         std::vector<std::string> chromosomes;
         if (args.hasField("chromosomes")) {
           chromosomes = utils::build_vector(args["chromosomes"].Array());
@@ -763,7 +769,7 @@ namespace epidb {
           end = std::numeric_limits<Position>::max();
         }
 
-        if (!genes::get_genes_from_database(chromosomes, start, end, genes, gene_set, regions, msg)) {
+        if (!genes::get_genes_from_database(chromosomes, start, end, genes, gene_model, regions, msg)) {
             return false;
           }
 
@@ -1339,7 +1345,7 @@ namespace epidb {
           return true;
         }
 
-        cursor = c->query(helpers::collection_name(Collections::GENE_SETS()), o);
+        cursor = c->query(helpers::collection_name(Collections::GENE_MODELS()), o);
         if (cursor->more()) {
           int pos = 0;
           for (const auto& column : parser::FileFormat::gtf_format()) {

@@ -225,7 +225,7 @@ class TestSearch(helpers.TestCase):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init(epidb)
     s, e = epidb.search("hg19", "genome", self.admin_key)
-    self.assertEqual("115000:Invalid collection 'genome'. The valid types are: annotations,biosources,column_types,epigenetic_marks,experiments,genomes,gene_sets,genes,projects,samples,techniques,tilings.", e)
+    self.assertEqual("115000:Invalid collection 'genome'. The valid types are: annotations,biosources,column_types,epigenetic_marks,experiments,genomes,gene_models,genes,projects,samples,techniques,tilings.", e)
 
   def test_search_synonyms(self):
     epidb = DeepBlueClient(address="localhost", port=31415)

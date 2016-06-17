@@ -77,7 +77,7 @@ namespace epidb {
         }
 
         if (!dba::exists::query(query_id, user_key, msg)) {
-          result.add_error("Invalid query id: '" + query_id + "'" + msg);
+          result.add_error(Error::m(ERR_INVALID_QUERY_ID, query_id));
           return false;
         }
 

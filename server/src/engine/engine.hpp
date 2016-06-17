@@ -31,6 +31,9 @@
 #include "../log.hpp"
 
 namespace epidb {
+  namespace serialize {
+    class Parameters;
+  }
   class Engine : private boost::noncopyable {
   private:
     mdbq::Hub _hub;
@@ -71,9 +74,15 @@ namespace epidb {
     */
     bool request_jobs(const std::string& status, const std::string& user_key, std::vector<request::Job>& ret, std::string &msg);
 
-    bool request_data(const std::string &request_id, const std::string &user_key, request::Data &data, std::string& content, request::DataType& type, std::string &msg);
+    bool check_request(const std::string & request_id, const std::string & user_key, std::string& msg);
+
+    bool request_download_data(const std::string & request_id, const std::string & user_key, std::string &request_data, std::string& msg);
+
+    bool request_data(const std::string & request_id, const std::string & user_key, serialize::Parameters &request_data);
 
     bool queue_count_regions(const std::string &query_id, const std::string &user_key, std::string &request_id, std::string &msg);
+
+    bool queue_coverage(const std::string &query_id, const std::string &genome, const std::string &user_key, std::string &id, std::string &msg);
 
     bool queue_get_regions(const std::string &query_id, const std::string &output_format, const std::string &user_key, std::string &id, std::string &msg);
 
@@ -91,6 +100,10 @@ namespace epidb {
 
     bool remove_request_data(const std::string& request_id, mdbq::TaskState state, std::string& msg);
   };
+
+  // TODO: Move to other file.
+  serialize::ParameterPtr bson_to_parameters(const mongo::BSONObj & o);
+  serialize::ParameterPtr element_to_parameter(const mongo::BSONElement& e);
 }
 
 #endif

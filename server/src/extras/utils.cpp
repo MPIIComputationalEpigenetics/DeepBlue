@@ -54,6 +54,7 @@ namespace epidb {
     }
 
 
+    // Remove it and use the bson to parameters directly
     std::vector<utils::IdName> bsons_to_id_names(const std::vector<mongo::BSONObj> &bsons)
     {
       std::vector<utils::IdName> v;
@@ -62,19 +63,6 @@ namespace epidb {
       }
       return v;
     }
-
-    std::vector<IdName> request_bson_to_id_name(const mongo::BSONObj &o)
-    {
-      std::vector<IdName> v;
-      for (mongo::BSONObj::iterator it = o.begin(); it.more(); ) {
-        mongo::BSONElement e = it.next();
-        std::string id = e.fieldName();
-        std::string name = e.str();
-        v.emplace_back(id, name);
-      }
-      return v;
-    }
-
 
     std::ostream &operator<<(std::ostream &os, const IdNameCount &o)
     {

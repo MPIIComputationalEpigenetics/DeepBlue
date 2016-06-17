@@ -432,6 +432,17 @@ namespace epidb {
 
       {
         mongo::BSONObjBuilder index_name;
+        index_name.append("upload_info.upload_end", -1);
+        c->createIndex(helpers::collection_name(Collections::EXPERIMENTS()), index_name.obj());
+        if (!c->getLastError().empty()) {
+          msg = c->getLastError();
+          c.done();
+          return false;
+        }
+      }
+
+      {
+        mongo::BSONObjBuilder index_name;
         index_name.append("$**", "text");
         c->createIndex(helpers::collection_name(Collections::EXPERIMENTS()), index_name.obj());
         if (!c->getLastError().empty()) {

@@ -251,7 +251,27 @@ EXPERIMENTS = {
     "project": "ENCODE",
     "description": "desc",
     "format": ""
-  }
+  },
+
+  "deepshitty": {
+    "genome": "hg18",
+    "epigenetic_mark": "Methylation",
+    "sample_id": None,
+    "technique": "tech1",
+    "project": "ENCODE",
+    "description": "desc1",
+    "format": ",".join([
+      "CHROMOSOME",
+      "START",
+      "END",
+      "P_VALUE",
+      "SIGNAL_VALUE",
+      "AVG_METHYL_LEVEL",
+      "PER_CPG",
+      "PER_GC",
+      "SUM_SQUARES"
+    ])
+  },
 }
 
 COLUMNS = [

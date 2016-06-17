@@ -131,19 +131,19 @@ namespace epidb {
         return true;
       }
 
-      bool gene_set(const std::string &id, const std::string &user_key, std::string &msg)
+      bool gene_model(const std::string &id, const std::string &user_key, std::string &msg)
       {
-        mongo::BSONObj gene_set;
-        if (!data::gene_set(id, gene_set, msg)) {
+        mongo::BSONObj gene_model;
+        if (!data::gene_model(id, gene_model, msg)) {
           msg = "Gene set " + id + " not found";
           return false;
         }
 
-        if (!has_permission(gene_set, user_key, true, msg)) {
+        if (!has_permission(gene_model, user_key, true, msg)) {
           return false;
         }
 
-        int dataset_id = gene_set[KeyMapper::DATASET()].Int();
+        int dataset_id = gene_model[KeyMapper::DATASET()].Int();
 
         if (!helpers::remove_all(Collections::GENES(), BSON(KeyMapper::DATASET() << dataset_id), msg)) {
           return false;
@@ -155,11 +155,11 @@ namespace epidb {
         }
 
         // Delete from collection
-        if (!helpers::remove_one(helpers::collection_name(Collections::GENE_SETS()), id, msg)) {
+        if (!helpers::remove_one(helpers::collection_name(Collections::GENE_MODELS()), id, msg)) {
           return false;
         }
 
-        if (!helpers::notify_change_occurred(Collections::GENE_SETS(), msg)) {
+        if (!helpers::notify_change_occurred(Collections::GENE_MODELS(), msg)) {
           return false;
         }
 

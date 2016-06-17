@@ -73,8 +73,7 @@ namespace epidb {
 
       for (ChromosomeRegionsList::iterator it = chromosomeRegionsList.begin();
            it != chromosomeRegionsList.end(); it++) {
-        std::string chromosome = it->first;
-
+        std::string &chromosome = it->first;
         Regions &regions = it->second;
 
         if (regions.empty()) {

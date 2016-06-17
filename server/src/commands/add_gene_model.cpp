@@ -1,5 +1,5 @@
 //
-//  add_gene_set.cpp
+//  add_gene_model.cpp
 //  DeepBlue Epigenomic Data Server
 //  File created by Felipe Albrecht on 08.07.2015
 //  Copyright (c) 2016 Max Planck Institute for Informatics. All rights reserved.
@@ -40,7 +40,7 @@
 namespace epidb {
   namespace command {
 
-    class AddGeneSetCommand: public Command {
+    class AddGeneModelCommand: public Command {
 
     private:
       static CommandDescription desc_()
@@ -51,7 +51,7 @@ namespace epidb {
       static Parameters parameters_()
       {
         Parameter p[] = {
-          Parameter("name", serialize::STRING, "gene set name"),
+          Parameter("name", serialize::STRING, "gene model name"),
           Parameter("description", serialize::STRING, "description of the annotation"),
           Parameter("data", serialize::DATASTRING, "the BED formatted data"),
           Parameter("format", serialize::STRING, "Currently, it is only supported GTF."),
@@ -72,7 +72,7 @@ namespace epidb {
       }
 
     public:
-      AddGeneSetCommand() : Command("add_gene_set", parameters_(), results_(), desc_()) {}
+      AddGeneModelCommand() : Command("add_gene_model", parameters_(), results_(), desc_()) {}
 
       // TODO: Check user
       virtual bool run(const std::string &ip,
@@ -101,14 +101,14 @@ namespace epidb {
         std::string norm_name = utils::normalize_name(name);
         std::string norm_description = utils::normalize_name(description);
 
-        if (dba::exists::gene_set(norm_name)) {
-          std::string s = Error::m(ERR_DUPLICATED_GENE_SET_NAME, name);
+        if (dba::exists::gene_model(norm_name)) {
+          std::string s = Error::m(ERR_DUPLICATED_GENE_MODEL_NAME, name);
           result.add_error(s);
           return false;
         }
 
-        if (dba::exists::gene_set(norm_name)) {
-          std::string s = "The gene set name " + name + " is already being used.";
+        if (dba::exists::gene_model(norm_name)) {
+          std::string s = "The gene model name " + name + " is already being used.";
           result.add_error(s);
           return false;
         }
@@ -140,6 +140,6 @@ namespace epidb {
         return true;
       }
 
-    } addGeneSetCommand;
+    } addGeneModelCommand;
   }
 }

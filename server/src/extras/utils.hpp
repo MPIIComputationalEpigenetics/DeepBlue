@@ -50,7 +50,6 @@ namespace epidb {
     std::ostream &operator<<(std::ostream &os, const IdName &o);
 
     std::vector<IdName> bsons_to_id_names(const std::vector<mongo::BSONObj> &bsons);
-    std::vector<IdName> request_bson_to_id_name(const mongo::BSONObj &o);
     IdName bson_to_id_name(const mongo::BSONObj& bson);
 
 

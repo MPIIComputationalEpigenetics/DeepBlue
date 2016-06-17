@@ -9,13 +9,14 @@ import changes
 import clone
 import column_types
 import complex_queries
+import coverage
 import epigenetic_marks
 import experiments
 import extend
 import faceting
 import filters
 import flank
-import gene_sets
+import gene_models
 import genomes
 import info
 import init

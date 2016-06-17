@@ -12,7 +12,7 @@ class TestGenes(helpers.TestCase):
 
     data = open("data/gtf/gencode.v23.basic.annotation_head.gtf").read()
 
-    (s, ss) = epidb.add_gene_set("Test One", "Test One Description", data, "GTF", {}, self.admin_key)
+    (s, ss) = epidb.add_gene_model("Test One", "Test One Description", data, "GTF", {}, self.admin_key)
     self.assertSuccess(s, ss)
 
     (s, query_id) = epidb.select_genes(["ENSG00000223972.5", "ENSG00000223972.5", "DDX11L1"], "Test One", None, None, None, self.admin_key)
@@ -40,7 +40,7 @@ class TestGenes(helpers.TestCase):
 
     data = open("data/gtf/gencode.v23.basic.annotation_head.gtf").read()
 
-    (s, ss) = epidb.add_gene_set("Test One", "Test One Description", data, "GTF", {}, self.admin_key)
+    (s, ss) = epidb.add_gene_model("Test One", "Test One Description", data, "GTF", {}, self.admin_key)
     self.assertSuccess(s, ss)
 
     (s, query_id) = epidb.select_genes(["RP11-34P13.7"], "Test One", None, None, None, self.admin_key)
@@ -69,7 +69,7 @@ class TestGenes(helpers.TestCase):
 
     data = open("data/gtf/gencode.v23.basic.annotation_head.gtf").read()
 
-    (s, ss) = epidb.add_gene_set("Test One", "Test One Description", data, "GTF", {}, self.admin_key)
+    (s, ss) = epidb.add_gene_model("Test One", "Test One Description", data, "GTF", {}, self.admin_key)
     self.assertSuccess(s, ss)
 
     (s, query_id) = epidb.select_genes(["Rp11-34p13.7"], "Test One", None, None, None, self.admin_key)
@@ -83,7 +83,7 @@ class TestGenes(helpers.TestCase):
 
     data = gzip.open("data/gtf/gencode.v19.annotation.ONLY_GENES.gtf.gz").read()
 
-    (s, ss) = epidb.add_gene_set("Test One", "Test One Description", data, "GTF", {}, self.admin_key)
+    (s, ss) = epidb.add_gene_model("Test One", "Test One Description", data, "GTF", {}, self.admin_key)
     self.assertSuccess(s, ss)
 
     (s, query_id) = epidb.select_genes(".*", "Test One", ["chr1"], 1000, 15000, self.admin_key)
