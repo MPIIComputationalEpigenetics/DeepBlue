@@ -39,7 +39,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::COLUMN_TYPES, "Lists all available column types.");
+        return CommandDescription(categories::COLUMN_TYPES, "Lists the ColumnTypes included in DeepBlue.");
       }
 
       static Parameters parameters_()

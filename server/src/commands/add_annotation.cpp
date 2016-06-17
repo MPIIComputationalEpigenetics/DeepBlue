@@ -47,7 +47,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::ANNOTATIONS, "Inserts a new annotation with the given parameters.");
+        return CommandDescription(categories::ANNOTATIONS, "Include an Annotation in DeepBlue.");
       }
 
       static Parameters parameters_()

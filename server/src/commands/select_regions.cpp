@@ -46,7 +46,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::OPERATIONS, "Selects experiment regions matching the given parameters.");
+        return CommandDescription(categories::OPERATIONS, "Selects Experiment regions that matches the informed criteria.");
       }
 
       static  Parameters parameters_()

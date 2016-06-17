@@ -41,7 +41,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::PROJECTS, "Include or exclude an user from a project");
+        return CommandDescription(categories::PROJECTS, "Include an user as a Project member.");
       }
 
       static  Parameters parameters_()

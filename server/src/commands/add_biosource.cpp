@@ -38,7 +38,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::BIOSOURCES, "Inserts a new biosource with the given parameters.");
+        return CommandDescription(categories::BIOSOURCES, "Include a BioSource in DeepBlue.");
       }
 
       static Parameters parameters_()

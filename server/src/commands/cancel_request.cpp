@@ -36,7 +36,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::GENERAL_INFORMATION, "Stop, cancel, and remove request data. Its data will be remove if the request did finish.");
+        return CommandDescription(categories::GENERAL_INFORMATION, "Stop, cancel, and remove request data. The request processed data is remove if its processing was finished.");
       }
 
       static  Parameters parameters_()

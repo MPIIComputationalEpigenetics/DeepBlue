@@ -1,7 +1,7 @@
 //
-//  set_project_public.cpp
+//  name_to_id.cpp
 //  DeepBlue Epigenomic Data Server
-//  File created by Felipe Albrecht on 27.05.15.
+//  File created by Felipe Albrecht on 08.04.2016.
 //  Copyright (c) 2016 Max Planck Institute for Informatics. All rights reserved.
 
 //  This program is free software: you can redistribute it and/or modify
@@ -18,13 +18,16 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "../datatypes/metadata.hpp"
-#include "../datatypes/projects.hpp"
+#include <map>
+#include <sstream>
+#include <iostream>
+
+#include <mongo/bson/bson.h>
+
 #include "../datatypes/user.hpp"
+#include "../datatypes/metadata.hpp"
 
 #include "../dba/dba.hpp"
-#include "../dba/info.hpp"
-#include "../dba/list.hpp"
 #include "../dba/users.hpp"
 
 #include "../engine/commands.hpp"
@@ -37,19 +40,19 @@
 namespace epidb {
   namespace command {
 
-    class SetProjectPublicCommand: public Command {
+    class NameToIdCommand : public Command {
 
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::PROJECTS, "Define a project as public, that means that all DeepBlue users can access its data. You must be the project owner to perform this operation.");
+        return CommandDescription(categories::GENERAL_INFORMATION, "The ID for the given name(s).");
       }
 
       static  Parameters parameters_()
       {
         Parameter p[] = {
-          Parameter("project", serialize::STRING, "Project name or ID"),
-          Parameter("set", serialize::BOOLEAN, "True to set the project as public of false for unset"),
+          Parameter("name", serialize::STRING, "ID or an array of IDs", true),
+          Parameter("collection", serialize::STRING, "ID or an array of IDs", true),
           parameters::UserKey
         };
         Parameters params(&p[0], &p[0] + 3);
@@ -59,43 +62,32 @@ namespace epidb {
       static Parameters results_()
       {
         Parameter p[] = {
-          Parameter("id", serialize::STRING, "id of the project"),
+          Parameter("information", serialize::LIST, "List of IDs.", true)
         };
         Parameters results(&p[0], &p[0] + 1);
         return results;
       }
 
     public:
-      SetProjectPublicCommand() : Command("set_project_public", parameters_(), results_(), desc_()) {}
+      NameToIdCommand() : Command("name_to_id", parameters_(), results_(), desc_()) {}
 
       virtual bool run(const std::string &ip,
                        const serialize::Parameters &parameters, serialize::Parameters &result) const
       {
-        const std::string project = parameters[0]->as_string();
-        const bool set = parameters[1]->as_boolean();
+        /*
+        const std::string collection = parameters[0]->as_string();
         const std::string user_key = parameters[2]->as_string();
 
         std::string msg;
-
-        std::string id;
-        if (!datatypes::projects::get_id(project, id, msg)) {
-          result.add_error(msg);
-          return false;
-        }
-
         datatypes::User user;
-        if (!check_permissions(user_key, datatypes::ADMIN, user, msg )) {
-            datatypes::User user2;
-            if (!dba::users::get_owner(id, user2, msg)) {
-                result.add_error(msg);
-                return false;
-            }
-            if (user.get_id() != user2.get_id()) {
-                result.add_error(msg);
-                return false;
-            }
-        }
 
+        std::string err_msg;
+        bool has_list_collections_permissions = false;
+        if (check_permissions(user_key, datatypes::LIST_COLLECTIONS, user, msg )) {
+          has_list_collections_permissions = true;
+        } else {
+          err_msg = msg;
+        }
 
         std::vector<utils::IdName> user_projects_id_names;
         if (!dba::list::projects(user_key, user_projects_id_names, msg)) {
@@ -108,27 +100,36 @@ namespace epidb {
           user_projects.push_back(utils::normalize_name(project.name));
         }
 
-        datatypes::Metadata project_res;
-        if (!dba::info::get_project(id, user_projects, project_res, msg)) {
-          result.add_error(msg);
-          return false;
-        }
-        std::string owner = project_res["user"];
+        std::vector<serialize::ParameterPtr> names_param;
+        parameters[0]->children(names_param);
 
-        if (!user.is_admin() && user.get_id() != owner) {
-          result.add_error(Error::m(ERR_PERMISSION_PROJECT, project));
-          return false;
+        if (names_param.empty()) {
+          result.set_as_array(true);
+          return true;
         }
 
-        if (!datatypes::projects::set_public(id, set, msg)) {
-          result.add_error(msg);
-          return false;
-        }
+        const std::string& collection_name = dba::helpers::collection_name(utils::normalize_name(collection));
 
-        result.add_string(id);
+        for (const auto & name_param : names_param) {
+          std::string normalize_name = utils::normalize_name(names_param->as_string());
+
+          bool ok;
+
+          helpers::get_one()
+
+
+
+          if (!ok) {
+            result.add_error(msg);
+            return false;
+          }
+
+          result.add_string(id);
+        }
+  */
         return true;
       }
 
-    } setProjectPublic;
+    } nameToIdCommand;
   }
 }

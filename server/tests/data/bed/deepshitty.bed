@@ -1,0 +1,2 @@
+chr	start	stop	p.value	avg(fg_cov)	avg.meth	avg(fg+bg_cov)	coverage_group	q.value
+1	62125	62154	0.00245493749518915	6.5	0.461538461538462	9.2	1	0.16679042112398523

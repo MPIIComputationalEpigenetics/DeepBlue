@@ -38,7 +38,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::GENOMES, "Lists all genomes similar to the one provided.");
+        return CommandDescription(categories::GENOMES, "Lists all Genomes biosources that have a similar name compared to the provided name.");
       }
 
       static Parameters parameters_()

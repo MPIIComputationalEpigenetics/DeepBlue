@@ -50,7 +50,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::EXPERIMENTS, "Inserts a new experiment with the given parameters.");
+        return CommandDescription(categories::EXPERIMENTS, "Include an Experiment in DeepBlue.");
       }
 
       static Parameters parameters_()

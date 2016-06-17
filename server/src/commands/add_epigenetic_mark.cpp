@@ -35,7 +35,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::EPIGENETIC_MARKS, "Inserts a new epigenetic mark with the given parameters.");
+        return CommandDescription(categories::EPIGENETIC_MARKS, "Include an Epigenetic Mark in DeepBlue.");
       }
 
       static Parameters parameters_()

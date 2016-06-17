@@ -41,7 +41,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::OPERATIONS, "Send a request  to retrieve the regions for the given query in the requested BED format.");
+        return CommandDescription(categories::OPERATIONS, "Request the processing of the query's genomic regions. The output is a column based format with the columns defined in the 'output_format' parameter. Use the command 'info' for verifying the processing, the 'get_request_data' to download the regions using the programmatic interface, or download using the URL: http://deepblue.mpi-inf.mpg.de/download?r_id=<REQUEST_ID>&key=<USER_KEY>.");
       }
 
       static Parameters parameters_()

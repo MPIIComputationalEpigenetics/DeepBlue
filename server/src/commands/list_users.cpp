@@ -38,7 +38,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::ADMINISTRATION, "Lists all existing users.");
+        return CommandDescription(categories::ADMINISTRATION, "Lists the users registered in DeepBlue.");
       }
 
       static Parameters parameters_()

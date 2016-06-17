@@ -35,7 +35,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::TECHNIQUES, "Inserts a technique with the given parameters.");
+        return CommandDescription(categories::TECHNIQUES, "Include a technique in DeepBlue.");
       }
 
       static Parameters parameters_()

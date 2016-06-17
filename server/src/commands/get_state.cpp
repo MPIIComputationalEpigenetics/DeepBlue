@@ -38,7 +38,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::ADMINISTRATION, "Returns the current state of specific data.");
+        return CommandDescription(categories::ADMINISTRATION, "Returns the current state of specific DeepBlue collection. The state value is an incremental number that is increase upon a change in the collection data. The changes are inclusion, removal, and modification of a collection element.");
       }
 
       static Parameters parameters_()
@@ -54,7 +54,7 @@ namespace epidb {
       static Parameters results_()
       {
         Parameter p[] = {
-          Parameter("data_state", serialize::INTEGER, "State of the data")
+          Parameter("data_state", serialize::INTEGER, "Collection state.")
         };
         Parameters results(&p[0], &p[0] + 1);
         return results;

@@ -38,7 +38,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::OPERATIONS, "Extend regions.");
+        return CommandDescription(categories::OPERATIONS, "Extend the regions included in the query. It is possible to extend downstream, upstream or to both directions.");
       }
 
       static Parameters parameters_()

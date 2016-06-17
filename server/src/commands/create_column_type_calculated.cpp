@@ -38,7 +38,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::COLUMN_TYPES, "Create a calculated column");
+        return CommandDescription(categories::COLUMN_TYPES, "Create a calculated column in DeepBlue.");
       }
 
       static Parameters parameters_()

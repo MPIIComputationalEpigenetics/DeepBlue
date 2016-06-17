@@ -40,7 +40,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::GENOMES, "Uploads the sequence data of the chromosome.");
+        return CommandDescription(categories::GENOMES, "Uploads the DNA sequence of the chromosome.");
       }
 
       static Parameters parameters_()

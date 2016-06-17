@@ -45,7 +45,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::SAMPLES, "Lists all existing samples that matches the given biosource and metadata.");
+        return CommandDescription(categories::SAMPLES, "Lists the Samples included in DeepBlue. It is possible to filter by the BioSource and by extra_metadata fields content");
       }
 
       static Parameters parameters_()

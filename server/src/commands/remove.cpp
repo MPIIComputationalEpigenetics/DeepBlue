@@ -36,7 +36,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::GENERAL_INFORMATION, "Remove data from DeepBlue.");
+        return CommandDescription(categories::GENERAL_INFORMATION, "Remove a DeepBlue data.");
       }
 
       static  Parameters parameters_()
