@@ -43,7 +43,7 @@ namespace epidb {
         Parameter p[] = {
           Parameter("name", serialize::STRING, "technique name"),
           Parameter("description", serialize::STRING, "description of technique"),
-          Parameters::AdditionalExtraMetadata,
+          parameters::AdditionalExtraMetadata,
           parameters::UserKey
         };
         Parameters params(&p[0], &p[0] + 4);
