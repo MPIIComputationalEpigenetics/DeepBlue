@@ -36,7 +36,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::OPERATIONS, "Merge the queries regions in a new query.");
+        return CommandDescription(categories::OPERATIONS, "Merge regions from two queries in a new query.");
       }
 
       static Parameters parameters_()

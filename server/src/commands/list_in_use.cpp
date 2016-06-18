@@ -39,7 +39,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::GENERAL_INFORMATION, "List all terms from the given controlled_vocabulary that have at least one Experiment or Annotation using them.");
+        return CommandDescription(categories::GENERAL_INFORMATION, "List all terms used by the Experiments mandatory metadata that have at least one Experiment or Annotation using them.");
       }
 
       static Parameters parameters_()
