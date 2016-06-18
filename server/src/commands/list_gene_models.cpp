@@ -38,7 +38,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::GENES, "Lists the Gene Models that are registered in DeepBlue.");
+        return CommandDescription(categories::GENES, "List all the Gene Models currently available in DeepBlue. A gene model is a set of genes usually imported from GENCODE. For example Gencode v22.");
       }
 
       static Parameters parameters_()
