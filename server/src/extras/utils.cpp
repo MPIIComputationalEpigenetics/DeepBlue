@@ -50,7 +50,7 @@ namespace epidb {
 
     IdName bson_to_id_name(const mongo::BSONObj& bson)
     {
-        return utils::IdName(bson["_id"].str(), bson["name"].str());
+      return utils::IdName(bson["_id"].str(), bson["name"].str());
     }
 
 
@@ -58,7 +58,7 @@ namespace epidb {
     std::vector<utils::IdName> bsons_to_id_names(const std::vector<mongo::BSONObj> &bsons)
     {
       std::vector<utils::IdName> v;
-      for(const mongo::BSONObj & o: bsons) {
+      for (const mongo::BSONObj & o : bsons) {
         v.push_back(bson_to_id_name(o));
       }
       return v;
@@ -70,6 +70,26 @@ namespace epidb {
       return os;
     }
 
+    std::vector<std::string> capitalize_vector(std::vector<std::string> vector)
+    {
+      std::transform(vector.begin(), vector.end(), vector.begin(),
+      [](std::string s) {
+        if (s.empty()) {
+          return s;
+        }
+        s[0] = std::toupper(s[0]);
+        return s;
+      });
+
+      return vector;
+    }
+
+    std::string lower_case(const std::string string)
+    {
+      std::string data(string);
+      std::transform(data.begin(), data.end(), data.begin(), ::tolower);
+      return data;
+    }
 
     static uint64_t decdigits[100] = {
       0ll, 0ll, 0ll, 0ll, 0ll, 0ll, 0ll, 0ll, 0ll, 0,
@@ -349,12 +369,12 @@ namespace epidb {
       return l;
     }
 
-    std::string format_extra_metadata(const mongo::BSONObj &key_value) {
+    std::string format_extra_metadata(const mongo::BSONObj &key_value)
+    {
       StringBuilder sb;
       auto it = key_value.begin();
 
-      while(it.more() )
-      {
+      while (it.more() ) {
         auto const &e = it.next();
         std::string field_name = std::string(e.fieldName());
 

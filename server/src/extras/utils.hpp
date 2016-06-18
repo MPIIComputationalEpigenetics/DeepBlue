@@ -21,6 +21,7 @@
 #ifndef EPIDB_UTILS_HPP
 #define EPIDB_UTILS_HPP
 
+#include <algorithm>
 #include <vector>
 #include <string>
 #include <algorithm>
@@ -67,6 +68,10 @@ namespace epidb {
     std::ostream &operator<<(std::ostream &os, const IdName &o);
 
     std::ostream &operator<<(std::ostream &os, const IdNameCount &o);
+
+    std::vector<std::string> capitalize_vector(std::vector<std::string> vector);
+
+    std::string lower_case(std::string string);
 
     template <typename Type> std::string vector_to_string(std::vector<Type> vector, std::string sep = ",")
     {

@@ -46,7 +46,8 @@ namespace epidb {
         desc += "A minus (-) character in front of a keyword searches for data ";
         desc += "without the given keyword. ";
         desc += "The search can be restricted to the following data types are: ";
-        desc += utils::vector_to_string(dba::Collections::valid_search_Collections());
+        desc += utils::vector_to_string(utils::capitalize_vector(dba::Collections::valid_search_Collections()), ", ");
+        desc += ".";
 
         return CommandDescription(categories::GENERAL_INFORMATION, desc);
       }
@@ -55,7 +56,7 @@ namespace epidb {
       {
         Parameter p[] = {
           Parameter("keyword", serialize::STRING, "keyword to search by"),
-          Parameter("type", serialize::STRING, "type of data to search for - " + utils::vector_to_string(dba::Collections::valid_search_Collections()), true),
+          Parameter("type", serialize::STRING, "type of data to search for - " + utils::vector_to_string(utils::capitalize_vector(dba::Collections::valid_search_Collections()), ", "), true),
           parameters::UserKey
         };
         Parameters params(&p[0], &p[0] + 3);
@@ -90,11 +91,14 @@ namespace epidb {
 
         std::vector<serialize::ParameterPtr> types;
         parameters[1]->children(types);
+
+
+
         std::vector<std::string> types_s;
         for (std::vector<serialize::ParameterPtr>::iterator it = types.begin(); it != types.end(); ++it) {
-          std::string type = (**it).as_string();
+          std::string type = utils::lower_case((**it).as_string());
           if (!dba::Collections::is_valid_search_collection(type)) {
-            msg = Error::m(ERR_INVALID_COLLECTION_NAME, type, utils::vector_to_string(dba::Collections::valid_search_Collections()));
+            msg = Error::m(ERR_INVALID_COLLECTION_NAME, type, utils::vector_to_string(utils::capitalize_vector(dba::Collections::valid_search_Collections()), ", "));
             result.add_error(msg);
             return false;
           }
