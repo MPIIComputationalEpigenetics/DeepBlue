@@ -44,7 +44,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::EXPERIMENTS, "Aggregate the number of experiments that matches the selection criteria in each term of the selected controlled_vocabulary.");
+        return CommandDescription(categories::EXPERIMENTS, "Count the number of experiments that match the selection criteria in each term of the selected controlled_vocabulary. The selection can be achieved through specifying a list of BioSources, experimental Techniques, Epigenetic Marks, Samples or Projects.");
       }
 
       static Parameters parameters_()

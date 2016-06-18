@@ -43,7 +43,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::GENES, "Selects genes (by their name or ID) as genomic regions from the specified gene model.");
+        return CommandDescription(categories::GENES, "Select genes (by their name or ID) as genomic regions from the specified gene model.");
       }
 
       static Parameters parameters_()

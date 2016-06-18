@@ -38,7 +38,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::ANNOTATIONS, "Generate an Annotation that contains the genomic locations where the given pattern appears in the genomic sequence. Please, be patient and gently as this command may need a few minutes for being executed.");
+        return CommandDescription(categories::ANNOTATIONS, "Generate a custom annotation of genomic regions based on a given pattern that appears in the genomic sequence. Be patient and gently as this command may need a few minutes for execution.");
       }
 
       static Parameters parameters_()

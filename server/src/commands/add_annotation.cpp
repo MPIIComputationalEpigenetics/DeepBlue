@@ -47,7 +47,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::ANNOTATIONS, "Include an Annotation in DeepBlue.");
+        return CommandDescription(categories::ANNOTATIONS, "Add a custom annotation of genomic regions such as, for instance, promoters, transcription factor binding sites, or genes to DeepBlue. Annotations are a set genomic regions such as, for instance, promoters, transcription factor binding sites, or genes to DeepBlue.");
       }
 
       static Parameters parameters_()

@@ -38,7 +38,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::BIOSOURCES, "Lists the BioSources included in DeepBlue. It is possible to filter the BioSources by their extra_metadata fields content.");
+        return CommandDescription(categories::BIOSOURCES, "List BioSources included in DeepBlue. A BioSource refers to a term describing the origin of a given sample, such as a tissue or cell line. It is possible to filter the BioSources by their extra_metadata fields content. These fields vary depending on the original data source.");
       }
 
       static Parameters parameters_()

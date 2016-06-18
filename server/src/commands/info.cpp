@@ -48,7 +48,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::GENERAL_INFORMATION, "Information about a DeepBlue data ID. Any DeepBlue data ID can be queried with this command. For example, it is possible to obtain all available information about an Experiment using its ID, or obtain the actual Request processing status, or the information about a Sample, an user can obtain information about itself using the value 'me' in the parameter 'id'. Multiple IDs can be informed in the same operation.");
+        return CommandDescription(categories::GENERAL_INFORMATION, "Information about a DeepBlue data identifier (ID). Any DeepBlue data ID can be queried with this command. For example, it is possible to obtain all available information about an Experiment using its ID, to obtain the actual Request processing status or the information about a Sample. A user can obtain information about him- or herself using the value 'me' in the parameter 'id'. Multiple IDs can be queried in the same operation.");
       }
 
       static  Parameters parameters_()

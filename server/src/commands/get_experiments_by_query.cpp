@@ -38,7 +38,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::OPERATIONS, "List the experiments and annotations that have at least one region in the final query data result.");
+        return CommandDescription(categories::OPERATIONS, "List the experiments and annotations that have at least one genomic region in the final query result.");
       }
 
       static Parameters parameters_()

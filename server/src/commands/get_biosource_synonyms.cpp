@@ -38,7 +38,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::BIOSOURCE_RELATIONSHIP, "Obtain the synonyms of the specified biosource. Synonyms are different aliases for the same biosource.");
+        return CommandDescription(categories::BIOSOURCE_RELATIONSHIP, "Obtain the synonyms of the specified biosource. Synonyms are different aliases for the same biosource. A BioSource refers to a term describing the origin of a given sample, such as a tissue or cell line.");
       }
 
       static Parameters parameters_()

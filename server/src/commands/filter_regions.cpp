@@ -41,7 +41,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::OPERATIONS, "Remove the genomic regions that does not match the specified criteria.");
+        return CommandDescription(categories::OPERATIONS, "Filter the genomic regions by their content.");
       }
 
       static Parameters parameters_()

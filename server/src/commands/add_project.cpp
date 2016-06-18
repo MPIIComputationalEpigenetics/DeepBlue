@@ -38,7 +38,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::PROJECTS, "Include a Project in DeepBlue.");
+        return CommandDescription(categories::PROJECTS, "Add a Project to DeepBlue. A Project is used to group Experiments and to define their origin.");
       }
 
       static Parameters parameters_()

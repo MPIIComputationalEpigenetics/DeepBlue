@@ -34,7 +34,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::STATUS, "Greets the user with the DeepBlue version.");
+        return CommandDescription(categories::STATUS, "Greet the user with the DeepBlue version.");
       }
 
       static Parameters parameters_()

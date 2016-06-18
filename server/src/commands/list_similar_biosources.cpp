@@ -38,7 +38,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::BIOSOURCES, "Lists all BioSources that have a similar name compared to the provided name.");
+        return CommandDescription(categories::BIOSOURCES, "List all BioSources that have a similar name compared to the provided name. A BioSource refers to a term describing the origin of a given sample, such as a tissue or cell line. The similarity is calculated using the Levenshtein method.");
       }
 
       static Parameters parameters_()

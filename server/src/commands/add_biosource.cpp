@@ -38,7 +38,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::BIOSOURCES, "Include a BioSource in DeepBlue.");
+        return CommandDescription(categories::BIOSOURCES, "Add a BioSource to DeepBlue. A BioSource refers to a term describing the origin of a given sample, such as a tissue or cell line.");
       }
 
       static Parameters parameters_()

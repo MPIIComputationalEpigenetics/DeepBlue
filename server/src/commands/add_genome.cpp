@@ -36,7 +36,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::GENOMES, "Include a Genome in DeepBlue.");
+        return CommandDescription(categories::GENOMES, "Add a (reference) Genome assembly to DeepBlue.");
       }
 
       static Parameters parameters_()

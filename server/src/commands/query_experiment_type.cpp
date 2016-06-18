@@ -42,7 +42,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::OPERATIONS, "Filter the query ID for selecting only regions from experiments of the given type. For example, it is possible to select only peaks using this command with the 'peaks' parameter.");
+        return CommandDescription(categories::OPERATIONS, "Filter the query ID for regions associated with experiments of a given type. For example, it is possible to select only peaks using this command with the 'peaks' parameter.");
       }
 
       static  Parameters parameters_()

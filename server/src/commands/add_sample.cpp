@@ -39,7 +39,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::SAMPLES, "Include Sample in DeepBlue that is related to a BioSource.");
+        return CommandDescription(categories::SAMPLES, "Add a Sample to DeepBlue that is related to a BioSource.");
       }
 
       static Parameters parameters_()

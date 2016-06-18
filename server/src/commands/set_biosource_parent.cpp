@@ -38,7 +38,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::BIOSOURCE_RELATIONSHIP, "Define a BioSource as parent of another BioSource. This command is used to build the BioSources hierarchy.");
+        return CommandDescription(categories::BIOSOURCE_RELATIONSHIP, "Define a BioSource as parent of another BioSource. This command is used to build the BioSources hierarchy. A BioSource refers to a term describing the origin of a given sample, such as a tissue or cell line.");
       }
 
       static  Parameters parameters_()

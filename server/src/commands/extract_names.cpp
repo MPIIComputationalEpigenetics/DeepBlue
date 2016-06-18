@@ -32,7 +32,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::UTILITIES, "An utility command that returns a list of names extracted from a list of ID and names.");
+        return CommandDescription(categories::UTILITIES, "A utility command that returns a list of names extracted from a list of ID and names.");
       }
 
       static Parameters parameters_()

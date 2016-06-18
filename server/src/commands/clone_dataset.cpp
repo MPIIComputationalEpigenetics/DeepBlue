@@ -41,7 +41,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::DATA_MODIFICATION, "Clone a dataset optionally changing its metadata and extra_metadata values. This command is useful for data curation.");
+        return CommandDescription(categories::DATA_MODIFICATION, "Clone a dataset optionally changing its metadata and extra_metadata values. This command must be used in data curation because users do not have permission to change the metadata values of the Annotations and Experiments that were not uploaded by them.");
       }
 
       static  Parameters parameters_()

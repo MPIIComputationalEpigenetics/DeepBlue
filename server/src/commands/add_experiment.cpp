@@ -50,7 +50,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::EXPERIMENTS, "Include an Experiment in DeepBlue.");
+        return CommandDescription(categories::EXPERIMENTS, "Add an Experiment in DeepBlue. An Experiment describes the characteristics of a specific Epigenetic Mark with respect to a single sample. The technology used and project must be informed as well. Extra metadata can be specified in addition to the mandatory meta information.");
       }
 
       static Parameters parameters_()

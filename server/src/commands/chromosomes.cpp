@@ -35,7 +35,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::GENOMES, "List the genome chromosomes.");
+        return CommandDescription(categories::GENOMES, "List the chromosomes of a given Genome.");
       }
 
       static Parameters parameters_()

@@ -55,7 +55,7 @@ namespace epidb {
       {
         Parameter p[] = {
           Parameter("keyword", serialize::STRING, "keyword to search by"),
-          Parameter("type", serialize::STRING, "type of data to search for", true),
+          Parameter("type", serialize::STRING, "type of data to search for - " + utils::vector_to_string(dba::Collections::valid_search_Collections()), true),
           parameters::UserKey
         };
         Parameters params(&p[0], &p[0] + 3);

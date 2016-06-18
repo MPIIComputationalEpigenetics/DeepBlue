@@ -41,7 +41,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::GENERAL_INFORMATION, "Verify if the name is an existing and valid DeepBlue BioSource name.");
+        return CommandDescription(categories::GENERAL_INFORMATION, "Verify if the name is an existing and valid DeepBlue BioSource name. A BioSource refers to a term describing the origin of a given sample, such as a tissue or cell line.");
       }
 
       static  Parameters parameters_()

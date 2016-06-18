@@ -40,7 +40,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::EXPERIMENTS, "Lists the latest Experiments included in DeepBlue that match the defined criteria.");
+        return CommandDescription(categories::EXPERIMENTS, " List the latest Experiments included in DeepBlue that match the defined criteria informed in the parameters.");
       }
 
       static Parameters parameters_()

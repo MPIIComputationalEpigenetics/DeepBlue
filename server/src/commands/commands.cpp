@@ -34,7 +34,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::STATUS, "Lists all available DeepBlue commands.");
+        return CommandDescription(categories::STATUS, "List all available DeepBlue commands.");
       }
 
       static Parameters parameters_()

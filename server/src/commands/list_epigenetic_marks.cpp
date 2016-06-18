@@ -38,7 +38,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::EPIGENETIC_MARKS, "Lists the Epigenetic Marks included in DeepBlue. It is possible to filter the Epigenetic Marks by their extra_metadata fields contents.");
+        return CommandDescription(categories::EPIGENETIC_MARKS, "List Epigenetic Marks included in DeepBlue. This includes histone marks, DNA methylation, DNA sensitivity, etc. It is possible to filter the Epigenetic Marks by their extra_metadata field content.");
       }
 
       static Parameters parameters_()
