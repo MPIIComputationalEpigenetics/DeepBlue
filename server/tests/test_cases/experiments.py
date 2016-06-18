@@ -8,7 +8,7 @@ import data_info
 
 class TestExperiments(helpers.TestCase):
 
-  def _test_experiments_pass(self):
+  def test_experiments_pass(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
@@ -35,7 +35,7 @@ class TestExperiments(helpers.TestCase):
     self.assertTrue("test_exp2" in experiments_names)
 
 
-  def _test_insert_local_file(self):
+  def test_insert_local_file(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
     sample_id = self.sample_ids[0]
@@ -67,7 +67,7 @@ class TestExperiments(helpers.TestCase):
 
     self.assertEqual(data1, data2)
 
-  def _test_double_experiment_same_user_fail(self):
+  def test_double_experiment_same_user_fail(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
@@ -91,7 +91,7 @@ class TestExperiments(helpers.TestCase):
     self.assertEqual(res[1], "102001:The experiment name 'test_exp1' is already being used.")
 
 
-  def _test_double_experiment_fail(self):
+  def test_double_experiment_fail(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
@@ -110,7 +110,7 @@ class TestExperiments(helpers.TestCase):
     res = epidb.add_experiment(*(exp + (self.admin_key,)))
     self.assertFailure(res)
 
-  def _test_list_recent(self):
+  def test_list_recent(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
@@ -148,7 +148,7 @@ class TestExperiments(helpers.TestCase):
     self.assertTrue("test_exp1" in experiments_names)
     self.assertTrue("test_exp2" in experiments_names)
 
-  def _test_add_with_invalid_sample(self):
+  def test_add_with_invalid_sample(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
@@ -161,7 +161,7 @@ class TestExperiments(helpers.TestCase):
     self.assertFailure(res)
 
 
-  def _test_add_with_invalid_genome(self):
+  def test_add_with_invalid_genome(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
@@ -174,7 +174,7 @@ class TestExperiments(helpers.TestCase):
     self.assertFailure(res)
 
 
-  def _test_add_with_invalid_project(self):
+  def test_add_with_invalid_project(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
@@ -187,7 +187,7 @@ class TestExperiments(helpers.TestCase):
     self.assertFailure(res)
 
 
-  def _test_add_with_invalid_chromosome(self):
+  def test_add_with_invalid_chromosome(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
@@ -212,7 +212,7 @@ class TestExperiments(helpers.TestCase):
 
     self.assertEqual(data, regions_data_okay)
 
-  def _test_add_with_out_of_bound_region(self):
+  def test_add_with_out_of_bound_region(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
@@ -238,7 +238,7 @@ class TestExperiments(helpers.TestCase):
     self.assertEqual(data, regions_data_okay)
 
 
-  def _test_add_with_invalid_epigenetic_mark(self):
+  def test_add_with_invalid_epigenetic_mark(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
@@ -250,7 +250,7 @@ class TestExperiments(helpers.TestCase):
               "ENCODE", "desc1", regions_data, format, None, self.admin_key)
     self.assertFailure(res)
 
-  def _test_shitty_deep_file(self):
+  def test_shitty_deep_file(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 

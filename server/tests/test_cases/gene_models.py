@@ -46,7 +46,7 @@ class TestGenes(helpers.TestCase):
     print gene_models[0][1]
     print epidb.list_genes(gene_models[0][1], self.admin_key)
 
-  def _test_gene_re(self):
+  def test_gene_re(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
@@ -78,7 +78,7 @@ class TestGenes(helpers.TestCase):
     status, gene_models = epidb.list_gene_models(self.admin_key)
     self.assertEquals(gene_models, [['gs1', 'Test One']])
 
-  def _test_gene_case_insensitive(self):
+  def test_gene_case_insensitive(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
@@ -95,7 +95,7 @@ class TestGenes(helpers.TestCase):
     status, gene_models = epidb.list_gene_models(self.admin_key)
     self.assertEquals(gene_models, [['gs1', 'Test One']])
 
-  def _test_gene_chr1_retrieve(self):
+  def test_gene_chr1_retrieve(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
