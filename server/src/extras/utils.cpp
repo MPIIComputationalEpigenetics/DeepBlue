@@ -448,6 +448,54 @@ namespace epidb {
       }
     }
 
+    serialize::ParameterPtr element_to_parameter(const mongo::BSONElement& e)
+    {
+
+      switch ( e.type() ) {
+      case mongo::NumberDouble: {
+        return std::make_shared<serialize::SimpleParameter>(e.Double());
+      }
+      case mongo::NumberInt:
+      case mongo::NumberLong: {
+        return std::make_shared<serialize::SimpleParameter>((long long) e.numberLong());
+      }
+      case mongo::Object: {
+        return bson_to_parameters(e.Obj());
+      }
+      case mongo::Array: {
+        serialize::ParameterPtr p = std::make_shared<serialize::ListParameter>();
+        std::vector<mongo::BSONElement> ees = e.Array();
+        for (auto const& ee : ees) {
+          p->add_child(element_to_parameter(ee));
+        }
+        return p;
+      }
+      default: {
+        return std::make_shared<serialize::SimpleParameter>(e.String());
+      }
+      }
+    }
+
+    serialize::ParameterPtr bson_to_parameters(const mongo::BSONObj & o)
+    {
+      serialize::ParameterPtr parameter(new serialize::MapParameter());
+
+      for (mongo::BSONObj::iterator it = o.begin(); it.more(); ) {
+        mongo::BSONElement e = it.next();
+
+        std::string fieldname = e.fieldName();
+
+        if (!fieldname.compare(0, 2, "__")) {
+          continue;
+        }
+
+        parameter->add_child(fieldname, element_to_parameter(e));
+      }
+
+      return parameter;
+    }
+
+
     std::string sanitize(const std::string &data)
     {
       std::string buffer;

@@ -261,7 +261,6 @@ namespace epidb {
 
       bool genes(const std::string &user_key, const std::vector<std::string> &norm_gene_models,  std::vector<mongo::BSONObj> &genes, std::string &msg)
       {
-
         return dba::genes::get_genes(user_key, norm_gene_models, genes, msg);
       }
 

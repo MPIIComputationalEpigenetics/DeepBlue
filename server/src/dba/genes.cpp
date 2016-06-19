@@ -281,7 +281,30 @@ namespace epidb {
           return false;
         }
 
-        return helpers::get(Collections::GENES(), query, genes, msg);
+
+        std::vector<mongo::BSONObj> genes_db_objs;
+        if (!helpers::get(Collections::GENES(), query, genes_db_objs, msg)) {
+          return false;
+        }
+
+        for (const auto& gene_db_obj : genes_db_objs) {
+          mongo::BSONObjBuilder gene_builder;
+          gene_builder.append("chromosome", gene_db_obj[KeyMapper::CHROMOSOME()].String());
+          gene_builder.append("start", gene_db_obj[KeyMapper::START()].numberLong());
+          gene_builder.append("end", gene_db_obj[KeyMapper::END()].numberLong());
+          gene_builder.append("source", gene_db_obj[KeyMapper::SOURCE()].String());
+          gene_builder.append("feature", gene_db_obj[KeyMapper::FEATURE()].String());
+          gene_builder.append("score", gene_db_obj[KeyMapper::SCORE()].numberDouble());
+          gene_builder.append("strand", gene_db_obj[KeyMapper::STRAND()].String());
+          gene_builder.append("frame", gene_db_obj[KeyMapper::FRAME()].String());
+
+          const mongo::BSONObj& attributes = gene_db_obj[KeyMapper::ATTRIBUTES()].Obj();
+          gene_builder.appendElements(attributes);
+
+          genes.emplace_back(gene_builder.obj());
+        }
+
+        return true;
       }
 
       bool get_genes_from_database(const std::vector<std::string> &chromosomes, const int start, const int end,

@@ -136,8 +136,11 @@ namespace epidb {
 
     std::string bson_to_string(const mongo::BSONElement &e);
 
-    std::string sanitize(const std::string &data);
+    serialize::ParameterPtr bson_to_parameters(const mongo::BSONObj & o);
 
+    serialize::ParameterPtr element_to_parameter(const mongo::BSONElement& e);
+
+    std::string sanitize(const std::string &data);
 
     mongo::BSONArray build_array(const std::vector<std::string> &params);
     mongo::BSONArray build_array(const std::vector<int> &params);

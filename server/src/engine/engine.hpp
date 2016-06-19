@@ -100,10 +100,6 @@ namespace epidb {
 
     bool remove_request_data(const std::string& request_id, mdbq::TaskState state, std::string& msg);
   };
-
-  // TODO: Move to other file.
-  serialize::ParameterPtr bson_to_parameters(const mongo::BSONObj & o);
-  serialize::ParameterPtr element_to_parameter(const mongo::BSONElement& e);
 }
 
 #endif

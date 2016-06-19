@@ -92,8 +92,10 @@ namespace epidb {
           result.add_error(msg);
         }
 
-        for (auto a: genes) {
-          std::cerr << a.toString() << std::endl;
+        result.set_as_array(true);
+        for (auto gene: genes) {
+          std::cerr << gene.toString() << std::endl;
+          result.add_param(utils::bson_to_parameters(gene));
         }
 
         return true;
