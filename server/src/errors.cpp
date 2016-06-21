@@ -49,7 +49,7 @@
  * 10 - Query
  * 11 - Genome
  * 12 - Gene
- * 13 - Gene Set
+ * 13 - Gene model
  * 14 - Pre-processed annotation
  * 15 - Collection
  * 16 - ..
@@ -113,7 +113,7 @@ namespace epidb {
   Error ERR_USER_FORMAT_MISSING("109002", "The Format is missing. Please, specify the Format.");
   Error ERR_USER_GENOME_MISSING("111002", "The Genome is missing. Please, specify the Genome.");
   Error ERR_USER_GENE_MISSING("112002", "The Gene is missing. Please, specify the Gene.");
-  Error ERR_USER_GENE_MODEL_MISSING("113002", "The Gene Set is missing. Please, specify the Gene Set.");
+  Error ERR_USER_GENE_MODEL_MISSING("113002", "The Gene Model is missing. Please, specify the Gene Model.");
 
   Error ERR_FORMAT_CHROMOSOME_MISSING("120002", "The CHROMOSOME is missing in the format. Please, inform the CHROMOSOME column in the Format.");
   Error ERR_FORMAT_START_MISSING("121002", "The START is missing in the format. Please, inform the START column in the Format.");
@@ -127,8 +127,8 @@ namespace epidb {
 
   Error ERR_DUPLICATED_EXPERIMENT_NAME("102001", "The experiment name '{}' is already being used.");
 
-  Error ERR_DUPLICATED_GENE_MODEL_NAME("113001", "The gene set '{}' is already being used.");
-  Error ERR_INVALID_GENE_MODEL_ID("113003", "Unable to find gene set ID '{}'.");
+  Error ERR_DUPLICATED_GENE_MODEL_NAME("113001", "The Gene Model '{}' is already being used.");
+  Error ERR_INVALID_GENE_MODEL_ID("113003", "Unable to find Gene Model ID '{}'.");
 
   Error ERR_INVALID_BIOSOURCE_NAME("104000", "Unable to find BioSource '{}'. No BioSource or Synonym was defined with this name.");
   Error ERR_INVALID_BIOSOURCE_ID("104003", "Uable to find BioSource ID '{}'. No BioSource or Synonym was defined with this ID.");

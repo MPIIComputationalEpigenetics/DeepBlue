@@ -157,7 +157,7 @@ namespace epidb {
     const std::string &Collections::GENE_MODELS()
     {
       // Keep the old collection
-      // TODO: update/change collection name in the 
+      // TODO: update/change collection name in the
       static std::string gene_models("gene_models");
       return gene_models;
     }

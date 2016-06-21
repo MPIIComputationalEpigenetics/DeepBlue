@@ -135,7 +135,7 @@ namespace epidb {
       {
         mongo::BSONObj gene_model;
         if (!data::gene_model(id, gene_model, msg)) {
-          msg = "Gene set " + id + " not found";
+          msg = "Gene model " + id + " not found";
           return false;
         }
 
