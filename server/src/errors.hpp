@@ -158,6 +158,8 @@ namespace epidb {
 
   extern Error ERR_DATASET_NOT_FOUND;
 
+  extern Error ERR_NAME_NOT_FOUND;
+
   extern Error ERR_DATABASE_CONNECTION;
   extern Error ERR_DATABASE_EXCEPTION;
   extern Error ERR_DATABASE_INVALID_BIOSOURCE;

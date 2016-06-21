@@ -67,6 +67,7 @@
  * 60 - Input
  * 61 - Input sub-item
  * 66 - Internal
+ * 88 - Name
  * 99 - Identifier
  */
 
@@ -181,6 +182,8 @@ namespace epidb {
   Error ERR_INVALID_META_COLUMN_NAME("125000", "The meta-column '{}' does not exist.");
 
   Error ERR_REQUEST_CANCELED("130300", "The request was canceled.");
+
+  Error ERR_NAME_NOT_FOUND("188000", "Element name {} of the collection {} not found.");
 
   Error ERR_UNKNOW_QUERY_TYPE("310004", "Unknown query type '{}'");
 

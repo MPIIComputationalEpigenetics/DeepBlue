@@ -34,6 +34,12 @@ class TestExperiments(helpers.TestCase):
     self.assertTrue("test_exp1" in experiments_names)
     self.assertTrue("test_exp2" in experiments_names)
 
+    s, ids = epidb.name_to_id(['test_exp1'], 'experiments', self.admin_key)
+    self.assertEqual(ids, [['e1', 'test_exp1']])
+    s, ids = epidb.name_to_id(['test_exp1', 'test_exp2'], 'experiments', self.admin_key)
+    self.assertEqual([['e1', 'test_exp1'], ['e2', 'test_exp2']], ids)
+    s, ids = epidb.name_to_id('test_exp1', 'experiments', self.admin_key)
+    self.assertEqual([['e1', 'test_exp1']], ids)
 
   def test_insert_local_file(self):
     epidb = DeepBlueClient(address="localhost", port=31415)

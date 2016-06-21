@@ -602,7 +602,6 @@ namespace epidb {
       return true;
     }
 
-
     bool add_genome(const std::string &name, const std::string &norm_name,
                     const std::string &description, const std::string &norm_description,
                     const parser::ChromosomesInfo &genome_info,

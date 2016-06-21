@@ -26,6 +26,11 @@ class TestEpigeneticMarkCommands(helpers.TestCase):
     self.assertTrue("DNaseI" in mark_names)
     self.assertTrue("DNaseIUniform" in mark_names)
 
+    status, _id = epidb.name_to_id("Methylation", "epigenetic_marks", self.admin_key)
+    self.assertEqual(_id[0][0], "em1")
+
+    status, _id = epidb.name_to_id(["methylation", "OpenChromDnase", "dnasei", "dnaseiuniform"], "epigenetic_marks", self.admin_key)
+    self.assertEqual(_id, [['em1', 'methylation'], ['em2', 'OpenChromDnase'], ['em3', 'dnasei'], ['em4', 'dnaseiuniform']])
 
   def test_insert_histone_modifications(self):
     epidb = DeepBlueClient(address="localhost", port=31415)

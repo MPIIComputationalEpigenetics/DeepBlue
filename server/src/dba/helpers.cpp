@@ -242,7 +242,7 @@ namespace epidb {
         }
 
         if (results.size() == 0) {
-          msg = "Unable to retrieve the id of the '" + norm_name + "''. Where: " + where;
+          msg = Error::m(ERR_NAME_NOT_FOUND, norm_name, where);
           return false;
         }
 

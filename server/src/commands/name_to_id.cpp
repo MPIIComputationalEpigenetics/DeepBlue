@@ -24,10 +24,9 @@
 
 #include <mongo/bson/bson.h>
 
-#include "../datatypes/user.hpp"
-#include "../datatypes/metadata.hpp"
-
+#include "../dba/collections.hpp"
 #include "../dba/dba.hpp"
+#include "../dba/helpers.hpp"
 #include "../dba/users.hpp"
 
 #include "../engine/commands.hpp"
@@ -45,14 +44,14 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::GENERAL_INFORMATION, "The ID for the given name(s).");
+        return CommandDescription(categories::GENERAL_INFORMATION, "Obtain the data ID(s) from the informed data name(s).");
       }
 
       static  Parameters parameters_()
       {
         Parameter p[] = {
           Parameter("name", serialize::STRING, "ID or an array of IDs", true),
-          Parameter("collection", serialize::STRING, "ID or an array of IDs", true),
+          Parameter("collection", serialize::STRING, "Collection where the data name is in "),
           parameters::UserKey
         };
         Parameters params(&p[0], &p[0] + 3);
@@ -74,30 +73,21 @@ namespace epidb {
       virtual bool run(const std::string &ip,
                        const serialize::Parameters &parameters, serialize::Parameters &result) const
       {
-        /*
-        const std::string collection = parameters[0]->as_string();
+        const std::string collection = utils::lower_case(parameters[1]->as_string());
         const std::string user_key = parameters[2]->as_string();
 
         std::string msg;
         datatypes::User user;
 
-        std::string err_msg;
-        bool has_list_collections_permissions = false;
-        if (check_permissions(user_key, datatypes::LIST_COLLECTIONS, user, msg )) {
-          has_list_collections_permissions = true;
-        } else {
-          err_msg = msg;
-        }
-
-        std::vector<utils::IdName> user_projects_id_names;
-        if (!dba::list::projects(user_key, user_projects_id_names, msg)) {
+        if (!check_permissions(user_key, datatypes::LIST_COLLECTIONS, user, msg )) {
           result.add_error(msg);
           return false;
         }
 
-        std::vector<std::string> user_projects;
-        for (const auto& project : user_projects_id_names) {
-          user_projects.push_back(utils::normalize_name(project.name));
+        if (!dba::Collections::is_valid_search_collection(collection)) {
+          msg = Error::m(ERR_INVALID_COLLECTION_NAME, collection, utils::vector_to_string(utils::capitalize_vector(dba::Collections::valid_search_Collections()), ", "));
+          result.add_error(msg);
+          return false;
         }
 
         std::vector<serialize::ParameterPtr> names_param;
@@ -108,25 +98,22 @@ namespace epidb {
           return true;
         }
 
-        const std::string& collection_name = dba::helpers::collection_name(utils::normalize_name(collection));
-
+        std::vector<utils::IdName> id_names;
         for (const auto & name_param : names_param) {
-          std::string normalize_name = utils::normalize_name(names_param->as_string());
-
+          std::string name = name_param->as_string();
+          std::string normalize_name = utils::normalize_name(name);
           bool ok;
 
-          helpers::get_one()
-
-
-
-          if (!ok) {
+          std::string id;
+          if (!dba::helpers::get_id(collection, normalize_name, id, msg)) {
             result.add_error(msg);
             return false;
           }
 
-          result.add_string(id);
+          id_names.emplace_back(id, name);
         }
-  */
+
+        set_id_names_return(id_names, result);
         return true;
       }
 

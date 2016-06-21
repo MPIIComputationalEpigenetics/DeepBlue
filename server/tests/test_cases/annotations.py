@@ -19,11 +19,8 @@ class TestAnnotationCommands(helpers.TestCase):
           {"url":"genome.ucsc.edu/cgi-bin/hgTables?db=hg19&hgta_group=regulation&hgta_track=cpgIslandExt&hgta_table=cpgIslandExt&hgta_doSchema=describe+table+schema"},
           self.admin_key)
     self.assertSuccess(res)
-    print res
 
     res, annotations = epidb.list_annotations("hg19", self.admin_key)
-    print res
-    print annotations
     self.assertSuccess(res, annotations)
     self.assertEqual(len(annotations), 2)
 
