@@ -238,7 +238,7 @@ namespace epidb {
         c.done();
 
         if (gene_model_obj.isEmpty()) {
-          msg = "gene sets " + utils::vector_to_string<std::string>(norm_gene_models) + " does not exists";
+          msg = "gene model " + utils::vector_to_string<std::string>(norm_gene_models) + " does not exists";
           return false;
         }
 
