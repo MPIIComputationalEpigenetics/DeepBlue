@@ -87,7 +87,7 @@ class TestProjects(helpers.TestCase):
     self.assertEqual(projects, [['p1', 'ENCODE'], ['p2', 'Mouse ENCODE'], ['p3', 'Other']])
 
 
-  def _test_set_project_public(self):
+  def test_set_project_public(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
@@ -104,7 +104,7 @@ class TestProjects(helpers.TestCase):
     self.assertEqual(user_add, user_two[0])
     self.assertEqual(project, project_add)
 
-  def _test_set_project_public_no_permisson(self):
+  def test_set_project_public_no_permisson(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
