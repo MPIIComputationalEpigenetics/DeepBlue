@@ -28,7 +28,7 @@
 
 #include "hub.hpp"
 
-#include "../log.hpp"
+#include "../connection/connection.hpp"
 
 #include "../dba/collections.hpp"
 #include "../dba/config.hpp"
@@ -38,8 +38,8 @@
 #include "../extras/date_time.hpp"
 #include "../extras/utils.hpp"
 
-#include "../connection/connection.hpp"
-
+#include "../errors.hpp"
+#include "../log.hpp"
 
 #define CHECK_DB_ERR_LOG(CON)\
   {\
@@ -74,10 +74,10 @@ namespace epidb {
                                   "nfailed" << 1);
         Connection conn;
         auto p = conn->query( dba::helpers::collection_name(dba::Collections::JOBS()),
-                        BSON(
-                          "state" << TS_FAILED <<
-                          "nfailed" << mongo::LT << 1), /* first time failure only */
-                        0, 0, &ret);
+                              BSON(
+                                "state" << TS_FAILED <<
+                                "nfailed" << mongo::LT << 1), /* first time failure only */
+                              0, 0, &ret);
         CHECK_DB_ERR_LOG(conn);
         while (p->more()) {
           mongo::BSONObj f = p->next();
@@ -89,13 +89,13 @@ namespace epidb {
                     << f["owner"].String() << "' failed, rescheduling" << std::endl;
 
           conn->update(dba::helpers::collection_name(dba::Collections::JOBS()),
-                        BSON("_id" << f["_id"]),
-                        BSON(
-                          "$inc" << BSON("nfailed" << 1) <<
-                          "$set" << BSON(
-                            "state"         << TS_NEW
-                            << "book_time"   << mongo::Undefined
-                            << "refresh_time" << mongo::Undefined)));
+                       BSON("_id" << f["_id"]),
+                       BSON(
+                         "$inc" << BSON("nfailed" << 1) <<
+                         "$set" << BSON(
+                           "state"         << TS_NEW
+                           << "book_time"   << mongo::Undefined
+                           << "refresh_time" << mongo::Undefined)));
           CHECK_DB_ERR_LOG(conn);
         }
 
@@ -148,19 +148,19 @@ namespace epidb {
       boost::posix_time::ptime ctime = epidb::extras::universal_date_time();
       Connection c;
       c->insert(dba::helpers::collection_name(dba::Collections::JOBS()),
-                           BSON( "_id" << id
-                                 << "timeout"     << timeout
-                                 << "version"     << version_value
-                                 << "create_time" << epidb::extras::to_mongo_date(ctime)
-                                 << "finish_time" << mongo::Undefined
-                                 << "book_time"   << mongo::Undefined
-                                 << "refresh_time" << mongo::Undefined
-                                 << "misc"        << job
-                                 << "nfailed"     << (int)0
-                                 << "state"       << TS_NEW
-                                 << "version"     << (int)0
-                               )
-                          );
+                BSON( "_id" << id
+                      << "timeout"     << timeout
+                      << "version"     << version_value
+                      << "create_time" << epidb::extras::to_mongo_date(ctime)
+                      << "finish_time" << mongo::Undefined
+                      << "book_time"   << mongo::Undefined
+                      << "refresh_time" << mongo::Undefined
+                      << "misc"        << job
+                      << "nfailed"     << (int)0
+                      << "state"       << TS_NEW
+                      << "version"     << (int)0
+                    )
+               );
       CHECK_DB_ERR_RETURN(c, msg);
       c.done();
       return true;
@@ -239,7 +239,7 @@ namespace epidb {
       Connection c;
       if (state == mdbq::_TS_END) {
         auto cursor = c->query(dba::helpers::collection_name(dba::Collections::JOBS()),
-                                          BSON("misc.user_id" << user_id));
+                               BSON("misc.user_id" << user_id));
         while (cursor->more()) {
           mongo::BSONObj o = cursor->next().getOwned();
           ret.push_back(o);
@@ -247,7 +247,7 @@ namespace epidb {
 
       } else {
         auto cursor = c->query(dba::helpers::collection_name(dba::Collections::JOBS()),
-                                          BSON("state" << state << "misc.user_id" << user_id));
+                               BSON("state" << state << "misc.user_id" << user_id));
         while (cursor->more()) {
           mongo::BSONObj o = cursor->next().getOwned();
           ret.push_back(o);
@@ -263,7 +263,7 @@ namespace epidb {
 
       Connection c;
       bool b = c->count(dba::helpers::collection_name(dba::Collections::JOBS()),
-                                 BSON("_id" << request_id << "misc.user_id" << user_id)) > 0;
+                        BSON("_id" << request_id << "misc.user_id" << user_id)) > 0;
       c.done();
       return b;
     }
@@ -272,7 +272,7 @@ namespace epidb {
     {
       Connection c;
       mongo::BSONObj o = c->findOne(dba::helpers::collection_name(dba::Collections::JOBS()),
-                                   mongo::Query(BSON("state" << TS_DONE)).sort("finish_time"));
+                                    mongo::Query(BSON("state" << TS_DONE)).sort("finish_time"));
       c.done();
       return o;
     }
@@ -478,13 +478,17 @@ namespace epidb {
       return true;
     }
 
-    bool Hub::cancel_request(const std::string& request_id, std::string& msg)
+    bool Hub::cancel_request(const datatypes::User& user, const std::string& request_id, std::string& msg)
     {
       boost::posix_time::ptime now = epidb::extras::universal_date_time();
 
       mongo::BSONObjBuilder queryb;
       mongo::BSONObj res, cmd, query;
       queryb.append("_id", request_id);
+
+      if (!user.is_admin()) {
+        queryb.append("misc.user_id", user.get_id());
+      }
 
       query = queryb.obj();
 
@@ -502,9 +506,8 @@ namespace epidb {
       epidb::Connection c;
       c->runCommand(m_ptr->m_prefix, cmd, res);
 
-
       if (!res["value"].isABSONObj()) {
-        std::cout << "No task available, cmd:" << cmd << std::endl;
+        msg = Error::m(ERR_REQUEST_ID_INVALID, request_id);
         return false;
       }
 

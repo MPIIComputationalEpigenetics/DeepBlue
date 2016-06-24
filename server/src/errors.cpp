@@ -182,6 +182,7 @@ namespace epidb {
   Error ERR_INVALID_META_COLUMN_NAME("125000", "The meta-column '{}' does not exist.");
 
   Error ERR_REQUEST_CANCELED("130300", "The request was canceled.");
+  Error ERR_REQUEST_ID_INVALID("130003", "The request ID '{}' is invalid.");
 
   Error ERR_NAME_NOT_FOUND("188000", "Element name {} of the collection {} not found.");
 

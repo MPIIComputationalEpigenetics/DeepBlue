@@ -22,6 +22,7 @@
 #     define __MDBQ_HUB_HPP__
 
 #include <memory>
+#include "../datatypes/user.hpp"
 #include "../mdbq/common.hpp"
 
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -134,7 +135,7 @@ namespace epidb {
       /**
        * Cancel, stop, or delete a request
        */
-      bool cancel_request(const std::string& request_id, std::string& msg);
+      bool cancel_request(const datatypes::User &user, const std::string& request_id, std::string& msg);
 
 
       /**

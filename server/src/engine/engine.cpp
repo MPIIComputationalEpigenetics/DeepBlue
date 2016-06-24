@@ -350,9 +350,9 @@ namespace epidb {
     return false;
   }
 
-  bool Engine::cancel_request(const std::string & request_id, std::string & msg)
+  bool Engine::cancel_request(const datatypes::User& user, const std::string & request_id, std::string & msg)
   {
-    return _hub.cancel_request(request_id, msg);
+    return _hub.cancel_request(user, request_id, msg);
   }
 
   bool Engine::remove_request_data(const std::string & request_id, mdbq::TaskState state, std::string & msg)

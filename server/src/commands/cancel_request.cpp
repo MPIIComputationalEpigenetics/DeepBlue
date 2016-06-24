@@ -64,7 +64,7 @@ namespace epidb {
       virtual bool run(const std::string &ip,
                        const serialize::Parameters &parameters, serialize::Parameters &result) const
       {
-        const std::string id = parameters[0]->as_string();
+        const std::string request_id = parameters[0]->as_string();
         const std::string user_key = parameters[1]->as_string();
 
         std::string msg;
@@ -75,10 +75,12 @@ namespace epidb {
           return false;
         }
 
-        if (!epidb::Engine::instance().cancel_request(id, msg)) {
+        if (!epidb::Engine::instance().cancel_request(user, request_id, msg)) {
           result.add_error(msg);
           return false;
         }
+
+        result.add_string(request_id);
 
         return true;
       }

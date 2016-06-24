@@ -165,6 +165,7 @@ namespace epidb {
   extern Error ERR_DATABASE_INVALID_BIOSOURCE;
 
   extern Error ERR_REQUEST_CANCELED;
+  extern Error ERR_REQUEST_ID_INVALID;
 }
 
 #endif
