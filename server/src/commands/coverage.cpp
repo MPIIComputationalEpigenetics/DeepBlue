@@ -83,13 +83,15 @@ namespace epidb {
           return false;
         }
 
-        if (!dba::exists::genome(genome)) {
+        const std::string norm_genome = utils::normalize_name(genome);
+
+        if (!dba::exists::genome(norm_genome)) {
           result.add_error(Error::m(ERR_INVALID_GENOME_NAME, genome));
           return false;
         }
 
         std::string request_id;
-        if (!epidb::Engine::instance().queue_coverage(query_id, genome, user_key, request_id, msg)) {
+        if (!epidb::Engine::instance().queue_coverage(query_id, norm_genome, user_key, request_id, msg)) {
           result.add_error(msg);
           return false;
         }
