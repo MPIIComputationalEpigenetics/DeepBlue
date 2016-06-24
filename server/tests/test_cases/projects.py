@@ -50,7 +50,7 @@ class TestProjects(helpers.TestCase):
 
   def test_set_project_public(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
-    self.init(epidb)
+    self.init_base(epidb)
 
     res = epidb.add_project("Other", "Some other project", self.admin_key)
     self.assertSuccess(res)
