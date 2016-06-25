@@ -121,7 +121,7 @@ namespace epidb {
       Connection c;
 
       auto data_cursor = c->query(helpers::collection_name(Collections::EXPERIMENTS()),
-                             mongo::Query(BSON(KeyMapper::DATASET() << dataset_id)));
+                                  mongo::Query(BSON(KeyMapper::DATASET() << dataset_id)));
       if (data_cursor->more()) {
         obj = data_cursor->next().getOwned();
         obj_by_dataset_id[dataset_id] = obj;
@@ -175,6 +175,14 @@ namespace epidb {
       return false;
     }
 
+    inline std::string metafield_attribute(const std::string& op)
+    {
+      unsigned int s = op.find("(") + 1;
+      unsigned int e = op.find_last_of(")");
+      unsigned int length = e - s;
+      return op.substr(s, length);
+    }
+
     bool Metafield::process(const std::string &op, const std::string &chrom, const AbstractRegion *region_ref,
                             processing::StatusPtr status, std::string &result, std::string &msg)
     {
@@ -200,7 +208,7 @@ namespace epidb {
       return false;
     }
 
-      const std::string get_by_region_set(const mongo::BSONObj &obj, const std::string &field)
+    const std::string get_by_region_set(const mongo::BSONObj &obj, const std::string &field)
     {
       if (!obj.hasField(field)) {
         return "";
@@ -304,11 +312,7 @@ namespace epidb {
     bool Metafield::count_overlap(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion *region_ref,
                                   processing::StatusPtr status, std::string &result, std::string &msg)
     {
-      unsigned int s = op.find("(") + 1;
-      unsigned int e = op.find_last_of(")");
-      unsigned int length = e - s;
-
-      std::string pattern = op.substr(s, length);
+      std::string pattern = metafield_attribute(op);
 
       std::string genome = get_by_region_set(obj, "genome");
       size_t count = 0;
@@ -323,11 +327,7 @@ namespace epidb {
     bool Metafield::count_non_overlap(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion *region_ref,
                                       processing::StatusPtr status, std::string &result, std::string &msg)
     {
-      unsigned int s = op.find("(") + 1;
-      unsigned int e = op.find_last_of(")");
-      unsigned int length = e - s;
-
-      std::string pattern = op.substr(s, length);
+      std::string pattern = metafield_attribute(op);
 
       std::string genome = get_by_region_set(obj, "genome");
       size_t count = 0;
@@ -428,11 +428,7 @@ namespace epidb {
     bool Metafield::calculated(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion *region_ref,
                                processing::StatusPtr status, std::string &result, std::string &msg)
     {
-      unsigned int s = op.find("(") + 1;
-      unsigned int e = op.find_last_of(")");
-      unsigned int length = e - s;
-
-      std::string code = op.substr(s, length);
+      std::string code = metafield_attribute(op);
 
       lua::Sandbox::LuaPtr lua = lua::Sandbox::new_instance(status);
       if (!lua->store_row_code(code, msg)) {
@@ -446,11 +442,7 @@ namespace epidb {
     bool Metafield::gene_attribute(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion *region_ref,
                                    processing::StatusPtr status, std::string &result, std::string &msg)
     {
-      unsigned int s = op.find("(") + 1;
-      unsigned int e = op.find_last_of(")");
-      unsigned int length = e - s;
-
-      std::string attribute_name = op.substr(s, length);
+      std::string attribute_name = metafield_attribute(op);
 
       auto it = region_ref->attributes().find(attribute_name);
       if (it == region_ref->attributes().end()) {
