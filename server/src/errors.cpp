@@ -211,4 +211,6 @@ namespace epidb {
   Error ERR_DATABASE_EXCEPTION("466666", "MongoDB exception at operation '{}': '{}'.");
   Error ERR_DATABASE_INVALID_BIOSOURCE("404666", "BioSource '{}' not found.");
 
+  Error ERR_INVALID_INTERNAL_NAME("366000", "Unable to retrieve the name of the internal name '{}'.");
+
 };

@@ -166,6 +166,8 @@ namespace epidb {
 
   extern Error ERR_REQUEST_CANCELED;
   extern Error ERR_REQUEST_ID_INVALID;
+
+  extern Error ERR_INVALID_INTERNAL_NAME;
 }
 
 #endif
