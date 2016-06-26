@@ -37,7 +37,7 @@ class TestOutput(helpers.TestCase):
     self.assertEqual(10, count)
 
     res, req = epidb.get_regions(qid_1, "chr:start:end:name:length:cpgNum:gcNum:perCpg:perGc:obsExp", self.admin_key)
-    self.assertEquals(req, "123000:Column name 'chr:start:end:name:length:cpgNum:gcNum:perCpg:perGc:obsExp' does not exist.")
+    self.assertEquals(req, "125000:Column name 'chr:start:end:name:length:cpgNum:gcNum:perCpg:perGc:obsExp' does not exist.")
 
     res, req = epidb.get_regions(qid_1, "CHROMOSOME,START,END,NAME,LENGTH,NUM_CPG,NUM_GC,PER_CPG,PER_CG,OBS_EXP", self.admin_key)
     regions = self.get_regions_request(req)

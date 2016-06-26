@@ -35,6 +35,8 @@
 
 #include "../connection/connection.hpp"
 
+#include "../dba/genes.hpp"
+
 #include "../lua/sandbox.hpp"
 
 #include "../errors.hpp"
@@ -65,6 +67,9 @@ namespace epidb {
       m["@COUNT.NON-OVERLAP"] = &Metafield::count_non_overlap;
       m["@CALCULATED"] = &Metafield::calculated;
       m["@GENE_ATTRIBUTE"] = &Metafield::gene_attribute;
+      m["@GENE_ID"] = &Metafield::gene_id;
+      m["@GENE_NAME"] = &Metafield::gene_name;
+      m["@GENE_EXPRESSION"] = &Metafield::gene_expression;
 
       return m;
     }
@@ -90,6 +95,9 @@ namespace epidb {
       m["@COUNT.NON-OVERLAP"] = "integer";
       m["@CALCULATED"] = "string";
       m["@GENE_ATTRIBUTE"] = "string";
+      m["@GENE_ID"] = "string";
+      m["@GENE_NAME"] = "string";
+      m["@GENE_EXPRESSION"] = "double";
 
       return m;
     }
@@ -451,6 +459,34 @@ namespace epidb {
       }
       result = it->second;
 
+      return true;
+    }
+
+    bool Metafield::gene_id(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion *region_ref,
+                            processing::StatusPtr status, std::string &result, std::string &msg)
+    {
+      std::string gene_model = metafield_attribute(op);
+      std::cerr << region_ref->start() << " : " << region_ref->end() << std::endl;
+      if (!dba::genes::get_gene_attribute(chrom, region_ref->start(), region_ref->end(), "gene_id", gene_model, result, msg)) {
+        return false;
+      }
+      return true;
+    }
+
+    bool Metafield::gene_name(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion *region_ref,
+                              processing::StatusPtr status, std::string &result, std::string &msg)
+    {
+      std::string gene_model = metafield_attribute(op);
+      std::cerr << region_ref->start() << " : " << region_ref->end() << std::endl;
+      if (!dba::genes::get_gene_attribute(chrom, region_ref->start(), region_ref->end(), "gene_name",  gene_model, result, msg)) {
+        return false;
+      }
+      return true;
+    }
+
+    bool Metafield::gene_expression(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion *region_ref,
+                         processing::StatusPtr status, std::string &result, std::string &msg)
+    {
       return true;
     }
   }

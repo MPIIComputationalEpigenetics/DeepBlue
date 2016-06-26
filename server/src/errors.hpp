@@ -109,6 +109,11 @@ namespace epidb {
   extern Error ERR_INVALID_GENOME_NAME;
   extern Error ERR_INVALID_GENOME_ID;
 
+  extern Error ERR_INVALID_GENE_ID;
+  extern Error ERR_INVALID_GENE_NAME;
+  extern Error ERR_INVALID_GENE_LOCATION;
+  extern Error ERR_INVALID_GENE_ATTRIBUTE;
+
   extern Error ERR_INVALID_SAMPLE_ID;
 
   extern Error ERR_INVALID_BIOSOURCE_NAME;

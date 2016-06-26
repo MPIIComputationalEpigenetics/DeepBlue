@@ -35,9 +35,12 @@
 #include "annotations.hpp"
 #include "collections.hpp"
 #include "full_text.hpp"
+#include "genes.hpp"
 #include "helpers.hpp"
 #include "remove.hpp"
 #include "users.hpp"
+
+#include "../errors.hpp"
 
 namespace epidb {
   namespace dba {
@@ -227,14 +230,13 @@ namespace epidb {
 
       bool build_genes_database_query(const std::vector<std::string> &chromosomes, const int start, const int end,
                                       const std::vector<std::string>& genes, const std::vector<std::string>& norm_gene_models,
+                                      const bool exactly,
                                       mongo::Query& query, std::string& msg)
       {
-        mongo::BSONArray genes_array = utils::build_regex_array(genes);
-        mongo::BSONArray genes_array_2 = genes_array;
 
         Connection c;
         mongo::BSONObj gene_model_obj = c->findOne(dba::helpers::collection_name(dba::Collections::GENE_MODELS()),
-          BSON("norm_name" << BSON("$in" << utils::build_array(norm_gene_models))));
+                                        BSON("norm_name" << BSON("$in" << utils::build_array(norm_gene_models))));
         c.done();
 
         if (gene_model_obj.isEmpty()) {
@@ -242,24 +244,37 @@ namespace epidb {
           return false;
         }
 
-        auto dataset_id = gene_model_obj[KeyMapper::DATASET()].Int();
-
-        mongo::BSONObj b_in_gene_name = BSON((KeyMapper::ATTRIBUTES() + ".gene_name") << BSON("$in" << genes_array));
-        mongo::BSONObj b_in_gene_id = BSON((KeyMapper::ATTRIBUTES() + ".gene_id") << BSON("$in" << genes_array_2));
-
         mongo::BSONObjBuilder bob;
+        auto dataset_id = gene_model_obj[KeyMapper::DATASET()].Int();
         bob.append(KeyMapper::DATASET(), dataset_id);
-        bob.append("$or", BSON_ARRAY(b_in_gene_name << b_in_gene_id));
+
+        if (!genes.empty()) {
+          mongo::BSONArray genes_array = utils::build_regex_array(genes);
+          mongo::BSONArray genes_array_2 = genes_array;
+
+          mongo::BSONObj b_in_gene_name = BSON((KeyMapper::ATTRIBUTES() + ".gene_name") << BSON("$in" << genes_array));
+          mongo::BSONObj b_in_gene_id = BSON((KeyMapper::ATTRIBUTES() + ".gene_id") << BSON("$in" << genes_array_2));
+          bob.append("$or", BSON_ARRAY(b_in_gene_name << b_in_gene_id));
+        }
 
         if (!chromosomes.empty()) {
           bob.append(KeyMapper::CHROMOSOME(), BSON("$in" << utils::build_array(chromosomes)));
         }
 
-        if (start > -1) {
-          bob.append(KeyMapper::END(), BSON("$gte" << start));
-        }
-        if (end > -1) {
-          bob.append(KeyMapper::START(), BSON("$lte" << end));
+        if (exactly) {
+          if (start > -1) {
+            bob.append(KeyMapper::START(), start);
+          }
+          if (end > -1) {
+            bob.append(KeyMapper::END(), end);
+          }
+        } else {
+          if (start > -1) {
+            bob.append(KeyMapper::END(), BSON("$gte" << start));
+          }
+          if (end > -1) {
+            bob.append(KeyMapper::START(), BSON("$lte" << end));
+          }
         }
 
         mongo::BSONObj filter = bob.obj();
@@ -267,6 +282,47 @@ namespace epidb {
         query = mongo::Query(filter).sort(BSON(KeyMapper::CHROMOSOME() << 1 << KeyMapper::START() << 1));
 
         return true;
+      }
+
+      bool get_gene_attribute(const std::string& chromosome, const Position start, const Position end,
+                              const std::string& attribute_name, const std::string& gene_model,
+                              std::string& attibute_value, std::string& msg)
+      {
+        mongo::BSONObj gene;
+        if (!get_gene(chromosome, start, end, gene_model, gene, msg)) {
+          if (msg.empty()) {
+            msg = Error::m(ERR_INVALID_GENE_LOCATION, chromosome, start, end, gene_model);
+          }
+          return false;
+        }
+
+        mongo::BSONObj gene_attributes = gene[KeyMapper::ATTRIBUTES()].Obj();
+        if (!gene_attributes.hasElement(attribute_name)) {
+          msg = Error::m(ERR_INVALID_GENE_ATTRIBUTE, attribute_name);
+        }
+
+        attibute_value = gene_attributes[attribute_name].String();
+
+        return true;
+      }
+
+      bool get_gene(const std::string& chromosome, const Position start, const Position end, const std::string& gene_model,
+                    mongo::BSONObj& gene, std::string& msg)
+      {
+        std::string norm_gene_model = utils::normalize_name(gene_model);
+
+        const std::vector<std::string> genes_empty;
+        const std::vector<std::string> gene_models = {norm_gene_model};
+        const std::vector<std::string> chromosomes = {chromosome};
+        mongo::Query query;
+
+        if (!dba::genes::build_genes_database_query(chromosomes, start, end, genes_empty, gene_models, true, query, msg)) {
+          msg = "";
+          return false;
+        }
+
+        std::cerr << query.toString() << std::endl;
+        return helpers::get_one(Collections::GENES(), query, gene);
       }
 
       bool get_genes(const std::string &user_key, const std::vector<std::string> &norm_gene_models,  std::vector<mongo::BSONObj>& genes, std::string &msg)
@@ -277,10 +333,9 @@ namespace epidb {
         const std::vector<std::string> genes_re = {".*"};
         mongo::Query query;
 
-        if (!dba::genes::build_genes_database_query(chromosomes, start, end, genes_re, norm_gene_models, query, msg)) {
+        if (!dba::genes::build_genes_database_query(chromosomes, start, end, genes_re, norm_gene_models, true, query, msg)) {
           return false;
         }
-
 
         std::vector<mongo::BSONObj> genes_db_objs;
         if (!helpers::get(Collections::GENES(), query, genes_db_objs, msg)) {
@@ -318,7 +373,7 @@ namespace epidb {
 
         mongo::Query query;
 
-        if (!build_genes_database_query(chromosomes, start, end, genes, gene_models, query, msg)) {
+        if (!build_genes_database_query(chromosomes, start, end, genes, gene_models, false, query, msg)) {
           return false;
         }
 
