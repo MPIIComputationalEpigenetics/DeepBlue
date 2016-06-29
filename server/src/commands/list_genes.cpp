@@ -30,6 +30,8 @@
 
 #include "../errors.hpp"
 
+#include <ctime>
+
 namespace epidb {
   namespace command {
 
@@ -44,17 +46,21 @@ namespace epidb {
       static Parameters parameters_()
       {
         Parameter p[] = {
+          Parameter("gene_id_or_name", serialize::STRING, "Name(s) or ID(s) (ensembl id) of the selected gene(s)", true),
+          Parameter("chromosome", serialize::STRING, "chromosome name(s)", true),
+          Parameter("start", serialize::INTEGER, "minimum start region"),
+          Parameter("end", serialize::INTEGER, "maximum end region"),
           parameters::GeneModels,
           parameters::UserKey
         };
-        Parameters params(&p[0], &p[0] + 2);
+        Parameters params(&p[0], &p[0] + 6);
         return params;
       }
 
       static Parameters results_()
       {
         Parameter p[] = {
-          Parameter("genes", serialize::LIST, "genes names and IDs")
+          Parameter("genes", serialize::LIST, "genes names and its content")
         };
         Parameters results(&p[0], &p[0] + 1);
         return results;
@@ -66,19 +72,24 @@ namespace epidb {
       virtual bool run(const std::string &ip,
                        const serialize::Parameters &parameters, serialize::Parameters &result) const
       {
-        const std::string user_key = parameters[1]->as_string();
-
-        std::vector<serialize::ParameterPtr> gene_models;
-        parameters[0]->children(gene_models);
-
-
-        std::string msg;
         datatypes::User user;
+        std::string msg;
+        const std::string user_key = parameters[5]->as_string();
 
         if (!check_permissions(user_key, datatypes::LIST_COLLECTIONS, user, msg )) {
           result.add_error(msg);
           return false;
         }
+
+        std::vector<serialize::ParameterPtr> gene_id_or_name;
+        std::vector<serialize::ParameterPtr> chromosomes;
+        std::vector<serialize::ParameterPtr> gene_models;
+        parameters[0]->children(gene_id_or_name);
+        parameters[1]->children(chromosomes);
+        parameters[4]->children(gene_models);
+
+        const Position start = parameters[2]->isNull() ? -1 : parameters[2]->as_long();
+        const Position end = parameters[3]->isNull() ? -1 : parameters[3]->as_long();
 
         std::vector<std::string> norm_gene_models;
 
@@ -87,16 +98,19 @@ namespace epidb {
           norm_gene_models.emplace_back(utils::normalize_name(gene_model));
         }
 
+          clock_t list_time = clock();
         std::vector<mongo::BSONObj> genes;
-        if (!dba::list::genes(user_key, norm_gene_models, genes, msg)) {
+        if (!dba::list::genes(user_key, utils::build_vector(gene_id_or_name), utils::build_vector(chromosomes), start, end, norm_gene_models, genes, msg)) {
           result.add_error(msg);
         }
+        std::cerr << "list in " << (( ((float)  clock()) - list_time) / CLOCKS_PER_SEC) << std::endl;
 
         result.set_as_array(true);
         for (auto gene: genes) {
-          std::cerr << gene.toString() << std::endl;
           result.add_param(utils::bson_to_parameters(gene));
         }
+
+        std::cerr << "total in " << (( ((float)  clock()) - list_time) / CLOCKS_PER_SEC) << std::endl;
 
         return true;
       }

@@ -325,17 +325,15 @@ namespace epidb {
         return helpers::get_one(Collections::GENES(), query, gene);
       }
 
-      bool get_genes(const std::string &user_key, const std::vector<std::string> &norm_gene_models,  std::vector<mongo::BSONObj>& genes, std::string &msg)
+      bool get_genes(const std::vector<std::string> &chromosomes, const Position start, const Position end, const std::vector<std::string>& genes_names_or_id,
+                     const std::string &user_key, const std::vector<std::string> &norm_gene_models,  std::vector<mongo::BSONObj>& genes, std::string &msg)
       {
-        const std::vector<std::string> chromosomes;
-        const int start = -1;
-        const int end = -1;
-        const std::vector<std::string> genes_re = {".*"};
         mongo::Query query;
-
-        if (!dba::genes::build_genes_database_query(chromosomes, start, end, genes_re, norm_gene_models, true, query, msg)) {
+        if (!dba::genes::build_genes_database_query(chromosomes, start, end, genes_names_or_id, norm_gene_models, false, query, msg)) {
           return false;
         }
+
+        std::cerr << query.toString() << std::endl;
 
         std::vector<mongo::BSONObj> genes_db_objs;
         if (!helpers::get(Collections::GENES(), query, genes_db_objs, msg)) {
@@ -362,7 +360,7 @@ namespace epidb {
         return true;
       }
 
-      bool get_genes_from_database(const std::vector<std::string> &chromosomes, const int start, const int end,
+      bool get_genes_from_database(const std::vector<std::string> &chromosomes, const Position start, const Position end,
                                    const std::vector<std::string>& genes, const std::string& norm_gene_model,
                                    ChromosomeRegionsList& chromosomeRegionsList, std::string& msg )
       {
