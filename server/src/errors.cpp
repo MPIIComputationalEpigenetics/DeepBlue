@@ -147,9 +147,10 @@ namespace epidb {
   Error ERR_INVALID_BIOSOURCE_SYNONYM("104400", "Invalid BioSource Synonym '{}'. A BioSource or a synonym with this name already exists.");
 
   Error ERR_DUPLICATED_EPIGENETIC_MARK_NAME("105001", "Duplicated Epigenetic Mark Name '{}'." );
+  Error ERR_INVALID_EPIGENETIC_MARK("105000", "Epigenetic Mark ID '{}' does not exists." );
   Error ERR_INVALID_EPIGENETIC_MARK_ID("105003", "Unable to find Epigenetic Mark ID '{}'." );
 
-  Error ERR_INVALID_PROJECT_NAME("107000", "Unable to find the project '{}'.");
+  Error ERR_INVALID_PROJECT("107000", "Project '{}' does not exist.");
   Error ERR_DUPLICATED_PROJECT_NAME("107001", "Duplicated Project Name '{}'.");
   Error ERR_INVALID_PROJECT_ID("107003", "Unable to find the project ID '{}'.");
   Error ERR_PERMISSION_PROJECT("107100", "You are not the project '{}' owner and neither an administrator.");
@@ -161,10 +162,11 @@ namespace epidb {
   Error ERR_INVALID_CHROMOSOME_NAME("120000", "Unable to find the chromosome '{}'.");
   Error ERR_INVALID_CHROMOSOME_NAME_GENOME("120002", "Unable to find the chromosome '{}' in the genome '{}'.");
 
+  Error ERR_INVALID_TECHNIQUE("106000", "Technique '{}' does not exist.");
   Error ERR_INVALID_TECHNIQUE_ID("106003", "Unable to find the technique ID '{}'.");
   Error ERR_DUPLICATED_TECHNIQUE_NAME("106001", "Duplicated Genome Name '{}'.");
 
-  Error ERR_INVALID_EXPERIMENT_NAME("101000", "Unable to find the experiment '{}'.");
+  Error ERR_INVALID_EXPERIMENT("101000", "Experiment '{}' does not exists.");
   Error ERR_INVALID_EXPERIMENT_ID("101003", "Unable to find the experiment ID '{}'.");
   Error ERR_INVALID_EXPERIMENT_COLUMN("101007", "The experiment '{}' does not have the column '{}'.");
 

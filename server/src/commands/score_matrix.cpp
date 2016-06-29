@@ -108,7 +108,7 @@ namespace epidb {
           std::string column_name = mit->second->as_string();
 
           if (!dba::exists::experiment(utils::normalize_name(experiment_name))) {
-            result.add_error(Error::m(ERR_INVALID_EXPERIMENT_NAME, experiment_name));
+            result.add_error(Error::m(ERR_INVALID_EXPERIMENT, experiment_name));
             return false;
           }
 

@@ -93,7 +93,7 @@ namespace epidb {
 
         mongo::BSONObj obj;
         if (!dba::helpers::get_one(dba::Collections::PROJECTS(), BSON("norm_name" << norm_name), obj)) {
-          msg = Error::m(ERR_INVALID_PROJECT_NAME, project);
+          msg = Error::m(ERR_INVALID_PROJECT, project);
           return false;
         }
 

@@ -26,6 +26,9 @@ class TestFacetingCommand(helpers.TestCase):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_full(epidb)
 
+    (s, v) = epidb.collection_experiments_count("epigenetic_marks", "hg19", "peaks", "", "", "", "", "BLUEPRINT", self.admin_key)
+    self.assertEqual(v, "107000:Project 'BLUEPRINT' does not exist.")
+
     (s, v) = epidb.collection_experiments_count("epigenetic_marks", "hg19", "peaks", "", "", "", "", "", self.admin_key)
 
 

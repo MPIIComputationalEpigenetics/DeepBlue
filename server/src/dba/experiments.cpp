@@ -43,7 +43,7 @@ namespace epidb {
       {
         const std::string norm_name = utils::normalize_name(name);
         if (!helpers::get_one(Collections::EXPERIMENTS(), BSON("norm_name" << norm_name), experiment)) {
-          msg = Error::m(ERR_INVALID_EXPERIMENT_NAME, name);
+          msg = Error::m(ERR_INVALID_EXPERIMENT, name);
           return false;
         }
         return true;

@@ -126,7 +126,7 @@ namespace epidb {
           args_builder.append("norm_experiment_name", utils::build_array(norm_names));
 
           if (!utils::check_parameters(names, utils::normalize_name, dba::exists::experiment, msg)) {
-            result.add_error("Experiment " + msg + " does not exists.");
+            result.add_error(Error::m(ERR_INVALID_EXPERIMENT, msg));
             return false;
           }
           has_exp_or_genome = true;
@@ -134,7 +134,7 @@ namespace epidb {
         // epigenetic mark
         if (epigenetic_marks.size() > 0) {
           if (!utils::check_parameters(epigenetic_marks, utils::normalize_epigenetic_mark, dba::exists::epigenetic_mark, msg)) {
-            result.add_error("Epigenetic mark " + msg + " does not exists.");
+            result.add_error(Error::m(ERR_INVALID_EPIGENETIC_MARK, msg));
             return false;
           }
           args_builder.append("epigenetic_mark", utils::build_array(epigenetic_marks));
@@ -143,7 +143,7 @@ namespace epidb {
         // sample id
         if (sample_ids.size() > 0) {
           if (!utils::check_parameters(sample_ids, utils::normalize_name, dba::exists::sample, msg)) {
-            result.add_error("Sample ID " + msg + " does not exists.");
+            result.add_error(Error::m(ERR_INVALID_SAMPLE_ID, msg));
             return false;
           }
           args_builder.append("sample_id", utils::build_array(sample_ids));
@@ -172,7 +172,7 @@ namespace epidb {
             }
 
             if (!found) {
-              result.add_error("Project " + project->as_string() + " does not exists.");
+              result.add_error(Error::m(ERR_INVALID_PROJECT, project->as_string()));
               return false;
             }
           }
@@ -190,7 +190,7 @@ namespace epidb {
         // technique
         if (techniques.size() > 0) {
           if (!utils::check_parameters(techniques, utils::normalize_name, dba::exists::technique, msg)) {
-            result.add_error("Technique " + msg + " does not exists.");
+            result.add_error(Error::m(ERR_INVALID_TECHNIQUE, msg));
             return false;
           }
           args_builder.append("technique", utils::build_array(techniques));

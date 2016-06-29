@@ -118,7 +118,7 @@ namespace epidb {
                                         const std::vector<serialize::ParameterPtr> epigenetic_marks, const std::vector<serialize::ParameterPtr> biosources,
                                         const std::vector<serialize::ParameterPtr> sample_ids, const std::vector<serialize::ParameterPtr> techniques,
                                         const std::vector<serialize::ParameterPtr> projects, const std::string user_key,
-                                        mongo::BSONObj& query, std::string msg);
+                                        mongo::BSONObj& query, std::string &msg);
 
       /**
        * List in use
