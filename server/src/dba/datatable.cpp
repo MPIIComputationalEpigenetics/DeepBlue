@@ -205,7 +205,7 @@ namespace epidb {
           } else if (filter.first == "data_type") {
             query_builder.appendRegex("upload_info.content_format", filter.second, "ix");
           } else if (filter.first == "biosource") {
-            query_builder.appendRegex("sample_info.biosource_name", filter.second, "ix");
+            query_builder.appendRegex("sample_info.norm_biosource_name", filter.second, "ix");
           } else {
             query_builder.appendRegex(filter.first, filter.second, "i"); // case insensitivity and ignore spaces and special characters
           }
