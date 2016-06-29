@@ -217,7 +217,7 @@ namespace epidb {
         }
 
         if (results.size() == 0) {
-          msg = "Unable to retrieve the name of the internal name '" + norm_name + "'.";
+          msg = Error::m(ERR_INVALID_INTERNAL_NAME, norm_name);
           return false;
         }
 
