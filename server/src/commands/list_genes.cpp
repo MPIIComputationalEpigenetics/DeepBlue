@@ -40,13 +40,13 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::GENES, "List all the Gene currently available in DeepBlue.");
+        return CommandDescription(categories::GENES, "List the Gene currently available in DeepBlue.");
       }
 
       static Parameters parameters_()
       {
         Parameter p[] = {
-          Parameter("gene_id_or_name", serialize::STRING, "Name(s) or ID(s) (ensembl id) of the selected gene(s)", true),
+          Parameter("gene_id_or_name", serialize::STRING, "Regular expression with the Name(s) or ID(s) (ensembl id) of the selected gene(s).", true),
           Parameter("chromosome", serialize::STRING, "chromosome name(s)", true),
           Parameter("start", serialize::INTEGER, "minimum start region"),
           Parameter("end", serialize::INTEGER, "maximum end region"),
