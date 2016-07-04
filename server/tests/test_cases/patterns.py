@@ -146,7 +146,7 @@ class TestPattern(helpers.TestCase):
     self.assertEquals(rgs, 'chrM\t91\t95\nchrM\t1439\t1443\nchrM\t1553\t1557\nchrM\t1643\t1647\nchrM\t1885\t1889\nchrM\t2144\t2148\nchrM\t3137\t3141\nchrM\t3880\t3884\nchrM\t5758\t5762\nchrM\t6580\t6584\nchrM\t7321\t7325\nchrM\t8340\t8344\nchrM\t8517\t8521\nchrM\t9394\t9398\nchrM\t11889\t11893\nchrM\t12054\t12058\nchrM\t12207\t12211\nchrM\t12767\t12771\nchrM\t12923\t12927\nchrM\t14601\t14605\nchrM\t14958\t14962\nchrM\t15928\t15932\nchrM\t15959\t15963')
 
 
-  def test_missing_preprocessed(self):
+  def _test_missing_preprocessed(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
