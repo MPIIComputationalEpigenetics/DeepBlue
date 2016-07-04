@@ -241,14 +241,8 @@ namespace epidb {
         }
       }
 
-      bool get_regions_from_collection(const std::string &collection, const mongo::BSONObj &regions_query, const bool full_overlap,
-                                       processing::StatusPtr status, Regions &regions, std::string &msg)
+      mongo::Query build_query(const mongo::BSONObj &regions_query, Position& start, Position& end)
       {
-        Connection c;
-
-        Position start;
-        Position end;
-
         if (regions_query.hasField(KeyMapper::START())) {
           mongo::BSONObj o = regions_query[KeyMapper::START()].Obj();
           end = o["$lte"].Int();
@@ -263,19 +257,27 @@ namespace epidb {
           start = std::numeric_limits<Position>::min();
         }
 
+        return mongo::Query(regions_query)
+               .sort(BSON(KeyMapper::DATASET() << 1 << KeyMapper::START() << 1 << KeyMapper::END() << 1))
+               .hint("D_1_S_1_E_1");
+      }
 
-        mongo::Query query = mongo::Query(regions_query)
-                             .sort(BSON(KeyMapper::DATASET() << 1 << KeyMapper::START() << 1 << KeyMapper::END() << 1))
-                             .hint("D_1_S_1_E_1");
+      bool get_regions_from_collection(const std::string &collection, const mongo::BSONObj &regions_query, const bool full_overlap,
+                                       processing::StatusPtr status, Regions &regions, std::string &msg)
+      {
+        Position start;
+        Position end;
 
-        int queryOptions = (int)( mongo::QueryOption_NoCursorTimeout | mongo::QueryOption_SlaveOk );
-
+        Connection c;
         unsigned long long count = c->count(collection, regions_query);
         if (count == 0) {
           c.done();
           return true;
         }
 
+        mongo::Query query = build_query(regions_query, start, end);
+
+        int queryOptions = (int)( mongo::QueryOption_NoCursorTimeout | mongo::QueryOption_SlaveOk );
         regions.reserve(count);
         auto cursor( c->query(collection, query, 0, 0, NULL, queryOptions) );
         cursor->setBatchSize(BULK_SIZE);
@@ -339,6 +341,28 @@ namespace epidb {
         }
 
         return std::make_tuple(true, std::string(""));
+      }
+
+      bool get_regions_preview(const std::string &genome, const std::string &chromosome, const mongo::BSONObj &regions_query,
+                               Regions& regions, std::string &msg)
+      {
+
+        std::string collection = helpers::region_collection_name(genome, chromosome);
+        regions = Regions();
+
+        Position start = 0;
+        Position end = std::numeric_limits<Position>::max();
+
+        mongo::Query query = build_query(regions_query, start, end);
+
+        Connection c;
+        mongo::BSONObj o = c->findOne(collection, query);
+        c.done();
+
+        RegionProcess rp(regions, start, end, true);
+        rp.read_region(o);
+
+        return true;
       }
 
       bool get_regions(const std::string &genome, const std::string &chromosome,

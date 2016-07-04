@@ -501,11 +501,9 @@ namespace epidb {
         return true;
       }
 
-      bool build_experiment_query(const mongo::BSONObj &query,
+      bool build_experiment_query(const mongo::BSONObj &args,
                                   mongo::BSONObj &regions_query, std::string &msg)
       {
-        mongo::BSONObj args = query["args"].Obj();
-
         mongo::BSONArrayBuilder datasets_array_builder;
 
         const mongo::BSONObj args_query = build_query(args);
@@ -533,6 +531,8 @@ namespace epidb {
         }
 
         regions_query = regions_query_builder.obj();
+
+        std::cerr << regions_query.toString() << std::endl;
 
         return true;
       }
@@ -591,11 +591,12 @@ namespace epidb {
         }
 
         mongo::BSONObj regions_query;
-        if (!build_experiment_query(query, regions_query, msg)) {
+        mongo::BSONObj args = query["args"].Obj();
+
+        if (!build_experiment_query(args, regions_query, msg)) {
           return false;
         }
 
-        mongo::BSONObj args = query["args"].Obj();
 
         std::vector<std::string> chromosomes = utils::build_vector(args["chromosomes"].Array());
         std::set<std::string> genomes = utils::build_set(args["norm_genomes"].Array());

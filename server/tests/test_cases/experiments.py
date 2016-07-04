@@ -8,6 +8,23 @@ import data_info
 
 class TestExperiments(helpers.TestCase):
 
+  def test_experiments_preview(self):
+    epidb = DeepBlueClient(address="localhost", port=31415)
+    self.init_base(epidb)
+
+    sample_id = self.sample_ids[0]
+    regions_data = helpers.load_bed("hg19_chr1_1")
+    format = data_info.EXPERIMENTS["hg19_chr1_1"]["format"]
+
+    # adding two experiments with the same data should work
+    res = epidb.add_experiment("test_exp1", "hg19", "Methylation", sample_id, "tech1",
+              "ENCODE", "desc1", regions_data, format, None, self.admin_key)
+    self.assertSuccess(res)
+
+    #epidb.preview_experiment(res[1], ...)
+    print epidb.preview_experiment('test_exp1', self.admin_key)
+
+  """
   def test_experiments_pass(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
@@ -313,3 +330,4 @@ class TestExperiments(helpers.TestCase):
     (res, req) = epidb.get_regions(qid2, "CHROMOSOME,START,END", self.admin_key)
     x = self.get_regions_request(req)
     self.assertEqual(x, 'chr1\t567500\t567650\nchr1\t713000\t713070\nchr1\t713240\t713390\nchr1\t713280\t713430\nchr1\t713520\t713670\nchr1\t713520\t713670\nchr1\t713900\t714050\nchr1\t713920\t714070\nchr1\t714160\t714310\nchr1\t714200\t714350\nchr1\t714300\t714350\nchr1\t714460\t714590\nchr1\t714540\t714690\nchr1\t714540\t714690\nchr1\t715060\t715210\nchr1\t715080\t715230\nchr1\t719100\t719330\nchr1\t761180\t761330\nchr1\t762060\t762210\nchr1\t762060\t762210\nchr1\t762100\t762250\nchr1\t762420\t762570\nchr1\t762440\t762590\nchr1\t762460\t762500\nchr1\t762620\t762790\nchr1\t762820\t762970\nchr1\t762820\t762970\nchr1\t763020\t763170\nchr1\t839540\t839690\nchr1\t840000\t840150\nchr1\t840080\t840230\nchr1\t840100\t840310\nchr1\t840600\t840750\nchr1\t840640\t840790\nchr1\t840850\t840990\nchr1\t857740\t857890\nchr1\t858740\t858890\nchr1\t858880\t859030\nchr1\t859600\t859750\nchr1\t859640\t859790\nchr1\t859650\t859790\nchr1\t860220\t860370\nchr1\t860240\t860390\nchr1\t860600\t860750\nchr1\t861040\t861190\nchr1\t861040\t861190\nchr1\t875220\t875370\nchr1\t875400\t875550\nchr1\t875900\t876050\nchr1\t875920\t876070\nchr1\t876180\t876330\nchr1\t876420\t876570\nchr1\t877000\t877150')
+    """

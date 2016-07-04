@@ -56,6 +56,9 @@ namespace epidb {
                          processing::StatusPtr status,
                          size_t &size, std::string &msg);
 
+      bool get_regions_preview(const std::string &genome, const std::string &chromosome, const mongo::BSONObj &regions_query,
+                               Regions& regions, std::string &msg);
+
 
       class SequenceRetriever {
       private:
