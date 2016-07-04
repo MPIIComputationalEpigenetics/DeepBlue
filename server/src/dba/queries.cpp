@@ -466,7 +466,7 @@ namespace epidb {
             c->query(helpers::collection_name(Collections::EXPERIMENTS()), BSON("norm_name" << norm_name));
 
           if (!cursor->more()) {
-            msg = "Experiments name '" + experiment_name + "' not found";
+            msg = Error::m(ERR_INVALID_EXPERIMENT, experiment_name);
             c.done();
             return false;
           }
