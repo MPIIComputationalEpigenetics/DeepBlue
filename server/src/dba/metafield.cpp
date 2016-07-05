@@ -303,8 +303,8 @@ namespace epidb {
       mongo::BSONObjBuilder region_query_builder;
 
       region_query_builder.append(KeyMapper::DATASET(), dataset_id);
-      region_query_builder.append(KeyMapper::START(), BSON("$gte" << (int) region_ref->start() << "$lte" << (int) region_ref->end()));
-      region_query_builder.append(KeyMapper::END(), BSON("$gte" << (int) region_ref->start() << "$lte" << (int) region_ref->end()));
+      region_query_builder.append(KeyMapper::START(), BSON("$lte" << (int) region_ref->end()));
+      region_query_builder.append(KeyMapper::END(), BSON("$gte" << (int) region_ref->start()));
 
       mongo::BSONObj region_query = region_query_builder.obj();
 
