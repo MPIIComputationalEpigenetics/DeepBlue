@@ -532,8 +532,6 @@ namespace epidb {
 
         regions_query = regions_query_builder.obj();
 
-        std::cerr << regions_query.toString() << std::endl;
-
         return true;
       }
 
