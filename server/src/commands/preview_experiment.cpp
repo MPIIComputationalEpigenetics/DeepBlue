@@ -33,6 +33,8 @@
 #include "../extras/utils.hpp"
 #include "../extras/serialize.hpp"
 
+#include "../processing/processing.hpp"
+
 #include "../errors.hpp"
 
 namespace epidb {
@@ -90,6 +92,7 @@ namespace epidb {
           return false;
         }
 
+
         if (!dba::exists::experiment(experiment_norm_name)) {
           result.add_error(Error::m(ERR_INVALID_EXPERIMENT, experiment_name));
           return false;
@@ -141,23 +144,43 @@ namespace epidb {
         std::vector<std::string> chroms_vector;
         std::copy(chroms.begin(), chroms.end(), std::back_inserter(chroms_vector));
 
-        size_t total = 0;
+        ChromosomeRegionsList chromosomeRegionsList;
         size_t chrom_pos = 0;
-        Regions regions;
-        while (total < 10 && chrom_pos < chroms_vector.size()) {
+        do {
+          Regions regions;
           std::cerr << regions_query.toString() << std::endl;
           if (!dba::retrieve::get_regions_preview(norm_genome, chroms_vector[chrom_pos], regions_query, regions, msg)) {
             result.add_error(msg);
             return false;
           }
-          total += regions.size();
-          chrom_pos++;
+          if (!regions.empty()) {
+            Regions preview_regions;
+            size_t count = std::min(regions.size(), static_cast<size_t>(5));
+            preview_regions.insert(preview_regions.end(), std::make_move_iterator(regions.begin()), std::make_move_iterator(regions.begin() + count));
+            chromosomeRegionsList.emplace_back(chroms_vector[chrom_pos], std::move(preview_regions));
+          }
+        } while(chromosomeRegionsList.empty() && ++chrom_pos < chroms_vector.size());
+
+        processing::StatusPtr status = processing::build_dummy_status();
+
+        mongo::BSONObj experiment_bson;
+        if (!dba::experiments::by_name(experiment_norm_name, experiment_bson, msg)) {
+          result.add_error(msg);
+          return false;
         }
 
-        std::cerr << regions[0]->start() << "\t" << regions[0]->end() << std::endl;
+        std::string experiment_format = experiment_bson["format"].str();
 
-        result.add_string("shit");
+        StringBuilder sb;
+        if (!epidb::processing::format_regions(experiment_format, chromosomeRegionsList, status, sb, msg)) {
+          return false;
+        }
 
+        std::replace( experiment_format.begin(), experiment_format.end(), ',', '\t');
+
+        std::string output = experiment_format + "\n" + sb.to_string();
+
+        result.add_string(output);
         return true;
       }
     } previewExperimentCommand;
