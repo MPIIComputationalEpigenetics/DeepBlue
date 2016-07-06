@@ -295,7 +295,7 @@ namespace epidb {
                                   processing::StatusPtr status, size_t &count, std::string &msg)
     {
       DatasetId dataset_id;
-      if (!dba::find_annotation_pattern(genome, pattern, overlap, dataset_id, msg)) {
+      if (!dba::query::find_annotation_pattern(genome, pattern, overlap, dataset_id, msg)) {
         count = 0;
         return false;
       }

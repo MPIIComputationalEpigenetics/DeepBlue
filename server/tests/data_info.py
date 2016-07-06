@@ -243,6 +243,26 @@ EXPERIMENTS = {
     ])
   },
 
+  "hg19_big_2_chr19": {
+    "genome": "hg19",
+    "epigenetic_mark": "H3K4me3",
+    "sample_id": None,
+    "technique": "tech2",
+    "project": "ENCODE",
+    "description": "desc",
+    "format": ",".join([
+      "CHROMOSOME",
+      "START",
+      "END",
+      "NAME",
+      "SCORE",
+      "STRAND",
+      "P_VALUE",
+      "Q_VALUE",
+      "PEAK"
+    ])
+  },
+
   "hg19_small": {
     "genome": "hg19",
     "epigenetic_mark": "H3K4me3",

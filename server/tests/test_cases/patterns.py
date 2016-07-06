@@ -1,10 +1,11 @@
+import data_info
 import helpers
 
 from deepblue_client import DeepBlueClient
 
 class TestPattern(helpers.TestCase):
 
-  def test_pattern_chromosome(self):
+  def _test_pattern_chromosome(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
@@ -99,6 +100,7 @@ class TestPattern(helpers.TestCase):
     res = epidb.upload_chromosome("hg19_only_chr19", "chr19", sequence, self.admin_key)
     self.assertSuccess(res)
 
+    res = epidb.find_pattern("C", "hg19_only_chr19", False, self.admin_key)
     res = epidb.find_pattern("GAGA", "hg19_only_chr19", False, self.admin_key)
     self.assertSuccess(res)
     res = epidb.find_pattern("TATA", "hg19_only_chr19", False, self.admin_key)
@@ -106,6 +108,7 @@ class TestPattern(helpers.TestCase):
     res = epidb.find_pattern("(TATA|GAGA)", "hg19_only_chr19", False, self.admin_key)
     self.assertSuccess(res)
 
+    """
     d = "chr19\t1\t59128983"
     res, qid = epidb.select_annotations("Chromosomes size for hg19_only_chr19", "hg19_only_chr19", None, None, None, self.admin_key)
     fmt = "CHROMOSOME,START,END,@NAME,@LENGTH,@COUNT.NON-OVERLAP(TATA),@COUNT.NON-OVERLAP(GAGA),@COUNT.NON-OVERLAP((TATA|GAGA))"
@@ -115,8 +118,32 @@ class TestPattern(helpers.TestCase):
 
     expected = "chr19\t0\t59128983\tChromosomes size for hg19_only_chr19\t59128983\t159464\t336889\t496353"
     self.assertEquals(expected, regions)
+    """
 
-  def test_pattern_duplicate(self):
+    sample_id = self.sample_ids[0]
+    regions_data = helpers.load_bed("hg19_big_2_chr19")
+    #print sample_id
+    #print regions_data
+    _format = data_info.EXPERIMENTS["hg19_big_2_chr19"]["format"]
+    res = epidb.add_experiment("hg19_big_2_chr19", "hg19_only_chr19", "Methylation", sample_id, "tech1",
+              "ENCODE", "desc1", regions_data, _format, None, self.admin_key)
+    self.assertSuccess(res)
+
+    res, qid = epidb.select_experiments("hg19_big_2_chr19", None, None, None, self.admin_key)
+    fmt = "CHROMOSOME,START,END,@NAME,@LENGTH,@COUNT.NON-OVERLAP(TATA),@COUNT.NON-OVERLAP(GAGA),@COUNT.NON-OVERLAP((TATA|GAGA)),@COUNT.NON-OVERLAP(C)"
+    res, req = epidb.get_regions(qid, fmt, self.admin_key)
+    regions = self.get_regions_request(req)
+    print regions
+    self.assertSuccess(res, req)
+
+  def _test_higher_pattern_experiments(self):
+    epidb = DeepBlueClient(address="localhost", port=31415)
+    self.init_base(epidb)
+
+    sample_id = self.sample_ids[0]
+    regions_data = helpers.load_bed("hg19_chr1_1")
+
+  def _test_pattern_duplicate(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 

@@ -60,6 +60,8 @@ namespace epidb {
                                            std::string &query_region_set_id,
                                            mongo::BSONObj &query_region_set_metadata,
                                            std::string &msg);
+
+      const std::string build_pattern_annotation_name(const std::string &pattern, const std::string &genome, const bool overlap);
     }
   }
 }
