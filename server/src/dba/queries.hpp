@@ -118,6 +118,9 @@ namespace epidb {
       bool get_columns_from_dataset(const DatasetId &dataset_id, std::vector<mongo::BSONObj> &columns, std::string &msg);
 
       bool is_canceled(processing::StatusPtr status, std::string msg);
+
+      bool find_annotation_pattern(const std::string &genome, const std::string &pattern, const bool overlap,
+                                   DatasetId &dataset_id, std::string &msg);
     }
   }
 }

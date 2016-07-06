@@ -38,6 +38,7 @@
 
 #include "../extras/utils.hpp"
 
+#include "annotations.hpp"
 #include "collections.hpp"
 #include "dba.hpp"
 #include "genes.hpp"
@@ -59,7 +60,7 @@ namespace epidb {
     namespace query {
 
       // TODO: Merge wtth users cache and use templates
-      class ExperimentNameDatasetIdCache {
+      class NameDatasetIdCache {
       private:
 
         std::map<std::string, DatasetId> name_dataset_id;
@@ -90,12 +91,13 @@ namespace epidb {
         }
       };
 
-      ExperimentNameDatasetIdCache experiment_name_dataset_id_cache;
-
+      NameDatasetIdCache experiment_name_dataset_id_cache;
+      NameDatasetIdCache annotation_pattern_cache;
 
       void invalidate_cache()
       {
         experiment_name_dataset_id_cache.invalidate();
+        annotation_pattern_cache.invalidate();
       }
 
 
@@ -729,8 +731,8 @@ namespace epidb {
         }
 
         if (!genes::get_genes_from_database(chromosomes, start, end, genes, gene_model, regions, msg)) {
-            return false;
-          }
+          return false;
+        }
 
         return true;
       }
@@ -1340,6 +1342,52 @@ namespace epidb {
           return true;
         }
         return false;
+      }
+
+      bool find_annotation_pattern(const std::string &genome, const std::string &pattern, const bool overlap,
+                                   DatasetId &dataset_id, std::string &msg)
+      {
+        std::string __cache__key__ = genome + pattern + (overlap ? "_TRUE" : "_false");
+        if (annotation_pattern_cache.exists_dataset_id(__cache__key__)) {
+          dataset_id = annotation_pattern_cache.get_dataset_id(__cache__key__);
+          return true;
+        }
+
+        mongo::BSONObjBuilder annotations_query_builder;
+
+        std::string name = annotations::build_pattern_annotation_name(pattern, genome, overlap);
+        std::string norm_name = utils::normalize_annotation_name(name);
+        std::string norm_genome = utils::normalize_name(genome);
+
+
+        annotations_query_builder.append("norm_name", norm_name);
+        annotations_query_builder.append("norm_genome", norm_genome);
+        mongo::BSONObjBuilder metadata_builder;
+        if (overlap) {
+          metadata_builder.append("overlap-style", "overlap");
+        } else {
+          metadata_builder.append("overlap-style", "non-overlap");
+        }
+        metadata_builder.append("pattern", pattern);
+        annotations_query_builder.append("extra_metadata", metadata_builder.obj());
+        annotations_query_builder.append("upload_info.done", true);
+
+        Connection c;
+
+        mongo::BSONObj annotation_query = annotations_query_builder.obj();
+        auto cursor = c->query(helpers::collection_name(Collections::ANNOTATIONS()), annotation_query);
+
+        if (cursor->more()) {
+          mongo::BSONObj p = cursor->next();
+          dataset_id = p.getField(KeyMapper::DATASET()).Int();
+          annotation_pattern_cache.set_dataset_id(__cache__key__, dataset_id);
+          c.done();
+          return true;
+        } else {
+          msg = Error::m(ERR_INVALID_PRA_PROCESSED_ANNOTATION_NAME, overlap ? "overlapped pattern" : "non-overlapped pattern", pattern, genome);
+          c.done();
+          return false;
+        }
       }
     }
   }
