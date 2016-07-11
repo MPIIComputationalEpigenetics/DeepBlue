@@ -53,7 +53,7 @@ namespace epidb {
         Parameter p[] = {
           Parameter("name", serialize::STRING, "gene model name"),
           Parameter("description", serialize::STRING, "description of the annotation"),
-          Parameter("data", serialize::DATASTRING, "the BED formatted data"),
+          Parameter("data", serialize::DATASTRING, "the GTF formatted data"),
           Parameter("format", serialize::STRING, "Currently, it is only supported GTF."),
           parameters::AdditionalExtraMetadata,
           parameters::UserKey
