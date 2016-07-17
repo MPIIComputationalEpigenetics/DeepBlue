@@ -68,7 +68,7 @@ class TestColumnTypes(helpers.TestCase):
     self.assertEqual(column_types[6][1], "column type name: 'SOURCE' type: 'string'")
     self.assertEqual(column_types[7][1], "column type name: 'FRAME' type: 'string'")
     self.assertEqual(column_types[8][1], "column type name: 'GTF_ATTRIBUTES' type: 'string'")
-    self.assertEqual(column_types[9][1], "column type name: 'name' type: 'string'")
+    self.assertEqual(column_types[9][1], "column type name: 'TRACKING_ID' type: 'string'")
 
 
   def test_no_ignore_if(self):

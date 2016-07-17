@@ -69,6 +69,9 @@ class TestGenes(helpers.TestCase):
     (s, genes) = epidb.list_genes(None, "chr10", None, None, gene_models[0][1], self.admin_key)
     self.assertEquals(2260, len(genes))
 
+    data = gzip.open("data/fpkm/51_Hf03_BlTN_Ct_mRNA_M_1.LXPv1.20150708_genes.fpkm_tracking").read()
+    (s, gene_expression) = epidb.add_gene_expression("s1", 0, data, "cufflinks", None, self.admin_key)
+    print gene_expression
 
   def test_gene_re(self):
     epidb = DeepBlueClient(address="localhost", port=31415)

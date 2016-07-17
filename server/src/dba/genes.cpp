@@ -96,6 +96,7 @@ namespace epidb {
         gene_model_metadata_builder.append(KeyMapper::DATASET(), dataset_id);
         gene_model_metadata_builder.append("name", name);
         gene_model_metadata_builder.append("norm_name", norm_name);
+        gene_model_metadata_builder.append("format", format);
         gene_model_metadata_builder.append("description", description);
         gene_model_metadata_builder.append("norm_description", norm_description);
         gene_model_metadata_builder.append("extra_metadata", extra_metadata_obj);
@@ -219,6 +220,132 @@ namespace epidb {
         if (!update_upload_info(Collections::GENE_MODELS(), gene_model_id, total_size, total_genes, msg)) {
           std::string new_msg;
           if (!remove::gene_model(gene_model_id, user_key, new_msg)) {
+            msg = msg + " " + new_msg;
+          }
+          return false;
+        }
+
+        c.done();
+        return true;
+      }
+
+
+      bool build_expression_metadata(const std::string &sample_id, const int replica,
+                                     const std::string &format,
+                                     const mongo::BSONObj& extra_metadata_obj,
+                                     const std::string &user_key, const std::string &ip,
+                                     int &dataset_id,
+                                     std::string &gene_model_id,
+                                     mongo::BSONObj &gene_model_metadata,
+                                     std::string &msg)
+      {
+        if (!helpers::get_increment_counter("datasets", dataset_id, msg) ||
+            !helpers::notify_change_occurred("datasets", msg))  {
+          return false;
+        }
+
+        int _id;
+        if (!helpers::get_increment_counter(Collections::GENE_EXPRESSIONS(), _id, msg) ||
+            !helpers::notify_change_occurred(Collections::GENE_EXPRESSIONS(), msg))  {
+          return false;
+        }
+        gene_model_id = "gx" + utils::integer_to_string(_id);
+
+        mongo::BSONObjBuilder gene_model_metadata_builder;
+        gene_model_metadata_builder.append("_id", gene_model_id);
+        gene_model_metadata_builder.append(KeyMapper::DATASET(), dataset_id);
+        gene_model_metadata_builder.append("sample_id", sample_id);
+        gene_model_metadata_builder.append("replica", replica);
+        gene_model_metadata_builder.append("format", format);
+        gene_model_metadata_builder.append("extra_metadata", extra_metadata_obj);
+
+        gene_model_metadata = gene_model_metadata_builder.obj();
+        return true;
+      }
+
+      mongo::BSONObj to_bson(const int dataset_id, const std::string& gene_model_id, const std::string& gene_id, const parser::FPKMRow& row)
+      {
+        mongo::BSONObjBuilder bob;
+
+        bob.append("_id", gene_id);
+        bob.append(KeyMapper::DATASET(), dataset_id);
+        bob.append(KeyMapper::TRACKING_ID(), row.tracking_id());
+        bob.append(KeyMapper::GENE_ID(), row.gene_id());
+        bob.append(KeyMapper::GENE_SHORT_NAME(), row.gene_short_name());
+        bob.append(KeyMapper::FPKM(), row.fpkm());
+        bob.append(KeyMapper::FPKM_LO(), row.fpkm_lo());
+        bob.append(KeyMapper::FPKM_HI(), row.fpkm_hi());
+        bob.append(KeyMapper::FPKM_STATUS(), row.fpkm_status());
+
+        return bob.obj();
+      }
+
+      bool insert_expression(const std::string& sample_id, const int replica, datatypes::Metadata extra_metadata,
+                             const parser::FPKMPtr &fpkm,  const std::string &user_key, const std::string &ip,
+                             std::string &gene_expression_id, std::string &msg)
+      {
+        mongo::BSONObj gene_expression_metadata;
+        mongo::BSONObj extra_metadata_obj = datatypes::metadata_to_bson(extra_metadata);
+        int dataset_id;
+
+        if (!build_expression_metadata(sample_id, replica, "FPKM", extra_metadata_obj,
+                                       user_key, ip, dataset_id, gene_expression_id, gene_expression_metadata, msg)) {
+          return false;
+        }
+
+        mongo::BSONObj upload_info;
+        if (!build_upload_info(user_key, ip, "FPKM", upload_info, msg)) {
+          return false;
+        }
+        mongo::BSONObjBuilder gene_expression_builder;
+        gene_expression_builder.appendElements(gene_expression_metadata);
+        gene_expression_builder.append("upload_info", upload_info);
+
+        mongo::BSONObj e = gene_expression_builder.obj();
+        Connection c;
+        c->insert(helpers::collection_name(Collections::GENE_EXPRESSIONS()), e);
+        if (!c->getLastError().empty()) {
+          msg = c->getLastError();
+          c.done();
+          return false;
+        }
+
+        if (!search::insert_full_text(Collections::GENE_EXPRESSIONS(), gene_expression_id, gene_expression_metadata, msg)) {
+          c.done();
+          std::string new_msg;
+          if (!remove::gene_expression(gene_expression_id, user_key, new_msg)) {
+            msg = msg + " " + new_msg;
+          }
+          return false;
+        }
+
+        size_t total_size = 0;
+        size_t total_genes = 0;
+
+        for (const auto& row :  fpkm->rows()) {
+
+          int _id;
+          if (!helpers::get_increment_counter("gene_single_expressions", _id, msg) ||
+              !helpers::notify_change_occurred(Collections::GENE_SINGLE_EXPRESSIONS(), msg))  {
+            return false;
+          }
+
+          std::string gene_id = "gx" + utils::integer_to_string(_id);
+          mongo::BSONObj row_obj = to_bson(dataset_id, gene_expression_id, gene_id, row);
+
+          c->insert(helpers::collection_name(Collections::GENE_SINGLE_EXPRESSIONS()), row_obj);
+          if (!c->getLastError().empty()) {
+            msg = c->getLastError();
+            c.done();
+            return false;
+          }
+
+          total_genes++;
+        }
+
+        if (!update_upload_info(Collections::GENE_EXPRESSIONS(), gene_expression_id, total_size, total_genes, msg)) {
+          std::string new_msg;
+          if (!remove::gene_model(gene_expression_id, user_key, new_msg)) {
             msg = msg + " " + new_msg;
           }
           return false;

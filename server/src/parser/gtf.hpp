@@ -9,14 +9,13 @@
 #ifndef GTF_HPP
 #define GTF_HPP
 
-#include <memory>
 #include <string>
+#include <memory>
 #include <unordered_map>
 #include <vector>
 
 #include <boost/utility.hpp>
 
-#include "../extras/utils.hpp"
 #include "../types.hpp"
 
 namespace epidb {
@@ -71,4 +70,4 @@ namespace epidb {
   }
 }
 
-#endif /* defined(WIG_HPP) */
+#endif /* defined(GTF_HPP) */

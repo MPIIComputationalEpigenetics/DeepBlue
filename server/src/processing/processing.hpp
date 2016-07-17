@@ -26,6 +26,7 @@
 #include <string>
 #include <vector>
 
+#include "../datatypes/regions.hpp"
 #include "../extras/utils.hpp"
 
 namespace epidb {

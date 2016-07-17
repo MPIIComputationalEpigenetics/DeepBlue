@@ -170,6 +170,46 @@ namespace epidb {
         return true;
       }
 
+      bool gene_expression(const std::string &id, const std::string &user_key, std::string &msg)
+      {
+        mongo::BSONObj gene_expression;
+        if (!data::gene_expression(id, gene_expression, msg)) {
+          msg = "Gene expression " + id + " not found";
+          return false;
+        }
+
+        if (!has_permission(gene_expression, user_key, true, msg)) {
+          return false;
+        }
+
+        int dataset_id = gene_expression[KeyMapper::DATASET()].Int();
+
+        if (!helpers::remove_all(Collections::GENE_SINGLE_EXPRESSIONS(), BSON(KeyMapper::DATASET() << dataset_id), msg)) {
+          return false;
+        }
+
+        // delete from full text search
+        if (!search::remove(id, msg)) {
+          return false;
+        }
+
+        // Delete from collection
+        if (!helpers::remove_one(helpers::collection_name(Collections::GENE_EXPRESSIONS()), id, msg)) {
+            return false;
+        }
+
+        if (!helpers::notify_change_occurred(Collections::GENE_EXPRESSIONS(), msg)) {
+          return false;
+        }
+
+        if (!helpers::notify_change_occurred(Collections::GENE_SINGLE_EXPRESSIONS(), msg)) {
+          return false;
+        }
+
+        return true;
+      }
+
+
       bool experiment(const std::string &id, const std::string &user_key, std::string &msg)
       {
         std::vector<utils::IdName> user_projects_id_names;

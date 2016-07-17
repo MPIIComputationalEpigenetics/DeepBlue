@@ -27,6 +27,7 @@
 
 #include "../datatypes/metadata.hpp"
 
+#include "../parser/fpkm.hpp"
 #include "../parser/gtf.hpp"
 
 namespace epidb {
@@ -49,6 +50,10 @@ namespace epidb {
                   const parser::GTFPtr &gtf,
                   const std::string &user_key, const std::string &ip,
                   std::string &gene_model_id, std::string &msg);
+
+      bool insert_expression(const std::string& sample_id, const int replica, datatypes::Metadata extra_metadata,
+        const parser::FPKMPtr &fpkm,  const std::string &user_key, const std::string &ip,
+                  std::string &gene_expression_id, std::string &msg);
 
       bool get_gene_attribute(const std::string& chromosome, const Position start, const Position end,
                               const std::string& attribute_name, const std::string& gene_model,

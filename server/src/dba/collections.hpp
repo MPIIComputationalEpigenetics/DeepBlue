@@ -47,6 +47,8 @@ namespace epidb {
       static const std::string &REGIONS();
       static const std::string &ANNOTATIONS();
       static const std::string &GENE_MODELS();
+      static const std::string &GENE_EXPRESSIONS();
+      static const std::string &GENE_SINGLE_EXPRESSIONS();
       static const std::string &GENES();
       static const std::string &QUERIES();
       static const std::string &SAMPLES();

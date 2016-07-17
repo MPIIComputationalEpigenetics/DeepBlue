@@ -195,6 +195,48 @@ namespace epidb {
         return false;
       }
 
+      if (!dba::columns::create_column_type_simple("TRACKING_ID", utils::normalize_name("TRACKING_ID"),
+          "ID used for tracking data.",
+          utils::normalize_name("ID used for tracking data."),
+          "string", user_key, column_id, msg)) {
+        return false;
+      }
+
+      if (!dba::columns::create_column_type_simple("GENE_SHORT_NAME", utils::normalize_name("GENE_SHORT_NAME"),
+          "Gene short name.",
+          utils::normalize_name("Gene short name."),
+          "string", user_key, column_id, msg)) {
+        return false;
+      }
+
+      if (!dba::columns::create_column_type_simple("FPKM", utils::normalize_name("FPKM"),
+          "Fragments Per Kilobase of transcript per Million mapped reads. In RNA-Seq, the relative expression of a transcript is proportional to the number of cDNA fragments that originate from it.",
+          utils::normalize_name("Fragments Per Kilobase of transcript per Million mapped reads. In RNA-Seq, the relative expression of a transcript is proportional to the number of cDNA fragments that originate from it."),
+          "double", user_key, column_id, msg)) {
+        return false;
+      }
+
+      if (!dba::columns::create_column_type_simple("FPKM_CONF_LO", utils::normalize_name("FPKM_CONF_LO"),
+          "FPKM confidence interval - low value.",
+          utils::normalize_name("FPKM confidence interval - low value."),
+          "double", user_key, column_id, msg)) {
+        return false;
+      }
+
+      if (!dba::columns::create_column_type_simple("FPKM_CONF_HI", utils::normalize_name("FPKM_CONF_HI"),
+          "FPKM confidence interval - high value.",
+          utils::normalize_name("FPKM confidence interval - high value."),
+          "double", user_key, column_id, msg)) {
+        return false;
+      }
+
+      if (!dba::columns::create_column_type_simple("FPKM_STATUS", utils::normalize_name("FPKM_STATUS"),
+          "FPKM status.",
+          utils::normalize_name("FPKM status"),
+          "string", user_key, column_id, msg)) {
+        return false;
+      }
+
       // Clear caches
       cv::biosources_cache.invalidate();
       query::invalidate_cache();

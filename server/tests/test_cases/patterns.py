@@ -88,7 +88,8 @@ class TestPattern(helpers.TestCase):
     c = self.count_request(req)
     self.assertEquals(c, 638969)
 
-  def test_upload_sequence(self):
+  ## Too slow. Must be fixed.
+  def __test_upload_sequence(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 

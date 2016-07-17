@@ -239,6 +239,49 @@ namespace epidb {
       return ATTRIBUTES;
     }
 
+    const std::string& KeyMapper::TRACKING_ID()
+    {
+      static std::string TRACKING_ID = epidb::dba::KeyMapper::build_default("TRACKING_ID");
+      return TRACKING_ID;
+    }
+
+
+    const std::string& KeyMapper::GENE_SHORT_NAME()
+    {
+      static std::string GENE_SHORT_NAME = epidb::dba::KeyMapper::build_default("GENE_SHORT_NAME");
+      return GENE_SHORT_NAME;
+    }
+
+    const std::string& KeyMapper::GENE_ID()
+    {
+      static std::string GENE_ID = epidb::dba::KeyMapper::build_default("GENE_ID");
+      return GENE_ID;
+    }
+
+    const std::string& KeyMapper::FPKM()
+    {
+      static std::string FPKM = epidb::dba::KeyMapper::build_default("FPKM");
+      return FPKM;
+    }
+
+    const std::string& KeyMapper::FPKM_LO()
+    {
+      static std::string FPKM_LO = epidb::dba::KeyMapper::build_default("FPKM_LO");
+      return FPKM_LO;
+    }
+
+    const std::string& KeyMapper::FPKM_HI()
+    {
+      static std::string FPKM_HI = epidb::dba::KeyMapper::build_default("FPKM_HI");
+      return FPKM_HI;
+    }
+
+    const std::string& KeyMapper::FPKM_STATUS()
+    {
+      static std::string FPKM_STATUS = epidb::dba::KeyMapper::build_default("FPKM_STATUS");
+      return FPKM_STATUS;
+    }
+
     std::string KeyMapper::build_default(const std::string &s)
     {
       std::string r;
