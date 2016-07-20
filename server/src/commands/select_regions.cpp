@@ -58,7 +58,7 @@ namespace epidb {
           Parameter("sample_id", serialize::STRING, "id(s) of selected sample(s)", true),
           Parameter("technique", serialize::STRING, "name(s) of selected technique(es)", true),
           Parameter("project", serialize::STRING, "name(s) of selected projects", true),
-          Parameter("chromosome", serialize::STRING, "chromosome name(s)", true),
+          parameters::ChromosomeMultiple,
           Parameter("start", serialize::INTEGER, "minimum start region"),
           Parameter("end", serialize::INTEGER, "maximum end region"),
           parameters::UserKey

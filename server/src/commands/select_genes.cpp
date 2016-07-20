@@ -110,13 +110,8 @@ namespace epidb {
           args_builder.append("end", (int) end);
         }
 
-        if (chromosomes.size() != 0) {
-          std::set<std::string> chroms;
-          std::vector<serialize::ParameterPtr>::iterator it;
-          for (it = chromosomes.begin(); it != chromosomes.end(); ++it) {
-            chroms.insert((**it).as_string());
-          }
-          args_builder.append("chromosomes", chroms);
+        if (!chromosomes.empty()) {
+          args_builder.append("chromosomes", utils::build_array(chromosomes));
         }
 
         args_builder.append("genes", utils::build_array(genes));

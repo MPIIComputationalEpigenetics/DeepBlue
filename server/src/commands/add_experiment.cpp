@@ -151,7 +151,7 @@ namespace epidb {
           ss << "Invalid epigenetic mark: ";
           ss << epigenetic_mark;
           ss << ".";
-          if (names.size() > 0) {
+          if (!names.empty()) {
             ss << " It is suggested the following names: ";
             ss << utils::vector_to_string(names);
           }
@@ -169,7 +169,7 @@ namespace epidb {
           ss << "Invalid technique name: ";
           ss << technique;
           ss << ".";
-          if (names.size() > 0) {
+          if (!names.empty()) {
             ss << " The following names are suggested: ";
             ss << utils::vector_to_string(names);
           }
@@ -189,7 +189,7 @@ namespace epidb {
           ss << "Invalid project name. ";
           ss << project;
           ss << ".";
-          if (names.size() > 0) {
+          if (!names.empty()) {
             ss << " The following names are suggested: ";
             ss << utils::vector_to_string(names);
           }

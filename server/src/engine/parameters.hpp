@@ -71,6 +71,7 @@ namespace epidb {
     const Parameter AdditionalExtraMetadata("extra_metadata", serialize::MAP, "additional metadata");
     const Parameter BioSource("biosource", serialize::STRING, "biosource name");
     const Parameter BioSourceMultiple("biosource", serialize::STRING, "name(s) of selected biosource(s)", true);
+    const Parameter ChromosomeMultiple("chromosomes", serialize::STRING, "chromosome name(s)", true);
     const Parameter ExtraMetadata("extra_metadata", serialize::MAP, "Metadata that must be matched");
     const Parameter GeneModels("gene_models", serialize::STRING, "the gene model", true);
     const Parameter Genome("genome", serialize::STRING, "the target genome");
