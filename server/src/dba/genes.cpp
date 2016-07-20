@@ -491,7 +491,6 @@ namespace epidb {
                                    const std::vector<std::string>& genes, const std::string& norm_gene_model,
                                    ChromosomeRegionsList& chromosomeRegionsList, std::string& msg )
       {
-        Connection c;
 
         std::vector<std::string> gene_models;
         gene_models.push_back(norm_gene_model);
@@ -503,6 +502,8 @@ namespace epidb {
         }
 
         std::string collection = dba::helpers::collection_name(dba::Collections::GENES());
+
+        Connection c;
         auto data_cursor = c->query(collection, query);
 
         std::string actual_chromosome("");
@@ -543,9 +544,37 @@ namespace epidb {
         return true;
       }
 
-      bool get_gene_expressions_from_database(const std::vector<std::string> &sample_ids, const  std::vector<int>& replicates,
-                                              const std::vector<std::string>& chromosomes, const int start, const  int end, const std::string& gene_model,  ChromosomeRegionsList& chromosomeRegionsList, std::string& msg)
+      bool get_gene_expressions_from_database(const std::vector<std::string> &sample_ids, const  std::vector<long>& replicas,
+                                              const std::vector<std::string>& chromosomes, const int start, const int end,
+                                              const std::string& norm_gene_model,  ChromosomeRegionsList& chromosomeRegionsList, std::string& msg)
       {
+        Connection c;
+        mongo::BSONObj gene_model_obj = c->findOne(dba::helpers::collection_name(dba::Collections::GENE_MODELS()),
+                                        BSON("norm_name" << norm_gene_model));
+        c.done();
+
+        if (gene_model_obj.isEmpty()) {
+          msg = "gene model " + norm_gene_model + " does not exists";
+          return false;
+        }
+
+        std::cerr << gene_model_obj.toString() << std::endl;
+
+        for (auto e : sample_ids) {
+          std::cerr << e << std::endl;
+        }
+
+        mongo::BSONArray ges_datasets = helpers::build_dataset_ids_arrays(Collections::GENE_EXPRESSIONS(), BSON(
+                                            "sample_id" << BSON("$in" << utils::build_array(sample_ids))  <<
+                                            "replica" << BSON("$in" << utils::build_array_long(replicas))
+                                          ));
+
+        std::cerr << ges_datasets.toString() << std::endl;
+
+        auto query = BSON(KeyMapper::DATASET() << BSON("$in" << ges_datasets));
+
+        std::cerr << query.toString() << std::endl;
+
         return true;
       }
     }

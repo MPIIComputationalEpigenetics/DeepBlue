@@ -50,7 +50,7 @@ namespace epidb {
       {
         Parameter p[] = {
           Parameter("sample_ids", serialize::STRING, "genes(s) - ENSB ID or ENSB name. Use the regular expression '.*' for selecting all." , true),
-          Parameter("replicates", serialize::INTEGER, "chromosome name(s)", true),
+          Parameter("replicas", serialize::INTEGER, "replica(s)", true),
           Parameter("gene_model", serialize::STRING, "gene model name"),
           parameters::ChromosomeMultiple,
           Parameter("start", serialize::INTEGER, "minimum start region"),
@@ -77,10 +77,10 @@ namespace epidb {
                        const serialize::Parameters &parameters, serialize::Parameters &result) const
       {
         std::vector<serialize::ParameterPtr> sample_ids;
-        std::vector<serialize::ParameterPtr> replicates;
+        std::vector<serialize::ParameterPtr> replicas;
 
         parameters[0]->children(sample_ids);
-        parameters[1]->children(replicates);
+        parameters[1]->children(replicas);
 
         const std::string gene_model = parameters[2]->as_string();
 
@@ -121,7 +121,7 @@ namespace epidb {
         }
 
         args_builder.append("sample_ids", utils::build_array(sample_ids));
-        args_builder.append("replicates", utils::build_array_long(replicates));
+        args_builder.append("replicas", utils::build_array_long(replicas));
         args_builder.append("gene_model", utils::normalize_name(gene_model));
 
         std::string query_id;

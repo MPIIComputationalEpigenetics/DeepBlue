@@ -143,9 +143,10 @@ namespace epidb {
     std::string sanitize(const std::string &data);
 
     mongo::BSONArray build_array(const std::vector<std::string> &params);
-    mongo::BSONArray build_array(const std::vector<int> &params);
+    mongo::BSONArray build_array(const std::vector<long> &params);
     mongo::BSONArray build_array(const std::vector<serialize::ParameterPtr> &params);
     mongo::BSONArray build_array_long(const std::vector<serialize::ParameterPtr> &params);
+    mongo::BSONArray build_array_long(const std::vector<long> &params);
     mongo::BSONArray build_regex_array(const std::vector<std::string> &params);
     mongo::BSONArray build_normalized_array(const std::vector<std::string> &params);
     mongo::BSONArray build_normalized_array(const std::vector<serialize::ParameterPtr> &params);

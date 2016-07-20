@@ -528,11 +528,11 @@ namespace epidb {
     }
 
 // TODO: Use template
-    mongo::BSONArray build_array(const std::vector<int> &params)
+    mongo::BSONArray build_array(const std::vector<long> &params)
     {
       mongo::BSONArrayBuilder ab;
       for (const auto& param : params) {
-        ab.append(param);
+        ab.append((long long)param);
       }
       return ab.arr();
     }
@@ -571,6 +571,15 @@ namespace epidb {
       mongo::BSONArrayBuilder ab;
       for (const auto& param : params) {
         ab.append(param->as_long());
+      }
+      return ab.arr();
+    }
+
+    mongo::BSONArray build_array_long(const std::vector<long> &params)
+    {
+      mongo::BSONArrayBuilder ab;
+      for (const auto& param : params) {
+        ab.append((long long)param);
       }
       return ab.arr();
     }
