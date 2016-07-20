@@ -545,23 +545,17 @@ namespace epidb {
       }
 
       bool get_gene_expressions_from_database(const std::vector<std::string> &sample_ids, const  std::vector<long>& replicas,
-                                              const std::vector<std::string> &geness,
+                                              const std::vector<std::string> &genes,
                                               const std::string& norm_gene_model,  ChromosomeRegionsList& chromosomeRegionsList, std::string& msg)
       {
         Connection c;
         mongo::BSONObj gene_model_obj = c->findOne(dba::helpers::collection_name(dba::Collections::GENE_MODELS()),
                                         BSON("norm_name" << norm_gene_model));
-        c.done();
 
         if (gene_model_obj.isEmpty()) {
           msg = "gene model " + norm_gene_model + " does not exists";
+          c.done();
           return false;
-        }
-
-        std::cerr << gene_model_obj.toString() << std::endl;
-
-        for (auto e : sample_ids) {
-          std::cerr << e << std::endl;
         }
 
         mongo::BSONArray ges_datasets = helpers::build_dataset_ids_arrays(Collections::GENE_EXPRESSIONS(), BSON(
@@ -569,14 +563,46 @@ namespace epidb {
                                           "replica" << BSON("$in" << utils::build_array_long(replicas))
                                         ));
 
-        std::cerr << ges_datasets.toString() << std::endl;
+        mongo::BSONObjBuilder bob;
+        bob.append(KeyMapper::DATASET(), BSON("$in" << ges_datasets));
+        if (!genes.empty()) {
+          bob.append(KeyMapper::TRACKING_ID(), BSON("$in" << utils::build_array(genes)));
+        }
 
-        auto datasets = BSON(KeyMapper::DATASET() << BSON("$in" << ges_datasets));
+        auto query = bob.obj();
+        std::cerr << query.toString() << std::endl;
 
-        std::cerr << datasets.toString() << std::endl;
+        std::string collection = dba::helpers::collection_name(dba::Collections::GENE_SINGLE_EXPRESSIONS());
+        auto data_cursor = c->query(collection, query);
+        while (data_cursor->more()) {
+          mongo::BSONObj gene = data_cursor->next().getOwned();
 
-        auto gene_expression = BSON(KeyMapper::DATASET() << datasets);
+          mongo::BSONObj::iterator e_it = gene.begin();
 
+          std::string gene_expression_id = e_it.next().String();
+          DatasetId dataset_id = e_it.next().numberInt();
+          std::string tracking_id = e_it.next().String();
+          std::string gene_id = e_it.next().String();
+          std::string gene_short_name = e_it.next().String();
+          Score fpkm = e_it.next().numberDouble();
+          Score fpkm_lo = e_it.next().numberDouble();
+          Score fpkm_hi = e_it.next().numberDouble();
+          std::string fpkm_status = e_it.next().String();
+
+          std::cerr << gene_expression_id << dataset_id << tracking_id << gene_id << gene_short_name << fpkm << fpkm_lo << fpkm_hi << fpkm_status << std::endl;
+        }
+
+        c.done();
+
+        return true;
+      }
+
+      bool map_gene_location(const std::string& gene_id, const std::string& gene_model,
+                             std::string& chromosome, Position& start, Position& end, std::string& msg)
+      {
+        chromosome = "chr1";
+        start = 1;
+        end = 2;
         return true;
       }
     }

@@ -73,6 +73,9 @@ namespace epidb {
       bool get_gene_expressions_from_database(const std::vector<std::string> &sample_ids, const  std::vector<long>& replicas,
                                               const std::vector<std::string> &geness,
                                               const std::string& norm_gene_model,  ChromosomeRegionsList& chromosomeRegionsList, std::string& msg);
+
+      bool map_gene_location(const std::string& gene_id, const std::string& gene_model,
+                             std::string& chromosome, Position& start, Position& end, std::string& msg);
     }
   }
 }
