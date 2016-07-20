@@ -78,6 +78,14 @@ class TestGenes(helpers.TestCase):
 
     print epidb.list_gene_expressions(self.admin_key)
 
+    data = gzip.open("data/gtf/gencode.v19.annotation.ONLY_GENES.gtf.gz").read()
+    (s, ss) = epidb.add_gene_model("gencode v19", "Test One Description", data, "GTF", {}, self.admin_key)
+    self.assertSuccess(s, ss)
+    print s, ss
+
+    (s, q) = epidb.select_gene_expressions("s1", 0, "gencode v19", None, None, None, self.admin_key)
+    print s, q
+
   def __test_gene_re(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)

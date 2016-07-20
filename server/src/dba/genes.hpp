@@ -52,8 +52,8 @@ namespace epidb {
                   std::string &gene_model_id, std::string &msg);
 
       bool insert_expression(const std::string& sample_id, const int replica, datatypes::Metadata extra_metadata,
-        const parser::FPKMPtr &fpkm,  const std::string &user_key, const std::string &ip,
-                  std::string &gene_expression_id, std::string &msg);
+                             const parser::FPKMPtr &fpkm,  const std::string &user_key, const std::string &ip,
+                             std::string &gene_expression_id, std::string &msg);
 
       bool get_gene_attribute(const std::string& chromosome, const Position start, const Position end,
                               const std::string& attribute_name, const std::string& gene_model,
@@ -69,6 +69,9 @@ namespace epidb {
       bool get_genes_from_database(const std::vector<std::string> &chromosomes, const Position start, const Position end,
                                    const std::vector<std::string>& genes, const std::string& norm_gene_model,
                                    ChromosomeRegionsList& chromosomeRegionsList, std::string& msg );
+
+      bool get_gene_expressions_from_database(const std::vector<std::string> &sample_ids, const  std::vector<int>& replicates,
+                                              const std::vector<std::string>& chromosomes, const int start, const  int end, const std::string& gene_model,  ChromosomeRegionsList& chromosomeRegionsList, std::string& msg);
 
     }
   }

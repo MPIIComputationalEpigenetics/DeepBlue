@@ -266,6 +266,10 @@ namespace epidb {
           if (!retrieve_genes_select_query(user_key, query, status, regions, msg)) {
             return false;
           }
+        } else if (type == "gene_expressions_select") {
+          if (!retrieve_gene_expression_select_query(user_key, query, status, regions, msg)) {
+            return false;
+          }
         } else if (type == "filter") {
           if (!retrieve_filter_query(user_key, query, status, regions, msg)) {
             return false;
@@ -737,6 +741,61 @@ namespace epidb {
         return true;
       }
 
+      bool retrieve_gene_expression_select_query(const std::string &user_key, const mongo::BSONObj &query,
+                                       processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg)
+      {
+        processing::RunningOp runningOp = status->start_operation(processing::RETRIEVE_GENE_EXPRESSIONS_DATA, query);
+        if (is_canceled(status, msg)) {
+          return false;
+        }
+
+        mongo::BSONObj args = query["args"].Obj();
+
+        std::vector<std::string> sample_ids;
+        if (args.hasField("sample_ids")) {
+          sample_ids = utils::build_vector(args["replicates"].Array());
+        }
+
+        std::vector<int> replicates;
+        if (args.hasField("replicates")) {
+          replicates = utils::build_vector_long(args["replicates"].Array());
+        }
+
+        // Honestly I dont like it, but since we changed these parameters and we already have a database with queries...
+        // TODO: manually change the database.
+        std::string gene_model;
+        if (args.hasField("gene_set")) {
+          gene_model = args["gene_set"].str();
+        } else {
+          gene_model = args["gene_model"].str();
+        }
+
+        std::vector<std::string> chromosomes;
+        if (args.hasField("chromosomes")) {
+          chromosomes = utils::build_vector(args["chromosomes"].Array());
+        }
+
+        int start;
+        int end;
+
+        if (args.hasField("start")) {
+          start = args["start"].Int();
+        } else {
+          start = std::numeric_limits<Position>::min();
+        }
+
+        if (args.hasField("end")) {
+          end = args["end"].Int();
+        } else {
+          end = std::numeric_limits<Position>::max();
+        }
+
+        if (!genes::get_gene_expressions_from_database(sample_ids, replicates, chromosomes, start, end, gene_model, regions, msg)) {
+          return false;
+        }
+
+        return true;
+      }
 
       bool retrieve_intersection_query(const std::string &user_key, const mongo::BSONObj &query,
                                        processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg)

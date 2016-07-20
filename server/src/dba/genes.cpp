@@ -543,6 +543,11 @@ namespace epidb {
         return true;
       }
 
+      bool get_gene_expressions_from_database(const std::vector<std::string> &sample_ids, const  std::vector<int>& replicates,
+                                              const std::vector<std::string>& chromosomes, const int start, const  int end, const std::string& gene_model,  ChromosomeRegionsList& chromosomeRegionsList, std::string& msg)
+      {
+        return true;
+      }
     }
   }
 }

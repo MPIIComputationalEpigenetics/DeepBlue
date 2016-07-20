@@ -145,6 +145,7 @@ namespace epidb {
     mongo::BSONArray build_array(const std::vector<std::string> &params);
     mongo::BSONArray build_array(const std::vector<int> &params);
     mongo::BSONArray build_array(const std::vector<serialize::ParameterPtr> &params);
+    mongo::BSONArray build_array_long(const std::vector<serialize::ParameterPtr> &params);
     mongo::BSONArray build_regex_array(const std::vector<std::string> &params);
     mongo::BSONArray build_normalized_array(const std::vector<std::string> &params);
     mongo::BSONArray build_normalized_array(const std::vector<serialize::ParameterPtr> &params);
@@ -153,6 +154,7 @@ namespace epidb {
 
     std::vector<std::string> build_vector(const std::vector<serialize::ParameterPtr> &params);
     std::vector<std::string> build_vector(const std::vector<mongo::BSONElement> &params);
+    std::vector<long> build_vector_long(const std::vector<mongo::BSONElement> &params);
     std::set<std::string> build_set(const std::vector<mongo::BSONElement> &params);
 
     bool check_parameters(const std::vector<serialize::ParameterPtr> &params, const std::function<std::string(const std::string&)> &normalizer, const std::function<bool(const std::string&)> &checker, std::string &wrong);
