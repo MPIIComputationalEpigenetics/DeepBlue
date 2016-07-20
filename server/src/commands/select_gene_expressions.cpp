@@ -51,13 +51,11 @@ namespace epidb {
         Parameter p[] = {
           Parameter("sample_ids", serialize::STRING, "genes(s) - ENSB ID or ENSB name. Use the regular expression '.*' for selecting all." , true),
           Parameter("replicas", serialize::INTEGER, "replica(s)", true),
+          Parameter("genes", serialize::STRING, "genes(s)", true),
           Parameter("gene_model", serialize::STRING, "gene model name"),
-          parameters::ChromosomeMultiple,
-          Parameter("start", serialize::INTEGER, "minimum start region"),
-          Parameter("end", serialize::INTEGER, "maximum end region"),
           parameters::UserKey
         };
-        Parameters params(&p[0], &p[0] + 7);
+        Parameters params(&p[0], &p[0] + 5);
         return params;
       }
 
@@ -78,17 +76,15 @@ namespace epidb {
       {
         std::vector<serialize::ParameterPtr> sample_ids;
         std::vector<serialize::ParameterPtr> replicas;
+        std::vector<serialize::ParameterPtr> genes;
 
         parameters[0]->children(sample_ids);
         parameters[1]->children(replicas);
+        parameters[2]->children(replicas);
 
-        const std::string gene_model = parameters[2]->as_string();
+        const std::string gene_model = parameters[3]->as_string();
 
-        std::vector<serialize::ParameterPtr> chromosomes;
-        parameters[3]->children(chromosomes);
-        const int start = parameters[3]->isNull() ? -1 : parameters[4]->as_long();
-        const int end = parameters[4]->isNull() ? -1 : parameters[5]->as_long();
-        const std::string user_key = parameters[6]->as_string();
+        const std::string user_key = parameters[4]->as_string();
 
         std::string msg;
         datatypes::User user;
@@ -109,19 +105,12 @@ namespace epidb {
         }
 
         mongo::BSONObjBuilder args_builder;
-        if (start > 0) {
-          args_builder.append("start", (int) start);
-        }
-        if (end > 0) {
-          args_builder.append("end", (int) end);
-        }
-
-        if (!chromosomes.empty()) {
-          args_builder.append("chromosomes", utils::build_array(chromosomes));
-        }
 
         args_builder.append("sample_ids", utils::build_array(sample_ids));
         args_builder.append("replicas", utils::build_array_long(replicas));
+        if (!genes.empty()) {
+          args_builder.append("genes", utils::build_array_long(genes));
+        }
         args_builder.append("gene_model", utils::normalize_name(gene_model));
 
         std::string query_id;

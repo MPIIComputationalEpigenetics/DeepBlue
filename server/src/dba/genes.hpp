@@ -70,9 +70,9 @@ namespace epidb {
                                    const std::vector<std::string>& genes, const std::string& norm_gene_model,
                                    ChromosomeRegionsList& chromosomeRegionsList, std::string& msg );
 
-      bool get_gene_expressions_from_database(const std::vector<std::string> &sample_ids, const  std::vector<long>& replicates,
-                                              const std::vector<std::string>& chromosomes, const int start, const  int end, const std::string& gene_model,  ChromosomeRegionsList& chromosomeRegionsList, std::string& msg);
-
+      bool get_gene_expressions_from_database(const std::vector<std::string> &sample_ids, const  std::vector<long>& replicas,
+                                              const std::vector<std::string> &geness,
+                                              const std::string& norm_gene_model,  ChromosomeRegionsList& chromosomeRegionsList, std::string& msg);
     }
   }
 }

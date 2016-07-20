@@ -545,7 +545,7 @@ namespace epidb {
       }
 
       bool get_gene_expressions_from_database(const std::vector<std::string> &sample_ids, const  std::vector<long>& replicas,
-                                              const std::vector<std::string>& chromosomes, const int start, const int end,
+                                              const std::vector<std::string> &geness,
                                               const std::string& norm_gene_model,  ChromosomeRegionsList& chromosomeRegionsList, std::string& msg)
       {
         Connection c;
@@ -565,15 +565,17 @@ namespace epidb {
         }
 
         mongo::BSONArray ges_datasets = helpers::build_dataset_ids_arrays(Collections::GENE_EXPRESSIONS(), BSON(
-                                            "sample_id" << BSON("$in" << utils::build_array(sample_ids))  <<
-                                            "replica" << BSON("$in" << utils::build_array_long(replicas))
-                                          ));
+                                          "sample_id" << BSON("$in" << utils::build_array(sample_ids))  <<
+                                          "replica" << BSON("$in" << utils::build_array_long(replicas))
+                                        ));
 
         std::cerr << ges_datasets.toString() << std::endl;
 
-        auto query = BSON(KeyMapper::DATASET() << BSON("$in" << ges_datasets));
+        auto datasets = BSON(KeyMapper::DATASET() << BSON("$in" << ges_datasets));
 
-        std::cerr << query.toString() << std::endl;
+        std::cerr << datasets.toString() << std::endl;
+
+        auto gene_expression = BSON(KeyMapper::DATASET() << datasets);
 
         return true;
       }
