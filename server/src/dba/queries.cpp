@@ -510,19 +510,8 @@ namespace epidb {
       bool build_experiment_query(const mongo::BSONObj &args,
                                   mongo::BSONObj &regions_query, std::string &msg)
       {
-        mongo::BSONArrayBuilder datasets_array_builder;
-
         const mongo::BSONObj args_query = build_query(args);
-        Connection c;
-        auto cursor = c->query(helpers::collection_name(Collections::EXPERIMENTS()), args_query);
-        while (cursor->more()) {
-          mongo::BSONObj p = cursor->next();
-          mongo::BSONElement dataset_id = p.getField(KeyMapper::DATASET());
-          datasets_array_builder.append(dataset_id.Int());
-        }
-        c.done();
-
-        mongo::BSONArray datasets_array = datasets_array_builder.arr();
+        mongo::BSONArray datasets_array = helpers::build_dataset_ids_arrays(Collections::EXPERIMENTS(), args_query);
 
         mongo::BSONObjBuilder regions_query_builder;
         regions_query_builder.append(KeyMapper::DATASET(), BSON("$in" << datasets_array));
@@ -557,19 +546,10 @@ namespace epidb {
         }
         annotations_query_builder.append("upload_info.done", true);
 
-        Connection c;
         mongo::BSONObj annotation_query = annotations_query_builder.obj();
-        auto cursor = c->query(helpers::collection_name(Collections::ANNOTATIONS()), annotation_query);
-        while (cursor->more()) {
-          mongo::BSONObj p = cursor->next();
-          mongo::BSONElement dataset_id = p.getField(KeyMapper::DATASET());
-          datasets_array_builder.append(dataset_id.Int());
-        }
-        c.done();
+        mongo::BSONArray datasets_array = helpers::build_dataset_ids_arrays(Collections::ANNOTATIONS(), annotation_query);
 
-        mongo::BSONArray datasets_array = datasets_array_builder.arr();
         mongo::BSONObjBuilder regions_query_builder;
-
         regions_query_builder.append(KeyMapper::DATASET(), BSON("$in" << datasets_array));
 
         if (args.hasField("start") && args.hasField("end")) {
@@ -742,7 +722,7 @@ namespace epidb {
       }
 
       bool retrieve_gene_expression_select_query(const std::string &user_key, const mongo::BSONObj &query,
-                                       processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg)
+          processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg)
       {
         processing::RunningOp runningOp = status->start_operation(processing::RETRIEVE_GENE_EXPRESSIONS_DATA, query);
         if (is_canceled(status, msg)) {
@@ -753,12 +733,12 @@ namespace epidb {
 
         std::vector<std::string> sample_ids;
         if (args.hasField("sample_ids")) {
-          sample_ids = utils::build_vector(args["replicates"].Array());
+          sample_ids = utils::build_vector(args["sample_ids"].Array());
         }
 
-        std::vector<int> replicates;
-        if (args.hasField("replicates")) {
-          replicates = utils::build_vector_long(args["replicates"].Array());
+        std::vector<long> replicas;
+        if (args.hasField("replicas")) {
+          replicas = utils::build_vector_long(args["replicas"].Array());
         }
 
         // Honestly I dont like it, but since we changed these parameters and we already have a database with queries...
@@ -790,7 +770,7 @@ namespace epidb {
           end = std::numeric_limits<Position>::max();
         }
 
-        if (!genes::get_gene_expressions_from_database(sample_ids, replicates, chromosomes, start, end, gene_model, regions, msg)) {
+        if (!genes::get_gene_expressions_from_database(sample_ids, replicas, chromosomes, start, end, gene_model, regions, msg)) {
           return false;
         }
 
@@ -837,16 +817,7 @@ namespace epidb {
 
           mongo::BSONArrayBuilder datasets_array_builder;
           const mongo::BSONObj query = build_query(args);
-          Connection c;
-          auto cursor = c->query(helpers::collection_name(Collections::EXPERIMENTS()), query);
-          while (cursor->more()) {
-            mongo::BSONObj p = cursor->next();
-            mongo::BSONElement dataset_id = p.getField(KeyMapper::DATASET());
-            datasets_array_builder.append(dataset_id.Int());
-          }
-          c.done();
-
-          mongo::BSONArray datasets_array = datasets_array_builder.arr();
+          mongo::BSONArray datasets_array = helpers::build_dataset_ids_arrays(Collections::EXPERIMENTS(), query);
 
           std::set<std::string> genomes = utils::build_set(args["norm_genomes"].Array());
 
