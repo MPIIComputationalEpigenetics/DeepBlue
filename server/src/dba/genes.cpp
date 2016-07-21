@@ -448,7 +448,6 @@ namespace epidb {
           return false;
         }
 
-        std::cerr << query.toString() << std::endl;
         return helpers::get_one(Collections::GENES(), query, gene);
       }
 
@@ -459,8 +458,6 @@ namespace epidb {
         if (!dba::genes::build_genes_database_query(chromosomes, start, end, genes_names_or_id, norm_gene_models, false, query, msg)) {
           return false;
         }
-
-        std::cerr << query.toString() << std::endl;
 
         std::vector<mongo::BSONObj> genes_db_objs;
         if (!helpers::get(Collections::GENES(), query, genes_db_objs, msg)) {
@@ -569,7 +566,6 @@ namespace epidb {
         }
 
         auto query = bob.obj();
-        std::cerr << query.toString() << std::endl;
 
         std::string collection = dba::helpers::collection_name(dba::Collections::GENE_SINGLE_EXPRESSIONS());
         auto data_cursor = c->query(collection, query);
