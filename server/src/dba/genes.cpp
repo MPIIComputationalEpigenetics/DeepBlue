@@ -573,6 +573,9 @@ namespace epidb {
 
         std::string collection = dba::helpers::collection_name(dba::Collections::GENE_SINGLE_EXPRESSIONS());
         auto data_cursor = c->query(collection, query);
+
+        std::map<std::string, Regions> gene_expressions;
+
         while (data_cursor->more()) {
           mongo::BSONObj gene = data_cursor->next().getOwned();
 
@@ -588,14 +591,27 @@ namespace epidb {
           Score fpkm_hi = e_it.next().numberDouble();
           std::string fpkm_status = e_it.next().String();
 
-          std::cerr << gene_expression_id << dataset_id << tracking_id << gene_id << gene_short_name << fpkm << fpkm_lo << fpkm_hi << fpkm_status << std::endl;
-
           std::string chromosome;
           Position start;
           Position end;
 
           map_gene_location(tracking_id, norm_gene_model, chromosome, start, end, msg);
-          std::cerr << gene_id << "\t" << chromosome << "\t" << start << "\t" << end << std::endl;
+
+          RegionPtr region = build_bed_region(start, end, dataset_id);
+          region->insert(tracking_id);
+          region->insert(gene_id);
+          region->insert(gene_short_name);
+          region->insert(fpkm);
+          region->insert(fpkm_lo);
+          region->insert(fpkm_hi);
+          region->insert(fpkm_status);
+
+          gene_expressions[chromosome].emplace_back(std::move(region));
+        }
+
+        for (auto &chromosome_regions : gene_expressions) {
+          std::sort(chromosome_regions.second.begin(), chromosome_regions.second.end(), RegionPtrComparer);
+          chromosomeRegionsList.emplace_back(chromosome_regions.first, std::move(chromosome_regions.second));
         }
 
         c.done();
@@ -654,8 +670,8 @@ namespace epidb {
             return false;
           }
           gene_models_cache.emplace(std::piecewise_construct,
-                                   std::forward_as_tuple(gene_model),
-                                   std::forward_as_tuple(cache));
+                                    std::forward_as_tuple(gene_model),
+                                    std::forward_as_tuple(cache));
         }
         //
 
