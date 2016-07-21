@@ -29,6 +29,7 @@ namespace epidb {
                      const std::string& fpkm_status):
       _tracking_id(tracking_id),
       _gene_id(gene_id),
+      _gene_short_name(gene_short_name),
       _fpkm(fpkm),
       _fpkm_lo(fpkm_lo),
       _fpkm_hi(fpkm_hi),
