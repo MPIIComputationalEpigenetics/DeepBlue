@@ -256,9 +256,16 @@ namespace epidb {
         gene_model_metadata_builder.append(KeyMapper::DATASET(), dataset_id);
         gene_model_metadata_builder.append("sample_id", sample_id);
         gene_model_metadata_builder.append("replica", replica);
-        gene_model_metadata_builder.append("format", format);
         gene_model_metadata_builder.append("extra_metadata", extra_metadata_obj);
 
+        if (format == "cufflinks") {
+          const auto& cufflinks_format = parser::FileFormat::cufflinks_format();
+          gene_model_metadata_builder.append("format", cufflinks_format.format());
+          gene_model_metadata_builder.append("columns", cufflinks_format.to_bson());
+        } else {
+          msg = "Format '" + format + "' is unknow";
+          return false;
+        }
         gene_model_metadata = gene_model_metadata_builder.obj();
         return true;
       }
@@ -288,13 +295,13 @@ namespace epidb {
         mongo::BSONObj extra_metadata_obj = datatypes::metadata_to_bson(extra_metadata);
         int dataset_id;
 
-        if (!build_expression_metadata(sample_id, replica, "FPKM", extra_metadata_obj,
+        if (!build_expression_metadata(sample_id, replica, "cufflinks", extra_metadata_obj,
                                        user_key, ip, dataset_id, gene_expression_id, gene_expression_metadata, msg)) {
           return false;
         }
 
         mongo::BSONObj upload_info;
-        if (!build_upload_info(user_key, ip, "FPKM", upload_info, msg)) {
+        if (!build_upload_info(user_key, ip, "cufflinks", upload_info, msg)) {
           return false;
         }
         mongo::BSONObjBuilder gene_expression_builder;

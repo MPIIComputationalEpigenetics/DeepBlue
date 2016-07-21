@@ -1338,12 +1338,15 @@ namespace epidb {
 
         cursor = c->query(helpers::collection_name(Collections::GENE_EXPRESSIONS()), o);
         if (cursor->more()) {
+          mongo::BSONObj gene_expression = cursor->next().getOwned();
           int s_count = 0;
           int n_count = 0;
-          for (const auto& column : parser::FileFormat::cufflinks_format()) {
+          std::vector<mongo::BSONElement> tmp_columns = gene_expression["columns"].Array();
+          for (const mongo::BSONElement & e : tmp_columns) {
+            mongo::BSONObj column = e.Obj();
+            const std::string &column_type = column["column_type"].str();
+            const std::string &column_name = column["name"].str();
             mongo::BSONObjBuilder bob;
-            const std::string &column_type = datatypes::column_type_to_name(column->type());
-            const std::string &column_name = column->name();
             if (column_name != "CHROMOSOME" && column_name != "START" &&  column_name != "END") {
               int pos = -1;
               if (column_type == "string") {
@@ -1353,10 +1356,7 @@ namespace epidb {
               } else if (column_type == "double") {
                 pos = n_count++;
               }
-              std::cerr << column_name << "\t";
-              std::cerr << column->BSONObj().toString() << "\t";
-              std::cerr << pos << std::endl;
-              bob.appendElements(column->BSONObj());
+              bob.appendElements(column);
               bob.append("pos", pos);
               columns.emplace_back(bob.obj());
             }
