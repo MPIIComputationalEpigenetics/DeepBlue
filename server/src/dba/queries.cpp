@@ -1336,6 +1336,35 @@ namespace epidb {
           found = true;
         }
 
+        cursor = c->query(helpers::collection_name(Collections::GENE_EXPRESSIONS()), o);
+        if (cursor->more()) {
+          int s_count = 0;
+          int n_count = 0;
+          for (const auto& column : parser::FileFormat::cufflinks_format()) {
+            mongo::BSONObjBuilder bob;
+            const std::string &column_type = datatypes::column_type_to_name(column->type());
+            const std::string &column_name = column->name();
+            if (column_name != "CHROMOSOME" && column_name != "START" &&  column_name != "END") {
+              int pos = -1;
+              if (column_type == "string") {
+                pos = s_count++;
+              } else if (column_type == "integer") {
+                pos = n_count++;
+              } else if (column_type == "double") {
+                pos = n_count++;
+              }
+              std::cerr << column_name << "\t";
+              std::cerr << column->BSONObj().toString() << "\t";
+              std::cerr << pos << std::endl;
+              bob.appendElements(column->BSONObj());
+              bob.append("pos", pos);
+              columns.emplace_back(bob.obj());
+            }
+          }
+          found = true;
+        }
+
+
         c.done();
         if (found) {
           return true;
@@ -1359,8 +1388,8 @@ namespace epidb {
         return false;
       }
 
-      bool find_annotation_pattern(const std::string &genome, const std::string &pattern, const bool overlap,
-                                   DatasetId &dataset_id, std::string &msg)
+      bool find_annotation_pattern(const std::string & genome, const std::string & pattern, const bool overlap,
+                                   DatasetId & dataset_id, std::string & msg)
       {
         std::string __cache__key__ = genome + pattern + (overlap ? "_TRUE" : "_false");
         if (annotation_pattern_cache.exists_dataset_id(__cache__key__)) {
