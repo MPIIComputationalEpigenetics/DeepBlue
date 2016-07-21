@@ -491,7 +491,6 @@ namespace epidb {
                                    const std::vector<std::string>& genes, const std::string& norm_gene_model,
                                    ChromosomeRegionsList& chromosomeRegionsList, std::string& msg )
       {
-
         std::vector<std::string> gene_models;
         gene_models.push_back(norm_gene_model);
 
@@ -590,6 +589,13 @@ namespace epidb {
           std::string fpkm_status = e_it.next().String();
 
           std::cerr << gene_expression_id << dataset_id << tracking_id << gene_id << gene_short_name << fpkm << fpkm_lo << fpkm_hi << fpkm_status << std::endl;
+
+          std::string chromosome;
+          Position start;
+          Position end;
+
+          map_gene_location(tracking_id, norm_gene_model, chromosome, start, end, msg);
+          std::cerr << gene_id << "\t" << chromosome << "\t" << start << "\t" << end << std::endl;
         }
 
         c.done();
@@ -597,12 +603,73 @@ namespace epidb {
         return true;
       }
 
+      struct GeneLocation {
+        std::string chromosome;
+        Position start;
+        Position end;
+
+        GeneLocation(std::string c, Position s, Position e) :
+          chromosome(c),
+          start(s),
+          end(e) {}
+      };
+
+      typedef std::map<std::string, GeneLocation> GeneModelCache;
+      typedef std::map<std::string, GeneModelCache> GeneModelsCache;
+
+      bool load_gene_model(const std::string& norm_gene_model, GeneModelCache &cache, std::string& msg)
+      {
+        std::vector<std::string> chromosomes;
+        std::vector<std::string> genes;
+        ChromosomeRegionsList chromosomeRegionsList;
+
+        if (!get_genes_from_database(chromosomes, -1, -1, genes, norm_gene_model, chromosomeRegionsList, msg)) {
+          return false;
+        }
+
+        for (const auto &chromosomes_regions : chromosomeRegionsList) {
+          const std::string &chromosome = chromosomes_regions.first;
+          const Regions &regions = chromosomes_regions.second;
+          for (const auto& region : regions) {
+            const GeneRegion* gene_region = static_cast<const GeneRegion *>(region.get());
+            const std::string& gene_id = gene_region->attributes().at("gene_id");
+            cache.emplace(std::piecewise_construct,
+                          std::forward_as_tuple(gene_id),
+                          std::forward_as_tuple(chromosome, gene_region->start(), gene_region->end()));
+
+          }
+        }
+
+        return true;
+      }
+
+      GeneModelsCache gene_models_cache;
       bool map_gene_location(const std::string& gene_id, const std::string& gene_model,
                              std::string& chromosome, Position& start, Position& end, std::string& msg)
       {
-        chromosome = "chr1";
-        start = 1;
-        end = 2;
+        // Put a lock here
+        if (gene_models_cache.find(gene_model) == gene_models_cache.end()) {
+          GeneModelCache cache;
+          if (!load_gene_model(gene_model, cache, msg)) {
+            return false;
+          }
+          gene_models_cache.emplace(std::piecewise_construct,
+                                   std::forward_as_tuple(gene_model),
+                                   std::forward_as_tuple(cache));
+        }
+        //
+
+        const auto &cache = gene_models_cache[gene_model];
+        auto it = cache.find(gene_id);
+        if (it != cache.end()) {
+          msg = "Gene ID " + gene_id + " not found in the gene model " + gene_model;
+        }
+
+        const auto &region = it->second;
+        chromosome = region.chromosome;
+        start = region.start;
+        end = region.end;
+
         return true;
       }
     }
