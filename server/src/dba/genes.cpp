@@ -197,6 +197,8 @@ namespace epidb {
         size_t total_size = 0;
         size_t total_genes = 0;
 
+        std::vector<mongo::BSONObj> rows_obj_bulk;
+
         for (const auto& row :  gtf->rows()) {
 
           int _id;
@@ -208,14 +210,15 @@ namespace epidb {
           std::string gene_id = "gn" + utils::integer_to_string(_id);
           mongo::BSONObj row_obj = to_bson(dataset_id, gene_model_id, gene_id, row);
 
-          c->insert(helpers::collection_name(Collections::GENES()), row_obj);
-          if (!c->getLastError().empty()) {
-            msg = c->getLastError();
-            c.done();
-            return false;
-          }
-
+          rows_obj_bulk.emplace_back(std::move(row_obj));
           total_genes++;
+        }
+
+        c->insert(helpers::collection_name(Collections::GENES()), rows_obj_bulk);
+        if (!c->getLastError().empty()) {
+          msg = c->getLastError();
+          c.done();
+          return false;
         }
 
         if (!update_upload_info(Collections::GENE_MODELS(), gene_model_id, total_size, total_genes, msg)) {
@@ -344,6 +347,8 @@ namespace epidb {
         size_t total_size = 0;
         size_t total_genes = 0;
 
+        std::vector<mongo::BSONObj> rows_obj_bulk;
+
         for (const auto& row :  fpkm->rows()) {
 
           int _id;
@@ -355,15 +360,18 @@ namespace epidb {
           std::string gene_id = "gx" + utils::integer_to_string(_id);
           mongo::BSONObj row_obj = to_bson(dataset_id, gene_expression_id, gene_id, row);
 
-          c->insert(helpers::collection_name(Collections::GENE_SINGLE_EXPRESSIONS()), row_obj);
-          if (!c->getLastError().empty()) {
-            msg = c->getLastError();
-            c.done();
-            return false;
-          }
-
+          rows_obj_bulk.emplace_back(std::move(row_obj));
           total_genes++;
         }
+
+
+        c->insert(helpers::collection_name(Collections::GENE_SINGLE_EXPRESSIONS()), rows_obj_bulk);
+        if (!c->getLastError().empty()) {
+          msg = c->getLastError();
+          c.done();
+          return false;
+        }
+
 
         if (!update_upload_info(Collections::GENE_EXPRESSIONS(), gene_expression_id, total_size, total_genes, msg)) {
           std::string new_msg;
