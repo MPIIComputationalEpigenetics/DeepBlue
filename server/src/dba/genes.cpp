@@ -698,9 +698,7 @@ namespace epidb {
           if (!load_gene_model(gene_model, cache, msg)) {
             return false;
           }
-          gene_models_cache.emplace(std::piecewise_construct,
-                                    std::forward_as_tuple(gene_model),
-                                    std::forward_as_tuple(cache));
+          gene_models_cache.insert(std::make_pair(gene_model, cache));
         }
         //
 
