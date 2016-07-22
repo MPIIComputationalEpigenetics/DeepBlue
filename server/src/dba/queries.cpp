@@ -1058,8 +1058,10 @@ namespace epidb {
               removed++;
             }
           }
-          ChromosomeRegions chr_region(chromosome, std::move(saved));
-          filtered_regions.push_back(std::move(chr_region));
+          if (!saved.empty()) {
+            ChromosomeRegions chr_region(chromosome, std::move(saved));
+            filtered_regions.push_back(std::move(chr_region));
+          }
         }
 
         return true;
