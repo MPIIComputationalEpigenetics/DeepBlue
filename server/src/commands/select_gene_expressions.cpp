@@ -1,5 +1,5 @@
 //
-//  select_genes.cpp
+//  select_gene_expressions.cpp
 //  DeepBlue Epigenomic Data Server
 //  File created by Felipe Albrecht on 10.09.15.
 //  Copyright (c) 2016 Max Planck Institute for Informatics. All rights reserved.
@@ -38,7 +38,7 @@
 namespace epidb {
   namespace command {
 
-    class SelectGenesCommand: public Command {
+    class SelectGeneExpressionsCommand: public Command {
 
     private:
       static CommandDescription desc_()
@@ -49,14 +49,13 @@ namespace epidb {
       static Parameters parameters_()
       {
         Parameter p[] = {
-          Parameter("genes_name", serialize::STRING, "genes(s) - ENSB ID or ENSB name. Use the regular expression '.*' for selecting all." , true),
+          Parameter("sample_ids", serialize::STRING, "genes(s) - ENSB ID or ENSB name. Use the regular expression '.*' for selecting all." , true),
+          Parameter("replicas", serialize::INTEGER, "replica(s)", true),
+          Parameter("genes", serialize::STRING, "genes(s)", true),
           Parameter("gene_model", serialize::STRING, "gene model name"),
-          Parameter("chromosome", serialize::STRING, "chromosome name(s)", true),
-          Parameter("start", serialize::INTEGER, "minimum start region"),
-          Parameter("end", serialize::INTEGER, "maximum end region"),
           parameters::UserKey
         };
-        Parameters params(&p[0], &p[0] + 6);
+        Parameters params(&p[0], &p[0] + 5);
         return params;
       }
 
@@ -70,19 +69,22 @@ namespace epidb {
       }
 
     public:
-      SelectGenesCommand() : Command("select_genes", parameters_(), results_(), desc_()) {}
+      SelectGeneExpressionsCommand() : Command("select_gene_expressions", parameters_(), results_(), desc_()) {}
 
       virtual bool run(const std::string &ip,
                        const serialize::Parameters &parameters, serialize::Parameters &result) const
       {
+        std::vector<serialize::ParameterPtr> sample_ids;
+        std::vector<serialize::ParameterPtr> replicas;
         std::vector<serialize::ParameterPtr> genes;
-        parameters[0]->children(genes);
-        const std::string gene_model = parameters[1]->as_string();
-        std::vector<serialize::ParameterPtr> chromosomes;
-        parameters[2]->children(chromosomes);
-        const int start = parameters[3]->isNull() ? -1 : parameters[3]->as_long();
-        const int end = parameters[4]->isNull() ? -1 : parameters[4]->as_long();
-        const std::string user_key = parameters[5]->as_string();
+
+        parameters[0]->children(sample_ids);
+        parameters[1]->children(replicas);
+        parameters[2]->children(replicas);
+
+        const std::string gene_model = parameters[3]->as_string();
+
+        const std::string user_key = parameters[4]->as_string();
 
         std::string msg;
         datatypes::User user;
@@ -92,8 +94,8 @@ namespace epidb {
           return false;
         }
 
-        if (genes.empty()) {
-          result.add_error(Error::m(ERR_USER_GENE_MISSING));
+        if (sample_ids.empty()) {
+          result.add_error(Error::m(ERR_USER_SAMPLE_MISSING));
           return false;
         }
 
@@ -103,22 +105,16 @@ namespace epidb {
         }
 
         mongo::BSONObjBuilder args_builder;
-        if (start > 0) {
-          args_builder.append("start", (int) start);
-        }
-        if (end > 0) {
-          args_builder.append("end", (int) end);
-        }
 
-        if (!chromosomes.empty()) {
-          args_builder.append("chromosomes", utils::build_array(chromosomes));
+        args_builder.append("sample_ids", utils::build_array(sample_ids));
+        args_builder.append("replicas", utils::build_array_long(replicas));
+        if (!genes.empty()) {
+          args_builder.append("genes", utils::build_array_long(genes));
         }
-
-        args_builder.append("genes", utils::build_array(genes));
         args_builder.append("gene_model", utils::normalize_name(gene_model));
 
         std::string query_id;
-        if (!dba::query::store_query("genes_select", args_builder.obj(), user_key, query_id, msg)) {
+        if (!dba::query::store_query("gene_expressions_select", args_builder.obj(), user_key, query_id, msg)) {
           result.add_error(msg);
           return false;
         }
@@ -126,6 +122,6 @@ namespace epidb {
         result.add_string(query_id);
         return true;
       }
-    } selectGenesCommand;
+    } selectGeneExpressionCommand;
   }
 }

@@ -231,6 +231,14 @@ namespace epidb {
       return GTF_FORMAT;
     }
 
+    const FileFormat FileFormat::cufflinks_format()
+    {
+      std::cerr << "cufflinks_format BEGIN" << std::endl;
+      static FileFormat CUFFLINKS_FORMAT = FileFormat::cufflinks_format_builder();
+      std::cerr << "cufflinks_format END" << std::endl;
+      return CUFFLINKS_FORMAT;
+    }
+
     const FileFormat FileFormat::default_format_builder()
     {
       FileFormat format;
@@ -358,6 +366,57 @@ namespace epidb {
       return format;
     }
 
+
+    const FileFormat FileFormat::cufflinks_format_builder()
+    {
+      FileFormat format;
+
+      dba::columns::ColumnTypePtr tracking_id;
+      dba::columns::ColumnTypePtr gene_id;
+      dba::columns::ColumnTypePtr gene_short_name;
+      dba::columns::ColumnTypePtr fpkm;
+      dba::columns::ColumnTypePtr fpkm_lo;
+      dba::columns::ColumnTypePtr fpkm_hi;
+      dba::columns::ColumnTypePtr fpkm_status;
+
+      std::string msg;
+
+      format.set_format("TRACKING_ID,GENE_ID,GENE_SHORT_NAME,FPKM,FPKM_CONF_LO,FPKM_CONF_HI,FPKM_STATUS");
+
+      processing::StatusPtr status = processing::build_dummy_status();
+
+      if (!dba::columns::load_column_type("TRACKING_ID", status, tracking_id, msg)) {
+        EPIDB_LOG_ERR(msg);
+      }
+      if (!dba::columns::load_column_type("GENE_ID", status, gene_id, msg)) {
+        EPIDB_LOG_ERR(msg);
+      }
+      if (!dba::columns::load_column_type("GENE_SHORT_NAME", status, gene_short_name, msg)) {
+        EPIDB_LOG_ERR(msg);
+      }
+      if (!dba::columns::load_column_type("FPKM", status, fpkm, msg)) {
+        EPIDB_LOG_ERR(msg);
+      }
+      if (!dba::columns::load_column_type("FPKM_CONF_LO", status, fpkm_lo, msg)) {
+        EPIDB_LOG_ERR(msg);
+      }
+      if (!dba::columns::load_column_type("FPKM_CONF_HI", status, fpkm_hi, msg)) {
+        EPIDB_LOG_ERR(msg);
+      }
+      if (!dba::columns::load_column_type("FPKM_STATUS", status, fpkm_status, msg)) {
+        EPIDB_LOG_ERR(msg);
+      }
+
+      format.add(tracking_id);
+      format.add(gene_id);
+      format.add(gene_short_name);
+      format.add(fpkm);
+      format.add(fpkm_lo);
+      format.add(fpkm_hi);
+      format.add(fpkm_status);
+      return format;
+    }
+
     mongo::BSONArray FileFormat::to_bson() const
     {
       mongo::BSONArrayBuilder ab;
@@ -378,7 +437,7 @@ namespace epidb {
       std::vector<std::string> fields_string;
       boost::split(fields_string, format, boost::is_any_of(","));
 
-      for(std::string & field_string: fields_string) {
+      for (std::string & field_string : fields_string) {
         boost::trim(field_string);
 
         if (field_string.empty()) {
@@ -424,7 +483,7 @@ namespace epidb {
       std::vector<std::string> fields_string;
       boost::split(fields_string, format, boost::is_any_of(","));
 
-      for(std::string & field_string: fields_string) {
+      for (std::string & field_string : fields_string) {
         boost::trim(field_string);
 
         if (field_string.empty()) {
@@ -436,7 +495,7 @@ namespace epidb {
         bool found = false;
 
         // Look into experiment columns
-        for(const mongo::BSONObj & column: experiment_columns) {
+        for (const mongo::BSONObj & column : experiment_columns) {
           if (found) {
             break;
           }
@@ -484,7 +543,7 @@ namespace epidb {
       std::vector<std::string> fields_string;
       boost::split(fields_string, format, boost::is_any_of(","));
 
-      for(const std::string & field_string: fields_string) {
+      for (const std::string & field_string : fields_string) {
         processing::StatusPtr status = processing::build_dummy_status();
 
         dba::columns::ColumnTypePtr column_type;

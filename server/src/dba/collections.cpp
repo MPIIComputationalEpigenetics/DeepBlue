@@ -38,6 +38,7 @@ namespace epidb {
       v.push_back(EXPERIMENTS());
       v.push_back(GENOMES());
       v.push_back(GENE_MODELS());
+      v.push_back(GENE_EXPRESSIONS());
       v.push_back(GENES());
       v.push_back(PROJECTS());
       v.push_back(SAMPLES());
@@ -57,47 +58,50 @@ namespace epidb {
       return std::find(valid_search_Collections().begin(), valid_search_Collections().end(), name) != valid_search_Collections().end();
     }
 
-    const bool Collections::get_collection_for_id(const std::string& id, std::string& collection) {
-        unsigned int char_count = 0;
-        for (const char& c : id) {
-            if (isalpha(c)) {
-                char_count++;
-            }
+    const bool Collections::get_collection_for_id(const std::string& id, std::string& collection)
+    {
+      unsigned int char_count = 0;
+      for (const char& c : id) {
+        if (isalpha(c)) {
+          char_count++;
         }
-        std::string collection_prefix = id.substr(0, char_count);
+      }
+      std::string collection_prefix = id.substr(0, char_count);
 
-        if ("a" == collection_prefix) {
-            collection = ANNOTATIONS();
-        } else if ("bs" == collection_prefix) {
-            collection = BIOSOURCES();
-        } else if ("ct" == collection_prefix) {
-            collection = COLUMN_TYPES();
-        } else if ("em" == collection_prefix) {
-            collection = EPIGENETIC_MARKS();
-        } else if ("gs" == collection_prefix) {
-            collection = GENE_MODELS();
-        } else if ("gn" == collection_prefix) {
-            collection = GENES();
-        } else if ("e" == collection_prefix) {
-            collection = EXPERIMENTS();
-        } else if ("g" == collection_prefix) {
-            collection = GENOMES();
-        } else if ("p" == collection_prefix) {
-            collection = PROJECTS();
-        } else if ("q" == collection_prefix) {
-            collection = QUERIES();
-        } else if ("s" == collection_prefix) {
-            collection = SAMPLES();
-        } else if ("t" == collection_prefix) {
-            collection = TECHNIQUES();
-        } else if ("tr" == collection_prefix) {
-            collection = TILINGS();
-        } else if ("u" == collection_prefix) {
-            collection = USERS();
-        } else {
-            return false;
-        }
-        return true;
+      if ("a" == collection_prefix) {
+        collection = ANNOTATIONS();
+      } else if ("bs" == collection_prefix) {
+        collection = BIOSOURCES();
+      } else if ("ct" == collection_prefix) {
+        collection = COLUMN_TYPES();
+      } else if ("em" == collection_prefix) {
+        collection = EPIGENETIC_MARKS();
+      } else if ("gs" == collection_prefix) {
+        collection = GENE_MODELS();
+      } else if ("gx" == collection_prefix) {
+        collection = GENE_EXPRESSIONS();
+      } else if ("gn" == collection_prefix) {
+        collection = GENES();
+      } else if ("e" == collection_prefix) {
+        collection = EXPERIMENTS();
+      } else if ("g" == collection_prefix) {
+        collection = GENOMES();
+      } else if ("p" == collection_prefix) {
+        collection = PROJECTS();
+      } else if ("q" == collection_prefix) {
+        collection = QUERIES();
+      } else if ("s" == collection_prefix) {
+        collection = SAMPLES();
+      } else if ("t" == collection_prefix) {
+        collection = TECHNIQUES();
+      } else if ("tr" == collection_prefix) {
+        collection = TILINGS();
+      } else if ("u" == collection_prefix) {
+        collection = USERS();
+      } else {
+        return false;
+      }
+      return true;
     }
 
     const std::string &Collections::EXPERIMENTS()
@@ -156,10 +160,20 @@ namespace epidb {
 
     const std::string &Collections::GENE_MODELS()
     {
-      // Keep the old collection
-      // TODO: update/change collection name in the
       static std::string gene_models("gene_models");
       return gene_models;
+    }
+
+    const std::string &Collections::GENE_EXPRESSIONS()
+    {
+      static std::string gene_expressions("gene_expressions");
+      return gene_expressions;
+    }
+
+    const std::string &Collections::GENE_SINGLE_EXPRESSIONS()
+    {
+      static std::string gene_single_expressions("gene_single_expressions");
+      return gene_single_expressions;
     }
 
     const std::string &Collections::GENES()

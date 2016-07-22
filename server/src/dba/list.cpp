@@ -259,6 +259,11 @@ namespace epidb {
         return helpers::get(Collections::GENE_MODELS(), result, msg);
       }
 
+      bool gene_expressions(const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg)
+      {
+        return helpers::get(Collections::GENE_EXPRESSIONS(), result, msg);
+      }
+
       bool genes(const std::string &user_key, const std::vector<std::string> &genes_id_or_name,
                  const std::vector<std::string> &chromosomes,
                  const Position start, const Position end,

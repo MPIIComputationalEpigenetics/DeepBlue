@@ -177,6 +177,14 @@ namespace epidb {
         return true;
       }
 
+      data_cursor = c->query(helpers::collection_name(Collections::GENE_EXPRESSIONS()),
+                             mongo::Query(BSON(KeyMapper::DATASET() << dataset_id)));
+      if (data_cursor->more()) {
+        obj = data_cursor->next().getOwned();
+        obj_by_dataset_id[dataset_id] = obj;
+        c.done();
+        return true;
+      }
 
       c.done();
       msg = Error::m(ERR_DATASET_NOT_FOUND, dataset_id);

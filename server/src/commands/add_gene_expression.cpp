@@ -1,5 +1,5 @@
 //
-//  add_gene_model.cpp
+//  add_gene_expression.cpp
 //  DeepBlue Epigenomic Data Server
 //  File created by Felipe Albrecht on 08.07.2015
 //  Copyright (c) 2016 Max Planck Institute for Informatics. All rights reserved.
@@ -33,28 +33,29 @@
 #include "../extras/utils.hpp"
 #include "../extras/serialize.hpp"
 
-#include "../parser/gtf_parser.hpp"
+#include "../parser/cufflinks_parser.hpp"
+#include "../parser/fpkm.hpp"
 
 #include "../errors.hpp"
 
 namespace epidb {
   namespace command {
 
-    class AddGeneModelCommand: public Command {
+    class AddGeneExpressionCommand: public Command {
 
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::GENES, "Include a Gene Model in DeepBlue. The data must be in the GTF format. Important: this command will include only the lines where the column 'feature' is 'genes'.");
+        return CommandDescription(categories::GENES, "Include a Gene Expression in DeepBlue. The data must be in the XXXX format.");
       }
 
       static Parameters parameters_()
       {
         Parameter p[] = {
-          Parameter("gene_model", serialize::STRING, "gene model name"),
-          Parameter("description", serialize::STRING, "description of the annotation"),
-          Parameter("data", serialize::DATASTRING, "the GTF formatted data"),
-          Parameter("format", serialize::STRING, "Currently, it is only supported GTF."),
+          Parameter("sample_id", serialize::STRING, "gene model name"),
+          Parameter("replica", serialize::INTEGER, "description of the annotation"),
+          Parameter("data", serialize::DATASTRING, "the cufflinks formatted data"),
+          Parameter("format", serialize::STRING, "Currently, it is only supported cufflinks."),
           parameters::AdditionalExtraMetadata,
           parameters::UserKey
         };
@@ -65,21 +66,21 @@ namespace epidb {
       static Parameters results_()
       {
         Parameter p[] = {
-          Parameter("id", serialize::STRING, "id of the newly inserted gene model")
+          Parameter("id", serialize::STRING, "id of the newly inserted gene expression data")
         };
         Parameters results(&p[0], &p[0] + 1);
         return results;
       }
 
     public:
-      AddGeneModelCommand() : Command("add_gene_model", parameters_(), results_(), desc_()) {}
+      AddGeneExpressionCommand() : Command("add_gene_expression", parameters_(), results_(), desc_()) {}
 
       // TODO: Check user
       virtual bool run(const std::string &ip,
                        const serialize::Parameters &parameters, serialize::Parameters &result) const
       {
-        const std::string name = parameters[0]->as_string();
-        const std::string description = parameters[1]->as_string();
+        const std::string sample_id = parameters[0]->as_string();
+        const int replica = parameters[1]->as_long();
         const std::string data = parameters[2]->as_string();
         const std::string format = parameters[3]->as_string();
         const std::string user_key = parameters[5]->as_string();
@@ -87,7 +88,7 @@ namespace epidb {
         std::string msg;
         datatypes::User user;
 
-        if (!check_permissions(user_key, datatypes::INCLUDE_ANNOTATIONS, user, msg )) {
+        if (!check_permissions(user_key, datatypes::INCLUDE_EXPERIMENTS, user, msg )) {
           result.add_error(msg);
           return false;
         }
@@ -98,39 +99,30 @@ namespace epidb {
           return false;
         }
 
-        std::string norm_name = utils::normalize_name(name);
-        std::string norm_description = utils::normalize_name(description);
+        std::string norm_sample_id = utils::normalize_name(sample_id);
 
-        if (dba::exists::gene_model(norm_name)) {
-          std::string s = Error::m(ERR_DUPLICATED_GENE_MODEL_NAME, name);
-          result.add_error(s);
-          return false;
-        }
-
-        if (dba::exists::gene_model(norm_name)) {
-          std::string s = "The gene model name " + name + " is already being used.";
+        if (!dba::exists::sample(norm_sample_id)) {
+          std::string s = Error::m(ERR_INVALID_SAMPLE_ID, sample_id);
           result.add_error(s);
           return false;
         }
 
         std::string norm_file_format = utils::normalize_name(format);
-        if (norm_file_format != "gtf") {
-          std::string s = "Currently, only the format GTF is supported.";
+        if (norm_file_format != "cufflinks") {
+          std::string s = "Currently, only the format 'cufflinks' is supported.";
         }
 
 
         std::unique_ptr<std::istream> _input = std::unique_ptr<std::istream>(new std::stringstream(data));
-        parser::GTFParser parser(std::move(_input));
-        parser::GTFPtr gtf;
-        if (!parser.get( gtf, msg)) {
+        parser::CufflinksParser parser(std::move(_input));
+        parser::FPKMPtr fpkm_file;
+        if (!parser.get(fpkm_file, msg)) {
           result.add_error(msg);
           return false;
         }
 
         std::string id;
-        bool ret = dba::genes::insert(name, norm_name, description, norm_description,
-                                         extra_metadata, gtf, user_key, ip, id, msg);
-
+        bool ret = dba::genes::insert_expression(sample_id, replica, extra_metadata, fpkm_file, user_key, ip, id, msg);
         if (ret) {
           result.add_string(id);
         } else {
@@ -140,6 +132,6 @@ namespace epidb {
         return true;
       }
 
-    } addGeneModelCommand;
+    } addGeneExpressionCommand;
   }
 }

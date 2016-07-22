@@ -528,11 +528,11 @@ namespace epidb {
     }
 
 // TODO: Use template
-    mongo::BSONArray build_array(const std::vector<int> &params)
+    mongo::BSONArray build_array(const std::vector<long> &params)
     {
       mongo::BSONArrayBuilder ab;
       for (const auto& param : params) {
-        ab.append(param);
+        ab.append((long long)param);
       }
       return ab.arr();
     }
@@ -566,6 +566,23 @@ namespace epidb {
       return ab.arr();
     }
 
+    mongo::BSONArray build_array_long(const std::vector<serialize::ParameterPtr> &params)
+    {
+      mongo::BSONArrayBuilder ab;
+      for (const auto& param : params) {
+        ab.append(param->as_long());
+      }
+      return ab.arr();
+    }
+
+    mongo::BSONArray build_array_long(const std::vector<long> &params)
+    {
+      mongo::BSONArrayBuilder ab;
+      for (const auto& param : params) {
+        ab.append((long long)param);
+      }
+      return ab.arr();
+    }
 
     mongo::BSONArray build_array(const std::vector<serialize::ParameterPtr> &params)
     {
@@ -617,6 +634,15 @@ namespace epidb {
       std::vector<std::string> vector;
       for (auto be : params) {
         vector.push_back(be.str());
+      }
+      return vector;
+    }
+
+    std::vector<long> build_vector_long(const std::vector<mongo::BSONElement> &params)
+    {
+      std::vector<long> vector;
+      for (auto be : params) {
+        vector.push_back(be.Long());
       }
       return vector;
     }

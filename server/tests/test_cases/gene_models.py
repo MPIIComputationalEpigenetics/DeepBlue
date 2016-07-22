@@ -69,6 +69,29 @@ class TestGenes(helpers.TestCase):
     (s, genes) = epidb.list_genes(None, "chr10", None, None, gene_models[0][1], self.admin_key)
     self.assertEquals(2260, len(genes))
 
+  def test_gene_expression(self):
+    epidb = DeepBlueClient(address="localhost", port=31415)
+    self.init_base(epidb)
+
+    data = gzip.open("data/fpkm/51_Hf03_BlTN_Ct_mRNA_M_1.LXPv1.20150708_genes.fpkm_tracking.gz").read()
+    (s, gene_expression) = epidb.add_gene_expression("s1", 0, data, "cufflinks", None, self.admin_key)
+
+    data = gzip.open("data/gtf/gencode.v19.annotation.ONLY_GENES.gtf.gz").read()
+    (s, ss) = epidb.add_gene_model("gencode v19", "Test One Description", data, "GTF", {}, self.admin_key)
+    self.assertSuccess(s, ss)
+
+    (status, query) = epidb.select_gene_expressions("s1", [0, 2, 10, 122], None, "gencode v19", self.admin_key)
+    self.assertSuccess(status, query)
+    (status, filtered) = epidb.filter_regions (query, "FPKM_STATUS", "!=", "OK", "string", self.admin_key)
+    self.assertSuccess(status, filtered)
+    (status, filtered_chr) = epidb.filter_regions (filtered,"CHROMOSOME", "==", "chr21", "string", self.admin_key)
+    self.assertSuccess(status, filtered_chr)
+    (status, r_id) = epidb.get_regions(filtered_chr, "GENE_ID,FPKM_STATUS,@SAMPLE_ID,@BIOSOURCE", self.admin_key)
+    self.assertSuccess(status, r_id)
+
+    regions = self.get_regions_request(r_id)
+
+    self.assertEquals(regions, "ENSG00000240755.1\tLOWDATA\ts1\tK562\nENSG00000256386.1\tLOWDATA\ts1\tK562\nENSG00000198743.5\tLOWDATA\ts1\tK562\nENSG00000267937.1\tLOWDATA\ts1\tK562\nENSG00000238556.1\tLOWDATA\ts1\tK562\nENSG00000255902.1\tLOWDATA\ts1\tK562\nENSG00000266692.1\tLOWDATA\ts1\tK562")
 
   def test_gene_re(self):
     epidb = DeepBlueClient(address="localhost", port=31415)

@@ -58,7 +58,14 @@ namespace epidb {
       static const std::string& STRAND();
       static const std::string& FRAME();
       static const std::string& ATTRIBUTES();
+
+      static const std::string& TRACKING_ID();
       static const std::string& GENE_ID();
+      static const std::string& GENE_SHORT_NAME();
+      static const std::string& FPKM();
+      static const std::string& FPKM_LO();
+      static const std::string& FPKM_HI();
+      static const std::string& FPKM_STATUS();
 
     private:
       static bool set_shortcut(const std::string &s, const std::string &l, std::string &err);

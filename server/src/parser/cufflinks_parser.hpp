@@ -1,5 +1,5 @@
 //
-//  gtf_parser.hpp
+//  cufflinks_parser.hpp
 //  DeepBlue Epigenomic Data Server
 //  File created by Felipe Albrecht on 07.09.15.
 //  Copyright (c) 2016 Max Planck Institute for Informatics. All rights reserved.
@@ -18,27 +18,29 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef GTF_PARSER_HPP
-#define GTF_PARSER_HPP
+#ifndef CUFFLINKES_PARSER_HPP
+#define CUFFLINKES_PARSER_HPP
 
 #include <memory>
+#include <string>
 #include <sstream>
 #include <list>
 
 #include <memory>
 
-#include "../extras/utils.hpp"
+#include <strtk.hpp>
 
-#include "gtf.hpp"
+#include "fpkm.hpp"
+
+#include "../extras/utils.hpp"
 
 namespace epidb {
   namespace parser {
 
-    class GTFParser {
+    class CufflinksParser {
     protected:
       size_t actual_line_;
       std::unique_ptr<std::istream> input_;
-      bool parse_attributes(const std::string& line, const std::string& s_attributes, GTFRow::Attributes& attributes, std::string& msg);
       bool get_line(std::string line, std::string &msg);
 
 
@@ -48,8 +50,8 @@ namespace epidb {
       }
 
     public:
-      GTFParser(std::unique_ptr<std::istream> &&input);
-      bool get(GTFPtr &wig, std::string &msg);
+      CufflinksParser(std::unique_ptr<std::istream> &&input);
+      bool get(FPKMPtr &wig, std::string &msg);
       size_t actual_line();
       bool eof();
     };
