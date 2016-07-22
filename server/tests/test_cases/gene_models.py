@@ -6,7 +6,7 @@ from deepblue_client import DeepBlueClient
 
 class TestGenes(helpers.TestCase):
 
-  def __test_gene_retrieve(self):
+  def test_gene_retrieve(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
     data = open("data/gtf/gencode.v23.basic.annotation_head.gtf").read()
@@ -43,7 +43,7 @@ class TestGenes(helpers.TestCase):
         self.assertEquals(ls[3], ls[6])
         self.assertEquals(ls[4], ls[7])
 
-  def _test_genes_location(self):
+  def test_genes_location(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
@@ -72,21 +72,28 @@ class TestGenes(helpers.TestCase):
   def test_gene_expression(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
+
     data = gzip.open("data/fpkm/51_Hf03_BlTN_Ct_mRNA_M_1.LXPv1.20150708_genes.fpkm_tracking.gz").read()
     (s, gene_expression) = epidb.add_gene_expression("s1", 0, data, "cufflinks", None, self.admin_key)
-    print gene_expression
-
-    print epidb.list_gene_expressions(self.admin_key)
 
     data = gzip.open("data/gtf/gencode.v19.annotation.ONLY_GENES.gtf.gz").read()
     (s, ss) = epidb.add_gene_model("gencode v19", "Test One Description", data, "GTF", {}, self.admin_key)
     self.assertSuccess(s, ss)
-    print s, ss
 
-    (s, q) = epidb.select_gene_expressions("s1", 0, "gencode v19", None, None, None, self.admin_key)
-    print s, q
+    (status, query) = epidb.select_gene_expressions("s1", [0, 2, 10, 122], None, "gencode v19", self.admin_key)
+    self.assertSuccess(status, query)
+    (status, filtered) = epidb.filter_regions (query, "FPKM_STATUS", "!=", "OK", "string", self.admin_key)
+    self.assertSuccess(status, filtered)
+    (status, filtered_chr) = epidb.filter_regions (filtered,"CHROMOSOME", "==", "chr21", "string", self.admin_key)
+    self.assertSuccess(status, filtered_chr)
+    (status, r_id) = epidb.get_regions(filtered_chr, "GENE_ID,FPKM_STATUS,@SAMPLE_ID,@BIOSOURCE", self.admin_key)
+    self.assertSuccess(status, r_id)
 
-  def __test_gene_re(self):
+    regions = self.get_regions_request(r_id)
+
+    self.assertEquals(regions, "ENSG00000240755.1\tLOWDATA\ts1\tK562\nENSG00000256386.1\tLOWDATA\ts1\tK562\nENSG00000198743.5\tLOWDATA\ts1\tK562\nENSG00000267937.1\tLOWDATA\ts1\tK562\nENSG00000238556.1\tLOWDATA\ts1\tK562\nENSG00000255902.1\tLOWDATA\ts1\tK562\nENSG00000266692.1\tLOWDATA\ts1\tK562")
+
+  def test_gene_re(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
@@ -118,7 +125,7 @@ class TestGenes(helpers.TestCase):
     status, gene_models = epidb.list_gene_models(self.admin_key)
     self.assertEquals(gene_models, [['gs1', 'Test One']])
 
-  def __test_gene_case_insensitive(self):
+  def test_gene_case_insensitive(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
@@ -135,7 +142,7 @@ class TestGenes(helpers.TestCase):
     status, gene_models = epidb.list_gene_models(self.admin_key)
     self.assertEquals(gene_models, [['gs1', 'Test One']])
 
-  def __test_gene_chr1_retrieve(self):
+  def test_gene_chr1_retrieve(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
