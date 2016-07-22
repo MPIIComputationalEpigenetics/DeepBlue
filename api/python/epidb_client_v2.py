@@ -27,6 +27,7 @@ class DeepBlueClient(object):
         self.server = xmlrpclib.Server(url, encoding='UTF-8', allow_none=True, verbose=False)
 
     def set_key(self, key):
+        print key
         self.key = key
 
     # Status command
@@ -270,11 +271,16 @@ class DeepBlueClient(object):
 
         # Genes
     @key_required
-    def add_gene_set(self, name, description, data, _format,
+    def add_gene_model(self, name, description, data, _format,
                      extra_metadata):
-        return self.server.add_gene_set(name, description, data, _format,
-                                        extra_metadata, self.key)
+        return self.server.add_gene_model(name, description, data, _format,
+                                          extra_metadata, self.key)
 
+    @key_required
+    def add_gene_expression(self, sample_id, replica, data, _format,
+                     extra_metadata):
+        return self.server.add_gene_expression(sample_id, replica, data,
+                                          _format, extra_metadata, self.key)
     # Operations
     @key_required
     def select_regions(self, experiment_name, genome, epigenetic_mark,
