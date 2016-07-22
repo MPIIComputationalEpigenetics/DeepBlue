@@ -1,5 +1,8 @@
 import xmlrpclib
 
+# Support long int types in XMLRPC
+xmlrpclib.Marshaller.dispatch[type(0L)] = lambda _, v, w: w("<value><i8>%d</i8></value>" % v) 
+
 def key_required(func):
     def func_wrapper(self, *args, **kwargs):
         if self.key:
