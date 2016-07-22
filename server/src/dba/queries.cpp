@@ -979,7 +979,11 @@ namespace epidb {
           }
           return filter->is(value);
         } else {
-          return filter->is(region_ref->value(column->pos()));
+          if (datatypes::column_type_is_compatible(column->type(), datatypes::COLUMN_STRING)) {
+            return filter->is(region_ref->get_string(column->pos()));
+          } else {
+            return filter->is(region_ref->value(column->pos()));
+          }
         }
       }
 
