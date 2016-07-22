@@ -8,6 +8,22 @@ import data_info
 
 class TestExperiments(helpers.TestCase):
 
+  def test_experiments_preview(self):
+    epidb = DeepBlueClient(address="localhost", port=31415)
+    self.init_base(epidb)
+
+    sample_id = self.sample_ids[0]
+    regions_data = helpers.load_bed("hg19_chr1_1")
+    format = data_info.EXPERIMENTS["hg19_chr1_1"]["format"]
+
+    # adding two experiments with the same data should work
+    res = epidb.add_experiment("test_exp1", "hg19", "Methylation", sample_id, "tech1",
+              "ENCODE", "desc1", regions_data, format, None, self.admin_key)
+    self.assertSuccess(res)
+
+    status, preview = epidb.preview_experiment('test_exp1', self.admin_key)
+    self.assertEqual(preview, 'CHROMOSOME\tSTART\tEND\tNAME\tSCORE\tSTRAND\tSIGNAL_VALUE\tP_VALUE\tQ_VALUE\tPEAK\nchr1\t713240\t713390\t.\t0.0000\t+\t21.0000\t69.6000\t-1.0000\t-1\nchr1\t713520\t713670\t.\t0.0000\t-\t21.0000\t22.4866\t-1.0000\t-1\nchr1\t713900\t714050\t.\t0.0000\t+\t59.0000\t71.2352\t-1.0000\t-1\nchr1\t714160\t714310\t.\t0.0000\t+\t22.0000\t101.8740\t-1.0000\t-1\nchr1\t714540\t714690\t.\t0.0000\t+\t77.0000\t105.3120\t-1.0000\t-1')
+
   def test_experiments_pass(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
@@ -34,6 +50,12 @@ class TestExperiments(helpers.TestCase):
     self.assertTrue("test_exp1" in experiments_names)
     self.assertTrue("test_exp2" in experiments_names)
 
+    s, ids = epidb.name_to_id(['test_exp1'], 'experiments', self.admin_key)
+    self.assertEqual(ids, [['e1', 'test_exp1']])
+    s, ids = epidb.name_to_id(['test_exp1', 'test_exp2'], 'experiments', self.admin_key)
+    self.assertEqual([['e1', 'test_exp1'], ['e2', 'test_exp2']], ids)
+    s, ids = epidb.name_to_id('test_exp1', 'experiments', self.admin_key)
+    self.assertEqual([['e1', 'test_exp1']], ids)
 
   def test_insert_local_file(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
@@ -250,6 +272,21 @@ class TestExperiments(helpers.TestCase):
               "ENCODE", "desc1", regions_data, format, None, self.admin_key)
     self.assertFailure(res)
 
+  def test_shitty_deep_file(self):
+    epidb = DeepBlueClient(address="localhost", port=31415)
+    self.init_base(epidb)
+
+    eid1 = self.insert_experiment(epidb, "deepshitty")
+    res, qid1 = epidb.select_regions("deepshitty", "hg18", None, None, None,
+        None, None, None, None, self.admin_key)
+    self.assertSuccess(res, qid1)
+
+    res, req = epidb.get_experiments_by_query(qid1, self.admin_key)
+    exps = self.get_regions_request(req)
+    self.assertEqual(len(exps), 1)
+    (res, req) = epidb.get_regions(qid1, "CHROMOSOME,START,END", self.admin_key)
+    exps = self.get_regions_request(req)
+    self.assertEqual(exps, "chr1\t62125\t62154")
 
   def test_get_by_query(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
@@ -267,7 +304,7 @@ class TestExperiments(helpers.TestCase):
     res, req = epidb.get_experiments_by_query(qid1, self.admin_key)
     exps = self.get_regions_request(req)
     self.assertEqual(len(exps), 1)
-    self.assertEqual(exps[0], [eid1, "hg18_chr1_1"])
+    self.assertEqual(exps, {eid1: "hg18_chr1_1"})
 
     (res, req) = epidb.get_regions(qid1, "CHROMOSOME,START,END", self.admin_key)
     exps = self.get_regions_request(req)
@@ -284,9 +321,10 @@ class TestExperiments(helpers.TestCase):
 
     self.assertSuccess(res, exps)
     self.assertEqual(len(exps), 3)
-    self.assertTrue([eid2, "hg19_chr1_1"] in exps)
-    self.assertTrue([eid3, "hg19_chr1_2"] in exps)
-    self.assertTrue([eid4, "hg19_chr1_3"] in exps)
+    self.assertEqual({'e4': 'hg19_chr1_3', 'e3': 'hg19_chr1_2', 'e2': 'hg19_chr1_1'}, exps)
+    self.assertTrue(eid2 in exps)
+    self.assertTrue(eid3 in exps)
+    self.assertTrue(eid4 in exps)
 
     (res, req) = epidb.get_regions(qid2, "CHROMOSOME,START,END", self.admin_key)
     x = self.get_regions_request(req)

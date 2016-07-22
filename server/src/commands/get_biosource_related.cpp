@@ -39,13 +39,13 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::BIOSOURCE_RELATIONSHIP, "Gets biosources related to the given one. e.g. the children terms and theirs synonyms.");
+        return CommandDescription(categories::BIOSOURCE_RELATIONSHIP, "A BioSource refers to a term describing the origin of a given sample, such as a tissue or cell line. These form a hierarchy in which the children of a BioSource term and its synonyms can be fetched with this command. Children terms are more specific terms that are defined in the imported ontologies. Synonyms are different aliases for the same biosource.");
       }
 
       static  Parameters parameters_()
       {
         Parameter p[] = {
-          Parameter("biosource", serialize::STRING, "name of the biosource"),
+          parameters::BioSource,
           parameters::UserKey
         };
         Parameters params(&p[0], &p[0] + 2);

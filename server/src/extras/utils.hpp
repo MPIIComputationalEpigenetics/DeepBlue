@@ -21,6 +21,7 @@
 #ifndef EPIDB_UTILS_HPP
 #define EPIDB_UTILS_HPP
 
+#include <algorithm>
 #include <vector>
 #include <string>
 #include <algorithm>
@@ -50,7 +51,6 @@ namespace epidb {
     std::ostream &operator<<(std::ostream &os, const IdName &o);
 
     std::vector<IdName> bsons_to_id_names(const std::vector<mongo::BSONObj> &bsons);
-    std::vector<IdName> request_bson_to_id_name(const mongo::BSONObj &o);
     IdName bson_to_id_name(const mongo::BSONObj& bson);
 
 
@@ -68,6 +68,10 @@ namespace epidb {
     std::ostream &operator<<(std::ostream &os, const IdName &o);
 
     std::ostream &operator<<(std::ostream &os, const IdNameCount &o);
+
+    std::vector<std::string> capitalize_vector(std::vector<std::string> vector);
+
+    std::string lower_case(std::string string);
 
     template <typename Type> std::string vector_to_string(std::vector<Type> vector, std::string sep = ",")
     {
@@ -132,12 +136,17 @@ namespace epidb {
 
     std::string bson_to_string(const mongo::BSONElement &e);
 
+    serialize::ParameterPtr bson_to_parameters(const mongo::BSONObj & o);
+
+    serialize::ParameterPtr element_to_parameter(const mongo::BSONElement& e);
+
     std::string sanitize(const std::string &data);
 
-
     mongo::BSONArray build_array(const std::vector<std::string> &params);
-    mongo::BSONArray build_array(const std::vector<int> &params);
+    mongo::BSONArray build_array(const std::vector<long> &params);
     mongo::BSONArray build_array(const std::vector<serialize::ParameterPtr> &params);
+    mongo::BSONArray build_array_long(const std::vector<serialize::ParameterPtr> &params);
+    mongo::BSONArray build_array_long(const std::vector<long> &params);
     mongo::BSONArray build_regex_array(const std::vector<std::string> &params);
     mongo::BSONArray build_normalized_array(const std::vector<std::string> &params);
     mongo::BSONArray build_normalized_array(const std::vector<serialize::ParameterPtr> &params);
@@ -146,6 +155,7 @@ namespace epidb {
 
     std::vector<std::string> build_vector(const std::vector<serialize::ParameterPtr> &params);
     std::vector<std::string> build_vector(const std::vector<mongo::BSONElement> &params);
+    std::vector<long> build_vector_long(const std::vector<mongo::BSONElement> &params);
     std::set<std::string> build_set(const std::vector<mongo::BSONElement> &params);
 
     bool check_parameters(const std::vector<serialize::ParameterPtr> &params, const std::function<std::string(const std::string&)> &normalizer, const std::function<bool(const std::string&)> &checker, std::string &wrong);

@@ -33,7 +33,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::ADMINISTRATION, "Lists all existing commands.");
+        return CommandDescription(categories::ADMINISTRATION, "Lists all existing administration commands.");
       }
 
       static Parameters parameters_()

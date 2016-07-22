@@ -41,7 +41,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::OPERATIONS, "Creates regions with the tiling size over the chromosomes.");
+        return CommandDescription(categories::OPERATIONS, "Generate tiling regions across the genome chromosomes. The idea is to \"bin\" genomic regions systematically in order to obtain discrete regions over which one can aggregate. Using the 'score_matrix' command, these bins (tiles) can be compared directly across experiments.");
       }
 
       static  Parameters parameters_()

@@ -35,7 +35,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::EPIGENETIC_MARKS, "Inserts a new epigenetic mark with the given parameters.");
+        return CommandDescription(categories::EPIGENETIC_MARKS, "Include an Epigenetic Mark such as, for instance, a specific type of histone modification, in DeepBlue.");
       }
 
       static Parameters parameters_()
@@ -43,7 +43,7 @@ namespace epidb {
         Parameter p[] = {
           Parameter("name", serialize::STRING, "name of the epigenetic mark"),
           Parameter("description", serialize::STRING, "description of the epigenetic mark"),
-          Parameter("extra_metadata", serialize::MAP, "additional metadata"),
+          parameters::AdditionalExtraMetadata,
           parameters::UserKey
         };
         Parameters params(&p[0], &p[0] + 4);

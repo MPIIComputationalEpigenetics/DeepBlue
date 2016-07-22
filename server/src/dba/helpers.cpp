@@ -217,7 +217,7 @@ namespace epidb {
         }
 
         if (results.size() == 0) {
-          msg = "Unable to retrieve the name of the internal name '" + norm_name + "'.";
+          msg = Error::m(ERR_INVALID_INTERNAL_NAME, norm_name);
           return false;
         }
 
@@ -242,7 +242,7 @@ namespace epidb {
         }
 
         if (results.size() == 0) {
-          msg = "Unable to retrieve the id of the '" + norm_name + "''. Where: " + where;
+          msg = Error::m(ERR_NAME_NOT_FOUND, norm_name, where);
           return false;
         }
 
@@ -324,6 +324,24 @@ namespace epidb {
         c.done();
         return true;
       }
+
+      mongo::BSONArray build_dataset_ids_arrays(const std::string &where, const mongo::BSONObj& query)
+      {
+        Connection c;
+        mongo::BSONArrayBuilder datasets_array_builder;
+        std::cerr << query.toString() << std::endl;
+        auto cursor = c->query(helpers::collection_name(where), query);
+        while (cursor->more()) {
+          mongo::BSONObj p = cursor->next();
+          std::cerr << p.toString() << std::endl;
+          mongo::BSONElement dataset_id = p.getField(KeyMapper::DATASET());
+          datasets_array_builder.append(dataset_id.Int());
+        }
+        c.done();
+
+        return datasets_array_builder.arr();
+      }
+
 
       bool remove_collection(const std::string &collection, std::string &msg)
       {

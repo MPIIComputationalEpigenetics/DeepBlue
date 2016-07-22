@@ -22,7 +22,6 @@
 
 #include "../engine/commands.hpp"
 #include "../engine/engine.hpp"
-#include "../engine/request.hpp"
 
 #include "../dba/collections.hpp"
 #include "../datatypes/user.hpp"
@@ -40,7 +39,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::REQUESTS, "Lists all requests in given state.");
+        return CommandDescription(categories::REQUESTS, "List the Requests made by the user. It is possible to obtain only the requests of a given state.");
       }
 
       static Parameters parameters_()

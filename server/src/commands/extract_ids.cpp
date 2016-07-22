@@ -32,13 +32,13 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::UTILITIES, "Extract the names from a list of ID and Names.");
+        return CommandDescription(categories::UTILITIES, "A utility command that returns a list of IDs extracted from a list of ID and names.");
       }
 
       static Parameters parameters_()
       {
         Parameter p[] = {
-          Parameter("list", serialize::LIST, "list of lists of IDs and Names")
+          Parameter("list", serialize::LIST, "list of lists of IDs and names")
         };
         Parameters params(&p[0], &p[0] + 1);
         return params;

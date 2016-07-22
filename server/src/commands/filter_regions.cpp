@@ -41,7 +41,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::OPERATIONS, "Filters the result of the given query by the given restrictions.");
+        return CommandDescription(categories::OPERATIONS, "Filter the genomic regions by their content.");
       }
 
       static Parameters parameters_()

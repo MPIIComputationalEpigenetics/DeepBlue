@@ -250,19 +250,19 @@ class TestSelectRegions(helpers.TestCase):
 
     res, msg = epidb.select_regions(*argument_combinations[0])
     self.assertFailure(res, msg)
-    self.assertEqual(msg, "Epigenetic mark _invalid_mark does not exists.")
+    self.assertEqual(msg, "105000:Epigenetic Mark ID '_invalid_mark' does not exists.")
 
     res, msg = epidb.select_regions(*argument_combinations[1])
     self.assertFailure(res, msg)
-    self.assertEqual(msg, 'Sample ID _invalid_sid does not exists.')
+    self.assertEqual(msg, "103000:Unable to find the sample ID '_invalid_sid'.")
 
     res, msg = epidb.select_regions(*argument_combinations[2])
     self.assertFailure(res, msg)
-    self.assertEqual(msg, 'Technique _invalid_tech does not exists.')
+    self.assertEqual(msg, "106000:Technique '_invalid_tech' does not exist.")
 
     res, msg = epidb.select_regions(*argument_combinations[3])
     self.assertFailure(res, msg)
-    self.assertEqual(msg, 'Project _invalid_project does not exists.')
+    self.assertEqual(msg, "107000:Project '_invalid_project' does not exist.")
 
 
   def test_argument_normalization(self):

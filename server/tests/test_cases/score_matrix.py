@@ -70,7 +70,7 @@ class TestScoreMatrixCommand(helpers.TestCase):
 
     (s, req) = epidb.score_matrix({"wgEncodeBroadHistoneH1hescH3k27me3StdPk.bed":"SCORE"}, "mean",  q_tiling, self.admin_key)
     self.assertFailure(s, req)
-    self.assertEquals(req, "101000:Unable to find the experiment 'wgEncodeBroadHistoneH1hescH3k27me3StdPk.bed'.")
+    self.assertEquals(req, "101000:Experiment 'wgEncodeBroadHistoneH1hescH3k27me3StdPk.bed' does not exists.")
 
     sample_id = self.sample_ids[0]
 

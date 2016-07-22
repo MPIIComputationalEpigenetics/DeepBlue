@@ -22,6 +22,9 @@ class TestBioSourceCommands(helpers.TestCase):
     self.assertTrue("K562b" in biosources_names)
     self.assertTrue("HepG2" in biosources_names)
 
+    status, _id = epidb.name_to_id(["k562", "k562b", "hepg2"], "biosources", self.admin_key)
+    self.assertTrue(_id, [['bs1', 'k562'], ['bs2', 'k562b'], ['bs3', 'hepg2']])
+
 
   def test_duplicated_biosource_with_synonym(self):
     epidb = DeepBlueClient(address="localhost", port=31415)

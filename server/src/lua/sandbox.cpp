@@ -209,7 +209,7 @@ namespace epidb {
 
       // TODO: better error handling
       if (!dba::experiments::get_field_pos(dataset_id, field_name, column, msg)) {
-        lua_pushstring(lua_state, "");
+        lua_pushstring(lua_state, msg.c_str());
         return 1;
       }
 

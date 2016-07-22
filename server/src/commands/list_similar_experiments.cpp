@@ -38,7 +38,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::EXPERIMENTS, "Lists all experiments similar to the one provided.");
+        return CommandDescription(categories::EXPERIMENTS, "List all Experiments that have a similar name compared to the provided name. The similarity is calculated using the Levenshtein method.");
       }
 
       static Parameters parameters_()

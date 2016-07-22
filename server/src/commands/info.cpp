@@ -34,7 +34,6 @@
 
 #include "../engine/commands.hpp"
 #include "../engine/engine.hpp"
-#include "../engine/request.hpp"
 
 #include "../extras/serialize.hpp"
 #include "../extras/utils.hpp"
@@ -49,14 +48,13 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::GENERAL_INFORMATION,
-                                  "Return information for the given ID (or IDs).");
+        return CommandDescription(categories::GENERAL_INFORMATION, "Information about a DeepBlue data identifier (ID). Any DeepBlue data ID can be queried with this command. For example, it is possible to obtain all available information about an Experiment using its ID, to obtain the actual Request processing status or the information about a Sample. A user can obtain information about him- or herself using the value 'me' in the parameter 'id'. Multiple IDs can be queried in the same operation.");
       }
 
       static  Parameters parameters_()
       {
         Parameter p[] = {
-          Parameter("id", serialize::STRING, "ID or an array of IDs", true),
+          parameters::IDs,
           parameters::UserKey
         };
         Parameters params(&p[0], &p[0] + 2);

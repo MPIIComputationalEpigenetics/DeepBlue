@@ -38,7 +38,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::COLUMN_TYPES, "Create a calculated column");
+        return CommandDescription(categories::COLUMN_TYPES, "Create a calculated column type in DeepBlue.A calculated column can use existing columns and transform or summarize them through mathematical operations or string operations using the programming language LUA. Examples: the following 'code' parameter can be used to calculate the square root of the column VALUE: 'return math.sqrt(value_of('VALUE'))'. Another example is dividing the value of the column 'VALUE' by the region length: 'return value_of('VALUE') / (value_of('END') - value_of('END'))'.");
       }
 
       static Parameters parameters_()

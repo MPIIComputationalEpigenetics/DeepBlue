@@ -50,31 +50,19 @@ namespace epidb {
 
     IdName bson_to_id_name(const mongo::BSONObj& bson)
     {
-        return utils::IdName(bson["_id"].str(), bson["name"].str());
+      return utils::IdName(bson["_id"].str(), bson["name"].str());
     }
 
 
+    // Remove it and use the bson to parameters directly
     std::vector<utils::IdName> bsons_to_id_names(const std::vector<mongo::BSONObj> &bsons)
     {
       std::vector<utils::IdName> v;
-      for(const mongo::BSONObj & o: bsons) {
+      for (const mongo::BSONObj & o : bsons) {
         v.push_back(bson_to_id_name(o));
       }
       return v;
     }
-
-    std::vector<IdName> request_bson_to_id_name(const mongo::BSONObj &o)
-    {
-      std::vector<IdName> v;
-      for (mongo::BSONObj::iterator it = o.begin(); it.more(); ) {
-        mongo::BSONElement e = it.next();
-        std::string id = e.fieldName();
-        std::string name = e.str();
-        v.emplace_back(id, name);
-      }
-      return v;
-    }
-
 
     std::ostream &operator<<(std::ostream &os, const IdNameCount &o)
     {
@@ -82,6 +70,26 @@ namespace epidb {
       return os;
     }
 
+    std::vector<std::string> capitalize_vector(std::vector<std::string> vector)
+    {
+      std::transform(vector.begin(), vector.end(), vector.begin(),
+      [](std::string s) {
+        if (s.empty()) {
+          return s;
+        }
+        s[0] = std::toupper(s[0]);
+        return s;
+      });
+
+      return vector;
+    }
+
+    std::string lower_case(const std::string string)
+    {
+      std::string data(string);
+      std::transform(data.begin(), data.end(), data.begin(), ::tolower);
+      return data;
+    }
 
     static uint64_t decdigits[100] = {
       0ll, 0ll, 0ll, 0ll, 0ll, 0ll, 0ll, 0ll, 0ll, 0,
@@ -361,12 +369,12 @@ namespace epidb {
       return l;
     }
 
-    std::string format_extra_metadata(const mongo::BSONObj &key_value) {
+    std::string format_extra_metadata(const mongo::BSONObj &key_value)
+    {
       StringBuilder sb;
       auto it = key_value.begin();
 
-      while(it.more() )
-      {
+      while (it.more() ) {
         auto const &e = it.next();
         std::string field_name = std::string(e.fieldName());
 
@@ -440,6 +448,54 @@ namespace epidb {
       }
     }
 
+    serialize::ParameterPtr element_to_parameter(const mongo::BSONElement& e)
+    {
+
+      switch ( e.type() ) {
+      case mongo::NumberDouble: {
+        return std::make_shared<serialize::SimpleParameter>(e.Double());
+      }
+      case mongo::NumberInt:
+      case mongo::NumberLong: {
+        return std::make_shared<serialize::SimpleParameter>((long long) e.numberLong());
+      }
+      case mongo::Object: {
+        return bson_to_parameters(e.Obj());
+      }
+      case mongo::Array: {
+        serialize::ParameterPtr p = std::make_shared<serialize::ListParameter>();
+        std::vector<mongo::BSONElement> ees = e.Array();
+        for (auto const& ee : ees) {
+          p->add_child(element_to_parameter(ee));
+        }
+        return p;
+      }
+      default: {
+        return std::make_shared<serialize::SimpleParameter>(e.String());
+      }
+      }
+    }
+
+    serialize::ParameterPtr bson_to_parameters(const mongo::BSONObj & o)
+    {
+      serialize::ParameterPtr parameter(new serialize::MapParameter());
+
+      for (mongo::BSONObj::iterator it = o.begin(); it.more(); ) {
+        mongo::BSONElement e = it.next();
+
+        std::string fieldname = e.fieldName();
+
+        if (!fieldname.compare(0, 2, "__")) {
+          continue;
+        }
+
+        parameter->add_child(fieldname, element_to_parameter(e));
+      }
+
+      return parameter;
+    }
+
+
     std::string sanitize(const std::string &data)
     {
       std::string buffer;
@@ -472,11 +528,11 @@ namespace epidb {
     }
 
 // TODO: Use template
-    mongo::BSONArray build_array(const std::vector<int> &params)
+    mongo::BSONArray build_array(const std::vector<long> &params)
     {
       mongo::BSONArrayBuilder ab;
       for (const auto& param : params) {
-        ab.append(param);
+        ab.append((long long)param);
       }
       return ab.arr();
     }
@@ -510,6 +566,23 @@ namespace epidb {
       return ab.arr();
     }
 
+    mongo::BSONArray build_array_long(const std::vector<serialize::ParameterPtr> &params)
+    {
+      mongo::BSONArrayBuilder ab;
+      for (const auto& param : params) {
+        ab.append(param->as_long());
+      }
+      return ab.arr();
+    }
+
+    mongo::BSONArray build_array_long(const std::vector<long> &params)
+    {
+      mongo::BSONArrayBuilder ab;
+      for (const auto& param : params) {
+        ab.append((long long)param);
+      }
+      return ab.arr();
+    }
 
     mongo::BSONArray build_array(const std::vector<serialize::ParameterPtr> &params)
     {
@@ -561,6 +634,15 @@ namespace epidb {
       std::vector<std::string> vector;
       for (auto be : params) {
         vector.push_back(be.str());
+      }
+      return vector;
+    }
+
+    std::vector<long> build_vector_long(const std::vector<mongo::BSONElement> &params)
+    {
+      std::vector<long> vector;
+      for (auto be : params) {
+        vector.push_back(be.Long());
       }
       return vector;
     }

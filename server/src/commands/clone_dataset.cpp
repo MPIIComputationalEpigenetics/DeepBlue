@@ -41,8 +41,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::DATA_MODIFICATION,
-                                  "Clone the dataset, allowing to change the description, column format (restrictively), and extra_metadata.");
+        return CommandDescription(categories::DATA_MODIFICATION, "Clone a dataset optionally changing its metadata and extra_metadata values. This command must be used in data curation because users do not have permission to change the metadata values of the Annotations and Experiments that were not uploaded by them.");
       }
 
       static  Parameters parameters_()
@@ -56,7 +55,7 @@ namespace epidb {
           Parameter("new_project", serialize::STRING, "New project"),
           Parameter("description", serialize::STRING, "description of the experiment - empty to copy from the cloned dataset"),
           Parameter("format", serialize::STRING, "format of the provided data - empty to copy from the cloned dataset"),
-          Parameter("extra_metadata", serialize::MAP, "additional metadata - empty to copy from the cloned dataset"),
+          parameters::AdditionalExtraMetadata,
           parameters::UserKey
         };
         Parameters params(&p[0], &p[0] + 10);
@@ -130,7 +129,7 @@ namespace epidb {
             ss << "Invalid epigenetic mark: ";
             ss << epigenetic_mark;
             ss << ".";
-            if (names.size() > 0) {
+            if (!names.empty()) {
               ss << " It is suggested the following names: ";
               ss << utils::vector_to_string(names);
             }
@@ -150,7 +149,7 @@ namespace epidb {
             ss << "Invalid technique name: ";
             ss << technique;
             ss << ".";
-            if (names.size() > 0) {
+            if (!names.empty()) {
               ss << " The following names are suggested: ";
               ss << utils::vector_to_string(names);
             }
@@ -172,7 +171,7 @@ namespace epidb {
             ss << "Invalid project name. ";
             ss << project;
             ss << ".";
-            if (names.size() > 0) {
+            if (!names.empty()) {
               ss << " The following names are suggested: ";
               ss << utils::vector_to_string(names);
             }

@@ -41,7 +41,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::PROJECTS, "Include or exclude an user from a project");
+        return CommandDescription(categories::PROJECTS, "Add a user as Project member.");
       }
 
       static  Parameters parameters_()
@@ -107,15 +107,7 @@ namespace epidb {
           result.add_error(msg);
           return false;
         }
-        std::string owner = project_res["user"];
-
-        // Getting the project owner ID
-        std::string owner_id;
-        if (!dba::users::get_id(owner, owner_id, msg)) {
-          result.add_error(msg);
-          return false;
-        }
-
+        std::string owner_id = project_res["user"];
 
         std::string user_id;
         if (!dba::users::get_id(user_to_include, user_id, msg)) {
@@ -123,16 +115,10 @@ namespace epidb {
           return false;
         }
 
-
-        // Getting the command operator
-        utils::IdName working_user;
-        if (!dba::users::get_user(user_key, working_user, msg)) {
-          result.add_error(msg);
-          return false;
-        }
-
         // Is the command operator admin or project owner ?
-        if ((user.is_admin()) && (working_user.id != owner_id)) {
+        std::cerr << user.is_admin() << std::endl;
+        if ((!user.is_admin()) && // Is not ADMIN
+            (user.get_id() != owner_id)) { // Neither the owner
           result.add_error(Error::m(ERR_PERMISSION_PROJECT, project));
           return false;
         }

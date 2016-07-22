@@ -44,7 +44,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::OPERATIONS, "Selects annotation regions matching the given parameters.");
+        return CommandDescription(categories::OPERATIONS, "Select regions from the Annotations that match the selection criteria. ");
       }
 
       static Parameters parameters_()

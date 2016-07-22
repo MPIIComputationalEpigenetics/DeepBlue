@@ -40,9 +40,6 @@
 namespace epidb {
   namespace processing {
 
-    static bool process(const std::string &output_format, ChromosomeRegionsList &chromosomeRegionsList,
-                        processing::StatusPtr status, StringBuilder &sb, std::string &msg);
-
     static inline bool format_region(StringBuilder &sb, const std::string &chromosome, RegionPtr region,
                                      const parser::FileFormat &format, dba::Metafield &metafield, processing::StatusPtr status, std::string &msg);
 
@@ -54,7 +51,7 @@ namespace epidb {
         return false;
       }
 
-      if (!process(format, chromosomeRegionsList, status, sb, msg)) {
+      if (!format_regions(format, chromosomeRegionsList, status, sb, msg)) {
         return false;
       }
 
@@ -62,7 +59,7 @@ namespace epidb {
     }
 
 
-    bool process(const std::string &output_format, ChromosomeRegionsList &chromosomeRegionsList, processing::StatusPtr status,
+    bool format_regions(const std::string &output_format, ChromosomeRegionsList &chromosomeRegionsList, processing::StatusPtr status,
                  StringBuilder &sb, std::string &msg)
     {
       std::unordered_map<DatasetId, parser::FileFormat> datasets_formats;
@@ -73,8 +70,7 @@ namespace epidb {
 
       for (ChromosomeRegionsList::iterator it = chromosomeRegionsList.begin();
            it != chromosomeRegionsList.end(); it++) {
-        std::string chromosome = it->first;
-
+        std::string &chromosome = it->first;
         Regions &regions = it->second;
 
         if (regions.empty()) {

@@ -43,7 +43,7 @@ namespace epidb {
       {
         const std::string norm_name = utils::normalize_name(name);
         if (!helpers::get_one(Collections::EXPERIMENTS(), BSON("norm_name" << norm_name), experiment)) {
-          msg = Error::m(ERR_INVALID_EXPERIMENT_NAME, name);
+          msg = Error::m(ERR_INVALID_EXPERIMENT, name);
           return false;
         }
         return true;
@@ -69,22 +69,34 @@ namespace epidb {
         return true;
       }
 
+      bool get_experiment_name(const std::string &name_id, std::string &name, std::string &norm_name, std::string &msg)
+      {
+        if (utils::is_id(name_id, "e")) {
+          mongo::BSONObj experiment;
+          if (!by_id(name_id, experiment, msg)) {
+            return false;
+          }
+          name = experiment["name"].str();
+          norm_name = utils::normalize_name(name);
+        } else {
+          name = name_id;
+          norm_name = utils::normalize_name(name_id);
+        }
+        return true;
+      }
+
       bool get_experiments_names(const std::vector<std::string> &names_ids, std::vector<std::string> &names, std::vector<std::string> &norm_names, std::string &msg)
       {
-
         for (const auto &name_id : names_ids) {
-          if (utils::is_id(name_id, "e")) {
-            mongo::BSONObj experiment;
-            if (!by_id(name_id, experiment, msg)) {
-              return false;
-            }
-            std::string name = experiment["name"].str();
-            names.push_back(name);
-            norm_names.push_back(utils::normalize_name(name));
-          } else {
-            names.push_back(name_id);
-            norm_names.push_back(utils::normalize_name(name_id));
+          std::string name;
+          std::string norm_name;
+
+          if (!get_experiment_name(name_id, name, norm_name, msg)) {
+            return false;
           }
+
+          names.push_back(name);
+          norm_names.push_back(norm_name);
         }
 
         return true;

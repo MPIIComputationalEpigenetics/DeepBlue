@@ -103,6 +103,8 @@ namespace epidb {
 
       bool collection_size(const std::string &where, const mongo::BSONObj& query, size_t &size, std::string &msg, const bool check=true);
 
+      mongo::BSONArray build_dataset_ids_arrays(const std::string &where, const mongo::BSONObj& query);
+
       template<typename T>
       mongo::BSONObj build_condition_array(const std::vector<T> &params, const std::string &condition)
       {

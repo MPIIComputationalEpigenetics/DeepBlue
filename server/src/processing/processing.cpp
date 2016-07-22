@@ -55,6 +55,7 @@ namespace epidb {
       m[PROCESS_AGGREGATE] = "Aggregate";
       m[RETRIEVE_QUERY_REGION_SET] = "Retrieve query regions set";
       m[RETRIEVE_FLANK_QUERY] = "Flanking";
+      m[RETRIEVE_GENE_EXPRESSIONS_DATA] = "Getting gene expressions data";
       m[FORMAT_OUTPUT] = "Formating output file";
 
       return m;

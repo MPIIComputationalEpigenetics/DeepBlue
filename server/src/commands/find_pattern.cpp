@@ -38,13 +38,13 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::ANNOTATIONS, "Process an annotation that will contain all genomic positions from the given pattern.");
+        return CommandDescription(categories::ANNOTATIONS, "Generate a custom annotation of genomic regions based on a given pattern that appears in the genomic sequence. Be patient and gently as this command may need a few minutes for execution.");
       }
 
       static Parameters parameters_()
       {
         Parameter p[] = {
-          Parameter("pattern", serialize::STRING, "pattern (regular expression)"),
+          Parameter("pattern", serialize::STRING, "pattern (PERL regular expression)"),
           parameters::Genome,
           Parameter("overlap", serialize::BOOLEAN, "if the matching should do overlap search"),
           parameters::UserKey

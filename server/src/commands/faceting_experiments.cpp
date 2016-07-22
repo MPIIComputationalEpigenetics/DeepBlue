@@ -1,5 +1,5 @@
 //
-//  faceti_experiments.cpp
+//  faceting_experiments.cpp
 //  DeepBlue Epigenomic Data Server
 //  File created by Felipe Albrecht on 25.06.13.
 //  Copyright (c) 2016 Max Planck Institute for Informatics. All rights reserved.
@@ -44,7 +44,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::EXPERIMENTS, "Experiments faceting.");
+        return CommandDescription(categories::EXPERIMENTS, "Summarize the controlled_vocabulary fields, from experiments that match the selection criteria. It is similar to the 'collection_experiments_count' command, but this command return the summarization for all controlled_vocabulary terms.");
       }
 
       static Parameters parameters_()
@@ -53,7 +53,7 @@ namespace epidb {
           parameters::GenomeMultiple,
           Parameter("type", serialize::STRING, "type of the experiment: peaks or signal", true),
           Parameter("epigenetic_mark", serialize::STRING, "name(s) of selected epigenetic mark(s)", true),
-          Parameter("biosource", serialize::STRING, "name(s) of selected biosource(s)", true),
+          parameters::BioSourceMultiple,
           Parameter("sample", serialize::STRING, "id(s) of selected sample(s)", true),
           Parameter("technique", serialize::STRING, "name(s) of selected technique(s)", true),
           Parameter("project", serialize::STRING, "name(s) of selected projects", true),

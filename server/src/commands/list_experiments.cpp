@@ -39,7 +39,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::EXPERIMENTS, "Lists all existing experiments.");
+        return CommandDescription(categories::EXPERIMENTS, " List the DeepBlue Experiments that matches the search criteria defined by this command parameters.");
       }
 
       static Parameters parameters_()
@@ -48,7 +48,7 @@ namespace epidb {
           parameters::GenomeMultiple,
           Parameter("type", serialize::STRING, "type of the experiment: peaks or signal", true),
           Parameter("epigenetic_mark", serialize::STRING, "name(s) of selected epigenetic mark(s)", true),
-          Parameter("biosource", serialize::STRING, "name(s) of selected biosource(s)", true),
+          parameters::BioSourceMultiple,
           Parameter("sample", serialize::STRING, "id(s) of selected sample(s)", true),
           Parameter("technique", serialize::STRING, "name(s) of selected technique(s)", true),
           Parameter("project", serialize::STRING, "name(s) of selected projects", true),
@@ -61,7 +61,7 @@ namespace epidb {
       static Parameters results_()
       {
         Parameter p[] = {
-          Parameter("experiments", serialize::LIST, "experiment names")
+          Parameter("experiments", serialize::LIST, "experiment names and IDS")
         };
         Parameters results(&p[0], &p[0] + 1);
         return results;

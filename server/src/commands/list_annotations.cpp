@@ -38,7 +38,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::ANNOTATIONS, "Lists all existing annotations.");
+        return CommandDescription(categories::ANNOTATIONS, "List all annotations of genomic regions currently available in DeepBlue.");
       }
 
       static Parameters parameters_()
@@ -54,7 +54,7 @@ namespace epidb {
       static Parameters results_()
       {
         Parameter p[] = {
-          Parameter("annotations", serialize::LIST, "annotation ids")
+          Parameter("annotations", serialize::LIST, "annotations names and IDs")
         };
         Parameters results(&p[0], &p[0] + 1);
         return results;

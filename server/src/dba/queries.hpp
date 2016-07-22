@@ -76,11 +76,17 @@ namespace epidb {
                                   mongo::BSONObj &regions_query, std::vector<std::string> &experiments_id,
                                   std::string &msg);
 
+      bool build_experiment_query(const mongo::BSONObj &query,
+                                  mongo::BSONObj &regions_query, std::string &msg);
+
       bool retrieve_annotation_select_query(const std::string &user_key, const mongo::BSONObj &query,
                                             processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg);
 
       bool retrieve_genes_select_query(const std::string &user_key, const mongo::BSONObj &query,
                                        processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg);
+
+      bool retrieve_gene_expression_select_query(const std::string &user_key, const mongo::BSONObj &query,
+          processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg);
 
       bool retrieve_intersection_query(const std::string &user_key, const mongo::BSONObj &query,
                                        processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg);
@@ -89,7 +95,7 @@ namespace epidb {
                                 processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg);
 
       bool retrieve_extend_query(const std::string &user_key, const mongo::BSONObj &query,
-                                processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg);
+                                 processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg);
 
       bool retrieve_merge_query(const std::string &user_key, const mongo::BSONObj &query,
                                 processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg);
@@ -115,6 +121,9 @@ namespace epidb {
       bool get_columns_from_dataset(const DatasetId &dataset_id, std::vector<mongo::BSONObj> &columns, std::string &msg);
 
       bool is_canceled(processing::StatusPtr status, std::string msg);
+
+      bool find_annotation_pattern(const std::string &genome, const std::string &pattern, const bool overlap,
+                                   DatasetId &dataset_id, std::string &msg);
     }
   }
 }

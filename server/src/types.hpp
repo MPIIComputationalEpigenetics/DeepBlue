@@ -18,6 +18,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <cstdint>
 
 namespace epidb {
 	typedef uint32_t Position;

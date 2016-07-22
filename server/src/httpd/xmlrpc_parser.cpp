@@ -243,7 +243,7 @@ namespace epidb {
         // remove closed element from param stack
         self->params_.pop_back();
         // if a parent parameter exists, append it
-        if (self->params_.size() != 0) {
+        if (!self->params_.empty()) {
           serialize::ParameterPtr parent_param = self->params_.back();
           if (parent_param->type() == serialize::LIST) {
             parent_param->add_child(last_param);

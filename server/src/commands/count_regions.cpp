@@ -37,7 +37,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::OPERATIONS, "Send a request to count the number of regions in the result of the given query.");
+        return CommandDescription(categories::OPERATIONS, " Return the number of genomic regions present in the query.");
       }
 
       static  Parameters parameters_()
@@ -77,7 +77,7 @@ namespace epidb {
         }
 
         if (!dba::exists::query(query_id, user_key, msg)) {
-          result.add_error("Invalid query id: '" + query_id + "'" + msg);
+          result.add_error(Error::m(ERR_INVALID_QUERY_ID, query_id));
           return false;
         }
 

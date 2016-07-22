@@ -39,13 +39,13 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::GENERAL_INFORMATION, "Lists all terms from the given controlled vocabulary that are used.");
+        return CommandDescription(categories::GENERAL_INFORMATION, "List all terms used by the Experiments mandatory metadata that have at least one Experiment or Annotation using them.");
       }
 
       static Parameters parameters_()
       {
         Parameter p[] = {
-          Parameter("controlled_vocabulary", serialize::STRING, "id of the data"),
+          Parameter("controlled_vocabulary", serialize::STRING, "controlled vocabulary name"),
           parameters::UserKey
         };
         Parameters params(&p[0], &p[0] + 2);
@@ -79,23 +79,8 @@ namespace epidb {
         }
 
         std::string collection_key;
-        if (controlled_vocabulary == dba::Collections::EPIGENETIC_MARKS()) {
-          collection_key = "$norm_epigenetic_mark";
-        } else if (controlled_vocabulary == dba::Collections::GENOMES()) {
-          collection_key = "$norm_genome";
-        } else if (controlled_vocabulary == dba::Collections::BIOSOURCES()) {
-          collection_key = "$sample_info.norm_biosource_name";
-        } else if (controlled_vocabulary == dba::Collections::SAMPLES()) {
-          collection_key = "$sample_id";
-        } else if (controlled_vocabulary == dba::Collections::TECHNIQUES()) {
-          collection_key = "$norm_technique";
-        } else if (controlled_vocabulary == dba::Collections::PROJECTS()) {
-          collection_key = "$norm_project";
-        } else {
-          result.add_error("Controlled vocabulary " + controlled_vocabulary + " does not exist. Available controlled vocabularies: " +
-                           dba::Collections::EPIGENETIC_MARKS() + ", " + dba::Collections::GENOMES() + ", " +
-                           dba::Collections::BIOSOURCES() + ", " + dba::Collections::SAMPLES() + ", " +
-                           dba::Collections::TECHNIQUES() + ", " + dba::Collections::PROJECTS());
+        if (!dba::list::get_controlled_vocabulary_key(controlled_vocabulary, collection_key, msg)) {
+          result.add_error(msg);
           return false;
         }
 

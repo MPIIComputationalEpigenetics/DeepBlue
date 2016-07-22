@@ -45,15 +45,27 @@ class TestExperiments(helpers.TestCase):
     res, qid1 = epidb.select_regions("test_exp1", "hg19", None, None, None, None, None, None, None, self.admin_key)
     self.assertSuccess(res, qid1)
 
-    res = epidb.create_column_type_calculated("calculated", "description", "return value_of('START') - value_of('END') * value_of('VALUE')", self.admin_key)
+    res = epidb.create_column_type_calculated("calculated_error", "description", "return value_of('SCORE')", self.admin_key)
     self.assertSuccess(res)
-
-
-    (s, req) = epidb.get_regions(qid1, "CHROMOSOME,START,END,VALUE, calculated", self.admin_key)
+    (s, req) = epidb.get_regions(qid1, "CHROMOSOME,START,END,VALUE, calculated_error", self.admin_key)
     regions = self.get_regions_request(req)
+    self.assertEqual(regions.split("\n")[0], "chr1\t0\t10\t8.1235\tInvalid column name SCORE")
 
+
+    res = epidb.create_column_type_calculated("calculated_dummy", "description", "return value_of('START') - value_of('END') * value_of('VALUE')", self.admin_key)
+    self.assertSuccess(res)
+    (s, req) = epidb.get_regions(qid1, "CHROMOSOME,START,END,VALUE, calculated_dummy", self.admin_key)
+    regions = self.get_regions_request(req)
     r =regions.split("\n")[0].split("\t")[4]
     self.assertEqual(r, '-81.234570')
+
+
+    res = epidb.create_column_type_calculated("calculated_norm_by_length", "description", "return math.sqrt(value_of('VALUE') / (value_of('END') - value_of('START')))", self.admin_key)
+    self.assertSuccess(res)
+    (s, req) = epidb.get_regions(qid1, "CHROMOSOME,START,END,VALUE, calculated_norm_by_length", self.admin_key)
+    regions = self.get_regions_request(req)
+    r =regions.split("\n")[0].split("\t")[4]
+    self.assertEqual(r, '0.901302')
 
 
   def test_calculated_metafield(self):
@@ -141,7 +153,7 @@ class TestExperiments(helpers.TestCase):
 
     # missing column definition
     (s, req) = epidb.get_regions(qid1, "CHROMOSOME,START,END,VALUE,@CALCULATED(return log(value_of('VALUE'))), calculated,@CALCULATED(em = value_of('@EPIGENETIC_MARK') if em == 'Methylation' then return 'it is methylation!' else return 'it is not methylation' end)", self.admin_key)
-    self.assertEqual(req, "123000:Column name 'calculated' does not exist.")
+    self.assertEqual(req, "125000:Column name 'calculated' does not exist.")
 
     # missing math. before log
     (s, req) = epidb.get_regions(qid1, "CHROMOSOME,START,END,VALUE,@CALCULATED(return log(value_of('VALUE'))), @CALCULATED(em = value_of('@EPIGENETIC_MARK') if em == 'Methylation' then return 'it is methylation!' else return 'it is not methylation' end)", self.admin_key)

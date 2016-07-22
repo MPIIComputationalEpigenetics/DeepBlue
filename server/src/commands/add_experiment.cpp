@@ -50,7 +50,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::EXPERIMENTS, "Inserts a new experiment with the given parameters.");
+        return CommandDescription(categories::EXPERIMENTS, "Add an Experiment in DeepBlue. An Experiment describes the characteristics of a specific Epigenetic Mark with respect to a single sample. The technology used and project must be informed as well. Extra metadata can be specified in addition to the mandatory meta information.");
       }
 
       static Parameters parameters_()
@@ -65,7 +65,7 @@ namespace epidb {
           Parameter("description", serialize::STRING, "description of the experiment"),
           Parameter("data", serialize::DATASTRING, "the BED formated data"),
           Parameter("format", serialize::STRING, "format of the provided data"),
-          Parameter("extra_metadata", serialize::MAP, "additional metadata"),
+          parameters::AdditionalExtraMetadata,
           parameters::UserKey
         };
         Parameters params(&p[0], &p[0] + 11);
@@ -151,7 +151,7 @@ namespace epidb {
           ss << "Invalid epigenetic mark: ";
           ss << epigenetic_mark;
           ss << ".";
-          if (names.size() > 0) {
+          if (!names.empty()) {
             ss << " It is suggested the following names: ";
             ss << utils::vector_to_string(names);
           }
@@ -169,7 +169,7 @@ namespace epidb {
           ss << "Invalid technique name: ";
           ss << technique;
           ss << ".";
-          if (names.size() > 0) {
+          if (!names.empty()) {
             ss << " The following names are suggested: ";
             ss << utils::vector_to_string(names);
           }
@@ -189,7 +189,7 @@ namespace epidb {
           ss << "Invalid project name. ";
           ss << project;
           ss << ".";
-          if (names.size() > 0) {
+          if (!names.empty()) {
             ss << " The following names are suggested: ";
             ss << utils::vector_to_string(names);
           }

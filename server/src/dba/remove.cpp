@@ -131,19 +131,19 @@ namespace epidb {
         return true;
       }
 
-      bool gene_set(const std::string &id, const std::string &user_key, std::string &msg)
+      bool gene_model(const std::string &id, const std::string &user_key, std::string &msg)
       {
-        mongo::BSONObj gene_set;
-        if (!data::gene_set(id, gene_set, msg)) {
-          msg = "Gene set " + id + " not found";
+        mongo::BSONObj gene_model;
+        if (!data::gene_model(id, gene_model, msg)) {
+          msg = "Gene model " + id + " not found";
           return false;
         }
 
-        if (!has_permission(gene_set, user_key, true, msg)) {
+        if (!has_permission(gene_model, user_key, true, msg)) {
           return false;
         }
 
-        int dataset_id = gene_set[KeyMapper::DATASET()].Int();
+        int dataset_id = gene_model[KeyMapper::DATASET()].Int();
 
         if (!helpers::remove_all(Collections::GENES(), BSON(KeyMapper::DATASET() << dataset_id), msg)) {
           return false;
@@ -155,11 +155,11 @@ namespace epidb {
         }
 
         // Delete from collection
-        if (!helpers::remove_one(helpers::collection_name(Collections::GENE_SETS()), id, msg)) {
+        if (!helpers::remove_one(helpers::collection_name(Collections::GENE_MODELS()), id, msg)) {
           return false;
         }
 
-        if (!helpers::notify_change_occurred(Collections::GENE_SETS(), msg)) {
+        if (!helpers::notify_change_occurred(Collections::GENE_MODELS(), msg)) {
           return false;
         }
 
@@ -169,6 +169,46 @@ namespace epidb {
 
         return true;
       }
+
+      bool gene_expression(const std::string &id, const std::string &user_key, std::string &msg)
+      {
+        mongo::BSONObj gene_expression;
+        if (!data::gene_expression(id, gene_expression, msg)) {
+          msg = "Gene expression " + id + " not found";
+          return false;
+        }
+
+        if (!has_permission(gene_expression, user_key, true, msg)) {
+          return false;
+        }
+
+        int dataset_id = gene_expression[KeyMapper::DATASET()].Int();
+
+        if (!helpers::remove_all(Collections::GENE_SINGLE_EXPRESSIONS(), BSON(KeyMapper::DATASET() << dataset_id), msg)) {
+          return false;
+        }
+
+        // delete from full text search
+        if (!search::remove(id, msg)) {
+          return false;
+        }
+
+        // Delete from collection
+        if (!helpers::remove_one(helpers::collection_name(Collections::GENE_EXPRESSIONS()), id, msg)) {
+            return false;
+        }
+
+        if (!helpers::notify_change_occurred(Collections::GENE_EXPRESSIONS(), msg)) {
+          return false;
+        }
+
+        if (!helpers::notify_change_occurred(Collections::GENE_SINGLE_EXPRESSIONS(), msg)) {
+          return false;
+        }
+
+        return true;
+      }
+
 
       bool experiment(const std::string &id, const std::string &user_key, std::string &msg)
       {

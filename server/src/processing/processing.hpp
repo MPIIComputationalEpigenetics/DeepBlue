@@ -26,6 +26,7 @@
 #include <string>
 #include <vector>
 
+#include "../datatypes/regions.hpp"
 #include "../extras/utils.hpp"
 
 namespace epidb {
@@ -48,6 +49,7 @@ namespace epidb {
       RETRIEVE_QUERY_REGION_SET = 36,
       RETRIEVE_GENES_DATA = 37,
       RETRIEVE_FLANK_QUERY = 38,
+      RETRIEVE_GENE_EXPRESSIONS_DATA = 39,
       PROCESS_AGGREGATE = 50,
       FORMAT_OUTPUT = 80
     };
@@ -99,16 +101,26 @@ namespace epidb {
 
     typedef std::shared_ptr<Status> StatusPtr;
 
+    struct CoverageInfo {
+      const std::string chromosome_name;
+      size_t chromosome_size;
+      size_t total;
+    };
+
     StatusPtr build_status(const std::string& _id, const long long maximum_memory);
     StatusPtr build_dummy_status();
 
     bool count_regions(const std::string &query_id, const std::string &user_key, processing::StatusPtr status, size_t &count, std::string &msg);
+
+    bool coverage(const std::string &query_id, const std::string &genome, const std::string &user_key, processing::StatusPtr status, std::vector<CoverageInfo> &coverage_infos, std::string &msg);
 
     bool get_regions(const std::string &query_id, const std::string &format, const std::string &user_key, processing::StatusPtr status, StringBuilder &sb, std::string &msg);
 
     bool score_matrix(const std::vector<std::pair<std::string, std::string>> &experiments_formats, const std::string &aggregation_function, const std::string &regions_query_id, const std::string &user_key, processing::StatusPtr status, std::string &matrix, std::string &msg);
 
     bool get_experiments_by_query(const std::string &query_id, const std::string &user_key, processing::StatusPtr status, std::vector<utils::IdName>& experiments, std::string &msg);
+
+    bool format_regions(const std::string &output_format, ChromosomeRegionsList &chromosomeRegionsList, processing::StatusPtr status, StringBuilder &sb, std::string &msg);
   }
 }
 

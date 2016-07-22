@@ -38,7 +38,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::BIOSOURCES, "Inserts a new biosource with the given parameters.");
+        return CommandDescription(categories::BIOSOURCES, "Add a BioSource to DeepBlue. A BioSource refers to a term describing the origin of a given sample, such as a tissue or cell line.");
       }
 
       static Parameters parameters_()
@@ -46,7 +46,7 @@ namespace epidb {
         Parameter p[] = {
           Parameter("name", serialize::STRING, "biosource name"),
           Parameter("description", serialize::STRING, "description of the biosource"),
-          Parameter("extra_metadata", serialize::MAP, "additional metadata"),
+          parameters::AdditionalExtraMetadata,
           parameters::UserKey
         };
         Parameters params(&p[0], &p[0] + 4);

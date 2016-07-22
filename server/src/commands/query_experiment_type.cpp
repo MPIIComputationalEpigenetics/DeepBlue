@@ -29,7 +29,6 @@
 
 #include "../engine/commands.hpp"
 #include "../engine/engine.hpp"
-#include "../engine/request.hpp"
 
 #include "../extras/serialize.hpp"
 
@@ -43,8 +42,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::OPERATIONS,
-                                  "Return information for the given ID (or IDs).");
+        return CommandDescription(categories::OPERATIONS, "Filter the query ID for regions associated with experiments of a given type. For example, it is possible to select only peaks using this command with the 'peaks' parameter.");
       }
 
       static  Parameters parameters_()

@@ -23,7 +23,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::ADMINISTRATION, "Modifies one field of a user.");
+        return CommandDescription(categories::ADMINISTRATION, "Modify an User information.");
       }
 
       static  Parameters parameters_()

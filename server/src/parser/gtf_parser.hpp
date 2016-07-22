@@ -27,6 +27,8 @@
 
 #include <memory>
 
+#include "../extras/utils.hpp"
+
 #include "gtf.hpp"
 
 namespace epidb {

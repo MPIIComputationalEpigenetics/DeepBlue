@@ -243,6 +243,26 @@ EXPERIMENTS = {
     ])
   },
 
+  "hg19_big_2_chr19": {
+    "genome": "hg19",
+    "epigenetic_mark": "H3K4me3",
+    "sample_id": None,
+    "technique": "tech2",
+    "project": "ENCODE",
+    "description": "desc",
+    "format": ",".join([
+      "CHROMOSOME",
+      "START",
+      "END",
+      "NAME",
+      "SCORE",
+      "STRAND",
+      "P_VALUE",
+      "Q_VALUE",
+      "PEAK"
+    ])
+  },
+
   "hg19_small": {
     "genome": "hg19",
     "epigenetic_mark": "H3K4me3",
@@ -251,7 +271,27 @@ EXPERIMENTS = {
     "project": "ENCODE",
     "description": "desc",
     "format": ""
-  }
+  },
+
+  "deepshitty": {
+    "genome": "hg18",
+    "epigenetic_mark": "Methylation",
+    "sample_id": None,
+    "technique": "tech1",
+    "project": "ENCODE",
+    "description": "desc1",
+    "format": ",".join([
+      "CHROMOSOME",
+      "START",
+      "END",
+      "P_VALUE",
+      "SIGNAL_VALUE",
+      "AVG_METHYL_LEVEL",
+      "PER_CPG",
+      "PER_GC",
+      "SUM_SQUARES"
+    ])
+  },
 }
 
 COLUMNS = [

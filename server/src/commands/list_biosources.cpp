@@ -38,13 +38,13 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::BIOSOURCES, "Lists all existing biosources.");
+        return CommandDescription(categories::BIOSOURCES, "List BioSources included in DeepBlue. A BioSource refers to a term describing the origin of a given sample, such as a tissue or cell line. It is possible to filter the BioSources by their extra_metadata fields content. These fields vary depending on the original data source.");
       }
 
       static Parameters parameters_()
       {
         Parameter p[] = {
-          Parameter("extra_metadata", serialize::MAP, "Key-value that must match the biosource extra_metadata."),
+          parameters::ExtraMetadata,
           parameters::UserKey
         };
         Parameters params(&p[0], &p[0] + 2);
@@ -54,7 +54,7 @@ namespace epidb {
       static Parameters results_()
       {
         Parameter p[] = {
-          Parameter("biosources", serialize::LIST, "biosources")
+          Parameter("biosources", serialize::LIST, "biosources names and IDS")
         };
         Parameters results(&p[0], &p[0] + 1);
         return results;

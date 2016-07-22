@@ -38,7 +38,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::ADMINISTRATION, "Initializes the system with the given user as administrator.");
+        return CommandDescription(categories::ADMINISTRATION, "Initializes the DeepBlue system and return the administrator user key. It must be used only once at each DeepBlue installation.");
       }
 
       static Parameters parameters_()

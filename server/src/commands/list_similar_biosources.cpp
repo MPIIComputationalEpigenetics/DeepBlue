@@ -38,7 +38,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::BIOSOURCES, "Lists all biosources similar to the one provided.");
+        return CommandDescription(categories::BIOSOURCES, "List all BioSources that have a similar name compared to the provided name. A BioSource refers to a term describing the origin of a given sample, such as a tissue or cell line. The similarity is calculated using the Levenshtein method.");
       }
 
       static Parameters parameters_()
@@ -54,7 +54,7 @@ namespace epidb {
       static Parameters results_()
       {
         Parameter p[] = {
-          Parameter("biosources", serialize::LIST, "similar biosources")
+          parameters::BioSource,
         };
         Parameters results(&p[0], &p[0] + 1);
         return results;

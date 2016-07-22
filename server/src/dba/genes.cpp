@@ -26,6 +26,7 @@
 #include "../connection/connection.hpp"
 
 #include "../datatypes/metadata.hpp"
+#include "../dba/helpers.hpp"
 
 #include "../parser/gtf.hpp"
 
@@ -34,9 +35,13 @@
 #include "annotations.hpp"
 #include "collections.hpp"
 #include "full_text.hpp"
+#include "genes.hpp"
 #include "helpers.hpp"
+#include "info.hpp"
 #include "remove.hpp"
 #include "users.hpp"
+
+#include "../errors.hpp"
 
 namespace epidb {
   namespace dba {
@@ -71,8 +76,8 @@ namespace epidb {
                           const mongo::BSONObj& extra_metadata_obj,
                           const std::string &user_key, const std::string &ip,
                           int &dataset_id,
-                          std::string &gene_set_id,
-                          mongo::BSONObj &gene_set_metadata,
+                          std::string &gene_model_id,
+                          mongo::BSONObj &gene_model_metadata,
                           std::string &msg)
       {
         if (!helpers::get_increment_counter("datasets", dataset_id, msg) ||
@@ -81,22 +86,23 @@ namespace epidb {
         }
 
         int _id;
-        if (!helpers::get_increment_counter(Collections::GENE_SETS(), _id, msg) ||
-            !helpers::notify_change_occurred(Collections::GENE_SETS(), msg))  {
+        if (!helpers::get_increment_counter(Collections::GENE_MODELS(), _id, msg) ||
+            !helpers::notify_change_occurred(Collections::GENE_MODELS(), msg))  {
           return false;
         }
-        gene_set_id = "gs" + utils::integer_to_string(_id);
+        gene_model_id = "gs" + utils::integer_to_string(_id);
 
-        mongo::BSONObjBuilder gene_set_metadata_builder;
-        gene_set_metadata_builder.append("_id", gene_set_id);
-        gene_set_metadata_builder.append(KeyMapper::DATASET(), dataset_id);
-        gene_set_metadata_builder.append("name", name);
-        gene_set_metadata_builder.append("norm_name", norm_name);
-        gene_set_metadata_builder.append("description", description);
-        gene_set_metadata_builder.append("norm_description", norm_description);
-        gene_set_metadata_builder.append("extra_metadata", extra_metadata_obj);
+        mongo::BSONObjBuilder gene_model_metadata_builder;
+        gene_model_metadata_builder.append("_id", gene_model_id);
+        gene_model_metadata_builder.append(KeyMapper::DATASET(), dataset_id);
+        gene_model_metadata_builder.append("name", name);
+        gene_model_metadata_builder.append("norm_name", norm_name);
+        gene_model_metadata_builder.append("format", format);
+        gene_model_metadata_builder.append("description", description);
+        gene_model_metadata_builder.append("norm_description", norm_description);
+        gene_model_metadata_builder.append("extra_metadata", extra_metadata_obj);
 
-        gene_set_metadata = gene_set_metadata_builder.obj();
+        gene_model_metadata = gene_model_metadata_builder.obj();
         return true;
       }
 
@@ -117,7 +123,7 @@ namespace epidb {
         return true;
       }
 
-      mongo::BSONObj to_bson(const int dataset_id, const std::string& gene_set_id, const std::string& gene_id, const parser::GTFRow& row)
+      mongo::BSONObj to_bson(const int dataset_id, const std::string& gene_model_id, const std::string& gene_id, const parser::GTFRow& row)
       {
         mongo::BSONObjBuilder bob;
 
@@ -151,14 +157,14 @@ namespace epidb {
                   datatypes::Metadata extra_metadata,
                   const parser::GTFPtr &gtf,
                   const std::string &user_key, const std::string &ip,
-                  std::string &gene_set_id, std::string &msg)
+                  std::string &gene_model_id, std::string &msg)
       {
-        mongo::BSONObj gene_set_metadata;
+        mongo::BSONObj gene_model_metadata;
         mongo::BSONObj extra_metadata_obj = datatypes::metadata_to_bson(extra_metadata);
         int dataset_id;
 
         if (!build_metadata(name, norm_name, description, norm_description, "GTF", extra_metadata_obj,
-                            user_key, ip, dataset_id, gene_set_id, gene_set_metadata, msg)) {
+                            user_key, ip, dataset_id, gene_model_id, gene_model_metadata, msg)) {
           return false;
         }
 
@@ -166,23 +172,23 @@ namespace epidb {
         if (!build_upload_info(user_key, ip, "GTF", upload_info, msg)) {
           return false;
         }
-        mongo::BSONObjBuilder gene_set_builder;
-        gene_set_builder.appendElements(gene_set_metadata);
-        gene_set_builder.append("upload_info", upload_info);
+        mongo::BSONObjBuilder gene_model_builder;
+        gene_model_builder.appendElements(gene_model_metadata);
+        gene_model_builder.append("upload_info", upload_info);
 
-        mongo::BSONObj e = gene_set_builder.obj();
+        mongo::BSONObj e = gene_model_builder.obj();
         Connection c;
-        c->insert(helpers::collection_name(Collections::GENE_SETS()), e);
+        c->insert(helpers::collection_name(Collections::GENE_MODELS()), e);
         if (!c->getLastError().empty()) {
           msg = c->getLastError();
           c.done();
           return false;
         }
 
-        if (!search::insert_full_text(Collections::GENE_SETS(), gene_set_id, gene_set_metadata, msg)) {
+        if (!search::insert_full_text(Collections::GENE_MODELS(), gene_model_id, gene_model_metadata, msg)) {
           c.done();
           std::string new_msg;
-          if (!remove::gene_set(gene_set_id, user_key, new_msg)) {
+          if (!remove::gene_model(gene_model_id, user_key, new_msg)) {
             msg = msg + " " + new_msg;
           }
           return false;
@@ -190,6 +196,8 @@ namespace epidb {
 
         size_t total_size = 0;
         size_t total_genes = 0;
+
+        std::vector<mongo::BSONObj> rows_obj_bulk;
 
         for (const auto& row :  gtf->rows()) {
 
@@ -200,21 +208,22 @@ namespace epidb {
           }
 
           std::string gene_id = "gn" + utils::integer_to_string(_id);
-          mongo::BSONObj row_obj = to_bson(dataset_id, gene_set_id, gene_id, row);
+          mongo::BSONObj row_obj = to_bson(dataset_id, gene_model_id, gene_id, row);
 
-          c->insert(helpers::collection_name(Collections::GENES()), row_obj);
-          if (!c->getLastError().empty()) {
-            msg = c->getLastError();
-            c.done();
-            return false;
-          }
-
+          rows_obj_bulk.emplace_back(std::move(row_obj));
           total_genes++;
         }
 
-        if (!update_upload_info(Collections::GENE_SETS(), gene_set_id, total_size, total_genes, msg)) {
+        c->insert(helpers::collection_name(Collections::GENES()), rows_obj_bulk);
+        if (!c->getLastError().empty()) {
+          msg = c->getLastError();
+          c.done();
+          return false;
+        }
+
+        if (!update_upload_info(Collections::GENE_MODELS(), gene_model_id, total_size, total_genes, msg)) {
           std::string new_msg;
-          if (!remove::gene_set(gene_set_id, user_key, new_msg)) {
+          if (!remove::gene_model(gene_model_id, user_key, new_msg)) {
             msg = msg + " " + new_msg;
           }
           return false;
@@ -224,47 +233,303 @@ namespace epidb {
         return true;
       }
 
-      bool get_genes_from_database(const std::vector<std::string> &chromosomes, const int start, const int end,
-                                   const std::vector<std::string>& genes, const std::string& gene_set,
-                                   ChromosomeRegionsList& chromosomeRegionsList, std::string& msg )
+
+      bool build_expression_metadata(const std::string &sample_id, const int replica,
+                                     const std::string &format,
+                                     const mongo::BSONObj& extra_metadata_obj,
+                                     const std::string &user_key, const std::string &ip,
+                                     int &dataset_id,
+                                     std::string &gene_model_id,
+                                     mongo::BSONObj &gene_model_metadata,
+                                     std::string &msg)
       {
+        if (!helpers::get_increment_counter("datasets", dataset_id, msg) ||
+            !helpers::notify_change_occurred("datasets", msg))  {
+          return false;
+        }
+
+        int _id;
+        if (!helpers::get_increment_counter(Collections::GENE_EXPRESSIONS(), _id, msg) ||
+            !helpers::notify_change_occurred(Collections::GENE_EXPRESSIONS(), msg))  {
+          return false;
+        }
+        gene_model_id = "gx" + utils::integer_to_string(_id);
+
+        mongo::BSONObjBuilder gene_model_metadata_builder;
+        gene_model_metadata_builder.append("_id", gene_model_id);
+        gene_model_metadata_builder.append(KeyMapper::DATASET(), dataset_id);
+        gene_model_metadata_builder.append("sample_id", sample_id);
+        gene_model_metadata_builder.append("replica", replica);
+        gene_model_metadata_builder.append("extra_metadata", extra_metadata_obj);
+
+        if (format == "cufflinks") {
+          const auto& cufflinks_format = parser::FileFormat::cufflinks_format();
+          gene_model_metadata_builder.append("format", cufflinks_format.format());
+          gene_model_metadata_builder.append("columns", cufflinks_format.to_bson());
+        } else {
+          msg = "Format '" + format + "' is unknow";
+          return false;
+        }
+
+        std::map<std::string, std::string> sample_data;
+        if (!info::get_sample_by_id(sample_id, sample_data, msg, true)) {
+          return false;
+        }
+        mongo::BSONObjBuilder sample_builder;
+        std::map<std::string, std::string>::iterator it;
+        for (it = sample_data.begin(); it != sample_data.end(); ++it) {
+          if ((it->first != "_id") && (it->first != "user")) {
+            sample_builder.append(it->first, it->second);
+          }
+        }
+        gene_model_metadata_builder.append("sample_info", sample_builder.obj());
+
+        gene_model_metadata = gene_model_metadata_builder.obj();
+        return true;
+      }
+
+      mongo::BSONObj to_bson(const int dataset_id, const std::string& gene_model_id, const std::string& gene_id, const parser::FPKMRow& row)
+      {
+        mongo::BSONObjBuilder bob;
+
+        bob.append("_id", gene_id);
+        bob.append(KeyMapper::DATASET(), dataset_id);
+        bob.append(KeyMapper::TRACKING_ID(), row.tracking_id());
+        bob.append(KeyMapper::GENE_ID(), row.gene_id());
+        bob.append(KeyMapper::GENE_SHORT_NAME(), row.gene_short_name());
+        bob.append(KeyMapper::FPKM(), row.fpkm());
+        bob.append(KeyMapper::FPKM_LO(), row.fpkm_lo());
+        bob.append(KeyMapper::FPKM_HI(), row.fpkm_hi());
+        bob.append(KeyMapper::FPKM_STATUS(), row.fpkm_status());
+
+        return bob.obj();
+      }
+
+      bool insert_expression(const std::string& sample_id, const int replica, datatypes::Metadata extra_metadata,
+                             const parser::FPKMPtr &fpkm,  const std::string &user_key, const std::string &ip,
+                             std::string &gene_expression_id, std::string &msg)
+      {
+        mongo::BSONObj gene_expression_metadata;
+        mongo::BSONObj extra_metadata_obj = datatypes::metadata_to_bson(extra_metadata);
+        int dataset_id;
+
+        if (!build_expression_metadata(sample_id, replica, "cufflinks", extra_metadata_obj,
+                                       user_key, ip, dataset_id, gene_expression_id, gene_expression_metadata, msg)) {
+          return false;
+        }
+
+        mongo::BSONObj upload_info;
+        if (!build_upload_info(user_key, ip, "cufflinks", upload_info, msg)) {
+          return false;
+        }
+        mongo::BSONObjBuilder gene_expression_builder;
+        gene_expression_builder.appendElements(gene_expression_metadata);
+        gene_expression_builder.append("upload_info", upload_info);
+
+        mongo::BSONObj e = gene_expression_builder.obj();
         Connection c;
-
-        mongo::BSONArray genes_array = utils::build_regex_array(genes);
-        mongo::BSONArray genes_array_2 = genes_array;
-
-        mongo::BSONObj gene_set_obj = c->findOne(dba::helpers::collection_name(dba::Collections::GENE_SETS()), BSON("norm_name" << gene_set));
-
-        if (gene_set_obj.isEmpty()) {
-          msg = "gene set " + gene_set + " does not exists";
+        c->insert(helpers::collection_name(Collections::GENE_EXPRESSIONS()), e);
+        if (!c->getLastError().empty()) {
+          msg = c->getLastError();
           c.done();
           return false;
         }
 
-        auto dataset_id = gene_set_obj[KeyMapper::DATASET()].Int();
+        if (!search::insert_full_text(Collections::GENE_EXPRESSIONS(), gene_expression_id, gene_expression_metadata, msg)) {
+          c.done();
+          std::string new_msg;
+          if (!remove::gene_expression(gene_expression_id, user_key, new_msg)) {
+            msg = msg + " " + new_msg;
+          }
+          return false;
+        }
 
-        mongo::BSONObj b_in_gene_name = BSON((KeyMapper::ATTRIBUTES() + ".gene_name") << BSON("$in" << genes_array));
-        mongo::BSONObj b_in_gene_id = BSON((KeyMapper::ATTRIBUTES() + ".gene_id") << BSON("$in" << genes_array_2));
+        size_t total_size = 0;
+        size_t total_genes = 0;
+
+        std::vector<mongo::BSONObj> rows_obj_bulk;
+
+        for (const auto& row :  fpkm->rows()) {
+
+          int _id;
+          if (!helpers::get_increment_counter("gene_single_expressions", _id, msg) ||
+              !helpers::notify_change_occurred(Collections::GENE_SINGLE_EXPRESSIONS(), msg))  {
+            return false;
+          }
+
+          std::string gene_id = "gx" + utils::integer_to_string(_id);
+          mongo::BSONObj row_obj = to_bson(dataset_id, gene_expression_id, gene_id, row);
+
+          rows_obj_bulk.emplace_back(std::move(row_obj));
+          total_genes++;
+        }
+
+
+        c->insert(helpers::collection_name(Collections::GENE_SINGLE_EXPRESSIONS()), rows_obj_bulk);
+        if (!c->getLastError().empty()) {
+          msg = c->getLastError();
+          c.done();
+          return false;
+        }
+
+
+        if (!update_upload_info(Collections::GENE_EXPRESSIONS(), gene_expression_id, total_size, total_genes, msg)) {
+          std::string new_msg;
+          if (!remove::gene_model(gene_expression_id, user_key, new_msg)) {
+            msg = msg + " " + new_msg;
+          }
+          return false;
+        }
+
+        c.done();
+        return true;
+      }
+
+      bool build_genes_database_query(const std::vector<std::string> &chromosomes, const int start, const int end,
+                                      const std::vector<std::string>& genes, const std::vector<std::string>& norm_gene_models,
+                                      const bool exactly,
+                                      mongo::Query& query, std::string& msg)
+      {
+
+        Connection c;
+        mongo::BSONObj gene_model_obj = c->findOne(dba::helpers::collection_name(dba::Collections::GENE_MODELS()),
+                                        BSON("norm_name" << BSON("$in" << utils::build_array(norm_gene_models))));
+        c.done();
+
+        if (gene_model_obj.isEmpty()) {
+          msg = "gene model " + utils::vector_to_string<std::string>(norm_gene_models) + " does not exists";
+          return false;
+        }
 
         mongo::BSONObjBuilder bob;
+        auto dataset_id = gene_model_obj[KeyMapper::DATASET()].Int();
         bob.append(KeyMapper::DATASET(), dataset_id);
-        bob.append("$or", BSON_ARRAY(b_in_gene_name << b_in_gene_id));
+
+        if (!genes.empty()) {
+          mongo::BSONArray genes_array = utils::build_regex_array(genes);
+          mongo::BSONArray genes_array_2 = genes_array;
+
+          mongo::BSONObj b_in_gene_name = BSON((KeyMapper::ATTRIBUTES() + ".gene_name") << BSON("$in" << genes_array));
+          mongo::BSONObj b_in_gene_id = BSON((KeyMapper::ATTRIBUTES() + ".gene_id") << BSON("$in" << genes_array_2));
+          bob.append("$or", BSON_ARRAY(b_in_gene_name << b_in_gene_id));
+        }
 
         if (!chromosomes.empty()) {
           bob.append(KeyMapper::CHROMOSOME(), BSON("$in" << utils::build_array(chromosomes)));
         }
 
-        if (start > -1) {
-          bob.append(KeyMapper::END(), BSON("$gte" << start));
-        }
-        if (end > -1) {
-          bob.append(KeyMapper::START(), BSON("$lte" << end));
+        if (exactly) {
+          if (start > -1) {
+            bob.append(KeyMapper::START(), start);
+          }
+          if (end > -1) {
+            bob.append(KeyMapper::END(), end);
+          }
+        } else {
+          if (start > -1) {
+            bob.append(KeyMapper::END(), BSON("$gte" << start));
+          }
+          if (end > -1) {
+            bob.append(KeyMapper::START(), BSON("$lte" << end));
+          }
         }
 
         mongo::BSONObj filter = bob.obj();
 
-        mongo::Query query = mongo::Query(filter).sort(BSON(KeyMapper::CHROMOSOME() << 1 << KeyMapper::START() << 1));
+        query = mongo::Query(filter).sort(BSON(KeyMapper::CHROMOSOME() << 1 << KeyMapper::START() << 1));
+
+        return true;
+      }
+
+      bool get_gene_attribute(const std::string& chromosome, const Position start, const Position end,
+                              const std::string& attribute_name, const std::string& gene_model,
+                              std::string& attibute_value, std::string& msg)
+      {
+        mongo::BSONObj gene;
+        if (!get_gene(chromosome, start, end, gene_model, gene, msg)) {
+          if (msg.empty()) {
+            msg = Error::m(ERR_INVALID_GENE_LOCATION, chromosome, start, end, gene_model);
+          }
+          return false;
+        }
+
+        mongo::BSONObj gene_attributes = gene[KeyMapper::ATTRIBUTES()].Obj();
+        if (!gene_attributes.hasElement(attribute_name)) {
+          msg = Error::m(ERR_INVALID_GENE_ATTRIBUTE, attribute_name);
+        }
+
+        attibute_value = gene_attributes[attribute_name].String();
+
+        return true;
+      }
+
+      bool get_gene(const std::string& chromosome, const Position start, const Position end, const std::string& gene_model,
+                    mongo::BSONObj& gene, std::string& msg)
+      {
+        std::string norm_gene_model = utils::normalize_name(gene_model);
+
+        const std::vector<std::string> genes_empty;
+        const std::vector<std::string> gene_models = {norm_gene_model};
+        const std::vector<std::string> chromosomes = {chromosome};
+        mongo::Query query;
+
+        if (!dba::genes::build_genes_database_query(chromosomes, start, end, genes_empty, gene_models, true, query, msg)) {
+          msg = "";
+          return false;
+        }
+
+        return helpers::get_one(Collections::GENES(), query, gene);
+      }
+
+      bool get_genes(const std::vector<std::string> &chromosomes, const Position start, const Position end, const std::vector<std::string>& genes_names_or_id,
+                     const std::string &user_key, const std::vector<std::string> &norm_gene_models,  std::vector<mongo::BSONObj>& genes, std::string &msg)
+      {
+        mongo::Query query;
+        if (!dba::genes::build_genes_database_query(chromosomes, start, end, genes_names_or_id, norm_gene_models, false, query, msg)) {
+          return false;
+        }
+
+        std::vector<mongo::BSONObj> genes_db_objs;
+        if (!helpers::get(Collections::GENES(), query, genes_db_objs, msg)) {
+          return false;
+        }
+
+        for (const auto& gene_db_obj : genes_db_objs) {
+          mongo::BSONObjBuilder gene_builder;
+          gene_builder.append("chromosome", gene_db_obj[KeyMapper::CHROMOSOME()].String());
+          gene_builder.append("start", gene_db_obj[KeyMapper::START()].numberLong());
+          gene_builder.append("end", gene_db_obj[KeyMapper::END()].numberLong());
+          gene_builder.append("source", gene_db_obj[KeyMapper::SOURCE()].String());
+          gene_builder.append("feature", gene_db_obj[KeyMapper::FEATURE()].String());
+          gene_builder.append("score", gene_db_obj[KeyMapper::SCORE()].numberDouble());
+          gene_builder.append("strand", gene_db_obj[KeyMapper::STRAND()].String());
+          gene_builder.append("frame", gene_db_obj[KeyMapper::FRAME()].String());
+
+          const mongo::BSONObj& attributes = gene_db_obj[KeyMapper::ATTRIBUTES()].Obj();
+          gene_builder.appendElements(attributes);
+
+          genes.emplace_back(gene_builder.obj());
+        }
+
+        return true;
+      }
+
+      bool get_genes_from_database(const std::vector<std::string> &chromosomes, const Position start, const Position end,
+                                   const std::vector<std::string>& genes, const std::string& norm_gene_model,
+                                   ChromosomeRegionsList& chromosomeRegionsList, std::string& msg )
+      {
+        std::vector<std::string> gene_models;
+        gene_models.push_back(norm_gene_model);
+
+        mongo::Query query;
+
+        if (!build_genes_database_query(chromosomes, start, end, genes, gene_models, false, query, msg)) {
+          return false;
+        }
+
         std::string collection = dba::helpers::collection_name(dba::Collections::GENES());
+
+        Connection c;
         auto data_cursor = c->query(collection, query);
 
         std::string actual_chromosome("");
@@ -305,6 +570,150 @@ namespace epidb {
         return true;
       }
 
+      bool get_gene_expressions_from_database(const std::vector<std::string> &sample_ids, const  std::vector<long>& replicas,
+                                              const std::vector<std::string> &genes,
+                                              const std::string& norm_gene_model,  ChromosomeRegionsList& chromosomeRegionsList, std::string& msg)
+      {
+        Connection c;
+        mongo::BSONObj gene_model_obj = c->findOne(dba::helpers::collection_name(dba::Collections::GENE_MODELS()),
+                                        BSON("norm_name" << norm_gene_model));
+
+        if (gene_model_obj.isEmpty()) {
+          msg = "gene model " + norm_gene_model + " does not exists";
+          c.done();
+          return false;
+        }
+
+        mongo::BSONArray ges_datasets = helpers::build_dataset_ids_arrays(Collections::GENE_EXPRESSIONS(), BSON(
+                                          "sample_id" << BSON("$in" << utils::build_array(sample_ids))  <<
+                                          "replica" << BSON("$in" << utils::build_array_long(replicas))
+                                        ));
+
+        mongo::BSONObjBuilder bob;
+        bob.append(KeyMapper::DATASET(), BSON("$in" << ges_datasets));
+        if (!genes.empty()) {
+          bob.append(KeyMapper::TRACKING_ID(), BSON("$in" << utils::build_array(genes)));
+        }
+
+        auto query = bob.obj();
+
+        std::string collection = dba::helpers::collection_name(dba::Collections::GENE_SINGLE_EXPRESSIONS());
+        auto data_cursor = c->query(collection, query);
+
+        std::map<std::string, Regions> gene_expressions;
+
+        while (data_cursor->more()) {
+          mongo::BSONObj gene = data_cursor->next().getOwned();
+
+          mongo::BSONObj::iterator e_it = gene.begin();
+
+          std::string gene_expression_id = e_it.next().String();
+          DatasetId dataset_id = e_it.next().numberInt();
+          std::string tracking_id = e_it.next().String();
+          std::string gene_id = e_it.next().String();
+          std::string gene_short_name = e_it.next().String();
+          Score fpkm = e_it.next().numberDouble();
+          Score fpkm_lo = e_it.next().numberDouble();
+          Score fpkm_hi = e_it.next().numberDouble();
+          std::string fpkm_status = e_it.next().String();
+
+          std::string chromosome;
+          Position start;
+          Position end;
+
+          map_gene_location(tracking_id, norm_gene_model, chromosome, start, end, msg);
+
+          RegionPtr region = build_bed_region(start, end, dataset_id);
+          region->insert(tracking_id);
+          region->insert(gene_id);
+          region->insert(gene_short_name);
+          region->insert(fpkm);
+          region->insert(fpkm_lo);
+          region->insert(fpkm_hi);
+          region->insert(fpkm_status);
+
+          gene_expressions[chromosome].emplace_back(std::move(region));
+        }
+
+        for (auto &chromosome_regions : gene_expressions) {
+          std::sort(chromosome_regions.second.begin(), chromosome_regions.second.end(), RegionPtrComparer);
+          chromosomeRegionsList.emplace_back(chromosome_regions.first, std::move(chromosome_regions.second));
+        }
+
+        c.done();
+
+        return true;
+      }
+
+      struct GeneLocation {
+        std::string chromosome;
+        Position start;
+        Position end;
+
+        GeneLocation(std::string c, Position s, Position e) :
+          chromosome(c),
+          start(s),
+          end(e) {}
+      };
+
+      typedef std::map<std::string, GeneLocation> GeneModelCache;
+      typedef std::map<std::string, GeneModelCache> GeneModelsCache;
+
+      bool load_gene_model(const std::string& norm_gene_model, GeneModelCache &cache, std::string& msg)
+      {
+        std::vector<std::string> chromosomes;
+        std::vector<std::string> genes;
+        ChromosomeRegionsList chromosomeRegionsList;
+
+        if (!get_genes_from_database(chromosomes, -1, -1, genes, norm_gene_model, chromosomeRegionsList, msg)) {
+          return false;
+        }
+
+        for (const auto &chromosomes_regions : chromosomeRegionsList) {
+          const std::string &chromosome = chromosomes_regions.first;
+          const Regions &regions = chromosomes_regions.second;
+          for (const auto& region : regions) {
+            const GeneRegion* gene_region = static_cast<const GeneRegion *>(region.get());
+            const std::string& gene_id = gene_region->attributes().at("gene_id");
+            cache.emplace(std::piecewise_construct,
+                          std::forward_as_tuple(gene_id),
+                          std::forward_as_tuple(chromosome, gene_region->start(), gene_region->end()));
+
+          }
+        }
+
+        return true;
+      }
+
+      GeneModelsCache gene_models_cache;
+      bool map_gene_location(const std::string& gene_id, const std::string& gene_model,
+                             std::string& chromosome, Position& start, Position& end, std::string& msg)
+      {
+        // Put a lock here
+        if (gene_models_cache.find(gene_model) == gene_models_cache.end()) {
+          GeneModelCache cache;
+          if (!load_gene_model(gene_model, cache, msg)) {
+            return false;
+          }
+          gene_models_cache.emplace(std::piecewise_construct,
+                                    std::forward_as_tuple(gene_model),
+                                    std::forward_as_tuple(cache));
+        }
+        //
+
+        const auto &cache = gene_models_cache[gene_model];
+        auto it = cache.find(gene_id);
+        if (it != cache.end()) {
+          msg = "Gene ID " + gene_id + " not found in the gene model " + gene_model;
+        }
+
+        const auto &region = it->second;
+        chromosome = region.chromosome;
+        start = region.start;
+        end = region.end;
+
+        return true;
+      }
     }
   }
 }

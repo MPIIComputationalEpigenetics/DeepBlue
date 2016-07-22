@@ -37,6 +37,7 @@
 
 #include "../connection/connection.hpp"
 
+#include "../dba/genes.hpp"
 #include "../dba/users.hpp"
 #include "../dba/queries.hpp"
 
@@ -251,6 +252,26 @@ namespace epidb {
         return true;
       }
 
+      // --
+
+      bool gene_models(const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg)
+      {
+        return helpers::get(Collections::GENE_MODELS(), result, msg);
+      }
+
+      bool gene_expressions(const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg)
+      {
+        return helpers::get(Collections::GENE_EXPRESSIONS(), result, msg);
+      }
+
+      bool genes(const std::string &user_key, const std::vector<std::string> &genes_id_or_name,
+                 const std::vector<std::string> &chromosomes,
+                 const Position start, const Position end,
+                 const std::vector<std::string> &norm_gene_models,  std::vector<mongo::BSONObj> &genes, std::string &msg)
+      {
+        return dba::genes::get_genes(chromosomes, start, end, genes_id_or_name, user_key, norm_gene_models, genes, msg);
+      }
+
       bool similar_biosources(const std::string &name, const std::string &user_key,
                               std::vector<utils::IdName> &result, std::string &msg)
       {
@@ -355,7 +376,7 @@ namespace epidb {
                                         const std::vector<serialize::ParameterPtr> epigenetic_marks, const std::vector<serialize::ParameterPtr> biosources,
                                         const std::vector<serialize::ParameterPtr> sample_ids, const std::vector<serialize::ParameterPtr> techniques,
                                         const std::vector<serialize::ParameterPtr> projects, const std::string user_key,
-                                        mongo::BSONObj& query, std::string msg)
+                                        mongo::BSONObj& query, std::string& msg)
       {
         mongo::BSONObjBuilder args_builder;
 
@@ -408,7 +429,7 @@ namespace epidb {
             }
 
             if (!found) {
-              msg = Error::m(ERR_INVALID_PROJECT_NAME, project_name);
+              msg = Error::m(ERR_INVALID_PROJECT, project_name);
               return false;
             }
           }
@@ -433,6 +454,46 @@ namespace epidb {
         query = dba::query::build_query(args_builder.obj());
 
         return true;
+      }
+
+      bool get_controlled_vocabulary_key(const std::string& controlled_vocabulary,
+                                         std::string &collection_key, std::string &msg)
+      {
+        if (controlled_vocabulary == dba::Collections::EPIGENETIC_MARKS()) {
+          collection_key = "$norm_epigenetic_mark";
+          return true;
+        }
+
+        if (controlled_vocabulary == dba::Collections::GENOMES()) {
+          collection_key = "$norm_genome";
+          return true;
+        }
+
+        if (controlled_vocabulary == dba::Collections::BIOSOURCES()) {
+          collection_key = "$sample_info.norm_biosource_name";
+          return true;
+        }
+
+        if (controlled_vocabulary == dba::Collections::SAMPLES()) {
+          collection_key = "$sample_id";
+          return true;
+        }
+
+        if (controlled_vocabulary == dba::Collections::TECHNIQUES()) {
+          collection_key = "$norm_technique";
+          return true;
+        }
+
+        if (controlled_vocabulary == dba::Collections::PROJECTS()) {
+          collection_key = "$norm_project";
+          return true;
+        }
+
+        msg = "Controlled vocabulary " + controlled_vocabulary + " does not exist. Available controlled vocabularies: " +
+              dba::Collections::EPIGENETIC_MARKS() + ", " + dba::Collections::GENOMES() + ", " +
+              dba::Collections::BIOSOURCES() + ", " + dba::Collections::SAMPLES() + ", " +
+              dba::Collections::TECHNIQUES() + ", " + dba::Collections::PROJECTS();
+        return false;
       }
 
 
@@ -555,6 +616,36 @@ namespace epidb {
         return std::make_tuple(true, std::string(""));
       }
 
+      bool collection_experiments_count(const std::string controlled_vocabulary,
+                                        const mongo::BSONObj & experiments_query, const std::string &user_key,
+                                        std::vector<utils::IdNameCount> &experiments_count, std::string& msg)
+      {
+        std::vector<utils::IdName> user_projects;
+        if (!projects(user_key, user_projects, msg)) {
+          return false;
+        }
+        std::vector<std::string> project_names;
+        for (const auto& project : user_projects) {
+          project_names.push_back(project.name);
+        }
+        mongo::BSONArray projects_array = utils::build_array(project_names);
+
+        std::string key_name;
+        if (!get_controlled_vocabulary_key(controlled_vocabulary, key_name, msg)) {
+          return false;
+        }
+
+
+        std::unordered_map<std::string, std::vector<utils::IdNameCount>> faceting_result;
+        auto result = __collection_experiments_count(experiments_query, projects_array,
+                      controlled_vocabulary, key_name, faceting_result);
+        if (!std::get<0>(result)) {
+          msg = std::get<1>(result);
+          return false;
+        }
+        experiments_count = faceting_result[controlled_vocabulary];
+        return true;
+      }
 
       bool faceting(const mongo::BSONObj& experiments_query, const std::string &user_key,
                     std::unordered_map<std::string, std::vector<utils::IdNameCount>> &faceting_result,

@@ -25,12 +25,15 @@
 #include <unordered_map>
 #include <vector>
 
-#include <mongo/bson/bson.h>
 #include <mongo/client/dbclient.h>
 
 #include "../datatypes/metadata.hpp"
 
 #include "../extras/utils.hpp"
+
+namespace mongo {
+  class BSONObj;
+}
 
 namespace epidb {
   namespace dba {
@@ -71,6 +74,15 @@ namespace epidb {
 
       bool column_types(const std::string &user_key, std::vector<utils::IdName> &content, std::string  &msg);
 
+      bool gene_models(const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg);
+
+      bool gene_expressions(const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg);
+
+      bool genes(const std::string &user_key, const std::vector<std::string> &genes_id_or_name,
+                 const std::vector<std::string> &chromosomes,
+                 const Position start, const Position end,
+                 const std::vector<std::string> &norm_gene_models,  std::vector<mongo::BSONObj> &genes, std::string &msg);
+
       /**
        * List similars
        */
@@ -108,15 +120,20 @@ namespace epidb {
                                         const std::vector<serialize::ParameterPtr> epigenetic_marks, const std::vector<serialize::ParameterPtr> biosources,
                                         const std::vector<serialize::ParameterPtr> sample_ids, const std::vector<serialize::ParameterPtr> techniques,
                                         const std::vector<serialize::ParameterPtr> projects, const std::string user_key,
-                                        mongo::BSONObj& query, std::string msg);
+                                        mongo::BSONObj& query, std::string &msg);
 
       /**
        * List in use
        */
+      bool get_controlled_vocabulary_key(const std::string& controlled_vocabulary,
+                                         std::string &collection_key, std::string &msg);
 
       bool in_use(const std::string &collection, const std::string &field_name, const std::string &user_key,
                   std::vector<utils::IdNameCount> &names, std::string &msg);
 
+      bool collection_experiments_count(const std::string controlled_vocabulary,
+                                        const mongo::BSONObj & experiments_query, const std::string &user_key,
+                                        std::vector<utils::IdNameCount> &experiments_count, std::string& msg);
 
       bool faceting(const mongo::BSONObj& experimentsq_uery, const std::string &user_key,
                     std::unordered_map<std::string, std::vector<utils::IdNameCount> > &result,

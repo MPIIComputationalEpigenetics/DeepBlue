@@ -26,7 +26,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::ADMINISTRATION, "Modifies one field of a user.");
+        return CommandDescription(categories::ADMINISTRATION, "Modifies a user information that only the administrator has the permission to change, for example, the user's permission_level (ADMIN, INCLUDE_COLLECTION_TERMS, INCLUDE_EXPERIMENTS, INCLUDE_ANNOTATIONS, GET_DATA, LIST_COLLECTIONS, NONE) and memory_limit (value in Megabytes).");
       }
 
       static  Parameters parameters_()

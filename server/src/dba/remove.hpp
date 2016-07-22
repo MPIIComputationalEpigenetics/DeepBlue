@@ -30,7 +30,9 @@ namespace epidb {
 
       bool annotation(const std::string &id, const std::string &user_id, std::string &msg);
 
-      bool gene_set(const std::string &id, const std::string &user_id, std::string &msg);
+      bool gene_model(const std::string &id, const std::string &user_id, std::string &msg);
+
+      bool gene_expression(const std::string &id, const std::string &user_id, std::string &msg);
 
       bool genome(const std::string &id, const std::string &user_id, std::string &msg);
 

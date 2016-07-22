@@ -74,14 +74,14 @@ namespace epidb {
   extern Error ERR_USER_FORMAT_MISSING;
   extern Error ERR_USER_GENOME_MISSING;
   extern Error ERR_USER_GENE_MISSING;
-  extern Error ERR_USER_GENE_SET_MISSING;
+  extern Error ERR_USER_GENE_MODEL_MISSING;
 
   extern Error ERR_FORMAT_CHROMOSOME_MISSING;
   extern Error ERR_FORMAT_START_MISSING;
   extern Error ERR_FORMAT_END_MISSING;
   extern Error ERR_FORMAT_COLUMN_NAME_MISSING;
 
-  extern Error ERR_INVALID_EXPERIMENT_NAME;
+  extern Error ERR_INVALID_EXPERIMENT;
   extern Error ERR_INVALID_EXPERIMENT_ID;
   extern Error ERR_INVALID_EXPERIMENT_COLUMN;
 
@@ -90,14 +90,18 @@ namespace epidb {
 
   extern Error ERR_INVALID_PRA_PROCESSED_ANNOTATION_NAME;
 
-  extern Error ERR_INVALID_PROJECT_NAME;
+  extern Error ERR_INVALID_PROJECT;
   extern Error ERR_INVALID_PROJECT_ID;
   extern Error ERR_PERMISSION_PROJECT;
 
+  extern Error ERR_INVALID_TECHNIQUE;
   extern Error ERR_INVALID_TECHNIQUE_ID;
+
   extern Error ERR_INVALID_BIOSOURCE_ID;
+  extern Error ERR_INVALID_EPIGENETIC_MARK;
   extern Error ERR_INVALID_EPIGENETIC_MARK_ID;
-  extern Error ERR_INVALID_GENE_SET_ID;
+  extern Error ERR_INVALID_GENE_MODEL_ID;
+  extern Error ERR_INVALID_GENE_EXPRESSION_ID;
   extern Error ERR_INVALID_TILING_REGIONS_ID;
   extern Error ERR_INVALID_COLUMN_TYPE_ID;
 
@@ -108,6 +112,11 @@ namespace epidb {
 
   extern Error ERR_INVALID_GENOME_NAME;
   extern Error ERR_INVALID_GENOME_ID;
+
+  extern Error ERR_INVALID_GENE_ID;
+  extern Error ERR_INVALID_GENE_NAME;
+  extern Error ERR_INVALID_GENE_LOCATION;
+  extern Error ERR_INVALID_GENE_ATTRIBUTE;
 
   extern Error ERR_INVALID_SAMPLE_ID;
 
@@ -122,7 +131,7 @@ namespace epidb {
 
   extern Error ERR_DUPLICATED_BIOSOURCE_NAME;
   extern Error ERR_DUPLICATED_EXPERIMENT_NAME;
-  extern Error ERR_DUPLICATED_GENE_SET_NAME;
+  extern Error ERR_DUPLICATED_GENE_MODEL_NAME;
 
   extern Error ERR_MORE_EMBRACING_BIOSOURCE_NAME;
 
@@ -158,11 +167,16 @@ namespace epidb {
 
   extern Error ERR_DATASET_NOT_FOUND;
 
+  extern Error ERR_NAME_NOT_FOUND;
+
   extern Error ERR_DATABASE_CONNECTION;
   extern Error ERR_DATABASE_EXCEPTION;
   extern Error ERR_DATABASE_INVALID_BIOSOURCE;
 
   extern Error ERR_REQUEST_CANCELED;
+  extern Error ERR_REQUEST_ID_INVALID;
+
+  extern Error ERR_INVALID_INTERNAL_NAME;
 }
 
 #endif

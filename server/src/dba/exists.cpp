@@ -73,9 +73,9 @@ namespace epidb {
         return helpers::check_exist(Collections::EXPERIMENTS(), query);
       }
 
-      bool gene_set(const std::string &name)
+      bool gene_model(const std::string &name)
       {
-        return helpers::check_exist(Collections::GENE_SETS(), "norm_name", name);
+        return helpers::check_exist(Collections::GENE_MODELS(), "norm_name", name);
       }
 
       bool annotation(const std::string &name, const std::string &genome)

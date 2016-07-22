@@ -49,24 +49,27 @@
  * 10 - Query
  * 11 - Genome
  * 12 - Gene
- * 13 - Gene Set
+ * 13 - Gene model
  * 14 - Pre-processed annotation
  * 15 - Collection
  * 16 - ..
  * 20 - Chromosome
  * 21 - Start
  * 22 - End
- * 23 - Column Name
- * 24 - Column Type
- * 25 - Metacolumn
-*  26 - Length
+*  23 - Length
+ * 24 - Location
+ * 25 - Column Name
+ * 26 - Column Type
+ * 27 - Metacolumn
  * 30 - Request
+ * 31 - Gene expression
  * 40 - Tiling region
  * 50 - Dataset
  * 51 - GSM Identifier
  * 60 - Input
  * 61 - Input sub-item
  * 66 - Internal
+ * 88 - Name
  * 99 - Identifier
  */
 
@@ -80,6 +83,7 @@
  * 006 - Invalid type
  * 007 - Invalid column name
  * 100 - Do not have permission
+ *
  *
  * 200 - Invalid User Key
  * 250 - Invalid email and password combination
@@ -112,12 +116,12 @@ namespace epidb {
   Error ERR_USER_FORMAT_MISSING("109002", "The Format is missing. Please, specify the Format.");
   Error ERR_USER_GENOME_MISSING("111002", "The Genome is missing. Please, specify the Genome.");
   Error ERR_USER_GENE_MISSING("112002", "The Gene is missing. Please, specify the Gene.");
-  Error ERR_USER_GENE_SET_MISSING("113002", "The Gene Set is missing. Please, specify the Gene Set.");
+  Error ERR_USER_GENE_MODEL_MISSING("113002", "The Gene Model is missing. Please, specify the Gene Model.");
 
   Error ERR_FORMAT_CHROMOSOME_MISSING("120002", "The CHROMOSOME is missing in the format. Please, inform the CHROMOSOME column in the Format.");
   Error ERR_FORMAT_START_MISSING("121002", "The START is missing in the format. Please, inform the START column in the Format.");
   Error ERR_FORMAT_END_MISSING("122002", "The END is missing in the format. Please, inform the END column in the Format.");
-  Error ERR_FORMAT_COLUMN_NAME_MISSING("123002", "The Column Name is missing in the format. Please, inform the column name in the Format.");
+  Error ERR_FORMAT_COLUMN_NAME_MISSING("125002", "The Column Name is missing in the format. Please, inform the column name in the Format.");
 
   Error ERR_INVALID_USER_NAME("100000", "Invalid User name '{}'.");
   Error ERR_INVALID_USER_ID("100003", "Invalid User ID '{}'.");
@@ -126,8 +130,15 @@ namespace epidb {
 
   Error ERR_DUPLICATED_EXPERIMENT_NAME("102001", "The experiment name '{}' is already being used.");
 
-  Error ERR_DUPLICATED_GENE_SET_NAME("113001", "The gene set '{}' is already being used.");
-  Error ERR_INVALID_GENE_SET_ID("113003", "Unable to find gene set ID '{}'.");
+  Error ERR_DUPLICATED_GENE_MODEL_NAME("113001", "The Gene Model '{}' is already being used.");
+  Error ERR_INVALID_GENE_MODEL_ID("113003", "Unable to find Gene Model ID '{}'.");
+
+  Error ERR_INVALID_GENE_EXPRESSION_ID("131003", "Unable to find Gene Expression ID '{}'.");
+
+  Error ERR_INVALID_GENE_NAME("113000", "Gene Name '{}' was not found in the Gene Model '{}'.");
+  Error ERR_INVALID_GENE_ID("113003", "Gene ID '{}' was not found in the Gene Model '{}'.");
+  Error ERR_INVALID_GENE_LOCATION("113150", "There are not gene in the chromosome '{}' location {} - {} in the Gene Model '{}'.");
+  Error ERR_INVALID_GENE_ATTRIBUTE("113150", "The Gene '{}' does not have the attribute '{}'.");
 
   Error ERR_INVALID_BIOSOURCE_NAME("104000", "Unable to find BioSource '{}'. No BioSource or Synonym was defined with this name.");
   Error ERR_INVALID_BIOSOURCE_ID("104003", "Uable to find BioSource ID '{}'. No BioSource or Synonym was defined with this ID.");
@@ -139,9 +150,10 @@ namespace epidb {
   Error ERR_INVALID_BIOSOURCE_SYNONYM("104400", "Invalid BioSource Synonym '{}'. A BioSource or a synonym with this name already exists.");
 
   Error ERR_DUPLICATED_EPIGENETIC_MARK_NAME("105001", "Duplicated Epigenetic Mark Name '{}'." );
+  Error ERR_INVALID_EPIGENETIC_MARK("105000", "Epigenetic Mark ID '{}' does not exists." );
   Error ERR_INVALID_EPIGENETIC_MARK_ID("105003", "Unable to find Epigenetic Mark ID '{}'." );
 
-  Error ERR_INVALID_PROJECT_NAME("107000", "Unable to find the project '{}'.");
+  Error ERR_INVALID_PROJECT("107000", "Project '{}' does not exist.");
   Error ERR_DUPLICATED_PROJECT_NAME("107001", "Duplicated Project Name '{}'.");
   Error ERR_INVALID_PROJECT_ID("107003", "Unable to find the project ID '{}'.");
   Error ERR_PERMISSION_PROJECT("107100", "You are not the project '{}' owner and neither an administrator.");
@@ -153,10 +165,11 @@ namespace epidb {
   Error ERR_INVALID_CHROMOSOME_NAME("120000", "Unable to find the chromosome '{}'.");
   Error ERR_INVALID_CHROMOSOME_NAME_GENOME("120002", "Unable to find the chromosome '{}' in the genome '{}'.");
 
+  Error ERR_INVALID_TECHNIQUE("106000", "Technique '{}' does not exist.");
   Error ERR_INVALID_TECHNIQUE_ID("106003", "Unable to find the technique ID '{}'.");
   Error ERR_DUPLICATED_TECHNIQUE_NAME("106001", "Duplicated Genome Name '{}'.");
 
-  Error ERR_INVALID_EXPERIMENT_NAME("101000", "Unable to find the experiment '{}'.");
+  Error ERR_INVALID_EXPERIMENT("101000", "Experiment '{}' does not exists.");
   Error ERR_INVALID_EXPERIMENT_ID("101003", "Unable to find the experiment ID '{}'.");
   Error ERR_INVALID_EXPERIMENT_COLUMN("101007", "The experiment '{}' does not have the column '{}'.");
 
@@ -172,20 +185,23 @@ namespace epidb {
 
   Error ERR_INVALID_PRA_PROCESSED_ANNOTATION_NAME("114000", "There is not {} annotation for the patterns '{}' for the genome '{}'.");
 
-  Error ERR_INVALID_COLUMN_NAME("123000", "Column name '{}' does not exist.");
-  Error ERR_INVALID_COLUMN_ID("123003", "Unable to find the column ID '{}'.");
-  Error ERR_DUPLICATED_COLUMN_NAME("123001", "Duplicated column name '{}'.");
+  Error ERR_INVALID_COLUMN_NAME("125000", "Column name '{}' does not exist.");
+  Error ERR_INVALID_COLUMN_ID("125003", "Unable to find the column ID '{}'.");
+  Error ERR_DUPLICATED_COLUMN_NAME("125001", "Duplicated column name '{}'.");
 
-  Error ERR_INVALID_COLUMN_TYPE_ID("124003", "Unable to find the column type ID '{}'." );
+  Error ERR_INVALID_COLUMN_TYPE_ID("126003", "Unable to find the column type ID '{}'." );
 
-  Error ERR_INVALID_META_COLUMN_NAME("125000", "The meta-column '{}' does not exist.");
+  Error ERR_INVALID_META_COLUMN_NAME("127000", "The meta-column '{}' does not exist.");
 
   Error ERR_REQUEST_CANCELED("130300", "The request was canceled.");
+  Error ERR_REQUEST_ID_INVALID("130003", "The request ID '{}' is invalid.");
+
+  Error ERR_NAME_NOT_FOUND("188000", "Element name {} of the collection {} not found.");
 
   Error ERR_UNKNOW_QUERY_TYPE("310004", "Unknown query type '{}'");
 
-  Error ERR_COLUMN_TYPE_MISSING("323002", "The Column Type '{}' does not exist.");
-  Error ERR_COLUMN_TYPE_NAME_MISSING("323003", "The Column Type '{}' does not exist.");
+  Error ERR_COLUMN_TYPE_MISSING("326002", "The Column Type '{}' does not exist.");
+  Error ERR_COLUMN_TYPE_NAME_MISSING("326003", "The Column Type '{}' does not exist.");
 
   Error ERR_DATASET_NOT_FOUND("350000", "Dataset id {} not found.");
 
@@ -194,7 +210,7 @@ namespace epidb {
   Error ERR_INVALID_IDENTIFIER("19900", "Invalid identifier '{}'.");
 
   Error ERR_INVALID_START("121003", "Invalid starting position '{}'.");
-  Error ERR_INVALID_LENGTH("126003", "Invalid length '{}'.");
+  Error ERR_INVALID_LENGTH("123003", "Invalid length '{}'.");
 
   Error ERR_INVALID_GSM_IDENTIFIER("151000", "Invalid GSM identifier '{}'.");
 
@@ -206,5 +222,7 @@ namespace epidb {
   Error ERR_DATABASE_CONNECTION("466555", "MongoDB connection error: '{}'.");
   Error ERR_DATABASE_EXCEPTION("466666", "MongoDB exception at operation '{}': '{}'.");
   Error ERR_DATABASE_INVALID_BIOSOURCE("404666", "BioSource '{}' not found.");
+
+  Error ERR_INVALID_INTERNAL_NAME("366000", "Unable to retrieve the name of the internal name '{}'.");
 
 };

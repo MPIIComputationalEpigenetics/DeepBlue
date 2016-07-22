@@ -27,6 +27,7 @@
 
 #include "../datatypes/metadata.hpp"
 
+#include "../parser/fpkm.hpp"
 #include "../parser/gtf.hpp"
 
 namespace epidb {
@@ -48,12 +49,33 @@ namespace epidb {
                   datatypes::Metadata extra_metadata,
                   const parser::GTFPtr &gtf,
                   const std::string &user_key, const std::string &ip,
-                  std::string &gene_set_id, std::string &msg);
+                  std::string &gene_model_id, std::string &msg);
 
-      bool get_genes_from_database(const std::vector<std::string> &chromosomes, const int start, const int end,
-                                   const std::vector<std::string>& genes, const std::string& gene_set,
+      bool insert_expression(const std::string& sample_id, const int replica, datatypes::Metadata extra_metadata,
+                             const parser::FPKMPtr &fpkm,  const std::string &user_key, const std::string &ip,
+                             std::string &gene_expression_id, std::string &msg);
+
+      bool get_gene_attribute(const std::string& chromosome, const Position start, const Position end,
+                              const std::string& attribute_name, const std::string& gene_model,
+                              std::string& attibute_value, std::string& msg);
+
+      bool get_gene(const std::string& chromosome, const Position start, const Position end, const std::string& gene_model,
+                    mongo::BSONObj& gene, std::string& msg);
+
+      bool get_genes(const std::vector<std::string> &chromosomes, const Position start, const Position end, const std::vector<std::string>& genes_names_or_id,
+                     const std::string &user_key, const std::vector<std::string> &norm_gene_models,  std::vector<mongo::BSONObj>& genes, std::string &msg);
+
+
+      bool get_genes_from_database(const std::vector<std::string> &chromosomes, const Position start, const Position end,
+                                   const std::vector<std::string>& genes, const std::string& norm_gene_model,
                                    ChromosomeRegionsList& chromosomeRegionsList, std::string& msg );
 
+      bool get_gene_expressions_from_database(const std::vector<std::string> &sample_ids, const  std::vector<long>& replicas,
+                                              const std::vector<std::string> &geness,
+                                              const std::string& norm_gene_model,  ChromosomeRegionsList& chromosomeRegionsList, std::string& msg);
+
+      bool map_gene_location(const std::string& gene_id, const std::string& gene_model,
+                             std::string& chromosome, Position& start, Position& end, std::string& msg);
     }
   }
 }

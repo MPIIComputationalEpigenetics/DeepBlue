@@ -67,7 +67,7 @@ class TestClone(helpers.TestCase):
     aid1 = self.insert_annotation(epidb, "Cpg Islands")
 
     (s, msg) = epidb.clone_dataset(aid1, "New CpG Islands", "", "", "", "", "", "CHROMOSOME,START,END,INVALID_COLUMN", {"new":"true"}, self.admin_key)
-    self.assertEqual(msg, "123000:Column name 'INVALID_COLUMN' does not exist.")
+    self.assertEqual(msg, "125000:Column name 'INVALID_COLUMN' does not exist.")
 
     (s, m) = epidb.create_column_type_simple("NICE_COLUMN", "",  "string", self.admin_key)
     self.assertSuccess(s,m)

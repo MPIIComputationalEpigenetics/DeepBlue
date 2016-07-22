@@ -22,11 +22,6 @@
 #include <sstream>
 #include <map>
 
-#include <boost/iostreams/filtering_streambuf.hpp>
-#include <boost/iostreams/copy.hpp>
-#include <boost/iostreams/filter/bzip2.hpp>
-#include <boost/iostreams/stream.hpp>
-
 #include "../dba/dba.hpp"
 #include "../dba/queries.hpp"
 #include "../dba/users.hpp"
@@ -35,7 +30,6 @@
 
 #include "../engine/commands.hpp"
 #include "../engine/engine.hpp"
-#include "../engine/request.hpp"
 
 #include "../extras/serialize.hpp"
 #include "../extras/utils.hpp"
@@ -50,7 +44,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::REQUESTS, "Get the request data.");
+        return CommandDescription(categories::REQUESTS, "Download the requested data. The output can be (i) a string (get_regions, score_matrix, and count_regions), or (ii) a list of ID and names (get_experiments_by_query), or (iii) a struct (coverage).");
       }
 
       static  Parameters parameters_()
@@ -66,7 +60,7 @@ namespace epidb {
       static Parameters results_()
       {
         Parameter p[] = {
-          Parameter("data", serialize::STRING, "The output can be (i) a string (get_regions, score_matrix, and count_regions), or (ii) a list of ID and names (get_experiments_by_query).", true)
+          Parameter("data", serialize::STRING, "the request data", true)
         };
         Parameters results(&p[0], &p[0] + 1);
         return results;
@@ -90,56 +84,12 @@ namespace epidb {
         }
 
         std::string file_content;
-        request::Data data;
-        request::DataType type = request::DataType::INVALID;
         if (!epidb::Engine::instance().user_owns_request(request_id, user.get_id())) {
           result.add_error("Request ID " + request_id + " not found.");
           return false;
         }
 
-        if (!epidb::Engine::instance().request_data(request_id, user_key, data, file_content, type, msg)) {
-          result.add_error(msg);
-          return false;
-        }
-
-        if (type == request::ID_NAMES) {
-          set_id_names_return(data.id_names, result);
-          return true;
-        }
-
-        if (type == request::REGIONS) {
-          std::istringstream inStream(file_content, std::ios::binary);
-          std::stringstream outStream;
-          boost::iostreams::filtering_streambuf< boost::iostreams::input> in;
-          in.push( boost::iostreams::bzip2_decompressor());
-          in.push( inStream );
-          boost::iostreams::copy(in, outStream);
-          result.add_string_content(outStream.str());
-          return true;
-        }
-
-        if (type == request::MAP) {
-          serialize::ParameterPtr map(new serialize::MapParameter());
-          for (auto &ss : data.strings) {
-            serialize::ParameterPtr p(new serialize::SimpleParameter(ss.second));
-            map->add_child(ss.first, std::move(p));
-          }
-
-          for (auto is : data.integers) {
-            serialize::ParameterPtr p(new serialize::SimpleParameter(is.second));
-            map->add_child(is.first, p);
-          }
-
-          for (auto fs : data.floats) {
-            serialize::ParameterPtr p(new serialize::SimpleParameter(fs.second));
-            map->add_child(fs.first, p);
-          }
-          result.add_param(map);
-          return true;
-        }
-
-        result.add_error("Internal Error: Invalid data type.");
-        return false;
+        return epidb::Engine::instance().request_data(request_id, user_key, result);
       }
     } getRequestDataCommand;
   }

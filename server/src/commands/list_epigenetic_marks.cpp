@@ -38,13 +38,13 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::EPIGENETIC_MARKS, "Lists all existing epigenetic marks.");
+        return CommandDescription(categories::EPIGENETIC_MARKS, "List Epigenetic Marks included in DeepBlue. This includes histone marks, DNA methylation, DNA sensitivity, etc. It is possible to filter the Epigenetic Marks by their extra_metadata field content.");
       }
 
       static Parameters parameters_()
       {
         Parameter p[] = {
-          Parameter("extra_metadata", serialize::MAP, "Key-value that must match the biosource extra_metadata."),
+          parameters::ExtraMetadata,
           parameters::UserKey
         };
         Parameters params(&p[0], &p[0] + 2);
@@ -54,7 +54,7 @@ namespace epidb {
       static Parameters results_()
       {
         Parameter p[] = {
-          Parameter("epigenetic_marks", serialize::LIST, "epigenetic mark names")
+          Parameter("epigenetic_marks", serialize::LIST, "epigenetic mark names and IDS")
         };
         Parameters results(&p[0], &p[0] + 1);
         return results;

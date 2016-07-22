@@ -35,7 +35,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::TECHNIQUES, "Inserts a technique with the given parameters.");
+        return CommandDescription(categories::TECHNIQUES, "Add an experimental Technique to DeepBlue.");
       }
 
       static Parameters parameters_()
@@ -43,7 +43,7 @@ namespace epidb {
         Parameter p[] = {
           Parameter("name", serialize::STRING, "technique name"),
           Parameter("description", serialize::STRING, "description of technique"),
-          Parameter("extra_metadata", serialize::MAP, "additional metadata"),
+          parameters::AdditionalExtraMetadata,
           parameters::UserKey
         };
         Parameters params(&p[0], &p[0] + 4);

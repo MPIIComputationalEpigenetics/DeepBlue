@@ -47,7 +47,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::ANNOTATIONS, "Inserts a new annotation with the given parameters.");
+        return CommandDescription(categories::ANNOTATIONS, "Add a custom annotation of genomic regions such as, for instance, promoters, transcription factor binding sites, or genes to DeepBlue. Annotations are a set genomic regions such as, for instance, promoters, transcription factor binding sites, or genes to DeepBlue.");
       }
 
       static Parameters parameters_()
@@ -58,7 +58,7 @@ namespace epidb {
           Parameter("description", serialize::STRING, "description of the annotation"),
           Parameter("data", serialize::DATASTRING, "the BED formatted data"),
           Parameter("format", serialize::STRING, "format of the provided data"),
-          Parameter("extra_metadata", serialize::MAP, "additional metadata"),
+          parameters::AdditionalExtraMetadata,
           parameters::UserKey
         };
         Parameters params(&p[0], &p[0] + 7);

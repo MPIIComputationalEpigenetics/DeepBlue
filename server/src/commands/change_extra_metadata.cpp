@@ -34,16 +34,15 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::DATA_MODIFICATION,
-                                  "Change the extra metadata content for experiments, annotations, biosources, and samples.");
+        return CommandDescription(categories::DATA_MODIFICATION, "Modify the extra metadata content of experiments, annotations, biosources, and samples. Use this command with an extra metadata key without value for removing this key. Extra metadata fields are optional non-standardized fields that are created during the import process. Only files uploaded by the user can me modified. The command 'clone_dataset' must be used if the user wants to modify a files that does not belong to him.");
       }
 
       static  Parameters parameters_()
       {
         Parameter p[] = {
           Parameter("id", serialize::STRING, "id of the data"),
-          Parameter("extra_metadata_key", serialize::STRING, "extra_metadata key"),
-          Parameter("extra_metadata_value", serialize::STRING, "extra_metadata key (empty for delete this key)"),
+          Parameter("key", serialize::STRING, "extra_metadata key"),
+          Parameter("value", serialize::STRING, "extra_metadata key (empty for delete this key)"),
           parameters::UserKey
         };
         Parameters params(&p[0], &p[0] + 4);

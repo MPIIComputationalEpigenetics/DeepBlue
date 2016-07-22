@@ -39,14 +39,14 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::SAMPLES, "Inserts a new sample of a given biosourcea.");
+        return CommandDescription(categories::SAMPLES, "Add a Sample to DeepBlue that is related to a BioSource.");
       }
 
       static Parameters parameters_()
       {
         Parameter p[] = {
-          Parameter("biosource_name", serialize::STRING, "biosource name"),
-          Parameter("extra_metadata", serialize::MAP, "sample extra metadata. You can include any key-value collection here."),
+          parameters::BioSource,
+          parameters::AdditionalExtraMetadata,
           parameters::UserKey
         };
         Parameters params(&p[0], &p[0] + 3);

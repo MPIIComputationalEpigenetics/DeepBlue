@@ -47,7 +47,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::OPERATIONS, "Selects experiments data. It is a simpler version of the select_regions command.");
+        return CommandDescription(categories::OPERATIONS, "Selects regions from Experiments by the experiments names.");
       }
 
       static  Parameters parameters_()
@@ -119,7 +119,7 @@ namespace epidb {
         }
 
         if (!has_exp_or_genome) {
-          result.add_error("At least one experiment_name or one genome must be informed.");
+          result.add_error("At least one experiment_name must be informed.");
           return false;
         }
 

@@ -38,6 +38,7 @@
 
 #include "../extras/utils.hpp"
 
+#include "annotations.hpp"
 #include "collections.hpp"
 #include "dba.hpp"
 #include "genes.hpp"
@@ -59,7 +60,7 @@ namespace epidb {
     namespace query {
 
       // TODO: Merge wtth users cache and use templates
-      class ExperimentNameDatasetIdCache {
+      class NameDatasetIdCache {
       private:
 
         std::map<std::string, DatasetId> name_dataset_id;
@@ -90,12 +91,13 @@ namespace epidb {
         }
       };
 
-      ExperimentNameDatasetIdCache experiment_name_dataset_id_cache;
-
+      NameDatasetIdCache experiment_name_dataset_id_cache;
+      NameDatasetIdCache annotation_pattern_cache;
 
       void invalidate_cache()
       {
         experiment_name_dataset_id_cache.invalidate();
+        annotation_pattern_cache.invalidate();
       }
 
 
@@ -264,6 +266,10 @@ namespace epidb {
           if (!retrieve_genes_select_query(user_key, query, status, regions, msg)) {
             return false;
           }
+        } else if (type == "gene_expressions_select") {
+          if (!retrieve_gene_expression_select_query(user_key, query, status, regions, msg)) {
+            return false;
+          }
         } else if (type == "filter") {
           if (!retrieve_filter_query(user_key, query, status, regions, msg)) {
             return false;
@@ -289,46 +295,6 @@ namespace epidb {
 
         return true;
       }
-
-      /*
-      bool get_possible_experiments_by_query(const std::string &user_key, const std::string &query_id,
-                                    processing::StatusPtr status, std::vector<utils::IdName> &experiments_name, std::string &msg) {
-
-
-                mongo::BSONObj query;
-        if (!helpers::get_one(Collections::QUERIES(), BSON("_id" << query_id), query)) {
-          msg = Error::m(ERR_INVALID_QUERY_ID, query_id);
-          return false;
-        }
-
-        const std::string& type = query["type"].str();
-
-        const mongo::BSONObj& args = query["args"].Obj();
-        if (args.hasField("cache") && args["cache"].String() == "yes") {
-          return cache::get_query_cache(user_key, query["derived_from"].String(), status, regions, msg);
-        }
-
-        if (type == "experiment_select") {
-          // get genome directly
-        } else if (type == "annotation_select") {
-          // get genome directly
-        } else if (type == "genes_select") {
-          // get genome from gene set
-        } else if (type == "tiling") {
-          // get genome directly
-        } else if (type == "input_regions") {
-          // get genome directly
-        } else {
-
-        get args
-       qid_1
-       qid_2
-       query_id
-        }
-
-      }
-
-      */
 
       bool get_experiments_by_query(const std::string &user_key, const std::string &query_id,
                                     processing::StatusPtr status, std::vector<utils::IdName> &experiments_name, std::string &msg)
@@ -506,7 +472,7 @@ namespace epidb {
             c->query(helpers::collection_name(Collections::EXPERIMENTS()), BSON("norm_name" << norm_name));
 
           if (!cursor->more()) {
-            msg = "Experiments name '" + experiment_name + "' not found";
+            msg = Error::m(ERR_INVALID_EXPERIMENT, experiment_name);
             c.done();
             return false;
           }
@@ -541,24 +507,11 @@ namespace epidb {
         return true;
       }
 
-      bool build_experiment_query(const mongo::BSONObj &query,
+      bool build_experiment_query(const mongo::BSONObj &args,
                                   mongo::BSONObj &regions_query, std::string &msg)
       {
-        mongo::BSONObj args = query["args"].Obj();
-
-        mongo::BSONArrayBuilder datasets_array_builder;
-
         const mongo::BSONObj args_query = build_query(args);
-        Connection c;
-        auto cursor = c->query(helpers::collection_name(Collections::EXPERIMENTS()), args_query);
-        while (cursor->more()) {
-          mongo::BSONObj p = cursor->next();
-          mongo::BSONElement dataset_id = p.getField(KeyMapper::DATASET());
-          datasets_array_builder.append(dataset_id.Int());
-        }
-        c.done();
-
-        mongo::BSONArray datasets_array = datasets_array_builder.arr();
+        mongo::BSONArray datasets_array = helpers::build_dataset_ids_arrays(Collections::EXPERIMENTS(), args_query);
 
         mongo::BSONObjBuilder regions_query_builder;
         regions_query_builder.append(KeyMapper::DATASET(), BSON("$in" << datasets_array));
@@ -593,19 +546,10 @@ namespace epidb {
         }
         annotations_query_builder.append("upload_info.done", true);
 
-        Connection c;
         mongo::BSONObj annotation_query = annotations_query_builder.obj();
-        auto cursor = c->query(helpers::collection_name(Collections::ANNOTATIONS()), annotation_query);
-        while (cursor->more()) {
-          mongo::BSONObj p = cursor->next();
-          mongo::BSONElement dataset_id = p.getField(KeyMapper::DATASET());
-          datasets_array_builder.append(dataset_id.Int());
-        }
-        c.done();
+        mongo::BSONArray datasets_array = helpers::build_dataset_ids_arrays(Collections::ANNOTATIONS(), annotation_query);
 
-        mongo::BSONArray datasets_array = datasets_array_builder.arr();
         mongo::BSONObjBuilder regions_query_builder;
-
         regions_query_builder.append(KeyMapper::DATASET(), BSON("$in" << datasets_array));
 
         if (args.hasField("start") && args.hasField("end")) {
@@ -631,11 +575,12 @@ namespace epidb {
         }
 
         mongo::BSONObj regions_query;
-        if (!build_experiment_query(query, regions_query, msg)) {
+        mongo::BSONObj args = query["args"].Obj();
+
+        if (!build_experiment_query(args, regions_query, msg)) {
           return false;
         }
 
-        mongo::BSONObj args = query["args"].Obj();
 
         std::vector<std::string> chromosomes = utils::build_vector(args["chromosomes"].Array());
         std::set<std::string> genomes = utils::build_set(args["norm_genomes"].Array());
@@ -740,8 +685,14 @@ namespace epidb {
 
         mongo::BSONObj args = query["args"].Obj();
         const std::vector<std::string> genes = utils::build_vector(args["genes"].Array());
-        const std::string gene_set = args["gene_set"].str();
-
+        // Honestly I dont like it, but since we changed these parameters and we already have a database with queries...
+        // TODO: manually change the database.
+        std::string gene_model;
+        if (args.hasField("gene_set")) {
+          gene_model = args["gene_set"].str();
+        } else {
+          gene_model = args["gene_model"].str();
+        }
 
         std::vector<std::string> chromosomes;
         if (args.hasField("chromosomes")) {
@@ -763,13 +714,53 @@ namespace epidb {
           end = std::numeric_limits<Position>::max();
         }
 
-        if (!genes::get_genes_from_database(chromosomes, start, end, genes, gene_set, regions, msg)) {
-            return false;
-          }
+        if (!genes::get_genes_from_database(chromosomes, start, end, genes, gene_model, regions, msg)) {
+          return false;
+        }
 
         return true;
       }
 
+      bool retrieve_gene_expression_select_query(const std::string &user_key, const mongo::BSONObj &query,
+          processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg)
+      {
+        processing::RunningOp runningOp = status->start_operation(processing::RETRIEVE_GENE_EXPRESSIONS_DATA, query);
+        if (is_canceled(status, msg)) {
+          return false;
+        }
+
+        mongo::BSONObj args = query["args"].Obj();
+
+        std::vector<std::string> sample_ids;
+        if (args.hasField("sample_ids")) {
+          sample_ids = utils::build_vector(args["sample_ids"].Array());
+        }
+
+        std::vector<long> replicas;
+        if (args.hasField("replicas")) {
+          replicas = utils::build_vector_long(args["replicas"].Array());
+        }
+
+        std::vector<std::string> genes;
+        if (args.hasField("genes")) {
+          genes = utils::build_vector(args["genes"].Array());
+        }
+
+        // Honestly I dont like it, but since we changed these parameters and we already have a database with queries...
+        // TODO: manually change the database.
+        std::string gene_model;
+        if (args.hasField("gene_set")) {
+          gene_model = args["gene_set"].str();
+        } else {
+          gene_model = args["gene_model"].str();
+        }
+
+        if (!genes::get_gene_expressions_from_database(sample_ids, replicas, genes, gene_model, regions, msg)) {
+          return false;
+        }
+
+        return true;
+      }
 
       bool retrieve_intersection_query(const std::string &user_key, const mongo::BSONObj &query,
                                        processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg)
@@ -811,16 +802,7 @@ namespace epidb {
 
           mongo::BSONArrayBuilder datasets_array_builder;
           const mongo::BSONObj query = build_query(args);
-          Connection c;
-          auto cursor = c->query(helpers::collection_name(Collections::EXPERIMENTS()), query);
-          while (cursor->more()) {
-            mongo::BSONObj p = cursor->next();
-            mongo::BSONElement dataset_id = p.getField(KeyMapper::DATASET());
-            datasets_array_builder.append(dataset_id.Int());
-          }
-          c.done();
-
-          mongo::BSONArray datasets_array = datasets_array_builder.arr();
+          mongo::BSONArray datasets_array = helpers::build_dataset_ids_arrays(Collections::EXPERIMENTS(), query);
 
           std::set<std::string> genomes = utils::build_set(args["norm_genomes"].Array());
 
@@ -997,7 +979,11 @@ namespace epidb {
           }
           return filter->is(value);
         } else {
-          return filter->is(region_ref->value(column->pos()));
+          if (datatypes::column_type_is_compatible(column->type(), datatypes::COLUMN_STRING)) {
+            return filter->is(region_ref->get_string(column->pos()));
+          } else {
+            return filter->is(region_ref->value(column->pos()));
+          }
         }
       }
 
@@ -1072,8 +1058,10 @@ namespace epidb {
               removed++;
             }
           }
-          ChromosomeRegions chr_region(chromosome, std::move(saved));
-          filtered_regions.push_back(std::move(chr_region));
+          if (!saved.empty()) {
+            ChromosomeRegions chr_region(chromosome, std::move(saved));
+            filtered_regions.push_back(std::move(chr_region));
+          }
         }
 
         return true;
@@ -1339,7 +1327,7 @@ namespace epidb {
           return true;
         }
 
-        cursor = c->query(helpers::collection_name(Collections::GENE_SETS()), o);
+        cursor = c->query(helpers::collection_name(Collections::GENE_MODELS()), o);
         if (cursor->more()) {
           int pos = 0;
           for (const auto& column : parser::FileFormat::gtf_format()) {
@@ -1353,6 +1341,35 @@ namespace epidb {
           }
           found = true;
         }
+
+        cursor = c->query(helpers::collection_name(Collections::GENE_EXPRESSIONS()), o);
+        if (cursor->more()) {
+          mongo::BSONObj gene_expression = cursor->next().getOwned();
+          int s_count = 0;
+          int n_count = 0;
+          std::vector<mongo::BSONElement> tmp_columns = gene_expression["columns"].Array();
+          for (const mongo::BSONElement & e : tmp_columns) {
+            mongo::BSONObj column = e.Obj();
+            const std::string &column_type = column["column_type"].str();
+            const std::string &column_name = column["name"].str();
+            mongo::BSONObjBuilder bob;
+            if (column_name != "CHROMOSOME" && column_name != "START" &&  column_name != "END") {
+              int pos = -1;
+              if (column_type == "string") {
+                pos = s_count++;
+              } else if (column_type == "integer") {
+                pos = n_count++;
+              } else if (column_type == "double") {
+                pos = n_count++;
+              }
+              bob.appendElements(column);
+              bob.append("pos", pos);
+              columns.emplace_back(bob.obj());
+            }
+          }
+          found = true;
+        }
+
 
         c.done();
         if (found) {
@@ -1375,6 +1392,52 @@ namespace epidb {
           return true;
         }
         return false;
+      }
+
+      bool find_annotation_pattern(const std::string & genome, const std::string & pattern, const bool overlap,
+                                   DatasetId & dataset_id, std::string & msg)
+      {
+        std::string __cache__key__ = genome + pattern + (overlap ? "_TRUE" : "_false");
+        if (annotation_pattern_cache.exists_dataset_id(__cache__key__)) {
+          dataset_id = annotation_pattern_cache.get_dataset_id(__cache__key__);
+          return true;
+        }
+
+        mongo::BSONObjBuilder annotations_query_builder;
+
+        std::string name = annotations::build_pattern_annotation_name(pattern, genome, overlap);
+        std::string norm_name = utils::normalize_annotation_name(name);
+        std::string norm_genome = utils::normalize_name(genome);
+
+
+        annotations_query_builder.append("norm_name", norm_name);
+        annotations_query_builder.append("norm_genome", norm_genome);
+        mongo::BSONObjBuilder metadata_builder;
+        if (overlap) {
+          metadata_builder.append("overlap-style", "overlap");
+        } else {
+          metadata_builder.append("overlap-style", "non-overlap");
+        }
+        metadata_builder.append("pattern", pattern);
+        annotations_query_builder.append("extra_metadata", metadata_builder.obj());
+        annotations_query_builder.append("upload_info.done", true);
+
+        Connection c;
+
+        mongo::BSONObj annotation_query = annotations_query_builder.obj();
+        auto cursor = c->query(helpers::collection_name(Collections::ANNOTATIONS()), annotation_query);
+
+        if (cursor->more()) {
+          mongo::BSONObj p = cursor->next();
+          dataset_id = p.getField(KeyMapper::DATASET()).Int();
+          annotation_pattern_cache.set_dataset_id(__cache__key__, dataset_id);
+          c.done();
+          return true;
+        } else {
+          msg = Error::m(ERR_INVALID_PRA_PROCESSED_ANNOTATION_NAME, overlap ? "overlapped pattern" : "non-overlapped pattern", pattern, genome);
+          c.done();
+          return false;
+        }
       }
     }
   }
