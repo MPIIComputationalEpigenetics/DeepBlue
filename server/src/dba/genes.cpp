@@ -675,10 +675,13 @@ namespace epidb {
           for (const auto& region : regions) {
             const GeneRegion* gene_region = static_cast<const GeneRegion *>(region.get());
             const std::string& gene_id = gene_region->attributes().at("gene_id");
+            /* Not supported by GCC 4.7 (MPI's compiler)
             cache.emplace(std::piecewise_construct,
                           std::forward_as_tuple(gene_id),
                           std::forward_as_tuple(chromosome, gene_region->start(), gene_region->end()));
-
+            */
+            auto gl = GeneLocation(chromosome, gene_region->start(), gene_region->end());
+            cache.insert( std::make_pair(gene_id,gl));
           }
         }
 
