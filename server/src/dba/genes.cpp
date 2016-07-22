@@ -37,6 +37,7 @@
 #include "full_text.hpp"
 #include "genes.hpp"
 #include "helpers.hpp"
+#include "info.hpp"
 #include "remove.hpp"
 #include "users.hpp"
 
@@ -266,6 +267,20 @@ namespace epidb {
           msg = "Format '" + format + "' is unknow";
           return false;
         }
+
+        std::map<std::string, std::string> sample_data;
+        if (!info::get_sample_by_id(sample_id, sample_data, msg, true)) {
+          return false;
+        }
+        mongo::BSONObjBuilder sample_builder;
+        std::map<std::string, std::string>::iterator it;
+        for (it = sample_data.begin(); it != sample_data.end(); ++it) {
+          if ((it->first != "_id") && (it->first != "user")) {
+            sample_builder.append(it->first, it->second);
+          }
+        }
+        gene_model_metadata_builder.append("sample_info", sample_builder.obj());
+
         gene_model_metadata = gene_model_metadata_builder.obj();
         return true;
       }
