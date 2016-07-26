@@ -62,9 +62,17 @@ namespace epidb {
 
             if (obj.hasField("upload_info")) {
               sb.append("<b>Upload information</b>:<br/><br/>");
-              sb.append("<b>data size</b>: ");
-              sb.append(utils::bson_to_string(obj["upload_info"]["total_size"]));
-              sb.append("kbytes<br/>");
+
+              if (collection == "gene_models") {
+                sb.append("<b>number of genes</b>: ");
+                sb.append(utils::bson_to_string(obj["upload_info"]["total_genes"]));
+                sb.append("kbytes<br/>");
+              } else {
+                sb.append("<b>data size</b>: ");
+                sb.append(utils::bson_to_string(obj["upload_info"]["total_size"]));
+                sb.append("kbytes<br/>");
+              }
+
               sb.append("<b>data inserted</b>: ");
               sb.append(utils::bson_to_string(obj["upload_info"]["upload_end"]));
               sb.append("<br/>");
