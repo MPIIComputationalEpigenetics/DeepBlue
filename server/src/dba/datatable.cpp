@@ -102,8 +102,6 @@ namespace epidb {
 
       bool format_column_type(const mongo::BSONObj& obj, std::vector<std::string> &row, std::string& msg)
       {
-        processing::StatusPtr sp = processing::build_dummy_status();
-
         std::map<std::string, std::string> res = columns::dataset_column_to_map(obj);
         row.emplace_back(res["_id"]);
         row.emplace_back(res["name"]);
@@ -122,6 +120,28 @@ namespace epidb {
           information = res["code"];
         }
         row.emplace_back(information);
+
+        return true;
+      }
+
+
+      bool format_gene(const mongo::BSONObj& obj, std::vector<std::string> &row, std::string& msg)
+      {
+        std::cerr << obj.toString() << std::endl;
+        mongo::BSONObj attributes = obj[KeyMapper::ATTRIBUTES()].Obj();
+
+        row.emplace_back(obj["_id"]);
+        std::cerr << "a" << std::endl;
+        row.emplace_back(obj[KeyMapper::CHROMOSOME()]);
+        std::cerr << "b" << std::endl;
+        row.emplace_back(obj[KeyMapper::START()]);
+        std::cerr << "c" << std::endl;
+        row.emplace_back(obj[KeyMapper::END()]);
+        std::cerr << "d" << std::endl;
+        row.emplace_back(attributes["gene_id"].String());
+        std::cerr << "e" << std::endl;
+        row.emplace_back(attributes["gene_name"].String());
+        std::cerr << "f" << std::endl;
 
         return true;
       }
@@ -178,7 +198,9 @@ namespace epidb {
 
         mongo::BSONObj projection;
 
-        if (collection == Collections::SAMPLES() || collection == Collections::COLUMN_TYPES()) {
+        if (collection == Collections::SAMPLES() ||
+            collection == Collections::COLUMN_TYPES() ||
+            collection == Collections::GENES()) {
           projection = mongo::BSONObj();
         } else {
           mongo::BSONObjBuilder b;
@@ -253,6 +275,11 @@ namespace epidb {
             }
           } else if (collection == Collections::COLUMN_TYPES()) {
             if (!format_column_type(obj, row, msg)) {
+              c.done();
+              return false;
+            }
+          } else if (collection == Collections::GENES()) {
+            if (!format_gene(obj, row, msg)) {
               c.done();
               return false;
             }
