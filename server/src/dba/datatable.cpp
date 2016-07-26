@@ -66,7 +66,7 @@ namespace epidb {
               if (collection == "gene_models") {
                 sb.append("<b>number of genes</b>: ");
                 sb.append(utils::bson_to_string(obj["upload_info"]["total_genes"]));
-                sb.append("kbytes<br/>");
+                sb.append("<br/>");
               } else {
                 sb.append("<b>data size</b>: ");
                 sb.append(utils::bson_to_string(obj["upload_info"]["total_size"]));
