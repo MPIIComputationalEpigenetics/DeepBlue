@@ -467,15 +467,12 @@ namespace epidb {
         auto it = id_to_gene_model.find(dataset_id);
         if (it == id_to_gene_model.end()) {
           mongo::BSONObj gene_model_obj;
-          std::cerr << dataset_id << std::endl;
           if (!helpers::get_one(Collections::GENE_MODELS(), mongo::Query(BSON(KeyMapper::DATASET() << dataset_id)), gene_model_obj)) {
             msg = Error::m(ERR_INVALID_GENE_MODEL_ID, dataset_id);
             return false;
           }
-          std::cerr << gene_model_obj.toString() << std::endl;
           name = gene_model_obj["name"].String();
           id_to_gene_model[dataset_id] = name;
-          std::cerr << name << std::endl;
         } else {
           name = it->second;
         }

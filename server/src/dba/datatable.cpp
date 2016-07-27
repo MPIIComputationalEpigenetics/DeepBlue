@@ -136,7 +136,6 @@ namespace epidb {
 
       bool format_gene(const mongo::BSONObj& obj, std::vector<std::string> &row, std::string& msg)
       {
-        std::cerr << obj.toString() << std::endl;
         mongo::BSONObj attributes = obj[KeyMapper::ATTRIBUTES()].Obj();
 
         row.emplace_back(obj["_id"].String());
@@ -151,7 +150,6 @@ namespace epidb {
         row.emplace_back(element_value(obj, KeyMapper::CHROMOSOME()));
         row.emplace_back(utils::integer_to_string( obj[KeyMapper::START()].Int()));
         row.emplace_back(utils::integer_to_string( obj[KeyMapper::END()].Int()));
-        row.emplace_back(element_value(obj, KeyMapper::FEATURE()));
         row.emplace_back(element_value(obj, KeyMapper::STRAND()));
         row.emplace_back(element_value(attributes, "gene_id"));
         row.emplace_back(element_value(attributes, "gene_name"));
@@ -186,6 +184,68 @@ namespace epidb {
         }
         row.emplace_back(sb.to_string());
 
+        return true;
+      }
+
+      bool build_gene_query(const datatypes::Metadata& columns_filters, mongo::BSONObj& query_obj, std::string& msg )
+      {
+        mongo::BSONObjBuilder query_builder;
+
+        for (const auto& column : columns_filters) {
+          std::string name = column.first;
+          std::string value = column.second;
+
+          std::cerr << name << " " << value << std::endl;
+
+          std::string key;
+          if (name == "_id") {
+            query_builder.appendRegex("_id", value, "i");
+
+          } else if (name == "level" || name == "gene_name" || name == "gene_id" || name == "gene_status" || name == "gene_type") {
+            key = KeyMapper::ATTRIBUTES() + "." + name;
+            query_builder.appendRegex(key, value, "i"); // case insensitivity and ignore spaces and special characters
+
+          } else if (name == "start" || name == "end") {
+            int int_value;
+            if (!utils::string_to_int(value, int_value)) {
+              continue;
+            }
+            std::transform(name.begin(), name.end(), name.begin(), ::toupper);
+            if (!KeyMapper::KeyMapper::to_short(name, key, msg)) {
+              return false;
+            }
+
+            if (name == "START") {
+              query_builder.append(key, BSON("$gte" << int_value));
+            } else {
+              query_builder.append(key, BSON("$lte" << int_value));
+            }
+
+          } else if (name == "strand") {
+            query_builder.append(KeyMapper::STRAND(), value);
+
+          } else if (name == "gene_model") {
+            mongo::BSONObjBuilder gene_datasets_query_builder;
+            gene_datasets_query_builder.appendRegex("norm_name", value, "i");
+
+            mongo::BSONArray IDs = helpers::build_dataset_ids_arrays(Collections::GENE_MODELS(), gene_datasets_query_builder.obj());
+            std::cerr << IDs.toString() << std::endl;
+            query_builder.append(KeyMapper::DATASET(),  BSON("$in" << IDs));
+
+          } else {
+            std::cerr << name << std::endl;
+            std::transform(name.begin(), name.end(), name.begin(), ::toupper);
+
+            if (!KeyMapper::KeyMapper::to_short(name, key, msg)) {
+              return false;
+            }
+            query_builder.appendRegex(key, value, "i"); // case insensitivity and ignore spaces and special characters
+          }
+
+        }
+
+        query_obj = query_builder.obj();
+        std::cerr << query_obj.toString() << std::endl;
         return true;
       }
 
@@ -243,20 +303,28 @@ namespace epidb {
           query_builder.append("$text", text_builder.obj());
         }
 
-        for (const auto& filter : columns_filters) {
-          if (filter.first == "extra_metadata" && global_search.empty()) {
-            mongo::BSONObjBuilder text_builder;
-            text_builder.append("$search", filter.second);
-            query_builder.append("$text", text_builder.obj());
-          } else if (filter.first == "data_type") {
-            query_builder.appendRegex("upload_info.content_format", filter.second, "ix");
-          } else if (filter.first == "biosource") {
-            query_builder.appendRegex("sample_info.norm_biosource_name", filter.second, "ix");
-          } else {
-            query_builder.appendRegex(filter.first, filter.second, "i"); // case insensitivity and ignore spaces and special characters
+        mongo::BSONObj query_obj;
+        if (collection == Collections::GENES()) {
+          if (!build_gene_query(columns_filters, query_obj, msg)) {
+            return false;
           }
+        } else {
+          for (const auto& filter : columns_filters) {
+            if (filter.first == "extra_metadata" && global_search.empty()) {
+              mongo::BSONObjBuilder text_builder;
+              text_builder.append("$search", filter.second);
+              query_builder.append("$text", text_builder.obj());
+            } else if (filter.first == "data_type") {
+              query_builder.appendRegex("upload_info.content_format", filter.second, "ix");
+            } else if (filter.first == "biosource") {
+              query_builder.appendRegex("sample_info.norm_biosource_name", filter.second, "ix");
+            } else {
+              query_builder.appendRegex(filter.first, filter.second, "i"); // case insensitivity and ignore spaces and special characters
+            }
+          }
+          query_obj = query_builder.obj();
         }
-        mongo::BSONObj query_obj = query_builder.obj();
+
         mongo::Query query(query_obj);
 
 
@@ -275,6 +343,7 @@ namespace epidb {
           }
         }
 
+        std::cerr << query.toString() << std::endl;
         Connection c;
         auto cursor = c->query(helpers::collection_name(collection), query, length, start, &projection);
 
