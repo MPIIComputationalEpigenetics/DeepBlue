@@ -520,6 +520,39 @@ namespace epidb {
       {
         mongo::BSONObjBuilder index_name;
         index_name.append("$**", "text");
+        c->createIndex(helpers::collection_name(Collections::GENOMES()), index_name.obj());
+        if (!c->getLastError().empty()) {
+          msg = c->getLastError();
+          c.done();
+          return false;
+        }
+      }
+
+      {
+        mongo::BSONObjBuilder index_name;
+        index_name.append("$**", "text");
+        c->createIndex(helpers::collection_name(Collections::GENES()), index_name.obj());
+        if (!c->getLastError().empty()) {
+          msg = c->getLastError();
+          c.done();
+          return false;
+        }
+      }
+
+      {
+        mongo::BSONObjBuilder index_name;
+        index_name.append("$**", "text");
+        c->createIndex(helpers::collection_name(Collections::COLUMN_TYPES()), index_name.obj());
+        if (!c->getLastError().empty()) {
+          msg = c->getLastError();
+          c.done();
+          return false;
+        }
+      }
+
+      {
+        mongo::BSONObjBuilder index_name;
+        index_name.append("$**", "text");
         c->createIndex(helpers::collection_name(Collections::EPIGENETIC_MARKS()), index_name.obj());
         if (!c->getLastError().empty()) {
           msg = c->getLastError();
