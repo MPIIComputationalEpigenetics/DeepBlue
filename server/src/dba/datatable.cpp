@@ -25,11 +25,12 @@
 
 #include "../connection/connection.hpp"
 
-#include "../dba/column_types.hpp"
-#include "../dba/collections.hpp"
-#include "../dba/helpers.hpp"
-
 #include "../processing/processing.hpp"
+
+#include "column_types.hpp"
+#include "collections.hpp"
+#include "genes.hpp"
+#include "helpers.hpp"
 
 #include "../errors.hpp"
 
@@ -124,24 +125,39 @@ namespace epidb {
         return true;
       }
 
+      std::string element_value(const mongo::BSONObj& o, const std::string& key)
+      {
+        if (o.hasField(key)) {
+          return o[key].String();
+        }
+
+        return std::string("");
+      }
 
       bool format_gene(const mongo::BSONObj& obj, std::vector<std::string> &row, std::string& msg)
       {
         std::cerr << obj.toString() << std::endl;
         mongo::BSONObj attributes = obj[KeyMapper::ATTRIBUTES()].Obj();
 
-        row.emplace_back(obj["_id"]);
-        std::cerr << "a" << std::endl;
-        row.emplace_back(obj[KeyMapper::CHROMOSOME()]);
-        std::cerr << "b" << std::endl;
-        row.emplace_back(obj[KeyMapper::START()]);
-        std::cerr << "c" << std::endl;
-        row.emplace_back(obj[KeyMapper::END()]);
-        std::cerr << "d" << std::endl;
-        row.emplace_back(attributes["gene_id"].String());
-        std::cerr << "e" << std::endl;
-        row.emplace_back(attributes["gene_name"].String());
-        std::cerr << "f" << std::endl;
+        row.emplace_back(obj["_id"].String());
+
+        std::string gene_model;
+        if (!genes::get_gene_model_by_dataset_id(obj[KeyMapper::DATASET()].Int(), gene_model, msg)) {
+          return false;
+        }
+
+        row.emplace_back(gene_model);
+        row.emplace_back(element_value(obj, KeyMapper::SOURCE()));
+        row.emplace_back(element_value(obj, KeyMapper::CHROMOSOME()));
+        row.emplace_back(utils::integer_to_string( obj[KeyMapper::START()].Int()));
+        row.emplace_back(utils::integer_to_string( obj[KeyMapper::END()].Int()));
+        row.emplace_back(element_value(obj, KeyMapper::FEATURE()));
+        row.emplace_back(element_value(obj, KeyMapper::STRAND()));
+        row.emplace_back(element_value(attributes, "gene_id"));
+        row.emplace_back(element_value(attributes, "gene_name"));
+        row.emplace_back(element_value(attributes, "gene_type"));
+        row.emplace_back(element_value(attributes, "gene_status"));
+        row.emplace_back(element_value(attributes, "level"));
 
         return true;
       }
