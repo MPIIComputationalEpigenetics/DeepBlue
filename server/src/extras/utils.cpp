@@ -451,6 +451,8 @@ namespace epidb {
     serialize::ParameterPtr element_to_parameter(const mongo::BSONElement& e)
     {
 
+      std::cerr << e.toString() << std::endl;
+
       switch ( e.type() ) {
       case mongo::NumberDouble: {
         return std::make_shared<serialize::SimpleParameter>(e.Double());
@@ -469,6 +471,12 @@ namespace epidb {
           p->add_child(element_to_parameter(ee));
         }
         return p;
+      }
+      case mongo::Bool: {
+        return std::make_shared<serialize::SimpleParameter>(e.boolean());
+      }
+      case mongo::Date: {
+        return std::make_shared<serialize::SimpleParameter>((long long)e.date());
       }
       default: {
         return std::make_shared<serialize::SimpleParameter>(e.String());

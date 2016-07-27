@@ -28,6 +28,7 @@
 #include "../datatypes/metadata.hpp"
 
 #include "../dba/dba.hpp"
+#include "../dba/genes.hpp"
 #include "../dba/info.hpp"
 #include "../dba/users.hpp"
 #include "../dba/list.hpp"
@@ -179,6 +180,9 @@ namespace epidb {
         for (const serialize::ParameterPtr & id_param : ids_param) {
           std::string id = id_param->as_string();
           std::string type;
+          mongo::BSONObj obj_metadata;
+
+          // TODO: change the use of Metadata and use BSONObj
           datatypes::Metadata metadata;
           datatypes::Metadata extra_metadata;
           datatypes::Metadata sample_info;
@@ -202,6 +206,16 @@ namespace epidb {
               ok = dba::info::get_annotation(id, metadata, extra_metadata, columns, upload_info, msg);
               ok = ok && dba::info::id_to_name(upload_info, msg);
               type = "annotation";
+            } else if (id.compare(0, 2, "gs") == 0) {
+              ok = dba::genes::gene_model_info(id, obj_metadata, msg);
+              type = "gene_model";
+
+            } else if (id.compare(0, 2, "gn") == 0) {
+              // Gene
+
+            } else if (id.compare(0, 2, "gx") == 0) {
+              // Gene expression
+
             } else if (id.compare(0, 1, "g") == 0) {
               ok = dba::info::get_genome(id, metadata, chromosomes, msg);
               ok = ok && dba::info::id_to_name(metadata, msg);
@@ -345,7 +359,12 @@ namespace epidb {
             info->add_child("columns", columns_parameters);
           }
 
-          result.add_param(info);
+          if (obj_metadata.isEmpty()) {
+            result.add_param(info);
+          } else {
+            std::cerr << "DOWN" << std::endl;
+            result.add_param(utils::bson_to_parameters(obj_metadata));
+          }
         }
 
         return true;

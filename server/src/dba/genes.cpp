@@ -33,6 +33,7 @@
 
 #include "annotations.hpp"
 #include "collections.hpp"
+#include "data.hpp"
 #include "full_text.hpp"
 #include "genes.hpp"
 #include "helpers.hpp"
@@ -45,6 +46,11 @@
 namespace epidb {
   namespace dba {
     namespace genes {
+
+      bool gene_model_info(const std::string& id, mongo::BSONObj& obj_metadata, std::string& msg)
+      {
+        return data::gene_model(id, obj_metadata, msg);
+      }
 
       bool build_upload_info(const std::string &user_key, const std::string &client_address, const std::string &content_format,
                              mongo::BSONObj &upload_info, std::string &msg)
