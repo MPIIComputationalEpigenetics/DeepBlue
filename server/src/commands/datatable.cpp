@@ -131,6 +131,6 @@ namespace epidb {
         return true;
       }
 
-    } atatableCommand;
+    } datatableCommand;
   }
 }
