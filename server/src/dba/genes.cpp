@@ -26,7 +26,6 @@
 #include "../connection/connection.hpp"
 
 #include "../datatypes/metadata.hpp"
-#include "../dba/helpers.hpp"
 
 #include "../parser/gtf.hpp"
 
@@ -271,13 +270,12 @@ namespace epidb {
           return false;
         }
 
-        std::map<std::string, std::string> sample_data;
+        datatypes::Metadata sample_data;
         if (!info::get_sample_by_id(sample_id, sample_data, msg, true)) {
           return false;
         }
         mongo::BSONObjBuilder sample_builder;
-        std::map<std::string, std::string>::iterator it;
-        for (it = sample_data.begin(); it != sample_data.end(); ++it) {
+        for (auto it = sample_data.begin(); it != sample_data.end(); ++it) {
           if ((it->first != "_id") && (it->first != "user")) {
             sample_builder.append(it->first, it->second);
           }
@@ -463,6 +461,27 @@ namespace epidb {
         return true;
       }
 
+      std::unordered_map<int, std::string> id_to_gene_model;
+      bool get_gene_model_by_dataset_id(const int dataset_id, std::string& name, std::string& msg)
+      {
+        auto it = id_to_gene_model.find(dataset_id);
+        if (it == id_to_gene_model.end()) {
+          mongo::BSONObj gene_model_obj;
+          std::cerr << dataset_id << std::endl;
+          if (!helpers::get_one(Collections::GENE_MODELS(), mongo::Query(BSON(KeyMapper::DATASET() << dataset_id)), gene_model_obj)) {
+            msg = Error::m(ERR_INVALID_GENE_MODEL_ID, dataset_id);
+            return false;
+          }
+          std::cerr << gene_model_obj.toString() << std::endl;
+          name = gene_model_obj["name"].String();
+          id_to_gene_model[dataset_id] = name;
+          std::cerr << name << std::endl;
+        } else {
+          name = it->second;
+        }
+        return true;
+      }
+
       bool get_gene(const std::string& chromosome, const Position start, const Position end, const std::string& gene_model,
                     mongo::BSONObj& gene, std::string& msg)
       {
@@ -600,7 +619,7 @@ namespace epidb {
         std::string collection = dba::helpers::collection_name(dba::Collections::GENE_SINGLE_EXPRESSIONS());
         auto data_cursor = c->query(collection, query);
 
-        std::map<std::string, Regions> gene_expressions;
+        std::unordered_map<std::string, Regions> gene_expressions;
 
         while (data_cursor->more()) {
           mongo::BSONObj gene = data_cursor->next().getOwned();
@@ -656,8 +675,8 @@ namespace epidb {
           end(e) {}
       };
 
-      typedef std::map<std::string, GeneLocation> GeneModelCache;
-      typedef std::map<std::string, GeneModelCache> GeneModelsCache;
+      typedef std::unordered_map<std::string, GeneLocation> GeneModelCache;
+      typedef std::unordered_map<std::string, GeneModelCache> GeneModelsCache;
 
       bool load_gene_model(const std::string& norm_gene_model, GeneModelCache &cache, std::string& msg)
       {
@@ -681,7 +700,7 @@ namespace epidb {
                           std::forward_as_tuple(chromosome, gene_region->start(), gene_region->end()));
             */
             auto gl = GeneLocation(chromosome, gene_region->start(), gene_region->end());
-            cache.insert( std::make_pair(gene_id,gl));
+            cache.insert( std::make_pair(gene_id, gl));
           }
         }
 
