@@ -212,7 +212,7 @@ namespace epidb {
 
     const std::string& KeyMapper::FEATURE()
     {
-      static std::string FEATURE = epidb::dba::KeyMapper::build_default("DATA_WIG");
+      static std::string FEATURE = epidb::dba::KeyMapper::build_default("FEATURE");
       return FEATURE;
     }
     const std::string& KeyMapper::SCORE()
