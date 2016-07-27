@@ -187,15 +187,35 @@ namespace epidb {
         return true;
       }
 
-      bool build_gene_query(const datatypes::Metadata& columns_filters, mongo::BSONObj& query_obj, std::string& msg )
+      std::string get_gene_sort_column(std::string name)
       {
-        mongo::BSONObjBuilder query_builder;
+        if (name == "_id") {
+          return "_id";
+        }
 
+        if (name == "gene_model") {
+          return KeyMapper::DATASET();
+        }
+
+        if (name == "level" || name == "gene_name" || name == "gene_id" || name == "gene_status" || name == "gene_type") {
+          return KeyMapper::ATTRIBUTES() + "." + name;
+        }
+
+        std::transform(name.begin(), name.end(), name.begin(), ::toupper);
+
+        std::string msg;
+        std::string key;
+        if (!KeyMapper::KeyMapper::to_short(name, key, msg)) {
+          return name;
+        }
+        return key;
+      }
+
+      bool build_gene_query(const datatypes::Metadata& columns_filters, mongo::BSONObjBuilder& query_builder, std::string& msg )
+      {
         for (const auto& column : columns_filters) {
           std::string name = column.first;
           std::string value = column.second;
-
-          std::cerr << name << " " << value << std::endl;
 
           std::string key;
           if (name == "_id") {
@@ -229,11 +249,9 @@ namespace epidb {
             gene_datasets_query_builder.appendRegex("norm_name", value, "i");
 
             mongo::BSONArray IDs = helpers::build_dataset_ids_arrays(Collections::GENE_MODELS(), gene_datasets_query_builder.obj());
-            std::cerr << IDs.toString() << std::endl;
             query_builder.append(KeyMapper::DATASET(),  BSON("$in" << IDs));
 
           } else {
-            std::cerr << name << std::endl;
             std::transform(name.begin(), name.end(), name.begin(), ::toupper);
 
             if (!KeyMapper::KeyMapper::to_short(name, key, msg)) {
@@ -244,8 +262,6 @@ namespace epidb {
 
         }
 
-        query_obj = query_builder.obj();
-        std::cerr << query_obj.toString() << std::endl;
         return true;
       }
 
@@ -305,7 +321,7 @@ namespace epidb {
 
         mongo::BSONObj query_obj;
         if (collection == Collections::GENES()) {
-          if (!build_gene_query(columns_filters, query_obj, msg)) {
+          if (!build_gene_query(columns_filters, query_builder, msg)) {
             return false;
           }
         } else {
@@ -322,9 +338,9 @@ namespace epidb {
               query_builder.appendRegex(filter.first, filter.second, "i"); // case insensitivity and ignore spaces and special characters
             }
           }
-          query_obj = query_builder.obj();
         }
 
+        query_obj = query_builder.obj();
         mongo::Query query(query_obj);
 
 
@@ -334,7 +350,9 @@ namespace epidb {
         }
 
         if (!sort_column.empty()) {
-          if (sort_column == "data_type") {
+          if (collection == Collections::GENES()) {
+            query.sort(get_gene_sort_column(sort_column), sort);
+          } else if (sort_column == "data_type") {
             query.sort(std::string("upload_info.content_format"), sort);
           } else if (sort_column == "biosource") {
             query.sort(std::string("sample_info.biosource_name"), sort);
@@ -343,7 +361,6 @@ namespace epidb {
           }
         }
 
-        std::cerr << query.toString() << std::endl;
         Connection c;
         auto cursor = c->query(helpers::collection_name(collection), query, length, start, &projection);
 
