@@ -489,7 +489,13 @@ namespace epidb {
           return true;
         }
 
-        msg = "Controlled vocabulary " + controlled_vocabulary + " does not exist. Available controlled vocabularies: " +
+        if (controlled_vocabulary == "types") {
+          collection_key = "$upload_info.content_format";
+          return true;
+        }
+
+
+        msg = "Controlled vocabulary '" + controlled_vocabulary + "' does not exist. Available controlled vocabularies: types, " +
               dba::Collections::EPIGENETIC_MARKS() + ", " + dba::Collections::GENOMES() + ", " +
               dba::Collections::BIOSOURCES() + ", " + dba::Collections::SAMPLES() + ", " +
               dba::Collections::TECHNIQUES() + ", " + dba::Collections::PROJECTS();

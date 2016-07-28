@@ -43,3 +43,6 @@ class TestFacetingCommand(helpers.TestCase):
 
     (s, v) = epidb.collection_experiments_count("epigenetic_marks", "hg18", "", "", "", "", "", "", self.admin_key)
     self.assertEqual(v, [['em2', 'Methylation', 2]])
+
+    (s, v) = epidb.collection_experiments_count("types", "hg18", "", "", "", "", "", "", self.admin_key)
+    self.assertEqual(v, [['', 'peaks', 2]])

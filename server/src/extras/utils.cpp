@@ -450,9 +450,6 @@ namespace epidb {
 
     serialize::ParameterPtr element_to_parameter(const mongo::BSONElement& e)
     {
-
-      std::cerr << e.toString() << std::endl;
-
       switch ( e.type() ) {
       case mongo::NumberDouble: {
         return std::make_shared<serialize::SimpleParameter>(e.Double());
