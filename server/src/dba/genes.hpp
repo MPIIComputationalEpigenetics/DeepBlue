@@ -36,6 +36,10 @@ namespace epidb {
 
       bool gene_model_info(const std::string& id, mongo::BSONObj& obj_metadata, std::string& msg);
 
+      bool gene_info(const std::string& id, mongo::BSONObj& obj_metadata, std::string& msg);
+
+      bool gene_expression_info(const std::string& id, mongo::BSONObj& obj_metadata, std::string& msg);
+
       bool build_metadata(const std::string &name, const std::string &norm_name,
                           const std::string &description, const std::string &norm_description,
                           const std::string &format,

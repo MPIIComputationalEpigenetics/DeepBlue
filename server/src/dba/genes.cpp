@@ -47,9 +47,89 @@ namespace epidb {
   namespace dba {
     namespace genes {
 
+      mongo::BSONObj build_gene_info(mongo::BSONObj gene_db_obj)
+      {
+        mongo::BSONObjBuilder gene_builder;
+
+        gene_builder.append(gene_db_obj["_id"]);
+        gene_builder.append("chromosome", gene_db_obj[KeyMapper::CHROMOSOME()].String());
+        gene_builder.append("start", gene_db_obj[KeyMapper::START()].numberLong());
+        gene_builder.append("end", gene_db_obj[KeyMapper::END()].numberLong());
+        gene_builder.append("source", gene_db_obj[KeyMapper::SOURCE()].String());
+        gene_builder.append("feature", gene_db_obj[KeyMapper::FEATURE()].String());
+        gene_builder.append("score", gene_db_obj[KeyMapper::SCORE()].numberDouble());
+        gene_builder.append("strand", gene_db_obj[KeyMapper::STRAND()].String());
+        gene_builder.append("frame", gene_db_obj[KeyMapper::FRAME()].String());
+        const mongo::BSONObj& attributes = gene_db_obj[KeyMapper::ATTRIBUTES()].Obj();
+        gene_builder.appendElements(attributes);
+
+        return gene_builder.obj();
+      }
+
       bool gene_model_info(const std::string& id, mongo::BSONObj& obj_metadata, std::string& msg)
       {
-        return data::gene_model(id, obj_metadata, msg);
+        mongo::BSONObj data_obj;
+        if (!data::gene_model(id, data_obj, msg)) {
+          return false;
+        }
+
+        mongo::BSONObjBuilder bob;
+
+        bob.append(data_obj["_id"]);
+        bob.append(data_obj["description"]);
+        bob.append(data_obj["format"]);
+        bob.append(data_obj["upload_info"]["total_genes"]);
+        bob.append(data_obj["extra_metadata"]);
+
+        obj_metadata = bob.obj();
+
+        return true;
+      }
+
+      bool gene_info(const std::string& id, mongo::BSONObj& obj_metadata, std::string& msg)
+      {
+        mongo::BSONObj data_obj;
+        if (!data::gene(id, data_obj, msg)) {
+          return false;
+        }
+
+        obj_metadata = build_gene_info(data_obj);
+
+        return true;
+      }
+
+      bool gene_expression_info(const std::string& id, mongo::BSONObj& obj_metadata, std::string& msg)
+      {
+        mongo::BSONObj data_obj;
+        if (!data::gene_expression(id, data_obj, msg)) {
+          return false;
+        }
+
+        mongo::BSONObjBuilder bob;
+
+        bob.append(data_obj["_id"]);
+        bob.append(data_obj["format"]);
+        bob.append(data_obj["upload_info"]["content_format"]);
+        bob.append(data_obj["upload_info"]["total_genes"]);
+        bob.append(data_obj["replica"]);
+        bob.append(data_obj["sample_id"]);
+        bob.append(data_obj["extra_metadata"]);
+        bob.append(data_obj["columns"]);
+
+        mongo::BSONObjBuilder sample_bob;
+        const auto sample = data_obj["sample_info"].Obj();
+        for (auto it = sample.begin(); it.more(); ) {
+          mongo::BSONElement e = it.next();
+          if (strncmp("norm_", e.fieldName(), 5) != 0) {
+            sample_bob.append(e.fieldName(), utils::bson_to_string(e));
+          }
+        }
+
+        bob.append("sample_info", sample_bob.obj());
+
+        obj_metadata = bob.obj();
+
+        return true;
       }
 
       bool build_upload_info(const std::string &user_key, const std::string &client_address, const std::string &content_format,
@@ -518,19 +598,7 @@ namespace epidb {
 
         for (const auto& gene_db_obj : genes_db_objs) {
           mongo::BSONObjBuilder gene_builder;
-          gene_builder.append("chromosome", gene_db_obj[KeyMapper::CHROMOSOME()].String());
-          gene_builder.append("start", gene_db_obj[KeyMapper::START()].numberLong());
-          gene_builder.append("end", gene_db_obj[KeyMapper::END()].numberLong());
-          gene_builder.append("source", gene_db_obj[KeyMapper::SOURCE()].String());
-          gene_builder.append("feature", gene_db_obj[KeyMapper::FEATURE()].String());
-          gene_builder.append("score", gene_db_obj[KeyMapper::SCORE()].numberDouble());
-          gene_builder.append("strand", gene_db_obj[KeyMapper::STRAND()].String());
-          gene_builder.append("frame", gene_db_obj[KeyMapper::FRAME()].String());
-
-          const mongo::BSONObj& attributes = gene_db_obj[KeyMapper::ATTRIBUTES()].Obj();
-          gene_builder.appendElements(attributes);
-
-          genes.emplace_back(gene_builder.obj());
+          genes.emplace_back(build_gene_info(gene_builder.obj()));
         }
 
         return true;

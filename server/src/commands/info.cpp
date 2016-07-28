@@ -209,13 +209,12 @@ namespace epidb {
             } else if (id.compare(0, 2, "gs") == 0) {
               ok = dba::genes::gene_model_info(id, obj_metadata, msg);
               type = "gene_model";
-
             } else if (id.compare(0, 2, "gn") == 0) {
-              // Gene
-
+              ok = dba::genes::gene_info(id, obj_metadata, msg);
+              type = "gene";
             } else if (id.compare(0, 2, "gx") == 0) {
-              // Gene expression
-
+              ok = dba::genes::gene_expression_info(id, obj_metadata, msg);
+              type = "gene";
             } else if (id.compare(0, 1, "g") == 0) {
               ok = dba::info::get_genome(id, metadata, chromosomes, msg);
               ok = ok && dba::info::id_to_name(metadata, msg);
