@@ -31,6 +31,7 @@
 #include "collections.hpp"
 #include "genes.hpp"
 #include "helpers.hpp"
+#include "list.hpp"
 
 #include "../errors.hpp"
 
@@ -290,6 +291,7 @@ namespace epidb {
 
         mongo::BSONObj projection;
 
+
         if (collection == Collections::SAMPLES() ||
             collection == Collections::COLUMN_TYPES() ||
             collection == Collections::GENES()) {
@@ -340,9 +342,26 @@ namespace epidb {
           }
         }
 
+        if (collection == Collections::EXPERIMENTS() ||
+            collection == Collections::PROJECTS() ||
+            collection == Collections::GENE_EXPRESSIONS()) {
+
+          std::vector<utils::IdName> user_projects;
+          if (!dba::list::projects(user_key, user_projects, msg)) {
+            return false;
+          }
+
+          std::vector<std::string> user_projects_names;
+          for (const auto& project : user_projects) {
+            user_projects_names.push_back(project.name);
+          }
+
+          query_builder.append("project", utils::build_array(user_projects_names));
+          query_builder.append("norm_project", utils::build_normalized_array(user_projects_names));
+        }
+
         query_obj = query_builder.obj();
         mongo::Query query(query_obj);
-
 
         int sort = 1;
         if (sort_direction == "desc") {
@@ -360,6 +379,7 @@ namespace epidb {
             query.sort(sort_column, sort);
           }
         }
+
 
         Connection c;
         auto cursor = c->query(helpers::collection_name(collection), query, length, start, &projection);
