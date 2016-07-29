@@ -64,6 +64,7 @@ namespace epidb {
         }
         // ***
 
+        // Move to the begin of the range region
         while ( it_data_begin != data.end()
                 && (*it_data_begin)->end() < (*it_ranges)->start() )  {
           it_data_begin++;
@@ -72,9 +73,26 @@ namespace epidb {
         Accumulator acc;
         auto it_data = it_data_begin;
         while (it_data != data.end() &&
-              (*it_ranges)->end() >= (*it_data)->start()) {
+               (*it_ranges)->end() >= (*it_data)->start()) {
 
-          if (((*it_ranges)->start() <= (*it_data)->end()) && ((*it_ranges)->end() >= (*it_data)->start())) {
+
+          std::cerr << (*it_data)->start() << " " << (*it_data)->end() << std::endl;
+          std::cerr << (*it_ranges)->start() << " " << (*it_ranges)->end() << std::endl;
+
+          std::cerr << ((*it_data)->start() < (*it_ranges)->end()) << std::endl;
+          std::cerr << ((*it_data)->end() > (*it_ranges)->start()) << std::endl;
+
+          if (((*it_data)->start() < (*it_ranges)->end()) && ((*it_data)->end() > (*it_ranges)->start())) {
+            auto begin = std::max((*it_data)->start(), (*it_ranges)->start());
+            auto end =  std::min((*it_data)->end(), (*it_ranges)->end());
+
+            double overlap_length = end - begin;
+            double original_length = (*it_data)->end() - (*it_data)->start();
+
+            auto correct_offset = (overlap_length / original_length );
+
+            std::cerr << "Correct offset: " << correct_offset << std::endl;
+
             if (field[0] == '@') {
               std::string value;
               if (!metafield.process(field, chrom, it_data->get(), status, value, msg)) {
@@ -83,7 +101,7 @@ namespace epidb {
               Score s;
               // TODO: the meta.process should return the double value directly
               utils::string_to_score(value, s);
-              acc.push(s);
+              acc.push(s * correct_offset);
             } else {
               if (dataset_id != (*it_data)->dataset_id()) {
                 dataset_id = (*it_data)->dataset_id();
@@ -92,7 +110,7 @@ namespace epidb {
                 }
               }
               Score score = (*it_data)->value(column->pos());
-              acc.push(score);
+              acc.push(score * correct_offset);
             }
           }
           it_data++;
