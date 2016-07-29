@@ -75,13 +75,6 @@ namespace epidb {
         while (it_data != data.end() &&
                (*it_ranges)->end() >= (*it_data)->start()) {
 
-
-          std::cerr << (*it_data)->start() << " " << (*it_data)->end() << std::endl;
-          std::cerr << (*it_ranges)->start() << " " << (*it_ranges)->end() << std::endl;
-
-          std::cerr << ((*it_data)->start() < (*it_ranges)->end()) << std::endl;
-          std::cerr << ((*it_data)->end() > (*it_ranges)->start()) << std::endl;
-
           if (((*it_data)->start() < (*it_ranges)->end()) && ((*it_data)->end() > (*it_ranges)->start())) {
             auto begin = std::max((*it_data)->start(), (*it_ranges)->start());
             auto end =  std::min((*it_data)->end(), (*it_ranges)->end());
@@ -90,8 +83,6 @@ namespace epidb {
             double original_length = (*it_data)->end() - (*it_data)->start();
 
             auto correct_offset = (overlap_length / original_length );
-
-            std::cerr << "Correct offset: " << correct_offset << std::endl;
 
             if (field[0] == '@') {
               std::string value;
