@@ -208,7 +208,7 @@ namespace epidb {
         return true;
       }
 
-      mongo::BSONObj to_bson(const int dataset_id, const std::string& gene_model_id, const std::string& gene_id, const parser::GTFRow& row)
+      mongo::BSONObj to_bson(const int dataset_id, const std::string& gene_id, const parser::GTFRow& row)
       {
         mongo::BSONObjBuilder bob;
 
@@ -293,7 +293,7 @@ namespace epidb {
           }
 
           std::string gene_id = "gn" + utils::integer_to_string(_id);
-          mongo::BSONObj row_obj = to_bson(dataset_id, gene_model_id, gene_id, row);
+          mongo::BSONObj row_obj = to_bson(dataset_id, gene_id, row);
 
           rows_obj_bulk.emplace_back(std::move(row_obj));
           total_genes++;
@@ -377,7 +377,7 @@ namespace epidb {
         return true;
       }
 
-      mongo::BSONObj to_bson(const int dataset_id, const std::string& gene_model_id, const std::string& gene_id, const parser::FPKMRow& row)
+      mongo::BSONObj to_bson(const int dataset_id, const std::string& gene_id, const parser::FPKMRow& row)
       {
         mongo::BSONObjBuilder bob;
 
@@ -448,8 +448,8 @@ namespace epidb {
             return false;
           }
 
-          std::string gene_id = "gx" + utils::integer_to_string(_id);
-          mongo::BSONObj row_obj = to_bson(dataset_id, gene_expression_id, gene_id, row);
+          std::string gene_id = "gsx" + utils::integer_to_string(_id);
+          mongo::BSONObj row_obj = to_bson(dataset_id, gene_id, row);
 
           rows_obj_bulk.emplace_back(std::move(row_obj));
           total_genes++;
