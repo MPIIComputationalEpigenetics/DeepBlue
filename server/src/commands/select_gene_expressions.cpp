@@ -25,6 +25,7 @@
 #include "../dba/dba.hpp"
 #include "../dba/genomes.hpp"
 #include "../dba/helpers.hpp"
+#include "../dba/list.hpp"
 #include "../dba/queries.hpp"
 
 #include "../datatypes/user.hpp"
@@ -52,10 +53,11 @@ namespace epidb {
           Parameter("sample_ids", serialize::STRING, "genes(s) - ENSB ID or ENSB name. Use the regular expression '.*' for selecting all." , true),
           Parameter("replicas", serialize::INTEGER, "replica(s)", true),
           Parameter("genes", serialize::STRING, "genes(s)", true),
+          Parameter("projects", serialize::STRING, "projects(s)", true),
           Parameter("gene_model", serialize::STRING, "gene model name"),
           parameters::UserKey
         };
-        Parameters params(&p[0], &p[0] + 5);
+        Parameters params(&p[0], &p[0] + 6);
         return params;
       }
 
@@ -77,14 +79,16 @@ namespace epidb {
         std::vector<serialize::ParameterPtr> sample_ids;
         std::vector<serialize::ParameterPtr> replicas;
         std::vector<serialize::ParameterPtr> genes;
+        std::vector<serialize::ParameterPtr> projects;
 
         parameters[0]->children(sample_ids);
         parameters[1]->children(replicas);
-        parameters[2]->children(replicas);
+        parameters[2]->children(genes);
+        parameters[3]->children(projects);
 
-        const std::string gene_model = parameters[3]->as_string();
+        const std::string gene_model = parameters[4]->as_string();
 
-        const std::string user_key = parameters[4]->as_string();
+        const std::string user_key = parameters[5]->as_string();
 
         std::string msg;
         datatypes::User user;
@@ -112,6 +116,46 @@ namespace epidb {
           args_builder.append("genes", utils::build_array_long(genes));
         }
         args_builder.append("gene_model", utils::normalize_name(gene_model));
+
+        // project
+
+        std::vector<utils::IdName> user_projects;
+        if (!dba::list::projects(user_key, user_projects, msg)) {
+          result.add_error(msg);
+          return false;
+        }
+
+        if (projects.size() > 0) {
+          // Filter the projects that are available to the user
+          std::vector<serialize::ParameterPtr> filtered_projects;
+          for (const auto& project : projects) {
+            std::string norm_project = utils::normalize_name(project->as_string());
+            bool found = false;
+            for (const auto& user_project : user_projects) {
+              std::string norm_user_project = utils::normalize_name(user_project.name);
+              if (norm_project == norm_user_project) {
+                filtered_projects.push_back(project);
+                found = true;
+                break;
+              }
+            }
+
+            if (!found) {
+              result.add_error(Error::m(ERR_INVALID_PROJECT, project->as_string()));
+              return false;
+            }
+          }
+
+          args_builder.append("project", utils::build_array(filtered_projects));
+          args_builder.append("norm_project", utils::build_normalized_array(filtered_projects));
+        } else {
+          std::vector<std::string> user_projects_names;
+          for (const auto& project : user_projects) {
+            user_projects_names.push_back(project.name);
+          }
+          args_builder.append("project", utils::build_array(user_projects_names));
+          args_builder.append("norm_project", utils::build_normalized_array(user_projects_names));
+        }
 
         std::string query_id;
         if (!dba::query::store_query("gene_expressions_select", args_builder.obj(), user_key, query_id, msg)) {

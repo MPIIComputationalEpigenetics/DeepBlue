@@ -746,6 +746,11 @@ namespace epidb {
           genes = utils::build_vector(args["genes"].Array());
         }
 
+        std::vector<std::string> project;
+        if (args.hasField("norm_project")) {
+          project = utils::build_vector(args["norm_project"].Array());
+        }
+
         // Honestly I dont like it, but since we changed these parameters and we already have a database with queries...
         // TODO: manually change the database.
         std::string gene_model;
@@ -755,7 +760,7 @@ namespace epidb {
           gene_model = args["gene_model"].str();
         }
 
-        if (!genes::get_gene_expressions_from_database(sample_ids, replicas, genes, gene_model, regions, msg)) {
+        if (!genes::get_gene_expressions_from_database(sample_ids, replicas, genes, project, gene_model, regions, msg)) {
           return false;
         }
 

@@ -25,6 +25,7 @@
 #include "../dba/exists.hpp"
 #include "../dba/genes.hpp"
 #include "../dba/insert.hpp"
+#include "../dba/list.hpp"
 
 #include "../datatypes/user.hpp"
 
@@ -52,14 +53,15 @@ namespace epidb {
       static Parameters parameters_()
       {
         Parameter p[] = {
-          Parameter("sample_id", serialize::STRING, "gene model name"),
-          Parameter("replica", serialize::INTEGER, "description of the annotation"),
+          Parameter("sample_id", serialize::STRING, "sample ID"),
+          Parameter("replica", serialize::INTEGER, "replica count (use 0 if it is the single replica)"),
           Parameter("data", serialize::DATASTRING, "the cufflinks formatted data"),
           Parameter("format", serialize::STRING, "Currently, it is only supported cufflinks."),
+          Parameter("project", serialize::STRING, "the project name"),
           parameters::AdditionalExtraMetadata,
           parameters::UserKey
         };
-        Parameters params(&p[0], &p[0] + 6);
+        Parameters params(&p[0], &p[0] + 7);
         return params;
       }
 
@@ -83,7 +85,8 @@ namespace epidb {
         const int replica = parameters[1]->as_long();
         const std::string data = parameters[2]->as_string();
         const std::string format = parameters[3]->as_string();
-        const std::string user_key = parameters[5]->as_string();
+        const std::string project = parameters[4]->as_string();
+        const std::string user_key = parameters[6]->as_string();
 
         std::string msg;
         datatypes::User user;
@@ -94,12 +97,13 @@ namespace epidb {
         }
 
         datatypes::Metadata extra_metadata;
-        if (!read_metadata(parameters[4], extra_metadata, msg)) {
+        if (!read_metadata(parameters[5], extra_metadata, msg)) {
           result.add_error(msg);
           return false;
         }
 
         std::string norm_sample_id = utils::normalize_name(sample_id);
+        std::string norm_project = utils::normalize_name(project);
 
         if (!dba::exists::sample(norm_sample_id)) {
           std::string s = Error::m(ERR_INVALID_SAMPLE_ID, sample_id);
@@ -112,6 +116,23 @@ namespace epidb {
           std::string s = "Currently, only the format 'cufflinks' is supported.";
         }
 
+        if (!dba::exists::project(norm_project)) {
+          std::vector<utils::IdName> names;
+          if (!dba::list::similar_projects(project, user_key, names, msg)) {
+            result.add_error(msg);
+            return false;
+          }
+          std::stringstream ss;
+          ss << "Invalid project name. ";
+          ss << project;
+          ss << ".";
+          if (!names.empty()) {
+            ss << " The following names are suggested: ";
+            ss << utils::vector_to_string(names);
+          }
+          result.add_error(ss.str());
+          return false;
+        }
 
         std::unique_ptr<std::istream> _input = std::unique_ptr<std::istream>(new std::stringstream(data));
         parser::CufflinksParser parser(std::move(_input));
@@ -122,7 +143,7 @@ namespace epidb {
         }
 
         std::string id;
-        bool ret = dba::genes::insert_expression(sample_id, replica, extra_metadata, fpkm_file, user_key, ip, id, msg);
+        bool ret = dba::genes::insert_expression(sample_id, replica, extra_metadata, fpkm_file, project, norm_project, user_key, ip, id, msg);
         if (ret) {
           result.add_string(id);
         } else {

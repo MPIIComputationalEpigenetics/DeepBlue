@@ -44,9 +44,12 @@ namespace epidb {
       static Parameters parameters_()
       {
         Parameter p[] = {
+          Parameter("sample_id", serialize::STRING, "sample ID(s)"),
+          Parameter("replica", serialize::INTEGER, "replica(s)", true),
+          Parameter("project", serialize::STRING, "project(s) name", true),
           parameters::UserKey
         };
-        Parameters params(&p[0], &p[0] + 1);
+        Parameters params(&p[0], &p[0] + 4);
         return params;
       }
 
@@ -65,8 +68,14 @@ namespace epidb {
       virtual bool run(const std::string &ip,
                        const serialize::Parameters &parameters, serialize::Parameters &result) const
       {
-        // TODO: Check user
-        const std::string user_key = parameters[0]->as_string();
+        std::vector<serialize::ParameterPtr> sample_ids;
+        std::vector<serialize::ParameterPtr> replicas;
+        std::vector<serialize::ParameterPtr> projects;
+
+        parameters[0]->children(sample_ids);
+        parameters[1]->children(replicas);
+        parameters[2]->children(projects);
+        const std::string user_key = parameters[3]->as_string();
 
         std::string msg;
         datatypes::User user;
@@ -75,13 +84,16 @@ namespace epidb {
           result.add_error(msg);
           return false;
         }
+        mongo::BSONObj query;
 
-        std::vector<utils::IdName> names;
-        bool ret = dba::list::gene_expressions(user_key, names, msg);
-
-        if (!ret) {
+        if (!dba::list::build_list_gene_expressions_query(sample_ids, replicas, projects, user_key, query, msg)) {
           result.add_error(msg);
           return false;
+        }
+
+        std::vector<utils::IdName> names;
+        if (!dba::list::gene_expressions(query, names, msg)) {
+          result.add_error(msg);
         }
 
         set_id_names_return(names, result);

@@ -59,9 +59,9 @@ namespace epidb {
       bool epigenetic_marks(const datatypes::Metadata &metadata,
                             std::vector<utils::IdName> &result, std::string &msg);
 
-      bool experiments(const mongo::BSONObj query, std::vector<utils::IdName> &result, std::string &msg);
+      bool experiments(const mongo::BSONObj& query, std::vector<utils::IdName> &result, std::string &msg);
 
-      bool experiments(const mongo::Query query, std::vector<utils::IdName> &result, std::string &msg);
+      bool experiments(const mongo::Query& query, std::vector<utils::IdName> &result, std::string &msg);
 
       bool annotations(const std::string &genome, const std::string &user_key,
                        std::vector<utils::IdName> &result, std::string &msg);
@@ -76,7 +76,9 @@ namespace epidb {
 
       bool gene_models(const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg);
 
-      bool gene_expressions(const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg);
+      bool gene_expressions(const mongo::BSONObj& query, std::vector<utils::IdName> &result, std::string &msg);
+
+      bool gene_expressions(const mongo::Query& query, std::vector<utils::IdName> &result, std::string &msg);
 
       bool genes(const std::string &user_key, const std::vector<std::string> &genes_id_or_name,
                  const std::vector<std::string> &chromosomes,
@@ -121,6 +123,10 @@ namespace epidb {
                                         const std::vector<serialize::ParameterPtr> sample_ids, const std::vector<serialize::ParameterPtr> techniques,
                                         const std::vector<serialize::ParameterPtr> projects, const std::string user_key,
                                         mongo::BSONObj& query, std::string &msg);
+
+      bool build_list_gene_expressions_query(const std::vector<serialize::ParameterPtr> sample_ids, const std::vector<serialize::ParameterPtr> replicas,
+                                             const std::vector<serialize::ParameterPtr> projects, const std::string user_key,
+                                             mongo::BSONObj& query, std::string& msg);
 
       /**
        * List in use

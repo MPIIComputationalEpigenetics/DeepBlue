@@ -321,6 +321,8 @@ namespace epidb {
 
       bool build_expression_metadata(const std::string &sample_id, const int replica,
                                      const std::string &format,
+                                     const std::string &project,
+                                     const std::string &norm_project,
                                      const mongo::BSONObj& extra_metadata_obj,
                                      const std::string &user_key, const std::string &ip,
                                      int &dataset_id,
@@ -356,6 +358,9 @@ namespace epidb {
           return false;
         }
 
+        gene_model_metadata_builder.append("project", project);
+        gene_model_metadata_builder.append("norm_project", norm_project);
+
         datatypes::Metadata sample_data;
         if (!info::get_sample_by_id(sample_id, sample_data, msg, true)) {
           return false;
@@ -390,14 +395,16 @@ namespace epidb {
       }
 
       bool insert_expression(const std::string& sample_id, const int replica, datatypes::Metadata extra_metadata,
-                             const parser::FPKMPtr &fpkm,  const std::string &user_key, const std::string &ip,
+                             const parser::FPKMPtr &fpkm,
+                             const std::string& project, const std::string& norm_project,
+                             const std::string &user_key, const std::string &ip,
                              std::string &gene_expression_id, std::string &msg)
       {
         mongo::BSONObj gene_expression_metadata;
         mongo::BSONObj extra_metadata_obj = datatypes::metadata_to_bson(extra_metadata);
         int dataset_id;
 
-        if (!build_expression_metadata(sample_id, replica, "cufflinks", extra_metadata_obj,
+        if (!build_expression_metadata(sample_id, replica, "cufflinks", project, norm_project, extra_metadata_obj,
                                        user_key, ip, dataset_id, gene_expression_id, gene_expression_metadata, msg)) {
           return false;
         }
@@ -661,7 +668,7 @@ namespace epidb {
       }
 
       bool get_gene_expressions_from_database(const std::vector<std::string> &sample_ids, const  std::vector<long>& replicas,
-                                              const std::vector<std::string> &genes,
+                                              const std::vector<std::string> &genes, const std::vector<std::string> &project,
                                               const std::string& norm_gene_model,  ChromosomeRegionsList& chromosomeRegionsList, std::string& msg)
       {
         Connection c;
@@ -676,7 +683,8 @@ namespace epidb {
 
         mongo::BSONArray ges_datasets = helpers::build_dataset_ids_arrays(Collections::GENE_EXPRESSIONS(), BSON(
                                           "sample_id" << BSON("$in" << utils::build_array(sample_ids))  <<
-                                          "replica" << BSON("$in" << utils::build_array_long(replicas))
+                                          "replica" << BSON("$in" << utils::build_array_long(replicas)) <<
+                                          "norm_project" << BSON("$in" << utils::build_array(project))
                                         ));
 
         mongo::BSONObjBuilder bob;
