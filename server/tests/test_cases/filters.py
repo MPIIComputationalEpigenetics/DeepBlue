@@ -5,7 +5,7 @@ from deepblue_client import DeepBlueClient
 
 class TestFilterCommand(helpers.TestCase):
 
-  def _test_filter_regions(self):
+  def test_filter_regions(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_full(epidb)
 
@@ -60,7 +60,7 @@ class TestFilterCommand(helpers.TestCase):
     self.assertEquals(regions, "chr21\t9656828\t9656920\t.\nchr21\t9700370\t9700415\t.\nchr21\t9825445\t9826573\t.\nchr21\t9826759\t9827609\t.\nchr21\t9829381\t9829420\t.\nchr21\t9831594\t9831981\t.\nchr21\t9833197\t9833459\t.\nchr21\t9833733\t9833902\t.\nchr21\t9841288\t9841558\t.")
 
 
-  def _test_filter_two_genomes(self):
+  def test_filter_two_genomes(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_full(epidb)
 
