@@ -604,8 +604,7 @@ namespace epidb {
         }
 
         for (const auto& gene_db_obj : genes_db_objs) {
-          mongo::BSONObjBuilder gene_builder;
-          genes.emplace_back(build_gene_info(gene_builder.obj()));
+          genes.emplace_back(build_gene_info(gene_db_obj));
         }
 
         return true;

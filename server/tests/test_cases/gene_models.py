@@ -7,7 +7,7 @@ from deepblue_client import DeepBlueClient
 
 class TestGenes(helpers.TestCase):
 
-  def _test_gene_retrieve(self):
+  def test_gene_retrieve(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
     data = open("data/gtf/gencode.v23.basic.annotation_head.gtf").read()
@@ -44,7 +44,7 @@ class TestGenes(helpers.TestCase):
         self.assertEquals(ls[3], ls[6])
         self.assertEquals(ls[4], ls[7])
 
-  def _test_genes_location(self):
+  def test_genes_location(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
@@ -56,13 +56,13 @@ class TestGenes(helpers.TestCase):
     self.assertEquals(gene_models, [['gs1', 'Test One']])
 
     (s, genes) = epidb.list_genes("", "chr21", 9683191, 9683272, gene_models[0][1], self.admin_key)
-    self.assertEquals(genes, [{'transcript_status': 'NOVEL', 'gene_name': 'CR381670.1', 'gene_type': 'miRNA', 'end': 9683272, 'source': 'ENSEMBL', 'frame': '.', 'level': '3', 'feature': 'gene', 'gene_id': 'ENSG00000238411.1', 'start': 9683191, 'score': 0.0, 'strand': '+', 'transcript_id': 'ENSG00000238411.1', 'transcript_name': 'CR381670.1', 'gene_status': 'NOVEL', 'transcript_type': 'miRNA', 'chromosome': 'chr21'}])
+    self.assertEquals(genes, [{'transcript_status': 'NOVEL', 'gene_name': 'CR381670.1', 'gene_type': 'miRNA', 'end': 9683272, 'source': 'ENSEMBL', 'frame': '.', 'level': '3', 'feature': 'gene', 'gene_id': 'ENSG00000238411.1', 'start': 9683191, 'transcript_id': 'ENSG00000238411.1', 'score': 0.0, 'strand': '+', 'transcript_name': 'CR381670.1', '_id': 'gn52851', 'gene_status': 'NOVEL', 'transcript_type': 'miRNA', 'chromosome': 'chr21'}])
 
     (s, genes) = epidb.list_genes("", "chr21", 9683191, 9683272, gene_models[0][1], self.admin_key)
-    self.assertEquals(genes, [{'transcript_status': 'NOVEL', 'gene_name': 'CR381670.1', 'gene_type': 'miRNA', 'end': 9683272, 'source': 'ENSEMBL', 'frame': '.', 'level': '3', 'feature': 'gene', 'gene_id': 'ENSG00000238411.1', 'start': 9683191, 'score': 0.0, 'strand': '+', 'transcript_id': 'ENSG00000238411.1', 'transcript_name': 'CR381670.1', 'gene_status': 'NOVEL', 'transcript_type': 'miRNA', 'chromosome': 'chr21'}])
+    self.assertEquals(genes, [{'transcript_status': 'NOVEL', 'gene_name': 'CR381670.1', 'gene_type': 'miRNA', 'end': 9683272, 'source': 'ENSEMBL', 'frame': '.', 'level': '3', 'feature': 'gene', 'gene_id': 'ENSG00000238411.1', 'start': 9683191, 'transcript_id': 'ENSG00000238411.1', 'score': 0.0, 'strand': '+', 'transcript_name': 'CR381670.1', '_id': 'gn52851', 'gene_status': 'NOVEL', 'transcript_type': 'miRNA', 'chromosome': 'chr21'}])
 
     (s, genes) = epidb.list_genes("CR381670", "chr21", None, None, gene_models[0][1], self.admin_key)
-    self.assertEquals(genes, [{'transcript_status': 'NOVEL', 'gene_name': 'CR381670.1', 'gene_type': 'miRNA', 'end': 9683272, 'source': 'ENSEMBL', 'frame': '.', 'level': '3', 'feature': 'gene', 'gene_id': 'ENSG00000238411.1', 'start': 9683191, 'score': 0.0, 'strand': '+', 'transcript_id': 'ENSG00000238411.1', 'transcript_name': 'CR381670.1', 'gene_status': 'NOVEL', 'transcript_type': 'miRNA', 'chromosome': 'chr21'}])
+    self.assertEquals(genes, [{'transcript_status': 'NOVEL', 'gene_name': 'CR381670.1', 'gene_type': 'miRNA', 'end': 9683272, 'source': 'ENSEMBL', 'frame': '.', 'level': '3', 'feature': 'gene', 'gene_id': 'ENSG00000238411.1', 'start': 9683191, 'transcript_id': 'ENSG00000238411.1', 'score': 0.0, 'strand': '+', 'transcript_name': 'CR381670.1', '_id': 'gn52851', 'gene_status': 'NOVEL', 'transcript_type': 'miRNA', 'chromosome': 'chr21'}])
 
     (s, genes) = epidb.list_genes("Pax", None, None, None, gene_models[0][1], self.admin_key)
     self.assertEquals(len(genes), 14)
@@ -155,7 +155,7 @@ class TestGenes(helpers.TestCase):
 
     self.assertEquals(regions, "")
 
-  def _test_gene_re(self):
+  def test_gene_re(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
@@ -187,7 +187,7 @@ class TestGenes(helpers.TestCase):
     status, gene_models = epidb.list_gene_models(self.admin_key)
     self.assertEquals(gene_models, [['gs1', 'Test One']])
 
-  def _test_gene_case_insensitive(self):
+  def test_gene_case_insensitive(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
@@ -204,7 +204,7 @@ class TestGenes(helpers.TestCase):
     status, gene_models = epidb.list_gene_models(self.admin_key)
     self.assertEquals(gene_models, [['gs1', 'Test One']])
 
-  def _test_gene_chr1_retrieve(self):
+  def test_gene_chr1_retrieve(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
