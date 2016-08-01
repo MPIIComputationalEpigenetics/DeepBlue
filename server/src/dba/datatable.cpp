@@ -356,8 +356,11 @@ namespace epidb {
             user_projects_names.push_back(project.name);
           }
 
-          query_builder.append("project", utils::build_array(user_projects_names));
-          query_builder.append("norm_project", utils::build_normalized_array(user_projects_names));
+          if (collection == Collections::PROJECTS()) {
+            query_builder.append("norm_name", BSON("$in" << utils::build_normalized_array(user_projects_names)));
+          } else {
+            query_builder.append("norm_project", BSON("$in" << utils::build_normalized_array(user_projects_names)));
+          }
         }
 
         query_obj = query_builder.obj();
