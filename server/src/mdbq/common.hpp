@@ -24,13 +24,13 @@
 namespace epidb {
   namespace mdbq {
     enum TaskState {
-      TS_NEW,
-      TS_RUNNING,
-      TS_DONE,
-      TS_FAILED,
-      TS_CANCELLED,
-      TS_REMOVED,
-      TS_RENEW,
+      TS_NEW,       // 0
+      TS_RUNNING,   // 1
+      TS_DONE,      // 2
+      TS_FAILED,    // 3
+      TS_CANCELLED, // 4
+      TS_REMOVED,   // 5
+      TS_RENEW,     // 6
       _TS_END,
       _TS_FIRST = TS_NEW
     };
