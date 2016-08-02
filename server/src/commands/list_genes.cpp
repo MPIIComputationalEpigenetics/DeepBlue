@@ -103,14 +103,11 @@ namespace epidb {
         if (!dba::list::genes(user_key, utils::build_vector(gene_id_or_name), utils::build_vector(chromosomes), start, end, norm_gene_models, genes, msg)) {
           result.add_error(msg);
         }
-        std::cerr << "list in " << (( ((float)  clock()) - list_time) / CLOCKS_PER_SEC) << std::endl;
 
         result.set_as_array(true);
         for (auto gene: genes) {
           result.add_param(utils::bson_to_parameters(gene));
         }
-
-        std::cerr << "total in " << (( ((float)  clock()) - list_time) / CLOCKS_PER_SEC) << std::endl;
 
         return true;
       }

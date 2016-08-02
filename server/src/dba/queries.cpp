@@ -581,7 +581,6 @@ namespace epidb {
           return false;
         }
 
-
         std::vector<std::string> chromosomes = utils::build_vector(args["chromosomes"].Array());
         std::set<std::string> genomes = utils::build_set(args["norm_genomes"].Array());
 
@@ -590,7 +589,7 @@ namespace epidb {
         // get region data for all genomes
         for (const auto& genome : genomes) {
           ChromosomeRegionsList reg;
-          if (!retrieve::get_regions(genome, chromosomes, regions_query, true, status, reg, msg)) {
+          if (!retrieve::get_regions(genome, chromosomes, regions_query, false, status, reg, msg)) {
             return false;
           }
           genome_regions.push_back(std::move(reg));
@@ -627,7 +626,7 @@ namespace epidb {
         std::vector<std::string> chromosomes = utils::build_vector(args["chromosomes"].Array());
         std::string genome = args["norm_genome"].String();
 
-        if (!retrieve::get_regions(genome, chromosomes, regions_query, true, status, regions, msg)) {
+        if (!retrieve::get_regions(genome, chromosomes, regions_query, false, status, regions, msg)) {
           return false;
         }
 
@@ -657,7 +656,7 @@ namespace epidb {
         std::vector<mongo::BSONElement>::iterator git;
         for (git = genome_arr.begin(); git != genome_arr.end(); ++git) {
           ChromosomeRegionsList reg;
-          if (!retrieve::get_regions(git->str(), chromosomes, regions_query, true, status, reg, msg)) {
+          if (!retrieve::get_regions(git->str(), chromosomes, regions_query, false, status, reg, msg)) {
             return false;
           }
           genome_regions.push_back(std::move(reg));

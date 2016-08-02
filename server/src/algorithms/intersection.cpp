@@ -73,8 +73,8 @@ namespace epidb {
         while ((data_pos < data_size) &&
                ((*it_ranges)->end() >= regions_data[data_pos]->start()) )  {
 
-          if (((*it_ranges)->start() <= regions_data[data_pos]->end()) &&
-              ((*it_ranges)->end() >= regions_data[data_pos]->start())) {
+          if (((*it_ranges)->start() < regions_data[data_pos]->end()) &&
+              ((*it_ranges)->end() > regions_data[data_pos]->start())) {
             regions.emplace_back(std::move(regions_data[data_pos]));
           }
           data_pos++;

@@ -120,10 +120,11 @@ namespace epidb {
               } else {
                 scores = reinterpret_cast<const Score *>(data);
               }
-              for (Length i = 0; i < size; i++) {
-                if ((start + (i * step) < _query_start) ||  start + (i * step) + span > _query_end) {
-                  continue;
-                }
+              for (Length i = 0;
+                   (i < size) &&
+                   ((start + (i * step)) < _query_end) &&  // Region START < Range END
+                   ( ((start + (i * step) + span)) > _query_start); // Region END > Range START
+                   i++) {
                 RegionPtr region = build_wig_region(start + (i * step), start + (i * step) + span, dataset_id, scores[i]);
                 _it_size += region->size();
                 _regions.emplace_back(std::move(region));
@@ -138,10 +139,11 @@ namespace epidb {
                 starts = reinterpret_cast<const Position *>(data);
                 scores = reinterpret_cast<const Score *>(data + (size * sizeof(Position)));
               }
-              for (Length i = 0; i < size; i++)  {
-                if ((starts[i] < _query_start) || (starts[i] + span > _query_end)) {
-                  continue;
-                }
+              for (Length i = 0;
+                   (i < size) &&
+                   (starts[i] < _query_end) &&  // Region START < Range END
+                   ((starts[i] + span) > _query_start); // Region END > Range START
+                   i++)  {
                 RegionPtr region = build_wig_region(starts[i], starts[i] + span, dataset_id, scores[i]);
                 _it_size += region->size();
                 _regions.emplace_back(std::move(region));
@@ -158,10 +160,11 @@ namespace epidb {
                 ends = reinterpret_cast<const Position *>(data + (size * sizeof(Position)));
                 scores = reinterpret_cast<const Score *>(data + (size * sizeof(Position) + (size * sizeof(Position))));
               }
-              for (Length i = 0; i < size; i++)  {
-                if ((starts[i] < _query_start) || (ends[i] > _query_end)) {
-                  continue;
-                }
+              for (Length i = 0;
+                   (i < size) &&
+                   (starts[i] < _query_end) &&
+                   (ends[i] > _query_start);
+                   i++)  {
                 RegionPtr region = build_wig_region(starts[i], ends[i], dataset_id, scores[i]);
                 _it_size += region->size();
                 _regions.emplace_back(std::move(region));
@@ -219,7 +222,7 @@ namespace epidb {
               continue;
             }
           } else {
-            if ((start > _query_end) || (end < _query_start)) {
+            if ((start >= _query_end) || (end <= _query_start)) {
               continue;
             }
           }

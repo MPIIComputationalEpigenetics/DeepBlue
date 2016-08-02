@@ -101,7 +101,7 @@ class TestComplexQueries(helpers.TestCase):
     self.assertSuccess(res, req)
     count = self.count_request(req)
 
-    self.assertEqual(count, 14370)
+    self.assertEqual(count, 14356)
 
     res, qid_6_1 = epidb.filter_regions(qid_5_1, "END",  "<", "2200000", "number", self.admin_key)
     self.assertSuccess(res, qid_6_1)

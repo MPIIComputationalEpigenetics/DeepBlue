@@ -93,6 +93,10 @@ namespace epidb {
               // TODO: the meta.process should return the double value directly
               utils::string_to_score(value, s);
               acc.push(s * correct_offset);
+            } else if (field == "START") {
+              acc.push((*it_data)->start());
+            } else if (field == "END") {
+              acc.push((*it_data)->end());
             } else {
               if (dataset_id != (*it_data)->dataset_id()) {
                 dataset_id = (*it_data)->dataset_id();
