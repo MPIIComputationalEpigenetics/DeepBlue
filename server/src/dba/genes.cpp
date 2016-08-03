@@ -51,26 +51,15 @@ namespace epidb {
       {
         mongo::BSONObjBuilder gene_builder;
 
-std::cerr << gene_db_obj.toString() << std::endl;
         gene_builder.append(gene_db_obj["_id"]);
-
-std::cerr << "A" << std::endl;
         gene_builder.append("chromosome", gene_db_obj[KeyMapper::CHROMOSOME()].String());
-std::cerr << "B" << std::endl;
         gene_builder.append("start", gene_db_obj[KeyMapper::START()].numberLong());
-std::cerr << "C" << std::endl;
         gene_builder.append("end", gene_db_obj[KeyMapper::END()].numberLong());
-std::cerr << "D" << std::endl;
         gene_builder.append("source", gene_db_obj[KeyMapper::SOURCE()].String());
-std::cerr << "F" << std::endl;
         gene_builder.append("score", gene_db_obj[KeyMapper::SCORE()].numberDouble());
-std::cerr << "G" << std::endl;
         gene_builder.append("strand", gene_db_obj[KeyMapper::STRAND()].String());
-std::cerr << "H" << std::endl;
         gene_builder.append("frame", gene_db_obj[KeyMapper::FRAME()].String());
-std::cerr << "J" << std::endl;
         const mongo::BSONObj& attributes = gene_db_obj[KeyMapper::ATTRIBUTES()].Obj();
-std::cerr << "K" << std::endl;
         gene_builder.appendElements(attributes);
 
         return gene_builder.obj();
