@@ -15,12 +15,14 @@
 
 #include <boost/utility.hpp>
 
+#include "../interfaces/serializable.hpp"
+
 #include "../types.hpp"
 
 namespace epidb {
   namespace parser {
 
-    class FPKMRow {
+    class FPKMRow : public ISerializable {
 
     private:
       std::string _tracking_id;
@@ -33,8 +35,8 @@ namespace epidb {
 
     public:
       FPKMRow(const std::string &tracking_id, const std::string &gene_id, const std::string &gene_short_name,
-             Score fpkm, Score fpkm_lo, Score fpkm_hi,
-             const std::string& fpkm_status);
+              Score fpkm, Score fpkm_lo, Score fpkm_hi,
+              const std::string& fpkm_status);
 
       const std::string& tracking_id() const { return _tracking_id; }
       const std::string& gene_id() const { return _gene_id; }
@@ -43,22 +45,15 @@ namespace epidb {
       const Score fpkm_lo() const { return _fpkm_lo; }
       const Score fpkm_hi() const { return _fpkm_hi; }
       const std::string& fpkm_status() const { return _fpkm_status; }
+
+      virtual const mongo::BSONObj to_BSON();
     };
 
-    typedef std::vector<FPKMRow> FPKMContent;
-
-    class FPKMFile : boost::noncopyable {
-    private:
-      FPKMContent _content;
-
+    class FPKMFile : ISerializableFile {
     public:
-      const FPKMContent& rows() const;
       void add_row(const std::string &tracking_id, const std::string &gene_id, const std::string &gene_short_name,
-             Score fpkm, Score fpkm_lo, Score fpkm_hi, const std::string& fpkm_status);
-      size_t size() const;
+                   Score fpkm, Score fpkm_lo, Score fpkm_hi, const std::string& fpkm_status);
     };
-
-    typedef std::shared_ptr<FPKMFile> FPKMPtr;
   }
 }
 

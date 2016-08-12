@@ -1,7 +1,7 @@
 //
 //  cufflinks_parser.hpp
 //  DeepBlue Epigenomic Data Server
-//  File created by Felipe Albrecht on 07.09.15.
+//  File created by Felipe Albrecht on 29.06.16.
 //  Copyright (c) 2016 Max Planck Institute for Informatics. All rights reserved.
 
 //  This program is free software: you can redistribute it and/or modify
@@ -30,6 +30,7 @@
 
 #include <strtk.hpp>
 
+#include "gene_expression_parser.hpp"
 #include "fpkm.hpp"
 
 #include "../extras/utils.hpp"
@@ -37,7 +38,7 @@
 namespace epidb {
   namespace parser {
 
-    class CufflinksParser {
+    class CufflinksParser: public IGeneExpressionParser {
     protected:
       size_t actual_line_;
       std::unique_ptr<std::istream> input_;
@@ -51,7 +52,7 @@ namespace epidb {
 
     public:
       CufflinksParser(std::unique_ptr<std::istream> &&input);
-      bool get(FPKMPtr &wig, std::string &msg);
+      bool get(FPKMFile &wig, std::string &msg);
       size_t actual_line();
       bool eof();
     };

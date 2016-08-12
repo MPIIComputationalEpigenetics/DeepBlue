@@ -34,8 +34,9 @@
 #include "../extras/utils.hpp"
 #include "../extras/serialize.hpp"
 
-#include "../parser/cufflinks_parser.hpp"
-#include "../parser/fpkm.hpp"
+#include "../parser/gene_expression_parser_factory.hpp"
+
+#include "../interfaces/serializable.hpp"
 
 #include "../errors.hpp"
 
@@ -134,10 +135,9 @@ namespace epidb {
           return false;
         }
 
-        std::unique_ptr<std::istream> _input = std::unique_ptr<std::istream>(new std::stringstream(data));
-        parser::CufflinksParser parser(std::move(_input));
-        parser::FPKMPtr fpkm_file;
-        if (!parser.get(fpkm_file, msg)) {
+        auto parser = parser::GeneExpressionParserFactory::build(format, std::unique_ptr<std::istream>(new std::stringstream(data)));
+        ISerializableFile serializable_file;
+        if (!parser.get(serializable_file, msg)) {
           result.add_error(msg);
           return false;
         }

@@ -67,6 +67,20 @@ namespace epidb {
       static const std::string& FPKM_HI();
       static const std::string& FPKM_STATUS();
 
+      static const std::string& TRANSCRIPTS_IDS();
+      static const std::string& LENGTH();
+      static const std::string& EFFECTIVE_LENGTH();
+      static const std::string& EXPECTED_COUNT();
+      static const std::string& TPM();
+      static const std::string& POSTERIOR_MEAN_COUNT();
+      static const std::string& POSTERIOR_STANDARD_DEVIATION_OF_COUNT();
+      static const std::string& PME_TPM();
+      static const std::string& PME_FPKM();
+      static const std::string& TPM_CI_LOWER_BOUND();
+      static const std::string& TPM_CI_UPPER_BOUND();
+      static const std::string& FPKM_CI_LOWER_BOUND();
+      static const std::string& FPKM_CI_UPPER_BOUND();
+
     private:
       static bool set_shortcut(const std::string &s, const std::string &l, std::string &err);
       static bool read_database();

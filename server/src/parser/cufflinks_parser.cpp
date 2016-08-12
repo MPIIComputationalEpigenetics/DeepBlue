@@ -1,7 +1,7 @@
 //
-//  _parser.cpp
+//  cufflinks_parser.cpp
 //  DeepBlue Epigenomic Data Server
-//  File created by Felipe Albrecht on 29.04.14.
+//  File created by Felipe Albrecht on 29.06.16.
 //  Copyright (c) 2016 Max Planck Institute for Informatics. All rights reserved.
 
 //  This program is free software: you can redistribute it and/or modify
@@ -41,7 +41,7 @@ namespace epidb {
       input_(std::move(input))
     {}
 
-    bool CufflinksParser::get(parser::FPKMPtr &file, std::string &msg)
+    bool CufflinksParser::get(FPKMFile &file, std::string &msg)
     {
       file = std::make_shared<FPKMFile>();
 

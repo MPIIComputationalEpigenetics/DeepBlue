@@ -58,7 +58,7 @@ namespace epidb {
                   std::string &gene_model_id, std::string &msg);
 
       bool insert_expression(const std::string& sample_id, const int replica, datatypes::Metadata extra_metadata,
-                             const parser::FPKMPtr &fpkm,
+                             const ISerializable &file,
                              const std::string &project, const std::string &norm_roject,
                              const std::string &user_key, const std::string &ip,
                              std::string &gene_expression_id, std::string &msg);
