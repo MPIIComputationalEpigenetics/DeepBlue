@@ -1,7 +1,7 @@
 //
-//  _parser.cpp
+//  cufflinks_parser.cpp
 //  DeepBlue Epigenomic Data Server
-//  File created by Felipe Albrecht on 29.04.14.
+//  File created by Felipe Albrecht on 29.06.16.
 //  Copyright (c) 2016 Max Planck Institute for Informatics. All rights reserved.
 
 //  This program is free software: you can redistribute it and/or modify
@@ -18,35 +18,29 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include <ctime>
-#include <limits>
 #include <string>
 
 #include <strtk.hpp>
 
-#include <boost/algorithm/string.hpp>
-#include <boost/tokenizer.hpp>
-
 #include "cufflinks_parser.hpp"
 #include "fpkm.hpp"
 
-#include "../types.hpp"
+#include "../interfaces/serializable.hpp"
 
+#include "../types.hpp"
 
 namespace epidb {
   namespace parser {
 
     CufflinksParser::CufflinksParser(std::unique_ptr<std::istream> &&input) :
-      actual_line_(0),
-      input_(std::move(input))
+      IGeneExpressionParser(std::move(input))
     {}
 
-    bool CufflinksParser::get(parser::FPKMPtr &file, std::string &msg)
+    bool CufflinksParser::parse(ISerializableFilePtr& file, std::string &msg)
     {
-      file = std::make_shared<FPKMFile>();
+      std::shared_ptr<FPKMFile> fpkm_file = std::make_shared<FPKMFile>();
 
       strtk::for_each_line_conditional(*input_, [&](const std::string & line) -> bool {
-
         actual_line_++;
         if (line.empty() || line[0] == '#')
         {
@@ -71,7 +65,7 @@ namespace epidb {
           return false;
         }
 
-        file->add_row(tracking_id, gene_id, gene_short_name, FPKM, FPKM_conf_lo, FPKM_conf_hi, FPKM_status);
+        fpkm_file->add_row(tracking_id, gene_id, gene_short_name, FPKM, FPKM_conf_lo, FPKM_conf_hi, FPKM_status);
 
         return true;
       });
@@ -81,6 +75,7 @@ namespace epidb {
         return false;
       }
 
+      file = fpkm_file;
       return true;
     }
   }

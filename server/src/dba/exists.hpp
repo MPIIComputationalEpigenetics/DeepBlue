@@ -58,6 +58,8 @@ namespace epidb {
 
       bool gene_model(const std::string &name);
 
+      bool gene_expression(const std::string &sample_id, const int replica);
+
       bool annotation(const std::string &name, const std::string& genome);
 
       bool user(const std::string &name);

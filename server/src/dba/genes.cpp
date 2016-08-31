@@ -27,9 +27,11 @@
 
 #include "../datatypes/metadata.hpp"
 
+#include "../extras/utils.hpp"
+
 #include "../parser/gtf.hpp"
 
-#include "../extras/utils.hpp"
+#include "../interfaces/serializable.hpp"
 
 #include "annotations.hpp"
 #include "collections.hpp"
@@ -376,25 +378,21 @@ namespace epidb {
         return true;
       }
 
-      mongo::BSONObj to_bson(const int dataset_id, const std::string& gene_id, const parser::FPKMRow& row)
+      mongo::BSONObj to_bson(const int dataset_id, const std::string& gene_id, const ISerializablePtr& row)
       {
         mongo::BSONObjBuilder bob;
 
+        auto row_bson = row->to_BSON();
+
         bob.append("_id", gene_id);
         bob.append(KeyMapper::DATASET(), dataset_id);
-        bob.append(KeyMapper::TRACKING_ID(), row.tracking_id());
-        bob.append(KeyMapper::GENE_ID(), row.gene_id());
-        bob.append(KeyMapper::GENE_SHORT_NAME(), row.gene_short_name());
-        bob.append(KeyMapper::FPKM(), row.fpkm());
-        bob.append(KeyMapper::FPKM_LO(), row.fpkm_lo());
-        bob.append(KeyMapper::FPKM_HI(), row.fpkm_hi());
-        bob.append(KeyMapper::FPKM_STATUS(), row.fpkm_status());
+        bob.appendElements(row_bson);
 
         return bob.obj();
       }
 
       bool insert_expression(const std::string& sample_id, const int replica, datatypes::Metadata extra_metadata,
-                             const parser::FPKMPtr &fpkm,
+                             const ISerializableFilePtr file,
                              const std::string& project, const std::string& norm_project,
                              const std::string &user_key, const std::string &ip,
                              std::string &gene_expression_id, std::string &msg)
@@ -439,8 +437,7 @@ namespace epidb {
 
         std::vector<mongo::BSONObj> rows_obj_bulk;
 
-        for (const auto& row :  fpkm->rows()) {
-
+        for (const auto& row : file->rows()) {
           int _id;
           if (!helpers::get_increment_counter("gene_single_expressions", _id, msg) ||
               !helpers::notify_change_occurred(Collections::GENE_SINGLE_EXPRESSIONS(), msg))  {
@@ -685,10 +682,16 @@ namespace epidb {
                                           "norm_project" << BSON("$in" << utils::build_array(project))
                                         ));
 
+
+
         mongo::BSONObjBuilder bob;
+        // Look at the tracking ID, gene id, and short name
         bob.append(KeyMapper::DATASET(), BSON("$in" << ges_datasets));
         if (!genes.empty()) {
-          bob.append(KeyMapper::TRACKING_ID(), BSON("$in" << utils::build_array(genes)));
+          mongo::BSONObj b_in_tracking_id = BSON(KeyMapper::TRACKING_ID() << BSON("$in" << utils::build_array(genes)));
+          mongo::BSONObj b_in_gene_id = BSON(KeyMapper::GENE_ID() << BSON("$in" << utils::build_array(genes)));
+          mongo::BSONObj b_in_short_name = BSON(KeyMapper::GENE_SHORT_NAME() <<  BSON("$in" << utils::build_array(genes)));
+          bob.append("$or", BSON_ARRAY(b_in_tracking_id << b_in_gene_id << b_in_short_name ));
         }
 
         auto query = bob.obj();

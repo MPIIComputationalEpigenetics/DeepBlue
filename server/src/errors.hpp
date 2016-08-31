@@ -118,6 +118,8 @@ namespace epidb {
   extern Error ERR_INVALID_GENE_LOCATION;
   extern Error ERR_INVALID_GENE_ATTRIBUTE;
 
+  extern Error ERR_DUPLICATE_GENE_EXPRESSION;
+
   extern Error ERR_INVALID_SAMPLE_ID;
 
   extern Error ERR_INVALID_BIOSOURCE_NAME;

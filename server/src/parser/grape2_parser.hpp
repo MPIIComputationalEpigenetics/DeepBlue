@@ -1,7 +1,7 @@
 //
-//  cufflinks_parser.hpp
+//  grape2_parser.hpp
 //  DeepBlue Epigenomic Data Server
-//  File created by Felipe Albrecht on 29.06.16.
+//  File created by Felipe Albrecht on 08.08.16.
 //  Copyright (c) 2016 Max Planck Institute for Informatics. All rights reserved.
 
 //  This program is free software: you can redistribute it and/or modify
@@ -18,8 +18,8 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef CUFFLINKES_PARSER_HPP
-#define CUFFLINKES_PARSER_HPP
+#ifndef GRAPE2_PARSER_HPP
+#define GRAPE2_PARSER_HPP
 
 #include <string>
 #include <sstream>
@@ -32,12 +32,13 @@
 namespace epidb {
   namespace parser {
 
-    class CufflinksParser: public IGeneExpressionParser {
+    class Grape2Parser: public IGeneExpressionParser {
+
     public:
-      CufflinksParser(std::unique_ptr<std::istream> &&input);
+      Grape2Parser(std::unique_ptr<std::istream> &&input);
       virtual bool parse(ISerializableFilePtr &file, std::string &msg);
     };
   }
 }
 
-#endif /* defined(GTF_PARSER_HPP) */
+#endif /* defined(GRAPE2_PARSER_HPP) */

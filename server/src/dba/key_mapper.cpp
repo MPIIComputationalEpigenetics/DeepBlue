@@ -215,6 +215,7 @@ namespace epidb {
       static std::string FEATURE = epidb::dba::KeyMapper::build_default("FEATURE");
       return FEATURE;
     }
+
     const std::string& KeyMapper::SCORE()
     {
       static std::string SCORE = epidb::dba::KeyMapper::build_default("SCORE");
@@ -244,7 +245,6 @@ namespace epidb {
       static std::string TRACKING_ID = epidb::dba::KeyMapper::build_default("TRACKING_ID");
       return TRACKING_ID;
     }
-
 
     const std::string& KeyMapper::GENE_SHORT_NAME()
     {
@@ -282,6 +282,84 @@ namespace epidb {
       return FPKM_STATUS;
     }
 
+    const std::string& KeyMapper::TRANSCRIPTS_IDS()
+    {
+      static std::string TRANSCRIPTS_IDS = epidb::dba::KeyMapper::build_default("TRANSCRIPTS_IDS");
+      return TRANSCRIPTS_IDS;
+    }
+
+    const std::string& KeyMapper::LENGTH()
+    {
+      static std::string LENGTH = epidb::dba::KeyMapper::build_default("LENGTH");
+      return LENGTH;
+    }
+
+    const std::string& KeyMapper::EFFECTIVE_LENGTH()
+    {
+      static std::string EFFECTIVE_LENGTH = epidb::dba::KeyMapper::build_default("EFFECTIVE_LENGTH");
+      return EFFECTIVE_LENGTH;
+    }
+
+    const std::string& KeyMapper::EXPECTED_COUNT()
+    {
+      static std::string EXPECTED_COUNT = epidb::dba::KeyMapper::build_default("EXPECTED_COUNT");
+      return EXPECTED_COUNT;
+    }
+
+    const std::string& KeyMapper::TPM()
+    {
+      static std::string TPM = epidb::dba::KeyMapper::build_default("TPM");
+      return TPM;
+    }
+
+    const std::string& KeyMapper::POSTERIOR_MEAN_COUNT()
+    {
+      static std::string POSTERIOR_MEAN_COUNT = epidb::dba::KeyMapper::build_default("POSTERIOR_MEAN_COUNT");
+      return POSTERIOR_MEAN_COUNT;
+    }
+
+    const std::string& KeyMapper::POSTERIOR_STANDARD_DEVIATION_OF_COUNT()
+    {
+      static std::string POSTERIOR_STANDARD_DEVIATION_OF_COUNT = epidb::dba::KeyMapper::build_default("POSTERIOR_STANDARD_DEVIATION_OF_COUNT");
+      return POSTERIOR_STANDARD_DEVIATION_OF_COUNT;
+    }
+
+    const std::string& KeyMapper::PME_TPM()
+    {
+      static std::string PME_TPM = epidb::dba::KeyMapper::build_default("PME_TPM");
+      return PME_TPM;
+    }
+
+    const std::string& KeyMapper::PME_FPKM()
+    {
+      static std::string PME_FPKM = epidb::dba::KeyMapper::build_default("PME_FPKM");
+      return PME_FPKM;
+    }
+
+    const std::string& KeyMapper::TPM_CI_LOWER_BOUND()
+    {
+      static std::string TPM_CI_LOWER_BOUND = epidb::dba::KeyMapper::build_default("TPM_CI_LOWER_BOUND");
+      return TPM_CI_LOWER_BOUND;
+    }
+
+    const std::string& KeyMapper::TPM_CI_UPPER_BOUND()
+    {
+      static std::string TPM_CI_UPPER_BOUND = epidb::dba::KeyMapper::build_default("TPM_CI_UPPER_BOUND");
+      return TPM_CI_UPPER_BOUND;
+    }
+
+    const std::string& KeyMapper::FPKM_CI_LOWER_BOUND()
+    {
+      static std::string FPKM_CI_LOWER_BOUND = epidb::dba::KeyMapper::build_default("FPKM_CI_LOWER_BOUND");
+      return FPKM_CI_LOWER_BOUND;
+    }
+
+    const std::string& KeyMapper::FPKM_CI_UPPER_BOUND()
+    {
+      static std::string FPKM_CI_UPPER_BOUND = epidb::dba::KeyMapper::build_default("FPKM_CI_UPPER_BOUND");
+      return FPKM_CI_UPPER_BOUND;
+    }
+
     std::string KeyMapper::build_default(const std::string &s)
     {
       std::string r;
@@ -291,6 +369,7 @@ namespace epidb {
       }
       return r;
     }
+
 
     bool KeyMapper::to_short(const std::string &l, std::string &res, std::string &err)
     {

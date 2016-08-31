@@ -18,7 +18,17 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <string>
+#include <memory>
+
+#include <mongo/bson/bson.h>
+
 #include "fpkm.hpp"
+
+#include "../dba/key_mapper.hpp"
+
+#include "../interfaces/serializable.hpp"
+
 #include "../types.hpp"
 
 namespace epidb {
@@ -36,21 +46,29 @@ namespace epidb {
       _fpkm_status(fpkm_status)
     { }
 
+    const mongo::BSONObj FPKMRow::to_BSON()
+    {
+      mongo::BSONObjBuilder bob;
+
+      bob.append(dba::KeyMapper::TRACKING_ID(), _tracking_id);
+      bob.append(dba::KeyMapper::GENE_ID(), _gene_id);
+      bob.append(dba::KeyMapper::GENE_SHORT_NAME(), _gene_short_name);
+      bob.append(dba::KeyMapper::FPKM(), _fpkm);
+      bob.append(dba::KeyMapper::FPKM_LO(), _fpkm_lo);
+      bob.append(dba::KeyMapper::FPKM_HI(), _fpkm_hi);
+      bob.append(dba::KeyMapper::FPKM_STATUS(), _fpkm_status);
+
+      return bob.obj();
+    }
+
     void FPKMFile::add_row(const std::string &tracking_id, const std::string &gene_id, const std::string &gene_short_name,
-                          Score fpkm, Score fpkm_lo, Score fpkm_hi, const std::string& fpkm_status)
+                           Score fpkm, Score fpkm_lo, Score fpkm_hi, const std::string& fpkm_status)
     {
-      _content.emplace_back(tracking_id, gene_id, gene_short_name, fpkm, fpkm_lo, fpkm_hi, fpkm_status);
+      _data.emplace_back(
+        std::unique_ptr<FPKMRow>(
+          new FPKMRow(tracking_id, gene_id, gene_short_name, fpkm, fpkm_lo, fpkm_hi, fpkm_status)
+        )
+      );
     }
-
-    const FPKMContent & FPKMFile::rows() const
-    {
-      return _content;
-    }
-
-    size_t FPKMFile::size() const
-    {
-      return _content.size();
-    }
-
   }
 }

@@ -137,7 +137,7 @@ namespace epidb {
           result.add_error(msg);
         }
 
-        return true;
+        return ret;
       }
 
     } addGeneModelCommand;
