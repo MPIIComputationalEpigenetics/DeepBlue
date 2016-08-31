@@ -815,6 +815,7 @@ namespace epidb {
         auto it = cache.find(gene_id);
         if (it == cache.end()) {
           msg = "Gene ID " + gene_id + " not found in the gene model " + gene_model;
+          return false;
         }
 
         const auto &region = it->second;
