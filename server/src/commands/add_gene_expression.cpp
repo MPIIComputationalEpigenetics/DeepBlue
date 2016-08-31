@@ -112,6 +112,12 @@ namespace epidb {
           return false;
         }
 
+        if (dba::exists::gene_expression(norm_sample_id, replica)) {
+          std::string s = Error::m(ERR_DUPLICATE_GENE_EXPRESSION, sample_id, replica);
+          result.add_error(s);
+          return false;
+        }
+
         std::string norm_file_format = utils::normalize_name(format);
         if (norm_file_format != "cufflinks") {
           std::string s = "Currently, only the format 'cufflinks' is supported.";
@@ -135,22 +141,28 @@ namespace epidb {
           return false;
         }
 
-        auto parser = parser::GeneExpressionParserFactory::build(format, std::unique_ptr<std::istream>(new std::stringstream(data)));
-        ISerializableFile serializable_file;
-        if (!parser.get(serializable_file, msg)) {
+        auto parser = parser::GeneExpressionParserFactory::build(format, std::unique_ptr<std::istream>(new std::stringstream(data)), msg);
+
+        if (parser == nullptr) {
+          result.add_error(msg);
+          return false;
+        }
+
+        ISerializableFilePtr serializable_file;
+        if (!parser->parse(serializable_file, msg)) {
           result.add_error(msg);
           return false;
         }
 
         std::string id;
-        bool ret = dba::genes::insert_expression(sample_id, replica, extra_metadata, fpkm_file, project, norm_project, user_key, ip, id, msg);
+        bool ret = dba::genes::insert_expression(sample_id, replica, extra_metadata, serializable_file, project, norm_project, user_key, ip, id, msg);
         if (ret) {
           result.add_string(id);
         } else {
           result.add_error(msg);
         }
 
-        return true;
+        return ret;
       }
 
     } addGeneExpressionCommand;

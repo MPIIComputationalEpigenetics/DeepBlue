@@ -1,9 +1,10 @@
 //
-//  cufflinks_parser.hpp
+//  gene_expression_parser_factory.hpp
 //  DeepBlue Epigenomic Data Server
-//  File created by Felipe Albrecht on 29.06.16.
-//  Copyright (c) 2016 Max Planck Institute for Informatics. All rights reserved.
-
+//  File created by Felipe Albrecht on 12.08.16.
+//  Copyright (c) 2015 Max Planck Institute for Computer Science. All rights
+//  reserved.
+//
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
@@ -18,26 +19,40 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef CUFFLINKES_PARSER_HPP
-#define CUFFLINKES_PARSER_HPP
+#ifndef GENE_EXPRESSION_PARSER_HPP
+#define GENE_EXPRESSION_PARSER_HPP
 
-#include <string>
-#include <sstream>
 #include <memory>
 
 #include "../interfaces/serializable.hpp"
 
-#include "gene_expression_parser.hpp"
+#include "../extras/utils.hpp"
 
 namespace epidb {
   namespace parser {
+    class IGeneExpressionParser {
+    protected:
+      size_t actual_line_;
+      std::unique_ptr<std::istream> input_;
 
-    class CufflinksParser: public IGeneExpressionParser {
+      const std::string line_str()
+      {
+        return utils::integer_to_string(actual_line_);
+      }
+
     public:
-      CufflinksParser(std::unique_ptr<std::istream> &&input);
-      virtual bool parse(ISerializableFilePtr &file, std::string &msg);
+      IGeneExpressionParser(std::unique_ptr<std::istream> &&input) :
+        actual_line_(0),
+        input_(std::move(input))
+      {}
+
+      virtual bool parse(ISerializableFilePtr& file, std::string &msg) = 0;
+
     };
+
+    typedef std::unique_ptr<IGeneExpressionParser> GeneExpressionParserPtr;
   }
 }
 
-#endif /* defined(GTF_PARSER_HPP) */
+
+#endif

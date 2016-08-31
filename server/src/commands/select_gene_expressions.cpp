@@ -113,7 +113,7 @@ namespace epidb {
         args_builder.append("sample_ids", utils::build_array(sample_ids));
         args_builder.append("replicas", utils::build_array_long(replicas));
         if (!genes.empty()) {
-          args_builder.append("genes", utils::build_array_long(genes));
+          args_builder.append("genes", utils::build_array(genes));
         }
         args_builder.append("gene_model", utils::normalize_name(gene_model));
 

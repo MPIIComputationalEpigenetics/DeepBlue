@@ -16,14 +16,12 @@
 
 #include <boost/utility.hpp>
 
-#include "../interfaces/serializable.hpp"
-
 #include "../types.hpp"
 
 namespace epidb {
   namespace parser {
 
-    class GTFRow: public ISerializable {
+    class GTFRow {
     public:
       typedef std::unordered_map<std::string, std::string> Attributes;
 

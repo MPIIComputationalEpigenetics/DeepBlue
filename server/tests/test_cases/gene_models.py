@@ -56,13 +56,13 @@ class TestGenes(helpers.TestCase):
     self.assertEquals(gene_models, [['gs1', 'Test One']])
 
     (s, genes) = epidb.list_genes("", "chr21", 9683191, 9683272, gene_models[0][1], self.admin_key)
-    self.assertEquals(genes, [{'transcript_status': 'NOVEL', 'gene_name': 'CR381670.1', 'gene_type': 'miRNA', 'end': 9683272, 'source': 'ENSEMBL', 'frame': '.', 'level': '3', 'feature': 'gene', 'gene_id': 'ENSG00000238411.1', 'start': 9683191, 'transcript_id': 'ENSG00000238411.1', 'score': 0.0, 'strand': '+', 'transcript_name': 'CR381670.1', '_id': 'gn52851', 'gene_status': 'NOVEL', 'transcript_type': 'miRNA', 'chromosome': 'chr21'}])
+    self.assertEquals(genes, [{'transcript_status': 'NOVEL', 'gene_name': 'CR381670.1', 'gene_type': 'miRNA', 'end': 9683272, 'source': 'ENSEMBL', 'frame': '.', 'level': '3', 'gene_id': 'ENSG00000238411.1', 'start': 9683191, 'transcript_id': 'ENSG00000238411.1', 'score': 0.0, 'strand': '+', 'transcript_name': 'CR381670.1', '_id': 'gn52851', 'gene_status': 'NOVEL', 'transcript_type': 'miRNA', 'chromosome': 'chr21'}])
 
     (s, genes) = epidb.list_genes("", "chr21", 9683191, 9683272, gene_models[0][1], self.admin_key)
-    self.assertEquals(genes, [{'transcript_status': 'NOVEL', 'gene_name': 'CR381670.1', 'gene_type': 'miRNA', 'end': 9683272, 'source': 'ENSEMBL', 'frame': '.', 'level': '3', 'feature': 'gene', 'gene_id': 'ENSG00000238411.1', 'start': 9683191, 'transcript_id': 'ENSG00000238411.1', 'score': 0.0, 'strand': '+', 'transcript_name': 'CR381670.1', '_id': 'gn52851', 'gene_status': 'NOVEL', 'transcript_type': 'miRNA', 'chromosome': 'chr21'}])
+    self.assertEquals(genes, [{'transcript_status': 'NOVEL', 'gene_name': 'CR381670.1', 'gene_type': 'miRNA', 'end': 9683272, 'source': 'ENSEMBL', 'frame': '.', 'level': '3', 'gene_id': 'ENSG00000238411.1', 'start': 9683191, 'transcript_id': 'ENSG00000238411.1', 'score': 0.0, 'strand': '+', 'transcript_name': 'CR381670.1', '_id': 'gn52851', 'gene_status': 'NOVEL', 'transcript_type': 'miRNA', 'chromosome': 'chr21'}])
 
     (s, genes) = epidb.list_genes("CR381670", "chr21", None, None, gene_models[0][1], self.admin_key)
-    self.assertEquals(genes, [{'transcript_status': 'NOVEL', 'gene_name': 'CR381670.1', 'gene_type': 'miRNA', 'end': 9683272, 'source': 'ENSEMBL', 'frame': '.', 'level': '3', 'feature': 'gene', 'gene_id': 'ENSG00000238411.1', 'start': 9683191, 'transcript_id': 'ENSG00000238411.1', 'score': 0.0, 'strand': '+', 'transcript_name': 'CR381670.1', '_id': 'gn52851', 'gene_status': 'NOVEL', 'transcript_type': 'miRNA', 'chromosome': 'chr21'}])
+    self.assertEquals(genes, [{'transcript_status': 'NOVEL', 'gene_name': 'CR381670.1', 'gene_type': 'miRNA', 'end': 9683272, 'source': 'ENSEMBL', 'frame': '.', 'level': '3', 'gene_id': 'ENSG00000238411.1', 'start': 9683191, 'transcript_id': 'ENSG00000238411.1', 'score': 0.0, 'strand': '+', 'transcript_name': 'CR381670.1', '_id': 'gn52851', 'gene_status': 'NOVEL', 'transcript_type': 'miRNA', 'chromosome': 'chr21'}])
 
     (s, genes) = epidb.list_genes("Pax", None, None, None, gene_models[0][1], self.admin_key)
     self.assertEquals(len(genes), 14)
@@ -108,20 +108,64 @@ class TestGenes(helpers.TestCase):
 
     self.assertEquals(info[0], {'format': 'TRACKING_ID,GENE_ID,GENE_SHORT_NAME,FPKM,FPKM_CONF_LO,FPKM_CONF_HI,FPKM_STATUS', 'sample_info': {'biosource_name': 'K562', 'karyotype': 'cancer', 'sex': 'F'}, 'content_format': 'cufflinks', 'total_genes': 57910, 'replica': 0, 'sample_id': 's1', '_id': 'gx1', 'extra_metadata': {}, 'columns': [{'name': 'TRACKING_ID', 'column_type': 'string'}, {'name': 'GENE_ID', 'column_type': 'string'}, {'name': 'GENE_SHORT_NAME', 'column_type': 'string'}, {'name': 'FPKM', 'column_type': 'double'}, {'name': 'FPKM_CONF_LO', 'column_type': 'double'}, {'name': 'FPKM_CONF_HI', 'column_type': 'double'}, {'name': 'FPKM_STATUS', 'column_type': 'string'}]})
 
+    #data = gzip.open("data/grape2/SP8-TH91.gene_quantification.rsem_grape2_crg.GRCh38.20150622.results.txt.gz").read()
+    #(s, gene_expression) = epidb.add_gene_expression("s1", 0, data, "grape2", "ENCODE", None, self.admin_key)
+    #self.assertEquals(gene_expression, "131001:A Gene Expression with sample_id 's1' and replicate '0' already exists.")
+
+#    data = gzip.open("data/grape2/SP8-TH91.gene_quantification.rsem_grape2_crg.GRCh38.20150622.results.txt.gz").read()
+#    (s, gene_expression) = epidb.add_gene_expression("s1", 1, data, "grape2", "ENCODE", None, self.admin_key)
+#    self.assertSuccess(s, gene_expression)
 
     data = gzip.open("data/gtf/gencode.v19.annotation.ONLY_GENES.gtf.gz").read()
     (s, ss) = epidb.add_gene_model("gencode v19", "Test One Description", data, "GTF", {}, self.admin_key)
     self.assertSuccess(s, ss)
+
+    (status, gx_query) = epidb.select_gene_expressions("s1", 0, "OR4G11P", "ENCODE", "gencode v19", self.admin_key)
+    self.assertSuccess(status, gx_query)
+    status, info = epidb.info("gx1", user_key)
+    (status, r_id) = epidb.get_regions(gx_query, info[0]["format"], self.admin_key)
+    self.assertSuccess(status, r_id)
+    regions = self.get_regions_request(r_id)
+    self.assertEquals(regions, "ENSG00000240361.1\tENSG00000240361.1\tOR4G11P\t0.0000\t0.0000\t0.0000\tOK")
+
+    (status, gx_query) = epidb.select_gene_expressions("s1", 0, ['CCR1', 'CD164', 'CD1D', 'CD2', 'CD34', 'CD3G', 'CD44'], "ENCODE", "gencode v19", self.admin_key)
+    self.assertSuccess(status, gx_query)
+    status, info = epidb.info("gx1", user_key)
+    (status, r_id) = epidb.get_regions(gx_query, info[0]["format"], self.admin_key)
+    self.assertSuccess(status, r_id)
+    regions_a = self.get_regions_request(r_id)
+    self.assertEquals(regions_a, "ENSG00000135535.10\tENSG00000135535.10\tCD164\t101.3820\t98.8947\t103.8680\tOK\nENSG00000026508.12\tENSG00000026508.12\tCD44\t193.4920\t189.4020\t197.5830\tOK\nENSG00000160654.5\tENSG00000160654.5\tCD3G\t53.0051\t51.4405\t54.5696\tOK\nENSG00000163823.3\tENSG00000163823.3\tCCR1\t0.0201\t0.0000\t0.0433\tOK\nENSG00000116824.4\tENSG00000116824.4\tCD2\t90.0146\t87.9630\t92.0661\tOK\nENSG00000158473.6\tENSG00000158473.6\tCD1D\t0.0241\t0.0000\t0.0519\tOK\nENSG00000174059.12\tENSG00000174059.12\tCD34\t0.0000\t0.0000\t0.0000\tOK")
+
+    (status, gx_query) = epidb.select_gene_expressions("s1", 0, 'CCR1', "ENCODE", "gencode v19", self.admin_key)
+    self.assertSuccess(status, gx_query)
+    status, info = epidb.info("gx1", user_key)
+    (status, r_id) = epidb.get_regions(gx_query, info[0]["format"], self.admin_key)
+    self.assertSuccess(status, r_id)
+    regions = self.get_regions_request(r_id)
+    self.assertEquals(regions, "ENSG00000163823.3\tENSG00000163823.3\tCCR1\t0.0201\t0.0000\t0.0433\tOK")
+
+    q1 = gx_query
+
+    (status, gx_query) = epidb.select_gene_expressions("s1", 0, 'CD164', "ENCODE", "gencode v19", self.admin_key)
+    self.assertSuccess(status, gx_query)
+    status, info = epidb.info("gx1", user_key)
+    (status, r_id) = epidb.get_regions(gx_query, info[0]["format"], self.admin_key)
+    self.assertSuccess(status, r_id)
+    regions = self.get_regions_request(r_id)
+    self.assertEquals(regions, "ENSG00000135535.10\tENSG00000135535.10\tCD164\t101.3820\t98.8947\t103.8680\tOK")
+
+    self.assertTrue(q1 != gx_query)
 
     (s, info) = epidb.info(ss, self.admin_key)
 
     self.assertEquals(info[0], {'total_genes': 57820, '_id': 'gs1', 'extra_metadata': {}, 'description': 'Test One Description', 'format': 'GTF'})
 
     (status, gene_info) = epidb.info("gn1", self.admin_key)
-    self.assertEquals(gene_info[0], {'transcript_status': 'KNOWN', 'gene_name': 'DDX11L1', 'gene_type': 'pseudogene', 'end': 14412, 'source': 'HAVANA', 'frame': '.', 'level': '2', 'feature': 'gene', 'gene_id': 'ENSG00000223972.4', 'start': 11869, 'transcript_id': 'ENSG00000223972.4', 'score': 0.0, 'strand': '+', 'havana_gene': 'OTTHUMG00000000961.2', 'transcript_name': 'DDX11L1', '_id': 'gn1', 'gene_status': 'KNOWN', 'transcript_type': 'pseudogene', 'chromosome': 'chr1'})
+    self.assertEquals(gene_info[0], {'transcript_status': 'KNOWN', 'gene_name': 'DDX11L1', 'gene_type': 'pseudogene', 'end': 14412, 'source': 'HAVANA', 'frame': '.', 'level': '2', 'gene_id': 'ENSG00000223972.4', 'start': 11869, 'transcript_id': 'ENSG00000223972.4', 'score': 0.0, 'strand': '+', 'havana_gene': 'OTTHUMG00000000961.2', 'transcript_name': 'DDX11L1', '_id': 'gn1', 'gene_status': 'KNOWN', 'transcript_type': 'pseudogene', 'chromosome': 'chr1'})
 
 
     (status, query) = epidb.select_gene_expressions("s1", [0, 2, 10, 122], None,  "ENCODE", "gencode v19", self.admin_key)
+    query_one = query
 
     self.assertSuccess(status, query)
     (status, filtered) = epidb.filter_regions (query, "FPKM_STATUS", "!=", "OK", "string", self.admin_key)

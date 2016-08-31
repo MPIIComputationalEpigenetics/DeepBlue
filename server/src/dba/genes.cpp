@@ -392,7 +392,7 @@ namespace epidb {
       }
 
       bool insert_expression(const std::string& sample_id, const int replica, datatypes::Metadata extra_metadata,
-                             const ISerializableFile &file,
+                             const ISerializableFilePtr file,
                              const std::string& project, const std::string& norm_project,
                              const std::string &user_key, const std::string &ip,
                              std::string &gene_expression_id, std::string &msg)
@@ -437,7 +437,7 @@ namespace epidb {
 
         std::vector<mongo::BSONObj> rows_obj_bulk;
 
-        for (const auto& row : file.rows()) {
+        for (const auto& row : file->rows()) {
           int _id;
           if (!helpers::get_increment_counter("gene_single_expressions", _id, msg) ||
               !helpers::notify_change_occurred(Collections::GENE_SINGLE_EXPRESSIONS(), msg))  {
@@ -682,10 +682,16 @@ namespace epidb {
                                           "norm_project" << BSON("$in" << utils::build_array(project))
                                         ));
 
+
+
         mongo::BSONObjBuilder bob;
+        // Look at the tracking ID, gene id, and short name
         bob.append(KeyMapper::DATASET(), BSON("$in" << ges_datasets));
         if (!genes.empty()) {
-          bob.append(KeyMapper::TRACKING_ID(), BSON("$in" << utils::build_array(genes)));
+          mongo::BSONObj b_in_tracking_id = BSON(KeyMapper::TRACKING_ID() << BSON("$in" << utils::build_array(genes)));
+          mongo::BSONObj b_in_gene_id = BSON(KeyMapper::GENE_ID() << BSON("$in" << utils::build_array(genes)));
+          mongo::BSONObj b_in_short_name = BSON(KeyMapper::GENE_SHORT_NAME() <<  BSON("$in" << utils::build_array(genes)));
+          bob.append("$or", BSON_ARRAY(b_in_tracking_id << b_in_gene_id << b_in_short_name ));
         }
 
         auto query = bob.obj();

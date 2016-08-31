@@ -49,7 +49,7 @@ namespace epidb {
       virtual const mongo::BSONObj to_BSON();
     };
 
-    class FPKMFile : ISerializableFile {
+    class FPKMFile : public ISerializableFile {
     public:
       void add_row(const std::string &tracking_id, const std::string &gene_id, const std::string &gene_short_name,
                    Score fpkm, Score fpkm_lo, Score fpkm_hi, const std::string& fpkm_status);
