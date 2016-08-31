@@ -676,13 +676,23 @@ namespace epidb {
           return false;
         }
 
-        mongo::BSONArray ges_datasets = helpers::build_dataset_ids_arrays(Collections::GENE_EXPRESSIONS(), BSON(
-                                          "sample_id" << BSON("$in" << utils::build_array(sample_ids))  <<
-                                          "replica" << BSON("$in" << utils::build_array_long(replicas)) <<
-                                          "norm_project" << BSON("$in" << utils::build_array(project))
-                                        ));
+        mongo::BSONObjBuilder ges_builder;
+        if (!sample_ids.empty()) {
+          ges_builder.append("sample_id",  BSON("$in" << utils::build_array(sample_ids)));
+        }
 
+        if (!replicas.empty()) {
+          ges_builder.append("replica", BSON("$in" << utils::build_array_long(replicas)));
+        }
 
+        if (!project.empty()) {
+          ges_builder.append("norm_project", BSON("$in" << utils::build_array(project)));
+        }
+
+        mongo::BSONObj ges_query = ges_builder.obj();
+        std::cerr << ges_query.toString() << std::endl;
+
+        mongo::BSONArray ges_datasets = helpers::build_dataset_ids_arrays(Collections::GENE_EXPRESSIONS(), ges_query);
 
         mongo::BSONObjBuilder bob;
         // Look at the tracking ID, gene id, and short name

@@ -197,7 +197,7 @@ class TestGenes(helpers.TestCase):
 
     s, regions = epidb.get_request_data(req, user_key)
 
-    self.assertEquals(regions, "")
+    self.assertEquals(regions, "ENSG00000240755.1\tLOWDATA\ts1\tK562\nENSG00000256386.1\tLOWDATA\ts1\tK562\nENSG00000198743.5\tLOWDATA\ts1\tK562\nENSG00000267937.1\tLOWDATA\ts1\tK562\nENSG00000238556.1\tLOWDATA\ts1\tK562\nENSG00000255902.1\tLOWDATA\ts1\tK562\nENSG00000266692.1\tLOWDATA\ts1\tK562")
 
   def test_gene_re(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
