@@ -730,7 +730,9 @@ namespace epidb {
           Position start;
           Position end;
 
-          map_gene_location(tracking_id, norm_gene_model, chromosome, start, end, msg);
+          if (!map_gene_location(tracking_id, gene_short_name, norm_gene_model, chromosome, start, end, msg)) {
+            return false;
+          }
 
           RegionPtr region = build_bed_region(start, end, dataset_id);
           region->insert(tracking_id);
@@ -768,7 +770,9 @@ namespace epidb {
       typedef std::unordered_map<std::string, GeneLocation> GeneModelCache;
       typedef std::unordered_map<std::string, GeneModelCache> GeneModelsCache;
 
-      bool load_gene_model(const std::string& norm_gene_model, GeneModelCache &cache, std::string& msg)
+      bool load_gene_model(const std::string& norm_gene_model,
+                           GeneModelCache &cache_tracking_id, GeneModelCache &cache_gene_name,
+                           std::string& msg)
       {
         std::vector<std::string> chromosomes;
         std::vector<std::string> genes;
@@ -784,38 +788,50 @@ namespace epidb {
           for (const auto& region : regions) {
             const GeneRegion* gene_region = static_cast<const GeneRegion *>(region.get());
             const std::string& gene_id = gene_region->attributes().at("gene_id");
+            const std::string& gene_name = gene_region->attributes().at("gene_name");
             /* Not supported by GCC 4.7 (MPI's compiler)
             cache.emplace(std::piecewise_construct,
                           std::forward_as_tuple(gene_id),
                           std::forward_as_tuple(chromosome, gene_region->start(), gene_region->end()));
             */
             auto gl = GeneLocation(chromosome, gene_region->start(), gene_region->end());
-            cache.insert( std::make_pair(gene_id, gl));
+            cache_tracking_id.insert( std::make_pair(gene_id, gl));
+            cache_gene_name.insert( std::make_pair(gene_name, gl));
           }
         }
 
         return true;
       }
 
-      GeneModelsCache gene_models_cache;
-      bool map_gene_location(const std::string& gene_id, const std::string& gene_model,
+      GeneModelsCache gene_models_cache_tracking_id;
+      GeneModelsCache gene_models_cache_gene_name;
+
+      bool map_gene_location(const std::string& gene_tracking_id,
+                             const std::string& gene_name, const std::string& gene_model,
                              std::string& chromosome, Position& start, Position& end, std::string& msg)
       {
         // Put a lock here
-        if (gene_models_cache.find(gene_model) == gene_models_cache.end()) {
-          GeneModelCache cache;
-          if (!load_gene_model(gene_model, cache, msg)) {
+        if (gene_models_cache_tracking_id.find(gene_model) == gene_models_cache_tracking_id.end()) {
+          GeneModelCache cache_tracking_id;
+          GeneModelCache cache_gene_name;
+          if (!load_gene_model(gene_model, cache_tracking_id, cache_gene_name, msg)) {
             return false;
           }
-          gene_models_cache.insert(std::make_pair(gene_model, cache));
+          gene_models_cache_tracking_id.insert(std::make_pair(gene_model, cache_tracking_id));
+          gene_models_cache_gene_name.insert(std::make_pair(gene_model, cache_gene_name));
         }
         //
 
-        const auto &cache = gene_models_cache[gene_model];
-        auto it = cache.find(gene_id);
-        if (it == cache.end()) {
-          msg = "Gene ID " + gene_id + " not found in the gene model " + gene_model;
-          return false;
+        const auto &cache_tracking_id = gene_models_cache_tracking_id[gene_model];
+        auto it = cache_tracking_id.find(gene_tracking_id);
+
+        if (it == cache_tracking_id.end()) {
+          const auto &cache_gene_name = gene_models_cache_gene_name[gene_model];
+          it = cache_gene_name.find(gene_name);
+          if (it == cache_gene_name.end()) {
+            msg = "Gene " + gene_tracking_id + "/" + gene_name + " not found in the gene model " + gene_model;
+            return false;
+          }
         }
 
         const auto &region = it->second;

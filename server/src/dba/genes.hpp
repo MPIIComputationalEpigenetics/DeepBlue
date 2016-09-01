@@ -83,7 +83,7 @@ namespace epidb {
                                               const std::vector<std::string> &genes, const std::vector<std::string> &project,
                                               const std::string& norm_gene_model,  ChromosomeRegionsList& chromosomeRegionsList, std::string& msg);
 
-      bool map_gene_location(const std::string& gene_id, const std::string& gene_model,
+      bool map_gene_location(const std::string& gene_tracking_id, const std::string& gene_name, const std::string& gene_model,
                              std::string& chromosome, Position& start, Position& end, std::string& msg);
     }
   }
