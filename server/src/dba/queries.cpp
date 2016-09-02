@@ -390,8 +390,6 @@ namespace epidb {
 
       const mongo::BSONObj build_query(const mongo::BSONObj &args)
       {
-        mongo::BSONObjBuilder regions_query_builder;
-
         // Get the experiments
         mongo::BSONObjBuilder experiments_query_builder;
 

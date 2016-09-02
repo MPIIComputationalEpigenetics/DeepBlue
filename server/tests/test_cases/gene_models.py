@@ -74,22 +74,55 @@ class TestGenes(helpers.TestCase):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
+    (s, project) = epidb.add_project("DEEP", "Deutsche Epigenom", self.admin_key)
+    self.assertSuccess(s, project)
+
+    data = gzip.open("data/fpkm/small_1.fpkm_tracking.gz").read()
+    (s, gene_expression) = epidb.add_gene_expression("s2", 1, data, "cufflinks", "DEEP", None, self.admin_key)
+    self.assertSuccess(s, gene_expression)
+
+    data = gzip.open("data/fpkm/small_2.fpkm_tracking.gz").read()
+    (s, gene_expression) = epidb.add_gene_expression("s2", 2, data, "cufflinks", "DEEP", None, self.admin_key)
+    self.assertSuccess(s, gene_expression)
+
+    data = gzip.open("data/fpkm/small_3.fpkm_tracking.gz").read()
+    (s, gene_expression) = epidb.add_gene_expression("s2", 44, data, "cufflinks", "DEEP", None, self.admin_key)
+    self.assertSuccess(s, gene_expression)
+
+    (s, gex) = epidb.list_gene_expressions("s1", None, None, self.admin_key)
+    self.assertEquals(gex, [])
+
+    (s, gex) = epidb.list_gene_expressions("s2", None, None, self.admin_key)
+    self.assertEquals(gex, [['gx1', ''], ['gx2', ''], ['gx3', '']])
+
+    (s, gex) = epidb.list_gene_expressions("s2", [1, 2], None, self.admin_key)
+    self.assertEquals(gex, [['gx1', ''],['gx2', '']])
+
+    (s, gex) = epidb.list_gene_expressions("s2", 44, None, self.admin_key)
+    self.assertEquals(gex, [['gx3', '']])
+
+    (s, gex) = epidb.list_gene_expressions(None, 1, "DEEP", self.admin_key)
+    self.assertEquals(gex, [['gx1', '']])
+
     data = gzip.open("data/fpkm/51_Hf03_BlTN_Ct_mRNA_M_1.LXPv1.20150708_genes.fpkm_tracking.gz").read()
-    (s, gene_expression) = epidb.add_gene_expression("s1", 0, data, "cufflinks", "ENCODE", None, self.admin_key)
+    (s, gene_expression) = epidb.add_gene_expression("s1", 1, data, "cufflinks", "ENCODE", None, self.admin_key)
+    self.assertSuccess(s, gene_expression)
 
     (s, gex) = epidb.list_gene_expressions(None, None, None, self.admin_key)
-    self.assertEquals(gex, [['gx1', '']])
-    (s, gex) = epidb.list_gene_expressions("s1", 0, None, self.admin_key)
-    self.assertEquals(gex, [['gx1', '']])
+    self.assertEquals(gex, [['gx1', ''], ['gx2', ''], ['gx3', ''], ['gx4', '']])
+    (s, gex) = epidb.list_gene_expressions("s1", 1, None, self.admin_key)
+    self.assertEquals(gex, [['gx4', '']])
     (s, gex) = epidb.list_gene_expressions(None, None, "ENCODE", self.admin_key)
-    self.assertEquals(gex, [['gx1', '']])
+    self.assertEquals(gex, [['gx4', '']])
 
-    (s, gex) = epidb.list_gene_expressions(None, None, None, self.admin_key)
-    self.assertEquals(gex, [['gx1', '']])
-    (s, gex) = epidb.list_gene_expressions("s1", 0, None, self.admin_key)
-    self.assertEquals(gex, [['gx1', '']])
-    (s, gex) = epidb.list_gene_expressions(None, None, "ENCODE", self.admin_key)
-    self.assertEquals(gex, [['gx1', '']])
+    (s, gex) = epidb.list_gene_expressions(["s1", "s2"], 1, None, self.admin_key)
+    self.assertEquals(gex, [['gx1', ''], ['gx4', '']])
+
+    (s, gex) = epidb.list_gene_expressions(["s1", "s2"], 2, None, self.admin_key)
+    self.assertEquals(gex, [['gx2', '']])
+
+    (s, gex) = epidb.list_gene_expressions(None, 1, "ENCODE", self.admin_key)
+    self.assertEquals(gex, [['gx4', '']])
 
     s, user = epidb.add_user("user", "email", "institution", self.admin_key)
     (user_id, user_key) = user
@@ -99,10 +132,12 @@ class TestGenes(helpers.TestCase):
 
     (s, gex) = epidb.list_gene_expressions(None, None, None, user_key)
     self.assertEquals(gex, [])
-    (s, gex) = epidb.list_gene_expressions("s1", 0, None, user_key)
+    (s, gex) = epidb.list_gene_expressions("s1", 1, None, user_key)
     self.assertEquals(gex, [])
     (s, gex) = epidb.list_gene_expressions(None, None, "ENCODE", user_key)
     self.assertEquals(gex, "107000:Project 'ENCODE' does not exist.")
+
+    return
 
     (s, info) = epidb.info(gene_expression, self.admin_key)
 

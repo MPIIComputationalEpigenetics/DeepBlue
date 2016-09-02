@@ -44,7 +44,7 @@ namespace epidb {
       static Parameters parameters_()
       {
         Parameter p[] = {
-          Parameter("sample_id", serialize::STRING, "sample ID(s)"),
+          Parameter("sample_id", serialize::STRING, "sample ID(s)", true),
           Parameter("replica", serialize::INTEGER, "replica(s)", true),
           Parameter("project", serialize::STRING, "project(s) name", true),
           parameters::UserKey
@@ -90,6 +90,8 @@ namespace epidb {
           result.add_error(msg);
           return false;
         }
+
+        std::cerr << query.toString() << std::endl;
 
         std::vector<utils::IdName> names;
         if (!dba::list::gene_expressions(query, names, msg)) {

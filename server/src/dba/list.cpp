@@ -399,15 +399,14 @@ namespace epidb {
         mongo::BSONObjBuilder args_builder;
 
         if (!sample_ids.empty()) {
-          args_builder.append("sample_id", utils::build_array(sample_ids));
+          args_builder.append("sample_id", BSON("$in" << utils::build_array(sample_ids)));
         }
 
         if (!replicas.empty()) {
-          args_builder.append("replica", utils::build_array_long(replicas));
+          args_builder.append("replica", BSON("$in" << utils::build_array_long(replicas)));
         }
 
         // project
-
         std::vector<utils::IdName> user_projects;
         if (!dba::list::projects(user_key, user_projects, msg)) {
           return false;
@@ -435,19 +434,19 @@ namespace epidb {
               return false;
             }
           }
-          args_builder.append("project", utils::build_array(filtered_projects));
-          args_builder.append("norm_project", utils::build_normalized_array(filtered_projects));
+          args_builder.append("project", BSON("$in" << utils::build_array(filtered_projects)));
+          args_builder.append("norm_project", BSON("$in" << utils::build_normalized_array(filtered_projects)));
         } else {
           std::vector<std::string> user_projects_names;
           for (const auto& project : user_projects) {
             user_projects_names.push_back(project.name);
           }
 
-          args_builder.append("project", utils::build_array(user_projects_names));
-          args_builder.append("norm_project", utils::build_normalized_array(user_projects_names));
+          args_builder.append("project", BSON("$in" << utils::build_array(user_projects_names)));
+          args_builder.append("norm_project", BSON("$in" << utils::build_normalized_array(user_projects_names)));
         }
 
-        query = dba::query::build_query(args_builder.obj());
+        query = args_builder.obj();
 
         return true;
       }

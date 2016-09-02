@@ -50,9 +50,9 @@ namespace epidb {
       static Parameters parameters_()
       {
         Parameter p[] = {
-          Parameter("sample_ids", serialize::STRING, "genes(s) - ENSB ID or ENSB name. Use the regular expression '.*' for selecting all." , true),
+          Parameter("sample_ids", serialize::STRING, "id(s) of selected sample(s)" , true),
           Parameter("replicas", serialize::INTEGER, "replica(s)", true),
-          Parameter("genes", serialize::STRING, "genes(s)", true),
+          Parameter("genes", serialize::STRING, "genes(s) - ensembl ID or ENSB name. It does accept regular expressions. For example: '.*' to select all genes.", true),
           Parameter("projects", serialize::STRING, "projects(s)", true),
           Parameter("gene_model", serialize::STRING, "gene model name"),
           parameters::UserKey
