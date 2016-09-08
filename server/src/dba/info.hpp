@@ -66,6 +66,9 @@ namespace epidb {
                           std::map<std::string, std::string> &upload_info,
                           std::string &msg, bool full = false);
 
+      bool get_experiment_set_info(const std::string& id,  mongo::BSONObj& obj_metadata, std::string& msg);
+
+
       bool get_query(const std::string &id, std::map<std::string, std::string> &, std::string &msg);
 
       bool get_tiling_region(const std::string &id, std::map<std::string, std::string> &res, std::string &msg, bool full = false);

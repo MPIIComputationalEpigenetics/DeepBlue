@@ -306,6 +306,24 @@ namespace epidb {
         return true;
       }
 
+      bool get_experiment_set_info(const std::string& id,  mongo::BSONObj& obj_metadata, std::string& msg)
+      {
+        mongo::BSONObj data_obj;
+        if (!data::experiment_set(id, data_obj, msg)) {
+          return false;
+        }
+
+        mongo::BSONObjBuilder bob;
+
+        bob.append(data_obj["_id"]);
+        bob.append(data_obj["name"]);
+        bob.append(data_obj["experiments"]);
+
+        obj_metadata = bob.obj();
+
+        return true;
+      }
+
       bool get_query(const std::string &id, std::map<std::string, std::string> &res, std::string &msg)
       {
         mongo::BSONObj result;

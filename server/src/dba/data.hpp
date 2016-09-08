@@ -53,6 +53,8 @@ namespace epidb {
       bool experiment(const std::string &id, const std::vector<std::string>& user_projects,
                       mongo::BSONObj &result, std::string &msg);
 
+      bool experiment_set(const std::string& id, mongo::BSONObj &result, std::string& msg);
+
       bool query(const std::string &id, mongo::BSONObj &result, std::string &msg);
 
       bool tiling_region(const std::string &id, mongo::BSONObj &result, std::string &msg);

@@ -66,6 +66,7 @@ namespace epidb {
       static const std::string &COUNTERS();
       static const std::string &KEY_MAPPER();
 
+      static const std::string &EXPERIMENT_SETS();
 
       // Jobs management
       static const std::string &JOBS();

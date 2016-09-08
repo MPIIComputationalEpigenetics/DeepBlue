@@ -12,6 +12,7 @@ import complex_queries
 import coverage
 import epigenetic_marks
 import experiments
+import experiment_sets
 import extend
 import faceting
 import filters

@@ -158,6 +158,16 @@ namespace epidb {
         }
       }
 
+      bool experiment_set(const std::string& id, mongo::BSONObj &result, std::string& msg)
+      {
+        if (helpers::get_one(Collections::EXPERIMENT_SETS(), mongo::Query(BSON("_id" << id)), result)) {
+          return true;
+        } else {
+          msg = "ERR_INVALID_EXPERIMENT_SET_ID: " + id;
+          return false;
+        }
+      }
+
       bool query(const std::string &id, mongo::BSONObj &result, std::string &msg)
       {
         if (helpers::get_one(Collections::QUERIES(), mongo::Query(BSON("_id" << id)), result)) {

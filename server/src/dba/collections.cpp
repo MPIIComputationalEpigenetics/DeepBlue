@@ -260,6 +260,12 @@ namespace epidb {
       return key_mapper;
     }
 
+    const std::string &Collections::EXPERIMENT_SETS()
+    {
+      static std::string experment_set("experment_set");
+      return experment_set;
+    }
+
     const std::string &Collections::JOBS()
     {
       static std::string jobs("jobs");
