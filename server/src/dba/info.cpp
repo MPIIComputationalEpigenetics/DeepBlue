@@ -317,6 +317,8 @@ namespace epidb {
 
         bob.append(data_obj["_id"]);
         bob.append(data_obj["name"]);
+        bob.append(data_obj["description"]);
+        bob.append(data_obj["public"]);
         bob.append(data_obj["experiments"]);
 
         obj_metadata = bob.obj();

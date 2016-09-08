@@ -262,7 +262,7 @@ namespace epidb {
 
     const std::string &Collections::EXPERIMENT_SETS()
     {
-      static std::string experment_set("experment_set");
+      static std::string experment_set("experiment_set");
       return experment_set;
     }
 

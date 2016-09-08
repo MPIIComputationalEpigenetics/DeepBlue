@@ -256,7 +256,9 @@ namespace epidb {
         return true;
       }
 
-      bool create_experiment_set(const std::vector<std::string> &experiment_names, const std::string& set_name, std::string& set_id, std::string& msg)
+      bool create_experiment_set(const std::vector<std::string> &experiment_names, const std::string& set_name,
+                                 const std::string& description, const bool is_public,
+                                 std::string& set_id, std::string& msg)
       {
         std::string norm_set_name = utils::normalize_name(set_name);
 
@@ -278,6 +280,9 @@ namespace epidb {
         bob.append("_id", set_id);
         bob.append("name", set_name);
         bob.append("norm_name", utils::normalize_name(norm_set_name));
+        bob.append("description", description);
+        bob.append("norm_description", utils::normalize_name(description));
+        bob.append("public", is_public);
         bob.append("experiments", experiment_names_array);
 
         mongo::BSONObj obj = bob.obj();

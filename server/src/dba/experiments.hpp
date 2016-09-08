@@ -79,7 +79,9 @@ namespace epidb {
 
       // TODO: move others functions from dba.hpp to here
 
-      bool create_experiment_set(const std::vector<std::string> &experiment_names, const std::string& set_name, std::string& set_id, std::string& msg);
+      bool create_experiment_set(const std::vector<std::string> &experiment_names, const std::string& set_name,
+                                 const std::string& description, const bool is_public,
+                                 std::string& set_id, std::string& msg);
     }
   }
 }
