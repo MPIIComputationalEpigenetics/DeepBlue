@@ -22,13 +22,14 @@
 #include <limits>
 #include <string>
 
-#include <strtk.hpp>
-
 #include <boost/algorithm/string.hpp>
-#include <boost/tokenizer.hpp>
+
+#include <strtk.hpp>
 
 #include "grape2.hpp"
 #include "grape2_parser.hpp"
+
+#include "../extras/utils.hpp"
 
 #include "../types.hpp"
 
@@ -67,28 +68,104 @@ namespace epidb {
         double FPKM_ci_lower_bound;
         double FPKM_ci_upper_bound;
 
-        if (
-          !strtk::parse(line, "\t", gene_id, transcript_ids, length, effective_length, expected_count, TPM, FPKM,
-        posterior_mean_count, posterior_standard_deviation_of_count, pme_TPM, pme_FPKM)
-          ||
-          !strtk::parse(line, "\t",
-        TPM_ci_lower_bound, TPM_ci_upper_bound, FPKM_ci_lower_bound, FPKM_ci_upper_bound)
-        )
+        std::vector<std::string> strs;
+        boost::split(strs, line, boost::is_any_of("\t"));
+
+        std::cerr << line << std::endl;
+
+        // TODO: check list size
+        gene_id = strs[0];
+        transcript_ids = strs[1];
+
+        // If it is the first line and it is a header.
+        if ((actual_line_ == 1) && (strs[2].compare(0, 6, "length") == 0)) {
+          return true;
+        }
+
+        if (!utils::string_to_double(strs[2], length))
         {
-          // The first line can be the header.
-          if (actual_line_ == 1) {
-            return true;
-          }
-          msg = "Failed to parse line : " + line_str() + " " + line;
+          msg = "Error at line " + line_str() + " . The field 'length' with the value '"  + strs[2] + "'";
+          return false;
+        }
+
+        if (!utils::string_to_double(strs[3], effective_length))
+        {
+          msg = "Error at line " + line_str() + " . The field 'effective_length' with the value '"  + strs[3] + "'";
+          return false;
+        }
+
+        if (!utils::string_to_double(strs[4], expected_count))
+        {
+          msg = "Error at line " + line_str() + " . The field 'expected_count' with the value '"  + strs[4] + "'";
+          return false;
+        }
+
+        if (!utils::string_to_double(strs[5], TPM))
+        {
+          msg = "Error at line " + line_str() + " . The field 'TPM' with the value '"  + strs[5] + "'";
+          return false;
+        }
+
+        if (!utils::string_to_double(strs[6], FPKM))
+        {
+          msg = "Error at line " + line_str() + " . The field 'FPKM' with the value '"  + strs[6] + "'";
+          return false;
+        }
+
+        if (!utils::string_to_double(strs[7], posterior_mean_count))
+        {
+          msg = "Error at line " + line_str() + " . The field 'posterior_mean_count' with the value '"  + strs[7] + "'";
+          return false;
+        }
+
+        if (!utils::string_to_double(strs[8], posterior_standard_deviation_of_count))
+        {
+          msg = "Error at line " + line_str() + " . The field 'posterior_standard_deviation_of_count' with the value '"  + strs[8] + "'";
+          return false;
+        }
+
+        if (!utils::string_to_double(strs[9], pme_TPM))
+        {
+          msg = "Error at line " + line_str() + " . The field 'pme_TPM' with the value '"  + strs[9] + "'";
+          return false;
+        }
+
+        if (!utils::string_to_double(strs[10], pme_FPKM))
+        {
+          msg = "Error at line " + line_str() + " . The field 'pme_FPKM' with the value '"  + strs[10] + "'";
+          return false;
+        }
+
+        if (!utils::string_to_double(strs[11], TPM_ci_lower_bound))
+        {
+          msg = "Error at line " + line_str() + " . The field 'TPM_ci_lower_bound' with the value '"  + strs[11] + "'";
+          return false;
+        }
+
+        if (!utils::string_to_double(strs[12], TPM_ci_upper_bound))
+        {
+          msg = "Error at line " + line_str() + " . The field 'TPM_ci_upper_bound' with the value '"  + strs[12] + "'";
+          return false;
+        }
+
+        if (!utils::string_to_double(strs[13], FPKM_ci_lower_bound))
+        {
+          msg = "Error at line " + line_str() + " . The field 'FPKM_ci_lower_bound' with the value '"  + strs[13] + "'";
+          return false;
+        }
+
+        if (!utils::string_to_double(strs[14], FPKM_ci_upper_bound))
+        {
+          msg = "Error at line " + line_str() + " . The field 'FPKM_ci_upper_bound' with the value '"  + strs[14] + "'";
           return false;
         }
 
         grape2_file->add_row(gene_id, transcript_ids, length, effective_length, expected_count,
-                             TPM, FPKM,
-                             posterior_mean_count, posterior_standard_deviation_of_count,
-                             pme_TPM, pme_FPKM,
-                             TPM_ci_lower_bound, TPM_ci_upper_bound,
-                             FPKM_ci_lower_bound, FPKM_ci_upper_bound);
+        TPM, FPKM,
+        posterior_mean_count, posterior_standard_deviation_of_count,
+        pme_TPM, pme_FPKM,
+        TPM_ci_lower_bound, TPM_ci_upper_bound,
+        FPKM_ci_lower_bound, FPKM_ci_upper_bound);
         return true;
       });
 

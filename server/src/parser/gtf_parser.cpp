@@ -98,7 +98,7 @@ namespace epidb {
         gtf_line row;
         if (!strtk::parse(line, "\t", row.seqname, row.source, row.feature, row.start, row.end, row.score, row.strand, row.frame, row.s_attributes))
         {
-          msg = "Failed to parse line : " + line_str() + " " + line;
+          msg = "Failed to parse line " + line_str() + ": " + line;
           return false;
         }
 

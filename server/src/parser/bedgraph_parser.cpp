@@ -77,7 +77,7 @@ namespace epidb {
 
         bed_graph_line row;
         if (!strtk::parse(line,"\t ",row.chr, row.start, row.end, row.score)) {
-          msg = "Failed to parse line : " + line_str() + " " + line;
+          msg = "Failed to parse line " + line_str() + ": " + line;
           return false;
         }
 
