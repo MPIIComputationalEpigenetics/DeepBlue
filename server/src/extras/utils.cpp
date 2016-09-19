@@ -268,6 +268,11 @@ namespace epidb {
       return string_to_floating_point<Score>(c, s_.c_str());
     }
 
+    bool string_to_double(const std::string &s_, double &c)
+    {
+      return string_to_floating_point<double>(c, s_.c_str());
+    }
+
     std::string score_to_string(const Score s)
     {
       return fmt::format("{:-.4f}", s);

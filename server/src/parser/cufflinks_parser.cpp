@@ -61,7 +61,7 @@ namespace epidb {
           if (actual_line_ == 1) {
             return true;
           }
-          msg = "Failed to parse line : " + line_str() + " " + line;
+          msg = "Failed to parse line " + line_str() + ": " + line;
           return false;
         }
 

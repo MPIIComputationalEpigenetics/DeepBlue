@@ -114,6 +114,8 @@ namespace epidb {
 
     bool string_to_score(const std::string &s, Score &c);
 
+    bool string_to_double(const std::string &s_, double &c);
+
     std::string score_to_string(const Score s);
 
     std::string integer_to_string(const int d);

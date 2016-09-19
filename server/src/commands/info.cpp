@@ -215,6 +215,9 @@ namespace epidb {
             } else if (id.compare(0, 2, "gx") == 0) {
               ok = dba::genes::gene_expression_info(id, obj_metadata, msg);
               type = "gene";
+            } else if (id.compare(0, 2, "es") == 0) {
+              ok = dba::info::get_experiment_set_info(id, obj_metadata, msg);
+              type = "experiment_set";
             } else if (id.compare(0, 1, "g") == 0) {
               ok = dba::info::get_genome(id, metadata, chromosomes, msg);
               ok = ok && dba::info::id_to_name(metadata, msg);

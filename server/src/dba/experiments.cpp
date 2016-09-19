@@ -24,6 +24,8 @@
 
 #include <mongo/bson/bson.h>
 
+#include "../connection/connection.hpp"
+
 #include "../datatypes/column_types_def.hpp"
 #include "../datatypes/regions.hpp"
 
@@ -31,6 +33,7 @@
 
 #include "collections.hpp"
 #include "experiments.hpp"
+#include "exists.hpp"
 #include "info.hpp"
 #include "helpers.hpp"
 #include "queries.hpp"
@@ -253,6 +256,49 @@ namespace epidb {
         return true;
       }
 
+      bool create_experiment_set(const std::vector<std::string> &experiment_names, const std::string& set_name,
+                                 const std::string& description, const bool is_public,
+                                 std::string& set_id, std::string& msg)
+      {
+        std::string norm_set_name = utils::normalize_name(set_name);
+
+        if (exists::experiment_set(set_name)) {
+          msg = "Experiment set with the name " + set_name + " already exists";
+          return false;
+        }
+
+        int es_id;
+        if (!helpers::get_increment_counter("experiment_set", es_id, msg) ||
+            !helpers::notify_change_occurred(Collections::EXPERIMENT_SETS(), msg))  {
+          return false;
+        }
+        set_id = "es" + utils::integer_to_string(es_id);
+
+        auto experiment_names_array = utils::build_array(experiment_names);
+
+        mongo::BSONObjBuilder bob;
+        bob.append("_id", set_id);
+        bob.append("name", set_name);
+        bob.append("norm_name", utils::normalize_name(norm_set_name));
+        bob.append("description", description);
+        bob.append("norm_description", utils::normalize_name(description));
+        bob.append("public", is_public);
+        bob.append("experiments", experiment_names_array);
+
+        mongo::BSONObj obj = bob.obj();
+        std::cerr << obj.toString() << std::endl;
+
+        Connection c;
+        c->insert(helpers::collection_name(Collections::EXPERIMENT_SETS()), obj);
+        if (!c->getLastError().empty()) {
+          msg = c->getLastError();
+          c.done();
+          return false;
+        }
+        c.done();
+
+        return true;
+      }
     }
   }
 }

@@ -114,8 +114,9 @@ namespace epidb {
       }
 
       {
-        datatypes::User anon_user = datatypes::User("anonymous", "anonymous@deepblue-epigenomic-data-server.com", "DeepBlue Epigenomic Data Server");
+        datatypes::User anon_user = datatypes::User("anonymous", "anonymous.deepblue@mpi-inf.mpg.de", "DeepBlue Epigenomic Data Server");
         anon_user.set_key("anonymous_key");
+        anon_user.set_password("anonymous");
         anon_user.set_permission_level(datatypes::PermissionLevel::GET_DATA);
         if (!dba::users::add_user(anon_user, msg)) {
           return false;

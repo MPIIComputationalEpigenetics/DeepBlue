@@ -62,7 +62,7 @@ namespace epidb {
       static Parameters results_()
       {
         Parameter p[] = {
-          Parameter("regions", serialize::STRING, "BED formated regions")
+          Parameter("score_matrix", serialize::STRING, "the score matrix containing the summarized data")
         };
         Parameters results(&p[0], &p[0] + 1);
         return results;

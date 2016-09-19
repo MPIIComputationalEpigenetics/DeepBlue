@@ -305,7 +305,7 @@ namespace epidb {
           double value;
 
           if (!strtk::parse(line, "\t ", position, value)) {
-            msg = "Failed to parse line : " + line_str() + " " + line;
+            msg = "Failed to parse line " + line_str() + ": " + line;
             return false;
           }
 

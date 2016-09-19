@@ -118,11 +118,6 @@ namespace epidb {
           return false;
         }
 
-        std::string norm_file_format = utils::normalize_name(format);
-        if (norm_file_format != "cufflinks") {
-          std::string s = "Currently, only the format 'cufflinks' is supported.";
-        }
-
         if (!dba::exists::project(norm_project)) {
           std::vector<utils::IdName> names;
           if (!dba::list::similar_projects(project, user_key, names, msg)) {
@@ -139,6 +134,11 @@ namespace epidb {
           }
           result.add_error(ss.str());
           return false;
+        }
+
+        std::string norm_file_format = utils::normalize_name(format);
+        if (norm_file_format != "cufflinks"  || norm_file_format == "grape2") {
+          std::string s = "Currently, only the formats 'cufflinks' or 'grape2' is supported.";
         }
 
         auto parser = parser::GeneExpressionParserFactory::build(format, std::unique_ptr<std::istream>(new std::stringstream(data)), msg);

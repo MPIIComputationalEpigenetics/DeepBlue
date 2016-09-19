@@ -7,7 +7,7 @@ from deepblue_client import DeepBlueClient
 
 class TestGenes(helpers.TestCase):
 
-  def test_gene_retrieve(self):
+  def __test_gene_retrieve(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
     data = open("data/gtf/gencode.v23.basic.annotation_head.gtf").read()
@@ -44,7 +44,7 @@ class TestGenes(helpers.TestCase):
         self.assertEquals(ls[3], ls[6])
         self.assertEquals(ls[4], ls[7])
 
-  def test_genes_location(self):
+  def __test_genes_location(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
@@ -137,25 +137,29 @@ class TestGenes(helpers.TestCase):
     (s, gex) = epidb.list_gene_expressions(None, None, "ENCODE", user_key)
     self.assertEquals(gex, "107000:Project 'ENCODE' does not exist.")
 
-    return
-
     (s, info) = epidb.info(gene_expression, self.admin_key)
 
-    self.assertEquals(info[0], {'format': 'TRACKING_ID,GENE_ID,GENE_SHORT_NAME,FPKM,FPKM_CONF_LO,FPKM_CONF_HI,FPKM_STATUS', 'sample_info': {'biosource_name': 'K562', 'karyotype': 'cancer', 'sex': 'F'}, 'content_format': 'cufflinks', 'total_genes': 57910, 'replica': 0, 'sample_id': 's1', '_id': 'gx1', 'extra_metadata': {}, 'columns': [{'name': 'TRACKING_ID', 'column_type': 'string'}, {'name': 'GENE_ID', 'column_type': 'string'}, {'name': 'GENE_SHORT_NAME', 'column_type': 'string'}, {'name': 'FPKM', 'column_type': 'double'}, {'name': 'FPKM_CONF_LO', 'column_type': 'double'}, {'name': 'FPKM_CONF_HI', 'column_type': 'double'}, {'name': 'FPKM_STATUS', 'column_type': 'string'}]})
+    self.assertEquals(info[0], {'format': 'TRACKING_ID,GENE_ID,GENE_SHORT_NAME,FPKM,FPKM_CONF_LO,FPKM_CONF_HI,FPKM_STATUS', 'sample_info': {'biosource_name': 'K562', 'karyotype': 'cancer', 'sex': 'F'}, 'content_format': 'cufflinks', 'total_genes': 57910, 'replica': 1, 'sample_id': 's1', '_id': 'gx4', 'extra_metadata': {}, 'columns': [{'name': 'TRACKING_ID', 'column_type': 'string'}, {'name': 'GENE_ID', 'column_type': 'string'}, {'name': 'GENE_SHORT_NAME', 'column_type': 'string'}, {'name': 'FPKM', 'column_type': 'double'}, {'name': 'FPKM_CONF_LO', 'column_type': 'double'}, {'name': 'FPKM_CONF_HI', 'column_type': 'double'}, {'name': 'FPKM_STATUS', 'column_type': 'string'}]})
 
-    #data = gzip.open("data/grape2/SP8-TH91.gene_quantification.rsem_grape2_crg.GRCh38.20150622.results.txt.gz").read()
-    #(s, gene_expression) = epidb.add_gene_expression("s1", 0, data, "grape2", "ENCODE", None, self.admin_key)
-    #self.assertEquals(gene_expression, "131001:A Gene Expression with sample_id 's1' and replicate '0' already exists.")
+    data = gzip.open("data/grape2/SP8-TH91.gene_quantification.rsem_grape2_crg.GRCh38.20150622.results.txt.gz").read()
+    (s, gene_expression) = epidb.add_gene_expression("s1", 1, data, "grape2", "ENCODE", None, self.admin_key)
+    self.assertEquals(gene_expression, "131001:A Gene Expression with sample_id 's1' and replicate '1' already exists.")
 
-#    data = gzip.open("data/grape2/SP8-TH91.gene_quantification.rsem_grape2_crg.GRCh38.20150622.results.txt.gz").read()
-#    (s, gene_expression) = epidb.add_gene_expression("s1", 1, data, "grape2", "ENCODE", None, self.admin_key)
-#    self.assertSuccess(s, gene_expression)
+    data = gzip.open("data/grape2/SP8-TH91.gene_quantification.rsem_grape2_crg.GRCh38.20150622.results.txt.gz").read()
+    print("\n".join(data.split("\n")[0:3]))
+    (s, gene_expression) = epidb.add_gene_expression("s1", 2, data, "grape2", "ENCODE", None, self.admin_key)
+    self.assertSuccess(s, gene_expression)
+    print gene_expression
+    print
+    print epidb.info(gene_expression, self.admin_key)
+    print
+
 
     data = gzip.open("data/gtf/gencode.v19.annotation.ONLY_GENES.gtf.gz").read()
     (s, ss) = epidb.add_gene_model("gencode v19", "Test One Description", data, "GTF", {}, self.admin_key)
     self.assertSuccess(s, ss)
 
-    (status, gx_query) = epidb.select_gene_expressions("s1", 0, "OR4G11P", "ENCODE", "gencode v19", self.admin_key)
+    (status, gx_query) = epidb.select_gene_expressions("s1", 1, "OR4G11P", "ENCODE", "gencode v19", self.admin_key)
     self.assertSuccess(status, gx_query)
     status, info = epidb.info("gx1", user_key)
     (status, r_id) = epidb.get_regions(gx_query, info[0]["format"], self.admin_key)
@@ -163,7 +167,7 @@ class TestGenes(helpers.TestCase):
     regions = self.get_regions_request(r_id)
     self.assertEquals(regions, "ENSG00000240361.1\tENSG00000240361.1\tOR4G11P\t0.0000\t0.0000\t0.0000\tOK")
 
-    (status, gx_query) = epidb.select_gene_expressions("s1", 0, ['CCR1', 'CD164', 'CD1D', 'CD2', 'CD34', 'CD3G', 'CD44'], "ENCODE", "gencode v19", self.admin_key)
+    (status, gx_query) = epidb.select_gene_expressions("s1", 1, ['CCR1', 'CD164', 'CD1D', 'CD2', 'CD34', 'CD3G', 'CD44'], "ENCODE", "gencode v19", self.admin_key)
     self.assertSuccess(status, gx_query)
     status, info = epidb.info("gx1", user_key)
     (status, r_id) = epidb.get_regions(gx_query, info[0]["format"], self.admin_key)
@@ -171,7 +175,7 @@ class TestGenes(helpers.TestCase):
     regions_a = self.get_regions_request(r_id)
     self.assertEquals(regions_a, "ENSG00000135535.10\tENSG00000135535.10\tCD164\t101.3820\t98.8947\t103.8680\tOK\nENSG00000026508.12\tENSG00000026508.12\tCD44\t193.4920\t189.4020\t197.5830\tOK\nENSG00000160654.5\tENSG00000160654.5\tCD3G\t53.0051\t51.4405\t54.5696\tOK\nENSG00000163823.3\tENSG00000163823.3\tCCR1\t0.0201\t0.0000\t0.0433\tOK\nENSG00000116824.4\tENSG00000116824.4\tCD2\t90.0146\t87.9630\t92.0661\tOK\nENSG00000158473.6\tENSG00000158473.6\tCD1D\t0.0241\t0.0000\t0.0519\tOK\nENSG00000174059.12\tENSG00000174059.12\tCD34\t0.0000\t0.0000\t0.0000\tOK")
 
-    (status, gx_query) = epidb.select_gene_expressions("s1", 0, 'CCR1', "ENCODE", "gencode v19", self.admin_key)
+    (status, gx_query) = epidb.select_gene_expressions("s1", 1, 'CCR1', "ENCODE", "gencode v19", self.admin_key)
     self.assertSuccess(status, gx_query)
     status, info = epidb.info("gx1", user_key)
     (status, r_id) = epidb.get_regions(gx_query, info[0]["format"], self.admin_key)
@@ -181,7 +185,7 @@ class TestGenes(helpers.TestCase):
 
     q1 = gx_query
 
-    (status, gx_query) = epidb.select_gene_expressions("s1", 0, 'CD164', "ENCODE", "gencode v19", self.admin_key)
+    (status, gx_query) = epidb.select_gene_expressions("s1", 1, 'CD164', "ENCODE", "gencode v19", self.admin_key)
     self.assertSuccess(status, gx_query)
     status, info = epidb.info("gx1", user_key)
     (status, r_id) = epidb.get_regions(gx_query, info[0]["format"], self.admin_key)
@@ -199,7 +203,7 @@ class TestGenes(helpers.TestCase):
     self.assertEquals(gene_info[0], {'transcript_status': 'KNOWN', 'gene_name': 'DDX11L1', 'gene_type': 'pseudogene', 'end': 14412, 'source': 'HAVANA', 'frame': '.', 'level': '2', 'gene_id': 'ENSG00000223972.4', 'start': 11869, 'transcript_id': 'ENSG00000223972.4', 'score': 0.0, 'strand': '+', 'havana_gene': 'OTTHUMG00000000961.2', 'transcript_name': 'DDX11L1', '_id': 'gn1', 'gene_status': 'KNOWN', 'transcript_type': 'pseudogene', 'chromosome': 'chr1'})
 
 
-    (status, query) = epidb.select_gene_expressions("s1", [0, 2, 10, 122], None,  "ENCODE", "gencode v19", self.admin_key)
+    (status, query) = epidb.select_gene_expressions("s1", [1, 5, 10, 122], None,  "ENCODE", "gencode v19", self.admin_key)
     query_one = query
 
     self.assertSuccess(status, query)
@@ -215,7 +219,7 @@ class TestGenes(helpers.TestCase):
     self.assertEquals(regions, "ENSG00000240755.1\tLOWDATA\ts1\tK562\nENSG00000256386.1\tLOWDATA\ts1\tK562\nENSG00000198743.5\tLOWDATA\ts1\tK562\nENSG00000267937.1\tLOWDATA\ts1\tK562\nENSG00000238556.1\tLOWDATA\ts1\tK562\nENSG00000255902.1\tLOWDATA\ts1\tK562\nENSG00000266692.1\tLOWDATA\ts1\tK562")
 
 
-    (status, query) = epidb.select_gene_expressions("s1", [0, 2, 10, 122], None,  "", "gencode v19", user_key)
+    (status, query) = epidb.select_gene_expressions("s1", [1, 5, 10, 122], None,  "", "gencode v19", user_key)
 
     self.assertSuccess(status, query)
     (status, filtered) = epidb.filter_regions (query, "FPKM_STATUS", "!=", "OK", "string", user_key)
@@ -234,7 +238,7 @@ class TestGenes(helpers.TestCase):
 
     self.assertEquals(regions, "ENSG00000240755.1\tLOWDATA\ts1\tK562\nENSG00000256386.1\tLOWDATA\ts1\tK562\nENSG00000198743.5\tLOWDATA\ts1\tK562\nENSG00000267937.1\tLOWDATA\ts1\tK562\nENSG00000238556.1\tLOWDATA\ts1\tK562\nENSG00000255902.1\tLOWDATA\ts1\tK562\nENSG00000266692.1\tLOWDATA\ts1\tK562")
 
-  def test_gene_re(self):
+  def __test_gene_re(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
@@ -266,7 +270,7 @@ class TestGenes(helpers.TestCase):
     status, gene_models = epidb.list_gene_models(self.admin_key)
     self.assertEquals(gene_models, [['gs1', 'Test One']])
 
-  def test_gene_case_insensitive(self):
+  def __test_gene_case_insensitive(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
@@ -283,7 +287,7 @@ class TestGenes(helpers.TestCase):
     status, gene_models = epidb.list_gene_models(self.admin_key)
     self.assertEquals(gene_models, [['gs1', 'Test One']])
 
-  def test_gene_chr1_retrieve(self):
+  def __test_gene_chr1_retrieve(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
