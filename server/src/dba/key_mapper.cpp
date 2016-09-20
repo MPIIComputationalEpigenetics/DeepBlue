@@ -282,10 +282,10 @@ namespace epidb {
       return FPKM_STATUS;
     }
 
-    const std::string& KeyMapper::TRANSCRIPTS_IDS()
+    const std::string& KeyMapper::TRANSCRIPT_IDS()
     {
-      static std::string TRANSCRIPTS_IDS = epidb::dba::KeyMapper::build_default("TRANSCRIPTS_IDS");
-      return TRANSCRIPTS_IDS;
+      static std::string TRANSCRIPT_IDS = epidb::dba::KeyMapper::build_default("TRANSCRIPT_IDS");
+      return TRANSCRIPT_IDS;
     }
 
     const std::string& KeyMapper::LENGTH()

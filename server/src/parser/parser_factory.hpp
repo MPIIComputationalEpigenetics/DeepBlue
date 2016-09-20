@@ -118,6 +118,7 @@ namespace epidb {
       static const FileFormat wig_format_builder();
       static const FileFormat gtf_format_builder();
       static const FileFormat cufflinks_format_builder();
+      static const FileFormat grape2_format_builder();
 
     public:
       typedef std::vector<dba::columns::ColumnTypePtr>::iterator iterator;
@@ -129,6 +130,7 @@ namespace epidb {
       static const FileFormat wig_format();
       static const FileFormat gtf_format();
       static const FileFormat cufflinks_format();
+      static const FileFormat grape2_format();
 
       bool operator==(const FileFormat &other) const
       {

@@ -155,7 +155,7 @@ namespace epidb {
         }
 
         std::string id;
-        bool ret = dba::genes::insert_expression(sample_id, replica, extra_metadata, serializable_file, project, norm_project, user_key, ip, id, msg);
+        bool ret = dba::genes::insert_expression(sample_id, replica, extra_metadata, serializable_file, format, project, norm_project, user_key, ip, id, msg);
         if (ret) {
           result.add_string(id);
         } else {

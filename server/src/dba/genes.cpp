@@ -23,6 +23,8 @@
 
 #include <mongo/bson/bson.h>
 
+#include <boost/algorithm/string.hpp>
+
 #include "../connection/connection.hpp"
 
 #include "../datatypes/metadata.hpp"
@@ -354,6 +356,10 @@ namespace epidb {
           const auto& cufflinks_format = parser::FileFormat::cufflinks_format();
           gene_model_metadata_builder.append("format", cufflinks_format.format());
           gene_model_metadata_builder.append("columns", cufflinks_format.to_bson());
+        } else if (format == "grape2") {
+          const auto& grape2_format = parser::FileFormat::grape2_format();
+          gene_model_metadata_builder.append("format", grape2_format.format());
+          gene_model_metadata_builder.append("columns", grape2_format.to_bson());
         } else {
           msg = "Format '" + format + "' is unknow";
           return false;
@@ -392,7 +398,7 @@ namespace epidb {
       }
 
       bool insert_expression(const std::string& sample_id, const int replica, datatypes::Metadata extra_metadata,
-                             const ISerializableFilePtr file,
+                             const ISerializableFilePtr file, const std::string &format,
                              const std::string& project, const std::string& norm_project,
                              const std::string &user_key, const std::string &ip,
                              std::string &gene_expression_id, std::string &msg)
@@ -401,13 +407,13 @@ namespace epidb {
         mongo::BSONObj extra_metadata_obj = datatypes::metadata_to_bson(extra_metadata);
         int dataset_id;
 
-        if (!build_expression_metadata(sample_id, replica, "cufflinks", project, norm_project, extra_metadata_obj,
+        if (!build_expression_metadata(sample_id, replica, format, project, norm_project, extra_metadata_obj,
                                        user_key, ip, dataset_id, gene_expression_id, gene_expression_metadata, msg)) {
           return false;
         }
 
         mongo::BSONObj upload_info;
-        if (!build_upload_info(user_key, ip, "cufflinks", upload_info, msg)) {
+        if (!build_upload_info(user_key, ip, format, upload_info, msg)) {
           return false;
         }
         mongo::BSONObjBuilder gene_expression_builder;
@@ -714,17 +720,18 @@ namespace epidb {
         while (data_cursor->more()) {
           mongo::BSONObj gene = data_cursor->next().getOwned();
 
-          mongo::BSONObj::iterator e_it = gene.begin();
+          std::string gene_short_name;
+          std::string tracking_id;
 
-          std::string gene_expression_id = e_it.next().String();
-          DatasetId dataset_id = e_it.next().numberInt();
-          std::string tracking_id = e_it.next().String();
-          std::string gene_id = e_it.next().String();
-          std::string gene_short_name = e_it.next().String();
-          Score fpkm = e_it.next().numberDouble();
-          Score fpkm_lo = e_it.next().numberDouble();
-          Score fpkm_hi = e_it.next().numberDouble();
-          std::string fpkm_status = e_it.next().String();
+          DatasetId dataset_id = gene[KeyMapper::DATASET()].Int();
+
+          if (gene.hasElement(KeyMapper::GENE_SHORT_NAME())) {
+            gene_short_name = gene[KeyMapper::GENE_SHORT_NAME()].str();
+          }
+
+          if (gene.hasElement(KeyMapper::TRACKING_ID())) {
+            tracking_id = gene[KeyMapper::TRACKING_ID()].str();
+          }
 
           std::string chromosome;
           Position start;
@@ -735,13 +742,23 @@ namespace epidb {
           }
 
           RegionPtr region = build_bed_region(start, end, dataset_id);
-          region->insert(tracking_id);
-          region->insert(gene_id);
-          region->insert(gene_short_name);
-          region->insert(fpkm);
-          region->insert(fpkm_lo);
-          region->insert(fpkm_hi);
-          region->insert(fpkm_status);
+
+          mongo::BSONObj::iterator it = gene.begin();
+
+          // Jump the _id field
+          it.next();
+          // Jump the dataset_id field
+          it.next();
+
+          while ( it.more() ) {
+            const mongo::BSONElement &e = it.next();
+            switch (e.type()) {
+            case mongo::String : region->insert(e.str()); break;
+            case mongo::NumberDouble : region->insert((float) e._numberDouble()); break;
+            case mongo::NumberInt : region->insert(e._numberInt()); break;
+            default: region->insert(e.toString(false));
+            }
+          }
 
           gene_expressions[chromosome].emplace_back(std::move(region));
         }
@@ -770,9 +787,9 @@ namespace epidb {
       typedef std::unordered_map<std::string, GeneLocation> GeneModelCache;
       typedef std::unordered_map<std::string, GeneModelCache> GeneModelsCache;
 
-      bool load_gene_model(const std::string& norm_gene_model,
-                           GeneModelCache &cache_tracking_id, GeneModelCache &cache_gene_name,
-                           std::string& msg)
+      bool load_gene_model(const std::string & norm_gene_model,
+                           GeneModelCache & cache_tracking_id, GeneModelCache & cache_gene_name,
+                           std::string & msg)
       {
         std::vector<std::string> chromosomes;
         std::vector<std::string> genes;
@@ -789,13 +806,16 @@ namespace epidb {
             const GeneRegion* gene_region = static_cast<const GeneRegion *>(region.get());
             const std::string& gene_id = gene_region->attributes().at("gene_id");
             const std::string& gene_name = gene_region->attributes().at("gene_name");
+
+            std::vector<std::string> gene_id_parts;
+            boost::split(gene_id_parts, gene_id, boost::is_any_of("."));
             /* Not supported by GCC 4.7 (MPI's compiler)
             cache.emplace(std::piecewise_construct,
                           std::forward_as_tuple(gene_id),
                           std::forward_as_tuple(chromosome, gene_region->start(), gene_region->end()));
             */
             auto gl = GeneLocation(chromosome, gene_region->start(), gene_region->end());
-            cache_tracking_id.insert( std::make_pair(gene_id, gl));
+            cache_tracking_id.insert( std::make_pair(gene_id_parts[0], gl));
             cache_gene_name.insert( std::make_pair(gene_name, gl));
           }
         }
@@ -806,10 +826,14 @@ namespace epidb {
       GeneModelsCache gene_models_cache_tracking_id;
       GeneModelsCache gene_models_cache_gene_name;
 
-      bool map_gene_location(const std::string& gene_tracking_id,
-                             const std::string& gene_name, const std::string& gene_model,
-                             std::string& chromosome, Position& start, Position& end, std::string& msg)
+      bool map_gene_location(const std::string & gene_tracking_id,
+                             const std::string & gene_name, const std::string & gene_model,
+                             std::string & chromosome, Position & start, Position & end, std::string & msg)
       {
+
+
+        std::vector<std::string> gene_tracking_id_parts;
+        boost::split(gene_tracking_id_parts, gene_tracking_id, boost::is_any_of("."));
         // Put a lock here
         if (gene_models_cache_tracking_id.find(gene_model) == gene_models_cache_tracking_id.end()) {
           GeneModelCache cache_tracking_id;
@@ -823,13 +847,17 @@ namespace epidb {
         //
 
         const auto &cache_tracking_id = gene_models_cache_tracking_id[gene_model];
-        auto it = cache_tracking_id.find(gene_tracking_id);
+        auto it = cache_tracking_id.find(gene_tracking_id_parts[0]);
 
         if (it == cache_tracking_id.end()) {
           const auto &cache_gene_name = gene_models_cache_gene_name[gene_model];
           it = cache_gene_name.find(gene_name);
           if (it == cache_gene_name.end()) {
-            msg = "Gene " + gene_tracking_id + "/" + gene_name + " not found in the gene model " + gene_model;
+            if (gene_tracking_id.empty()) {
+              msg = "Gene '" + gene_name + "' not found in the gene model " + gene_model;
+            } else {
+              msg = "Gene '" + gene_tracking_id + "'/'" + gene_name + "' not found in the gene model " + gene_model;
+            }
             return false;
           }
         }

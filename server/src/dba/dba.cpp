@@ -237,6 +237,78 @@ namespace epidb {
           "string", user_key, column_id, msg)) {
         return false;
       }
+      if (!dba::columns::create_column_type_simple("TRANSCRIPT_IDS", utils::normalize_name("TRANSCRIPT_IDS"),
+          "IDs of the transcripts.",
+          utils::normalize_name("IDs of the transcripts"),
+          "string", user_key, column_id, msg)) {
+        return false;
+      }
+      if (!dba::columns::create_column_type_simple("EFFECTIVE_LENGTH", utils::normalize_name("EFFECTIVE_LENGTH"),
+          "Effective length.",
+          utils::normalize_name("Effective length"),
+          "double", user_key, column_id, msg)) {
+        return false;
+      }
+      if (!dba::columns::create_column_type_simple("EXPECTED_COUNT", utils::normalize_name("EXPECTED_COUNT"),
+          "Expected count.",
+          utils::normalize_name("Expected count"),
+          "double", user_key, column_id, msg)) {
+        return false;
+      }
+      if (!dba::columns::create_column_type_simple("TPM", utils::normalize_name("TPM"),
+          "Transcripts per kilobase million",
+          utils::normalize_name("Transcripts per kilobase million"),
+          "double", user_key, column_id, msg)) {
+        return false;
+      }
+      if (!dba::columns::create_column_type_simple("POSTERIOR_MEAN_COUNT", utils::normalize_name("POSTERIOR_MEAN_COUNT"),
+          "Posterior mean count.",
+          utils::normalize_name("Posterior mean count"),
+          "double", user_key, column_id, msg)) {
+        return false;
+      }
+      if (!dba::columns::create_column_type_simple("POSTERIOR_STANDARD_DEVIATION_OF_COUNT", utils::normalize_name("POSTERIOR_STANDARD_DEVIATION_OF_COUNT"),
+          "Posterior standard deviation of count.",
+          utils::normalize_name("Posterior standard deviation of count"),
+          "double", user_key, column_id, msg)) {
+        return false;
+      }
+      if (!dba::columns::create_column_type_simple("PME_TPM", utils::normalize_name("PME_TPM"),
+          "Posterior mean estimate - Transcripts per kilobase million.",
+          utils::normalize_name("Posterior mean estimate - Transcripts per kilobase million"),
+          "double", user_key, column_id, msg)) {
+        return false;
+      }
+      if (!dba::columns::create_column_type_simple("PME_FPKM", utils::normalize_name("PME_FPKM"),
+          "Posterior mean estimate - Fragments Per Kilobase of transcript per Million mapped reads.",
+          utils::normalize_name("Posterior mean estimate - Fragments Per Kilobase of transcript per Million mapped reads"),
+          "double", user_key, column_id, msg)) {
+        return false;
+      }
+      if (!dba::columns::create_column_type_simple("TPM_CI_LOWER_BOUND", utils::normalize_name("TPM_CI_LOWER_BOUND"),
+          "TPM - Credibility interval - lower bound.",
+          utils::normalize_name("TPM - Credibility interval - lower bound"),
+          "double", user_key, column_id, msg)) {
+        return false;
+      }
+      if (!dba::columns::create_column_type_simple("TPM_CI_UPPER_BOUND", utils::normalize_name("TPM_CI_UPPER_BOUND"),
+          "TPM - Credibility interval - upper bound.",
+          utils::normalize_name("TPM - Credibility interval - upper bound"),
+          "double", user_key, column_id, msg)) {
+        return false;
+      }
+      if (!dba::columns::create_column_type_simple("FPKM_CI_LOWER_BOUND", utils::normalize_name("FPKM_CI_LOWER_BOUND"),
+          "FPKM - Credibility interval - lower bound.",
+          utils::normalize_name("FPKM - Credibility interval - lower bound."),
+          "double", user_key, column_id, msg)) {
+        return false;
+      }
+      if (!dba::columns::create_column_type_simple("FPKM_CI_UPPER_BOUND", utils::normalize_name("FPKM_CI_UPPER_BOUND"),
+          "FPKM - Credibility interval - upper bound.",
+          utils::normalize_name("FPKM - Credibility interval - upper bound"),
+          "double", user_key, column_id, msg)) {
+        return false;
+      }
 
       // Clear caches
       cv::biosources_cache.invalidate();

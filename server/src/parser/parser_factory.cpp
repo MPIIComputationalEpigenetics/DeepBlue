@@ -233,10 +233,14 @@ namespace epidb {
 
     const FileFormat FileFormat::cufflinks_format()
     {
-      std::cerr << "cufflinks_format BEGIN" << std::endl;
       static FileFormat CUFFLINKS_FORMAT = FileFormat::cufflinks_format_builder();
-      std::cerr << "cufflinks_format END" << std::endl;
       return CUFFLINKS_FORMAT;
+    }
+
+    const FileFormat FileFormat::grape2_format()
+    {
+      static FileFormat GRAPE2_FORMAT = FileFormat::grape2_format_builder();
+      return GRAPE2_FORMAT;
     }
 
     const FileFormat FileFormat::default_format_builder()
@@ -414,6 +418,109 @@ namespace epidb {
       format.add(fpkm_lo);
       format.add(fpkm_hi);
       format.add(fpkm_status);
+      return format;
+    }
+
+    const FileFormat FileFormat::grape2_format_builder()
+    {
+      FileFormat format;
+
+      dba::columns::ColumnTypePtr tracking_id;
+      dba::columns::ColumnTypePtr gene_id;
+      dba::columns::ColumnTypePtr transcript_ids;
+      dba::columns::ColumnTypePtr length;
+      dba::columns::ColumnTypePtr effective_length;
+      dba::columns::ColumnTypePtr expected_count;
+      dba::columns::ColumnTypePtr TPM;
+      dba::columns::ColumnTypePtr FPKM;
+      dba::columns::ColumnTypePtr posterior_mean_count;
+      dba::columns::ColumnTypePtr posterior_standard_deviation_of_count;
+      dba::columns::ColumnTypePtr pme_TPM;
+      dba::columns::ColumnTypePtr pme_FPKM;
+      dba::columns::ColumnTypePtr TPM_ci_lower_bound;
+      dba::columns::ColumnTypePtr TPM_ci_upper_bound;
+      dba::columns::ColumnTypePtr FPKM_ci_lower_bound;
+      dba::columns::ColumnTypePtr FPKM_ci_upper_bound;
+
+      std::string msg;
+
+      format.set_format("GENE_ID,TRANSCRIPT_IDS,LENGTH,EFFECTIVE_LENGTH,EXPECTED_COUNT,TPM,FPKM,POSTERIOR_MEAN_COUNT,POSTERIOR_STANDARD_DEVIATION_OF_COUNT,PME_TPM,PME_FPKM,TPM_CI_LOWER_BOUND,TPM_CI_UPPER_BOUND,FPKM_CI_LOWER_BOUND,FPKM_CI_UPPER_BOUND");
+
+      processing::StatusPtr status = processing::build_dummy_status();
+
+      if (!dba::columns::load_column_type("TRACKING_ID", status, tracking_id, msg)) {
+        EPIDB_LOG_ERR(msg);
+      }
+      if (!dba::columns::load_column_type("GENE_ID", status, gene_id, msg)) {
+        EPIDB_LOG_ERR(msg);
+      }
+      if (!dba::columns::load_column_type("TRANSCRIPT_IDS", status, transcript_ids, msg)) {
+        EPIDB_LOG_ERR(msg);
+      }
+      if (!dba::columns::load_column_type("LENGTH", status, length, msg)) {
+        EPIDB_LOG_ERR(msg);
+      }
+      if (!dba::columns::load_column_type("EFFECTIVE_LENGTH", status, effective_length, msg)) {
+        EPIDB_LOG_ERR(msg);
+      }
+      if (!dba::columns::load_column_type("EXPECTED_COUNT", status, expected_count, msg)) {
+        EPIDB_LOG_ERR(msg);
+      }
+      if (!dba::columns::load_column_type("TPM", status, TPM, msg)) {
+        EPIDB_LOG_ERR(msg);
+      }
+      if (!dba::columns::load_column_type("FPKM", status, FPKM, msg)) {
+        EPIDB_LOG_ERR(msg);
+      }
+
+      if (!dba::columns::load_column_type("POSTERIOR_MEAN_COUNT", status, posterior_mean_count, msg)) {
+        EPIDB_LOG_ERR(msg);
+      }
+
+      if (!dba::columns::load_column_type("POSTERIOR_STANDARD_DEVIATION_OF_COUNT", status, posterior_standard_deviation_of_count, msg)) {
+        EPIDB_LOG_ERR(msg);
+      }
+
+      if (!dba::columns::load_column_type("PME_TPM", status, pme_TPM, msg)) {
+        EPIDB_LOG_ERR(msg);
+      }
+
+      if (!dba::columns::load_column_type("PME_FPKM", status, pme_FPKM, msg)) {
+        EPIDB_LOG_ERR(msg);
+      }
+
+      if (!dba::columns::load_column_type("TPM_CI_LOWER_BOUND", status, TPM_ci_lower_bound, msg)) {
+        EPIDB_LOG_ERR(msg);
+      }
+
+      if (!dba::columns::load_column_type("TPM_CI_UPPER_BOUND", status, TPM_ci_upper_bound, msg)) {
+        EPIDB_LOG_ERR(msg);
+      }
+
+      if (!dba::columns::load_column_type("FPKM_CI_LOWER_BOUND", status, FPKM_ci_lower_bound, msg)) {
+        EPIDB_LOG_ERR(msg);
+      }
+
+      if (!dba::columns::load_column_type("FPKM_CI_UPPER_BOUND", status, FPKM_ci_upper_bound, msg)) {
+        EPIDB_LOG_ERR(msg);
+      }
+
+      format.add(gene_id);
+      format.add(transcript_ids);
+      format.add(length);
+      format.add(effective_length);
+      format.add(expected_count);
+      format.add(TPM);
+      format.add(FPKM);
+      format.add(posterior_mean_count);
+      format.add(posterior_standard_deviation_of_count);
+      format.add(pme_TPM);
+      format.add(pme_FPKM);
+      format.add(TPM_ci_lower_bound);
+      format.add(TPM_ci_upper_bound);
+      format.add(FPKM_ci_lower_bound);
+      format.add(FPKM_ci_upper_bound);
+
       return format;
     }
 

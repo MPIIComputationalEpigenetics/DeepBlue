@@ -71,8 +71,6 @@ namespace epidb {
         std::vector<std::string> strs;
         boost::split(strs, line, boost::is_any_of("\t"));
 
-        std::cerr << line << std::endl;
-
         // TODO: check list size
         gene_id = strs[0];
         transcript_ids = strs[1];

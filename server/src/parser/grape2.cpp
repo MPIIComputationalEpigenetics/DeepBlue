@@ -58,11 +58,9 @@ namespace epidb {
     {
       mongo::BSONObjBuilder bob;
 
-      std::cerr << dba::KeyMapper::TRANSCRIPTS_IDS() << std::endl;
-
       bob.append(dba::KeyMapper::TRACKING_ID(), _gene_id);
       bob.append(dba::KeyMapper::GENE_ID(), _gene_id);
-      bob.append(dba::KeyMapper::TRANSCRIPTS_IDS(), _transcript_ids);
+      bob.append(dba::KeyMapper::TRANSCRIPT_IDS(), _transcript_ids);
       bob.append(dba::KeyMapper::LENGTH(), _length);
       bob.append(dba::KeyMapper::EFFECTIVE_LENGTH(), _effective_length);
       bob.append(dba::KeyMapper::EXPECTED_COUNT(), _expected_count);
