@@ -1,7 +1,7 @@
 import xmlrpclib
 
 # Support long int types in XMLRPC
-xmlrpclib.Marshaller.dispatch[type(0L)] = lambda _, v, w: w("<value><i8>%d</i8></value>" % v) 
+xmlrpclib.Marshaller.dispatch[type(0L)] = lambda _, v, w: w("<value><i8>%d</i8></value>" % v)
 
 def key_required(func):
     def func_wrapper(self, *args, **kwargs):
@@ -280,10 +280,11 @@ class DeepBlueClient(object):
                                           extra_metadata, self.key)
 
     @key_required
-    def add_gene_expression(self, sample_id, replica, data, _format,
+    def add_gene_expression(self, sample_id, replica, data, _format, project,
                      extra_metadata):
         return self.server.add_gene_expression(sample_id, replica, data,
-                                          _format, extra_metadata, self.key)
+                                          _format, project,
+                                          extra_metadata, self.key)
     # Operations
     @key_required
     def select_regions(self, experiment_name, genome, epigenetic_mark,

@@ -56,8 +56,8 @@ namespace epidb {
         Parameter p[] = {
           Parameter("sample_id", serialize::STRING, "sample ID"),
           Parameter("replica", serialize::INTEGER, "replica count (use 0 if it is the single replica)"),
-          Parameter("data", serialize::DATASTRING, "the cufflinks formatted data"),
-          Parameter("format", serialize::STRING, "Currently, it is only supported cufflinks."),
+          Parameter("data", serialize::DATASTRING, "the data in the right format"),
+          Parameter("format", serialize::STRING, "cufflinks or grape2"),
           Parameter("project", serialize::STRING, "the project name"),
           parameters::AdditionalExtraMetadata,
           parameters::UserKey
