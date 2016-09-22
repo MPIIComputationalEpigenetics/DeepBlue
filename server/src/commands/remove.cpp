@@ -81,7 +81,7 @@ namespace epidb {
         } else if (id.compare(0, 2, "gx") == 0) {
           ok = dba::remove::gene_expression(id, user_key, msg);
         } else if (id.compare(0, 2, "gs") == 0) {
-          ok = dba::remove::gene_expression(id, user_key, msg);
+          ok = dba::remove::gene_model(id, user_key, msg);
         } else if (id.compare(0, 1, "g") == 0) {
           ok = dba::remove::genome(id, user_key, msg);
         } else if (id.compare(0, 1, "p") == 0) {
