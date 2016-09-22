@@ -145,7 +145,7 @@ namespace epidb {
 
         int dataset_id = gene_model[KeyMapper::DATASET()].Int();
 
-        if (!helpers::remove_all(collection_name(Collections::GENES()), BSON(KeyMapper::DATASET() << dataset_id), msg)) {
+        if (!helpers::remove_all(helpers::collection_name(Collections::GENES()), BSON(KeyMapper::DATASET() << dataset_id), msg)) {
           return false;
         }
 
@@ -184,7 +184,7 @@ namespace epidb {
 
         int dataset_id = gene_expression[KeyMapper::DATASET()].Int();
 
-        if (!helpers::remove_all(collection_name(Collections::GENE_SINGLE_EXPRESSIONS()), BSON(KeyMapper::DATASET() << dataset_id), msg)) {
+        if (!helpers::remove_all(helpers::collection_name(Collections::GENE_SINGLE_EXPRESSIONS()), BSON(KeyMapper::DATASET() << dataset_id), msg)) {
           return false;
         }
 
