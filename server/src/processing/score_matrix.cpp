@@ -105,8 +105,17 @@ namespace epidb {
           while (it_data != data.end() &&
                  (*it_ranges)->end() >= (*it_data)->start() ) {
 
+            auto begin = std::max((*it_data)->start(), (*it_ranges)->start());
+            auto end =  std::min((*it_data)->end(), (*it_ranges)->end());
+
+            double overlap_length = end - begin;
+            double original_length = (*it_data)->end() - (*it_data)->start();
+
+            auto correct_offset = (overlap_length / original_length );
+
+
             if (((*it_ranges)->start() <= (*it_data)->end()) && ((*it_ranges)->end() >= (*it_data)->start())) {
-              acc.push((*it_data)->value(experiment_format.second->pos()));
+              acc.push((*it_data)->value(experiment_format.second->pos()) * correct_offset);
             }
             it_data++;
           }

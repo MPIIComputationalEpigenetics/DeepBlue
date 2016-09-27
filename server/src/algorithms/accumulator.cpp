@@ -34,6 +34,7 @@ namespace epidb {
     Accumulator::Accumulator() : _calculated(false),
       _min(0.0),
       _max(0.0),
+      _sum(0.0),
       _median(0.0),
       _mean(0.0),
       _var(0.0),
@@ -55,6 +56,12 @@ namespace epidb {
     {
       calculate();
       return _max;
+    }
+
+    Score Accumulator::sum() const
+    {
+      calculate();
+      return _sum;
     }
 
     Score Accumulator::mean() const
@@ -105,8 +112,8 @@ namespace epidb {
       _max = calculated_values[calculated_values.size() - 1];
       _median = calculated_values[calculated_values.size() / 2];
 
-      Score sum = std::accumulate(calculated_values.begin(), calculated_values.end(), 0.0);
-      _mean = sum / calculated_values.size();
+      _sum = std::accumulate(calculated_values.begin(), calculated_values.end(), 0.0);
+      _mean = _sum / calculated_values.size();
 
       std::vector<Score> diff(calculated_values.size());
       std::transform(calculated_values.begin(), calculated_values.end(), diff.begin(),
@@ -133,6 +140,10 @@ namespace epidb {
 
       if (function_name == "max") {
         return &Accumulator::max;
+      }
+
+      if (function_name == "sum") {
+        return &Accumulator::sum;
       }
 
       if (function_name == "mean") {

@@ -35,6 +35,7 @@ namespace epidb {
 
       mutable Score _min;
       mutable Score _max;
+      mutable Score _sum;
       mutable Score _median;
       mutable Score _mean;
       mutable Score _var;
@@ -47,6 +48,7 @@ namespace epidb {
       void push(Score value);
       Score min() const;
       Score max() const;
+      Score sum() const;
       Score mean() const;
       Score var() const;
       Score sd() const;

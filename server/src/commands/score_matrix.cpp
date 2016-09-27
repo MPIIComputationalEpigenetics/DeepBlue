@@ -51,7 +51,7 @@ namespace epidb {
       {
         Parameter p[] = {
           Parameter("experiments_columns", serialize::MAP, "map with experiments names and columns to be processed. Example : {'wgEncodeBroadHistoneDnd41H3k27acSig.wig':'VALUE', 'wgEncodeBroadHistoneCd20ro01794H3k27acSig.wig':'VALUE'}"),
-          Parameter("aggregation_function", serialize::STRING, "aggregation function name: min, max, mean, var, sd, median, count, boolean"),
+          Parameter("aggregation_function", serialize::STRING, "aggregation function name: min, max, sum, mean, var, sd, median, count, boolean"),
           Parameter("aggregation_regions_id", serialize::STRING, "query ID of the regions that will be used as the aggregation boundaries"),
           parameters::UserKey
         };
