@@ -49,7 +49,7 @@ namespace epidb {
       DatasetId dataset_id = -1;
       dba::columns::ColumnTypePtr column;
 
-      auto it_data_begin = data.begin();
+     auto it_data_begin = data.begin();
 
       while (it_ranges != ranges.end()) {
 
@@ -112,7 +112,7 @@ namespace epidb {
         }
 
         chr_regions.emplace_back(build_aggregte_region((*it_ranges)->start(), (*it_ranges)->end(), DATASET_EMPTY_ID,
-                                 acc.min(), acc.max(), acc.median(), acc.mean(), acc.var(), acc.sd(), acc.count()));
+                                 acc.min(), acc.max(), acc.sum(), acc.median(), acc.mean(), acc.var(), acc.sd(), acc.count()));
         it_ranges++;
       }
 

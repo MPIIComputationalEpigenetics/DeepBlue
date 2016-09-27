@@ -288,6 +288,11 @@ namespace epidb {
     return _max;
   }
 
+  Score AggregateRegion::sum() const
+  {
+    return _sum;
+  }
+
   Score AggregateRegion::median() const
   {
     return _median;
@@ -348,8 +353,8 @@ namespace epidb {
     return std::unique_ptr<GeneRegion>(new GeneRegion(s, e, _id, source, score, feature, strand, frame, attributes));
   }
 
-  RegionPtr build_aggregte_region(Position s, Position e, DatasetId _id, Score min, Score max, Score median, Score mean, Score var, Score sd, Score count)
+  RegionPtr build_aggregte_region(Position s, Position e, DatasetId _id, Score min, Score max, Score sum, Score median, Score mean, Score var, Score sd, Score count)
   {
-    return std::unique_ptr<AggregateRegion>(new AggregateRegion(s, e, _id, min, max, median, mean, var, sd, count));
+    return std::unique_ptr<AggregateRegion>(new AggregateRegion(s, e, _id, min, max, sum, median, mean, var, sd, count));
   }
 } // namespace epidb

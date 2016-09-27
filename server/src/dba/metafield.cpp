@@ -58,6 +58,7 @@ namespace epidb {
       m["@SAMPLE_ID"] = &Metafield::sample_id;
       m["@AGG.MIN"] = &Metafield::min;
       m["@AGG.MAX"] = &Metafield::max;
+      m["@AGG.SUM"] = &Metafield::sum;
       m["@AGG.MEDIAN"] = &Metafield::median;
       m["@AGG.MEAN"] = &Metafield::mean;
       m["@AGG.VAR"] = &Metafield::var;
@@ -86,6 +87,7 @@ namespace epidb {
       m["@SAMPLE_ID"] = "string";
       m["@AGG.MIN"] = "double";
       m["@AGG.MAX"] = "double";
+      m["@AGG.SUM"] = "double";
       m["@AGG.MEDIAN"] = "double";
       m["@AGG.MEAN"] = "double";
       m["@AGG.VAR"] = "double";
@@ -380,6 +382,18 @@ namespace epidb {
       return true;
     }
 
+    bool Metafield::sum(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion *region_ref,
+                        processing::StatusPtr status, std::string &result, std::string &msg)
+    {
+      if (region_ref->has_stats()) {
+        const AggregateRegion *aggregate_region = static_cast<const AggregateRegion *>(region_ref);
+        result = utils::score_to_string(aggregate_region->sum());
+      } else {
+        result = "";
+      }
+      return true;
+    }
+
     bool Metafield::median(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion *region_ref,
                            processing::StatusPtr status, std::string &result, std::string &msg)
     {
@@ -493,7 +507,7 @@ namespace epidb {
     }
 
     bool Metafield::gene_expression(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion *region_ref,
-                         processing::StatusPtr status, std::string &result, std::string &msg)
+                                    processing::StatusPtr status, std::string &result, std::string &msg)
     {
       return true;
     }

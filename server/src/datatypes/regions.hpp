@@ -175,6 +175,7 @@ namespace epidb {
   private:
     Score _min;
     Score _max;
+    Score _sum;
     Score _median;
     Score _mean;
     Score _var;
@@ -182,10 +183,11 @@ namespace epidb {
     Score _count;
 
   public:
-    AggregateRegion(Position s, Position e, DatasetId _id, Score min, Score max, Score median, Score mean, Score var, Score sd, Score count) :
+    AggregateRegion(Position s, Position e, DatasetId _id, Score min, Score max, Score sum, Score median, Score mean, Score var, Score sd, Score count) :
       AbstractRegion(s, e, _id),
       _min(min),
       _max(max),
+      _sum(sum),
       _median(median),
       _mean(mean),
       _var(var),
@@ -195,6 +197,7 @@ namespace epidb {
     bool has_stats() const;
     Score min() const;
     Score max() const;
+    Score sum() const;
     Score median() const;
     Score mean() const;
     Score var() const;
@@ -208,7 +211,7 @@ namespace epidb {
   RegionPtr build_bed_region(Position s, Position e, DatasetId _id);
   RegionPtr build_wig_region(Position s, Position e, DatasetId _id, Score value);
   RegionPtr build_gene_region(Position s, Position e, DatasetId _id, std::string source, Score score, std::string feature, std::string strand, std::string frame, datatypes::Metadata& attributes);
-  RegionPtr build_aggregte_region(Position s, Position e, DatasetId _id, Score min, Score max, Score median, Score mean, Score var, Score sd, Score count);
+  RegionPtr build_aggregte_region(Position s, Position e, DatasetId _id, Score min, Score max, Score sum, Score median, Score mean, Score var, Score sd, Score count);
 
   class Regions {
   private:
