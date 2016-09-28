@@ -33,6 +33,7 @@ MINILZO=$(ROOT)/third_party/minilzo
 STRTK=$(ROOT)/third_party/strtk
 CPPFORMAT=$(ROOT)/third_party/cppformat
 URDL=$(ROOT)/third_party/urdl-0.1/include
+JEMALLOC=$(ROOT)/third_party/jemalloc-4.2.1
 
 ifeq ($(host),ubuntu)
  CXX = g++ -DBOOST_LOG_DYN_LINK -g
@@ -41,8 +42,8 @@ ifeq ($(host),ubuntu)
  MONGOLIBS = /opt/mongodb/drivers/lib/libmongoclient.a
  MONGO_INCLUDE = /opt/mongodb/drivers/include/
  BOOST_DIR = /opt/boost/lib
- DEFCXXFLAGS = -std=c++11 -Wall -O3 -ffast-math -march=native -Ofast -I$(MONGO_INCLUDE) -I/opt/boost/include/ -I$(MINILZO) -I$(URDL) -I$(CPPFORMAT) -I$(STRTK) -I$(LUA) -DURDL_HEADER_ONLY=1 -DURDL_DISABLE_SSL=1 -Wno-deprecated-declarations -Wno-unused-variable -Wno-unused-parameter -Wno-ignored-qualifiers -Wno-deprecated-declarations
- BOOSTLIBS = -lboost_filesystem -lboost_thread -lboost_system -lboost_regex -lboost_log -lboost_timer -lboost_chrono -lboost_program_options -lboost_iostreams /home/albrecht/DeepBlue/DeepBlue/server/third_party/bzip2/lib/linux/libbz2.a -lrt
+ DEFCXXFLAGS = -std=c++11 -Wall -O3 -ffast-math -march=native -Ofast -I$(MONGO_INCLUDE) -I/opt/boost/include/ -I$(MINILZO) -I$(URDL) -I$(CPPFORMAT) -I$(STRTK) -I$(LUA) -I${JEMALLOC}/include  -DURDL_HEADER_ONLY=1 -DURDL_DISABLE_SSL=1 -Wno-deprecated-declarations -Wno-unused-variable -Wno-unused-parameter -Wno-ignored-qualifiers -Wno-deprecated-declarations
+ BOOSTLIBS = -lboost_filesystem -lboost_thread -lboost_system -lboost_regex -lboost_log -lboost_timer -lboost_chrono -lboost_program_options -lboost_iostreams /home/albrecht/DeepBlue/DeepBlue/server/third_party/bzip2/lib/linux/libbz2.a -lrt -L${JEMALLOC}/lib -Wl,-rpath,${JEMALLOC}/lib -ljemalloc
  THIRDLIBS = ../third_party/libexpat_linux.a
 endif
 
