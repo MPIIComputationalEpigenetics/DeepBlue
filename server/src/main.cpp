@@ -29,12 +29,15 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
 
+#include <csignal>
 #include <iostream>
 #include <string>
 
 #include <boost/program_options.hpp>
 
 #include <mongo/client/init.h>
+
+#include <jemalloc/jemalloc.h>
 
 #include "log.hpp"
 #include "version.hpp"
@@ -44,6 +47,11 @@
 #include "httpd/server.hpp"
 
 #include "parser/wig.hpp"
+
+void usr1_handler( int signum )
+{
+  malloc_stats_print(NULL, NULL, NULL);
+}
 
 int main(int argc, char *argv[])
 {
@@ -124,6 +132,8 @@ int main(int argc, char *argv[])
     EPIDB_LOG_ERR("Problem initializing LZO compression algorithm.");
     return 1;
   }
+
+  signal(SIGUSR1, usr1_handler);
 
   epidb::engine::queue_processer_run(processing_threads);
 
