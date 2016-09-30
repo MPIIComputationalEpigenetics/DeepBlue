@@ -4,6 +4,7 @@ import helpers
 
 from deepblue_client import DeepBlueClient
 import data_info
+import gzip
 
 
 class TestExperiments(helpers.TestCase):
@@ -13,7 +14,7 @@ class TestExperiments(helpers.TestCase):
     self.init_base(epidb)
 
     sample_id = self.sample_ids[0]
-    regions_data = open("data/bedgraph/chr19.txt").read()
+    regions_data = gzip.open("data/bedgraph/chr19.txt.gz").read()
 
     # adding two experiments with the same data should work
     res = epidb.add_experiment("S0022IH2.ERX300681.H3K36me3.bwa.GRCh38.20150528.bedgraph", "hg19", "Methylation", sample_id, "tech1",
