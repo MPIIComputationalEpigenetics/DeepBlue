@@ -256,6 +256,12 @@ class TestGenes(helpers.TestCase):
     count = self.count_request(req)
     self.assertEquals(count, 1)
 
+    (s, new_query_id) = epidb.select_genes(["RP11-34P13.7"], "Test One", None, None, None, self.admin_key)
+    self.assertEquals(query_id, new_query_id)
+
+    (s, new_query_id) = epidb.select_genes("RP11-34P13.7", "Test One", None, None, None, self.admin_key)
+    self.assertEquals(query_id, new_query_id)
+
     (s, query_id) = epidb.select_genes(["RP11-34P13.234"], "Test One", None, None, None, self.admin_key)
     (s, req) = epidb.count_regions(query_id, self.admin_key)
     count = self.count_request(req)

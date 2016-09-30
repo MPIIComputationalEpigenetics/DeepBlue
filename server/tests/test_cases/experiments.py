@@ -8,6 +8,39 @@ import data_info
 
 class TestExperiments(helpers.TestCase):
 
+  def test_load_bedgraph(self):
+    epidb = DeepBlueClient(address="localhost", port=31415)
+    self.init_base(epidb)
+
+    sample_id = self.sample_ids[0]
+    regions_data = open("data/bedgraph/chr19.txt").read()
+
+    # adding two experiments with the same data should work
+    res = epidb.add_experiment("S0022IH2.ERX300681.H3K36me3.bwa.GRCh38.20150528.bedgraph", "hg19", "Methylation", sample_id, "tech1",
+              "ENCODE", "desc1", regions_data, "bedgraph", None, self.admin_key)
+    self.assertSuccess(res)
+
+    (status, query_id) = epidb.select_regions ("S0022IH2.ERX300681.H3K36me3.bwa.GRCh38.20150528.bedgraph", None, None, None, None, None, "chr19", 49388217, 49417994, self.admin_key)
+    #(status, query_id) = epidb.select_regions ("S0022IH2.ERX300681.H3K36me3.bwa.GRCh38.20150528.bedgraph", None, None, None, None, None, "chr19", None, None, self.admin_key)
+    self.assertSuccess(status, query_id)
+
+    (status, input) = epidb.input_regions("hg19", "chr19\t49388217\t49417994", self.admin_key)
+    self.assertSuccess(status, input)
+
+    (status, query_overlap) = epidb.intersection(query_id, input, self.admin_key)
+    self.assertSuccess(status, query_overlap)
+
+    (status, request_id) = epidb.get_regions(query_id, "CHROMOSOME,START,END,VALUE", self.admin_key)
+    self.assertSuccess(status, request_id)
+    (status, overlap_request_id) = epidb.get_regions(query_id, "CHROMOSOME,START,END,VALUE", self.admin_key)
+    self.assertSuccess(status, overlap_request_id)
+
+    by_select = self.get_regions_request(request_id)
+    by_overlap = self.get_regions_request(overlap_request_id)
+
+    self.assertEqual(by_overlap, by_select)
+    self.assertTrue(len(by_select) > 0)
+
   def test_experiments_preview(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)

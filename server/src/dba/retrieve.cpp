@@ -122,13 +122,16 @@ namespace epidb {
               }
               for (Length i = 0;
                    (i < size) &&
-                   ((start + (i * step)) < _query_end) &&  // Region START < Range END
-                   ( ((start + (i * step) + span)) > _query_start); // Region END > Range START
+                   (start + (i * step) < _query_end);
                    i++) {
-                RegionPtr region = build_wig_region(start + (i * step), start + (i * step) + span, dataset_id, scores[i]);
-                _it_size += region->size();
-                _regions.emplace_back(std::move(region));
-                _it_count++;
+
+                if ((start + (i * step) < _query_end) &&  // Region START < Range END
+                    (start + (i * step) + span > _query_start)) { // Region END > Range START
+                  RegionPtr region = build_wig_region(start + (i * step), start + (i * step) + span, dataset_id, scores[i]);
+                  _it_size += region->size();
+                  _regions.emplace_back(std::move(region));
+                  _it_count++;
+                }
               }
 
             } else if (track_type == parser::VARIABLE_STEP) {
@@ -141,13 +144,17 @@ namespace epidb {
               }
               for (Length i = 0;
                    (i < size) &&
-                   (starts[i] < _query_end) &&  // Region START < Range END
-                   ((starts[i] + span) > _query_start); // Region END > Range START
-                   i++)  {
-                RegionPtr region = build_wig_region(starts[i], starts[i] + span, dataset_id, scores[i]);
-                _it_size += region->size();
-                _regions.emplace_back(std::move(region));
-                _it_count++;
+                   (starts[i] < _query_end);
+                   i++) {
+
+                if ((starts[i] < _query_end) &&  // Region START < Range END
+                    ((starts[i] + span) > _query_start)) { // Region END > Range START
+
+                  RegionPtr region = build_wig_region(starts[i], starts[i] + span, dataset_id, scores[i]);
+                  _it_size += region->size();
+                  _regions.emplace_back(std::move(region));
+                  _it_count++;
+                }
               }
 
             } else if ((track_type == parser::ENCODE_BEDGRAPH) || (track_type == parser::MISC_BEDGRAPH)) {
@@ -160,15 +167,20 @@ namespace epidb {
                 ends = reinterpret_cast<const Position *>(data + (size * sizeof(Position)));
                 scores = reinterpret_cast<const Score *>(data + (size * sizeof(Position) + (size * sizeof(Position))));
               }
+
               for (Length i = 0;
                    (i < size) &&
-                   (starts[i] < _query_end) &&
-                   (ends[i] > _query_start);
-                   i++)  {
-                RegionPtr region = build_wig_region(starts[i], ends[i], dataset_id, scores[i]);
-                _it_size += region->size();
-                _regions.emplace_back(std::move(region));
-                _it_count++;
+                   (starts[i] < _query_end);
+                   i++) {
+
+                if ((starts[i] < _query_end) &&
+                    (ends[i] > _query_start)) {
+
+                  RegionPtr region = build_wig_region(starts[i], ends[i], dataset_id, scores[i]);
+                  _it_size += region->size();
+                  _regions.emplace_back(std::move(region));
+                  _it_count++;
+                }
               }
             }
 

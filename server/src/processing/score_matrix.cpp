@@ -121,6 +121,11 @@ namespace epidb {
           }
           regions_accs->push_back(acc);
           it_ranges++;
+
+          for (const auto& r : ranges) {
+            // Remove the size of the region, keeping only the size of the Stored score.
+            status->subtract_size(r->size() - sizeof(Score));
+          }
         }
       }
 

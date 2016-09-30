@@ -148,11 +148,39 @@ namespace epidb {
       }
     }
 
+    void Status::subtract_regions(const long long qtd)
+    {
+      _total_regions += qtd;
+
+      if (qtd < (_total_regions - (_total_regions / 5 ))) {
+        Connection c;
+        mongo::BSONObj query = BSON("_id" << _processing_id);
+        mongo::BSONObj update_value = BSON("$set" << BSON("total_regions" << (long long) _total_regions.load()));
+        c->update(dba::helpers::collection_name(dba::Collections::PROCESSING()), query, update_value, false, false);
+        c.done();
+      }
+    }
+
     long long Status::sum_size(const long long size)
     {
       _total_size += size;
 
       if (size > _total_size / 5) {
+        Connection c;
+        mongo::BSONObj query = BSON("_id" << _processing_id);
+        mongo::BSONObj update_value = BSON("$set" << BSON("total_size" << (long long) _total_size.load()));
+        c->update(dba::helpers::collection_name(dba::Collections::PROCESSING()), query, update_value, false, false);
+        c.done();
+      }
+
+      return _maximum_memory - _total_size;
+    }
+
+    long long Status::subtract_size(const long long size)
+    {
+      _total_size -= size;
+
+      if (size < (_total_size - (_total_size / 5))) {
         Connection c;
         mongo::BSONObj query = BSON("_id" << _processing_id);
         mongo::BSONObj update_value = BSON("$set" << BSON("total_size" << (long long) _total_size.load()));
@@ -208,7 +236,7 @@ namespace epidb {
         mongo::BSONObj result;
 
         if (!dba::helpers::get_one(dba::Collections::PROCESSING(),
-                mongo::Query(BSON("_id" << _processing_id)), result)) {
+                                   mongo::Query(BSON("_id" << _processing_id)), result)) {
           msg = Error::m(ERR_REQUEST_CANCELED);
           return false;
         }
