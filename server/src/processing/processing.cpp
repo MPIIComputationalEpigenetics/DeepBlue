@@ -19,6 +19,7 @@
 //
 
 #include <atomic>
+#include <chrono>
 #include <memory>
 #include <string>
 
@@ -103,7 +104,9 @@ namespace epidb {
       _total_regions(0),
       _total_size(0),
       _total_stored_data(0),
-      _total_stored_data_compressed(0)
+      _total_stored_data_compressed(0),
+      _last_update(std::chrono::duration_cast< std::chrono::seconds >( std::chrono::system_clock::now().time_since_epoch())),
+      _update_time_out(5)
     {
       if (_request_id != DUMMY_REQUEST) {
         std::string msg;
@@ -139,12 +142,14 @@ namespace epidb {
     {
       _total_regions += qtd;
 
-      if (qtd > _total_regions / 5 ) {
+      auto current_second = std::chrono::duration_cast< std::chrono::seconds >(std::chrono::system_clock::now().time_since_epoch());
+      if (current_second - _last_update > _update_time_out) {
         Connection c;
         mongo::BSONObj query = BSON("_id" << _processing_id);
         mongo::BSONObj update_value = BSON("$set" << BSON("total_regions" << (long long) _total_regions.load()));
         c->update(dba::helpers::collection_name(dba::Collections::PROCESSING()), query, update_value, false, false);
         c.done();
+        _last_update = current_second;
       }
     }
 
@@ -152,12 +157,14 @@ namespace epidb {
     {
       _total_regions += qtd;
 
-      if (qtd < (_total_regions - (_total_regions / 5 ))) {
+      auto current_second = std::chrono::duration_cast< std::chrono::seconds >(std::chrono::system_clock::now().time_since_epoch());
+      if (current_second - _last_update > _update_time_out) {
         Connection c;
         mongo::BSONObj query = BSON("_id" << _processing_id);
         mongo::BSONObj update_value = BSON("$set" << BSON("total_regions" << (long long) _total_regions.load()));
         c->update(dba::helpers::collection_name(dba::Collections::PROCESSING()), query, update_value, false, false);
         c.done();
+        _last_update = current_second;
       }
     }
 
@@ -165,12 +172,14 @@ namespace epidb {
     {
       _total_size += size;
 
-      if (size > _total_size / 5) {
+      auto current_second = std::chrono::duration_cast< std::chrono::seconds >(std::chrono::system_clock::now().time_since_epoch());
+      if (current_second - _last_update > _update_time_out) {
         Connection c;
         mongo::BSONObj query = BSON("_id" << _processing_id);
         mongo::BSONObj update_value = BSON("$set" << BSON("total_size" << (long long) _total_size.load()));
         c->update(dba::helpers::collection_name(dba::Collections::PROCESSING()), query, update_value, false, false);
         c.done();
+        _last_update = current_second;
       }
 
       return _maximum_memory - _total_size;
@@ -180,12 +189,14 @@ namespace epidb {
     {
       _total_size -= size;
 
-      if (size < (_total_size - (_total_size / 5))) {
+      auto current_second = std::chrono::duration_cast< std::chrono::seconds >(std::chrono::system_clock::now().time_since_epoch());
+      if (current_second - _last_update > _update_time_out) {
         Connection c;
         mongo::BSONObj query = BSON("_id" << _processing_id);
         mongo::BSONObj update_value = BSON("$set" << BSON("total_size" << (long long) _total_size.load()));
         c->update(dba::helpers::collection_name(dba::Collections::PROCESSING()), query, update_value, false, false);
         c.done();
+        _last_update = current_second;
       }
 
       return _maximum_memory - _total_size;

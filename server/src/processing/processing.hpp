@@ -22,6 +22,7 @@
 #define EPIDB_PROCESSING_PROCESSING_HPP
 
 #include <atomic>
+#include <chrono>
 #include <memory>
 #include <string>
 #include <vector>
@@ -82,6 +83,8 @@ namespace epidb {
       std::atomic_llong _total_size;
       std::atomic_llong _total_stored_data;
       std::atomic_llong _total_stored_data_compressed;
+      std::chrono::seconds _last_update;
+      const std::chrono::seconds _update_time_out;
 
       mongo::BSONObj toBson();
 
