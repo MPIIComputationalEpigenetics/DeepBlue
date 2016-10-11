@@ -57,21 +57,22 @@ namespace epidb {
       std::string msg;
       std::shared_ptr<std::vector<algorithms::Accumulator>> regions_accs = std::make_shared<std::vector<algorithms::Accumulator>>();
 
-      // Check if processing was canceled
-      bool is_canceled = false;
-      if (!status->is_canceled(is_canceled, msg)) {
-        sem->up();
-        return std::make_tuple(true, msg, "", "", regions_accs);
-      }
-      if (is_canceled) {
-        msg = Error::m(ERR_REQUEST_CANCELED);
-        sem->up();
-        return std::make_tuple(false, msg, "", "", regions_accs);
-      }
-
       const int BLOCK_SIZE = 100;
       size_t region_pos = 0;
       while (region_pos < chromosome.second.size()) {
+
+        // Check if processing was canceled
+        bool is_canceled = false;
+        if (!status->is_canceled(is_canceled, msg)) {
+          sem->up();
+          return std::make_tuple(false, msg, "", "", regions_accs);
+        }
+        if (is_canceled) {
+          msg = Error::m(ERR_REQUEST_CANCELED);
+          sem->up();
+          return std::make_tuple(false, msg, "", "", regions_accs);
+        }
+        ////////////////////////////////////////////////////////////
 
         Regions ranges;
         for (size_t i = 0; i < BLOCK_SIZE && region_pos < chromosome.second.size(); i++, region_pos++) {
@@ -121,11 +122,11 @@ namespace epidb {
           }
           regions_accs->push_back(acc);
           it_ranges++;
+        }
 
-          for (const auto& r : ranges) {
-            // Remove the size of the region, keeping only the size of the Stored score.
-            status->subtract_size(r->size() - sizeof(Score));
-          }
+        // Remove the size of the region, keeping only the size of the Stored score.
+        for (const auto& r : data) {
+          status->subtract_size(r->size() - sizeof(Score));
         }
       }
 
