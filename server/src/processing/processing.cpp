@@ -155,7 +155,7 @@ namespace epidb {
 
     void Status::subtract_regions(const long long qtd)
     {
-      _total_regions += qtd;
+      _total_regions -= qtd;
 
       auto current_second = std::chrono::duration_cast< std::chrono::seconds >(std::chrono::system_clock::now().time_since_epoch());
       if (current_second - _last_update > _update_time_out) {
