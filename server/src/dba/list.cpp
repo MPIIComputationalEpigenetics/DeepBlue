@@ -434,7 +434,6 @@ namespace epidb {
               return false;
             }
           }
-          args_builder.append("project", BSON("$in" << utils::build_array(filtered_projects)));
           args_builder.append("norm_project", BSON("$in" << utils::build_normalized_array(filtered_projects)));
         } else {
           std::vector<std::string> user_projects_names;
@@ -442,7 +441,6 @@ namespace epidb {
             user_projects_names.push_back(project.name);
           }
 
-          args_builder.append("project", BSON("$in" << utils::build_array(user_projects_names)));
           args_builder.append("norm_project", BSON("$in" << utils::build_normalized_array(user_projects_names)));
         }
 
