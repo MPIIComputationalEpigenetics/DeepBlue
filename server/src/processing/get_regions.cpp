@@ -60,7 +60,7 @@ namespace epidb {
 
 
     bool format_regions(const std::string &output_format, ChromosomeRegionsList &chromosomeRegionsList, processing::StatusPtr status,
-                 StringBuilder &sb, std::string &msg)
+                        StringBuilder &sb, std::string &msg)
     {
       std::unordered_map<DatasetId, parser::FileFormat> datasets_formats;
       dba::Metafield metafield;
@@ -80,14 +80,6 @@ namespace epidb {
         // TODO: use the generic version that will be put in processing.cpp
         processing::RunningOp runningOp = status->start_operation(processing::FORMAT_OUTPUT,
                                           BSON("format" << output_format << "chromosome" << chromosome << "regions" << (long long) regions.size()));
-        bool is_canceled = false;
-        if (!status->is_canceled(is_canceled, msg)) {
-          return true;
-        }
-        if (is_canceled) {
-          msg = Error::m(ERR_REQUEST_CANCELED);
-          return true;
-        }
 
         if (it != chromosomeRegionsList.begin()) {
           sb.endLine();
@@ -161,6 +153,7 @@ namespace epidb {
           // Change to use column->pos()
         } else if (column->name() == "END") {
           sb.append(utils::integer_to_string(region->end()));
+
         } else if (dba::Metafield::is_meta(column->name())) {
           std::string result;
           if (!metafield.process(column->name(), chromosome, region.get(), status, result, msg)) {
@@ -169,28 +162,30 @@ namespace epidb {
           if (!result.empty()) {
             sb.append(std::move(result));
           }
+
+        } else if (column->type() == datatypes::COLUMN_CALCULATED) {
+          std::string result;
+          if (!column->execute(chromosome, region.get(), metafield, result, msg)) {
+            return false;
+          }
+          sb.append(std::move(result));
+
+        } else if (column->type() == datatypes::COLUMN_INTEGER) {
+          const Score &v = region->value(column->pos());
+          if (v != std::numeric_limits<Score>::min()) {
+            sb.append(utils::integer_to_string((int)v));
+          }
+
+        } else if ( ( column->type() == datatypes::COLUMN_DOUBLE) ||  (column->type() == datatypes::COLUMN_RANGE)) {
+          const Score &v = region->value(column->pos());
+          if (v != std::numeric_limits<Score>::min()) {
+            sb.append(utils::score_to_string(v));
+          }
+
         } else {
-          if (column->type() == datatypes::COLUMN_CALCULATED) {
-            std::string result;
-            if (!column->execute(chromosome, region.get(), metafield, result, msg)) {
-              return false;
-            }
-            sb.append(std::move(result));
-          } else if (column->type() == datatypes::COLUMN_INTEGER) {
-            const Score &v = region->value(column->pos());
-            if (v != std::numeric_limits<Score>::min()) {
-              sb.append(utils::integer_to_string((int)v));
-            }
-          } else if ( ( column->type() == datatypes::COLUMN_DOUBLE) ||  (column->type() == datatypes::COLUMN_RANGE)) {
-            const Score &v = region->value(column->pos());
-            if (v != std::numeric_limits<Score>::min()) {
-              sb.append(utils::score_to_string(v));
-            }
-          } else {
-            const std::string &o = region->get_string(column->pos());
-            if (!o.empty()) {
-              sb.append(o);
-            }
+          const std::string &o = region->get_string(column->pos());
+          if (!o.empty()) {
+            sb.append(o);
           }
         }
       }
