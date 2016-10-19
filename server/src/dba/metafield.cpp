@@ -56,6 +56,7 @@ namespace epidb {
       m["@PROJECT"] = &Metafield::project;
       m["@BIOSOURCE"] = &Metafield::biosource;
       m["@SAMPLE_ID"] = &Metafield::sample_id;
+      m["@STRAND"] = &Metafield::strand;
       m["@AGG.MIN"] = &Metafield::min;
       m["@AGG.MAX"] = &Metafield::max;
       m["@AGG.SUM"] = &Metafield::sum;
@@ -85,6 +86,7 @@ namespace epidb {
       m["@PROJECT"] = "string";
       m["@BIOSOURCE"] = "string";
       m["@SAMPLE_ID"] = "string";
+      m["@STRAND"] = "string";
       m["@AGG.MIN"] = "double";
       m["@AGG.MAX"] = "double";
       m["@AGG.SUM"] = "double";
@@ -239,6 +241,18 @@ namespace epidb {
     {
 
       result = utils::integer_to_string(region_ref->end() - region_ref->start());
+      return true;
+    }
+
+    bool Metafield::strand(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion *region_ref,
+                         processing::StatusPtr status, std::string &result, std::string &msg)
+    {
+      if (region_ref->has_strand()) {
+        const StrandedRegion *stranded_region = static_cast<const StrandedRegion *>(region_ref);
+        result = stranded_region->strand();
+      } else {
+        result = "";
+      }
       return true;
     }
 
@@ -488,7 +502,6 @@ namespace epidb {
                             processing::StatusPtr status, std::string &result, std::string &msg)
     {
       std::string gene_model = metafield_attribute(op);
-      std::cerr << region_ref->start() << " : " << region_ref->end() << std::endl;
       if (!dba::genes::get_gene_attribute(chrom, region_ref->start(), region_ref->end(), "gene_id", gene_model, result, msg)) {
         return false;
       }
@@ -499,7 +512,6 @@ namespace epidb {
                               processing::StatusPtr status, std::string &result, std::string &msg)
     {
       std::string gene_model = metafield_attribute(op);
-      std::cerr << region_ref->start() << " : " << region_ref->end() << std::endl;
       if (!dba::genes::get_gene_attribute(chrom, region_ref->start(), region_ref->end(), "gene_name",  gene_model, result, msg)) {
         return false;
       }

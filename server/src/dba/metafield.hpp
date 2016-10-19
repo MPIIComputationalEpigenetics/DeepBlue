@@ -57,6 +57,8 @@ namespace epidb {
 
       bool name(const std::string &, const std::string &, const mongo::BSONObj &obj, const AbstractRegion *region_ref, processing::StatusPtr status, std::string &result, std::string &msg);
 
+      bool strand(const std::string &, const std::string &, const mongo::BSONObj &obj, const AbstractRegion *region_ref, processing::StatusPtr status, std::string &result, std::string &msg);
+
       bool sequence(const std::string &, const std::string &, const mongo::BSONObj &obj, const AbstractRegion *region_ref, processing::StatusPtr status, std::string &result, std::string &msg);
 
       bool count_overlap(const std::string &, const std::string &, const mongo::BSONObj &obj, const AbstractRegion *region_ref, processing::StatusPtr status, std::string &result, std::string &msg);
