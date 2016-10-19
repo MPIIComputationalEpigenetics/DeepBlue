@@ -696,7 +696,6 @@ namespace epidb {
         }
 
         mongo::BSONObj ges_query = ges_builder.obj();
-        std::cerr << ges_query.toString() << std::endl;
 
         mongo::BSONArray ges_datasets = helpers::build_dataset_ids_arrays(Collections::GENE_EXPRESSIONS(), ges_query);
 
@@ -736,12 +735,13 @@ namespace epidb {
           std::string chromosome;
           Position start;
           Position end;
+          std::string strand;
 
-          if (!map_gene_location(tracking_id, gene_short_name, norm_gene_model, chromosome, start, end, msg)) {
+          if (!map_gene_location(tracking_id, gene_short_name, norm_gene_model, chromosome, start, end, strand, msg)) {
             return false;
           }
 
-          RegionPtr region = build_bed_region(start, end, dataset_id);
+          RegionPtr region = build_stranded_region(start, end, dataset_id, strand);
 
           mongo::BSONObj::iterator it = gene.begin();
 
@@ -777,11 +777,13 @@ namespace epidb {
         std::string chromosome;
         Position start;
         Position end;
+        std::string strand;
 
-        GeneLocation(std::string c, Position s, Position e) :
+        GeneLocation(std::string c, Position s, Position e, std::string d) :
           chromosome(c),
           start(s),
-          end(e) {}
+          end(e),
+          strand(d) {}
       };
 
       typedef std::unordered_map<std::string, GeneLocation> GeneModelCache;
@@ -814,7 +816,8 @@ namespace epidb {
                           std::forward_as_tuple(gene_id),
                           std::forward_as_tuple(chromosome, gene_region->start(), gene_region->end()));
             */
-            auto gl = GeneLocation(chromosome, gene_region->start(), gene_region->end());
+                                                                                        // See the get_string in gene_regions
+            auto gl = GeneLocation(chromosome, gene_region->start(), gene_region->end(), gene_region->get_string(3));
             cache_tracking_id.insert( std::make_pair(gene_id_parts[0], gl));
             cache_gene_name.insert( std::make_pair(gene_name, gl));
           }
@@ -828,7 +831,7 @@ namespace epidb {
 
       bool map_gene_location(const std::string & gene_tracking_id,
                              const std::string & gene_name, const std::string & gene_model,
-                             std::string & chromosome, Position & start, Position & end, std::string & msg)
+                             std::string & chromosome, Position & start, Position & end, std::string& strand, std::string & msg)
       {
 
 
@@ -866,6 +869,7 @@ namespace epidb {
         chromosome = region.chromosome;
         start = region.start;
         end = region.end;
+        strand = region.strand;
 
         return true;
       }
