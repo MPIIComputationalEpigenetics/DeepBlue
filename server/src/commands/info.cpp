@@ -364,7 +364,6 @@ namespace epidb {
           if (obj_metadata.isEmpty()) {
             result.add_param(info);
           } else {
-            std::cerr << "DOWN" << std::endl;
             result.add_param(utils::bson_to_parameters(obj_metadata));
           }
         }
