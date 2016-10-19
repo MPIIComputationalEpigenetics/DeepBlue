@@ -69,6 +69,11 @@ namespace epidb {
     return false;
   }
 
+  bool AbstractRegion::has_strand() const
+  {
+    return false;
+  }
+
   void AbstractRegion::insert(const std::string &value)
   {
     // Nothing
@@ -183,6 +188,30 @@ namespace epidb {
     return RegionPtr(new BedRegion(*this));
   }
 
+
+  // -----------------------------------
+  // StrandedRegion
+  // -----------------------------------
+
+  bool StrandedRegion::has_strand() const
+  {
+    return true;
+  }
+
+  std::string StrandedRegion::strand() const
+  {
+    return _strand;
+  }
+
+  size_t StrandedRegion::size() const
+  {
+    return BedRegion::size() + _strand.capacity();
+  }
+
+  RegionPtr StrandedRegion::clone() const
+  {
+    return RegionPtr(new StrandedRegion(*this));
+  }
 
   // -----------------------------------
   // WigRegion
@@ -341,6 +370,11 @@ namespace epidb {
   RegionPtr build_bed_region(Position s, Position e, DatasetId _id)
   {
     return std::unique_ptr<BedRegion>(new BedRegion(s, e, _id));
+  }
+
+  RegionPtr build_stranded_region(Position s, Position e, DatasetId _id, std::string strand)
+  {
+    return std::unique_ptr<StrandedRegion>(new StrandedRegion(s, e, _id, strand));
   }
 
   RegionPtr build_wig_region(Position s, Position e, DatasetId _id, Score value)

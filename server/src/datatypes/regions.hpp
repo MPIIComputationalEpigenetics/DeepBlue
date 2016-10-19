@@ -77,6 +77,7 @@ namespace epidb {
     virtual const datatypes::Metadata& attributes() const;
 
     virtual bool has_stats() const;
+    virtual bool has_strand() const;
     virtual size_t size() const;
     virtual RegionPtr clone() const = 0;
   };
@@ -96,13 +97,12 @@ namespace epidb {
     virtual size_t size() const;
   };
 
-
   // -----------------------------------
   // BedRegion
   // -----------------------------------
   class BedRegion : public AbstractRegion {
     std::vector<std::string> _string_data;
-    std::vector<float> _numeric_data; // TODO: change to Score
+    std::vector<float> _numeric_data;
 
   public:
     BedRegion(Position s, Position e, DatasetId _id):
@@ -114,6 +114,24 @@ namespace epidb {
     virtual void insert(const int value);
     virtual const std::string  &get_string(const size_t pos) const;
     virtual Score value(const size_t pos) const;
+    virtual size_t size() const;
+    virtual RegionPtr clone() const;
+  };
+
+
+  // -----------------------------------
+  // StrandedRegion
+  // -----------------------------------
+  class StrandedRegion : public BedRegion {
+    std::string _strand;
+
+  public:
+    StrandedRegion(Position s, Position e,DatasetId _id, std::string d):
+      BedRegion(s, e, _id),
+      _strand(d) {}
+
+    virtual bool has_strand() const;
+    std::string strand() const;
     virtual size_t size() const;
     virtual RegionPtr clone() const;
   };
@@ -209,6 +227,7 @@ namespace epidb {
 
   RegionPtr build_simple_region(Position s, Position e, DatasetId _id);
   RegionPtr build_bed_region(Position s, Position e, DatasetId _id);
+  RegionPtr build_stranded_region(Position s, Position e, DatasetId _id, std::string strand);
   RegionPtr build_wig_region(Position s, Position e, DatasetId _id, Score value);
   RegionPtr build_gene_region(Position s, Position e, DatasetId _id, std::string source, Score score, std::string feature, std::string strand, std::string frame, datatypes::Metadata& attributes);
   RegionPtr build_aggregte_region(Position s, Position e, DatasetId _id, Score min, Score max, Score sum, Score median, Score mean, Score var, Score sd, Score count);
@@ -238,7 +257,7 @@ namespace epidb {
 
     Regions(Regions&& r) noexcept :
       _regions(std::move(r._regions))
-      { }
+    { }
 
 
     Regions& operator=(const Regions& other)
