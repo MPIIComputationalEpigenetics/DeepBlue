@@ -153,6 +153,13 @@ class TestGenes(helpers.TestCase):
     (s, ss) = epidb.add_gene_model("gencode v19", "Test One Description", data, "GTF", {}, self.admin_key)
     self.assertSuccess(s, ss)
 
+    (status, gx_query) = epidb.select_gene_expressions("s1", 2, "ENSG00000000003.13", "ENCODE", "gencode v19", self.admin_key)
+    self.assertSuccess(status, gx_query)
+    status, info = epidb.info(gx_query, user_key)
+    (status, r_id) = epidb.get_regions(gx_query, "CHROMOSOME,START,END,@STRAND,GENE_ID,TRANSCRIPT_IDS,LENGTH,EFFECTIVE_LENGTH,EXPECTED_COUNT,TPM,FPKM,POSTERIOR_MEAN_COUNT,POSTERIOR_STANDARD_DEVIATION_OF_COUNT,PME_TPM,PME_FPKM,TPM_CI_LOWER_BOUND,TPM_CI_UPPER_BOUND,FPKM_CI_LOWER_BOUND,FPKM_CI_UPPER_BOUND", self.admin_key)
+    self.assertSuccess(status, r_id)
+    regions = self.get_regions_request(r_id)
+    self.assertEquals(regions, "chrX\t99883667\t99894988\t-\tENSG00000000003.13\tENSG00000000003.13\t2025\t1855.4301\t161.0000\t1.0000\t2.1300\t161.0000\t0.0000\t1.0500\t2.2700\t0.8742\t1.2451\t1.8882\t2.6879")
 
     (status, gx_query) = epidb.select_gene_expressions("s1", 2, "ENSG00000000003.13", "ENCODE", "gencode v19", self.admin_key)
     self.assertSuccess(status, gx_query)
