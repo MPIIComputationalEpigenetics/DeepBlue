@@ -21,3 +21,10 @@ server/src/server
 api_auto.html
 server/src/server.dSYM
 cli/src/.deepblue_cli_config
+server/third_party/bzip2/lib/linux/libbz2.a
+server/third_party/expat/Makefile
+server/third_party/expat/config.log
+server/third_party/expat/config.status
+server/third_party/expat/libtool
+server/third_party/libexpat_linux.a
+server/third_party/luajit-2.0
