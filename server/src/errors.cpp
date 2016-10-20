@@ -138,7 +138,7 @@ namespace epidb {
 
   Error ERR_INVALID_GENE_NAME("113000", "Gene Name '{}' was not found in the Gene Model '{}'.");
   Error ERR_INVALID_GENE_ID("113003", "Gene ID '{}' was not found in the Gene Model '{}'.");
-  Error ERR_INVALID_GENE_LOCATION("113150", "There are not gene in the chromosome '{}' location {} - {} in the Gene Model '{}'.");
+  Error ERR_INVALID_GENE_LOCATION("113150", "There are no gene in the chromosome '{}' location {} - {} in the Gene Model '{}'.");
   Error ERR_INVALID_GENE_ATTRIBUTE("113150", "The Gene '{}' does not have the attribute '{}'.");
 
   Error ERR_INVALID_BIOSOURCE_NAME("104000", "Unable to find BioSource '{}'. No BioSource or Synonym was defined with this name.");
