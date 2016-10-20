@@ -282,14 +282,12 @@ namespace epidb {
         return true;
       }
 
-
-
       bool genes(const std::string &user_key, const std::vector<std::string> &genes_id_or_name,
                  const std::vector<std::string> &chromosomes,
                  const Position start, const Position end,
                  const std::vector<std::string> &norm_gene_models,  std::vector<mongo::BSONObj> &genes, std::string &msg)
       {
-        return dba::genes::get_genes(chromosomes, start, end, genes_id_or_name, user_key, norm_gene_models, genes, msg);
+        return dba::genes::get_genes(chromosomes, start, end, "", genes_id_or_name, user_key, norm_gene_models, genes, msg);
       }
 
       bool similar_biosources(const std::string &name, const std::string &user_key,

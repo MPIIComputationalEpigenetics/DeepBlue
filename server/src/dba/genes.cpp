@@ -478,7 +478,7 @@ namespace epidb {
         return true;
       }
 
-      bool build_genes_database_query(const std::vector<std::string> &chromosomes, const int start, const int end,
+      bool build_genes_database_query(const std::vector<std::string> &chromosomes, const int start, const int end, const std::string& strand,
                                       const std::vector<std::string>& genes, const std::vector<std::string>& norm_gene_models,
                                       const bool exactly,
                                       mongo::Query& query, std::string& msg)
@@ -527,6 +527,10 @@ namespace epidb {
           }
         }
 
+        if (!strand.empty()) {
+          bob.append(KeyMapper::STRAND(), strand);
+        }
+
         mongo::BSONObj filter = bob.obj();
 
         query = mongo::Query(filter).sort(BSON(KeyMapper::CHROMOSOME() << 1 << KeyMapper::START() << 1));
@@ -534,12 +538,12 @@ namespace epidb {
         return true;
       }
 
-      bool get_gene_attribute(const std::string& chromosome, const Position start, const Position end,
+      bool get_gene_attribute(const std::string& chromosome, const Position start, const Position end, const std::string& strand,
                               const std::string& attribute_name, const std::string& gene_model,
                               std::string& attibute_value, std::string& msg)
       {
         mongo::BSONObj gene;
-        if (!get_gene(chromosome, start, end, gene_model, gene, msg)) {
+        if (!get_gene(chromosome, start, end, strand, gene_model, gene, msg)) {
           if (msg.empty()) {
             msg = Error::m(ERR_INVALID_GENE_LOCATION, chromosome, start, end, gene_model);
           }
@@ -574,8 +578,9 @@ namespace epidb {
         return true;
       }
 
-      bool get_gene(const std::string& chromosome, const Position start, const Position end, const std::string& gene_model,
-                    mongo::BSONObj& gene, std::string& msg)
+      // TODO: cache it
+      bool get_gene(const std::string& chromosome, const Position start, const Position end, const std::string& strand,
+                    const std::string& gene_model, mongo::BSONObj& gene, std::string& msg)
       {
         std::string norm_gene_model = utils::normalize_name(gene_model);
 
@@ -584,7 +589,7 @@ namespace epidb {
         const std::vector<std::string> chromosomes = {chromosome};
         mongo::Query query;
 
-        if (!dba::genes::build_genes_database_query(chromosomes, start, end, genes_empty, gene_models, true, query, msg)) {
+        if (!dba::genes::build_genes_database_query(chromosomes, start, end, strand, genes_empty, gene_models, true, query, msg)) {
           msg = "";
           return false;
         }
@@ -592,11 +597,11 @@ namespace epidb {
         return helpers::get_one(Collections::GENES(), query, gene);
       }
 
-      bool get_genes(const std::vector<std::string> &chromosomes, const Position start, const Position end, const std::vector<std::string>& genes_names_or_id,
+      bool get_genes(const std::vector<std::string> &chromosomes, const Position start, const Position end, const std::string& strand, const std::vector<std::string>& genes_names_or_id,
                      const std::string &user_key, const std::vector<std::string> &norm_gene_models,  std::vector<mongo::BSONObj>& genes, std::string &msg)
       {
         mongo::Query query;
-        if (!dba::genes::build_genes_database_query(chromosomes, start, end, genes_names_or_id, norm_gene_models, false, query, msg)) {
+        if (!dba::genes::build_genes_database_query(chromosomes, start, end, strand, genes_names_or_id, norm_gene_models, false, query, msg)) {
           return false;
         }
 
@@ -612,7 +617,7 @@ namespace epidb {
         return true;
       }
 
-      bool get_genes_from_database(const std::vector<std::string> &chromosomes, const Position start, const Position end,
+      bool get_genes_from_database(const std::vector<std::string> &chromosomes, const Position start, const Position end, const std::string& strand,
                                    const std::vector<std::string>& genes, const std::string& norm_gene_model,
                                    ChromosomeRegionsList& chromosomeRegionsList, std::string& msg )
       {
@@ -621,7 +626,7 @@ namespace epidb {
 
         mongo::Query query;
 
-        if (!build_genes_database_query(chromosomes, start, end, genes, gene_models, false, query, msg)) {
+        if (!build_genes_database_query(chromosomes, start, end, strand, genes, gene_models, false, query, msg)) {
           return false;
         }
 
@@ -797,7 +802,7 @@ namespace epidb {
         std::vector<std::string> genes;
         ChromosomeRegionsList chromosomeRegionsList;
 
-        if (!get_genes_from_database(chromosomes, -1, -1, genes, norm_gene_model, chromosomeRegionsList, msg)) {
+        if (!get_genes_from_database(chromosomes, -1, -1, "", genes, norm_gene_model, chromosomeRegionsList, msg)) {
           return false;
         }
 
@@ -816,7 +821,7 @@ namespace epidb {
                           std::forward_as_tuple(gene_id),
                           std::forward_as_tuple(chromosome, gene_region->start(), gene_region->end()));
             */
-                                                                                        // See the get_string in gene_regions
+            // See the get_string in gene_regions
             auto gl = GeneLocation(chromosome, gene_region->start(), gene_region->end(), gene_region->get_string(3));
             cache_tracking_id.insert( std::make_pair(gene_id_parts[0], gl));
             cache_gene_name.insert( std::make_pair(gene_name, gl));
