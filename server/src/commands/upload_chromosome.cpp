@@ -58,7 +58,7 @@ namespace epidb {
       static Parameters results_()
       {
         Parameter p[] = {};
-        Parameters results(&p[0], &p[0]);
+        Parameters results;
         return results;
       }
 

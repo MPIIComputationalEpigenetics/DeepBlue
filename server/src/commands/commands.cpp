@@ -40,7 +40,7 @@ namespace epidb {
       static Parameters parameters_()
       {
         Parameter p[] = {};
-        Parameters params(&p[0], &p[0]);
+        Parameters params;
         return params;
       }
 
