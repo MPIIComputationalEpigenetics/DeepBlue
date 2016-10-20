@@ -286,7 +286,6 @@ namespace epidb {
         bob.append("experiments", experiment_names_array);
 
         mongo::BSONObj obj = bob.obj();
-        std::cerr << obj.toString() << std::endl;
 
         Connection c;
         c->insert(helpers::collection_name(Collections::EXPERIMENT_SETS()), obj);

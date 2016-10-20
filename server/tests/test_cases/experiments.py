@@ -345,6 +345,12 @@ class TestExperiments(helpers.TestCase):
 
     self.assertEqual(exps, 'chr1\t683240\t690390\nchr1\t697520\t697670\nchr1\t702900\t703050\nchr1\t714160\t714310\nchr1\t714540\t714690\nchr1\t715060\t715210\nchr1\t761180\t761330\nchr1\t762060\t762210\nchr1\t762420\t762570\nchr1\t762820\t762970\nchr1\t763020\t763170\nchr1\t839540\t839690\nchr1\t840080\t840230\nchr1\t840600\t840750\nchr1\t858880\t859030\nchr1\t859600\t859750\nchr1\t860240\t860390\nchr1\t861040\t861190\nchr1\t875400\t875550\nchr1\t875900\t876050\nchr1\t876400\t876650\nchr1\t877900\t878050\nchr1\t879180\t880330')
 
+
+    (res, req) = epidb.get_regions(qid1, "CHROMOSOME,START,END,@STRAND", self.admin_key)
+    exps = self.get_regions_request(req)
+    self.assertEqual(exps, 'chr1\t683240\t690390\t+\nchr1\t697520\t697670\t-\nchr1\t702900\t703050\t+\nchr1\t714160\t714310\t+\nchr1\t714540\t714690\t+\nchr1\t715060\t715210\t+\nchr1\t761180\t761330\t-\nchr1\t762060\t762210\t+\nchr1\t762420\t762570\t.\nchr1\t762820\t762970\t-\nchr1\t763020\t763170\t-\nchr1\t839540\t839690\t+\nchr1\t840080\t840230\t+\nchr1\t840600\t840750\t-\nchr1\t858880\t859030\t.\nchr1\t859600\t859750\t.\nchr1\t860240\t860390\t+\nchr1\t861040\t861190\t-\nchr1\t875400\t875550\t+\nchr1\t875900\t876050\t-\nchr1\t876400\t876650\t+\nchr1\t877900\t878050\t-\nchr1\t879180\t880330\t-')
+
+
     res, qid2 = epidb.select_regions(None, "hg19", "Methylation", None, None,
         None, None, None, None, self.admin_key)
     self.assertSuccess(res, qid1)

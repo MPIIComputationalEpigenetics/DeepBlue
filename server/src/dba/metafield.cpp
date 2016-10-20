@@ -247,13 +247,11 @@ namespace epidb {
     bool Metafield::strand(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion *region_ref,
                            processing::StatusPtr status, std::string &result, std::string &msg)
     {
-      std::cerr << "to no strand" << std::endl;
-       std::cerr << region_ref->has_strand() << std::endl;
       if (region_ref->has_strand()) {
         result = region_ref->strand();
       } else {
         int pos;
-        if (!query::get_column_position_from_dataset(region_ref->dataset_id(), KeyMapper::STRAND(), pos, msg)) {
+        if (!query::get_column_position_from_dataset(region_ref->dataset_id(), "STRAND", pos, msg)) {
           return false;
         }
         if (pos == -1) {
@@ -262,7 +260,6 @@ namespace epidb {
           result = region_ref->get_string(pos);
         }
       }
-      std::cerr << result << std::endl;
       return true;
     }
 
