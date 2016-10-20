@@ -35,13 +35,14 @@
 namespace epidb {
 
   typedef int DatasetId;
+  extern DatasetId DATASET_EMPTY_ID;
+
+  //////////////////////////////////
+  // Regions types
+  //////////////////////////////////
 
   class AbstractRegion;
   typedef std::unique_ptr<AbstractRegion> RegionPtr;
-
-
-
-  extern DatasetId DATASET_EMPTY_ID;
 
   class AbstractRegion {
   private:
@@ -74,6 +75,7 @@ namespace epidb {
     virtual void insert(const int value);
     virtual const std::string  &get_string(const size_t pos) const;
     virtual Score value(const size_t pos) const;
+    virtual const std::string strand() const;
     virtual const datatypes::Metadata& attributes() const;
 
     virtual bool has_stats() const;
@@ -123,15 +125,16 @@ namespace epidb {
   // StrandedRegion
   // -----------------------------------
   class StrandedRegion : public BedRegion {
+  private:
     std::string _strand;
 
   public:
-    StrandedRegion(Position s, Position e,DatasetId _id, std::string d):
+    StrandedRegion(Position s, Position e, DatasetId _id, std::string d):
       BedRegion(s, e, _id),
       _strand(d) {}
 
     virtual bool has_strand() const;
-    std::string strand() const;
+    virtual const std::string strand() const;
     virtual size_t size() const;
     virtual RegionPtr clone() const;
   };
@@ -180,6 +183,8 @@ namespace epidb {
       _score_cache("")
     {}
 
+    virtual bool has_strand() const;
+    virtual const std::string strand() const;
     virtual const datatypes::Metadata& attributes() const;
     virtual const std::string  &get_string(const size_t pos) const;
     virtual size_t size() const;

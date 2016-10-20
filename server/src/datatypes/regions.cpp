@@ -74,6 +74,11 @@ namespace epidb {
     return false;
   }
 
+  const std::string AbstractRegion::strand() const
+  {
+    return empty_string;
+  }
+
   void AbstractRegion::insert(const std::string &value)
   {
     // Nothing
@@ -192,13 +197,12 @@ namespace epidb {
   // -----------------------------------
   // StrandedRegion
   // -----------------------------------
-
   bool StrandedRegion::has_strand() const
   {
     return true;
   }
 
-  std::string StrandedRegion::strand() const
+  const std::string StrandedRegion::strand() const
   {
     return _strand;
   }
@@ -239,6 +243,16 @@ namespace epidb {
   // -----------------------------------
   // GeneRegion
   // -----------------------------------
+  bool GeneRegion::has_strand() const
+  {
+    return true;
+  }
+
+  const std::string GeneRegion::strand() const
+  {
+    return _strand;
+  }
+
   const datatypes::Metadata& GeneRegion::attributes() const
   {
     return _attributes;
