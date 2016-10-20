@@ -711,7 +711,7 @@ namespace epidb {
           end = std::numeric_limits<Position>::max();
         }
 
-        if (!genes::get_genes_from_database(chromosomes, start, end, genes, gene_model, regions, msg)) {
+        if (!genes::get_genes_from_database(chromosomes, start, end, "", genes, gene_model, regions, msg)) {
           return false;
         }
 
@@ -1205,6 +1205,25 @@ namespace epidb {
         return algorithms::aggregate(data, ranges, field, status, regions, msg);
       }
 
+      // TODO: move to another file
+      // TODO: cache it
+      bool get_column_position_from_dataset(const DatasetId & dataset_id, const std::string &name,  int& pos, std::string & msg)
+      {
+        std::vector<mongo::BSONObj> columns;
+        if (!dba::query::get_columns_from_dataset(dataset_id, columns, msg)) {
+          return false;
+        }
+        for (const auto& c : columns) {
+          if (c["name"].str() == name) {
+            pos = c["pos"].Number();
+            return true;
+          }
+        }
+        return -1;
+      }
+
+      // TODO: move to another file
+      // TODO: cache it
       bool get_columns_from_dataset(const DatasetId & dataset_id, std::vector<mongo::BSONObj> &columns, std::string & msg)
       {
         if (dataset_id == DATASET_EMPTY_ID) {

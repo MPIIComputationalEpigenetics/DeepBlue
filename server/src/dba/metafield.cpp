@@ -245,14 +245,24 @@ namespace epidb {
     }
 
     bool Metafield::strand(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion *region_ref,
-                         processing::StatusPtr status, std::string &result, std::string &msg)
+                           processing::StatusPtr status, std::string &result, std::string &msg)
     {
+      std::cerr << "to no strand" << std::endl;
+       std::cerr << region_ref->has_strand() << std::endl;
       if (region_ref->has_strand()) {
-        const StrandedRegion *stranded_region = static_cast<const StrandedRegion *>(region_ref);
-        result = stranded_region->strand();
+        result = region_ref->strand();
       } else {
-        result = "";
+        int pos;
+        if (!query::get_column_position_from_dataset(region_ref->dataset_id(), KeyMapper::STRAND(), pos, msg)) {
+          return false;
+        }
+        if (pos == -1) {
+          result = "";
+        } else {
+          result = region_ref->get_string(pos);
+        }
       }
+      std::cerr << result << std::endl;
       return true;
     }
 
@@ -501,8 +511,18 @@ namespace epidb {
     bool Metafield::gene_id(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion *region_ref,
                             processing::StatusPtr status, std::string &result, std::string &msg)
     {
+      std::string strand;
+
+      if (region_ref->has_strand()) {
+        strand = region_ref->strand();
+      } else {
+        if (!Metafield::strand(op, chrom, obj, region_ref, status, strand, msg)) {
+          return false;
+        }
+      }
+
       std::string gene_model = metafield_attribute(op);
-      if (!dba::genes::get_gene_attribute(chrom, region_ref->start(), region_ref->end(), "gene_id", gene_model, result, msg)) {
+      if (!dba::genes::get_gene_attribute(chrom, region_ref->start(), region_ref->end(), strand, "gene_id", gene_model, result, msg)) {
         return false;
       }
       return true;
@@ -511,8 +531,18 @@ namespace epidb {
     bool Metafield::gene_name(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion *region_ref,
                               processing::StatusPtr status, std::string &result, std::string &msg)
     {
+      std::string strand;
+
+      if (region_ref->has_strand()) {
+        strand = region_ref->strand();
+      } else {
+        if (!Metafield::strand(op, chrom, obj, region_ref, status, strand, msg)) {
+          return false;
+        }
+      }
+
       std::string gene_model = metafield_attribute(op);
-      if (!dba::genes::get_gene_attribute(chrom, region_ref->start(), region_ref->end(), "gene_name",  gene_model, result, msg)) {
+      if (!dba::genes::get_gene_attribute(chrom, region_ref->start(), region_ref->end(), strand, "gene_name",  gene_model, result, msg)) {
         return false;
       }
       return true;
