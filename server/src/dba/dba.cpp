@@ -51,6 +51,7 @@
 #include "controlled_vocabulary.hpp"
 #include "exists.hpp"
 #include "full_text.hpp"
+#include "genes.hpp"
 #include "genomes.hpp"
 #include "helpers.hpp"
 #include "insert.hpp"
@@ -314,6 +315,7 @@ namespace epidb {
       cv::biosources_cache.invalidate();
       query::invalidate_cache();
       users::invalidate_cache();
+      genes::invalidate_cache();
 
       c.done();
       return true;

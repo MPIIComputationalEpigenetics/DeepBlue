@@ -7,6 +7,52 @@ from deepblue_client import DeepBlueClient
 
 class TestGenes(helpers.TestCase):
 
+  def test_duplicated(self):
+    epidb = DeepBlueClient(address="localhost", port=31415)
+    self.init_base(epidb)
+
+    (s, project) = epidb.add_project("DEEP", "Deutsche Epigenom", self.admin_key)
+    self.assertSuccess(s, project)
+
+    data = gzip.open("data/gtf/repetitive.gtf.gz").read()
+    (s, ss) = epidb.add_gene_model("gencode v19", "Test One Description", data, "GTF", {}, self.admin_key)
+    self.assertSuccess(s, ss)
+
+    data = gzip.open("data/fpkm/duplicate_reverse_tracking.gz").read()
+    (s, gene_expression) = epidb.add_gene_expression("s2", 1, data, "cufflinks", "DEEP", None, self.admin_key)
+    self.assertSuccess(s, gene_expression)
+
+    (status, gx_query) = epidb.select_gene_expressions("s2", 1, None, "DEEP", "gencode v19", self.admin_key)
+    self.assertSuccess(status, gx_query)
+
+    (status, r_id) = epidb.get_regions(gx_query, "@GENE_ID(gencode v19),@GENE_NAME(gencode v19),FPKM,CHROMOSOME,START,END,FPKM,@BIOSOURCE,@SAMPLE_ID,@STRAND", self.admin_key)
+    self.assertSuccess(status, r_id)
+    data = self.get_regions_request(r_id)
+
+    self.assertEquals(data, 'ENSG00000240453.1\tRP11-206L10.10\t2.7720\tchr1\t745489\t753092\t2.7720\tBrain\ts2\t-\nENSG00000240453_REVERSE\tRP11-206L10_REVERSE\t9.1235\tchr1\t745489\t753092\t9.1235\tBrain\ts2\t+')
+
+  def __test_performance(self):
+    epidb = DeepBlueClient(address="localhost", port=31415)
+    self.init_base(epidb)
+
+    (s, project) = epidb.add_project("DEEP", "Deutsche Epigenom", self.admin_key)
+    self.assertSuccess(s, project)
+
+    data = gzip.open("data/gtf/gencode.v19.annotation.ONLY_GENES.gtf.gz").read()
+    (s, ss) = epidb.add_gene_model("gencode v19", "Test One Description", data, "GTF", {}, self.admin_key)
+    self.assertSuccess(s, ss)
+
+    data = gzip.open("data/fpkm/51_Hf03_BlTN_Ct_mRNA_M_1.LXPv1.20150708_genes.fpkm_tracking.gz").read()
+    (s, gene_expression) = epidb.add_gene_expression("s2", 1, data, "cufflinks", "DEEP", None, self.admin_key)
+    self.assertSuccess(s, gene_expression)
+
+    (status, gx_query) = epidb.select_gene_expressions("s2", 1, None, "DEEP", "gencode v19", self.admin_key)
+    self.assertSuccess(status, gx_query)
+
+    (status, r_id) = epidb.get_regions(gx_query, "@GENE_ID(gencode v19),@GENE_NAME(gencode v19),FPKM,CHROMOSOME,START,END,FPKM,@BIOSOURCE,@SAMPLE_ID,@STRAND", self.admin_key)
+    self.assertSuccess(status, r_id)
+    data = self.get_regions_request(r_id)
+
   def test_gene_retrieve(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)

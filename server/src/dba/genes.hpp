@@ -34,6 +34,8 @@ namespace epidb {
   namespace dba {
     namespace genes {
 
+      void invalidate_cache();
+
       bool gene_model_info(const std::string& id, mongo::BSONObj& obj_metadata, std::string& msg);
 
       bool gene_info(const std::string& id, mongo::BSONObj& obj_metadata, std::string& msg);
@@ -67,8 +69,8 @@ namespace epidb {
                               const std::string& attribute_name, const std::string& gene_model,
                               std::string& attibute_value, std::string& msg);
 
-      bool get_gene(const std::string& chromosome, const Position start, const Position end, const std::string& strand,
-                    const std::string& gene_model, mongo::BSONObj& gene, std::string& msg);
+      bool get_gene_by_location(const std::string& chromosome, const Position start, const Position end, const std::string& strand,
+                                const std::string& gene_model, RegionPtr& gene, std::string& msg);
 
       bool get_genes(const std::vector<std::string> &chromosomes, const Position start, const Position end, const std::string& strand,
                      const std::vector<std::string>& genes_names_or_id, const std::string &user_key,

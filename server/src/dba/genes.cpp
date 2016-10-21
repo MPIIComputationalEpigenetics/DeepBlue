@@ -302,6 +302,17 @@ namespace epidb {
           total_genes++;
         }
 
+        mongo::BSONObjBuilder index_name;
+        index_name.append(KeyMapper::CHROMOSOME(), 1);
+        index_name.append(KeyMapper::START(), 1);
+        index_name.append(KeyMapper::DATASET(), 1);
+        c->createIndex(helpers::collection_name(Collections::GENES()), index_name.obj());
+        if (!c->getLastError().empty()) {
+          msg = c->getLastError();
+          c.done();
+          return false;
+        }
+
         c->insert(helpers::collection_name(Collections::GENES()), rows_obj_bulk);
         if (!c->getLastError().empty()) {
           msg = c->getLastError();
@@ -542,20 +553,19 @@ namespace epidb {
                               const std::string& attribute_name, const std::string& gene_model,
                               std::string& attibute_value, std::string& msg)
       {
-        mongo::BSONObj gene;
-        if (!get_gene(chromosome, start, end, strand, gene_model, gene, msg)) {
-          if (msg.empty()) {
-            msg = Error::m(ERR_INVALID_GENE_LOCATION, chromosome, start, end, gene_model);
-          }
+        std::string norm_gene_model = utils::normalize_name(gene_model);
+        RegionPtr gene;
+        if (!get_gene_by_location(chromosome, start, end, strand, norm_gene_model, gene, msg)) {
           return false;
         }
 
-        mongo::BSONObj gene_attributes = gene[KeyMapper::ATTRIBUTES()].Obj();
-        if (!gene_attributes.hasElement(attribute_name)) {
+        auto it = gene->attributes().find(attribute_name);
+        if (it == gene->attributes().end()) {
           msg = Error::m(ERR_INVALID_GENE_ATTRIBUTE, attribute_name);
+          return false;
         }
 
-        attibute_value = gene_attributes[attribute_name].String();
+        attibute_value = it->second;
 
         return true;
       }
@@ -578,24 +588,6 @@ namespace epidb {
         return true;
       }
 
-      // TODO: cache it
-      bool get_gene(const std::string& chromosome, const Position start, const Position end, const std::string& strand,
-                    const std::string& gene_model, mongo::BSONObj& gene, std::string& msg)
-      {
-        std::string norm_gene_model = utils::normalize_name(gene_model);
-
-        const std::vector<std::string> genes_empty;
-        const std::vector<std::string> gene_models = {norm_gene_model};
-        const std::vector<std::string> chromosomes = {chromosome};
-        mongo::Query query;
-
-        if (!dba::genes::build_genes_database_query(chromosomes, start, end, strand, genes_empty, gene_models, true, query, msg)) {
-          msg = "";
-          return false;
-        }
-
-        return helpers::get_one(Collections::GENES(), query, gene);
-      }
 
       bool get_genes(const std::vector<std::string> &chromosomes, const Position start, const Position end, const std::string& strand, const std::vector<std::string>& genes_names_or_id,
                      const std::string &user_key, const std::vector<std::string> &norm_gene_models,  std::vector<mongo::BSONObj>& genes, std::string &msg)
@@ -789,14 +781,39 @@ namespace epidb {
           start(s),
           end(e),
           strand(d) {}
+
+        bool operator==(const GeneLocation &other) const
+        {
+          return (chromosome == other.chromosome
+                  && start == other.start
+                  && end == other.end
+                  && strand == other.strand);
+        }
+      };
+
+      struct GeneLocationHasher {
+        std::size_t operator()(const GeneLocation& k) const
+        {
+          using std::hash;
+
+          size_t res = 17;
+          res = res * 31 + hash<std::string>()( k.chromosome );
+          res = res * 31 + hash<Position>()( k.start );
+          res = res * 31 + hash<Position>()( k.end );
+          res = res * 31 + hash<std::string>()( k.strand );
+          return res;
+        }
       };
 
       typedef std::unordered_map<std::string, GeneLocation> GeneModelCache;
       typedef std::unordered_map<std::string, GeneModelCache> GeneModelsCache;
 
+      typedef std::unordered_map<GeneLocation, RegionPtr, GeneLocationHasher> GeneLocationCache;
+      typedef std::unordered_map<std::string, GeneLocationCache> GeneLocationsCache;
+
       bool load_gene_model(const std::string & norm_gene_model,
                            GeneModelCache & cache_tracking_id, GeneModelCache & cache_gene_name,
-                           std::string & msg)
+                           GeneLocationCache & cache_location_gene, std::string & msg)
       {
         std::vector<std::string> chromosomes;
         std::vector<std::string> genes;
@@ -809,7 +826,10 @@ namespace epidb {
         for (const auto &chromosomes_regions : chromosomeRegionsList) {
           const std::string &chromosome = chromosomes_regions.first;
           const Regions &regions = chromosomes_regions.second;
-          for (const auto& region : regions) {
+          for (const auto& r : regions) {
+            // We have to clone because the original gene_region is an unique_ptr and it will be destroyed.
+            auto region = r->clone();
+
             const GeneRegion* gene_region = static_cast<const GeneRegion *>(region.get());
             const std::string& gene_id = gene_region->attributes().at("gene_id");
             const std::string& gene_name = gene_region->attributes().at("gene_name");
@@ -825,6 +845,8 @@ namespace epidb {
             auto gl = GeneLocation(chromosome, gene_region->start(), gene_region->end(), gene_region->get_string(3));
             cache_tracking_id.insert( std::make_pair(gene_id_parts[0], gl));
             cache_gene_name.insert( std::make_pair(gene_name, gl));
+
+            cache_location_gene.insert( std::make_pair(gl,  std::move(region)));
           }
         }
 
@@ -833,27 +855,67 @@ namespace epidb {
 
       GeneModelsCache gene_models_cache_tracking_id;
       GeneModelsCache gene_models_cache_gene_name;
+      GeneLocationsCache gene_locations_cache;
+
+      void invalidate_cache() {
+        gene_models_cache_tracking_id.clear();
+        gene_models_cache_gene_name.clear();
+        gene_locations_cache.clear();
+      }
+
+      bool load_gene_location_caches(const std::string & gene_model, std::string &msg)
+      {
+        GeneModelCache cache_tracking_id;
+        GeneModelCache cache_gene_name;
+        GeneLocationCache gene_location_cache;
+        if (!load_gene_model(gene_model, cache_tracking_id, cache_gene_name, gene_location_cache, msg)) {
+          return false;
+        }
+        gene_models_cache_tracking_id.insert(std::make_pair(gene_model, cache_tracking_id));
+        gene_models_cache_gene_name.insert(std::make_pair(gene_model, cache_gene_name));
+        gene_locations_cache.insert(std::make_pair(gene_model, std::move(gene_location_cache)));
+
+        return true;
+      }
+
+      bool get_gene_by_location(const std::string& chromosome, const Position start, const Position end, const std::string& strand,
+                                const std::string& gene_model, RegionPtr& gene, std::string& msg)
+      {
+        // Put a lock here
+        if (gene_locations_cache.find(gene_model) == gene_locations_cache.end()) {
+          if (!load_gene_location_caches(gene_model, msg)) {
+            return false;
+          }
+        }
+
+        const auto &cache = gene_locations_cache[gene_model];
+        auto it = cache.find({chromosome, start, end, strand});
+
+        if (it == cache.end()) {
+          msg = Error::m(ERR_INVALID_GENE_LOCATION, chromosome, start, end, gene_model);
+          return false;
+        }
+
+        gene = it->second->clone();
+
+        return true;
+      }
+
 
       bool map_gene_location(const std::string & gene_tracking_id,
                              const std::string & gene_name, const std::string & gene_model,
                              std::string & chromosome, Position & start, Position & end, std::string& strand, std::string & msg)
       {
-
-
-        std::vector<std::string> gene_tracking_id_parts;
-        boost::split(gene_tracking_id_parts, gene_tracking_id, boost::is_any_of("."));
         // Put a lock here
         if (gene_models_cache_tracking_id.find(gene_model) == gene_models_cache_tracking_id.end()) {
-          GeneModelCache cache_tracking_id;
-          GeneModelCache cache_gene_name;
-          if (!load_gene_model(gene_model, cache_tracking_id, cache_gene_name, msg)) {
+          if (!load_gene_location_caches(gene_model, msg)) {
             return false;
           }
-          gene_models_cache_tracking_id.insert(std::make_pair(gene_model, cache_tracking_id));
-          gene_models_cache_gene_name.insert(std::make_pair(gene_model, cache_gene_name));
         }
         //
 
+        std::vector<std::string> gene_tracking_id_parts;
+        boost::split(gene_tracking_id_parts, gene_tracking_id, boost::is_any_of("."));
         const auto &cache_tracking_id = gene_models_cache_tracking_id[gene_model];
         auto it = cache_tracking_id.find(gene_tracking_id_parts[0]);
 
@@ -862,9 +924,9 @@ namespace epidb {
           it = cache_gene_name.find(gene_name);
           if (it == cache_gene_name.end()) {
             if (gene_tracking_id.empty()) {
-              msg = "Gene '" + gene_name + "' not found in the gene model " + gene_model;
+              msg = "Gene name '" + gene_name + "' not found in the gene model " + gene_model;
             } else {
-              msg = "Gene '" + gene_tracking_id + "'/'" + gene_name + "' not found in the gene model " + gene_model;
+              msg = "Gene tracking_id '" + gene_tracking_id + "' with gene name: '" + gene_name + "' not found in the gene model " + gene_model;
             }
             return false;
           }
