@@ -49,7 +49,7 @@ namespace epidb {
       static Parameters parameters_()
       {
         Parameter p[] = {
-          Parameter("genes_name", serialize::STRING, "genes(s) - ENSB ID or ENSB name. Use the regular expression '.*' for selecting all." , true),
+          parameters::Genes,
           Parameter("gene_model", serialize::STRING, "gene model name"),
           Parameter("chromosome", serialize::STRING, "chromosome name(s)", true),
           Parameter("start", serialize::INTEGER, "minimum start region"),
@@ -89,11 +89,6 @@ namespace epidb {
 
         if (!check_permissions(user_key, datatypes::GET_DATA, user, msg )) {
           result.add_error(msg);
-          return false;
-        }
-
-        if (genes.empty()) {
-          result.add_error(Error::m(ERR_USER_GENE_MISSING));
           return false;
         }
 

@@ -46,7 +46,7 @@ namespace epidb {
       static Parameters parameters_()
       {
         Parameter p[] = {
-          Parameter("gene_id_or_name", serialize::STRING, "Regular expression with the Name(s) or ID(s) (ensembl id) of the selected gene(s).", true),
+          parameters::Genes,
           Parameter("chromosome", serialize::STRING, "chromosome name(s)", true),
           Parameter("start", serialize::INTEGER, "minimum start region"),
           Parameter("end", serialize::INTEGER, "maximum end region"),
@@ -98,7 +98,6 @@ namespace epidb {
           norm_gene_models.emplace_back(utils::normalize_name(gene_model));
         }
 
-          clock_t list_time = clock();
         std::vector<mongo::BSONObj> genes;
         if (!dba::list::genes(user_key, utils::build_vector(gene_id_or_name), utils::build_vector(chromosomes), start, end, norm_gene_models, genes, msg)) {
           result.add_error(msg);

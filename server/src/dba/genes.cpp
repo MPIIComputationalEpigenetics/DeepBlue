@@ -510,7 +510,7 @@ namespace epidb {
         bob.append(KeyMapper::DATASET(), dataset_id);
 
         if (!genes.empty()) {
-          mongo::BSONArray genes_array = utils::build_regex_array(genes);
+          mongo::BSONArray genes_array = utils::build_array(genes);
           mongo::BSONArray genes_array_2 = genes_array;
 
           mongo::BSONObj b_in_gene_name = BSON((KeyMapper::ATTRIBUTES() + ".gene_name") << BSON("$in" << genes_array));
