@@ -73,7 +73,7 @@ namespace epidb {
         std::vector<serialize::ParameterPtr> replicas;
         std::vector<serialize::ParameterPtr> projects;
 
-        const std::string expression_type = parameters[0]->as_string();
+        const std::string expression_type_name = parameters[0]->as_string();
         parameters[1]->children(sample_ids);
         parameters[2]->children(replicas);
         parameters[3]->children(projects);
@@ -87,23 +87,23 @@ namespace epidb {
           return false;
         }
 
-        if (!datatypes::ExpressionManager::is_expression_type(expression_type)) {
-          msg = "Expression type: " + expression_type + " is not registered.";
+        if (!datatypes::ExpressionManager::is_expression_type(expression_type_name)) {
+          msg = "Expression type: " + expression_type_name + " is not registered.";
           result.add_error(msg);
           return false;
         }
 
-        datatypes::ExpressionTypePtr expression = datatypes::ExpressionManager::get_manager(expression_type);
+        datatypes::ExpressionTypePtr expression_type = datatypes::ExpressionManager::get_manager(expression_type_name);
 
         mongo::BSONObj query;
 
-        if (!dba::list::build_list_gene_expressions_query(sample_ids, replicas, projects, user_key, query, msg)) {
+        if (!expression_type->build_list_expressions_query(sample_ids, replicas, projects, user_key, query, msg)) {
           result.add_error(msg);
           return false;
         }
 
         std::vector<utils::IdName> names;
-        if (!dba::list::gene_expressions(query, names, msg)) {
+        if (!expression_type->list(query, names, msg)) {
           result.add_error(msg);
         }
 

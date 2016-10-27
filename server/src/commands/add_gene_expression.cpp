@@ -28,6 +28,7 @@
 #include "../dba/list.hpp"
 
 #include "../datatypes/user.hpp"
+#include "../datatypes/gene_expressions.hpp"
 
 #include "../engine/commands.hpp"
 
@@ -154,15 +155,19 @@ namespace epidb {
           return false;
         }
 
+        /*
         std::string id;
-        bool ret = dba::genes::insert_expression(sample_id, replica, extra_metadata, serializable_file, format, project, norm_project, user_key, ip, id, msg);
+        bool ret = datatypes::genes::insert_expression(sample_id, replica, extra_metadata, serializable_file, format, project, norm_project, user_key, ip, id, msg);
         if (ret) {
           result.add_string(id);
         } else {
           result.add_error(msg);
         }
-
         return ret;
+        */
+
+        return true;
+
       }
 
     } addGeneExpressionCommand;

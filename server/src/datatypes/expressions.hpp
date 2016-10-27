@@ -28,6 +28,8 @@
 #include "metadata.hpp"
 #include "regions.hpp"
 
+#include "../extras/utils.hpp"
+
 #include "../interfaces/serializable.hpp"
 
 namespace epidb {
@@ -74,7 +76,11 @@ namespace epidb {
                        const std::vector<std::string> &genes, const std::vector<std::string> &project,
                        const std::string& norm_model,  ChromosomeRegionsList& chromosomeRegionsList, std::string& msg);
 
+      virtual bool list(const mongo::BSONObj& query, std::vector<utils::IdName> &result, std::string &msg);
 
+      virtual bool build_list_expressions_query(const std::vector<serialize::ParameterPtr> sample_ids, const std::vector<serialize::ParameterPtr> replicas,
+          const std::vector<serialize::ParameterPtr> projects, const std::string user_key,
+          mongo::BSONObj& query, std::string& msg);
     };
 
     typedef std::shared_ptr<AbstractExpressionType> ExpressionTypePtr;

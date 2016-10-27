@@ -303,5 +303,23 @@ namespace epidb {
     {
       return get_gene_expressions_from_database(sample_ids, replicas, genes, project, norm_model, chromosomeRegionsList, msg);
     }
+
+    bool list(const mongo::BSONObj& query, std::vector<utils::IdName> &result, std::string &msg)
+    {
+      std::vector<std::string> fields;
+      fields.push_back("_id");
+
+      std::vector<mongo::BSONObj> objects;
+      if (!dba::helpers::get(dba::Collections::GENE_EXPRESSIONS(), query, fields, objects, msg)) {
+        return false;
+      }
+
+      for (const mongo::BSONObj & o : objects) {
+        utils::IdName id_name(o["_id"].String(), "");
+        result.push_back(id_name);
+      }
+
+      return true;
+    }
   }
 }

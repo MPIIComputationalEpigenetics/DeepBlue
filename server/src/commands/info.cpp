@@ -25,6 +25,7 @@
 #include <mongo/bson/bson.h>
 
 #include "../datatypes/user.hpp"
+#include "../datatypes/gene_expressions.hpp"
 #include "../datatypes/metadata.hpp"
 
 #include "../dba/dba.hpp"
@@ -213,7 +214,7 @@ namespace epidb {
               ok = dba::genes::gene_info(id, obj_metadata, msg);
               type = "gene";
             } else if (id.compare(0, 2, "gx") == 0) {
-              ok = dba::genes::gene_expression_info(id, obj_metadata, msg);
+              ok = datatypes::GeneExpressionType::gene_expression_info(id, obj_metadata, msg);
               type = "gene";
             } else if (id.compare(0, 2, "es") == 0) {
               ok = dba::info::get_experiment_set_info(id, obj_metadata, msg);

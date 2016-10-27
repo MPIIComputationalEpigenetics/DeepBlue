@@ -28,11 +28,13 @@
 #include "../dba/collections.hpp"
 #include "../dba/helpers.hpp"
 #include "../dba/info.hpp"
+#include "../dba/list.hpp"
 #include "../dba/key_mapper.hpp"
 #include "../dba/users.hpp"
 
 #include "../parser/parser_factory.hpp"
 
+#include "../errors.hpp"
 #include "../macros.hpp"
 
 #include "expressions.hpp"
@@ -40,7 +42,7 @@
 namespace epidb {
   namespace datatypes {
 
-  	std::vector<ExpressionTypePtr> ExpressionManager::__registered;
+    std::vector<ExpressionTypePtr> ExpressionManager::__registered;
 
     bool ExpressionManager::is_expression_type(const std::string& name)
     {
@@ -55,6 +57,19 @@ namespace epidb {
       return __registered;
     }
 
+    const ExpressionTypePtr ExpressionManager::get_manager(const std::string& name)
+    {
+      auto etp = std::find_if(__registered.begin(), __registered.end(),
+      [&name](ExpressionTypePtr const & et) {
+        return et->name() == name;
+      });
+
+      if (etp == __registered.end()) {
+        return nullptr;
+      }
+      return *etp;
+    }
+
     bool AbstractExpressionType::build_expression_metadata(const std::string &sample_id, const int replica,
         const std::string &format,
         const std::string &project,
@@ -67,8 +82,8 @@ namespace epidb {
         std::string &msg)
     {
 
-    	NEW_DATASET_ID(dataset_id, msg)
-    	BUILD_ID(GENE_EXPRESSIONS, gx, gene_model_id, msg)
+      NEW_DATASET_ID(dataset_id, msg)
+      BUILD_ID(GENE_EXPRESSIONS, gx, gene_model_id, msg)
 
       int _id;
       if (!dba::helpers::get_increment_counter(dba::Collections::GENE_EXPRESSIONS(), _id, msg) ||
@@ -135,6 +150,64 @@ namespace epidb {
       upload_info_builder.appendTimeT("upload_start", time_);
 
       upload_info = upload_info_builder.obj();
+
+      return true;
+    }
+
+
+    bool AbstractExpressionType::build_list_expressions_query(const std::vector<serialize::ParameterPtr> sample_ids, const std::vector<serialize::ParameterPtr> replicas,
+        const std::vector<serialize::ParameterPtr> projects, const std::string user_key,
+        mongo::BSONObj& query, std::string& msg)
+    {
+      mongo::BSONObjBuilder args_builder;
+
+      if (!sample_ids.empty()) {
+        args_builder.append("sample_id", BSON("$in" << utils::build_array(sample_ids)));
+      }
+
+      if (!replicas.empty()) {
+        args_builder.append("replica", BSON("$in" << utils::build_array_long(replicas)));
+      }
+
+      // TODO: move to a more generic function
+      // project
+      std::vector<utils::IdName> user_projects;
+      if (!dba::list::projects(user_key, user_projects, msg)) {
+        return false;
+      }
+
+      if (!projects.empty()) {
+        // Filter the projects that are available to the user
+        std::vector<serialize::ParameterPtr> filtered_projects;
+        for (const auto& project : projects) {
+          std::string project_name = project->as_string();
+          std::string norm_project = utils::normalize_name(project_name);
+          bool found = false;
+          for (const auto& user_project : user_projects) {
+            std::string norm_user_project = utils::normalize_name(user_project.name);
+            if (norm_project == norm_user_project) {
+              filtered_projects.push_back(project);
+              found = true;
+              break;
+            }
+          }
+
+          if (!found) {
+            msg = Error::m(ERR_INVALID_PROJECT, project_name);
+            return false;
+          }
+        }
+        args_builder.append("norm_project", BSON("$in" << utils::build_normalized_array(filtered_projects)));
+      } else {
+        std::vector<std::string> user_projects_names;
+        for (const auto& project : user_projects) {
+          user_projects_names.push_back(project.name);
+        }
+
+        args_builder.append("norm_project", BSON("$in" << utils::build_normalized_array(user_projects_names)));
+      }
+
+      query = args_builder.obj();
 
       return true;
     }

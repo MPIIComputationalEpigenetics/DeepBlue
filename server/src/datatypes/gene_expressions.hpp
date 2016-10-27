@@ -56,6 +56,8 @@ namespace epidb {
       virtual bool get(const std::vector<std::string> &sample_ids, const  std::vector<long>& replicas,
                        const std::vector<std::string> &genes, const std::vector<std::string> &project,
                        const std::string& norm_model,  ChromosomeRegionsList& chromosomeRegionsList, std::string& msg);
+
+      virtual bool list(const mongo::BSONObj& query, std::vector<utils::IdName> &result, std::string &msg);
     };
   }
 }
