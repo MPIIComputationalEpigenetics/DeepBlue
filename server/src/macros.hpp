@@ -19,16 +19,28 @@
   __ID = #__PREFIX + utils::integer_to_string(_id);                            \
 }
 
+#define GET_EXPRESSION_MANAGER_INSTANCE(__EM_INSTANCE)                         \
+  using ::epidb::datatypes::ExpressionManager;                                 \
+  const auto *__EM_INSTANCE = ExpressionManager::INSTANCE();
+
+#define GET_EXPRESSION_MANAGER(__EXPRESSION_TYPE_NAME, __EXPRESSION_TYPE)      \
+  const datatypes::ExpressionTypePtr& __EXPRESSION_TYPE =                      \
+       em->get_manager(__EXPRESSION_TYPE_NAME);
 
 #define GET_EXPRESSION_TYPE(__EXPRESSION_TYPE_NAME, __EXPRESSION_TYPE)         \
-  using ::epidb::datatypes::ExpressionManager;                                 \
-  const auto *em = ExpressionManager::INSTANCE();                              \
+  GET_EXPRESSION_MANAGER_INSTANCE(em)                                          \
   if (!em->is_expression_type(__EXPRESSION_TYPE_NAME)) {                       \
     std::string _msg;                                                          \
     _msg = Error::m(ERR_INVALID_EXPRESSION_TYPE, __EXPRESSION_TYPE_NAME);      \
     result.add_error(_msg);                                                    \
     return false;                                                              \
   }                                                                            \
-  const datatypes::ExpressionTypePtr& __EXPRESSION_TYPE =                      \
-       em->get_manager(expression_type_name);                                  \
+  GET_EXPRESSION_MANAGER(__EXPRESSION_TYPE_NAME, __EXPRESSION_TYPE)
 
+#define GET_EXPRESSION_TYPE_MSG(__EXPRESSION_TYPE_NAME, __EXPRESSION_TYPE)     \
+  GET_EXPRESSION_MANAGER_INSTANCE(em)                                          \
+  if (!em->is_expression_type(__EXPRESSION_TYPE_NAME)) {                       \
+    msg = Error::m(ERR_INVALID_EXPRESSION_TYPE, __EXPRESSION_TYPE_NAME);       \
+    return false;                                                              \
+  }                                                                            \
+  GET_EXPRESSION_MANAGER(__EXPRESSION_TYPE_NAME, __EXPRESSION_TYPE)

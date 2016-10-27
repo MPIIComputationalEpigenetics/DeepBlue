@@ -1,5 +1,5 @@
 //
-//  select_gene_expressions.cpp
+//  select_expressions.cpp
 //  DeepBlue Epigenomic Data Server
 //  File created by Felipe Albrecht on 10.09.15.
 //  Copyright (c) 2016 Max Planck Institute for Informatics. All rights reserved.
@@ -28,6 +28,7 @@
 #include "../dba/list.hpp"
 #include "../dba/queries.hpp"
 
+#include "../datatypes/expressions_manager.hpp"
 #include "../datatypes/user.hpp"
 
 #include "../engine/commands.hpp"
@@ -35,43 +36,41 @@
 #include "../extras/serialize.hpp"
 
 #include "../errors.hpp"
+#include "../macros.hpp"
 
 namespace epidb {
   namespace command {
 
-    class SelectGeneExpressionsCommand: public Command {
+    class SelectExpressionsCommand: public Command {
 
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::GENES, "Select genes (by their name or ID) as genomic regions from the specified gene model.");
+        return CommandDescription(categories::EXPRESSIONS, "Select expressions (by their name or ID) as genomic regions from the specified model.");
       }
 
       static Parameters parameters_()
       {
-        Parameter p[] = {
+        return {
+          parameters::ExpressionType,
           Parameter("sample_ids", serialize::STRING, "id(s) of selected sample(s)" , true),
           Parameter("replicas", serialize::INTEGER, "replica(s)", true),
-          Parameter("genes", serialize::STRING, "genes(s) - ensembl ID or ENSB name. It does accept regular expressions. For example: '.*' to select all genes.", true),
+          Parameter("identifier", serialize::STRING, "identifier(s) (for genes: ensembl ID or ENSB name).", true),
           Parameter("projects", serialize::STRING, "projects(s)", true),
           Parameter("gene_model", serialize::STRING, "gene model name"),
           parameters::UserKey
         };
-        Parameters params(&p[0], &p[0] + 6);
-        return params;
       }
 
       static Parameters results_()
       {
-        Parameter p[] = {
+        return {
           Parameter("id", serialize::STRING, "query id")
         };
-        Parameters results(&p[0], &p[0] + 1);
-        return results;
       }
 
     public:
-      SelectGeneExpressionsCommand() : Command("select_gene_expressions", parameters_(), results_(), desc_()) {}
+      SelectExpressionsCommand() : Command("select_expressions", parameters_(), results_(), desc_()) {}
 
       virtual bool run(const std::string &ip,
                        const serialize::Parameters &parameters, serialize::Parameters &result) const
@@ -81,14 +80,15 @@ namespace epidb {
         std::vector<serialize::ParameterPtr> genes;
         std::vector<serialize::ParameterPtr> projects;
 
-        parameters[0]->children(sample_ids);
-        parameters[1]->children(replicas);
-        parameters[2]->children(genes);
-        parameters[3]->children(projects);
+        const std::string expression_type_name = parameters[0]->as_string();
+        parameters[1]->children(sample_ids);
+        parameters[2]->children(replicas);
+        parameters[3]->children(genes);
+        parameters[4]->children(projects);
 
-        const std::string gene_model = parameters[4]->as_string();
+        const std::string gene_model = parameters[5]->as_string();
 
-        const std::string user_key = parameters[5]->as_string();
+        const std::string user_key = parameters[6]->as_string();
 
         std::string msg;
         datatypes::User user;
@@ -108,8 +108,10 @@ namespace epidb {
           return false;
         }
 
-        mongo::BSONObjBuilder args_builder;
+        GET_EXPRESSION_TYPE(expression_type_name, expression_type)
 
+        mongo::BSONObjBuilder args_builder;
+        args_builder.append("expression_type", expression_type_name);
         args_builder.append("sample_ids", utils::build_array(sample_ids));
         args_builder.append("replicas", utils::build_array_long(replicas));
         if (!genes.empty()) {
@@ -158,7 +160,7 @@ namespace epidb {
         }
 
         std::string query_id;
-        if (!dba::query::store_query("gene_expressions_select", args_builder.obj(), user_key, query_id, msg)) {
+        if (!dba::query::store_query("expressions_select", args_builder.obj(), user_key, query_id, msg)) {
           result.add_error(msg);
           return false;
         }
@@ -166,6 +168,6 @@ namespace epidb {
         result.add_string(query_id);
         return true;
       }
-    } selectGeneExpressionCommand;
+    } selectExpressionCommand;
   }
 }

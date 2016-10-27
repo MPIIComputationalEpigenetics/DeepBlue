@@ -55,6 +55,7 @@
 
 #include "../errors.hpp"
 #include "../log.hpp"
+#include "../macros.hpp"
 
 namespace epidb {
   namespace dba {
@@ -267,8 +268,8 @@ namespace epidb {
           if (!retrieve_genes_select_query(user_key, query, status, regions, msg)) {
             return false;
           }
-        } else if (type == "gene_expressions_select") {
-          if (!retrieve_gene_expression_select_query(user_key, query, status, regions, msg)) {
+        } else if (type == "expressions_select") {
+          if (!retrieve_expression_select_query(user_key, query, status, regions, msg)) {
             return false;
           }
         } else if (type == "filter") {
@@ -719,15 +720,19 @@ namespace epidb {
         return true;
       }
 
-      bool retrieve_gene_expression_select_query(const std::string &user_key, const mongo::BSONObj &query,
+      bool retrieve_expression_select_query(const std::string &user_key, const mongo::BSONObj &query,
           processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg)
       {
-        processing::RunningOp runningOp = status->start_operation(processing::RETRIEVE_GENE_EXPRESSIONS_DATA, query);
+        processing::RunningOp runningOp = status->start_operation(processing::RETRIEVE_EXPRESSIONS_DATA, query);
         if (is_canceled(status, msg)) {
           return false;
         }
 
         mongo::BSONObj args = query["args"].Obj();
+
+        const std::string& expression_type_name = args["expression_type"].str();
+
+        GET_EXPRESSION_TYPE_MSG(expression_type_name, expression_type)
 
         std::vector<std::string> sample_ids;
         if (args.hasField("sample_ids")) {
@@ -758,7 +763,7 @@ namespace epidb {
           gene_model = args["gene_model"].str();
         }
 
-        if (!datatypes::ExpressionManager::INSTANCE()->GENE_EXPRESSION()->load_data(sample_ids, replicas, genes, project, gene_model, regions, msg)) {
+        if (!expression_type->load_data(sample_ids, replicas, genes, project, gene_model, regions, msg)) {
           return false;
         }
 
