@@ -22,14 +22,13 @@
 
 #define GET_EXPRESSION_TYPE(__EXPRESSION_TYPE_NAME, __EXPRESSION_TYPE)         \
   using ::epidb::datatypes::ExpressionManager;                                 \
-  {                                                                            \
-    if (!ExpressionManager::is_expression_type(__EXPRESSION_TYPE_NAME)) {      \
-      std::string _msg;                                                        \
-      _msg = Error::m(ERR_INVALID_EXPRESSION_TYPE, __EXPRESSION_TYPE_NAME);    \
-      result.add_error(msg);                                                   \
-      return false;                                                            \
-    }                                                                          \
+  const auto *em = ExpressionManager::INSTANCE();                              \
+  if (!em->is_expression_type(__EXPRESSION_TYPE_NAME)) {                       \
+    std::string _msg;                                                          \
+    _msg = Error::m(ERR_INVALID_EXPRESSION_TYPE, __EXPRESSION_TYPE_NAME);      \
+    result.add_error(_msg);                                                    \
+    return false;                                                              \
   }                                                                            \
   const datatypes::ExpressionTypePtr& __EXPRESSION_TYPE =                      \
-       ExpressionManager::get_manager(expression_type_name);                   \
+       em->get_manager(expression_type_name);                                  \
 

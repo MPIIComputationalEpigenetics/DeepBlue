@@ -18,8 +18,6 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-
-#include <algorithm>
 #include <string>
 #include <vector>
 
@@ -36,39 +34,12 @@
 
 #include "../errors.hpp"
 #include "../macros.hpp"
+#include "../log.hpp"
 
 #include "expressions.hpp"
 
 namespace epidb {
   namespace datatypes {
-
-    std::vector<ExpressionTypePtr> ExpressionManager::__registered;
-
-    bool ExpressionManager::is_expression_type(const std::string& name)
-    {
-      return std::find_if(__registered.begin(), __registered.end(),
-      [&name](ExpressionTypePtr const & et) {
-        return et->name() == name;
-      }) != __registered.end();
-    }
-
-    const std::vector<ExpressionTypePtr>& ExpressionManager::registered_expression_types()
-    {
-      return __registered;
-    }
-
-    const ExpressionTypePtr& ExpressionManager::get_manager(const std::string& name)
-    {
-      auto etp = std::find_if(__registered.begin(), __registered.end(),
-      [&name](ExpressionTypePtr const & et) {
-        return et->name() == name;
-      });
-
-      if (etp == __registered.end()) {
-        return nullptr;
-      }
-      return *etp;
-    }
 
     const std::string& AbstractExpressionType::name()
     {

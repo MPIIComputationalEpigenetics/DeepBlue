@@ -22,7 +22,7 @@
 
 #include <mongo/bson/bson.h>
 
-#include "../datatypes/expressions.hpp"
+#include "../datatypes/expressions_manager.hpp"
 
 #include "collections.hpp"
 #include "controlled_vocabulary.hpp"
@@ -176,7 +176,7 @@ namespace epidb {
       bool gene_expression(const std::string &id, const std::string &user_key, std::string &msg)
       {
         mongo::BSONObj gene_expression;
-        if (!datatypes::ExpressionManager::GENE_EXPRESSION()->data(id, gene_expression, msg)) {
+        if (!datatypes::ExpressionManager::INSTANCE()->GENE_EXPRESSION()->data(id, gene_expression, msg)) {
           msg = "Gene expression " + id + " not found";
           return false;
         }

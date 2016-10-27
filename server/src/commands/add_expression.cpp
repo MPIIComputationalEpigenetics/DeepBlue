@@ -28,7 +28,7 @@
 #include "../dba/list.hpp"
 
 #include "../datatypes/user.hpp"
-#include "../datatypes/gene_expressions.hpp"
+#include "../datatypes/expressions_manager.hpp"
 
 #include "../engine/commands.hpp"
 
@@ -55,7 +55,7 @@ namespace epidb {
 
       static Parameters parameters_()
       {
-        Parameter p[] = {
+        return {
           parameters::ExpressionType,
           Parameter("sample_id", serialize::STRING, "sample ID"),
           Parameter("replica", serialize::INTEGER, "replica count (use 0 if it is the single replica)"),
@@ -65,17 +65,13 @@ namespace epidb {
           parameters::AdditionalExtraMetadata,
           parameters::UserKey
         };
-        Parameters params(&p[0], &p[0] + 7);
-        return params;
       }
 
       static Parameters results_()
       {
-        Parameter p[] = {
+        return {
           Parameter("id", serialize::STRING, "id of the newly inserted expression data")
         };
-        Parameters results(&p[0], &p[0] + 1);
-        return results;
       }
 
     public:
@@ -144,7 +140,9 @@ namespace epidb {
 
         std::string norm_file_format = utils::normalize_name(format);
         if (norm_file_format != "cufflinks"  || norm_file_format == "grape2") {
-          std::string s = "Currently, only the formats 'cufflinks' or 'grape2' is supported.";
+          msg  = "Currently, only the formats 'cufflinks' or 'grape2' is supported.";
+          result.add_error(msg);
+          return false;
         }
 
         auto parser = parser::GeneExpressionParserFactory::build(format, std::unique_ptr<std::istream>(new std::stringstream(data)), msg);
@@ -160,19 +158,14 @@ namespace epidb {
           return false;
         }
 
-        /*
         std::string id;
-        bool ret = datatypes::genes::insert_expression(sample_id, replica, extra_metadata, serializable_file, format, project, norm_project, user_key, ip, id, msg);
+        bool ret = expression_type->insert(sample_id, replica, extra_metadata, serializable_file, format, project, norm_project, user_key, ip, id, msg);
         if (ret) {
           result.add_string(id);
         } else {
           result.add_error(msg);
         }
         return ret;
-        */
-
-        return true;
-
       }
 
     } addGeneExpressionCommand;

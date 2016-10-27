@@ -53,7 +53,7 @@ namespace epidb {
 
       virtual ~AbstractExpressionType() { }
 
-      virtual const std::string& name() =0;
+      virtual const std::string& name();
 
       virtual bool info(const std::string& id, mongo::BSONObj& obj_metadata, std::string& msg) =0;
 
@@ -87,22 +87,6 @@ namespace epidb {
     };
 
     typedef std::unique_ptr<AbstractExpressionType> ExpressionTypePtr;
-
-    class ExpressionManager {
-
-    private:
-      static std::vector<ExpressionTypePtr> __registered;
-
-    public:
-      ExpressionManager() {}
-
-      static bool register_expression_type(const std::string& name, ExpressionTypePtr _class);
-      static bool is_expression_type(const std::string& name);
-      static const std::vector<ExpressionTypePtr>& registered_expression_types();
-      static const ExpressionTypePtr& get_manager(const std::string& name);
-      static const ExpressionTypePtr& GENE_EXPRESSION();
-    };
-
   }
 }
 

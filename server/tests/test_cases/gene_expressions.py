@@ -19,10 +19,11 @@ class TestExpressions(helpers.TestCase):
     self.assertSuccess(s, ss)
 
     data = gzip.open("data/fpkm/duplicate_reverse_tracking.gz").read()
-    (s, gene_expression) = epidb.add_gene_expression("s2", 1, data, "cufflinks", "DEEP", None, self.admin_key)
+    (s, gene_expression) = epidb.add_expression("gene", "s2", 1, data, "cufflinks", "DEEP", None, self.admin_key)
+    print s, gene_expression
     self.assertSuccess(s, gene_expression)
 
-    (status, gx_query) = epidb.select_gene_expressions("s2", 1, None, "DEEP", "gencode v19", self.admin_key)
+    (status, gx_query) = epidb.select_expressions("gene", "s2", 1, None, "DEEP", "gencode v19", self.admin_key)
     self.assertSuccess(status, gx_query)
 
     (status, r_id) = epidb.get_regions(gx_query, "@GENE_ID(gencode v19),@GENE_NAME(gencode v19),FPKM,CHROMOSOME,START,END,FPKM,@BIOSOURCE,@SAMPLE_ID,@STRAND", self.admin_key)
@@ -53,7 +54,7 @@ class TestExpressions(helpers.TestCase):
     self.assertSuccess(status, r_id)
     data = self.get_regions_request(r_id)
 
-  def test_gene_retrieve(self):
+  def __test_gene_retrieve(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
     data = open("data/gtf/gencode.v23.basic.annotation_head.gtf").read()
@@ -90,7 +91,7 @@ class TestExpressions(helpers.TestCase):
         self.assertEquals(ls[3], ls[6])
         self.assertEquals(ls[4], ls[7])
 
-  def test_genes_location(self):
+  def __test_genes_location(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
@@ -123,7 +124,7 @@ class TestExpressions(helpers.TestCase):
     (s, genes) = epidb.list_genes(None, "chr10", None, None, gene_models[0][1], self.admin_key)
     self.assertEquals(2260, len(genes))
 
-  def test_gene_expression(self):
+  def __test_gene_expression(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
@@ -301,62 +302,3 @@ class TestExpressions(helpers.TestCase):
     s, regions = epidb.get_request_data(req, user_key)
 
     self.assertEquals(regions, "ENSG00000240755.1\tLOWDATA\ts1\tK562\nENSG00000256386.1\tLOWDATA\ts1\tK562\nENSG00000198743.5\tLOWDATA\ts1\tK562\nENSG00000267937.1\tLOWDATA\ts1\tK562\nENSG00000238556.1\tLOWDATA\ts1\tK562\nENSG00000255902.1\tLOWDATA\ts1\tK562\nENSG00000266692.1\tLOWDATA\ts1\tK562")
-
-  def test_select_genes(self):
-    epidb = DeepBlueClient(address="localhost", port=31415)
-    self.init_base(epidb)
-
-    data = open("data/gtf/gencode.v23.basic.annotation_head.gtf").read()
-
-    (s, ss) = epidb.add_gene_model("Test One", "Test One Description", data, "GTF", {}, self.admin_key)
-    self.assertSuccess(s, ss)
-
-    (s, ss) = epidb.list_genes(["ENSG00000279457.3"], None, None, None, "Test One", self.admin_key)
-    self.assertEquals(ss, [{'gene_name': 'FO538757.2', 'gene_type': 'protein_coding', 'end': 200322, 'source': 'ENSEMBL', 'frame': '.', 'level': '3', 'tag': 'ncRNA_host', 'gene_id': 'ENSG00000279457.3', 'start': 184923, 'score': 0.0, 'strand': '-', '_id': 'gn20', 'gene_status': 'KNOWN', 'chromosome': 'chr1'}])
-
-    (s, ss) = epidb.list_genes("ENSG00000279457", "chr1", None, None, "Test One", self.admin_key)
-    self.assertEquals(ss, [])
-
-    (s, ss) = epidb.list_genes(None, None, None, None, "Test One", self.admin_key)
-    self.assertEquals(20, len(ss))
-
-    (s, query_id) = epidb.select_genes(["RP11-34P13.7"], "Test One", None, None, None, self.admin_key)
-    (s, req) = epidb.count_regions(query_id, self.admin_key)
-    count = self.count_request(req)
-    self.assertEquals(count, 1)
-
-    (s, new_query_id) = epidb.select_genes(["RP11-34P13.7"], "Test One", None, None, None, self.admin_key)
-    self.assertEquals(query_id, new_query_id)
-
-    (s, new_query_id) = epidb.select_genes("RP11-34P13.7", "Test One", None, None, None, self.admin_key)
-    self.assertEquals(query_id, new_query_id)
-
-    (s, query_id) = epidb.select_genes(["RP11-34P13.234"], "Test One", None, None, None, self.admin_key)
-    (s, req) = epidb.count_regions(query_id, self.admin_key)
-    count = self.count_request(req)
-    self.assertEquals(count, 0)
-
-    (s, query_id) = epidb.select_genes(["RP11-34P13"], "Test One", None, None, None, self.admin_key)
-    (s, req) = epidb.count_regions(query_id, self.admin_key)
-    count = self.count_request(req)
-    self.assertEquals(count, 0)
-
-    status, gene_models = epidb.list_gene_models(self.admin_key)
-    self.assertEquals(gene_models, [['gs1', 'Test One']])
-
-  def test_gene_case_insensitive(self):
-    epidb = DeepBlueClient(address="localhost", port=31415)
-    self.init_base(epidb)
-
-    data = open("data/gtf/gencode.v23.basic.annotation_head.gtf").read()
-
-    (s, ss) = epidb.add_gene_model("Test One", "Test One Description", data, "GTF", {}, self.admin_key)
-    self.assertSuccess(s, ss)
-
-    (s, query_id) = epidb.select_genes(["RP11-34P13.7"], "Test One", None, None, None, self.admin_key)
-    (s, req) = epidb.count_regions(query_id, self.admin_key)
-    count = self.count_request(req)
-    self.assertEquals(count, 1)
-
-    status, gene_models = epidb.list_gene_models(self.admin_key)
-    self.assertEquals(gene_models, [['gs1', 'Test One']])

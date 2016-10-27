@@ -32,7 +32,7 @@
 #include "../connection/connection.hpp"
 
 #include "../datatypes/column_types_def.hpp"
-#include "../datatypes/gene_expressions.hpp"
+#include "../datatypes/expressions_manager.hpp"
 #include "../datatypes/regions.hpp"
 
 #include "../dba/experiments.hpp"
@@ -758,7 +758,7 @@ namespace epidb {
           gene_model = args["gene_model"].str();
         }
 
-        if (!datatypes::ExpressionManager::GENE_EXPRESSION()->load_data(sample_ids, replicas, genes, project, gene_model, regions, msg)) {
+        if (!datatypes::ExpressionManager::INSTANCE()->GENE_EXPRESSION()->load_data(sample_ids, replicas, genes, project, gene_model, regions, msg)) {
           return false;
         }
 
