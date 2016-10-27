@@ -22,6 +22,8 @@
 
 #include <mongo/bson/bson.h>
 
+#include "../datatypes/expressions.hpp"
+
 #include "collections.hpp"
 #include "controlled_vocabulary.hpp"
 #include "data.hpp"
@@ -170,10 +172,11 @@ namespace epidb {
         return true;
       }
 
+      // TODO: move to GeneExpression class
       bool gene_expression(const std::string &id, const std::string &user_key, std::string &msg)
       {
         mongo::BSONObj gene_expression;
-        if (!data::gene_expression(id, gene_expression, msg)) {
+        if (!datatypes::ExpressionManager::GENE_EXPRESSION()->data(id, gene_expression, msg)) {
           msg = "Gene expression " + id + " not found";
           return false;
         }

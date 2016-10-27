@@ -38,18 +38,24 @@
 #include "expressions.hpp"
 #include "gene_expressions.hpp"
 
+#include "../errors.hpp"
+
 namespace epidb {
   namespace datatypes {
 
-    const std::string& GeneExpressionType::collection_name()
+    const ExpressionTypePtr& ExpressionManager::GENE_EXPRESSION()
     {
-      return dba::Collections::GENE_EXPRESSIONS();
+      /*
+      static const ExpressionTypePtr etp = std::unique_ptr<GeneExpressionType>(new GeneExpressionType());
+      return etp;
+      */
+      return nullptr;
     }
 
-    bool GeneExpressionType::gene_expression_info(const std::string& id, mongo::BSONObj& obj_metadata, std::string& msg)
+    bool GeneExpressionType::info(const std::string& id, mongo::BSONObj& obj_metadata, std::string& msg)
     {
       mongo::BSONObj data_obj;
-      if (!dba::data::gene_expression(id, data_obj, msg)) {
+      if (!data(id, data_obj, msg)) {
         return false;
       }
 
@@ -78,6 +84,22 @@ namespace epidb {
       obj_metadata = bob.obj();
 
       return true;
+    }
+
+    bool GeneExpressionType::data(const std::string &id, mongo::BSONObj &result, std::string &msg)
+    {
+      if (dba::helpers::get_one(dba::Collections::GENE_EXPRESSIONS(), mongo::Query(BSON("_id" << id)), result)) {
+        return true;
+      } else {
+        msg = Error::m(ERR_INVALID_EXPRESSION_ID, id);
+        return false;
+      }
+    }
+
+    bool GeneExpressionType::exists(const std::string &sample_id, const int replica)
+    {
+      return dba::helpers::check_exist(dba::Collections::GENE_EXPRESSIONS(),
+                                       BSON("sample_id" << sample_id << "replica" << replica));
     }
 
     bool GeneExpressionType::update_upload_info(const std::string &collection, const std::string &annotation_id,
@@ -121,7 +143,7 @@ namespace epidb {
       mongo::BSONObj extra_metadata_obj = datatypes::metadata_to_bson(extra_metadata);
       int dataset_id;
 
-      if (!build_expression_metadata(sample_id, replica, format, project, norm_project, extra_metadata_obj,
+      if (!build_expression_type_metadata(sample_id, replica, format, project, norm_project, extra_metadata_obj,
                                      user_key, ip, dataset_id, expression_id, gene_expression_metadata, msg)) {
         return false;
       }
@@ -192,7 +214,7 @@ namespace epidb {
     }
 
 
-    bool GeneExpressionType::get_gene_expressions_from_database(const std::vector<std::string> &sample_ids, const  std::vector<long>& replicas,
+    bool GeneExpressionType::load_data(const std::vector<std::string> &sample_ids, const  std::vector<long>& replicas,
         const std::vector<std::string> &genes, const std::vector<std::string> &project,
         const std::string& norm_gene_model,  ChromosomeRegionsList& chromosomeRegionsList, std::string& msg)
     {
@@ -297,14 +319,7 @@ namespace epidb {
       return true;
     }
 
-    bool GeneExpressionType::get(const std::vector<std::string> &sample_ids, const  std::vector<long>& replicas,
-                                 const std::vector<std::string> &genes, const std::vector<std::string> &project,
-                                 const std::string& norm_model,  ChromosomeRegionsList& chromosomeRegionsList, std::string& msg)
-    {
-      return get_gene_expressions_from_database(sample_ids, replicas, genes, project, norm_model, chromosomeRegionsList, msg);
-    }
-
-    bool list(const mongo::BSONObj& query, std::vector<utils::IdName> &result, std::string &msg)
+    bool GeneExpressionType::list(const mongo::BSONObj& query, std::vector<utils::IdName> &result, std::string &msg)
     {
       std::vector<std::string> fields;
       fields.push_back("_id");

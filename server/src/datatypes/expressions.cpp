@@ -57,7 +57,7 @@ namespace epidb {
       return __registered;
     }
 
-    const ExpressionTypePtr ExpressionManager::get_manager(const std::string& name)
+    const ExpressionTypePtr& ExpressionManager::get_manager(const std::string& name)
     {
       auto etp = std::find_if(__registered.begin(), __registered.end(),
       [&name](ExpressionTypePtr const & et) {
@@ -70,7 +70,12 @@ namespace epidb {
       return *etp;
     }
 
-    bool AbstractExpressionType::build_expression_metadata(const std::string &sample_id, const int replica,
+    const std::string& AbstractExpressionType::name()
+    {
+      return _expression_type_name;
+    }
+
+    bool AbstractExpressionType::build_expression_type_metadata(const std::string &sample_id, const int replica,
         const std::string &format,
         const std::string &project,
         const std::string &norm_project,
@@ -81,16 +86,8 @@ namespace epidb {
         mongo::BSONObj &gene_model_metadata,
         std::string &msg)
     {
-
       NEW_DATASET_ID(dataset_id, msg)
       BUILD_ID(GENE_EXPRESSIONS, gx, gene_model_id, msg)
-
-      int _id;
-      if (!dba::helpers::get_increment_counter(dba::Collections::GENE_EXPRESSIONS(), _id, msg) ||
-          !dba::helpers::notify_change_occurred(dba::Collections::GENE_EXPRESSIONS(), msg))  {
-        return false;
-      }
-      gene_model_id = "gx" + utils::integer_to_string(_id);
 
       mongo::BSONObjBuilder gene_model_metadata_builder;
       gene_model_metadata_builder.append("_id", gene_model_id);

@@ -30,6 +30,7 @@
 #include "../extras/serialize.hpp"
 
 #include "../errors.hpp"
+#include "../macros.hpp"
 
 namespace epidb {
   namespace command {
@@ -39,18 +40,19 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::GENES, "List all the Gene Expression currently available in DeepBlue. A gene expression is a set of genes with their expression values.");
+        return CommandDescription(categories::EXPRESSIONS, "List the Expression currently available in DeepBlue. A expression is a set of data with an identifier and an expression value.");
       }
 
       static Parameters parameters_()
       {
         Parameter p[] = {
+          parameters::ExpressionType,
           Parameter("sample_id", serialize::STRING, "sample ID(s)", true),
           Parameter("replica", serialize::INTEGER, "replica(s)", true),
           Parameter("project", serialize::STRING, "project(s) name", true),
           parameters::UserKey
         };
-        Parameters params(&p[0], &p[0] + 4);
+        Parameters params(&p[0], &p[0] + 5);
         return params;
       }
 
@@ -87,13 +89,7 @@ namespace epidb {
           return false;
         }
 
-        if (!datatypes::ExpressionManager::is_expression_type(expression_type_name)) {
-          msg = "Expression type: " + expression_type_name + " is not registered.";
-          result.add_error(msg);
-          return false;
-        }
-
-        datatypes::ExpressionTypePtr expression_type = datatypes::ExpressionManager::get_manager(expression_type_name);
+        GET_EXPRESSION_TYPE(expression_type_name, expression_type)
 
         mongo::BSONObj query;
 
@@ -111,6 +107,6 @@ namespace epidb {
 
         return true;
       }
-    } listGeneExpressionsCommand;
+    } listExpressionsCommand;
   }
 }

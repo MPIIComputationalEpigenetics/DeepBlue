@@ -4,7 +4,7 @@ ROOT		= $(shell pwd)/../..
 CXXFLAGS	= $(DEFCXXFLAGS) -I..
 
 OBJLIBS	= ../libdatatypes.a
-OBJS    = column_types_def.o gene_expressions.o metadata.o expressions.o projects.o regions.o user.o
+OBJS    = column_types_def.o metadata.o expressions.o gene_expressions.o projects.o regions.o user.o
 
 all : $(OBJLIBS)
 

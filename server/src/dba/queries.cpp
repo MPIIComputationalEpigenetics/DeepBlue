@@ -758,7 +758,7 @@ namespace epidb {
           gene_model = args["gene_model"].str();
         }
 
-        if (!datatypes::GeneExpressionType::get_gene_expressions_from_database(sample_ids, replicas, genes, project, gene_model, regions, msg)) {
+        if (!datatypes::ExpressionManager::GENE_EXPRESSION()->load_data(sample_ids, replicas, genes, project, gene_model, regions, msg)) {
           return false;
         }
 
