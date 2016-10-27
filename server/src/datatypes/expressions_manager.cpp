@@ -53,13 +53,10 @@ namespace epidb {
 
     bool ExpressionManager::is_expression_type(const std::string& name) const
     {
-      auto x = std::find_if(__registered.begin(), __registered.end(),
+      return std::find_if(__registered.begin(), __registered.end(),
       [&name](ExpressionTypePtr const & et) {
         return et->name() == name;
       }) != __registered.end();
-
-      std::cerr << "X: " << x << std::endl;
-      return x;
     }
 
     const std::vector<ExpressionTypePtr>& ExpressionManager::registered_expression_types() const
