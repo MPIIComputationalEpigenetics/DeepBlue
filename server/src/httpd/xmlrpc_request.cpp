@@ -62,14 +62,14 @@ namespace epidb {
         okay = false;
         // overwrite with clear result
         result = serialize::Parameters();
-        result.add_string("internal server error" + s);
+        result.add_string("Internal server error (please, inform us about it - deepblue@mpi-inf.mpg.de) : " + request.method_name() + " - " + s);
 
       } catch (const std::string& ex) {
         EPIDB_LOG_ERR("exception on command " << request.method_name() << ": " << ex);
         okay = false;
         // overwrite with clear result
         result = serialize::Parameters();
-        result.add_string("internal server error: " + ex);
+        result.add_string("Internal server error (please, inform us about it - deepblue@mpi-inf.mpg.de) : " + request.method_name() + " - " + ex);
       }
 
       if (okay) {
