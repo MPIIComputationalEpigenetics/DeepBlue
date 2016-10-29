@@ -48,8 +48,6 @@ namespace epidb {
 
       bool gene(const std::string &id, mongo::BSONObj &result, std::string &msg);
 
-      bool gene_expression(const std::string &id, mongo::BSONObj &result, std::string &msg);
-
       bool experiment(const std::string &id, const std::vector<std::string>& user_projects,
                       mongo::BSONObj &result, std::string &msg);
 

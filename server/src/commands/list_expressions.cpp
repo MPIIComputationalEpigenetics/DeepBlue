@@ -1,5 +1,5 @@
 //
-//  list_gene_expressions.cpp
+//  list_expressions.cpp
 //  DeepBlue Epigenomic Data Server
 //  File created by Felipe Albrecht on 17.07.16.
 //  Copyright (c) 2016 Max Planck Institute for Informatics. All rights reserved.
@@ -23,47 +23,50 @@
 #include "../dba/dba.hpp"
 #include "../dba/list.hpp"
 
+#include "../datatypes/expressions_manager.hpp"
 #include "../datatypes/user.hpp"
 
 #include "../extras/utils.hpp"
 #include "../extras/serialize.hpp"
 
 #include "../errors.hpp"
+#include "../macros.hpp"
 
 namespace epidb {
   namespace command {
 
-    class ListGeneExpressionsCommand: public Command {
+    class ListExpressionsCommand: public Command {
 
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::GENES, "List all the Gene Expression currently available in DeepBlue. A gene expression is a set of genes with their expression values.");
+        return CommandDescription(categories::EXPRESSIONS, "List the Expression currently available in DeepBlue. A expression is a set of data with an identifier and an expression value.");
       }
 
       static Parameters parameters_()
       {
         Parameter p[] = {
+          parameters::ExpressionType,
           Parameter("sample_id", serialize::STRING, "sample ID(s)", true),
           Parameter("replica", serialize::INTEGER, "replica(s)", true),
           Parameter("project", serialize::STRING, "project(s) name", true),
           parameters::UserKey
         };
-        Parameters params(&p[0], &p[0] + 4);
+        Parameters params(&p[0], &p[0] + 5);
         return params;
       }
 
       static Parameters results_()
       {
         Parameter p[] = {
-          Parameter("gene_expressions", serialize::LIST, "gene expressions names and IDS")
+          Parameter("expressions", serialize::LIST, "expressions names and IDS")
         };
         Parameters results(&p[0], &p[0] + 1);
         return results;
       }
 
     public:
-      ListGeneExpressionsCommand() : Command("list_gene_expressions", parameters_(), results_(), desc_()) {}
+      ListExpressionsCommand() : Command("list_expressions", parameters_(), results_(), desc_()) {}
 
       virtual bool run(const std::string &ip,
                        const serialize::Parameters &parameters, serialize::Parameters &result) const
@@ -72,10 +75,11 @@ namespace epidb {
         std::vector<serialize::ParameterPtr> replicas;
         std::vector<serialize::ParameterPtr> projects;
 
-        parameters[0]->children(sample_ids);
-        parameters[1]->children(replicas);
-        parameters[2]->children(projects);
-        const std::string user_key = parameters[3]->as_string();
+        const std::string expression_type_name = parameters[0]->as_string();
+        parameters[1]->children(sample_ids);
+        parameters[2]->children(replicas);
+        parameters[3]->children(projects);
+        const std::string user_key = parameters[4]->as_string();
 
         std::string msg;
         datatypes::User user;
@@ -84,17 +88,18 @@ namespace epidb {
           result.add_error(msg);
           return false;
         }
+
+        GET_EXPRESSION_TYPE(expression_type_name, expression_type)
+
         mongo::BSONObj query;
 
-        if (!dba::list::build_list_gene_expressions_query(sample_ids, replicas, projects, user_key, query, msg)) {
+        if (!expression_type->build_list_expressions_query(sample_ids, replicas, projects, user_key, query, msg)) {
           result.add_error(msg);
           return false;
         }
 
-        std::cerr << query.toString() << std::endl;
-
         std::vector<utils::IdName> names;
-        if (!dba::list::gene_expressions(query, names, msg)) {
+        if (!expression_type->list(query, names, msg)) {
           result.add_error(msg);
         }
 
@@ -102,6 +107,6 @@ namespace epidb {
 
         return true;
       }
-    } listGeneExpressionsCommand;
+    } listExpressionsCommand;
   }
 }

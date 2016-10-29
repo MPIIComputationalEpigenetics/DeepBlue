@@ -348,11 +348,15 @@ class TestCase(unittest.TestCase):
 
     epidb = DeepBlueClient(address="localhost", port=31415)
     sleep = 0.1
+    count = 0
     (s, ss) = epidb.info(req, self.admin_key)
     while ss[0]["state"] not in status:
       time.sleep(sleep)
       (s, ss) = epidb.info(req, self.admin_key)
-      sleep += sleep
+      sleep += 0.5
+      count += 1
+      if count > 5:
+        print ss
 
     (s, data) = epidb.get_request_data(req, self.admin_key)
     return (s, data)

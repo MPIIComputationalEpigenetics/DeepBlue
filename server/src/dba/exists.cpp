@@ -83,12 +83,6 @@ namespace epidb {
         return helpers::check_exist(Collections::GENE_MODELS(), "norm_name", name);
       }
 
-      bool gene_expression(const std::string &sample_id, const int replica)
-      {
-        return helpers::check_exist(Collections::GENE_EXPRESSIONS(),
-                                    BSON("sample_id" << sample_id << "replica" << replica));
-      }
-
       bool annotation(const std::string &name, const std::string &genome)
       {
         mongo::BSONObj query = BSON("norm_name" << name << "norm_genome" << genome);

@@ -35,8 +35,6 @@ r == LZO_E_OK
 
 #include "extras/compress.hpp"
 
-#include "datatypes/datatypes.hpp"
-
 //bool compress()
 
 int main()

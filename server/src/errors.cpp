@@ -62,7 +62,7 @@
  * 26 - Column Type
  * 27 - Metacolumn
  * 30 - Request
- * 31 - Gene expression
+ * 31 - Expression
  * 40 - Tiling region
  * 50 - Dataset
  * 51 - GSM Identifier
@@ -133,8 +133,9 @@ namespace epidb {
   Error ERR_DUPLICATED_GENE_MODEL_NAME("113001", "The Gene Model '{}' is already being used.");
   Error ERR_INVALID_GENE_MODEL_ID("113003", "Unable to find Gene Model ID '{}'.");
 
-  Error ERR_DUPLICATE_GENE_EXPRESSION("131001", "A Gene Expression with sample_id '{}' and replicate '{}' already exists.");
-  Error ERR_INVALID_GENE_EXPRESSION_ID("131003", "Unable to find Gene Expression ID '{}'.");
+  Error ERR_DUPLICATE_EXPRESSION("131001", "A Expression of the type '{}' with sample_id '{}' and replicate '{}' already exists.");
+  Error ERR_INVALID_EXPRESSION_ID("131003", "Unable to find Gene Expression ID '{}'.");
+  Error ERR_INVALID_EXPRESSION_TYPE("131003", "Unable to find Expression Type '{}'.");
 
   Error ERR_INVALID_GENE_NAME("113000", "Gene Name '{}' was not found in the Gene Model '{}'.");
   Error ERR_INVALID_GENE_ID("113003", "Gene ID '{}' was not found in the Gene Model '{}'.");

@@ -101,7 +101,6 @@ namespace epidb {
   extern Error ERR_INVALID_EPIGENETIC_MARK;
   extern Error ERR_INVALID_EPIGENETIC_MARK_ID;
   extern Error ERR_INVALID_GENE_MODEL_ID;
-  extern Error ERR_INVALID_GENE_EXPRESSION_ID;
   extern Error ERR_INVALID_TILING_REGIONS_ID;
   extern Error ERR_INVALID_COLUMN_TYPE_ID;
 
@@ -118,7 +117,9 @@ namespace epidb {
   extern Error ERR_INVALID_GENE_LOCATION;
   extern Error ERR_INVALID_GENE_ATTRIBUTE;
 
-  extern Error ERR_DUPLICATE_GENE_EXPRESSION;
+  extern Error ERR_INVALID_EXPRESSION_TYPE;
+  extern Error ERR_INVALID_EXPRESSION_ID;
+  extern Error ERR_DUPLICATE_EXPRESSION;
 
   extern Error ERR_INVALID_SAMPLE_ID;
 

@@ -64,6 +64,7 @@ namespace epidb {
     static const CommandCategory DATA_MODIFICATION("Data Modification", "Operations that modify the data content");
     static const CommandCategory EPIGENETIC_MARKS("Epigenetic marks", "Inserting and listing epigenetic marks");
     static const CommandCategory EXPERIMENTS("Experiments", "Inserting and listing experiments");
+    static const CommandCategory EXPRESSIONS("Expressions", "Expression data");
     static const CommandCategory GENERAL_INFORMATION("General Information", "Commands for all types of data");
     static const CommandCategory GENOMES("Genomes", "Inserting and listing genomes");
     static const CommandCategory GENES("Genes", "Gene models and genes identifiers");

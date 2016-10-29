@@ -18,7 +18,7 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN EXPAT.
 #
 
-SHELL = /bin/sh
+SHELL = /bin/bash
 
 srcdir = .
 top_srcdir = .
@@ -104,8 +104,8 @@ mkdir-init:
 		(mkdir $$d 2> /dev/null || test 1) ; \
 	done
 
-CC = clang
-CXX = clang++
+CC = gcc
+CXX = g++
 LIBTOOL = $(SHELL) $(top_builddir)/libtool
 
 INCLUDES = -I$(srcdir)/lib -I.

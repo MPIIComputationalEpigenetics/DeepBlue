@@ -1,5 +1,5 @@
 //
-//  add_gene_expression.cpp
+//  add_expression.cpp
 //  DeepBlue Epigenomic Data Server
 //  File created by Felipe Albrecht on 08.07.2015
 //  Copyright (c) 2016 Max Planck Institute for Informatics. All rights reserved.
@@ -28,6 +28,7 @@
 #include "../dba/list.hpp"
 
 #include "../datatypes/user.hpp"
+#include "../datatypes/expressions_manager.hpp"
 
 #include "../engine/commands.hpp"
 
@@ -39,21 +40,23 @@
 #include "../interfaces/serializable.hpp"
 
 #include "../errors.hpp"
+#include "../macros.hpp"
 
 namespace epidb {
   namespace command {
 
-    class AddGeneExpressionCommand: public Command {
+    class AddExpressionCommand: public Command {
 
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::GENES, "Include a Gene Expression in DeepBlue. The data must be in the XXXX format.");
+        return CommandDescription(categories::EXPRESSIONS, "Include Expression data in DeepBlue.");
       }
 
       static Parameters parameters_()
       {
-        Parameter p[] = {
+        return {
+          parameters::ExpressionType,
           Parameter("sample_id", serialize::STRING, "sample ID"),
           Parameter("replica", serialize::INTEGER, "replica count (use 0 if it is the single replica)"),
           Parameter("data", serialize::DATASTRING, "the data in the right format"),
@@ -62,32 +65,29 @@ namespace epidb {
           parameters::AdditionalExtraMetadata,
           parameters::UserKey
         };
-        Parameters params(&p[0], &p[0] + 7);
-        return params;
       }
 
       static Parameters results_()
       {
-        Parameter p[] = {
-          Parameter("id", serialize::STRING, "id of the newly inserted gene expression data")
+        return {
+          Parameter("id", serialize::STRING, "id of the newly inserted expression data")
         };
-        Parameters results(&p[0], &p[0] + 1);
-        return results;
       }
 
     public:
-      AddGeneExpressionCommand() : Command("add_gene_expression", parameters_(), results_(), desc_()) {}
+      AddExpressionCommand() : Command("add_expression", parameters_(), results_(), desc_()) {}
 
       // TODO: Check user
       virtual bool run(const std::string &ip,
                        const serialize::Parameters &parameters, serialize::Parameters &result) const
       {
-        const std::string sample_id = parameters[0]->as_string();
-        const int replica = parameters[1]->as_long();
-        const std::string data = parameters[2]->as_string();
-        const std::string format = parameters[3]->as_string();
-        const std::string project = parameters[4]->as_string();
-        const std::string user_key = parameters[6]->as_string();
+        const std::string expression_type_name = parameters[0]->as_string();
+        const std::string sample_id = parameters[1]->as_string();
+        const int replica = parameters[2]->as_long();
+        const std::string data = parameters[3]->as_string();
+        const std::string format = parameters[4]->as_string();
+        const std::string project = parameters[5]->as_string();
+        const std::string user_key = parameters[7]->as_string();
 
         std::string msg;
         datatypes::User user;
@@ -98,7 +98,7 @@ namespace epidb {
         }
 
         datatypes::Metadata extra_metadata;
-        if (!read_metadata(parameters[5], extra_metadata, msg)) {
+        if (!read_metadata(parameters[6], extra_metadata, msg)) {
           result.add_error(msg);
           return false;
         }
@@ -112,8 +112,10 @@ namespace epidb {
           return false;
         }
 
-        if (dba::exists::gene_expression(norm_sample_id, replica)) {
-          std::string s = Error::m(ERR_DUPLICATE_GENE_EXPRESSION, sample_id, replica);
+        GET_EXPRESSION_TYPE(expression_type_name, expression_type)
+
+        if (expression_type->exists(norm_sample_id, replica)) {
+          std::string s = Error::m(ERR_DUPLICATE_EXPRESSION, expression_type_name, sample_id, replica);
           result.add_error(s);
           return false;
         }
@@ -137,8 +139,10 @@ namespace epidb {
         }
 
         std::string norm_file_format = utils::normalize_name(format);
-        if (norm_file_format != "cufflinks"  || norm_file_format == "grape2") {
-          std::string s = "Currently, only the formats 'cufflinks' or 'grape2' is supported.";
+        if (norm_file_format != "cufflinks" && norm_file_format != "grape2") {
+          msg  = "Only the formats 'cufflinks' or 'grape2' are currently supported. ('"+format+"')";
+          result.add_error(msg);
+          return false;
         }
 
         auto parser = parser::GeneExpressionParserFactory::build(format, std::unique_ptr<std::istream>(new std::stringstream(data)), msg);
@@ -155,13 +159,12 @@ namespace epidb {
         }
 
         std::string id;
-        bool ret = dba::genes::insert_expression(sample_id, replica, extra_metadata, serializable_file, format, project, norm_project, user_key, ip, id, msg);
+        bool ret = expression_type->insert(sample_id, replica, extra_metadata, serializable_file, format, project, norm_project, user_key, ip, id, msg);
         if (ret) {
           result.add_string(id);
         } else {
           result.add_error(msg);
         }
-
         return ret;
       }
 
