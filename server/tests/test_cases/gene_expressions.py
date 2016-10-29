@@ -31,7 +31,7 @@ class TestExpressions(helpers.TestCase):
 
     self.assertEquals(data, 'ENSG00000240453.1\tRP11-206L10.10\t2.7720\tchr1\t745489\t753092\t2.7720\tBrain\ts2\t-\nENSG00000240453_REVERSE\tRP11-206L10_REVERSE\t9.1235\tchr1\t745489\t753092\t9.1235\tBrain\ts2\t+')
 
-  def __test_performance(self):
+  def test_performance(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
 
@@ -53,7 +53,7 @@ class TestExpressions(helpers.TestCase):
     self.assertSuccess(status, r_id)
     data = self.get_regions_request(r_id)
 
-  def __test_gene_retrieve(self):
+  def test_gene_retrieve(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
     data = open("data/gtf/gencode.v23.basic.annotation_head.gtf").read()
@@ -163,9 +163,8 @@ class TestExpressions(helpers.TestCase):
 
     data = gzip.open("data/grape2/SP8-TH91.gene_quantification.rsem_grape2_crg.GRCh38.20150622.results.txt.gz").read()
     (s, gene_expression) = epidb.add_expression("gene", "s1", 1, data, "grape2", "ENCODE", None, self.admin_key)
-    self.assertEquals(gene_expression, "131001:A Gene Expression with sample_id 's1' and replicate '1' already exists.")
+    self.assertEquals(gene_expression, "131001:A Expression of the type 'gene' with sample_id 's1' and replicate '1' already exists.")
 
-    data = gzip.open("data/grape2/SP8-TH91.gene_quantification.rsem_grape2_crg.GRCh38.20150622.results.txt.gz").read()
     (s, gene_expression) = epidb.add_expression("gene", "s1", 2, data, "grape2", "ENCODE", None, self.admin_key)
     self.assertSuccess(s, gene_expression)
 

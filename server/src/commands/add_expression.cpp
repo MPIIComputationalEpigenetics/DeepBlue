@@ -115,7 +115,7 @@ namespace epidb {
         GET_EXPRESSION_TYPE(expression_type_name, expression_type)
 
         if (expression_type->exists(norm_sample_id, replica)) {
-          std::string s = Error::m(ERR_DUPLICATE_EXPRESSION, sample_id, replica);
+          std::string s = Error::m(ERR_DUPLICATE_EXPRESSION, expression_type_name, sample_id, replica);
           result.add_error(s);
           return false;
         }
@@ -139,8 +139,8 @@ namespace epidb {
         }
 
         std::string norm_file_format = utils::normalize_name(format);
-        if (norm_file_format != "cufflinks"  || norm_file_format == "grape2") {
-          msg  = "Currently, only the formats 'cufflinks' or 'grape2' is supported.";
+        if (norm_file_format != "cufflinks" && norm_file_format != "grape2") {
+          msg  = "Only the formats 'cufflinks' or 'grape2' are currently supported. ('"+format+"')";
           result.add_error(msg);
           return false;
         }
