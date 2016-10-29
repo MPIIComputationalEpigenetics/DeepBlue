@@ -55,7 +55,7 @@ namespace epidb {
           parameters::ExpressionType,
           Parameter("sample_ids", serialize::STRING, "id(s) of selected sample(s)" , true),
           Parameter("replicas", serialize::INTEGER, "replica(s)", true),
-          Parameter("identifier", serialize::STRING, "identifier(s) (for genes: ensembl ID or ENSB name).", true),
+          Parameter("identifiers", serialize::STRING, "identifier(s) (for genes: ensembl ID or ENSB name).", true),
           Parameter("projects", serialize::STRING, "projects(s)", true),
           Parameter("gene_model", serialize::STRING, "gene model name"),
           parameters::UserKey
