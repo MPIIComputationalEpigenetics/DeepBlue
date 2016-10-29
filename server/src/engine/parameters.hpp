@@ -74,7 +74,7 @@ namespace epidb {
     const Parameter ChromosomeMultiple("chromosomes", serialize::STRING, "chromosome name(s)", true);
     const Parameter ExpressionType("expression_type", serialize::STRING, "expression type (supported: 'gene')");
     const Parameter ExtraMetadata("extra_metadata", serialize::MAP, "Metadata that must be matched");
-    const Parameter Genes("gene_id_or_name", serialize::STRING, "Name(s) or ENSEMBL ID (ENSGXXXXXXXXXXX.X ) of the gene(s).", true);
+    const Parameter Genes("genes", serialize::STRING, "Name(s) or ENSEMBL ID (ENSGXXXXXXXXXXX.X ) of the gene(s).", true);
     const Parameter GeneModels("gene_models", serialize::STRING, "the gene model", true);
     const Parameter Genome("genome", serialize::STRING, "the target genome");
     const Parameter GenomeMultiple("genome", serialize::STRING, "the target genome", true);
