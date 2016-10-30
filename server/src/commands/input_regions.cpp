@@ -152,6 +152,7 @@ namespace epidb {
         int dataset_id;
         if (!dba::insert_query_region_set(genome, norm_genome, user_key, ip, map_regions, fileFormat, dataset_id, msg)) {
           result.add_error(msg);
+          return false;
         }
 
         std::vector<std::string> chromosomes = map_regions.chromosomes();
