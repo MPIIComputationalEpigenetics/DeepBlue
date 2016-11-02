@@ -159,7 +159,7 @@ namespace epidb {
 
       mongo::BSONObjBuilder queryb;
       mongo::BSONObj res, cmd, query;
-      queryb.append("state", BSON("$in" << BSON_ARRAY(TS_NEW << TS_FAILED << TS_CANCELLED << TS_RENEW << TS_REMOVED )));
+      queryb.append("state", BSON("$in" << BSON_ARRAY(TS_NEW << TS_RENEW)));
       if (! m_ptr->m_task_selector.isEmpty())
         queryb.appendElements(m_ptr->m_task_selector);
       query = queryb.obj();
