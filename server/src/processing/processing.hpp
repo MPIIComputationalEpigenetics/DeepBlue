@@ -30,6 +30,8 @@
 #include "../datatypes/regions.hpp"
 #include "../extras/utils.hpp"
 
+#include "running_cache.hpp"
+
 namespace epidb {
 
   class StringBuilder;
@@ -86,6 +88,8 @@ namespace epidb {
       std::chrono::seconds _last_update;
       const std::chrono::seconds _update_time_out;
 
+      std::unique_ptr<RunningCache> _running_cache;
+
       mongo::BSONObj toBson();
 
     public:
@@ -102,6 +106,7 @@ namespace epidb {
       long long total_size();
       long long maximum_size();
       bool is_canceled(bool& ret, std::string& msg);
+      std::unique_ptr<RunningCache>& running_cache();
     };
 
     typedef std::shared_ptr<Status> StatusPtr;

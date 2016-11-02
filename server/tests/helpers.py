@@ -367,6 +367,6 @@ class TestCase(unittest.TestCase):
     return data
 
   def get_regions_request_error(self, req):
-    (s, data) = self.__get_regions_request(req, ["failed"])
+    (s, data) = self.__get_regions_request(req, status=["failed"])
     self.assertFailure(s, data)
     return data

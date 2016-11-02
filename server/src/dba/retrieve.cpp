@@ -446,7 +446,6 @@ namespace epidb {
         return true;
       }
 
-      // TODO: Fix for counting the *real* number
       bool count_regions(const std::string &genome, const std::string &chromosome, const mongo::BSONObj &regions_query, const bool full_overlap,
                          processing::StatusPtr status, size_t &count)
       {

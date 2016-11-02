@@ -331,16 +331,8 @@ namespace epidb {
         return false;
       }
 
-      mongo::BSONObjBuilder region_query_builder;
-
-      region_query_builder.append(KeyMapper::DATASET(), dataset_id);
-      region_query_builder.append(KeyMapper::START(), BSON("$lte" << (int) region_ref->end()));
-      region_query_builder.append(KeyMapper::END(), BSON("$gte" << (int) region_ref->start()));
-
-      mongo::BSONObj region_query = region_query_builder.obj();
-
-      if (!retrieve::count_regions(genome, chrom, region_query, true, status, count)) {
-        msg = "Error while counting regions for " + genome + " " + chrom + " " + region_query.toString();
+      if (!status->running_cache()->count_regions(dataset_id, genome, chrom, region_ref->start(), region_ref->end(), count, status, msg)) {
+        msg = "Error while counting regions for " + genome + " " + chrom + " " + pattern;
         count = 0;
         return false;
       }
