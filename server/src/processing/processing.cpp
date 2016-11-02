@@ -31,6 +31,7 @@
 #include "../mdbq/common.hpp"
 
 #include "processing.hpp"
+#include "running_cache.hpp"
 
 #include "../extras/date_time.hpp"
 
@@ -106,7 +107,8 @@ namespace epidb {
       _total_stored_data(0),
       _total_stored_data_compressed(0),
       _last_update(std::chrono::duration_cast< std::chrono::seconds >( std::chrono::system_clock::now().time_since_epoch())),
-      _update_time_out(5)
+      _update_time_out(5),
+      _running_cache(std::unique_ptr<RunningCache>(new RunningCache()))
     {
       if (_request_id != DUMMY_REQUEST) {
         std::string msg;
@@ -257,6 +259,10 @@ namespace epidb {
       ret = _canceled;
 
       return true;
+    }
+
+    std::unique_ptr<RunningCache>& Status::running_cache() {
+      return _running_cache;
     }
 
     typedef std::shared_ptr<Status> StatusPtr;
