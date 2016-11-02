@@ -148,7 +148,6 @@ namespace epidb {
         size_t chrom_pos = 0;
         do {
           Regions regions;
-          std::cerr << regions_query.toString() << std::endl;
           if (!dba::retrieve::get_regions_preview(norm_genome, chroms_vector[chrom_pos], regions_query, regions, msg)) {
             result.add_error(msg);
             return false;
