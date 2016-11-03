@@ -107,7 +107,7 @@ namespace epidb {
       _total_stored_data(0),
       _total_stored_data_compressed(0),
       _last_update(std::chrono::duration_cast< std::chrono::seconds >( std::chrono::system_clock::now().time_since_epoch())),
-      _update_time_out(5),
+      _update_time_out(1),
       _running_cache(std::unique_ptr<RunningCache>(new RunningCache()))
     {
       if (_request_id != DUMMY_REQUEST) {
@@ -140,68 +140,49 @@ namespace epidb {
       return RunningOp(_processing_id, op, params);
     }
 
-    void Status::sum_regions(const long long qtd)
+    void Status::update_values_in_db()
     {
-      _total_regions += qtd;
-
       auto current_second = std::chrono::duration_cast< std::chrono::seconds >(std::chrono::system_clock::now().time_since_epoch());
       if (current_second - _last_update > _update_time_out) {
         Connection c;
         mongo::BSONObj query = BSON("_id" << _processing_id);
-        mongo::BSONObj update_value = BSON("$set" << BSON("total_regions" << (long long) _total_regions.load()));
+        mongo::BSONObj update_value = BSON("$set" <<
+                                           BSON("total_regions" << (long long) _total_regions.load() <<
+                                                "total_size" << (long long) _total_size.load())
+                                          );
         c->update(dba::helpers::collection_name(dba::Collections::PROCESSING()), query, update_value, false, false);
         c.done();
         _last_update = current_second;
       }
+
+    }
+
+    void Status::sum_regions(const long long qtd)
+    {
+      _total_regions += qtd;
+      update_values_in_db();
     }
 
     void Status::subtract_regions(const long long qtd)
     {
       _total_regions -= qtd;
-
-      auto current_second = std::chrono::duration_cast< std::chrono::seconds >(std::chrono::system_clock::now().time_since_epoch());
-      if (current_second - _last_update > _update_time_out) {
-        Connection c;
-        mongo::BSONObj query = BSON("_id" << _processing_id);
-        mongo::BSONObj update_value = BSON("$set" << BSON("total_regions" << (long long) _total_regions.load()));
-        c->update(dba::helpers::collection_name(dba::Collections::PROCESSING()), query, update_value, false, false);
-        c.done();
-        _last_update = current_second;
-      }
+      update_values_in_db();
     }
 
     long long Status::sum_size(const long long size)
     {
       _total_size += size;
+      update_values_in_db();
 
-      auto current_second = std::chrono::duration_cast< std::chrono::seconds >(std::chrono::system_clock::now().time_since_epoch());
-      if (current_second - _last_update > _update_time_out) {
-        Connection c;
-        mongo::BSONObj query = BSON("_id" << _processing_id);
-        mongo::BSONObj update_value = BSON("$set" << BSON("total_size" << (long long) _total_size.load()));
-        c->update(dba::helpers::collection_name(dba::Collections::PROCESSING()), query, update_value, false, false);
-        c.done();
-        _last_update = current_second;
-      }
-
-      return _maximum_memory - _total_size;
+      return _total_size;
     }
 
     long long Status::subtract_size(const long long size)
     {
       _total_size -= size;
+      update_values_in_db();
 
-      auto current_second = std::chrono::duration_cast< std::chrono::seconds >(std::chrono::system_clock::now().time_since_epoch());
-      if (current_second - _last_update > _update_time_out) {
-        Connection c;
-        mongo::BSONObj query = BSON("_id" << _processing_id);
-        mongo::BSONObj update_value = BSON("$set" << BSON("total_size" << (long long) _total_size.load()));
-        c->update(dba::helpers::collection_name(dba::Collections::PROCESSING()), query, update_value, false, false);
-        c.done();
-        _last_update = current_second;
-      }
-
-      return _maximum_memory - _total_size;
+      return _total_size;
     }
 
     void Status::set_total_stored_data(const long long size)
@@ -261,7 +242,8 @@ namespace epidb {
       return true;
     }
 
-    std::unique_ptr<RunningCache>& Status::running_cache() {
+    std::unique_ptr<RunningCache>& Status::running_cache()
+    {
       return _running_cache;
     }
 

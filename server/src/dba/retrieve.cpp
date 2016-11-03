@@ -391,6 +391,7 @@ namespace epidb {
           EPIDB_LOG_ERR(msg);
           return false;
         }
+        std::cerr << "REGIONS AFTER: " << regions.size() << std::endl;
         return true;
       }
 

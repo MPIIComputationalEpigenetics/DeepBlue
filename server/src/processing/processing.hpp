@@ -91,6 +91,7 @@ namespace epidb {
       std::unique_ptr<RunningCache> _running_cache;
 
       mongo::BSONObj toBson();
+      void update_values_in_db();
 
     public:
       Status(const std::string &request_id, const long long maximum_memory);
