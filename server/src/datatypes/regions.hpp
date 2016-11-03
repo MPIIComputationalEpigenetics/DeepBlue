@@ -271,6 +271,7 @@ namespace epidb {
         return *this;
       }
 
+      _regions = std::vector<RegionPtr>();
       _regions.reserve(other._regions.size());
       for (const auto& r : other._regions) {
         _regions.emplace_back(r->clone());
