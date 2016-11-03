@@ -31,47 +31,60 @@
 namespace epidb {
   namespace processing {
 
-    bool DatasetCache::retrieve_regions(const std::string& chromosome, std::string& msg)
+    bool DatasetCache::load_regions(const std::string& chromosome, const Position start, const Position end, std::string& msg)
     {
       mongo::BSONObjBuilder regions_query_builder;
+
       regions_query_builder.append(dba::KeyMapper::DATASET(), _dataset_id);
+      regions_query_builder.append(dba::KeyMapper::START(), BSON("$lte" << end));
+      regions_query_builder.append(dba::KeyMapper::END(), BSON("$gte" << start));
+
       mongo::BSONObj regions_query = regions_query_builder.obj();
       return ::epidb::dba::retrieve::get_regions(_genome, chromosome, regions_query, false, _status, regions, msg) ;
-    }
-
-    bool DatasetCache::load_chromosome(const std::string& chromosome, std::string& msg)
-    {
-      _last_index_position = 0;
-      return retrieve_regions(chromosome, msg);
     }
 
     bool DatasetCache::count_regions(const std::string& chromosome, const Position start, const Position end, size_t& count, std::string& msg)
     {
       count = 0;
 
-      if (chromosome != current_chromosome) {
-        load_chromosome(chromosome, msg);
+      if ((chromosome != current_chromosome) ||
+          end >= _actual_end) {
+
+        // Remove the regions size and counts from status
+        _status->subtract_regions(regions.size());
+        for (size_t i = 0; i < regions.size(); i++)  {
+          _status->subtract_size(regions[i]->size());
+        }
+
+        // Load the regions from the actual position until 1 million Bp after the end.
+        Position end_load = end + (1000 * 1000);
+        if (!load_regions(chromosome, start, end_load, msg)) {
+          return false;
+        }
         current_chromosome = chromosome;
+        _last_index_position = 0;
+        _actual_end = end_load;
       }
 
       // Walk to the beginning of the regions
       size_t data_size = regions.size();
-      Position _actual_position = _last_index_position;
-      while (_actual_position < data_size &&
-             regions[_actual_position]->end() < start) {
-        _actual_position++;
+      Position actual_position = _last_index_position;
+      while (actual_position < data_size &&
+             regions[actual_position]->end() < start) {
+        actual_position++;
       }
-      _last_index_position = _actual_position;
+
+      _last_index_position = actual_position;
 
       // Count overlaps
-      while (_actual_position < regions.size() &&
-             start < regions[_actual_position]->end()  ) {
+      while (actual_position < regions.size() &&
+             start < regions[actual_position]->end()  ) {
 
-        if ((regions[_actual_position]->start() < end) &&
-            (regions[_actual_position]->end() > start)) {
+        if ((regions[actual_position]->start() < end) &&
+            (regions[actual_position]->end() > start)) {
           count++;
         }
-        _actual_position++;
+        actual_position++;
       }
 
       return true;

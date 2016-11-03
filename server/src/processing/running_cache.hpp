@@ -39,15 +39,19 @@ namespace epidb {
       std::string current_chromosome;
       Regions regions;
       Position _last_index_position;
+      Position _actual_end;
 
       bool retrieve_regions(const std::string& chromosome, std::string& msg);
-      bool load_chromosome(const std::string& chromosome, std::string& msg);
+      bool load_regions(const std::string& chromosome, const Position start, const Position end, std::string& msg);
 
     public:
       DatasetCache(const DatasetId i, const std::string& g, StatusPtr s):
         _dataset_id(i),
         _genome(g),
-        _status(s) {}
+        _status(s),
+        regions(0),
+        _last_index_position(0),
+        _actual_end(0) {}
 
       bool count_regions(const std::string& chromosome, const Position start, const Position end,
                                        size_t& count, std::string& msg);
