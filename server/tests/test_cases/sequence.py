@@ -105,16 +105,8 @@ class TestSequence(helpers.TestCase):
 
     res, req = epidb.get_regions(qid, fmt, self.admin_key)
     self.assertSuccess(res, req)
-    regions = self.get_regions_request(req)
-
-    expected = """chrM\t0\t1\thg19_small\t\t1\tH3K4me3\tENCODE\tK562\ts1
-chrM\t1\t2\thg19_small\t\t1\tH3K4me3\tENCODE\tK562\ts1
-chrM\t2\t4\thg19_small\t\t2\tH3K4me3\tENCODE\tK562\ts1
-chrM\t4\t8\thg19_small\t\t4\tH3K4me3\tENCODE\tK562\ts1
-chrM\t8\t16\thg19_small\t\t8\tH3K4me3\tENCODE\tK562\ts1
-chrM\t16\t32\thg19_small\t\t16\tH3K4me3\tENCODE\tK562\ts1"""
-
-    self.assertEquals(regions, expected)
+    msg = self.get_regions_request_error(req)
+    self.assertEquals(msg, 'Sequence file with name hg19.chrM was not found')
 
     sequence = open("data/genomes/chromosomes/chrM.fa").read()
     res = epidb.upload_chromosome("hg19", "chrM", sequence, self.admin_key)
