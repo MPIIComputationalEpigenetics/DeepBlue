@@ -19,7 +19,7 @@
 //
 
 #include <memory>
-#include <regex>
+#include <boost/regex.hpp>
 #include <string>
 
 #include "../dba/genomes.hpp"
@@ -55,16 +55,15 @@ namespace epidb {
         current_chromosome = chromosome;
       }
 
-      std::regex word_regex;
-      try {
-        std::regex word_regex(pattern, std::regex::egrep);
-        std::string sub = _sequence.substr(start, end - start);
-        auto words_begin = std::sregex_iterator(sub.begin(), sub.end(), word_regex);
-        auto words_end = std::sregex_iterator();
-        count = std::distance(words_begin, words_end);
-      } catch (const std::regex_error& e) {
-        msg = "Your motif '" + pattern + "' has an error: " + e.what();
-        return false;
+      std::string sub = _sequence.substr(start, end - start);
+      boost::regex e(pattern);
+      boost::match_results<std::string::const_iterator> what;
+      std::string::const_iterator begin_it = sub.begin();
+      std::string::const_iterator end_it = sub.end();
+      count = 0;
+      while (boost::regex_search(begin_it, end_it, what, e)) {
+        begin_it = what[0].second;
+        ++count;
       }
 
       return true;
