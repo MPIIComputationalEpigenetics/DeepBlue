@@ -70,9 +70,35 @@ namespace epidb {
       return true;
     }
 
-    bool RunningCache::count_regions(const std::string& genome, const std::string& chromosome, const std::string& pattern,
+    bool DatasetCache::get_sequence(const std::string& chromosome, const Position start, const Position end,
+                                    std::string& sequence, std::string& msg)
+    {
+      if (chromosome != current_chromosome) {
+        if (!load_sequence(chromosome, msg)) {
+          return false;
+        }
+        current_chromosome = chromosome;
+      }
+
+      sequence = _sequence.substr(start, end - start);
+      return true;
+    }
+
+
+    bool RunningCache::get_sequence(const std::string & genome, const std::string & chromosome,
+                                    const Position start, const Position end, std::string & sequence,
+                                    StatusPtr status, std::string & msg)
+    {
+      if (caches.find(genome) == caches.end()) {
+        caches[genome] = std::unique_ptr<DatasetCache>(new DatasetCache(genome, status));
+      }
+
+      return caches[genome]->get_sequence(chromosome, start, end, sequence, msg);
+    }
+
+    bool RunningCache::count_regions(const std::string & genome, const std::string & chromosome, const std::string & pattern,
                                      const Position start, const Position end, size_t& count,
-                                     StatusPtr status, std::string& msg)
+                                     StatusPtr status, std::string & msg)
     {
       if (caches.find(genome) == caches.end()) {
         caches[genome] = std::unique_ptr<DatasetCache>(new DatasetCache(genome, status));

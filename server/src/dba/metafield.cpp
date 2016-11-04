@@ -306,19 +306,13 @@ namespace epidb {
     bool Metafield::sequence(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion *region_ref,
                              processing::StatusPtr status, std::string &result, std::string &msg)
     {
-
       std::string genome = get_by_region_set(obj, "genome");
 
-      std::string sequence;
-      if (seq_retr.exists(genome, chrom)) {
-        if (!seq_retr.retrieve(genome, chrom, region_ref->start(), region_ref->end(), sequence, msg)) {
-          return false;
-        }
-        std::cerr << "SEQUENCE: " << sequence << std::endl;
-        result = sequence;
-      } else {
-        result = "";
+      if (!status->running_cache()->get_sequence(genome, chrom,
+          region_ref->start(), region_ref->end(), result, status, msg)) {
+        return false;
       }
+
       return true;
     }
 

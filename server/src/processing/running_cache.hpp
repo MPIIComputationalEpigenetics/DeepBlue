@@ -53,6 +53,9 @@ namespace epidb {
       bool count_regions(const std::string& pattern,
                          const std::string& chromosome, const Position start, const Position end,
                          size_t& count, std::string& msg);
+
+      bool get_sequence(const std::string& chromosome, const Position start, const Position end,
+                        std::string& sequence, std::string& msg);
     };
 
     class RunningCache {
@@ -63,6 +66,10 @@ namespace epidb {
       bool count_regions(const std::string& genome, const std::string& chromosome, const std::string& pattern,
                          const Position start, const Position end, size_t& count,
                          StatusPtr status, std::string& msg);
+
+      bool get_sequence(const std::string & genome, const std::string & chromosome,
+                                    const Position start, const Position end, std::string & sequence,
+                                    StatusPtr status, std::string & msg);
     };
   }
 }
