@@ -1421,6 +1421,7 @@ namespace epidb {
         return false;
       }
 
+      // TODO: may be remove
       bool find_annotation_pattern(const std::string & genome, const std::string & pattern, const bool overlap,
                                    DatasetId & dataset_id, std::string & msg)
       {

@@ -37,6 +37,8 @@
 
 #include "../dba/genes.hpp"
 
+#include "../processing/running_cache.hpp"
+
 #include "../lua/sandbox.hpp"
 
 #include "../errors.hpp"
@@ -65,8 +67,7 @@ namespace epidb {
       m["@AGG.VAR"] = &Metafield::var;
       m["@AGG.SD"] = &Metafield::sd;
       m["@AGG.COUNT"] = &Metafield::count;
-      m["@COUNT.OVERLAP"] = &Metafield::count_overlap;
-      m["@COUNT.NON-OVERLAP"] = &Metafield::count_non_overlap;
+      m["@COUNT.MOTIF"] = &Metafield::count_motif;
       m["@CALCULATED"] = &Metafield::calculated;
       m["@GENE_ATTRIBUTE"] = &Metafield::gene_attribute;
       m["@GENE_ID"] = &Metafield::gene_id;
@@ -95,8 +96,7 @@ namespace epidb {
       m["@AGG.VAR"] = "double";
       m["@AGG.SD"] = "double";
       m["@AGG.COUNT"] = "integer";
-      m["@COUNT.OVERLAP"] = "integer";
-      m["@COUNT.NON-OVERLAP"] = "integer";
+      m["@COUNT.MOTIF"] = "integer";
       m["@CALCULATED"] = "string";
       m["@GENE_ATTRIBUTE"] = "string";
       m["@GENE_ID"] = "string";
@@ -314,6 +314,7 @@ namespace epidb {
         if (!seq_retr.retrieve(genome, chrom, region_ref->start(), region_ref->end(), sequence, msg)) {
           return false;
         }
+        std::cerr << "SEQUENCE: " << sequence << std::endl;
         result = sequence;
       } else {
         result = "";
@@ -321,52 +322,21 @@ namespace epidb {
       return true;
     }
 
-    bool Metafield::count_pattern(const std::string &pattern, const std::string &genome, const std::string &chrom,
-                                  const AbstractRegion *region_ref, const bool overlap,
-                                  processing::StatusPtr status, size_t &count, std::string &msg)
-    {
-      DatasetId dataset_id;
-      if (!dba::query::find_annotation_pattern(genome, pattern, overlap, dataset_id, msg)) {
-        count = 0;
-        return false;
-      }
-
-      if (!status->running_cache()->count_regions(dataset_id, genome, chrom, region_ref->start(), region_ref->end(), count, status, msg)) {
-        msg = "Error while counting regions for " + genome + " " + chrom + " " + pattern;
-        count = 0;
-        return false;
-      }
-
-      return true;
-    }
-
-    bool Metafield::count_overlap(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion *region_ref,
+    bool Metafield::count_motif(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion *region_ref,
                                   processing::StatusPtr status, std::string &result, std::string &msg)
     {
       std::string pattern = metafield_attribute(op);
 
       std::string genome = get_by_region_set(obj, "genome");
       size_t count = 0;
-      if (!count_pattern(pattern, genome, chrom, region_ref, true, status, count, msg)) {
+
+      if (!status->running_cache()->count_regions(genome, chrom, pattern,
+          region_ref->start(), region_ref->end(), count, status, msg)) {
+        count = 0;
         return false;
       }
 
       result = utils::integer_to_string(count);
-      return true;
-    }
-
-    bool Metafield::count_non_overlap(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion *region_ref,
-                                      processing::StatusPtr status, std::string &result, std::string &msg)
-    {
-      std::string pattern = metafield_attribute(op);
-
-      std::string genome = get_by_region_set(obj, "genome");
-      size_t count = 0;
-      if (!count_pattern(pattern, genome, chrom, region_ref, false, status, count, msg)) {
-        return false;
-      }
-      result = utils::integer_to_string(count);
-
       return true;
     }
 

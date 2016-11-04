@@ -30,8 +30,6 @@
 #include "../datatypes/regions.hpp"
 #include "../extras/utils.hpp"
 
-#include "running_cache.hpp"
-
 namespace epidb {
 
   class StringBuilder;
@@ -72,6 +70,8 @@ namespace epidb {
       RunningOp(const std::string& processing_id, const OP& op, const mongo::BSONObj& params);
       ~RunningOp();
     };
+
+    class RunningCache;
 
     class Status {
       std::string _request_id;

@@ -25,9 +25,10 @@
 
 #include <mongo/bson/bson.h>
 
-#include "../dba/retrieve.hpp"
-
 #include "../datatypes/regions.hpp"
+
+#include "../dba/retrieve.hpp"
+#include "../dba/sequence_retriever.hpp"
 
 namespace epidb {
   namespace dba {
@@ -49,10 +50,6 @@ namespace epidb {
 
       bool get_bson_by_dataset_id(DatasetId dataset_id, mongo::BSONObj &obj, std::string &msg);
 
-      bool count_pattern(const std::string &pattern, const std::string &genome, const std::string &chrom,
-                         const AbstractRegion *region_ref, const bool overlap,
-                         processing::StatusPtr status, size_t &count, std::string &msg);
-
       bool length(const std::string &, const std::string &, const mongo::BSONObj &obj, const AbstractRegion *region_ref, processing::StatusPtr status, std::string &result, std::string &msg);
 
       bool name(const std::string &, const std::string &, const mongo::BSONObj &obj, const AbstractRegion *region_ref, processing::StatusPtr status, std::string &result, std::string &msg);
@@ -61,9 +58,7 @@ namespace epidb {
 
       bool sequence(const std::string &, const std::string &, const mongo::BSONObj &obj, const AbstractRegion *region_ref, processing::StatusPtr status, std::string &result, std::string &msg);
 
-      bool count_overlap(const std::string &, const std::string &, const mongo::BSONObj &obj, const AbstractRegion *region_ref, processing::StatusPtr status, std::string &result, std::string &msg);
-
-      bool count_non_overlap(const std::string &, const std::string &, const mongo::BSONObj &obj, const AbstractRegion *region_ref, processing::StatusPtr status, std::string &result, std::string &msg);
+      bool count_motif(const std::string &, const std::string &, const mongo::BSONObj &obj, const AbstractRegion *region_ref, processing::StatusPtr status, std::string &result, std::string &msg);
 
       bool epigenetic_mark(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion *region_ref, processing::StatusPtr status, std::string &result, std::string &msg);
 

@@ -24,6 +24,8 @@
 #include <memory>
 #include <string>
 
+#include "../dba/sequence_retriever.hpp"
+
 namespace epidb {
   namespace processing {
 
@@ -33,38 +35,34 @@ namespace epidb {
     class DatasetCache {
 
     private:
-      DatasetId _dataset_id;
+      dba::retrieve::SequenceRetriever _sequence_retriever;
       std::string _genome;
       StatusPtr _status;
       std::string current_chromosome;
-      Regions regions;
-      Position _last_index_position;
-      Position _actual_end;
+      std::string _sequence;
 
-      bool retrieve_regions(const std::string& chromosome, std::string& msg);
-      bool load_regions(const std::string& chromosome, const Position start, const Position end, std::string& msg);
+      bool load_sequence(const std::string& chromosome, std::string& msg);
 
     public:
-      DatasetCache(const DatasetId i, const std::string& g, StatusPtr s):
-        _dataset_id(i),
+      DatasetCache(const std::string& g, StatusPtr s):
+        _sequence_retriever(),
         _genome(g),
         _status(s),
-        regions(0),
-        _last_index_position(0),
-        _actual_end(0) {}
+        _sequence() {}
 
-      bool count_regions(const std::string& chromosome, const Position start, const Position end,
-                                       size_t& count, std::string& msg);
+      bool count_regions(const std::string& pattern,
+                         const std::string& chromosome, const Position start, const Position end,
+                         size_t& count, std::string& msg);
     };
 
     class RunningCache {
     private:
-      std::unordered_map<DatasetId, std::unique_ptr<DatasetCache>> caches;
+      std::unordered_map<std::string, std::unique_ptr<DatasetCache>> caches;
 
     public:
-      bool count_regions(const DatasetId id, const std::string& genome,
-                                       const std::string& chromosome, const Position start, const Position end, size_t& count,
-                                       StatusPtr status, std::string& msg);
+      bool count_regions(const std::string& genome, const std::string& chromosome, const std::string& pattern,
+                         const Position start, const Position end, size_t& count,
+                         StatusPtr status, std::string& msg);
     };
   }
 }

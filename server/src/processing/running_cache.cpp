@@ -19,8 +19,10 @@
 //
 
 #include <memory>
+#include <regex>
 #include <string>
 
+#include "../dba/genomes.hpp"
 #include "../dba/retrieve.hpp"
 #include "../dba/key_mapper.hpp"
 
@@ -31,74 +33,52 @@
 namespace epidb {
   namespace processing {
 
-    bool DatasetCache::load_regions(const std::string& chromosome, const Position start, const Position end, std::string& msg)
+    bool DatasetCache::load_sequence(const std::string& chromosome, std::string& msg)
     {
-      mongo::BSONObjBuilder regions_query_builder;
-
-      regions_query_builder.append(dba::KeyMapper::DATASET(), _dataset_id);
-      regions_query_builder.append(dba::KeyMapper::START(), BSON("$lte" << end));
-      regions_query_builder.append(dba::KeyMapper::END(), BSON("$gte" << start));
-
-      mongo::BSONObj regions_query = regions_query_builder.obj();
-      return ::epidb::dba::retrieve::get_regions(_genome, chromosome, regions_query, false, _status, regions, msg) ;
+      size_t size;
+      if (!dba::genomes::chromosome_size(_genome, chromosome, size, msg)) {
+        return false;
+      }
+      return _sequence_retriever.retrieve(_genome, chromosome, 0, size, _sequence, msg);
     }
 
-    bool DatasetCache::count_regions(const std::string& chromosome, const Position start, const Position end, size_t& count, std::string& msg)
+    bool DatasetCache::count_regions(const std::string& pattern,
+                                     const std::string& chromosome, const Position start, const Position end,
+                                     size_t& count, std::string& msg)
     {
       count = 0;
 
-      if ((chromosome != current_chromosome) ||
-          end >= _actual_end) {
-
-        // Remove the regions size and counts from status
-        _status->subtract_regions(regions.size());
-        for (size_t i = 0; i < regions.size(); i++)  {
-          _status->subtract_size(regions[i]->size());
-        }
-
-        // Load the regions from the actual position until 1 million Bp after the end.
-        Position end_load = end + (1000 * 1000);
-        if (!load_regions(chromosome, start, end_load, msg)) {
+      if (chromosome != current_chromosome) {
+        if (!load_sequence(chromosome, msg)) {
           return false;
         }
         current_chromosome = chromosome;
-        _last_index_position = 0;
-        _actual_end = end_load;
       }
 
-      // Walk to the beginning of the regions
-      size_t data_size = regions.size();
-      Position actual_position = _last_index_position;
-      while (actual_position < data_size &&
-             regions[actual_position]->end() < start) {
-        actual_position++;
-      }
-
-      _last_index_position = actual_position;
-
-      // Count overlaps
-      while (actual_position < regions.size() &&
-             start < regions[actual_position]->end()  ) {
-
-        if ((regions[actual_position]->start() < end) &&
-            (regions[actual_position]->end() > start)) {
-          count++;
-        }
-        actual_position++;
+      std::regex word_regex;
+      try {
+        std::regex word_regex(pattern, std::regex::egrep);
+        std::string sub = _sequence.substr(start, end - start);
+        auto words_begin = std::sregex_iterator(sub.begin(), sub.end(), word_regex);
+        auto words_end = std::sregex_iterator();
+        count = std::distance(words_begin, words_end);
+      } catch (const std::regex_error& e) {
+        msg = "Your motif '" + pattern + "' has an error: " + e.what();
+        return false;
       }
 
       return true;
     }
 
-    bool RunningCache::count_regions(const DatasetId id, const std::string& genome,
-                                     const std::string& chromosome, const Position start, const Position end, size_t& count,
+    bool RunningCache::count_regions(const std::string& genome, const std::string& chromosome, const std::string& pattern,
+                                     const Position start, const Position end, size_t& count,
                                      StatusPtr status, std::string& msg)
     {
-      if (caches.find(id) == caches.end()) {
-        caches[id] = std::unique_ptr<DatasetCache>(new DatasetCache(id, genome, status));
+      if (caches.find(genome) == caches.end()) {
+        caches[genome] = std::unique_ptr<DatasetCache>(new DatasetCache(genome, status));
       }
 
-      return caches[id]->count_regions(chromosome, start, end, count, msg);
+      return caches[genome]->count_regions(pattern, chromosome, start, end, count, msg);
     }
   }
 }
