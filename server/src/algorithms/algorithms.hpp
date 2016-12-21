@@ -40,8 +40,12 @@ namespace epidb {
     bool flank(ChromosomeRegionsList &regions, const Offset start, const Length length, const bool use_strand,
                ChromosomeRegionsList &result, std::string &msg);
 
-    bool intersect(ChromosomeRegionsList &regions_a, ChromosomeRegionsList &regions_b,
+    bool intersect(ChromosomeRegionsList &regions_data, ChromosomeRegionsList &regions_overlap,
                    ChromosomeRegionsList &intersections);
+
+   bool overlap(ChromosomeRegionsList &regions_data, ChromosomeRegionsList &regions_overlap,
+                const bool overlap, const double amount, const std::string amount_type,
+                ChromosomeRegionsList &intersections);
 
     ChromosomeRegionsList merge_chromosome_regions(ChromosomeRegionsList& chrregions_a, ChromosomeRegionsList& chrregions_b);
   } // namespace algorithms

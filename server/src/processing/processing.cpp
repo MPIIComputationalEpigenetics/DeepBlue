@@ -50,6 +50,7 @@ namespace epidb {
       m[RETRIEVE_EXPERIMENT_SELECT_QUERY] = "Retrieve experiments data";
       m[RETRIEVE_ANNOTATION_SELECT_QUERY] = "Retrieve annotations data";
       m[RETRIEVE_INTERSECTION_QUERY] = "Intersections";
+      m[RETRIEVE_OVERLAP_QUERY] = "Overlaps";
       m[RETRIEVE_MERGE_QUERY] = "Merge";
       m[RETRIEVE_FILTER_QUERY] = "Filtering";
       m[RETRIEVE_TILING_QUERY] = "Tiling regions";
@@ -263,4 +264,3 @@ namespace epidb {
     std::map<OP, std::string> OP_names = create_OP_names_map();
   }
 }
-

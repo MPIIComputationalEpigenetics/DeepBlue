@@ -248,6 +248,10 @@ namespace epidb {
           if (!retrieve_intersection_query(user_key, query, status, regions, msg)) {
             return false;
           }
+        } else if (type == "overlap") {
+          if (!retrieve_overlap_query(user_key, query, status, regions, msg)) {
+            return false;
+          }
         } else if (type == "flank") {
           if (!retrieve_flank_query(user_key, query, status, regions, msg)) {
             return false;
@@ -786,11 +790,13 @@ namespace epidb {
           msg = Error::m(ERR_INVALID_QUERY_ID, query_a_id);
           return false;
         }
-        std::string query_a_type = query_a["type"].str();
-        bool use_fast = false;
-        //if ((query_a_type == "experiment_select") || (query_a_type == "annotation_select")) {
-        if (query_a_type == "experiment_select") {
-          use_fast = true;
+
+        ChromosomeRegionsList regions_a;
+        // Load all data from query 1, and intersect.
+        // load both region sets.
+        if (!retrieve_query(user_key, args["qid_1"].str(), status, regions_a, msg)) {
+          msg = "Cannot retrieve first region set: " + msg;
+          return false;
         }
 
         // Load regions that will be used for the overlap
@@ -801,90 +807,49 @@ namespace epidb {
           return false;
         }
 
-        ChromosomeRegionsList regions_a;
-
-        // The "fast" is in fact very slow!
-        use_fast = false;
-        if (use_fast) {
-          mongo::BSONObj args = query_a["args"].Obj();
-
-          mongo::BSONArrayBuilder datasets_array_builder;
-          const mongo::BSONObj query = build_query(args);
-          mongo::BSONArray datasets_array = helpers::build_dataset_ids_arrays(Collections::EXPERIMENTS(), query);
-
-          std::set<std::string> genomes = utils::build_set(args["norm_genomes"].Array());
-
-          std::vector<ChromosomeRegionsList> genome_regions;
-
-          unsigned int selection_start = std::numeric_limits<unsigned int>::min();
-          unsigned int selection_end = std::numeric_limits<unsigned int>::max();
-
-          if (args.hasField("start")) {
-            selection_start = args["start"].Int();
-          }
-
-          if (args.hasField("end")) {
-            selection_end = args["end"].Int();
-          }
-
-          // get region data for all genomes
-          for (const auto& genome : genomes) {
-            ChromosomeRegionsList chromosome_region_list;
-            for (auto &chromosome : range_regions) {
-              Regions chromosome_regions = Regions();
-              for (auto &region : chromosome.second) {
-                if (region->start() >= selection_start && region->end() <= selection_end) {
-                  mongo::BSONObj regions_query;
-                  if (!dba::query::build_experiment_query(region->start(), region->end(), datasets_array, regions_query, msg)) {
-                    return false;
-                  }
-
-                  Regions regions;
-                  if (!dba::retrieve::get_regions(genome, chromosome.first, regions_query, false, status, regions, msg)) {
-                    return false;
-                  }
-
-                  chromosome_regions.reserve(chromosome_regions.size() + regions.size());
-                  chromosome_regions.insert(chromosome_regions.end(),
-                                            std::make_move_iterator(regions.begin()),
-                                            std::make_move_iterator(regions.end()));
-                }
-              }
-              ChromosomeRegions chromossomeRegions(chromosome.first, std::move(chromosome_regions));
-              chromosome_region_list.push_back(std::move(chromossomeRegions));
-            }
-            genome_regions.push_back(std::move(chromosome_region_list));
-          }
-
-          // merge region data of all genomes
-          auto rit = genome_regions.begin();
-          if (rit == genome_regions.end()) {
-            return true;
-          }
-
-          ChromosomeRegionsList &last = *rit;
-          rit++;
-          for (; rit != genome_regions.end(); ++rit) {
-            last = algorithms::merge_chromosome_regions(last, *rit);
-          }
-          regions = std::move(last);
-
-          return true;
-
-          // Do the slow way: load all data from query 1, and intersect.
-        } else {
-          // load both region sets.
-
-          if (!retrieve_query(user_key, args["qid_1"].str(), status, regions_a, msg)) {
-            msg = "Cannot retrieve first region set: " + msg;
-            return false;
-          }
-
-          return algorithms::intersect(regions_a, range_regions, regions);
-
-          return true;
-        }
+        return algorithms::intersect(regions_a, range_regions, regions);
       }
+
+      bool retrieve_overlap_query(const std::string &user_key, const mongo::BSONObj &query,
+                                  processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg)
+      {
+        processing::RunningOp runningOp = status->start_operation(processing::RETRIEVE_OVERLAP_QUERY, query);
+        if (is_canceled(status, msg)) {
+          return false;
+        }
+
+        mongo::BSONObj args = query["args"].Obj();
+
+        mongo::BSONObj query_a;
+        const std::string query_a_id = args["qid_1"].str();
+        if (!helpers::get_one(Collections::QUERIES(), BSON("_id" << query_a_id), query_a)) {
+          msg = Error::m(ERR_INVALID_QUERY_ID, query_a_id);
+          return false;
+        }
+
+        ChromosomeRegionsList regions_a;
+        // Load all data from query 1, and intersect.
+        // load both region sets.
+        if (!retrieve_query(user_key, args["qid_1"].str(), status, regions_a, msg)) {
+          msg = "Cannot retrieve first region set: " + msg;
+          return false;
+        }
+
+        // Load regions that will be used for the overlap
+        ChromosomeRegionsList range_regions;
+        const std::string query_b_id = args["qid_2"].str();
+        if (!retrieve_query(user_key, query_b_id, status, range_regions, msg)) {
+          msg = "Cannot retrieve second region set: " + msg;
+          return false;
+        }
+
+        const bool overlap = args["overlap"].Bool();
+        const double amount = args["amount"].Number();
+        const std::string amount_type = args["amount_type"].str();
+
+        return algorithms::overlap(regions_a, range_regions, overlap, amount, amount_type, regions);
+      }
+
 
       bool retrieve_extend_query(const std::string &user_key, const mongo::BSONObj &query,
                                  processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg)

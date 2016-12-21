@@ -1,7 +1,7 @@
 //
-//  intersections.cpp
+//  overlap.cpp
 //  DeepBlue Epigenomic Data Server
-//  File created by Fabian Reinartz on 29.08.13.
+//  File created by Felipe Albrecht on 20.12.16.
 //  Copyright (c) 2016 Max Planck Institute for Informatics. All rights reserved.
 
 //  This program is free software: you can redistribute it and/or modify
@@ -33,43 +33,45 @@
 namespace epidb {
   namespace command {
 
-    class IntersectionCommand: public Command {
+    class OverlapCommand: public Command {
 
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::OPERATIONS, "Select genomic regions that intersect with at least one region of the second query.");
+        return CommandDescription(categories::OPERATIONS, "Select genomic regions that overlap with at least one region of the second query.");
       }
 
       static Parameters parameters_()
       {
-        Parameter p[] = {
+        return {
           Parameter("query_data_id", serialize::STRING, "query data that will be filtered."),
           Parameter("query_filter_id", serialize::STRING, "query containing the regions that the regions of the query_data_id must overlap."),
+          Parameter("overlap", serialize::BOOLEAN, "True if must overlap, or false if must not overlap."),
+          Parameter("amount", serialize::INTEGER, "Amount that must overlap, use the parameter amount_type for setting the percentage."),
+          Parameter("amount_type", serialize::STRING, "Type of the amount: 'bp' and 'percentage'."),
           parameters::UserKey
         };
-        Parameters params(&p[0], &p[0] + 3);
-        return params;
       }
 
       static Parameters results_()
       {
-        Parameter p[] = {
+        return {
           Parameter("id", serialize::STRING, "id of the new query")
         };
-        Parameters results(&p[0], &p[0] + 1);
-        return results;
       }
 
     public:
-      IntersectionCommand() : Command("intersection", parameters_(), results_(), desc_()) {}
+      OverlapCommand() : Command("overlap", parameters_(), results_(), desc_()) {}
 
       virtual bool run(const std::string &ip,
                        const serialize::Parameters &parameters, serialize::Parameters &result) const
       {
         const std::string query_a_id = parameters[0]->as_string();
         const std::string query_b_id = parameters[1]->as_string();
-        const std::string user_key = parameters[2]->as_string();
+        const bool overlap = parameters[2]->as_boolean();
+        const double amount = parameters[3]->as_number();
+        const std::string amount_type = parameters[4]->as_string();
+        const std::string user_key = parameters[5]->as_string();
 
         std::string msg;
         datatypes::User user;
@@ -100,9 +102,12 @@ namespace epidb {
         mongo::BSONObjBuilder args_builder;
         args_builder.append("qid_1", query_a_id);
         args_builder.append("qid_2", query_b_id);
-
+        args_builder.append("overlap", overlap);
+        args_builder.append("amount", amount);
+        args_builder.append("amount_type", amount_type);
+        
         std::string query_id;
-        if (!dba::query::store_query("intersect", args_builder.obj(), user_key, query_id, msg)) {
+        if (!dba::query::store_query("overlap", args_builder.obj(), user_key, query_id, msg)) {
           result.add_error(msg);
           return false;
         }
@@ -111,6 +116,6 @@ namespace epidb {
         return true;
       }
 
-    } intersectionCommand;
+    } overlapCommand;
   }
 }
