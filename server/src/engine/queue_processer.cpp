@@ -94,13 +94,14 @@ namespace epidb {
         return process_score_matrix(job["experiments_formats"].Obj(), job["aggregation_function"].str(), job["query_id"].str(), user_key, status, result);
       } if (command == "get_experiments_by_query") {
         return process_get_experiments_by_query(job["query_id"].str(), user_key, status, result);
+      }  if (command == "get_experiments_by_query") {
+        return process_histogram(job["query_id"].str(), job["column_name"].str(), job["bars"].Int(), user_key, status, result);
       } else {
         mongo::BSONObjBuilder bob;
         bob.append("__error__", "Invalid command " + command);
-        result = bob.obj();
+        result = BSON("__error__" << "Invalid command ");
         return false;
       }
-
     }
 
     bool QueueHandler::process_count(const std::string &query_id, const std::string &user_key, processing::StatusPtr status, mongo::BSONObj& result)
@@ -116,6 +117,30 @@ namespace epidb {
       }
 
       bob.append("count", (long long) count);
+      status->set_total_stored_data(sizeof(long long));
+      status->set_total_stored_data_compressed(sizeof(long long));
+      result = bob.obj();
+
+      if (is_canceled(status, msg)) {
+        return false;
+      }
+
+      return true;
+    }
+
+    bool QueueHandler::process_histogram(const std::string &query_id, const std::string& column_name, const int bars, const std::string &user_key, processing::StatusPtr status, mongo::BSONObj& result)
+    {
+      std::string msg;
+      mongo::BSONObjBuilder bob;
+      mongo::BSONArray counts;
+
+      if (!processing::histogram(query_id, column_name, bars, user_key, status, counts, msg)) {
+        bob.append("__error__", msg);
+        result = bob.obj();
+        return false;
+      }
+
+      bob.append("count", counts);
       status->set_total_stored_data(sizeof(long long));
       status->set_total_stored_data_compressed(sizeof(long long));
       result = bob.obj();

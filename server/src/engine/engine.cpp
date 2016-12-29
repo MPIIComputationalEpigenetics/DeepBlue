@@ -105,6 +105,18 @@ namespace epidb {
     return true;
   }
 
+  bool Engine::queue_histogram(const std::string &query_id, const std::string &column_name, const int bars, const std::string &user_key, std::string &id, std::string &msg)
+  {
+    utils::IdName user;
+    if (!dba::users::get_user(user_key, user, msg)) {
+      return false;
+    }
+    if (!queue(BSON("command" << "histogram" << "query_id" << query_id << "column_name" << column_name << "bars" << bars << "user_id" << user.id), 60 * 60, id, msg)) {
+      return false;
+    }
+    return true;
+  }
+
   bool Engine::queue_coverage(const std::string &query_id, const std::string &genome, const std::string &user_key, std::string &id, std::string &msg)
   {
     utils::IdName user;
