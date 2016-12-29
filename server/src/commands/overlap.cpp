@@ -38,7 +38,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::OPERATIONS, "Select genomic regions that overlap with at least one region of the second query.");
+        return CommandDescription(categories::OPERATIONS, "Select genomic regions that overlap or not overlap with with the specified number of regions of the second query. Important: This command is still experimental and changes may occour.");
       }
 
       static Parameters parameters_()
@@ -47,8 +47,8 @@ namespace epidb {
           Parameter("query_data_id", serialize::STRING, "query data that will be filtered."),
           Parameter("query_filter_id", serialize::STRING, "query containing the regions that the regions of the query_data_id must overlap."),
           Parameter("overlap", serialize::BOOLEAN, "True if must overlap, or false if must not overlap."),
-          Parameter("amount", serialize::INTEGER, "Amount that must overlap, use the parameter amount_type for setting the percentage."),
-          Parameter("amount_type", serialize::STRING, "Type of the amount: 'bp' and 'percentage'."),
+          Parameter("amount", serialize::INTEGER, "Amount of regions that must overlap. Use the parameter 'amount_type' ('bp'' or '%') to specify the unit.  For example, use the value '10' with the amount_type '%' to specify that 10% of the bases in both regions must overlap, or use '10' with the amount_type 'bp' to specify that at least 10 bases must or must not overlap."),
+          Parameter("amount_type", serialize::STRING, "Type of the amount: 'bp' for base pairs and '%' for percentage. "),
           parameters::UserKey
         };
       }
@@ -105,7 +105,7 @@ namespace epidb {
         args_builder.append("overlap", overlap);
         args_builder.append("amount", amount);
         args_builder.append("amount_type", amount_type);
-        
+
         std::string query_id;
         if (!dba::query::store_query("overlap", args_builder.obj(), user_key, query_id, msg)) {
           result.add_error(msg);

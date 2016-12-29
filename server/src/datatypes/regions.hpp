@@ -307,6 +307,12 @@ namespace epidb {
       return _regions.size();
     }
 
+    const RegionPtr& back() const
+    {
+      return _regions.back();
+    }
+
+
     std::vector<RegionPtr>::iterator begin()
     {
       return _regions.begin();

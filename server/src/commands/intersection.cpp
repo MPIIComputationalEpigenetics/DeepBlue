@@ -38,7 +38,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::OPERATIONS, "Select genomic regions that intersect with at least one region of the second query.");
+        return CommandDescription(categories::OPERATIONS, "Select genomic regions that intersect with at least one region of the second query. This command is a simplified version of the 'overlap' command.");
       }
 
       static Parameters parameters_()
