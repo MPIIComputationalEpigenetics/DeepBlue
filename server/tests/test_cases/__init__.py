@@ -20,6 +20,7 @@ import flank
 import gene_models
 import gene_expressions
 import genomes
+import histogram
 import info
 import init
 import intersection

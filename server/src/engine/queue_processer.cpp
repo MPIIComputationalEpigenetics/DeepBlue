@@ -94,7 +94,7 @@ namespace epidb {
         return process_score_matrix(job["experiments_formats"].Obj(), job["aggregation_function"].str(), job["query_id"].str(), user_key, status, result);
       } if (command == "get_experiments_by_query") {
         return process_get_experiments_by_query(job["query_id"].str(), user_key, status, result);
-      }  if (command == "get_experiments_by_query") {
+      }  if (command == "histogram") {
         return process_histogram(job["query_id"].str(), job["column_name"].str(), job["bars"].Int(), user_key, status, result);
       } else {
         mongo::BSONObjBuilder bob;

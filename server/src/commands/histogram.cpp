@@ -67,8 +67,8 @@ namespace epidb {
       {
         const std::string query_data_id = parameters[0]->as_string();
         const std::string column = parameters[1]->as_string();
-        const int bars = parameters[1]->as_long();
-        const std::string user_key = parameters[2]->as_string();
+        const int bars = parameters[2]->as_long();
+        const std::string user_key = parameters[3]->as_string();
         std::string msg;
         datatypes::User user;
 
