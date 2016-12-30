@@ -19,15 +19,12 @@
 
 #include <boost/bimap.hpp>
 #include <boost/bimap/list_of.hpp>
-#include <boost/bimap/set_of.hpp>
 #include <boost/function.hpp>
 #include <cassert>
 
 // Class providing fixed-size (by number of records)
 // LRU-replacement cache of a function with signature
 // V f(K).
-// SET is expected to be one of boost::bimaps::set_of
-// or boost::bimaps::unordered_set_of
 template <
   typename K,
   typename V,
@@ -39,9 +36,9 @@ public:
   typedef V value_type;
 
   typedef boost::bimaps::bimap <
-  SET<key_type>,
-      boost::bimaps::list_of<value_type>
-      > container_type;
+    SET<key_type>,
+    boost::bimaps::list_of<value_type>
+  > container_type;
 
   // Constuctor specifies the cached function and
   // the maximum number of records to be stored.
@@ -92,6 +89,10 @@ public:
     while (src != _container.right.rend()) {
       *dst++ = (*src++).second;
     }
+  }
+
+  void clear() {
+    _container.clear();
   }
 
 private:

@@ -105,56 +105,8 @@ namespace epidb {
         return true;
       }
 
-      bool get_field_pos(const DatasetId &dataset_id, const std::string &column_name, columns::ColumnTypePtr &column_type, std::string &msg)
-      {
-        processing::StatusPtr status = processing::build_dummy_status();
 
-        if (column_name == "CHROMOSOME") {
-          return dba::columns::load_column_type("CHROMOSOME",  status, column_type, msg);
-        }
 
-        if (column_name == "START") {
-          return dba::columns::load_column_type("START",  status, column_type, msg);
-        }
-
-        if (column_name == "END") {
-          return dba::columns::load_column_type("END",  status, column_type, msg);
-        }
-
-        // TODO: cache experiment_columns
-        std::vector<mongo::BSONObj> experiment_columns;
-        if (!dba::query::get_columns_from_dataset(dataset_id, experiment_columns, msg)) {
-          return false;
-        }
-
-        for (auto column : experiment_columns) {
-          if (column["name"].String() == column_name) {
-            if (!column_type_bsonobj_to_class(column, status, column_type, msg)) {
-              return false;
-            }
-            return true;
-          }
-        }
-
-        msg = "Invalid column name " + column_name;
-        return false;
-      }
-
-      bool get_field_pos(const std::string &experiment_name, const std::string &column_name, columns::ColumnTypePtr &column_type,  std::string &msg)
-      {
-        // TODO: cache experiment
-        mongo::BSONObj experiment;
-        if (!experiments::by_name(experiment_name, experiment, msg)) {
-          return false;
-        }
-        DatasetId dataset_id = experiment[dba::KeyMapper::DATASET()].Int();
-
-        if (!get_field_pos(dataset_id, column_name, column_type, msg)) {
-          return false;
-        }
-
-        return true;
-      }
 
       bool build_metadata(const std::string &name, const std::string &norm_name,
                           const std::string &genome, const std::string &norm_genome,

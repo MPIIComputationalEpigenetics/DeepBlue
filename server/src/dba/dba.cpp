@@ -30,6 +30,9 @@
 
 #include "../algorithms/patterns.hpp"
 
+#include "../cache/column_dataset_cache.hpp"
+#include "../cache/queries_cache.hpp"
+
 #include "../connection/connection.hpp"
 
 #include "../datatypes/metadata.hpp"
@@ -316,6 +319,8 @@ namespace epidb {
       query::invalidate_cache();
       users::invalidate_cache();
       genes::invalidate_cache();
+      cache::column_dataset_cache_invalidate();
+      cache::queries_cache_invalidate();
 
       c.done();
       return true;

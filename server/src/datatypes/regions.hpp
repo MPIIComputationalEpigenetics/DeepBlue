@@ -344,6 +344,20 @@ namespace epidb {
     {
       _regions.insert(it_end, begin, end);
     }
+
+
+    /*
+    void sort_field_value(const std::string field) {
+
+      sort(_regions.begin(), _regions.end(),
+        [field  ](const RegionPtr & a, const RegionPtr & b) -> bool
+          {
+            return b->value(field) - a->value(field);
+          }
+      );
+    }
+    */
+
   };
 
   typedef std::pair<std::string, Regions> ChromosomeRegions;

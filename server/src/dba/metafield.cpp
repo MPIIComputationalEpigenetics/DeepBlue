@@ -33,6 +33,8 @@
 #include "queries.hpp"
 #include "retrieve.hpp"
 
+#include "../cache/column_dataset_cache.hpp"
+
 #include "../connection/connection.hpp"
 
 #include "../dba/genes.hpp"
@@ -122,79 +124,6 @@ namespace epidb {
       return (s[0] == '@' || s[0] == '$');
     }
 
-    bool Metafield::get_bson_by_dataset_id(DatasetId dataset_id, mongo::BSONObj &obj, std::string &msg)
-    {
-
-      if (obj_by_dataset_id.find(dataset_id) != obj_by_dataset_id.end()) {
-        obj = obj_by_dataset_id.find(dataset_id)->second;
-        return true;
-      }
-
-      Connection c;
-
-      auto data_cursor = c->query(helpers::collection_name(Collections::EXPERIMENTS()),
-                                  mongo::Query(BSON(KeyMapper::DATASET() << dataset_id)));
-      if (data_cursor->more()) {
-        obj = data_cursor->next().getOwned();
-        obj_by_dataset_id[dataset_id] = obj;
-        c.done();
-        return true;
-      }
-
-      data_cursor = c->query(helpers::collection_name(Collections::ANNOTATIONS()),
-                             mongo::Query(BSON(KeyMapper::DATASET() << dataset_id)));
-      if (data_cursor->more()) {
-        obj = data_cursor->next().getOwned();
-        obj_by_dataset_id[dataset_id] = obj;
-        c.done();
-        return true;
-      }
-
-
-      data_cursor = c->query(helpers::collection_name(Collections::TILINGS()),
-                             mongo::Query(BSON(KeyMapper::DATASET() << dataset_id)));
-      if (data_cursor->more()) {
-        obj = data_cursor->next().getOwned();
-        obj_by_dataset_id[dataset_id] = obj;
-        c.done();
-        return true;
-      }
-
-      data_cursor = c->query(helpers::collection_name(Collections::QUERIES()),
-                             BSON("type" << "input_regions" << "args.dataset_id" << dataset_id));
-      if (data_cursor->more()) {
-        mongo::BSONObj query_obj = data_cursor->next().getOwned();
-        obj = BSON("name" << ("Query " + query_obj["_id"].String() + " regions set") <<
-                   "genome" << query_obj["args"]["genome"].String()
-                  );
-        obj_by_dataset_id[dataset_id] = obj;
-        c.done();
-        return true;
-      }
-
-      data_cursor = c->query(helpers::collection_name(Collections::GENE_MODELS()),
-                             mongo::Query(BSON(KeyMapper::DATASET() << dataset_id)));
-      if (data_cursor->more()) {
-        obj = data_cursor->next().getOwned();
-        obj_by_dataset_id[dataset_id] = obj;
-        c.done();
-        return true;
-      }
-
-      data_cursor = c->query(helpers::collection_name(Collections::GENE_EXPRESSIONS()),
-                             mongo::Query(BSON(KeyMapper::DATASET() << dataset_id)));
-      if (data_cursor->more()) {
-        obj = data_cursor->next().getOwned();
-        obj_by_dataset_id[dataset_id] = obj;
-        c.done();
-        return true;
-      }
-
-      c.done();
-      msg = Error::m(ERR_DATASET_NOT_FOUND, dataset_id);
-      return false;
-    }
-
     inline std::string metafield_attribute(const std::string& op)
     {
       unsigned int s = op.find("(") + 1;
@@ -211,7 +140,7 @@ namespace epidb {
 
       // TODO: Workaround - because aggregates does not have a region_set_id
       if (region_ref->dataset_id() != DATASET_EMPTY_ID) {
-        if (!get_bson_by_dataset_id(region_ref->dataset_id(), obj, msg)) {
+        if (!cache::get_bson_by_dataset_id(region_ref->dataset_id(), obj, msg)) {
           return false;
         }
       }
@@ -251,7 +180,7 @@ namespace epidb {
         result = region_ref->strand();
       } else {
         int pos;
-        if (!query::get_column_position_from_dataset(region_ref->dataset_id(), "STRAND", pos, msg)) {
+        if (!cache::get_column_position_from_dataset(region_ref->dataset_id(), "STRAND", pos, msg)) {
           return false;
         }
         if (pos == -1) {
@@ -317,7 +246,7 @@ namespace epidb {
     }
 
     bool Metafield::count_motif(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion *region_ref,
-                                  processing::StatusPtr status, std::string &result, std::string &msg)
+                                processing::StatusPtr status, std::string &result, std::string &msg)
     {
       std::string pattern = metafield_attribute(op);
 

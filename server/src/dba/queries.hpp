@@ -121,14 +121,17 @@ namespace epidb {
       bool process_aggregate(const std::string &user_key, const mongo::BSONObj &query,
                              processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg);
 
-      bool get_column_position_from_dataset(const DatasetId & dataset_id, const std::string &name,  int& pos, std::string & msg);
-
-      bool get_columns_from_dataset(const DatasetId &dataset_id, std::vector<mongo::BSONObj> &columns, std::string &msg);
-
       bool is_canceled(processing::StatusPtr status, std::string msg);
 
       bool find_annotation_pattern(const std::string &genome, const std::string &pattern, const bool overlap,
                                    DatasetId &dataset_id, std::string &msg);
+
+
+      /* These two functions must not be accessed directly. Use the cache:: methods */
+      /* TODO: move to another file */
+      bool __get_columns_from_dataset(const DatasetId & dataset_id, std::vector<mongo::BSONObj> &columns, std::string & msg);
+
+      bool __get_bson_by_dataset_id(DatasetId dataset_id, mongo::BSONObj &obj, std::string &msg);
     }
   }
 }

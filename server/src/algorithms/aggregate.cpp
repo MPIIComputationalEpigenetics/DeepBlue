@@ -32,6 +32,8 @@
 #include "../dba/key_mapper.hpp"
 #include "../dba/metafield.hpp"
 
+#include "../cache/column_dataset_cache.cpp"
+
 #include "../extras/utils.hpp"
 
 #include "../errors.hpp"
@@ -47,7 +49,6 @@ namespace epidb {
       auto it_ranges = ranges.begin();
 
       DatasetId dataset_id = -1;
-      dba::columns::ColumnTypePtr column;
 
      auto it_data_begin = data.begin();
 
@@ -70,6 +71,7 @@ namespace epidb {
           it_data_begin++;
         }
 
+        int column_pos;
         Accumulator acc;
         auto it_data = it_data_begin;
         while (it_data != data.end() &&
@@ -100,11 +102,11 @@ namespace epidb {
             } else {
               if (dataset_id != (*it_data)->dataset_id()) {
                 dataset_id = (*it_data)->dataset_id();
-                if (!dba::experiments::get_field_pos(dataset_id, field, column, msg)) {
+                if (!cache::get_column_position_from_dataset(dataset_id, field, column_pos, msg)) {
                   return false;
                 }
               }
-              Score score = (*it_data)->value(column->pos());
+              Score score = (*it_data)->value(column_pos);
               acc.push(score * correct_offset);
             }
           }

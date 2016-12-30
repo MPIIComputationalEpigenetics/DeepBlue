@@ -29,6 +29,8 @@
 #include "../algorithms/algorithms.hpp"
 #include "../algorithms/filter.hpp"
 
+#include "../cache/column_dataset_cache.hpp"
+
 #include "../connection/connection.hpp"
 
 #include "../datatypes/column_types_def.hpp"
@@ -726,7 +728,7 @@ namespace epidb {
       }
 
       bool retrieve_expression_select_query(const std::string &user_key, const mongo::BSONObj &query,
-          processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg)
+                                            processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg)
       {
         processing::RunningOp runningOp = status->start_operation(processing::RETRIEVE_EXPRESSIONS_DATA, query);
         if (is_canceled(status, msg)) {
@@ -1016,7 +1018,7 @@ namespace epidb {
             if (!dba::Metafield::is_meta(field)) {
               if (region->dataset_id() != dataset_id) {
                 dataset_id = region->dataset_id();
-                if (!dba::experiments::get_field_pos(dataset_id, field, column, msg)) {
+                if (!cache::get_column_type_from_dataset(dataset_id, field, column, msg)) {
                   return false;
                 }
               }
@@ -1178,25 +1180,7 @@ namespace epidb {
       }
 
       // TODO: move to another file
-      // TODO: cache it
-      bool get_column_position_from_dataset(const DatasetId & dataset_id, const std::string &name,  int& pos, std::string & msg)
-      {
-        std::vector<mongo::BSONObj> columns;
-        if (!dba::query::get_columns_from_dataset(dataset_id, columns, msg)) {
-          return false;
-        }
-        for (const auto& c : columns) {
-          if (c["name"].str() == name) {
-            pos = c["pos"].Number();
-            return true;
-          }
-        }
-        return -1;
-      }
-
-      // TODO: move to another file
-      // TODO: cache it
-      bool get_columns_from_dataset(const DatasetId & dataset_id, std::vector<mongo::BSONObj> &columns, std::string & msg)
+      bool __get_columns_from_dataset(const DatasetId & dataset_id, std::vector<mongo::BSONObj> &columns, std::string & msg)
       {
         if (dataset_id == DATASET_EMPTY_ID) {
           return true;
@@ -1371,6 +1355,59 @@ namespace epidb {
           msg = Error::m(ERR_DATASET_NOT_FOUND, dataset_id);
           return false;
         }
+      }
+
+
+      bool get_dataset_bson_from_id(DatasetId dataset_id, const std::string collection, mongo::BSONObj &obj)
+      {
+        Connection c;
+        auto data_cursor = c->query(helpers::collection_name(collection), mongo::Query(BSON(KeyMapper::DATASET() << dataset_id)));
+        if (data_cursor->more()) {
+          obj = data_cursor->next().getOwned();
+          c.done();
+          return true;
+        }
+        c.done();
+        return false;
+      }
+
+      bool __get_bson_by_dataset_id(DatasetId dataset_id, mongo::BSONObj &obj, std::string &msg)
+      {
+        if (get_dataset_bson_from_id(dataset_id, Collections::EXPERIMENTS(), obj)) {
+          return true;
+        }
+
+        if (get_dataset_bson_from_id(dataset_id, Collections::ANNOTATIONS(), obj)) {
+          return true;
+        }
+
+        if (get_dataset_bson_from_id(dataset_id, Collections::GENE_MODELS(), obj)) {
+          return true;
+        }
+
+        if (get_dataset_bson_from_id(dataset_id, Collections::GENE_EXPRESSIONS(), obj)) {
+          return true;
+        }
+
+        if (get_dataset_bson_from_id(dataset_id, Collections::TILINGS(), obj)) {
+          return true;
+        }
+
+        Connection c;
+        auto data_cursor = c->query(helpers::collection_name(Collections::QUERIES()),
+                                    BSON("type" << "input_regions" << "args.dataset_id" << dataset_id));
+        if (data_cursor->more()) {
+          mongo::BSONObj query_obj = data_cursor->next().getOwned();
+          obj = BSON("name" << ("Query " + query_obj["_id"].String() + " regions set") <<
+                     "genome" << query_obj["args"]["genome"].String()
+                    );
+          c.done();
+          return true;
+        }
+        c.done();
+
+        msg = Error::m(ERR_DATASET_NOT_FOUND, dataset_id);
+        return false;
       }
 
       // TODO: Move to processing file

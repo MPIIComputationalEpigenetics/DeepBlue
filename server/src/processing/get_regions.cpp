@@ -23,6 +23,8 @@
 #include <vector>
 #include <unordered_map>
 
+#include "../cache/column_dataset_cache.hpp"
+
 #include "../datatypes/column_types_def.hpp"
 #include "../datatypes/regions.hpp"
 
@@ -108,7 +110,7 @@ namespace epidb {
             std::vector<mongo::BSONObj> columns;
             auto it = datasets_formats.find(dataset_id);
             if (it == datasets_formats.end()) {
-              if (!dba::query::get_columns_from_dataset(dataset_id, columns, msg)) {
+              if (!cache::get_columns_from_dataset(dataset_id, columns, msg)) {
                 return false;
               }
               parser::FileFormat new_format;

@@ -18,6 +18,9 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#ifndef EPIDB_QUERIES_CACHE_HPP
+#define EPIDB_QUERIES_CACHE_HPP
+
 #include <string>
 
 #include <boost/bimap/set_of.hpp>
@@ -51,5 +54,9 @@ namespace epidb {
 
     bool get_query_cache(const std::string &user_key, const std::string &query_id,
                          processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg);
+
+    void queries_cache_invalidate();
   }
 }
+
+#endif

@@ -28,6 +28,8 @@
 
 #include "../algorithms/accumulator.hpp"
 
+#include "../cache/column_dataset_cache.hpp"
+
 #include "../datatypes/regions.hpp"
 
 #include "../dba/column_types.hpp"
@@ -162,7 +164,7 @@ namespace epidb {
         DatasetId dataset_id = experiment[dba::KeyMapper::DATASET()].Int();
         dba::columns::ColumnTypePtr column;
 
-        if (!dba::experiments::get_field_pos(dataset_id, experiment_input.second, column, msg)) {
+        if (!cache::get_column_type_from_dataset(dataset_id, experiment_input.second, column, msg)) {
           return false;
         }
 

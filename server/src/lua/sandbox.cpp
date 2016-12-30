@@ -27,6 +27,8 @@
 
 #include "sandbox.hpp"
 
+#include "../cache/column_dataset_cache.hpp"
+
 #include "../datatypes/column_types_def.hpp"
 #include "../datatypes/regions.hpp"
 
@@ -208,7 +210,7 @@ namespace epidb {
       dba::columns::ColumnTypePtr column;
 
       // TODO: better error handling
-      if (!dba::experiments::get_field_pos(dataset_id, field_name, column, msg)) {
+      if (!cache::get_column_type_from_dataset(dataset_id, field_name, column, msg)) {
         lua_pushstring(lua_state, msg.c_str());
         return 1;
       }

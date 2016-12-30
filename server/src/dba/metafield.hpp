@@ -48,8 +48,6 @@ namespace epidb {
 
       static const std::map<std::string, std::string> createFunctionsReturnsMap();
 
-      bool get_bson_by_dataset_id(DatasetId dataset_id, mongo::BSONObj &obj, std::string &msg);
-
       bool length(const std::string &, const std::string &, const mongo::BSONObj &obj, const AbstractRegion *region_ref, processing::StatusPtr status, std::string &result, std::string &msg);
 
       bool name(const std::string &, const std::string &, const mongo::BSONObj &obj, const AbstractRegion *region_ref, processing::StatusPtr status, std::string &result, std::string &msg);

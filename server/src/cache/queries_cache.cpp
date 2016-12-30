@@ -62,6 +62,10 @@ namespace epidb {
 
       return qr.success;
     }
+
+    void queries_cache_invalidate() {
+      QUERY_CACHE.clear();
+    }
   }
 }
 

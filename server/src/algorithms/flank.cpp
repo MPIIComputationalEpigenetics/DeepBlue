@@ -24,6 +24,8 @@
 
 #include <iostream>
 
+#include "../cache/column_dataset_cache.hpp"
+
 #include "../datatypes/regions.hpp"
 
 #include "../dba/column_types.hpp"
@@ -45,10 +47,11 @@ namespace epidb {
 
         bool positve_strand = true;
         if (use_strand) {
-          if (!dba::experiments::get_field_pos(region->dataset_id(), "STRAND", column_type, msg)) {
+          int pos;
+          if (!cache::get_column_position_from_dataset(region->dataset_id(), "STRAND", pos, msg)) {
             return false;
           }
-          std::string strand = region->get_string(column_type->pos());
+          std::string strand = region->get_string(pos);
           if (strand == "-") {
             positve_strand = false;
           }
