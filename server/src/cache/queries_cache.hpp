@@ -19,20 +19,18 @@
 //
 
 #include <string>
-#include <map>
-#include <unordered_map>
 
 #include <boost/bimap/set_of.hpp>
-#include <boost/bimap/unordered_set_of.hpp>
 
 #include "../algorithms/lru.hpp"
+
 #include "../datatypes/regions.hpp"
 
-#include "queries.hpp"
+#include "../dba/queries.hpp"
 
 namespace epidb {
-  namespace dba {
-    namespace cache {
+  namespace cache {
+    namespace query {
       struct QUERY_KEY {
         std::string user_key;
         std::string query_id;
@@ -49,10 +47,9 @@ namespace epidb {
         ChromosomeRegionsList regions;
         std::string msg;
       };
-
-
-      bool get_query_cache(const std::string &user_key, const std::string &query_id,
-                           processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg);
     }
+
+    bool get_query_cache(const std::string &user_key, const std::string &query_id,
+                         processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg);
   }
 }

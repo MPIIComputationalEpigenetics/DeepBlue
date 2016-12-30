@@ -66,7 +66,6 @@ namespace epidb {
           }
         }
 
-
         size_t chromosome_size;
         if (!dba::genomes::chromosome_size(genome, chromosome, chromosome_size, msg)) {
           return false;
@@ -74,7 +73,6 @@ namespace epidb {
 
         genome_size += chromosome_size;
 
-        std::cerr << chromosome << " " << total << " " << last_pos << " " << std::endl;
         coverage_infos.emplace_back(CoverageInfo{chromosome, chromosome_size, total});
       }
 

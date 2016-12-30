@@ -35,6 +35,8 @@
 #include "../datatypes/expressions_manager.hpp"
 #include "../datatypes/regions.hpp"
 
+#include "../cache/queries_cache.hpp"
+
 #include "../dba/experiments.hpp"
 
 #include "../extras/utils.hpp"
@@ -51,7 +53,6 @@
 #include "users.hpp"
 
 #include "queries.hpp"
-#include "queries_cache.hpp"
 
 #include "../errors.hpp"
 #include "../log.hpp"

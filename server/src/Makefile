@@ -8,7 +8,7 @@ COMMANDS = $(wildcard commands/*.cpp)
 COMMANDS_OBJS = $(COMMANDS:.cpp=.o)
 
 OBJS	= main.o version.o errors.o
-OBJLIBS	= $(COMMANDS_OBJS) libhttpd.a libdba.a libparser.a libengine.a libextras.a libalgorithms.a libdatatypes.a liblua.a libexternal.a libmdbq.a libprocessing.a libconnection.a libthreading.a
+OBJLIBS	= $(COMMANDS_OBJS) libhttpd.a libdba.a libparser.a libengine.a libextras.a libalgorithms.a libdatatypes.a liblua.a libexternal.a libmdbq.a libprocessing.a libconnection.a libthreading.a libcache.a
 
 CXXFLAGS	= $(DEFCXXFLAGS)
 
@@ -76,6 +76,10 @@ libmdbq.a: force_look
 libpool.a: force_look
 	@$(ECHO) looking into poll : $(MAKE) $(MFLAGS)
 	@cd pool; $(MAKE) $(MFLAGS)
+
+libcache.a: force_look
+	@$(ECHO) looking into cache : $(MAKE) $(MFLAGS)
+	@cd cache; $(MAKE) $(MFLAGS)
 
 clean:
 	$(ECHO) cleaning up in .
