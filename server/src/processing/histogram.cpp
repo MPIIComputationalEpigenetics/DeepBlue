@@ -48,6 +48,10 @@ namespace epidb {
         );
       }
 
+      if (all_regions.empty() ) {
+        return true;
+      }
+
       std::cerr << "X: " << all_regions.size() << "  " << total_size << std::endl;
 
       std::sort(all_regions.begin(), all_regions.end(),
@@ -56,18 +60,58 @@ namespace epidb {
             std::string msg;
             int pos_a;
             int pos_b;
-            cache::get_column_position_from_dataset(a->dataset_id(), column_name, pos_a, msg);
-            cache::get_column_position_from_dataset(b->dataset_id(), column_name, pos_b, msg);
+            if (!cache::get_column_position_from_dataset(a->dataset_id(), column_name, pos_a, msg)) {
+              return false;
+            }
+            if (!cache::get_column_position_from_dataset(b->dataset_id(), column_name, pos_b, msg)) {
+              return false;
+            }
             return a->value(pos_a) <  b->value(pos_b);
           }
       );
 
-      std::cerr << "XYZ" << std::endl;
-      for (const auto& x : all_regions) {
-        int pos_a;
-        cache::get_column_position_from_dataset(x->dataset_id(), column_name, pos_a, msg);
+      int min_column_pos;
+      cache::get_column_position_from_dataset(all_regions.front()->dataset_id(), column_name, min_column_pos, msg);
+      Score min = all_regions.front()->value(min_column_pos);
 
-        std::cerr << x->value(pos_a) << std::endl;
+      int max_column_pos;
+      cache::get_column_position_from_dataset(all_regions.back()->dataset_id(), column_name, max_column_pos, msg);
+      Score max = all_regions.back()->value(max_column_pos);
+
+      std::cerr << "MIN " << min << std::endl;
+      std::cerr << "MAX " << max << std::endl;
+      Score step = (max - min) / bars;
+      std::cerr << "STEP " << step << std::endl;
+
+      std::vector<size_t> bar_counts(bars);
+      int actual_bar = 0;
+      int actual_count = 0;
+
+      for (const RegionPtr& region: all_regions) {
+        int column_pos;
+        if (!cache::get_column_position_from_dataset(region->dataset_id(), column_name, column_pos, msg)) {
+          return false;
+        }
+        Score value = region->value(column_pos);
+
+        //std::cerr << value;
+
+        if (value <= (min + (step  * (actual_bar + 1)))) {
+          actual_count++;
+        } else {
+          std::cerr << value << "  "  << (min + (step * (actual_bar + 1))) << std::endl;
+          bar_counts[actual_bar] = actual_count;
+
+          actual_bar = static_cast<int>(floor((value - min) / step));
+
+          std::cerr << "actual bar: " << actual_bar << std::endl;
+          actual_count = 1;
+        }
+      }
+      bar_counts[actual_bar] = actual_count;
+
+      for (auto a: bar_counts) {
+        std::cerr << a << std::endl;
       }
 
       return true;
