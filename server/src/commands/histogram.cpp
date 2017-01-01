@@ -77,6 +77,17 @@ namespace epidb {
           return false;
         }
 
+        if (bars <= 0) {
+          result.add_error("There must be at least one bar in the histogram");
+          return false;
+        }
+
+        // No more than 65536 bars
+        if (bars >= 65536) {
+          result.add_error("There must be at no more than 65536 bars");
+          return false;
+        }
+
         if (!dba::exists::query(query_data_id, user_key, msg)) {
           result.add_error(Error::m(ERR_INVALID_QUERY_ID, query_data_id));
           return false;

@@ -22,6 +22,7 @@
 #include <cstring>
 #include <set>
 #include <iterator>
+#include <unordered_map>
 #include <utility>
 
 #include <mongo/bson/bson.h>
@@ -68,7 +69,8 @@ namespace epidb {
       class NameDatasetIdCache {
       private:
 
-        std::map<std::string, DatasetId> name_dataset_id;
+        std::unordered_map<std::string, DatasetId> name_dataset_id;
+        std::unordered_map<DatasetId, std::string> dataset_id_name;
 
       public:
 
@@ -77,14 +79,28 @@ namespace epidb {
           return name_dataset_id[name];
         }
 
-        void set_dataset_id(const std::string &name, const DatasetId id)
+        const std::string& get_name(const DatasetId id)
+        {
+          return dataset_id_name[id];
+        }
+
+        void set(const std::string &name, const DatasetId id)
         {
           name_dataset_id[name] = id;
+          dataset_id_name[id] = name;
         }
 
         bool exists_dataset_id(const std::string &name)
         {
           if (name_dataset_id.find(name) != name_dataset_id.end()) {
+            return true;
+          }
+          return false;
+        }
+
+        bool exists_name(const DatasetId id)
+        {
+          if (dataset_id_name.find(id) != dataset_id_name.end()) {
             return true;
           }
           return false;
@@ -487,7 +503,7 @@ namespace epidb {
           mongo::BSONObj p = cursor->next();
           mongo::BSONElement dataset_id_elem = p.getField(KeyMapper::DATASET());
           dataset_id = dataset_id_elem.Int();
-          experiment_name_dataset_id_cache.set_dataset_id(norm_name, dataset_id);
+          experiment_name_dataset_id_cache.set(norm_name, dataset_id);
         }
 
         mongo::BSONObjBuilder regions_query_builder;
@@ -1358,7 +1374,7 @@ namespace epidb {
       }
 
 
-      bool get_dataset_bson_from_id(DatasetId dataset_id, const std::string collection, mongo::BSONObj &obj)
+      bool __get_bson_by_dataset_id(DatasetId dataset_id, const std::string collection, mongo::BSONObj &obj)
       {
         Connection c;
         auto data_cursor = c->query(helpers::collection_name(collection), mongo::Query(BSON(KeyMapper::DATASET() << dataset_id)));
@@ -1373,23 +1389,23 @@ namespace epidb {
 
       bool __get_bson_by_dataset_id(DatasetId dataset_id, mongo::BSONObj &obj, std::string &msg)
       {
-        if (get_dataset_bson_from_id(dataset_id, Collections::EXPERIMENTS(), obj)) {
+        if (__get_bson_by_dataset_id(dataset_id, Collections::EXPERIMENTS(), obj)) {
           return true;
         }
 
-        if (get_dataset_bson_from_id(dataset_id, Collections::ANNOTATIONS(), obj)) {
+        if (__get_bson_by_dataset_id(dataset_id, Collections::ANNOTATIONS(), obj)) {
           return true;
         }
 
-        if (get_dataset_bson_from_id(dataset_id, Collections::GENE_MODELS(), obj)) {
+        if (__get_bson_by_dataset_id(dataset_id, Collections::GENE_MODELS(), obj)) {
           return true;
         }
 
-        if (get_dataset_bson_from_id(dataset_id, Collections::GENE_EXPRESSIONS(), obj)) {
+        if (__get_bson_by_dataset_id(dataset_id, Collections::GENE_EXPRESSIONS(), obj)) {
           return true;
         }
 
-        if (get_dataset_bson_from_id(dataset_id, Collections::TILINGS(), obj)) {
+        if (__get_bson_by_dataset_id(dataset_id, Collections::TILINGS(), obj)) {
           return true;
         }
 
@@ -1461,7 +1477,7 @@ namespace epidb {
         if (cursor->more()) {
           mongo::BSONObj p = cursor->next();
           dataset_id = p.getField(KeyMapper::DATASET()).Int();
-          annotation_pattern_cache.set_dataset_id(__cache__key__, dataset_id);
+          annotation_pattern_cache.set(__cache__key__, dataset_id);
           c.done();
           return true;
         } else {

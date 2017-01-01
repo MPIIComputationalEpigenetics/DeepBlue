@@ -132,17 +132,18 @@ namespace epidb {
     {
       std::string msg;
       mongo::BSONObjBuilder bob;
-      mongo::BSONArray counts;
+      mongo::BSONObj histogram;
 
-      if (!processing::histogram(query_id, column_name, bars, user_key, status, counts, msg)) {
+      if (!processing::histogram(query_id, column_name, bars, user_key, status, histogram, msg)) {
         bob.append("__error__", msg);
         result = bob.obj();
         return false;
       }
 
-      bob.append("count", counts);
-      status->set_total_stored_data(sizeof(long long));
-      status->set_total_stored_data_compressed(sizeof(long long));
+      int size = histogram.objsize();
+      bob.append("histogram", histogram);
+      status->set_total_stored_data(size);
+      status->set_total_stored_data_compressed(size);
       result = bob.obj();
 
       if (is_canceled(status, msg)) {

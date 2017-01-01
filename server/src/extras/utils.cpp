@@ -547,6 +547,16 @@ namespace epidb {
       return ab.arr();
     }
 
+    mongo::BSONArray build_array(const std::vector<Score> &params)
+    {
+      mongo::BSONArrayBuilder ab;
+      for (const auto& param : params) {
+        ab.append((Score)param);
+      }
+      return ab.arr();
+    }
+
+
     // TODO: move to arrays.cpp
     // TODO: Use template
     mongo::BSONArray build_array(const std::vector<std::string> &params)

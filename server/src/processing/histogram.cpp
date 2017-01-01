@@ -27,7 +27,18 @@
 
 namespace epidb {
   namespace processing {
-    bool histogram(const std::string& query_id, const std::string& column_name, const int bars, const std::string& user_key, processing::StatusPtr status, mongo::BSONArray& counts, std::string& msg) {
+    bool histogram(const std::string& query_id, const std::string& column_name, const int bars, const std::string& user_key, processing::StatusPtr status, mongo::BSONObj& result, std::string& msg) {
+
+
+      if (bars <= 0) {
+        msg = "There must be at least one bar in the histogram";
+        return false;
+      }
+
+      if (bars >= 65536) {
+        msg = "There must be at no more than 65536 bars";
+        return false;
+      }
 
       ChromosomeRegionsList chromosomeRegionsList;
       if (!dba::query::retrieve_query(user_key, query_id, status, chromosomeRegionsList, msg)) {
@@ -51,8 +62,6 @@ namespace epidb {
       if (all_regions.empty() ) {
         return true;
       }
-
-      std::cerr << "X: " << all_regions.size() << "  " << total_size << std::endl;
 
       std::sort(all_regions.begin(), all_regions.end(),
         [column_name](const RegionPtr & a, const RegionPtr & b) -> bool
@@ -78,14 +87,12 @@ namespace epidb {
       cache::get_column_position_from_dataset(all_regions.back()->dataset_id(), column_name, max_column_pos, msg);
       Score max = all_regions.back()->value(max_column_pos);
 
-      std::cerr << "MIN " << min << std::endl;
-      std::cerr << "MAX " << max << std::endl;
       Score step = (max - min) / bars;
-      std::cerr << "STEP " << step << std::endl;
 
-      std::vector<size_t> bar_counts(bars);
+      std::vector<long> bar_counts(bars);
       int actual_bar = 0;
       int actual_count = 0;
+
 
       for (const RegionPtr& region: all_regions) {
         int column_pos;
@@ -94,25 +101,28 @@ namespace epidb {
         }
         Score value = region->value(column_pos);
 
-        //std::cerr << value;
-
         if (value <= (min + (step  * (actual_bar + 1)))) {
           actual_count++;
         } else {
-          std::cerr << value << "  "  << (min + (step * (actual_bar + 1))) << std::endl;
           bar_counts[actual_bar] = actual_count;
 
           actual_bar = static_cast<int>(floor((value - min) / step));
 
-          std::cerr << "actual bar: " << actual_bar << std::endl;
           actual_count = 1;
         }
       }
       bar_counts[actual_bar] = actual_count;
 
-      for (auto a: bar_counts) {
-        std::cerr << a << std::endl;
+      std::vector<Score> scores;
+      for (int i = 0; i <= bars; i++) {
+        scores.push_back((min + (step * i)));
       }
+
+      mongo::BSONObjBuilder bob;
+      bob.append("ranges", utils::build_array(scores));
+      bob.append("counts", utils::build_array(bar_counts));
+
+      result = bob.obj();
 
       return true;
     }

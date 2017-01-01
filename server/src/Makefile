@@ -1,6 +1,6 @@
 include Makefile.inc
 
-LIB_DIRS	= algorithms connection datatypes dba engine external extras httpd lua mdbq parser processing threading
+LIB_DIRS	= algorithms cache connection datatypes dba engine external extras httpd lua mdbq parser processing threading
 
 EXE	= server
 

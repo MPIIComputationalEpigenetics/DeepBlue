@@ -113,8 +113,14 @@ namespace epidb {
         }
       }
 
+      mongo::BSONObj obj;
+      if (!get_bson_by_dataset_id(qk.dataset_id, obj, result.msg)) {
+        return result;
+      }
+
+      // Give a nice error message when we do not find the column in the given dataset.
       result.success = false;
-      result.msg = "Column " + qk.column_name + " not found in the Dataset " + utils::long_to_string(qk.dataset_id);
+      result.msg =  obj["name"].str() + "does not have the column '" + qk.column_name +"'";
       result.pos = -1;
 
       return result;
