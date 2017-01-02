@@ -124,7 +124,7 @@ namespace epidb {
 
     bool count_regions(const std::string &query_id, const std::string &user_key, processing::StatusPtr status, size_t &count, std::string &msg);
 
-    bool histogram(const std::string& query_id, const std::string& column_name, const int bars, const std::string& user_key, const processing::StatusPtr status, mongo::BSONObj& counts, std::string& msg);
+    bool binning(const std::string& query_id, const std::string& column_name, const int bars, const std::string& user_key, const processing::StatusPtr status, mongo::BSONObj& counts, std::string& msg);
 
     bool coverage(const std::string &query_id, const std::string &genome, const std::string &user_key, processing::StatusPtr status, std::vector<CoverageInfo> &coverage_infos, std::string &msg);
 

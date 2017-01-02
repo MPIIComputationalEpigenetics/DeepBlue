@@ -1,5 +1,5 @@
 //
-//  histogram.cpp
+//  binning.cpp
 //  DeepBlue Epigenomic Data Server
 //  File created by Felipe Albrecht on 29.12.16.
 //  Copyright (c) 2016 Max Planck Institute for Informatics. All rights reserved.
@@ -34,7 +34,7 @@
 namespace epidb {
   namespace command {
 
-    class HistogramCommand: public Command {
+    class BinningCommand: public Command {
 
     private:
       static CommandDescription desc_()
@@ -45,9 +45,9 @@ namespace epidb {
       static Parameters parameters_()
       {
         return {
-          Parameter("query_data_id", serialize::STRING, "query data that will made the histogram."),
+          Parameter("query_data_id", serialize::STRING, "query data that will made by the binning."),
           Parameter("column", serialize::STRING, "name of the column that will be used in the aggregation"),
-          Parameter("bars", serialize::INTEGER, "name of the column that will be used in the aggregation"),
+          Parameter("bins", serialize::INTEGER, "number of of bins"),
           parameters::UserKey
         };
       }
@@ -60,7 +60,7 @@ namespace epidb {
       }
 
     public:
-      HistogramCommand() : Command("histogram", parameters_(), results_(), desc_()) {}
+      BinningCommand() : Command("binning", parameters_(), results_(), desc_()) {}
 
       virtual bool run(const std::string &ip,
                        const serialize::Parameters &parameters, serialize::Parameters &result) const
@@ -78,13 +78,13 @@ namespace epidb {
         }
 
         if (bars <= 0) {
-          result.add_error("There must be at least one bar in the histogram");
+          result.add_error("There must be at least one bin.");
           return false;
         }
 
         // No more than 65536 bars
         if (bars >= 65536) {
-          result.add_error("There must be at no more than 65536 bars");
+          result.add_error("There must be at no more than 65536 bin.");
           return false;
         }
 
@@ -94,7 +94,7 @@ namespace epidb {
         }
 
         std::string request_id;
-        if (!epidb::Engine::instance().queue_histogram(query_data_id, column, bars, user_key, request_id, msg)) {
+        if (!epidb::Engine::instance().queue_binning(query_data_id, column, bars, user_key, request_id, msg)) {
           result.add_error(msg);
           return false;
         }

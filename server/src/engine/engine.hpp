@@ -82,7 +82,7 @@ namespace epidb {
 
     bool queue_count_regions(const std::string &query_id, const std::string &user_key, std::string &request_id, std::string &msg);
 
-    bool queue_histogram(const std::string &query_id, const std::string &column_name, const int bars, const std::string &user_key, std::string &request_id, std::string &msg);
+    bool queue_binning(const std::string &query_id, const std::string &column_name, const int bars, const std::string &user_key, std::string &request_id, std::string &msg);
 
     bool queue_coverage(const std::string &query_id, const std::string &genome, const std::string &user_key, std::string &id, std::string &msg);
 

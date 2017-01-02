@@ -94,8 +94,8 @@ namespace epidb {
         return process_score_matrix(job["experiments_formats"].Obj(), job["aggregation_function"].str(), job["query_id"].str(), user_key, status, result);
       } if (command == "get_experiments_by_query") {
         return process_get_experiments_by_query(job["query_id"].str(), user_key, status, result);
-      }  if (command == "histogram") {
-        return process_histogram(job["query_id"].str(), job["column_name"].str(), job["bars"].Int(), user_key, status, result);
+      }  if (command == "binning") {
+        return process_binning(job["query_id"].str(), job["column_name"].str(), job["bars"].Int(), user_key, status, result);
       } else {
         mongo::BSONObjBuilder bob;
         bob.append("__error__", "Invalid command " + command);
@@ -128,20 +128,20 @@ namespace epidb {
       return true;
     }
 
-    bool QueueHandler::process_histogram(const std::string &query_id, const std::string& column_name, const int bars, const std::string &user_key, processing::StatusPtr status, mongo::BSONObj& result)
+    bool QueueHandler::process_binning(const std::string &query_id, const std::string& column_name, const int bars, const std::string &user_key, processing::StatusPtr status, mongo::BSONObj& result)
     {
       std::string msg;
       mongo::BSONObjBuilder bob;
-      mongo::BSONObj histogram;
+      mongo::BSONObj binning;
 
-      if (!processing::histogram(query_id, column_name, bars, user_key, status, histogram, msg)) {
+      if (!processing::binning(query_id, column_name, bars, user_key, status, binning, msg)) {
         bob.append("__error__", msg);
         result = bob.obj();
         return false;
       }
 
-      int size = histogram.objsize();
-      bob.append("histogram", histogram);
+      int size = binning.objsize();
+      bob.append("binning", binning);
       status->set_total_stored_data(size);
       status->set_total_stored_data_compressed(size);
       result = bob.obj();

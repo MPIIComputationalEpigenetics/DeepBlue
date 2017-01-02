@@ -1,5 +1,5 @@
 //
-//  histogram.cpp
+//  binning.cpp
 //  DeepBlue Epigenomic Data Server
 //  File created by Felipe Albrecht on 29.12.14.
 //  Copyright (c) 2016 Max Planck Institute for Informatics. All rights reserved.
@@ -27,11 +27,11 @@
 
 namespace epidb {
   namespace processing {
-    bool histogram(const std::string& query_id, const std::string& column_name, const int bars, const std::string& user_key, processing::StatusPtr status, mongo::BSONObj& result, std::string& msg) {
+    bool binning(const std::string& query_id, const std::string& column_name, const int bars, const std::string& user_key, processing::StatusPtr status, mongo::BSONObj& result, std::string& msg) {
 
 
       if (bars <= 0) {
-        msg = "There must be at least one bar in the histogram";
+        msg = "There must be at least one bar in the binning";
         return false;
       }
 

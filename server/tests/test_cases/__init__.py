@@ -3,6 +3,7 @@ import aggregate
 import annotations
 import bedgraph_parser
 import biosources
+import binning
 import bugs
 import cancel
 import changes
@@ -20,7 +21,6 @@ import flank
 import gene_models
 import gene_expressions
 import genomes
-import histogram
 import info
 import init
 import intersection
