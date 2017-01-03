@@ -39,7 +39,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::OPERATIONS, "---");
+        return CommandDescription(categories::OPERATIONS, "Create set of numbers containing the the count values of the selected data columns");
       }
 
       static Parameters parameters_()
@@ -103,6 +103,6 @@ namespace epidb {
         return true;
       }
 
-    } histogramCommand;
+    } binningCommand;
   }
 }
