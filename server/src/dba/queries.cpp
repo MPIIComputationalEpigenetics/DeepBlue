@@ -341,41 +341,18 @@ namespace epidb {
           }
         }
 
-        std::vector<DatasetId> datasets_it(datasets_it_set.size());
-        std::copy(datasets_it_set.begin(), datasets_it_set.end(), datasets_it.begin());
+        for (const DatasetId& dataset_id: datasets_it_set) {
+          mongo::BSONObj obj;
+          if (!cache::get_bson_by_dataset_id(dataset_id, obj, msg)) {
+            return false;
+          }
 
-        mongo::BSONObjBuilder experiments_query_builder;
-        experiments_query_builder << KeyMapper::DATASET() << helpers::build_condition_array<DatasetId>(datasets_it, "$in");
-
-        mongo::BSONObj o = experiments_query_builder.obj();
-
-        Connection c;
-        auto cursor = c->query(helpers::collection_name(Collections::EXPERIMENTS()), o);
-        while (cursor->more()) {
-          mongo::BSONObj experiment = cursor->next();
-          std::string exp_id = experiment["_id"].str();
-          std::string exp_name = experiment["name"].str();
-          utils::IdName p(exp_id, exp_name);
-          experiments_name.push_back(p);
-        }
-        cursor = c->query(helpers::collection_name(Collections::ANNOTATIONS()), o);
-        while (cursor->more()) {
-          mongo::BSONObj experiment = cursor->next();
-          std::string exp_id = experiment["_id"].str();
-          std::string exp_name = experiment["name"].str();
-          utils::IdName p(exp_id, exp_name);
-          experiments_name.push_back(p);
-        }
-        cursor = c->query(helpers::collection_name(Collections::TILINGS()), o);
-        while (cursor->more()) {
-          mongo::BSONObj experiment = cursor->next();
-          std::string exp_id = experiment["_id"].str();
-          std::string exp_name = experiment["name"].str();
-          utils::IdName p(exp_id, exp_name);
-          experiments_name.push_back(p);
+          std::string _id = obj["_id"].str();
+          std::string name = obj["name"].str();
+          utils::IdName p(_id, name);
+          data.push_back(p);
         }
 
-        c.done();
         return true;
       }
 
