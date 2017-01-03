@@ -322,7 +322,7 @@ namespace epidb {
       }
 
       bool get_experiments_by_query(const std::string &user_key, const std::string &query_id,
-                                    processing::StatusPtr status, std::vector<utils::IdName> &experiments_name, std::string &msg)
+                                    processing::StatusPtr status, std::vector<utils::IdName> &datasets, std::string &msg)
       {
         processing::RunningOp runningOp = status->start_operation(processing::GET_EXPERIMENT_BY_QUERY);
         if (is_canceled(status, msg)) {
@@ -350,7 +350,7 @@ namespace epidb {
           std::string _id = obj["_id"].str();
           std::string name = obj["name"].str();
           utils::IdName p(_id, name);
-          data.push_back(p);
+          datasets.push_back(p);
         }
 
         return true;
