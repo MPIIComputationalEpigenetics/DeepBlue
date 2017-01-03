@@ -47,7 +47,7 @@ namespace epidb {
           Parameter("query_data_id", serialize::STRING, "query data that will be filtered."),
           Parameter("query_filter_id", serialize::STRING, "query containing the regions that the regions of the query_data_id must overlap."),
           Parameter("overlap", serialize::BOOLEAN, "True if must overlap, or false if must not overlap."),
-          Parameter("amount", serialize::INTEGER, "Amount of regions that must overlap. Use the parameter 'amount_type' ('bp'' or '%') to specify the unit.  For example, use the value '10' with the amount_type '%' to specify that 10% of the bases in both regions must overlap, or use '10' with the amount_type 'bp' to specify that at least 10 bases must or must not overlap."),
+          Parameter("amount", serialize::INTEGER, "Amount of regions that must overlap. Use the parameter 'amount_type' ('bp' or '%') to specify the unit.  For example, use the value '10' with the amount_type '%' to specify that 10% of the bases in both regions must overlap, or use '10' with the amount_type 'bp' to specify that at least 10 bases must or must not overlap."),
           Parameter("amount_type", serialize::STRING, "Type of the amount: 'bp' for base pairs and '%' for percentage. "),
           parameters::UserKey
         };
