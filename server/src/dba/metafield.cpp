@@ -59,7 +59,7 @@ namespace epidb {
       m["@EPIGENETIC_MARK"] = &Metafield::epigenetic_mark;
       m["@PROJECT"] = &Metafield::project;
       m["@BIOSOURCE"] = &Metafield::biosource;
-      m["@SAMPLE_ID"] = &Metafield::sample_id;
+      m["@GENOME"] = &Metafield::genome;
       m["@STRAND"] = &Metafield::strand;
       m["@AGG.MIN"] = &Metafield::min;
       m["@AGG.MAX"] = &Metafield::max;
@@ -88,6 +88,7 @@ namespace epidb {
       m["@EPIGENETIC_MARK"] = "string";
       m["@PROJECT"] = "string";
       m["@BIOSOURCE"] = "string";
+      m["@GENOME"] = "string";
       m["@SAMPLE_ID"] = "string";
       m["@STRAND"] = "string";
       m["@AGG.MIN"] = "double";
@@ -222,6 +223,13 @@ namespace epidb {
       } else {
         result = "";
       }
+      return true;
+    }
+
+    bool Metafield::genome(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion *region_ref,
+                              processing::StatusPtr status, std::string &result, std::string &msg)
+    {
+      result = get_by_region_set(obj, "genome");
       return true;
     }
 
