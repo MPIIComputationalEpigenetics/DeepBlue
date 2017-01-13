@@ -60,6 +60,7 @@ namespace epidb {
       m["@PROJECT"] = &Metafield::project;
       m["@BIOSOURCE"] = &Metafield::biosource;
       m["@GENOME"] = &Metafield::genome;
+      m["@SAMPLE_ID"] = &Metafield::sample_id;
       m["@STRAND"] = &Metafield::strand;
       m["@AGG.MIN"] = &Metafield::min;
       m["@AGG.MAX"] = &Metafield::max;

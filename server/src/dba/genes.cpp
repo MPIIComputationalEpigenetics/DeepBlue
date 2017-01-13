@@ -128,6 +128,7 @@ namespace epidb {
       }
 
       bool build_metadata(const std::string &name, const std::string &norm_name,
+                          const std::string &genome, const std::string &norm_genome,
                           const std::string &description, const std::string &norm_description,
                           const std::string &format,
                           const mongo::BSONObj& extra_metadata_obj,
@@ -154,6 +155,8 @@ namespace epidb {
         gene_model_metadata_builder.append(KeyMapper::DATASET(), dataset_id);
         gene_model_metadata_builder.append("name", name);
         gene_model_metadata_builder.append("norm_name", norm_name);
+        gene_model_metadata_builder.append("genome", genome);
+        gene_model_metadata_builder.append("norm_genome", norm_genome);
         gene_model_metadata_builder.append("format", format);
         gene_model_metadata_builder.append("description", description);
         gene_model_metadata_builder.append("norm_description", norm_description);
@@ -210,6 +213,7 @@ namespace epidb {
 
 
       bool insert(const std::string &name, const std::string &norm_name,
+                  const std::string &genome, const std::string &norm_genome,
                   const std::string &description, const std::string &norm_description,
                   datatypes::Metadata extra_metadata,
                   const parser::GTFPtr &gtf,
@@ -220,7 +224,8 @@ namespace epidb {
         mongo::BSONObj extra_metadata_obj = datatypes::metadata_to_bson(extra_metadata);
         int dataset_id;
 
-        if (!build_metadata(name, norm_name, description, norm_description, "GTF", extra_metadata_obj,
+        if (!build_metadata(name, norm_name, genome, norm_genome,
+                            description, norm_description, "GTF", extra_metadata_obj,
                             user_key, ip, dataset_id, gene_model_id, gene_model_metadata, msg)) {
           return false;
         }

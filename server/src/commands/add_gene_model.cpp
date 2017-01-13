@@ -50,7 +50,7 @@ namespace epidb {
 
       static Parameters parameters_()
       {
-        Parameter p[] = {
+        return {
           Parameter("gene_model", serialize::STRING, "gene model name"),
           parameters::Genome,
           Parameter("description", serialize::STRING, "description of the annotation"),
@@ -59,17 +59,13 @@ namespace epidb {
           parameters::AdditionalExtraMetadata,
           parameters::UserKey
         };
-        Parameters params(&p[0], &p[0] + 6);
-        return params;
       }
 
       static Parameters results_()
       {
-        Parameter p[] = {
+        return {
           Parameter("id", serialize::STRING, "id of the newly inserted gene model")
         };
-        Parameters results(&p[0], &p[0] + 1);
-        return results;
       }
 
     public:
@@ -80,10 +76,11 @@ namespace epidb {
                        const serialize::Parameters &parameters, serialize::Parameters &result) const
       {
         const std::string name = parameters[0]->as_string();
-        const std::string description = parameters[1]->as_string();
-        const std::string data = parameters[2]->as_string();
-        const std::string format = parameters[3]->as_string();
-        const std::string user_key = parameters[5]->as_string();
+        const std::string genome = parameters[1]->as_string();
+        const std::string description = parameters[2]->as_string();
+        const std::string data = parameters[3]->as_string();
+        const std::string format = parameters[4]->as_string();
+        const std::string user_key = parameters[6]->as_string();
 
         std::string msg;
         datatypes::User user;
@@ -94,13 +91,14 @@ namespace epidb {
         }
 
         datatypes::Metadata extra_metadata;
-        if (!read_metadata(parameters[4], extra_metadata, msg)) {
+        if (!read_metadata(parameters[5], extra_metadata, msg)) {
           result.add_error(msg);
           return false;
         }
 
         std::string norm_name = utils::normalize_name(name);
         std::string norm_description = utils::normalize_name(description);
+        std::string norm_genome = utils::normalize_name(genome);
 
         if (dba::exists::gene_model(norm_name)) {
           std::string s = Error::m(ERR_DUPLICATED_GENE_MODEL_NAME, name);
@@ -111,6 +109,11 @@ namespace epidb {
         if (dba::exists::gene_model(norm_name)) {
           std::string s = "The gene model name " + name + " is already being used.";
           result.add_error(s);
+          return false;
+        }
+
+        if (!dba::exists::genome(norm_genome)) {
+          result.add_error("Invalid genome '" + genome + "'");
           return false;
         }
 
@@ -129,8 +132,9 @@ namespace epidb {
         }
 
         std::string id;
-        bool ret = dba::genes::insert(name, norm_name, description, norm_description,
-                                         extra_metadata, gtf, user_key, ip, id, msg);
+        bool ret = dba::genes::insert(name, norm_name, genome, norm_genome,
+                                      description, norm_description,
+                                      extra_metadata, gtf, user_key, ip, id, msg);
 
         if (ret) {
           result.add_string(id);

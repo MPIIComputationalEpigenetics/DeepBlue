@@ -52,6 +52,7 @@ namespace epidb {
 
 
       bool insert(const std::string &name, const std::string &norm_name,
+                  const std::string &genome, const std::string &norm_genome,
                   const std::string &description, const std::string &norm_description,
                   datatypes::Metadata extra_metadata,
                   const parser::GTFPtr &gtf,

@@ -15,7 +15,7 @@ class TestExpressions(helpers.TestCase):
     self.assertSuccess(s, project)
 
     data = gzip.open("data/gtf/repetitive.gtf.gz").read()
-    (s, ss) = epidb.add_gene_model("gencode v19", "Test One Description", data, "GTF", {}, self.admin_key)
+    (s, ss) = epidb.add_gene_model("gencode v19", "hg19", "Test One Description", data, "GTF", {}, self.admin_key)
     self.assertSuccess(s, ss)
 
     data = gzip.open("data/fpkm/duplicate_reverse_tracking.gz").read()
@@ -39,7 +39,7 @@ class TestExpressions(helpers.TestCase):
     self.assertSuccess(s, project)
 
     data = gzip.open("data/gtf/gencode.v19.annotation.ONLY_GENES.gtf.gz").read()
-    (s, ss) = epidb.add_gene_model("gencode v19", "Test One Description", data, "GTF", {}, self.admin_key)
+    (s, ss) = epidb.add_gene_model("gencode v19", "hg19", "Test One Description", data, "GTF", {}, self.admin_key)
     self.assertSuccess(s, ss)
 
     data = gzip.open("data/fpkm/51_Hf03_BlTN_Ct_mRNA_M_1.LXPv1.20150708_genes.fpkm_tracking.gz").read()
@@ -57,7 +57,7 @@ class TestExpressions(helpers.TestCase):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init_base(epidb)
     data = open("data/gtf/gencode.v23.basic.annotation_head.gtf").read()
-    (s, ss) = epidb.add_gene_model("Test One", "Test One Description", data, "GTF", {}, self.admin_key)
+    (s, ss) = epidb.add_gene_model("Test One", "hg19", "Test One Description", data, "GTF", {}, self.admin_key)
     self.assertSuccess(s, ss)
 
     (s, query_id) = epidb.select_genes(["ENSG00000223972.5", "ENSG00000223972.5", "DDX11L1"], "Test One", None, None, None, self.admin_key)
@@ -169,7 +169,7 @@ class TestExpressions(helpers.TestCase):
     self.assertSuccess(s, gene_expression)
 
     data = gzip.open("data/gtf/gencode.v19.annotation.ONLY_GENES.gtf.gz").read()
-    (s, ss) = epidb.add_gene_model("gencode v19", "Test One Description", data, "GTF", {}, self.admin_key)
+    (s, ss) = epidb.add_gene_model("gencode v19", "hg19", "Test One Description", data, "GTF", {}, self.admin_key)
     self.assertSuccess(s, ss)
 
     (status, gx_query) = epidb.select_expressions("gene", "s1", 2, "ENSG00000000003.13", "ENCODE", "gencode v19", self.admin_key)
@@ -227,7 +227,7 @@ class TestExpressions(helpers.TestCase):
 
     (s, info) = epidb.info(ss, self.admin_key)
 
-    self.assertEquals(info[0], {'total_genes': 57820, '_id': 'gs1', 'extra_metadata': {}, 'description': 'Test One Description', 'format': 'GTF'})
+    self.assertEquals(info[0], {'total_genes': 57820, '_id': 'gs1', 'genome': 'hg19', 'description': 'Test One Description', 'format': 'GTF'})
 
     (status, gene_info) = epidb.info("gn1", self.admin_key)
     self.assertEquals(gene_info[0], {'transcript_status': 'KNOWN', 'gene_name': 'DDX11L1', 'gene_type': 'pseudogene', 'end': 14412, 'source': 'HAVANA', 'frame': '.', 'level': '2', 'gene_id': 'ENSG00000223972.4', 'start': 11869, 'transcript_id': 'ENSG00000223972.4', 'score': 0.0, 'strand': '+', 'havana_gene': 'OTTHUMG00000000961.2', 'transcript_name': 'DDX11L1', '_id': 'gn1', 'gene_status': 'KNOWN', 'transcript_type': 'pseudogene', 'chromosome': 'chr1'})

@@ -63,11 +63,11 @@ namespace epidb {
         RegionPtr flank = region->clone();
         if (positve_strand) {
           if (start >= 0) {
-            a = region->end() + start;
-            b = region->end() + start + length;
+            a = std::max<signed int>(0, region->end() + start);
+            b = std::max<signed int>(0, region->end() + start + length);
           } else {
-            a = region->start() + start + length;
-            b = region->start() + start;
+            a = std::max<signed int>(0, region->start() + start + length);
+            b = std::max<signed int>(0, region->start() + start);
           }
         } else {
           if (start >= 0) {
