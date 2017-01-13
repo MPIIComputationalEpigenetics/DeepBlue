@@ -39,7 +39,7 @@ namespace epidb {
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::OPERATIONS, "Create set of numbers containing the the count values of the selected data columns");
+        return CommandDescription(categories::OPERATIONS, "Bin results according to counts.");
       }
 
       static Parameters parameters_()
