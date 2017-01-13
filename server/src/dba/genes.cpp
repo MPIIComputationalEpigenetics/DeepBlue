@@ -83,7 +83,9 @@ namespace epidb {
         bob.append(data_obj["genome"]);
         bob.append(data_obj["format"]);
         bob.append(data_obj["upload_info"]["total_genes"]);
-        bob.append(data_obj["extra_metadata"]);
+        if (!data_obj["extra_metadata"].Obj().isEmpty()) {
+          bob.append(data_obj["extra_metadata"]);
+        }
 
         obj_metadata = bob.obj();
 
