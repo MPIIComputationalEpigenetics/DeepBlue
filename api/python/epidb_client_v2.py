@@ -274,17 +274,24 @@ class DeepBlueClient(object):
 
         # Genes
     @key_required
-    def add_gene_model(self, name, description, data, _format,
-                     extra_metadata):
-        return self.server.add_gene_model(name, description, data, _format,
-                                          extra_metadata, self.key)
+    def add_gene_model(self, name, genome, description, data,
+                       _format, extra_metadata):
+        return self.server.add_gene_model(name, genome, description, data,
+                                        _format, extra_metadata, self.key)
 
     @key_required
-    def add_gene_expression(self, sample_id, replica, data, _format, project,
-                     extra_metadata):
-        return self.server.add_gene_expression(sample_id, replica, data,
-                                          _format, project,
-                                          extra_metadata, self.key)
+    def add_expression(self, expression_type, sample_id, replica, data,
+                       _format, project, extra_metadata):
+        return self.server.add_gene_expression(expression_type, sample_id,
+                                               replica, data, _format,
+                                               project, extra_metadata,
+                                               self.key)
+
+    @key_required
+    def list_expressions(self, expression_type, sample_id, replica, project):
+        return self.server.list_expressions(expression_type, sample_id, replica,
+                                            project, self.key)
+
     # Operations
     @key_required
     def select_regions(self, experiment_name, genome, epigenetic_mark,
