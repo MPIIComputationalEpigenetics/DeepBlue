@@ -1,5 +1,5 @@
 //
-//  genes.cpp
+//  genes.hpp
 //  DeepBlue Epigenomic Data Server
 //  File created by Felipe Albrecht on 09.09.2015
 //  Copyright (c) 2016 Max Planck Institute for Informatics. All rights reserved.
@@ -78,6 +78,20 @@ namespace epidb {
 
       bool map_gene_location(const std::string& gene_tracking_id, const std::string& gene_name, const std::string& gene_model,
                              std::string& chromosome, Position& start, Position& end, std::string& strand, std::string& msg);
+
+
+      // Gene Ontology
+      bool is_valid_gene_ontology_id(const std::string &go_id, const std::string &norm_go_id, const std::string &msg);
+
+      bool is_valid_gene_ontology_label(const std::string &go_label, const std::string &norm_go_label, const std::string &msg);
+
+    bool is_valid_gene_ontology_namespace(const std::string &go_namespace, const std::string &norm_go_namespace, const std::string &msg);
+
+      bool add_gene_ontology_term(const std::string &go_id, const std::string &norm_go_id,
+                                  const std::string &go_label, const std::string &norm_go_label,
+                                  const std::string &description, const std::string &norm_description,
+                                  const std::string &go_namespace, const std::string &norm_go_namespace,
+                                  const std::string &user_key, const std::string &id, const std::string &msg);
     }
   }
 }
