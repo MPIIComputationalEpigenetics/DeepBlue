@@ -52,7 +52,8 @@
  * 13 - Gene model
  * 14 - Pre-processed annotation
  * 15 - Collection
- * 16 - ..
+ * 16 - Gene ontology
+ * 17 - ...
  * 20 - Chromosome
  * 21 - Start
  * 22 - End
@@ -141,6 +142,10 @@ namespace epidb {
   Error ERR_INVALID_GENE_ID("113003", "Gene ID '{}' was not found in the Gene Model '{}'.");
   Error ERR_INVALID_GENE_LOCATION("113150", "There are no gene in the chromosome '{}' location {} - {} in the Gene Model '{}'.");
   Error ERR_INVALID_GENE_ATTRIBUTE("113150", "The Gene '{}' does not have the attribute '{}'.");
+
+  Error ERR_DUPLICATED_GENE_ONTOLOGY_TERM_ID("117001", "Duplicated Gene Ontology term ID '{}'. GO term with this ID already exists.");
+  Error ERR_DUPLICATED_GENE_ONTOLOGY_TERM_LABEL("117001", "Duplicated Gene Ontology term label '{}'. GO term with this label already exists.");
+  Error ERR_INVALID_GENE_ONTOLOGY_NAMESPACE("117000", "Invalid Gene Ontology namespace '{}'. The valid names are: 'cellular component', 'biological process', 'molecular function'");
 
   Error ERR_INVALID_BIOSOURCE_NAME("104000", "Unable to find BioSource '{}'. No BioSource or Synonym was defined with this name.");
   Error ERR_INVALID_BIOSOURCE_ID("104003", "Uable to find BioSource ID '{}'. No BioSource or Synonym was defined with this ID.");

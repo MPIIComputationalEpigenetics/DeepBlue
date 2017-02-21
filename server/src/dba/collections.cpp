@@ -40,6 +40,7 @@ namespace epidb {
       v.push_back(GENE_MODELS());
       v.push_back(GENE_EXPRESSIONS());
       v.push_back(GENES());
+      v.push_back(GENE_ONTOLOGY());
       v.push_back(PROJECTS());
       v.push_back(SAMPLES());
       v.push_back(TECHNIQUES());
@@ -82,6 +83,8 @@ namespace epidb {
         collection = GENE_EXPRESSIONS();
       } else if ("gn" == collection_prefix) {
         collection = GENES();
+      } else if ("go" == collection_prefix) {
+        collection = GENE_ONTOLOGY();
       } else if ("e" == collection_prefix) {
         collection = EXPERIMENTS();
       } else if ("g" == collection_prefix) {
@@ -180,6 +183,12 @@ namespace epidb {
     {
       static std::string genes("genes");
       return genes;
+    }
+
+    const std::string &Collections::GENE_ONTOLOGY()
+    {
+      static std::string gene_ontology("gene_ontology");
+      return gene_ontology;
     }
 
     const std::string &Collections::QUERIES()
