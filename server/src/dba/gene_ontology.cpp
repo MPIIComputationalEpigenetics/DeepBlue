@@ -120,9 +120,38 @@ namespace epidb {
           return false;
         }
 
-        // db.gene_ontology.ensureIndex({"go_id":"hashed"})
-        // db.gene_ontology.ensureIndex({"go_label":"hashed"})
+        {
+          mongo::BSONObjBuilder index_name;
+          index_name.append("go_id", "hashed");
+          c->createIndex(helpers::collection_name(Collections::GENE_ONTOLOGY()), index_name.obj());
+          if (!c->getLastError().empty()) {
+            msg = c->getLastError();
+            c.done();
+            return false;
+          }
+        }
 
+        {
+          mongo::BSONObjBuilder index_name;
+          index_name.append("go_label", "hashed");
+          c->createIndex(helpers::collection_name(Collections::GENE_ONTOLOGY()), index_name.obj());
+          if (!c->getLastError().empty()) {
+            msg = c->getLastError();
+            c.done();
+            return false;
+          }
+        }
+
+        {
+          mongo::BSONObjBuilder index_name;
+          index_name.append("go_namespace", "hashed");
+          c->createIndex(helpers::collection_name(Collections::GENE_ONTOLOGY()), index_name.obj());
+          if (!c->getLastError().empty()) {
+            msg = c->getLastError();
+            c.done();
+            return false;
+          }
+        }
 
         c.done();
         return true;
@@ -142,7 +171,7 @@ namespace epidb {
         mongo::BSONObj gene_ontology_term_query = gene_ontology_term_query_bob.obj();
 
         mongo::BSONObj go_term;
-        //bool get_one(const std::string &where, const mongo::BSONObj &query,mongo::BSONObj &result)
+
         if (!helpers::get_one(Collections::GENE_ONTOLOGY(), gene_ontology_term_query, go_term)) {
           return false;
         }
@@ -152,8 +181,6 @@ namespace epidb {
         gene_ontology_term_bob.append(go_term["go_label"]);
         gene_ontology_term_bob.append(go_term["go_namespace"]);
         mongo::BSONObj gene_ontology_term = gene_ontology_term_bob.obj();
-
-        // db.genes.ensureIndex({"I.gene_id":1})
 
         mongo::BSONObj change_value = BSON("$push" << BSON("go_annotation" << gene_ontology_term));
 

@@ -276,15 +276,28 @@ namespace epidb {
           total_genes++;
         }
 
-        mongo::BSONObjBuilder index_name;
-        index_name.append(KeyMapper::CHROMOSOME(), 1);
-        index_name.append(KeyMapper::START(), 1);
-        index_name.append(KeyMapper::DATASET(), 1);
-        c->createIndex(helpers::collection_name(Collections::GENES()), index_name.obj());
-        if (!c->getLastError().empty()) {
-          msg = c->getLastError();
-          c.done();
-          return false;
+        {
+          mongo::BSONObjBuilder index_name;
+          index_name.append(KeyMapper::CHROMOSOME(), 1);
+          index_name.append(KeyMapper::START(), 1);
+          index_name.append(KeyMapper::DATASET(), 1);
+          c->createIndex(helpers::collection_name(Collections::GENES()), index_name.obj());
+          if (!c->getLastError().empty()) {
+            msg = c->getLastError();
+            c.done();
+            return false;
+          }
+        }
+
+        {
+          mongo::BSONObjBuilder index_name;
+          index_name.append(KeyMapper::ATTRIBUTES() + ".gene_id", 1);
+          c->createIndex(helpers::collection_name(Collections::GENES()), index_name.obj());
+          if (!c->getLastError().empty()) {
+            msg = c->getLastError();
+            c.done();
+            return false;
+          }
         }
 
         c->insert(helpers::collection_name(Collections::GENES()), rows_obj_bulk);
