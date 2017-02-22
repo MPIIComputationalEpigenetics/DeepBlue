@@ -31,23 +31,19 @@ namespace epidb {
       static const std::string GO_NAMESPACE_BIOLOGICAL_PROCESS;
       static const std::string GO_NAMESPACE_MOLECULAR_FUNCTION;
 
-      bool is_valid_gene_ontology(const std::string &go_id, const std::string &norm_go_id,
-                                  const std::string &go_label, const std::string &norm_go_label,
-                                  const std::string &go_namespace, const std::string &norm_go_namespace,
-                                  std::string &msg);
+      bool is_valid_gene_ontology(const std::string &go_id,  const std::string &go_label,
+                                  const std::string &go_namespace, std::string &msg);
 
-      bool add_gene_ontology_term(const std::string &go_id, const std::string &norm_go_id,
-                                  const std::string &go_label, const std::string &norm_go_label,
+      bool add_gene_ontology_term(const std::string &go_id,
+                                  const std::string &go_label,
                                   const std::string &description, const std::string &norm_description,
-                                  const std::string &go_namespace, const std::string &norm_go_namespace,
+                                  const std::string &go_namespace,
                                   const std::string &user_key,
                                   std::string &gene_ontology_term_id, std::string &msg);
 
       bool exists_gene_ontology_term(const std::string &norm_go_id);
 
-      bool annotate_gene(const std::string& gene_ensg_id, const std::string& norm_gene_ensg_id,
-                         const std::string& go_id, const std::string& norm_go_id,
-                         std::string& gene_id, std::string& msg);
+      bool annotate_gene(const std::string& gene_ensg_id, const std::string& go_id, std::string& msg);
     }
   }
 }

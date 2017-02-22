@@ -78,21 +78,17 @@ namespace epidb {
         }
 
         // Normal add_biosource code flow.
-        std::string norm_go_id = utils::normalize_name(go_id);
-        std::string norm_go_label = utils::normalize_name(go_label);
         std::string norm_description = utils::normalize_name(description);
-        std::string norm_go_namespace = utils::normalize_name(go_namespace);
 
-        if (!dba::gene_ontology::is_valid_gene_ontology(go_id, norm_go_id,
-            go_label, norm_go_label,
-            go_namespace, norm_go_namespace,
-            msg)) {
+        if (!dba::gene_ontology::is_valid_gene_ontology(go_id, go_label, go_namespace, msg)) {
           result.add_error(msg);
           return false;
         }
 
         std::string id;
-        bool ret = dba::gene_ontology::add_gene_ontology_term(go_id, norm_go_id, go_label, norm_go_label, description, norm_description, go_namespace, norm_go_namespace, user_key, id, msg);
+        bool ret = dba::gene_ontology::add_gene_ontology_term(go_id, go_label,
+                   description, norm_description,
+                   go_namespace, user_key, id, msg);
         if (!ret) {
           result.add_error(msg);
         } else {

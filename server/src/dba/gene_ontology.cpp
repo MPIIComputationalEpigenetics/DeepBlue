@@ -38,34 +38,31 @@ namespace epidb {
   namespace dba {
     namespace gene_ontology {
 
-      const std::string NORM_GO_NAMESPACE_CELLULAR_COMPONENT = "cellular component";
-      const std::string NORM_GO_NAMESPACE_BIOLOGICAL_PROCESS = "biological process";
-      const std::string NORM_GO_NAMESPACE_MOLECULAR_FUNCTION = "molecular function";
+      const std::string GO_NAMESPACE_CELLULAR_COMPONENT = "cellular_component";
+      const std::string GO_NAMESPACE_BIOLOGICAL_PROCESS = "biological_process";
+      const std::string GO_NAMESPACE_MOLECULAR_FUNCTION = "molecular_function";
 
-      bool exists_gene_ontology_term(const std::string &norm_go_id)
+      bool exists_gene_ontology_term(const std::string &go_id)
       {
-        return helpers::check_exist(Collections::GENE_ONTOLOGY(), "norm_go_id", norm_go_id);
+        return helpers::check_exist(Collections::GENE_ONTOLOGY(), "go_id", go_id);
       }
 
-      bool is_valid_gene_ontology(const std::string &go_id, const std::string &norm_go_id,
-                                  const std::string &go_label, const std::string &norm_go_label,
-                                  const std::string &go_namespace, const std::string &norm_go_namespace,
-                                  std::string &msg)
+      bool is_valid_gene_ontology(const std::string &go_id,  const std::string &go_label,
+                                  const std::string &go_namespace, std::string &msg)
       {
-
-        if (exists_gene_ontology_term(norm_go_id)) {
-          msg = Error::m(ERR_DUPLICATED_GENE_ONTOLOGY_TERM_ID, norm_go_id);
+        if (exists_gene_ontology_term(go_id)) {
+          msg = Error::m(ERR_DUPLICATED_GENE_ONTOLOGY_TERM_ID, go_id);
           return false;
         }
 
-        if (helpers::check_exist(Collections::GENE_ONTOLOGY(), "norm_go_label", norm_go_label)) {
+        if (helpers::check_exist(Collections::GENE_ONTOLOGY(), "go_label", go_label)) {
           msg = Error::m(ERR_DUPLICATED_GENE_ONTOLOGY_TERM_LABEL, go_label);
           return false;
         }
 
-        if ((norm_go_namespace != NORM_GO_NAMESPACE_CELLULAR_COMPONENT) &&
-            (norm_go_namespace != NORM_GO_NAMESPACE_BIOLOGICAL_PROCESS) &&
-            (norm_go_namespace != NORM_GO_NAMESPACE_MOLECULAR_FUNCTION)) {
+        if ((go_namespace != GO_NAMESPACE_CELLULAR_COMPONENT) &&
+            (go_namespace != GO_NAMESPACE_BIOLOGICAL_PROCESS) &&
+            (go_namespace != GO_NAMESPACE_MOLECULAR_FUNCTION)) {
 
           msg = Error::m(ERR_INVALID_GENE_ONTOLOGY_NAMESPACE, go_namespace);
           return false;
@@ -75,13 +72,12 @@ namespace epidb {
       }
 
 
-      bool add_gene_ontology_term(const std::string &go_id, const std::string &norm_go_id,
-                                  const std::string &go_label, const std::string &norm_go_label,
+      bool add_gene_ontology_term(const std::string &go_id,
+                                  const std::string &go_label,
                                   const std::string &description, const std::string &norm_description,
-                                  const std::string &go_namespace, const std::string &norm_go_namespace,
+                                  const std::string &go_namespace,
                                   const std::string &user_key,
                                   std::string &gene_ontology_term_id, std::string &msg)
-
       {
         {
           int id;
@@ -95,11 +91,10 @@ namespace epidb {
         mongo::BSONObjBuilder search_data_builder;
         search_data_builder.append("_id", gene_ontology_term_id);
         search_data_builder.append("go_id", go_id);
-        search_data_builder.append("norm_go_id", norm_go_id);
         search_data_builder.append("go_label", go_label);
-        search_data_builder.append("norm_go_label", norm_go_label);
         search_data_builder.append("description", description);
         search_data_builder.append("norm_description", norm_description);
+        search_data_builder.append("go_namespace", go_namespace);
 
         mongo::BSONObj search_data = search_data_builder.obj();
         mongo::BSONObjBuilder create_gene_ontology_term_builder;
@@ -125,13 +120,15 @@ namespace epidb {
           return false;
         }
 
+        // db.gene_ontology.ensureIndex({"go_id":"hashed"})
+        // db.gene_ontology.ensureIndex({"go_label":"hashed"})
+
+
         c.done();
         return true;
       }
 
-      bool annotate_gene(const std::string& gene_ensg_id, const std::string& norm_gene_ensg_id,
-                         const std::string& go_id, const std::string& norm_go_id,
-                         std::string& gene_id, std::string& msg)
+      bool annotate_gene(const std::string& gene_ensg_id, const std::string& go_id, std::string& msg)
       {
         Connection c;
 
@@ -141,7 +138,7 @@ namespace epidb {
 
 
         mongo::BSONObjBuilder gene_ontology_term_query_bob;
-        gene_ontology_term_query_bob.append("norm_go_id", norm_go_id);
+        gene_ontology_term_query_bob.append("go_id", go_id);
         mongo::BSONObj gene_ontology_term_query = gene_ontology_term_query_bob.obj();
 
         mongo::BSONObj go_term;
@@ -150,7 +147,15 @@ namespace epidb {
           return false;
         }
 
-        mongo::BSONObj change_value = BSON("$push" << BSON("go_annotation" << go_term));
+        mongo::BSONObjBuilder gene_ontology_term_bob;
+        gene_ontology_term_bob.append(go_term["go_id"]);
+        gene_ontology_term_bob.append(go_term["go_label"]);
+        gene_ontology_term_bob.append(go_term["go_namespace"]);
+        mongo::BSONObj gene_ontology_term = gene_ontology_term_bob.obj();
+
+        // db.genes.ensureIndex({"I.gene_id":1})
+
+        mongo::BSONObj change_value = BSON("$push" << BSON("go_annotation" << gene_ontology_term));
 
         std::cerr << gene_query.toString() << std::endl;
         std::cerr << change_value.toString() << std::endl;

@@ -23,7 +23,6 @@
 #include "../dba/genes.hpp"
 #include "../dba/gene_ontology.hpp"
 #include "../datatypes/user.hpp"
-#include "../extras/utils.hpp"
 #include "../extras/serialize.hpp"
 
 #include "../engine/commands.hpp"
@@ -76,30 +75,23 @@ namespace epidb {
           return false;
         }
 
-        // Normal add_biosource code flow.
-        std::string norm_gene_ensg_id = utils::normalize_name(gene_ensg_id);
-        std::string norm_go_term_id = utils::normalize_name(go_term_id);
-
         if (!dba::genes::exists_gene_ensg(gene_ensg_id)) {
           result.add_error(msg);
           msg = Error::m(ERR_INVALID_GENE_ID, gene_ensg_id);
           return false;
         }
 
-        if (!dba::gene_ontology::exists_gene_ontology_term(norm_go_term_id)) {
+        if (!dba::gene_ontology::exists_gene_ontology_term(go_term_id)) {
           msg = Error::m(ERR_INVALID_GENE_ONTOLOGY_TERM_ID, go_term_id);
           result.add_error(msg);
           return false;
         }
 
-        std::string gene_id;
-        bool ret = dba::gene_ontology::annotate_gene(gene_ensg_id, norm_gene_ensg_id,
-                                             go_term_id, norm_go_term_id,
-                                             gene_id, msg);
+        bool ret = dba::gene_ontology::annotate_gene(gene_ensg_id, go_term_id, msg);
         if (!ret) {
           result.add_error(msg);
         } else {
-          result.add_string(gene_id);
+          result.add_string(go_term_id + " inserted in all " + gene_ensg_id);
         }
         return ret;
       }
