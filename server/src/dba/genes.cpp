@@ -657,7 +657,7 @@ namespace epidb {
       bool exists_gene_ensg(const std::string& gene_ensg_id)
       {
         mongo::BSONObjBuilder bob;
-        bob.appendRegex(KeyMapper::ATTRIBUTES() + ".gene_id", "^"+gene_ensg_id, "i");
+        bob.appendRegex(KeyMapper::ATTRIBUTES() + ".gene_id", "^"+gene_ensg_id);
         mongo::BSONObj query = bob.obj();
 
         return helpers::check_exist(Collections::GENES(), query);

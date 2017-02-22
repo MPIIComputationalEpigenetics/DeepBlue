@@ -133,7 +133,7 @@ namespace epidb {
         Connection c;
 
         mongo::BSONObjBuilder gene_query_bob;
-        gene_query_bob.appendRegex(KeyMapper::ATTRIBUTES() + ".gene_id", "^"+gene_ensg_id, "i");
+        gene_query_bob.appendRegex(KeyMapper::ATTRIBUTES() + ".gene_id", "^"+gene_ensg_id);
         mongo::BSONObj gene_query = gene_query_bob.obj();
 
 
@@ -157,8 +157,6 @@ namespace epidb {
 
         mongo::BSONObj change_value = BSON("$push" << BSON("go_annotation" << gene_ontology_term));
 
-        std::cerr << gene_query.toString() << std::endl;
-        std::cerr << change_value.toString() << std::endl;
         c->update(helpers::collection_name(Collections::GENES()), gene_query, change_value, false, true);
 
         if (!c->getLastError().empty()) {
