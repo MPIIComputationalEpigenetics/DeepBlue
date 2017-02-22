@@ -29,6 +29,7 @@
 #include "collections.hpp"
 #include "full_text.hpp"
 #include "helpers.hpp"
+#include "key_mapper.hpp"
 #include "users.hpp"
 
 #include "../errors.hpp"
@@ -41,14 +42,19 @@ namespace epidb {
       const std::string NORM_GO_NAMESPACE_BIOLOGICAL_PROCESS = "biological process";
       const std::string NORM_GO_NAMESPACE_MOLECULAR_FUNCTION = "molecular function";
 
+      bool exists_gene_ontology_term(const std::string &norm_go_id)
+      {
+        return helpers::check_exist(Collections::GENE_ONTOLOGY(), "norm_go_id", norm_go_id);
+      }
+
       bool is_valid_gene_ontology(const std::string &go_id, const std::string &norm_go_id,
                                   const std::string &go_label, const std::string &norm_go_label,
                                   const std::string &go_namespace, const std::string &norm_go_namespace,
                                   std::string &msg)
       {
 
-        if (helpers::check_exist(Collections::GENE_ONTOLOGY(), "norm_go_id", norm_go_id)) {
-          msg = Error::m(ERR_DUPLICATED_GENE_ONTOLOGY_TERM_ID, go_id);
+        if (exists_gene_ontology_term(norm_go_id)) {
+          msg = Error::m(ERR_DUPLICATED_GENE_ONTOLOGY_TERM_ID, norm_go_id);
           return false;
         }
 
@@ -122,6 +128,45 @@ namespace epidb {
         c.done();
         return true;
       }
+
+      bool annotate_gene(const std::string& gene_ensg_id, const std::string& norm_gene_ensg_id,
+                         const std::string& go_id, const std::string& norm_go_id,
+                         std::string& gene_id, std::string& msg)
+      {
+        Connection c;
+
+        mongo::BSONObjBuilder gene_query_bob;
+        gene_query_bob.appendRegex(KeyMapper::ATTRIBUTES() + ".gene_id", "^"+gene_ensg_id, "i");
+        mongo::BSONObj gene_query = gene_query_bob.obj();
+
+
+        mongo::BSONObjBuilder gene_ontology_term_query_bob;
+        gene_ontology_term_query_bob.append("norm_go_id", norm_go_id);
+        mongo::BSONObj gene_ontology_term_query = gene_ontology_term_query_bob.obj();
+
+        mongo::BSONObj go_term;
+        //bool get_one(const std::string &where, const mongo::BSONObj &query,mongo::BSONObj &result)
+        if (!helpers::get_one(Collections::GENE_ONTOLOGY(), gene_ontology_term_query, go_term)) {
+          return false;
+        }
+
+        mongo::BSONObj change_value = BSON("$push" << BSON("go_annotation" << go_term));
+
+        std::cerr << gene_query.toString() << std::endl;
+        std::cerr << change_value.toString() << std::endl;
+        c->update(helpers::collection_name(Collections::GENES()), gene_query, change_value, false, true);
+
+        if (!c->getLastError().empty()) {
+          msg = c->getLastError();
+          c.done();
+          return false;
+        }
+        c.done();
+
+        return true;
+
+      }
+
     }
   }
 }

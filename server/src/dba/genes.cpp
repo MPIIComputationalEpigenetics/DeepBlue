@@ -40,6 +40,7 @@
 #include "data.hpp"
 #include "full_text.hpp"
 #include "genes.hpp"
+#include "key_mapper.hpp"
 #include "helpers.hpp"
 #include "info.hpp"
 #include "remove.hpp"
@@ -569,7 +570,8 @@ namespace epidb {
       GeneModelsCache gene_models_cache_gene_name;
       GeneLocationsCache gene_locations_cache;
 
-      void invalidate_cache() {
+      void invalidate_cache()
+      {
         gene_models_cache_tracking_id.clear();
         gene_models_cache_gene_name.clear();
         gene_locations_cache.clear();
@@ -651,6 +653,15 @@ namespace epidb {
         strand = region.strand;
 
         return true;
+      }
+
+      bool exists_gene_ensg(const std::string& gene_ensg_id)
+      {
+        mongo::BSONObjBuilder bob;
+        bob.appendRegex(KeyMapper::ATTRIBUTES() + ".gene_id", "^"+gene_ensg_id, "i");
+        mongo::BSONObj query = bob.obj();
+
+        return helpers::check_exist(Collections::GENES(), query);
       }
     }
   }
