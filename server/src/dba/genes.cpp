@@ -40,7 +40,6 @@
 #include "data.hpp"
 #include "full_text.hpp"
 #include "genes.hpp"
-#include "key_mapper.hpp"
 #include "helpers.hpp"
 #include "info.hpp"
 #include "remove.hpp"

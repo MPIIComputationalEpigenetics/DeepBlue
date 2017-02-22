@@ -76,8 +76,8 @@ namespace epidb {
         }
 
         if (!dba::genes::exists_gene_ensg(gene_ensg_id)) {
+          msg = Error::m(ERR_INVALID_GENE_ID, gene_ensg_id, "any");
           result.add_error(msg);
-          msg = Error::m(ERR_INVALID_GENE_ID, gene_ensg_id);
           return false;
         }
 
