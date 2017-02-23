@@ -64,6 +64,11 @@ namespace epidb {
                             std::vector<TextSearchResult> &results, std::string &msg);
 
       bool remove(const std::string &id, std::string &msg);
+
+      bool get_related_terms(const std::string& name, const std::string& norm_name,
+                             const std::string& key_name, const std::string& type,
+                             std::vector<std::string>& related_terms,
+                             std::string& msg);
     }
   }
 }

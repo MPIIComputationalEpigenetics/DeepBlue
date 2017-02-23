@@ -119,7 +119,7 @@ namespace epidb {
             norm_biosource_name = data["norm_biosource_name"].str();
           }
           auto cursor = c->query(helpers::collection_name(Collections::TEXT_SEARCH()),
-              mongo::fromjson("{\"norm_name\": \"" + norm_biosource_name + "\", \"type\": \"biosources\"}"));
+                                 mongo::fromjson("{\"norm_name\": \"" + norm_biosource_name + "\", \"type\": \"biosources\"}"));
 
           if (!cursor->more()) {
             std::string s = Error::m(ERR_DATABASE_INVALID_BIOSOURCE, norm_biosource_name);
@@ -150,19 +150,42 @@ namespace epidb {
         return true;
       }
 
+      bool get_related_terms(const std::string& name, const std::string& norm_name,
+                             const std::string& key_name, const std::string& type,
+                             std::vector<std::string>& related_terms,
+                             std::string& msg)
+      {
+        Connection c;
+        mongo::BSONObj term_bson = c->findOne(helpers::collection_name(Collections::TEXT_SEARCH()),
+                                              BSON(key_name << norm_name << "type" << type));
+        c.done();
+
+        if (term_bson.isEmpty()) {
+          msg = "Internal error: '" + type + "' '" + name + "' not found.";
+          return false;
+        }
+
+        if (!term_bson.hasElement("related_terms")) {
+          return true;
+        }
+
+        std::vector<mongo::BSONElement> e = term_bson["related_terms"].Array();
+        for (const mongo::BSONElement & be : e) {
+          related_terms.push_back(be.str());
+        }
+
+        return true;
+      }
+
       bool insert_related_term(const utils::IdName &id_name, const std::vector<std::string> &related_terms,
                                std::string &msg)
       {
-        Connection c;
-
-        mongo::BSONObjBuilder query_builder;
-        query_builder.append("epidb_id", id_name.id);
-        mongo::BSONObj query = query_builder.obj();
-
+        mongo::BSONObj query = BSON("epidb_id" << id_name.id);
         mongo::BSONArray related_terms_arr = utils::build_array(related_terms);
         mongo::BSONObj append_value = BSON("$addToSet" << BSON("related_terms" << BSON("$each" << related_terms_arr)));
 
         // Update the biosource term (that were informed in the id_names.name)
+        Connection c;
         c->update(helpers::collection_name(Collections::TEXT_SEARCH()), query, append_value, false, true);
         if (!c->getLastError().empty()) {
           msg = c->getLastError();
@@ -194,6 +217,24 @@ namespace epidb {
         }
 
         c.done();
+        return true;
+      }
+
+      bool insert_related_gene_ontology_term(const std::string& go_term_id, const std::vector<std::string>& terms_to_include)
+      {
+        /*
+        Connection c;
+
+        mongo::BSONArray related_terms_arr = utils::build_array(related_terms);
+        mongo::BSONObj append_value = BSON("$addToSet" << BSON("related_terms" << BSON("$each" << related_terms_arr)));
+
+        c->update(helpers::collection_name(Collections::TEXT_SEARCH()), BSON("go_id" << go_term_id << "type" << "gene_ontology"), append_value);
+        if (!c->getLastError().empty()) {
+          msg = c->getLastError();
+          c.done();
+          return false;
+        }
+        */
         return true;
       }
 
