@@ -43,20 +43,16 @@ namespace epidb {
 
       static  Parameters parameters_()
       {
-        Parameter p[] = {
+        return {
           Parameter("parent", serialize::STRING, "parent"),
           Parameter("child", serialize::STRING, "child"),
           parameters::UserKey
         };
-        Parameters params(&p[0], &p[0] + 3);
-        return params;
       }
 
       static Parameters results_()
       {
-        Parameter p[] = {};
-        Parameters results;
-        return results;
+        return {};
       }
 
     public:
