@@ -32,7 +32,7 @@
 namespace epidb {
   namespace command {
 
-    class AnnotateGene: public Command {
+    class AnnotateGeneCommand: public Command {
 
     private:
       static CommandDescription desc_()
@@ -58,7 +58,7 @@ namespace epidb {
       }
 
     public:
-      AnnotateGene() : Command("annotate_gene", parameters_(), results_(), desc_()) {}
+      AnnotateGeneCommand() : Command("annotate_gene", parameters_(), results_(), desc_()) {}
 
       virtual bool run(const std::string &ip,
                        const serialize::Parameters &parameters, serialize::Parameters &result) const
@@ -95,6 +95,6 @@ namespace epidb {
         }
         return ret;
       }
-    } annotateGene;
+    } annotateGeneCommand;
   }
 }
