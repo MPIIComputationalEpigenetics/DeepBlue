@@ -30,7 +30,7 @@
 namespace epidb {
   namespace command {
 
-    class AddGeneOntologyTerm: public Command {
+    class AddGeneOntologyTermCommand: public Command {
 
     private:
       static CommandDescription desc_()
@@ -58,7 +58,7 @@ namespace epidb {
       }
 
     public:
-      AddGeneOntologyTerm() : Command("add_gene_ontology_term", parameters_(), results_(), desc_()) {}
+      AddGeneOntologyTermCommand() : Command("add_gene_ontology_term", parameters_(), results_(), desc_()) {}
 
       virtual bool run(const std::string &ip,
                        const serialize::Parameters &parameters, serialize::Parameters &result) const
@@ -96,6 +96,6 @@ namespace epidb {
         }
         return ret;
       }
-    } addGeneOntologyTerm;
+    } addGeneOntologyTermCommand;
   }
 }
