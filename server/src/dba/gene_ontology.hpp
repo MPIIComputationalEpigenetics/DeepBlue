@@ -23,9 +23,13 @@
 
 #include <string>
 
+#include "../extras/connected_cache.hpp"
+
 namespace epidb {
   namespace dba {
     namespace gene_ontology {
+
+    extern ConnectedCache go_cache;
 
       static const std::string GO_NAMESPACE_CELLULAR_COMPONENT;
       static const std::string GO_NAMESPACE_BIOLOGICAL_PROCESS;
@@ -44,6 +48,8 @@ namespace epidb {
       bool exists_gene_ontology_term(const std::string &norm_go_id);
 
       bool annotate_gene(const std::string& gene_ensg_id, const std::string& go_id, std::string& msg);
+
+      bool set_go_parent(const std::string& bigger_scope, const std::string& smaller_scope, std::string& msg);
     }
   }
 }

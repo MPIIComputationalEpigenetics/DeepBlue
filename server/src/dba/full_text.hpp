@@ -54,6 +54,10 @@ namespace epidb {
       bool insert_related_term(const utils::IdName &id_name, const std::vector<std::string> &related_terms,
                                std::string &msg);
 
+      bool insert_related_gene_ontology_term(const std::string& go_term_id,
+                                             const std::vector<std::string>& terms_to_include,
+                                             std::string& msg);
+
       bool change_extra_metadata_full_text(const std::string &id, const std::string &key, const std::string &value,
                                            const std::string &norm_value, const bool is_sample,
                                            std::string &msg);

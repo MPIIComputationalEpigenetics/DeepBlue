@@ -220,21 +220,33 @@ namespace epidb {
         return true;
       }
 
-      bool insert_related_gene_ontology_term(const std::string& go_term_id, const std::vector<std::string>& terms_to_include)
+      bool insert_related_gene_ontology_term(const std::string& go_term_id, const std::vector<std::string>& terms_to_include,
+                                             std::string& msg)
       {
-        /*
         Connection c;
+        {
+          mongo::BSONObjBuilder index_name;
+          index_name.append("type", 1);
+          index_name.append("go_id", 1);
+          c->createIndex(helpers::collection_name(Collections::TEXT_SEARCH()), index_name.obj());
+          if (!c->getLastError().empty()) {
+            msg = c->getLastError();
+            c.done();
+            return false;
+          }
+        }
 
-        mongo::BSONArray related_terms_arr = utils::build_array(related_terms);
-        mongo::BSONObj append_value = BSON("$addToSet" << BSON("related_terms" << BSON("$each" << related_terms_arr)));
+        mongo::BSONArray terms_to_include_arr = utils::build_array(terms_to_include);
+        mongo::BSONObj append_value = BSON("$addToSet" << BSON("related_terms" << BSON("$each" << terms_to_include_arr)));
 
-        c->update(helpers::collection_name(Collections::TEXT_SEARCH()), BSON("go_id" << go_term_id << "type" << "gene_ontology"), append_value);
+        c->update(helpers::collection_name(Collections::TEXT_SEARCH()), BSON("type" << "gene_ontology" << "go_id" << go_term_id), append_value);
         if (!c->getLastError().empty()) {
           msg = c->getLastError();
           c.done();
           return false;
         }
-        */
+
+        c.done();
         return true;
       }
 
