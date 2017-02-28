@@ -147,6 +147,7 @@ namespace epidb {
   Error ERR_DUPLICATED_GENE_ONTOLOGY_TERM_LABEL("117001", "Duplicated Gene Ontology term label '{}'. GO term with this label already exists.");
   Error ERR_INVALID_GENE_ONTOLOGY_NAMESPACE("117000", "Invalid Gene Ontology namespace '{}'. The valid names are: 'cellular component', 'biological process', 'molecular function'");
   Error ERR_INVALID_GENE_ONTOLOGY_TERM_ID("117000", "Unable to find Gene Ontology Term '{}'. No Gene Ontology Term was defined with this ID.");
+  Error ERR_ALREADY_CONECTED_GENE_ONTOLOGY_TERM("117903", "'{}' and '{}' are already connected.");
 
   Error ERR_INVALID_BIOSOURCE_NAME("104000", "Unable to find BioSource '{}'. No BioSource or Synonym was defined with this name.");
   Error ERR_INVALID_BIOSOURCE_ID("104003", "Uable to find BioSource ID '{}'. No BioSource or Synonym was defined with this ID.");
