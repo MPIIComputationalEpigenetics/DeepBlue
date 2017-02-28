@@ -1,7 +1,9 @@
 import xmlrpclib
 
 # Support long int types in XMLRPC
-xmlrpclib.Marshaller.dispatch[type(0L)] = lambda _, v, w: w("<value><i8>%d</i8></value>" % v)
+xmlrpclib.Marshaller.dispatch[type(0L)] = lambda _, v, w: w(
+    "<value><i8>%d</i8></value>" % v)
+
 
 def key_required(func):
     def func_wrapper(self, *args, **kwargs):
@@ -16,6 +18,7 @@ def key_required(func):
 class DeepBlueClient(object):
     """Conveniently access a DeepBlue server
     """
+
     def __init__(self, key=None, address="deepblue.mpi-inf.mpg.de/xmlrpc", port=None):
         """
         :param key: Authentication key to be used for all commands
@@ -27,7 +30,8 @@ class DeepBlueClient(object):
             url = "http://%s:%d" % (address, port)
         else:
             url = "http://%s" % address
-        self.server = xmlrpclib.Server(url, encoding='UTF-8', allow_none=True, verbose=False)
+        self.server = xmlrpclib.Server(
+            url, encoding='UTF-8', allow_none=True, verbose=False)
 
     def set_key(self, key):
         print key
@@ -195,7 +199,6 @@ class DeepBlueClient(object):
     def set_project_public(self, project_name, set):
         return self.server.set_project_public(project_name, set, self.key)
 
-
         # Bio Source names
     @key_required
     def set_biosource_synonym(self, biosource_name, synonym_name):
@@ -277,7 +280,23 @@ class DeepBlueClient(object):
     def add_gene_model(self, name, genome, description, data,
                        _format, extra_metadata):
         return self.server.add_gene_model(name, genome, description, data,
-                                        _format, extra_metadata, self.key)
+                                          _format, extra_metadata, self.key)
+
+    @key_required
+    def add_gene_ontology_term(self, go_id, go_label, go_description,
+                               go_namespace):
+        return self.server.add_gene_ontology_term(go_id, go_label, go_description,
+                                                  go_namespace, self.key)
+
+    @key_required
+    def set_gene_ontology_term_parent(self, bigger_scope, smaller_scope):
+        return self.server.set_gene_ontology_term_parent(bigger_scope,
+                                                         smaller_scope,
+                                                         self.key)
+
+    @key_required
+    def annotate_gene(self, gene, go):
+        return self.server.annotate_gene(gene, go, self.key)
 
     @key_required
     def add_expression(self, expression_type, sample_id, replica, data,
