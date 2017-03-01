@@ -53,14 +53,6 @@ namespace epidb {
       {
         Connection c;
 
-        // XXX
-        // It was a bug in older C++ driver that came with mongodb version 2.4
-        // Delete these lines if the bug does not happen anymore
-        // if the collection is dropped MongoDB doesn't realize the index is deleted
-        // and will not recreate it even though it's missing. So we have to reset the
-        // index cache manually.
-        // c->resetIndexCache();
-
         if (!c->getLastError().empty()) {
           msg = c->getLastError();
           c.done();
