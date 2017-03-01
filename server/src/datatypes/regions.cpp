@@ -261,8 +261,10 @@ namespace epidb {
   const std::string &GeneRegion::get_string(const size_t pos) const
   {
     switch (pos) {
-    case 0: return _source;
-    case 1: return _feature;
+    case 0:
+      return _source;
+    case 1:
+      return _feature;
     case 2: {
       if (_score_cache.empty()) {
         if (_score == std::numeric_limits<Score>::min()) {
@@ -273,8 +275,10 @@ namespace epidb {
       }
       return _score_cache;
     }
-    case 3: return _strand;
-    case 4: return _frame;
+    case 3:
+      return _strand;
+    case 4:
+      return _frame;
     case 5: {
       if (_attributes_cache.empty()) {
         bool first = true;
@@ -292,7 +296,8 @@ namespace epidb {
       }
       return _attributes_cache;
     }
-    default: return empty_string;
+    default:
+      return empty_string;
     }
   }
 
@@ -396,9 +401,11 @@ namespace epidb {
     return std::unique_ptr<WigRegion>(new WigRegion(s, e, _id, value));
   }
 
-  RegionPtr build_gene_region(Position s, Position e, DatasetId _id, std::string source, Score score, std::string feature, std::string strand, std::string frame, datatypes::Metadata& attributes)
+  RegionPtr build_gene_region(Position s, Position e, DatasetId _id,
+                              std::string source, Score score, std::string feature, std::string strand, std::string frame,
+                              datatypes::Metadata& attributes, std::vector<datatypes::GeneOntologyTermPtr> go_terms)
   {
-    return std::unique_ptr<GeneRegion>(new GeneRegion(s, e, _id, source, score, feature, strand, frame, attributes));
+    return std::unique_ptr<GeneRegion>(new GeneRegion(s, e, _id, source, score, feature, strand, frame, attributes, go_terms));
   }
 
   RegionPtr build_aggregte_region(Position s, Position e, DatasetId _id, Score min, Score max, Score sum, Score median, Score mean, Score var, Score sd, Score count)

@@ -28,6 +28,7 @@
 #include "../connection/connection.hpp"
 
 #include "../datatypes/metadata.hpp"
+#include "../datatypes/gene_ontology_terms.hpp"
 
 #include "../extras/utils.hpp"
 
@@ -484,6 +485,19 @@ namespace epidb {
           std::string frame = e_it.next().String();
           datatypes::Metadata attributes = datatypes::bson_to_metadata(gene[KeyMapper::ATTRIBUTES()].Obj());
 
+          std::vector<datatypes::GeneOntologyTermPtr> go_terms;
+          if (gene.hasElement("go_annotation")) {
+            std::vector<mongo::BSONElement> go_annotations = gene["go_annotation"].Array();
+
+            for (auto go_term : go_annotations) {
+              std::string go_id = go_term["go_id"].String();
+              std::string go_label = go_term["go_label"].String();
+              std::string go_namespace = go_term["go_namespace"].String();
+              datatypes::GeneOntologyTermPtr go_term_ptr = datatypes::GeneOntolyTermsPool::get_go_term(go_id, go_label, go_namespace);
+              go_terms.emplace_back(go_term_ptr);
+            }
+          }
+
           if (chromosome != actual_chromosome) {
             if (!actual_chromosome.empty() && !actual_regions.empty()) {
               chromosomeRegionsList.emplace_back(std::move(actual_chromosome), std::move(actual_regions));
@@ -492,7 +506,7 @@ namespace epidb {
             actual_regions = Regions();
           }
 
-          actual_regions.emplace_back(build_gene_region(start, end, dataset_id, source, score, feature,  strand, frame, attributes));
+          actual_regions.emplace_back(build_gene_region(start, end, dataset_id, source, score, feature,  strand, frame, attributes, go_terms));
         }
 
         if (!actual_chromosome.empty()) {

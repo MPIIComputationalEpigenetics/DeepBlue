@@ -28,6 +28,7 @@
 #include <string>
 #include <vector>
 
+#include "../datatypes/gene_ontology_terms.hpp"
 #include "../datatypes/metadata.hpp"
 
 #include "../types.hpp"
@@ -169,9 +170,12 @@ namespace epidb {
     mutable std::string _attributes_cache;
     Score _score;
     mutable std::string _score_cache;
+    std::vector<datatypes::GeneOntologyTermPtr> _go_terms;
 
   public:
-    GeneRegion(Position s, Position e, DatasetId _id, std::string source, Score score, std::string feature, std::string strand, std::string frame, datatypes::Metadata& attributes):
+    GeneRegion(Position s, Position e, DatasetId _id,
+               std::string source, Score score, std::string feature, std::string strand, std::string frame,
+               datatypes::Metadata& attributes, std::vector<datatypes::GeneOntologyTermPtr>& go_terms):
       AbstractRegion(s, e, _id),
       _source(source),
       _feature(feature),
@@ -180,7 +184,8 @@ namespace epidb {
       _attributes(attributes),
       _attributes_cache(""),
       _score(score),
-      _score_cache("")
+      _score_cache(""),
+      _go_terms(go_terms)
     {}
 
     virtual bool has_strand() const;
@@ -231,11 +236,19 @@ namespace epidb {
   };
 
   RegionPtr build_simple_region(Position s, Position e, DatasetId _id);
+
   RegionPtr build_bed_region(Position s, Position e, DatasetId _id);
+
   RegionPtr build_stranded_region(Position s, Position e, DatasetId _id, std::string strand);
+
   RegionPtr build_wig_region(Position s, Position e, DatasetId _id, Score value);
-  RegionPtr build_gene_region(Position s, Position e, DatasetId _id, std::string source, Score score, std::string feature, std::string strand, std::string frame, datatypes::Metadata& attributes);
-  RegionPtr build_aggregte_region(Position s, Position e, DatasetId _id, Score min, Score max, Score sum, Score median, Score mean, Score var, Score sd, Score count);
+
+  RegionPtr build_gene_region(Position s, Position e, DatasetId _id,
+                              std::string source, Score score, std::string feature, std::string strand, std::string frame,
+                              datatypes::Metadata& attributes, std::vector<datatypes::GeneOntologyTermPtr> go_terms);
+
+  RegionPtr build_aggregte_region(Position s, Position e, DatasetId _id,
+                                  Score min, Score max, Score sum, Score median, Score mean, Score var, Score sd, Score count);
 
   class Regions {
   private:
