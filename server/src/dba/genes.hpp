@@ -71,6 +71,9 @@ namespace epidb {
                      const std::string &user_key, const std::string &norm_gene_model,
                      std::vector<mongo::BSONObj>& genes, std::string &msg);
 
+      bool get_gene_model_obj(const std::string& norm_gene_model,
+                              mongo::BSONObj& gene_model_obj, std::string& msg);
+
       bool get_gene_model_by_dataset_id(const int id, std::string& name, std::string& msg);
 
       bool get_genes_from_database(const std::vector<std::string> &chromosomes, const Position start, const Position end, const std::string& strand,

@@ -319,20 +319,28 @@ namespace epidb {
         return true;
       }
 
-      //bool get_gene_model_)
+      bool get_gene_model_obj(const std::string& norm_gene_model,
+                              mongo::BSONObj& gene_model_obj, std::string& msg)
+      {
+        Connection c;
+        gene_model_obj = c->findOne(dba::helpers::collection_name(dba::Collections::GENE_MODELS()),
+                                    BSON("norm_name" << norm_gene_model));
+        c.done();
+
+        if (gene_model_obj.isEmpty()) {
+          msg = "gene model " + norm_gene_model + " does not exists";
+          return false;
+        }
+        return true;
+      }
 
       bool build_genes_database_query(const std::vector<std::string> &chromosomes, const int start, const int end, const std::string& strand,
                                       const std::vector<std::string>& genes, const std::string& norm_gene_model,
                                       const bool exactly,
                                       mongo::Query& query, std::string& msg)
       {
-        Connection c;
-        mongo::BSONObj gene_model_obj = c->findOne(dba::helpers::collection_name(dba::Collections::GENE_MODELS()),
-                                        BSON("norm_name" << norm_gene_model));
-        c.done();
-
-        if (gene_model_obj.isEmpty()) {
-          msg = "gene model " + norm_gene_model + " does not exists";
+        mongo::BSONObj gene_model_obj;
+        if (!get_gene_model_obj(norm_gene_model, gene_model_obj, msg)) {
           return false;
         }
 
