@@ -26,6 +26,8 @@
 
 #include "../datatypes/user.hpp"
 
+#include "../dba/genes.hpp"
+
 #include "../extras/connected_cache.hpp"
 
 #include "collections.hpp"
@@ -457,6 +459,42 @@ namespace epidb {
             }
           }
         }
+
+        return true;
+      }
+
+      bool count_go_terms_in_genes(const std::string& gene_model, const std::string& norm_gene_model,
+                                   std::vector<utils::IdNameCount>& counts, std::string& msg)
+      {
+        mongo::BSONObj gene_model_obj;
+        if (!genes::get_gene_model_obj(norm_gene_model, gene_model_obj, msg)) {
+          return false;
+        }
+        auto dataset_id = gene_model_obj[KeyMapper::DATASET()].Int();
+
+
+        mongo::BSONObj match = BSON("$match" << BSON(KeyMapper::DATASET() << dataset_id));
+        mongo::BSONObj unwind = BSON("$unwind" << "$go_annotation");
+        mongo::BSONObj group = BSON( "$group" << BSON( "_id" << "$go_annotation.go_id" << "total" << BSON( "$sum" << 1 ) ) );
+        mongo::BSONObj sort = BSON( "$sort" << BSON( "count" << 1));
+
+
+        mongo::BSONArray pipeline = BSON_ARRAY( match << unwind << group << sort);
+
+        Connection c;
+        auto cursor = c->aggregate(helpers::collection_name(Collections::GENES()), pipeline);
+
+        while  (cursor->more()) {
+          mongo::BSONObj be = cursor->next();
+          std::cerr << be.toString() << std::endl;
+          const mongo::BSONElement& _id = be["_id"];
+          long count = be["total"].safeNumberLong();
+          utils::IdNameCount inc;
+          inc = utils::IdNameCount("", _id.String(), count);
+          counts.push_back(inc);
+        }
+
+        c.done();
 
         return true;
       }

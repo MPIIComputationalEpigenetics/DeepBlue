@@ -29,7 +29,7 @@ namespace epidb {
   namespace dba {
     namespace gene_ontology {
 
-    extern ConnectedCache go_cache;
+      extern ConnectedCache go_cache;
 
       static const std::string GO_NAMESPACE_CELLULAR_COMPONENT;
       static const std::string GO_NAMESPACE_BIOLOGICAL_PROCESS;
@@ -50,6 +50,9 @@ namespace epidb {
       bool annotate_gene(const std::string& gene_ensg_id, const std::string& go_id, std::string& msg);
 
       bool set_go_parent(const std::string& bigger_scope, const std::string& smaller_scope, std::string& msg);
+
+      bool count_go_terms_in_genes(const std::string& gene_model, const std::string& norm_gene_model,
+                                   std::vector<utils::IdNameCount>& counts, std::string& msg);
     }
   }
 }
