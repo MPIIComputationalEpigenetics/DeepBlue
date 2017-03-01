@@ -22,8 +22,9 @@
 
 #include "../connection/connection.hpp"
 
+#include "../cache/connected_cache.hpp"
+
 #include "../extras/utils.hpp"
-#include "../extras/connected_cache.hpp"
 
 #include "controlled_vocabulary.hpp"
 #include "collections.hpp"

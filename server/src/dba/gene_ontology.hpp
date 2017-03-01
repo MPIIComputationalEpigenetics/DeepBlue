@@ -22,8 +22,11 @@
 #define DBA_GENE_ONTOLOGY_HPP
 
 #include <string>
+#include <vector>
 
-#include "../extras/connected_cache.hpp"
+#include "../cache/connected_cache.hpp"
+
+#include "../extras/utils.hpp"
 
 namespace epidb {
   namespace dba {

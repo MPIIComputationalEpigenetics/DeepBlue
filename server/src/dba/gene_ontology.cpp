@@ -28,7 +28,7 @@
 
 #include "../dba/genes.hpp"
 
-#include "../extras/connected_cache.hpp"
+#include "../cache/connected_cache.hpp"
 
 #include "collections.hpp"
 #include "full_text.hpp"

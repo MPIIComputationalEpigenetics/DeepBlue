@@ -24,7 +24,7 @@
 #include <iostream>
 #include <vector>
 
-#include "../extras/connected_cache.hpp"
+#include "../cache/connected_cache.hpp"
 #include "../extras/utils.hpp"
 
 namespace epidb {
