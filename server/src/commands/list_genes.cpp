@@ -50,7 +50,7 @@ namespace epidb {
           Parameter("chromosome", serialize::STRING, "chromosome name(s)", true),
           Parameter("start", serialize::INTEGER, "minimum start region"),
           Parameter("end", serialize::INTEGER, "maximum end region"),
-          parameters::GeneModels,
+          parameters::GeneModel,
           parameters::UserKey
         };
         Parameters params(&p[0], &p[0] + 6);
@@ -81,25 +81,19 @@ namespace epidb {
           return false;
         }
 
+        std::string gene_model = parameters[4]->as_string();
+        std::string norm_gene_model = utils::normalize_name(gene_model);
+
         std::vector<serialize::ParameterPtr> gene_id_or_name;
         std::vector<serialize::ParameterPtr> chromosomes;
-        std::vector<serialize::ParameterPtr> gene_models;
         parameters[0]->children(gene_id_or_name);
         parameters[1]->children(chromosomes);
-        parameters[4]->children(gene_models);
 
         const Position start = parameters[2]->isNull() ? -1 : parameters[2]->as_long();
         const Position end = parameters[3]->isNull() ? -1 : parameters[3]->as_long();
 
-        std::vector<std::string> norm_gene_models;
-
-        for (auto it = gene_models.begin(); it != gene_models.end(); ++it) {
-          std::string gene_model = (**it).as_string();
-          norm_gene_models.emplace_back(utils::normalize_name(gene_model));
-        }
-
         std::vector<mongo::BSONObj> genes;
-        if (!dba::list::genes(user_key, utils::build_vector(gene_id_or_name), utils::build_vector(chromosomes), start, end, norm_gene_models, genes, msg)) {
+        if (!dba::list::genes(user_key, utils::build_vector(gene_id_or_name), utils::build_vector(chromosomes), start, end, norm_gene_model, genes, msg)) {
           result.add_error(msg);
         }
 

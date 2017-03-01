@@ -66,9 +66,10 @@ namespace epidb {
       bool get_gene_by_location(const std::string& chromosome, const Position start, const Position end, const std::string& strand,
                                 const std::string& gene_model, RegionPtr& gene, std::string& msg);
 
-      bool get_genes(const std::vector<std::string> &chromosomes, const Position start, const Position end, const std::string& strand,
-                     const std::vector<std::string>& genes_names_or_id, const std::string &user_key,
-                     const std::vector<std::string> &norm_gene_models,  std::vector<mongo::BSONObj>& genes, std::string &msg);
+      bool get_genes(const std::vector<std::string> &chromosomes, const Position start, const Position end,
+                     const std::string& strand, const std::vector<std::string>& genes_names_or_id,
+                     const std::string &user_key, const std::string &norm_gene_model,
+                     std::vector<mongo::BSONObj>& genes, std::string &msg);
 
       bool get_gene_model_by_dataset_id(const int id, std::string& name, std::string& msg);
 

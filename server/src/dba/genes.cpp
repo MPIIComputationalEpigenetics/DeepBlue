@@ -319,19 +319,20 @@ namespace epidb {
         return true;
       }
 
+      //bool get_gene_model_)
+
       bool build_genes_database_query(const std::vector<std::string> &chromosomes, const int start, const int end, const std::string& strand,
-                                      const std::vector<std::string>& genes, const std::vector<std::string>& norm_gene_models,
+                                      const std::vector<std::string>& genes, const std::string& norm_gene_model,
                                       const bool exactly,
                                       mongo::Query& query, std::string& msg)
       {
-
         Connection c;
         mongo::BSONObj gene_model_obj = c->findOne(dba::helpers::collection_name(dba::Collections::GENE_MODELS()),
-                                        BSON("norm_name" << BSON("$in" << utils::build_array(norm_gene_models))));
+                                        BSON("norm_name" << norm_gene_model));
         c.done();
 
         if (gene_model_obj.isEmpty()) {
-          msg = "gene model " + utils::vector_to_string<std::string>(norm_gene_models) + " does not exists";
+          msg = "gene model " + norm_gene_model + " does not exists";
           return false;
         }
 
@@ -419,11 +420,13 @@ namespace epidb {
       }
 
 
-      bool get_genes(const std::vector<std::string> &chromosomes, const Position start, const Position end, const std::string& strand, const std::vector<std::string>& genes_names_or_id,
-                     const std::string &user_key, const std::vector<std::string> &norm_gene_models,  std::vector<mongo::BSONObj>& genes, std::string &msg)
+      bool get_genes(const std::vector<std::string> &chromosomes, const Position start, const Position end,
+                     const std::string& strand, const std::vector<std::string>& genes_names_or_id,
+                     const std::string &user_key, const std::string &norm_gene_model,
+                     std::vector<mongo::BSONObj>& genes, std::string &msg)
       {
         mongo::Query query;
-        if (!dba::genes::build_genes_database_query(chromosomes, start, end, strand, genes_names_or_id, norm_gene_models, false, query, msg)) {
+        if (!dba::genes::build_genes_database_query(chromosomes, start, end, strand, genes_names_or_id, norm_gene_model, false, query, msg)) {
           return false;
         }
 
@@ -443,12 +446,9 @@ namespace epidb {
                                    const std::vector<std::string>& genes, const std::string& norm_gene_model,
                                    ChromosomeRegionsList& chromosomeRegionsList, std::string& msg )
       {
-        std::vector<std::string> gene_models;
-        gene_models.push_back(norm_gene_model);
-
         mongo::Query query;
 
-        if (!build_genes_database_query(chromosomes, start, end, strand, genes, gene_models, false, query, msg)) {
+        if (!build_genes_database_query(chromosomes, start, end, strand, genes, norm_gene_model, false, query, msg)) {
           return false;
         }
 
