@@ -475,8 +475,8 @@ namespace epidb {
 
         mongo::BSONObj match = BSON("$match" << BSON(KeyMapper::DATASET() << dataset_id));
         mongo::BSONObj unwind = BSON("$unwind" << "$go_annotation");
-        mongo::BSONObj group = BSON( "$group" << BSON( "_id" << "$go_annotation.go_id" << "total" << BSON( "$sum" << 1 ) ) );
-        mongo::BSONObj sort = BSON( "$sort" << BSON( "count" << 1));
+        mongo::BSONObj group = BSON( "$group" << BSON( "_id" << BSON("go_id" << "$go_annotation.go_id" << "go_label" << "$go_annotation.go_label") << "total" << BSON( "$sum" << 1 ) ) );
+        mongo::BSONObj sort = BSON( "$sort" << BSON( "total" << 1));
 
 
         mongo::BSONArray pipeline = BSON_ARRAY( match << unwind << group << sort);
@@ -488,9 +488,10 @@ namespace epidb {
           mongo::BSONObj be = cursor->next();
           std::cerr << be.toString() << std::endl;
           const mongo::BSONElement& _id = be["_id"];
+
           long count = be["total"].safeNumberLong();
           utils::IdNameCount inc;
-          inc = utils::IdNameCount("", _id.String(), count);
+          inc = utils::IdNameCount(_id["go_id"].String(), _id["go_label"].String(), count);
           counts.push_back(inc);
         }
 

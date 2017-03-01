@@ -77,6 +77,15 @@ class TestBioSourceCommands(helpers.TestCase):
     scope_names = epidb.extract_names(scope)[1]
     self.assertEquals(scope_names, ['mesoderm', 'blood', 'GM12878', 'K562', 'Adult_CD4_naive'])
 
+    self.assertSuccess(epidb.add_biosource("god master", None, {}, self.admin_key))
+    print epidb.set_biosource_parent("god master", "mesoderm", self.admin_key)
+
+    self.assertSuccess(epidb.add_biosource("shitty", None, {}, self.admin_key))
+    print epidb.set_biosource_parent("K562", "shitty", self.admin_key)
+
+    self.assertSuccess(epidb.add_biosource("weirdo", None, {}, self.admin_key))
+    print epidb.set_biosource_parent("weirdo", "K562", self.admin_key)
+
   def test_biosource_related(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
     self.init(epidb)
