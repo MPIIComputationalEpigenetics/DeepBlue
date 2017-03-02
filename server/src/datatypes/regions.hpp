@@ -79,6 +79,7 @@ namespace epidb {
     virtual const std::string strand() const;
     virtual const datatypes::Metadata& attributes() const;
 
+    virtual bool has_gene_infos() const;
     virtual bool has_stats() const;
     virtual bool has_strand() const;
     virtual size_t size() const;
@@ -188,7 +189,9 @@ namespace epidb {
       _go_terms(go_terms)
     {}
 
+    const std::vector<datatypes::GeneOntologyTermPtr>& get_gene_ontology_terms() const;
     virtual bool has_strand() const;
+    virtual bool has_gene_infos() const;
     virtual const std::string strand() const;
     virtual const datatypes::Metadata& attributes() const;
     virtual const std::string  &get_string(const size_t pos) const;
@@ -222,7 +225,7 @@ namespace epidb {
       _sd(sd),
       _count(count) {}
 
-    bool has_stats() const;
+    virtual bool has_stats() const;
     Score min() const;
     Score max() const;
     Score sum() const;

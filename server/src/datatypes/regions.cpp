@@ -74,6 +74,11 @@ namespace epidb {
     return false;
   }
 
+  bool AbstractRegion::has_gene_infos() const
+  {
+    return false;
+  }
+
   const std::string AbstractRegion::strand() const
   {
     return empty_string;
@@ -248,6 +253,11 @@ namespace epidb {
     return true;
   }
 
+  bool GeneRegion::has_gene_infos() const
+  {
+    return true;
+  }
+
   const std::string GeneRegion::strand() const
   {
     return _strand;
@@ -256,6 +266,11 @@ namespace epidb {
   const datatypes::Metadata& GeneRegion::attributes() const
   {
     return _attributes;
+  }
+
+  const std::vector<datatypes::GeneOntologyTermPtr>& GeneRegion::get_gene_ontology_terms() const
+  {
+    return _go_terms;
   }
 
   const std::string &GeneRegion::get_string(const size_t pos) const
