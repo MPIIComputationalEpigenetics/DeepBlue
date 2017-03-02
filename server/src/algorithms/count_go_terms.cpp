@@ -18,32 +18,19 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include <iostream>
-#include <limits>
-#include <set>
+#include <string>
+#include <unordered_map>
 #include <vector>
 
-#include "accumulator.hpp"
-
-#include "../datatypes/column_types_def.hpp"
+#include "../datatypes/gene_ontology_terms.hpp"
 #include "../datatypes/regions.hpp"
 
-#include "../dba/experiments.hpp"
-#include "../dba/key_mapper.hpp"
-#include "../dba/metafield.hpp"
-
-#include "../cache/column_dataset_cache.cpp"
-
-#include "../extras/utils.hpp"
-
-#include "../errors.hpp"
-#include "../log.hpp"
 
 namespace epidb {
   namespace algorithms {
 
-
-    bool count_go_terms(Regions &regions, std::unordered_map<std::string, size_t>& counts, std::string &msg)
+    bool __count_go_terms(const Regions &regions,
+                        std::unordered_map<std::string, size_t>& counts, std::string &msg)
     {
       for (const auto& region: regions) {
         if (region->has_gene_infos()) {
@@ -57,16 +44,14 @@ namespace epidb {
           }
         }
       }
-
       return true;
-
     }
 
-    bool count_go_terms(ChromosomeRegionsList &data,
+    bool count_go_terms(const ChromosomeRegionsList &chromosomeRegionsList,
                         std::unordered_map<std::string, size_t>& counts, std::string &msg)
     {
-      for (auto &datum : data) {
-        if(!count_go_terms(datum.second, counts, msg)) {
+      for (auto &chromosomeRegions : chromosomeRegionsList) {
+        if(!__count_go_terms(chromosomeRegions.second, counts, msg)) {
           return false;
         }
       }
