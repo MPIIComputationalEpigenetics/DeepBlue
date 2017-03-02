@@ -41,6 +41,7 @@ namespace epidb {
       bool process(const mongo::BSONObj &job, processing::StatusPtr status, mongo::BSONObj& result);
       bool process_count(const std::string &request_id, const std::string &user_key, processing::StatusPtr status, mongo::BSONObj& result);
       bool process_binning(const std::string &query_id, const std::string& column_name, const int bars, const std::string &user_key, processing::StatusPtr status, mongo::BSONObj& result);
+      bool process_calculate_enrichment(const std::string &query_id, const std::string& gene_model, const std::string &user_key, processing::StatusPtr status, mongo::BSONObj& result);
       bool process_coverage(const std::string &request_id, const std::string & genome, const std::string &user_key, processing::StatusPtr status, mongo::BSONObj& result);
       bool process_get_regions(const std::string &query_id, const std::string &format, const std::string &user_key, processing::StatusPtr status, mongo::BSONObj& result);
       bool process_score_matrix(const mongo::BSONObj &experiments_formats, const std::string &aggregation_function, const std::string &regions_query_id, const std::string &user_key, processing::StatusPtr status, mongo::BSONObj& result);
