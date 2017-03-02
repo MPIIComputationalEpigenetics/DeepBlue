@@ -44,7 +44,7 @@ namespace epidb {
       static Parameters parameters_()
       {
         Parameter p[] = {
-          Parameter("query_id", serialize::STRING, "id of the query that contains the regions"),
+          parameters::QueryId,
           Parameter("start", serialize::INTEGER, "Number of base pairs after the end of the region. Use a negative number to denote the number of base pairs before the start of the region."),
           Parameter("length", serialize::INTEGER, "The new region length"),
           Parameter("use_strand", serialize::BOOLEAN, "Use the region column STRAND to define the region direction"),

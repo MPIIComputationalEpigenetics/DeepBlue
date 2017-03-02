@@ -47,7 +47,7 @@ namespace epidb {
       static Parameters parameters_()
       {
         Parameter p[] = {
-          Parameter("query_id", serialize::STRING, "id of the query to be filtered"),
+          parameters::QueryId,
           Parameter("field", serialize::STRING, "field that is filtered by"),
           Parameter("operation", serialize::STRING, "operation used for filtering. For 'string' must be '==' or '!=' and for 'number' must be one of these: " + utils::vector_to_string(algorithms::FilterBuilder::operations())),
           Parameter("value", serialize::STRING, "value the operator is applied to"),

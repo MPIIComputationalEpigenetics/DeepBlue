@@ -44,7 +44,7 @@ namespace epidb {
       static Parameters parameters_()
       {
         Parameter p[] = {
-          Parameter("query_id", serialize::STRING, "id of the query"),
+          parameters::QueryId,
           parameters::UserKey
         };
         Parameters params(&p[0], &p[0] + 2);

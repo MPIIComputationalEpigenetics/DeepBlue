@@ -80,6 +80,7 @@ namespace epidb {
     const Parameter Genome("genome", serialize::STRING, "the target genome");
     const Parameter GenomeMultiple("genome", serialize::STRING, "the target genome", true);
     const Parameter IDs("id", serialize::STRING, "ID or an array of IDs", true);
+    const Parameter QueryId("query_id", serialize::STRING, "Query ID");
     const Parameter UserKey("user_key", serialize::STRING, "users token key");
   }
 } // namespace epidb

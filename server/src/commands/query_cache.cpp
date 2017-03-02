@@ -48,7 +48,7 @@ namespace epidb {
       static  Parameters parameters_()
       {
         Parameter p[] = {
-          Parameter("query_id", serialize::STRING, "query ID"),
+          parameters::QueryId,
           Parameter("cache", serialize::BOOLEAN, "set or unset this query caching"),
           parameters::UserKey
         };
