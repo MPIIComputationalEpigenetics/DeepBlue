@@ -94,6 +94,11 @@ namespace epidb {
 
       bool gene_expression(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion *region_ref, processing::StatusPtr status, std::string &result, std::string &msg);
 
+      bool get_gene_ontology_terms(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion *region_ref, processing::StatusPtr status, std::vector<datatypes::GeneOntologyTermPtr>& go_terms, std::string &msg);
+
+      bool go_ids(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion *region_ref, processing::StatusPtr status, std::string &result, std::string &msg);
+
+      bool go_labels(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion *region_ref, processing::StatusPtr status, std::string &result, std::string &msg);
 
     public:
       static bool is_meta(const std::string &s);

@@ -63,6 +63,10 @@ namespace epidb {
                               const std::string& attribute_name, const std::string& gene_model,
                               std::string& attibute_value, std::string& msg);
 
+      bool get_gene_gene_ontology_annotations(const std::string& chromosome, const Position start, const Position end, const std::string& strand,
+                                              const std::string& gene_model,
+                                              std::vector<datatypes::GeneOntologyTermPtr>& go_annotations, std::string& msg);
+
       bool get_gene_by_location(const std::string& chromosome, const Position start, const Position end, const std::string& strand,
                                 const std::string& gene_model, RegionPtr& gene, std::string& msg);
 

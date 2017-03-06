@@ -76,6 +76,8 @@ namespace epidb {
       m["@GENE_ID"] = &Metafield::gene_id;
       m["@GENE_NAME"] = &Metafield::gene_name;
       m["@GENE_EXPRESSION"] = &Metafield::gene_expression;
+      m["@GO_IDS"] = &Metafield::go_ids;
+      m["@GO_LABELS"] = &Metafield::go_labels;
 
       return m;
     }
@@ -106,6 +108,8 @@ namespace epidb {
       m["@GENE_ID"] = "string";
       m["@GENE_NAME"] = "string";
       m["@GENE_EXPRESSION"] = "double";
+      m["@GO_IDS"] = "string";
+      m["@GO_LABELS"] = "string";
 
       return m;
     }
@@ -228,7 +232,7 @@ namespace epidb {
     }
 
     bool Metafield::genome(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion *region_ref,
-                              processing::StatusPtr status, std::string &result, std::string &msg)
+                           processing::StatusPtr status, std::string &result, std::string &msg)
     {
       result = get_by_region_set(obj, "genome");
       return true;
@@ -436,6 +440,74 @@ namespace epidb {
       if (!dba::genes::get_gene_attribute(chrom, region_ref->start(), region_ref->end(), strand, "gene_name",  gene_model, result, msg)) {
         return false;
       }
+      return true;
+    }
+
+    bool Metafield::get_gene_ontology_terms(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion *region_ref,
+                                            processing::StatusPtr status, std::vector<datatypes::GeneOntologyTermPtr>& go_terms, std::string &msg)
+    {
+      std::string strand;
+
+      if (region_ref->has_strand()) {
+        strand = region_ref->strand();
+      } else {
+        if (!Metafield::strand(op, chrom, obj, region_ref, status, strand, msg)) {
+          return false;
+        }
+      }
+
+      std::string gene_model = metafield_attribute(op);
+      if (!dba::genes::get_gene_gene_ontology_annotations(chrom, region_ref->start(), region_ref->end(), strand, gene_model, go_terms, msg)) {
+        return false;
+      }
+
+      return true;
+    }
+
+
+    bool Metafield::go_ids(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion *region_ref,
+                           processing::StatusPtr status, std::string &result, std::string &msg)
+    {
+      std::vector<datatypes::GeneOntologyTermPtr> go_terms;
+      if (!get_gene_ontology_terms(op, chrom, obj, region_ref, status, go_terms, msg)) {
+        return false;
+      }
+
+      std::stringstream ss;
+      bool first = true;
+      for (const auto& go_term: go_terms) {
+        if (!first) {
+          ss << ",";
+        }
+        ss << go_term->go_id();
+        first = false;
+      }
+
+      result = ss.str();
+
+      return true;
+    }
+
+    bool Metafield::go_labels(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion *region_ref,
+                              processing::StatusPtr status, std::string &result, std::string &msg)
+    {
+      std::vector<datatypes::GeneOntologyTermPtr> go_terms;
+      if (!get_gene_ontology_terms(op, chrom, obj, region_ref, status, go_terms, msg)) {
+        return false;
+      }
+
+      std::stringstream ss;
+      bool first = true;
+      for (const auto& go_term: go_terms) {
+        if (!first) {
+          ss << ",";
+        }
+        ss << go_term->go_label();
+        first = false;
+      }
+
+      result = ss.str();
+
       return true;
     }
 

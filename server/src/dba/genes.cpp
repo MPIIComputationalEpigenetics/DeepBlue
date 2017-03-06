@@ -423,6 +423,7 @@ namespace epidb {
                               std::string& attibute_value, std::string& msg)
       {
         std::string norm_gene_model = utils::normalize_name(gene_model);
+        // TODO: Change to GeneRegion*
         RegionPtr gene;
         if (!get_gene_by_location(chromosome, start, end, strand, norm_gene_model, gene, msg)) {
           return false;
@@ -435,6 +436,23 @@ namespace epidb {
         }
 
         attibute_value = it->second;
+
+        return true;
+      }
+
+      bool get_gene_gene_ontology_annotations(const std::string& chromosome, const Position start, const Position end, const std::string& strand,
+                                              const std::string& gene_model,
+                                              std::vector<datatypes::GeneOntologyTermPtr>& go_annotations, std::string& msg)
+      {
+        std::string norm_gene_model = utils::normalize_name(gene_model);
+        // TODO: Change to GeneRegion*
+        RegionPtr gene;
+        if (!get_gene_by_location(chromosome, start, end, strand, norm_gene_model, gene, msg)) {
+          return false;
+        }
+
+        const GeneRegion* gene_region = static_cast<const GeneRegion*>(gene.get());
+        go_annotations = gene_region->get_gene_ontology_terms();
 
         return true;
       }
