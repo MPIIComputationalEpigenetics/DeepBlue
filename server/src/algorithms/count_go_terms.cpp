@@ -30,15 +30,19 @@ namespace epidb {
   namespace algorithms {
 
     bool __count_go_terms(const Regions &regions,
-                        std::unordered_map<std::string, size_t>& counts, std::string &msg)
+                          std::unordered_map<std::string, size_t>& counts,
+                          size_t& total_genes, size_t& total_found_go_terms,
+                          std::string &msg)
     {
       for (const auto& region: regions) {
         if (region->has_gene_infos()) {
+          total_genes++;
           const GeneRegion* gene_region = static_cast<const GeneRegion*>(region.get());
 
           const std::vector<datatypes::GeneOntologyTermPtr>& go_terms = gene_region->get_gene_ontology_terms();
 
           for (const auto& go_term: go_terms) {
+            total_found_go_terms++;
             const std::string& go_id = go_term->go_id();
             counts[go_id]++;
           }
@@ -48,10 +52,13 @@ namespace epidb {
     }
 
     bool count_go_terms(const ChromosomeRegionsList &chromosomeRegionsList,
-                        std::unordered_map<std::string, size_t>& counts, std::string &msg)
+                        std::unordered_map<std::string, size_t>& counts,
+                        size_t& total_genes, size_t& total_found_go_terms,
+                        std::string &msg)
     {
+      total_genes = 0;
       for (auto &chromosomeRegions : chromosomeRegionsList) {
-        if(!__count_go_terms(chromosomeRegions.second, counts, msg)) {
+        if(!__count_go_terms(chromosomeRegions.second, counts, total_genes, total_found_go_terms, msg)) {
           return false;
         }
       }

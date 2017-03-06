@@ -338,7 +338,7 @@ namespace epidb {
       bool build_genes_database_query(const std::vector<std::string> &chromosomes, const int start, const int end, const std::string& strand,
                                       const std::vector<std::string>& genes, const std::string& norm_gene_model,
                                       const bool exactly,
-                                      mongo::Query& query, std::string& msg)
+                                      mongo::BSONObj& filter, std::string& msg)
       {
         mongo::BSONObj gene_model_obj;
         if (!get_gene_model_obj(norm_gene_model, gene_model_obj, msg)) {
@@ -382,7 +382,24 @@ namespace epidb {
           bob.append(KeyMapper::STRAND(), strand);
         }
 
-        mongo::BSONObj filter = bob.obj();
+        filter = bob.obj();
+
+        return true;
+      }
+
+
+      bool build_genes_database_query(const std::vector<std::string> &chromosomes, const int start, const int end, const std::string& strand,
+                                      const std::vector<std::string>& genes, const std::string& norm_gene_model,
+                                      const bool exactly,
+                                      mongo::Query& query, std::string& msg)
+      {
+
+        mongo::BSONObj filter;
+        if (!build_genes_database_query(chromosomes, start, end, strand,
+                                        genes, norm_gene_model, exactly,
+                                        filter, msg)) {
+          return false;
+        }
 
         query = mongo::Query(filter).sort(BSON(KeyMapper::CHROMOSOME() << 1 << KeyMapper::START() << 1));
 

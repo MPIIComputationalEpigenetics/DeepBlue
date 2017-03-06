@@ -54,8 +54,11 @@ namespace epidb {
 
       bool set_go_parent(const std::string& bigger_scope, const std::string& smaller_scope, std::string& msg);
 
-      bool count_go_terms_in_genes(const std::string& gene_model, const std::string& norm_gene_model,
-                                   std::vector<utils::IdNameCount>& counts, std::string& msg);
+      bool count_go_terms_in_genes(const std::vector<std::string> &chromosomes, const Position start, const Position end,
+                                   const std::string& strand, const std::vector<std::string>& genes,
+                                   const std::string& gene_model, const std::string& norm_gene_model,
+                                   std::vector<utils::IdNameCount>& counts, size_t &total_go_terms,
+                                   std::string& msg);
     }
   }
 }

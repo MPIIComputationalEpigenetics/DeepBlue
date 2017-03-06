@@ -84,6 +84,11 @@ namespace epidb {
                              std::string& chromosome, Position& start, Position& end, std::string& strand, std::string& msg);
 
       bool exists_gene_ensg(const std::string& gene_ensg_id);
+
+      bool build_genes_database_query(const std::vector<std::string> &chromosomes, const int start, const int end, const std::string& strand,
+                                      const std::vector<std::string>& genes, const std::string& norm_gene_model,
+                                      const bool exactly,
+                                      mongo::BSONObj& filter, std::string& msg);
     }
   }
 }

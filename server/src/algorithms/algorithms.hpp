@@ -39,7 +39,9 @@ namespace epidb {
                 ChromosomeRegionsList &result, std::string &msg);
 
     bool count_go_terms(const ChromosomeRegionsList &chromosomeRegionsList,
-                        std::unordered_map<std::string, size_t>& counts, std::string &msg);
+                        std::unordered_map<std::string, size_t>& counts,
+                        size_t& total_genes, size_t& total_found_go_terms,
+                        std::string &msg);
 
     bool flank(ChromosomeRegionsList &regions, const Offset start, const Length length, const bool use_strand,
                ChromosomeRegionsList &result, std::string &msg);

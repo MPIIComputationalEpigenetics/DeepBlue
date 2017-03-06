@@ -463,17 +463,21 @@ namespace epidb {
         return true;
       }
 
-      bool count_go_terms_in_genes(const std::string& gene_model, const std::string& norm_gene_model,
-                                   std::vector<utils::IdNameCount>& counts, std::string& msg)
+      bool count_go_terms_in_genes(const std::vector<std::string> &chromosomes, const Position start, const Position end,
+                                   const std::string& strand, const std::vector<std::string>& genes,
+                                   const std::string& gene_model, const std::string& norm_gene_model,
+                                   std::vector<utils::IdNameCount>& counts, size_t &total_go_terms,
+                                   std::string& msg)
       {
-        mongo::BSONObj gene_model_obj;
-        if (!genes::get_gene_model_obj(norm_gene_model, gene_model_obj, msg)) {
+        total_go_terms = 0;
+
+        mongo::BSONObj query;
+        if (!genes::build_genes_database_query(chromosomes, start, end, strand,
+                                               genes, norm_gene_model, false, query, msg)) {
           return false;
         }
-        auto dataset_id = gene_model_obj[KeyMapper::DATASET()].Int();
 
-
-        mongo::BSONObj match = BSON("$match" << BSON(KeyMapper::DATASET() << dataset_id));
+        mongo::BSONObj match = BSON("$match" << query);
         mongo::BSONObj unwind = BSON("$unwind" << "$go_annotation");
         mongo::BSONObj group = BSON( "$group" << BSON( "_id" << BSON("go_id" << "$go_annotation.go_id" << "go_label" << "$go_annotation.go_label") << "total" << BSON( "$sum" << 1 ) ) );
         mongo::BSONObj sort = BSON( "$sort" << BSON( "total" << 1));
@@ -486,13 +490,13 @@ namespace epidb {
 
         while  (cursor->more()) {
           mongo::BSONObj be = cursor->next();
-          std::cerr << be.toString() << std::endl;
           const mongo::BSONElement& _id = be["_id"];
 
           long count = be["total"].safeNumberLong();
           utils::IdNameCount inc;
           inc = utils::IdNameCount(_id["go_id"].String(), _id["go_label"].String(), count);
           counts.push_back(inc);
+          total_go_terms += count;
         }
 
         c.done();

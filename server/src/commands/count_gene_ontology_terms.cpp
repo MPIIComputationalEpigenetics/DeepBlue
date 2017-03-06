@@ -48,7 +48,11 @@ namespace epidb {
       static Parameters parameters_()
       {
         return {
+          parameters::Genes,
           parameters::GeneModel,
+          Parameter("chromosome", serialize::STRING, "chromosome name(s)", true),
+          Parameter("start", serialize::INTEGER, "minimum start region"),
+          Parameter("end", serialize::INTEGER, "maximum end region"),
           parameters::UserKey
         };
       }
@@ -66,9 +70,19 @@ namespace epidb {
       virtual bool run(const std::string &ip,
                        const serialize::Parameters &parameters, serialize::Parameters &result) const
       {
+        std::vector<serialize::ParameterPtr> genes;
+        parameters[0]->children(genes);
 
-        const std::string gene_model = parameters[0]->as_string();
-        const std::string user_key = parameters[1]->as_string();
+        const std::string gene_model = parameters[1]->as_string();
+        std::string norm_gene_model = utils::normalize_name(gene_model);
+
+        std::vector<serialize::ParameterPtr> chromosomes;
+        parameters[2]->children(chromosomes);
+
+        const int start = parameters[3]->isNull() ? -1 : parameters[3]->as_long();
+        const int end = parameters[4]->isNull() ? -1 : parameters[4]->as_long();
+
+        const std::string user_key = parameters[5]->as_string();
 
         std::string msg;
         datatypes::User user;
@@ -78,11 +92,15 @@ namespace epidb {
           return false;
         }
 
-        std::string norm_gene_model = utils::normalize_name(gene_model);
-
+        std::vector<std::string> gene_names = utils::build_vector(genes);
+        std::vector<std::string> chromosome_names = utils::build_vector(chromosomes);
         std::vector<utils::IdNameCount> counts;
-        if (!dba::gene_ontology::count_go_terms_in_genes(gene_model, norm_gene_model, counts, msg)) {
+        size_t total_go_terms;
+        if (!dba::gene_ontology::count_go_terms_in_genes(chromosome_names, start, end,
+            "",  gene_names, gene_model, norm_gene_model,
+            counts, total_go_terms, msg)) {
           result.add_error(msg);
+          return false;
         }
 
         set_id_names_count_return(counts, result);
