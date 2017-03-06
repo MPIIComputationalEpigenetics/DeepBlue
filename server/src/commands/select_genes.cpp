@@ -48,25 +48,22 @@ namespace epidb {
 
       static Parameters parameters_()
       {
-        Parameter p[] = {
+        return {
           parameters::Genes,
+          parameters::GeneOntologyTerms,
           parameters::GeneModel,
           Parameter("chromosome", serialize::STRING, "chromosome name(s)", true),
           Parameter("start", serialize::INTEGER, "minimum start region"),
           Parameter("end", serialize::INTEGER, "maximum end region"),
           parameters::UserKey
         };
-        Parameters params(&p[0], &p[0] + 6);
-        return params;
       }
 
       static Parameters results_()
       {
-        Parameter p[] = {
+        return {
           Parameter("id", serialize::STRING, "query id")
         };
-        Parameters results(&p[0], &p[0] + 1);
-        return results;
       }
 
     public:
@@ -78,15 +75,18 @@ namespace epidb {
         std::vector<serialize::ParameterPtr> genes;
         parameters[0]->children(genes);
 
-        const std::string gene_model = parameters[1]->as_string();
+        std::vector<serialize::ParameterPtr> go_terms;
+        parameters[1]->children(go_terms);
+
+        const std::string gene_model = parameters[2]->as_string();
 
         std::vector<serialize::ParameterPtr> chromosomes;
-        parameters[2]->children(chromosomes);
+        parameters[3]->children(chromosomes);
 
-        const int start = parameters[3]->isNull() ? -1 : parameters[3]->as_long();
-        const int end = parameters[4]->isNull() ? -1 : parameters[4]->as_long();
+        const int start = parameters[3]->isNull() ? -1 : parameters[4]->as_long();
+        const int end = parameters[4]->isNull() ? -1 : parameters[5]->as_long();
 
-        const std::string user_key = parameters[5]->as_string();
+        const std::string user_key = parameters[6]->as_string();
 
         std::string msg;
         datatypes::User user;
@@ -114,6 +114,7 @@ namespace epidb {
         }
 
         args_builder.append("genes", utils::build_array(genes));
+        args_builder.append("go_terms", utils::build_array(go_terms));
         args_builder.append("gene_model", utils::normalize_name(gene_model));
 
         std::string query_id;

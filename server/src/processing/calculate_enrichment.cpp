@@ -74,11 +74,12 @@ namespace epidb {
         chromosomes_with_data.push_back(chromosomeRegions.first);
       }
       std::vector<std::string> genes;
+      std::vector<std::string> go_terms;
 
       size_t total_go_terms = 0;
       std::vector<utils::IdNameCount> counts;
       if (!dba::gene_ontology::count_go_terms_in_genes(empty_chromosomes,
-          -1, -1, "", genes,
+          -1, -1, "", genes, go_terms,
           gene_model, utils::normalize_name(gene_model),
           counts, total_go_terms,  msg)) {
         return false;
@@ -92,7 +93,7 @@ namespace epidb {
       }
 
       ChromosomeRegionsList genesRegionsList;
-      if (!dba::genes::get_genes_from_database(chromosomes_with_data, -1, -1, "", genes, utils::normalize_name(gene_model), genesRegionsList, msg)) {
+      if (!dba::genes::get_genes_from_database(chromosomes_with_data, -1, -1, "", genes, go_terms, utils::normalize_name(gene_model), genesRegionsList, msg)) {
         return false;
       }
 

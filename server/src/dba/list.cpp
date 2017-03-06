@@ -259,12 +259,13 @@ namespace epidb {
         return helpers::get(Collections::GENE_MODELS(), result, msg);
       }
 
-      bool genes(const std::string &user_key, const std::vector<std::string> &genes_id_or_name,
+      bool genes(const std::string &user_key,
+                 const std::vector<std::string> &genes_id_or_name, const std::vector<std::string> &go_terms,
                  const std::vector<std::string> &chromosomes,
                  const Position start, const Position end,
                  const std::string &norm_gene_model,  std::vector<mongo::BSONObj> &genes, std::string &msg)
       {
-        return dba::genes::get_genes(chromosomes, start, end, "", genes_id_or_name, user_key, norm_gene_model, genes, msg);
+        return dba::genes::get_genes(chromosomes, start, end, "", genes_id_or_name, go_terms, user_key, norm_gene_model, genes, msg);
       }
 
       bool similar_biosources(const std::string &name, const std::string &user_key,

@@ -67,7 +67,8 @@ namespace epidb {
                                 const std::string& gene_model, RegionPtr& gene, std::string& msg);
 
       bool get_genes(const std::vector<std::string> &chromosomes, const Position start, const Position end,
-                     const std::string& strand, const std::vector<std::string>& genes_names_or_id,
+                     const std::string& strand,
+                     const std::vector<std::string>& genes_names_or_id, const std::vector<std::string>& go_terms,
                      const std::string &user_key, const std::string &norm_gene_model,
                      std::vector<mongo::BSONObj>& genes, std::string &msg);
 
@@ -77,8 +78,8 @@ namespace epidb {
       bool get_gene_model_by_dataset_id(const int id, std::string& name, std::string& msg);
 
       bool get_genes_from_database(const std::vector<std::string> &chromosomes, const Position start, const Position end, const std::string& strand,
-                                   const std::vector<std::string>& genes, const std::string& norm_gene_model,
-                                   ChromosomeRegionsList& chromosomeRegionsList, std::string& msg );
+                                   const std::vector<std::string>& genes, const std::vector<std::string>& go_terms,
+                                   const std::string& norm_gene_model, ChromosomeRegionsList& chromosomeRegionsList, std::string& msg );
 
       bool map_gene_location(const std::string& gene_tracking_id, const std::string& gene_name, const std::string& gene_model,
                              std::string& chromosome, Position& start, Position& end, std::string& strand, std::string& msg);
@@ -86,9 +87,11 @@ namespace epidb {
       bool exists_gene_ensg(const std::string& gene_ensg_id);
 
       bool build_genes_database_query(const std::vector<std::string> &chromosomes, const int start, const int end, const std::string& strand,
-                                      const std::vector<std::string>& genes, const std::string& norm_gene_model,
+                                      const std::vector<std::string>& genes, const std::vector<std::string>& go_terms,
+                                      const std::string& norm_gene_model,
                                       const bool exactly,
                                       mongo::BSONObj& filter, std::string& msg);
+
     }
   }
 }

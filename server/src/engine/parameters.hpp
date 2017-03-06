@@ -77,6 +77,7 @@ namespace epidb {
     const Parameter Genes("genes", serialize::STRING, "Name(s) or ENSEMBL ID (ENSGXXXXXXXXXXX.X ) of the gene(s).", true);
     const Parameter GeneModel("gene_model", serialize::STRING, "the gene model");
     const Parameter GeneModels("gene_models", serialize::STRING, "the selected gene models", true);
+    const Parameter GeneOntologyTerms("go_terms", serialize::STRING, "gene ontology terms - ID or label", true);
     const Parameter Genome("genome", serialize::STRING, "the target genome");
     const Parameter GenomeMultiple("genome", serialize::STRING, "the target genome", true);
     const Parameter IDs("id", serialize::STRING, "ID or an array of IDs", true);

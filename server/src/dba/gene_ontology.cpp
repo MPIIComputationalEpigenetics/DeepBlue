@@ -464,7 +464,8 @@ namespace epidb {
       }
 
       bool count_go_terms_in_genes(const std::vector<std::string> &chromosomes, const Position start, const Position end,
-                                   const std::string& strand, const std::vector<std::string>& genes,
+                                   const std::string& strand,
+                                   const std::vector<std::string>& genes, const std::vector<std::string>& go_terms,
                                    const std::string& gene_model, const std::string& norm_gene_model,
                                    std::vector<utils::IdNameCount>& counts, size_t &total_go_terms,
                                    std::string& msg)
@@ -473,7 +474,8 @@ namespace epidb {
 
         mongo::BSONObj query;
         if (!genes::build_genes_database_query(chromosomes, start, end, strand,
-                                               genes, norm_gene_model, false, query, msg)) {
+                                               genes, go_terms,
+                                               norm_gene_model, false, query, msg)) {
           return false;
         }
 
