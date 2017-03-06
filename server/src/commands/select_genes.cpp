@@ -50,7 +50,7 @@ namespace epidb {
       {
         Parameter p[] = {
           parameters::Genes,
-          Parameter("gene_model", serialize::STRING, "gene model name"),
+          parameters::GeneModel,
           Parameter("chromosome", serialize::STRING, "chromosome name(s)", true),
           Parameter("start", serialize::INTEGER, "minimum start region"),
           Parameter("end", serialize::INTEGER, "maximum end region"),
@@ -77,11 +77,15 @@ namespace epidb {
       {
         std::vector<serialize::ParameterPtr> genes;
         parameters[0]->children(genes);
+
         const std::string gene_model = parameters[1]->as_string();
+
         std::vector<serialize::ParameterPtr> chromosomes;
         parameters[2]->children(chromosomes);
+
         const int start = parameters[3]->isNull() ? -1 : parameters[3]->as_long();
         const int end = parameters[4]->isNull() ? -1 : parameters[4]->as_long();
+
         const std::string user_key = parameters[5]->as_string();
 
         std::string msg;
