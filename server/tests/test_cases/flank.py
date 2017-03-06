@@ -18,7 +18,7 @@ class TestFlank(helpers.TestCase):
 
     print ss
 
-    (s, query_id) = epidb.select_genes(["ENSG00000223972.5", "ENSG00000223972.5", "DDX11L1", "RP11-34P13.7"], "Test One", None, None, None, self.admin_key)
+    (s, query_id) = epidb.select_genes(["ENSG00000223972.5", "ENSG00000223972.5", "DDX11L1", "RP11-34P13.7"], "", "Test One", None, None, None, self.admin_key)
     (s, r_id) = epidb.get_regions(query_id, "CHROMOSOME,START,END,STRAND", self.admin_key)
     regions = self.get_regions_request(r_id)
     self.assertEqual(regions, "chr1\t11869\t14409\t+\nchr1\t89295\t133723\t-")
