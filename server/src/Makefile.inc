@@ -35,8 +35,11 @@ CPPFORMAT=$(ROOT)/third_party/cppformat
 URDL=$(ROOT)/third_party/urdl-0.1/include
 JEMALLOC=$(ROOT)/third_party/jemalloc-4.2.1
 
+GIT_VERSION := $(shell git describe --abbrev=8 --dirty --always --tags)
+GIT_URL := $(shell git remote get-url origin)
+
 ifeq ($(host),ubuntu)
- CXX = g++ -DBOOST_LOG_DYN_LINK -g
+ CXX = g++ -DBOOST_LOG_DYN_LINK -DGIT_VERSION=\"$(GIT_VERSION)\" -DGIT_URL=\"$(GIT_URL)\"
  LD  = g++ -g
  LDFLAGS   = -pthread
  MONGOLIBS = /opt/mongodb/drivers/lib/libmongoclient.a
@@ -50,7 +53,7 @@ endif
 
 # Servers
 ifeq ($(host),new_server)
- CXX = g++
+ CXX = g++ -DGIT_VERSION=\"$(GIT_VERSION)\" -DGIT_URL=\"$(GIT_URL)\"
  LD  = g++
  LDFLAGS   = -pthread
  MONGOLIBS = /local/data/libraries/mongo-cxx-driver/lib/libmongoclient.a
@@ -61,7 +64,7 @@ ifeq ($(host),new_server)
 endif
 
 ifeq ($(host),production)
- CXX = g++
+ CXX = g++ -DGIT_VERSION=\"$(GIT_VERSION)\" -DGIT_URL=\"$(GIT_URL)\"
  LD  = g++
  LDFLAGS   = -pthread
  MONGOLIBS = /opt/mongodb/install/mongo-driver/lib/libmongoclient.a
@@ -74,7 +77,7 @@ endif
 # -O3 -Ofast
 # Felipe Albrecht's mac
 ifeq ($(host),macosx)
- CXX = clang++
+ CXX = clang++ -DGIT_VERSION=\"$(GIT_VERSION)\" -DGIT_URL=\"$(GIT_URL)\"
  NO_WARNINGS = -Wno-unused-parameter -Wno-ignored-qualifiers -Wno-deprecated-declarations -Wno-unused-local-typedefs -Wno-redeclared-class-member
  # -g -O3 -Ofast -ffast-math -march=native
  # The no warnings: -Wno-redeclared-class-member are declared because the boost set_of.hpp library

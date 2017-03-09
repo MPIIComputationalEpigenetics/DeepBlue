@@ -37,7 +37,6 @@ namespace epidb {
     static const std::string license;
     static const std::string terms;
     static const std::string author;
-    static const std::string coauthors;
     static const size_t major_version;
     static const size_t minor_version;
     static const size_t fix_version;
@@ -60,12 +59,21 @@ namespace epidb {
 
     static const std::string info() {
       std::ostringstream oss;
+      oss << std::endl;
+      oss << "--------------------------------------------------------------------------------------------------------------" << std::endl;
       oss << name << " - " << version() << std::endl;
-      oss << copyright << std::endl;
-      oss << "by " << author << " with " << coauthors << std::endl;
-      oss << " compiled with " << BOOST_PLATFORM << " " << BOOST_COMPILER << " at " << __DATE__ ", " __TIME__ "." << std::endl;
-      oss << " using standard library: " << BOOST_STDLIB;
-      oss << " and BOOST: " << (BOOST_VERSION/100000) << "." << ((BOOST_VERSION / 100) % 1000) << "." << (BOOST_VERSION % 100) << std::endl;
+      oss << "copyright: " << copyright << std::endl;
+      oss << "git version: " << GIT_VERSION << std::endl;
+      oss << "git url: " << GIT_URL << std::endl;
+      oss << "built on: " << __DATE__ ", " __TIME__ "." << std::endl;
+      oss << "author: " << author << std::endl;
+      oss << "platform: " << BOOST_PLATFORM << " " << BOOST_COMPILER << std::endl;
+      oss << "C++ library: " << BOOST_STDLIB << std::endl;;
+      oss << "BOOST: " << (BOOST_VERSION/100000) << "." << ((BOOST_VERSION / 100) % 1000) << "." << (BOOST_VERSION % 100) << std::endl;
+      oss << "--------------------------------------------------------------------------------------------------------------" << std::endl;
+      oss << license << std::endl;
+      oss << terms << std::endl;
+      oss << "--------------------------------------------------------------------------------------------------------------" << std::endl;
       return oss.str();
     }
 
