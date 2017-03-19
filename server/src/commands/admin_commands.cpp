@@ -38,18 +38,14 @@ namespace epidb {
 
       static Parameters parameters_()
       {
-        Parameter p[] = {};
-        Parameters params;
-        return params;
+        return {};
       }
 
       static Parameters results_()
       {
-        Parameter p[] = {
+        return {
           Parameter("admin_commands", serialize::MAP, "command descriptions")
         };
-        Parameters results(&p[0], &p[0] + 1);
-        return results;
       }
 
     public:

@@ -40,23 +40,19 @@ namespace epidb {
 
       static Parameters parameters_()
       {
-        Parameter p[] = {
+        return {
           Parameter("name", serialize::STRING, "name of the epigenetic mark"),
           Parameter("description", serialize::STRING, "description of the epigenetic mark"),
           parameters::AdditionalExtraMetadata,
           parameters::UserKey
         };
-        Parameters params(&p[0], &p[0] + 4);
-        return params;
       }
 
       static Parameters results_()
       {
-        Parameter p[] = {
+        return {
           Parameter("id", serialize::STRING, "id of the newly inserted epigenetic mark")
         };
-        Parameters results(&p[0], &p[0] + 1);
-        return results;
       }
 
     public:
