@@ -1,5 +1,5 @@
 //
-//  genes.cpp
+//  genes.hpp
 //  DeepBlue Epigenomic Data Server
 //  File created by Felipe Albrecht on 09.09.2015
 //  Copyright (c) 2016 Max Planck Institute for Informatics. All rights reserved.
@@ -63,21 +63,39 @@ namespace epidb {
                               const std::string& attribute_name, const std::string& gene_model,
                               std::string& attibute_value, std::string& msg);
 
+      bool get_gene_gene_ontology_annotations(const std::string& chromosome, const Position start, const Position end, const std::string& strand,
+                                              const std::string& gene_model,
+                                              std::vector<datatypes::GeneOntologyTermPtr>& go_annotations, std::string& msg);
+
       bool get_gene_by_location(const std::string& chromosome, const Position start, const Position end, const std::string& strand,
                                 const std::string& gene_model, RegionPtr& gene, std::string& msg);
 
-      bool get_genes(const std::vector<std::string> &chromosomes, const Position start, const Position end, const std::string& strand,
-                     const std::vector<std::string>& genes_names_or_id, const std::string &user_key,
-                     const std::vector<std::string> &norm_gene_models,  std::vector<mongo::BSONObj>& genes, std::string &msg);
+      bool get_genes(const std::vector<std::string> &chromosomes, const Position start, const Position end,
+                     const std::string& strand,
+                     const std::vector<std::string>& genes_names_or_id, const std::vector<std::string>& go_terms,
+                     const std::string &user_key, const std::string &norm_gene_model,
+                     std::vector<mongo::BSONObj>& genes, std::string &msg);
+
+      bool get_gene_model_obj(const std::string& norm_gene_model,
+                              mongo::BSONObj& gene_model_obj, std::string& msg);
 
       bool get_gene_model_by_dataset_id(const int id, std::string& name, std::string& msg);
 
       bool get_genes_from_database(const std::vector<std::string> &chromosomes, const Position start, const Position end, const std::string& strand,
-                                   const std::vector<std::string>& genes, const std::string& norm_gene_model,
-                                   ChromosomeRegionsList& chromosomeRegionsList, std::string& msg );
+                                   const std::vector<std::string>& genes, const std::vector<std::string>& go_terms,
+                                   const std::string& norm_gene_model, ChromosomeRegionsList& chromosomeRegionsList, std::string& msg );
 
       bool map_gene_location(const std::string& gene_tracking_id, const std::string& gene_name, const std::string& gene_model,
                              std::string& chromosome, Position& start, Position& end, std::string& strand, std::string& msg);
+
+      bool exists_gene_ensg(const std::string& gene_ensg_id);
+
+      bool build_genes_database_query(const std::vector<std::string> &chromosomes, const int start, const int end, const std::string& strand,
+                                      const std::vector<std::string>& genes, const std::vector<std::string>& go_terms,
+                                      const std::string& norm_gene_model,
+                                      const bool exactly,
+                                      mongo::BSONObj& filter, std::string& msg);
+
     }
   }
 }

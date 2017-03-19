@@ -53,7 +53,9 @@ namespace epidb {
       RETRIEVE_EXPRESSIONS_DATA = 39,
       RETRIEVE_OVERLAP_QUERY = 40,
       PROCESS_AGGREGATE = 50,
-      FORMAT_OUTPUT = 80
+      FORMAT_OUTPUT = 80,
+      BUILDING_OUTPUT = 82,
+      COMPRESSING_OUTPUT = 84
     };
 
     extern std::map<OP, std::string> OP_names;
@@ -107,6 +109,7 @@ namespace epidb {
       long long total_regions();
       long long total_size();
       long long maximum_size();
+      bool is_allowed_size(size_t size);
       bool is_canceled(bool& ret, std::string& msg);
       std::unique_ptr<RunningCache>& running_cache();
     };
@@ -125,6 +128,8 @@ namespace epidb {
     bool count_regions(const std::string &query_id, const std::string &user_key, processing::StatusPtr status, size_t &count, std::string &msg);
 
     bool binning(const std::string& query_id, const std::string& column_name, const int bars, const std::string& user_key, const processing::StatusPtr status, mongo::BSONObj& counts, std::string& msg);
+
+    bool calculate_enrichment(const std::string& query_id, const std::string& gene_model, const std::string& user_key, processing::StatusPtr status, mongo::BSONObj& result, std::string& msg);
 
     bool coverage(const std::string &query_id, const std::string &genome, const std::string &user_key, processing::StatusPtr status, std::vector<CoverageInfo> &coverage_infos, std::string &msg);
 

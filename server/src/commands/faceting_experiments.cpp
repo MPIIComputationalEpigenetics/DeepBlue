@@ -49,7 +49,7 @@ namespace epidb {
 
       static Parameters parameters_()
       {
-        Parameter p[] = {
+        return {
           parameters::GenomeMultiple,
           Parameter("type", serialize::STRING, "type of the experiment: peaks or signal", true),
           Parameter("epigenetic_mark", serialize::STRING, "name(s) of selected epigenetic mark(s)", true),
@@ -59,17 +59,13 @@ namespace epidb {
           Parameter("project", serialize::STRING, "name(s) of selected projects", true),
           parameters::UserKey
         };
-        Parameters params(&p[0], &p[0] + 8);
-        return params;
       }
 
       static Parameters results_()
       {
-        Parameter p[] = {
+        return {
           Parameter("faceting", serialize::MAP, "Map with the mandatory fields of the experiments metadata, where each contains a list of terms that appears.")
         };
-        Parameters results(&p[0], &p[0] + 1);
-        return results;
       }
 
       static std::tuple<std::string, serialize::ParameterPtr> __build_face_result(const std::string& key, const std::vector<utils::IdNameCount>& values)

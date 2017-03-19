@@ -44,21 +44,17 @@ namespace epidb {
 
       static Parameters parameters_()
       {
-        Parameter p[] = {
+        return {
           Parameter("controlled_vocabulary", serialize::STRING, "controlled vocabulary name"),
           parameters::UserKey
         };
-        Parameters params(&p[0], &p[0] + 2);
-        return params;
       }
 
       static Parameters results_()
       {
-        Parameter p[] = {
+        return {
           Parameter("terms", serialize::LIST, "controlled_vocabulary terms with count")
         };
-        Parameters results(&p[0], &p[0] + 1);
-        return results;
       }
 
     public:

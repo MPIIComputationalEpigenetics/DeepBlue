@@ -55,6 +55,7 @@
 #include "exists.hpp"
 #include "full_text.hpp"
 #include "genes.hpp"
+#include "gene_ontology.hpp"
 #include "genomes.hpp"
 #include "helpers.hpp"
 #include "insert.hpp"
@@ -316,6 +317,7 @@ namespace epidb {
 
       // Clear caches
       cv::biosources_cache.invalidate();
+      gene_ontology::go_cache.invalidate();
       query::invalidate_cache();
       users::invalidate_cache();
       genes::invalidate_cache();

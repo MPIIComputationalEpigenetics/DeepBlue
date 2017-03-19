@@ -52,7 +52,7 @@ namespace epidb {
 
       static Parameters parameters_()
       {
-        Parameter p[] = {
+        return {
           Parameter("name", serialize::STRING, "annotation name"),
           parameters::Genome,
           Parameter("description", serialize::STRING, "description of the annotation"),
@@ -61,8 +61,6 @@ namespace epidb {
           parameters::AdditionalExtraMetadata,
           parameters::UserKey
         };
-        Parameters params(&p[0], &p[0] + 7);
-        return params;
       }
 
       static Parameters results_()

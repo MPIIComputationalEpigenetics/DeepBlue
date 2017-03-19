@@ -683,7 +683,17 @@ namespace epidb {
         }
 
         mongo::BSONObj args = query["args"].Obj();
-        const std::vector<std::string> genes = utils::build_vector(args["genes"].Array());
+
+        std::vector<std::string> genes;
+        if (args.hasElement("genes")) {
+          genes = utils::build_vector(args["genes"].Array());
+        }
+
+        std::vector<std::string> go_terms;
+        if (args.hasElement("go_terms")) {
+          go_terms = utils::build_vector(args["go_terms"].Array());
+        }
+
         // Honestly I dont like it, but since we changed these parameters and we already have a database with queries...
         // TODO: manually change the database.
         std::string gene_model;
@@ -713,7 +723,7 @@ namespace epidb {
           end = std::numeric_limits<Position>::max();
         }
 
-        if (!genes::get_genes_from_database(chromosomes, start, end, "", genes, gene_model, regions, msg)) {
+        if (!genes::get_genes_from_database(chromosomes, start, end, "", genes, go_terms, gene_model, regions, msg)) {
           return false;
         }
 

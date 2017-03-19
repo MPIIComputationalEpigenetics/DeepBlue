@@ -51,11 +51,11 @@ namespace epidb {
       static Parameters parameters_()
       {
         return {
-          Parameter("gene_model", serialize::STRING, "gene model name"),
+          parameters::GeneModel,
           parameters::Genome,
-          Parameter("description", serialize::STRING, "description of the annotation"),
-          Parameter("data", serialize::DATASTRING, "the GTF formatted data"),
-          Parameter("format", serialize::STRING, "Currently, it is only supported GTF."),
+          Parameter("description", serialize::STRING, "description of the gene model"),
+          Parameter("data", serialize::DATASTRING, "data in the GTF format"),
+          Parameter("format", serialize::STRING, "data format - currently, only the GTF format is supported."),
           parameters::AdditionalExtraMetadata,
           parameters::UserKey
         };
@@ -102,12 +102,6 @@ namespace epidb {
 
         if (dba::exists::gene_model(norm_name)) {
           std::string s = Error::m(ERR_DUPLICATED_GENE_MODEL_NAME, name);
-          result.add_error(s);
-          return false;
-        }
-
-        if (dba::exists::gene_model(norm_name)) {
-          std::string s = "The gene model name " + name + " is already being used.";
           result.add_error(s);
           return false;
         }

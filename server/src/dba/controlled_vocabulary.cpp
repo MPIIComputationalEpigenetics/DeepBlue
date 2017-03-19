@@ -18,11 +18,11 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include <map>
-
 #include <mongo/bson/bson.h>
 
 #include "../connection/connection.hpp"
+
+#include "../cache/connected_cache.hpp"
 
 #include "../extras/utils.hpp"
 
@@ -39,9 +39,10 @@ namespace epidb {
   namespace dba {
     namespace cv {
 
-      BiosourceConnectedCache biosources_cache;
+      ConnectedCache biosources_cache;
 
-      bool __get_synonyms_from_biosource(const std::string &id, const std::string &biosource_name, const std::string &norm_biosource_name,
+      bool __get_synonyms_from_biosource(const std::string &id,
+                                         const std::string &biosource_name, const std::string &norm_biosource_name,
                                          const std::string &user_key,
                                          std::vector<utils::IdName> &syns, std::string &msg)
       {
@@ -57,12 +58,10 @@ namespace epidb {
         syns.push_back(id_name_biosource);
 
         Connection c;
-
-        mongo::BSONObjBuilder syn_query_builder;
-        syn_query_builder.append("norm_name", norm_biosource_name);
-        mongo::BSONObj query_obj = syn_query_builder.obj();
-        mongo::Query query = mongo::Query(query_obj);
-        auto syns_cursor = c->query(helpers::collection_name(Collections::BIOSOURCE_SYNONYMS()), query);
+        auto syns_cursor = c->query(helpers::collection_name(
+                                      Collections::BIOSOURCE_SYNONYMS()),
+                                    BSON("norm_name" << norm_biosource_name)
+                                   );
 
         if (!syns_cursor->more()) {
           c.done();
@@ -74,9 +73,7 @@ namespace epidb {
 
         for (const mongo::BSONElement & be : e) {
           std::string norm_synonym = be.str();
-          mongo::BSONObjBuilder syn_query;
-          syn_query.append("norm_synonym", norm_synonym);
-          mongo::Query query = mongo::Query(syn_query.obj());
+          mongo::BSONObj query = BSON("norm_synonym" << norm_synonym);
 
           auto syns_names_cursor = c->query(helpers::collection_name(Collections::BIOSOURCE_SYNONYM_NAMES()), query);
 
@@ -132,6 +129,7 @@ namespace epidb {
                                 const std::string &biosource, const std::string &norm_biosource,
                                 std::string &msg)
       {
+        std::vector<std::string> related_terms;
 
         // Get the synonyms from this term
         std::vector<utils::IdName> syns;
@@ -139,10 +137,14 @@ namespace epidb {
           return false;
         }
 
-        std::vector<std::string> synonyms_terms;
         for (const utils::IdName & syn : syns) {
-          synonyms_terms.push_back(syn.name);
-          synonyms_terms.push_back(utils::normalize_name(syn.name));
+          related_terms.push_back(syn.name);
+        }
+
+        if (!search::get_related_terms(term, norm_term,
+                                       "norm_name", "biosources",
+                                       related_terms, msg)) {
+          return false;
         }
 
         // Get the sub terms
@@ -162,7 +164,7 @@ namespace epidb {
 
         // Update
         for (auto &id_name : id_names) {
-          if (!search::insert_related_term(id_name, synonyms_terms, msg)) {
+          if (!search::insert_related_term(id_name, related_terms, msg)) {
             return false;
           }
         }

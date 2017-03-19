@@ -43,7 +43,7 @@ namespace epidb {
       static  Parameters parameters_()
       {
         Parameter p[] = {
-          Parameter("query_id", serialize::STRING, "Query ID"),
+          parameters::QueryId,
           Parameter("genome", serialize::STRING, "Genome where the coverage will be calculated to"),
           parameters::UserKey
         };

@@ -24,6 +24,7 @@
 #include <vector>
 #include <set>
 #include <iostream>
+#include <unordered_map>
 
 #include "../datatypes/regions.hpp"
 #include "../processing/processing.hpp"
@@ -37,15 +38,20 @@ namespace epidb {
     bool extend(ChromosomeRegionsList &regions, const Length length, const std::string direction, const bool use_strand,
                 ChromosomeRegionsList &result, std::string &msg);
 
+    bool count_go_terms(const ChromosomeRegionsList &chromosomeRegionsList,
+                        std::unordered_map<std::string, size_t>& counts,
+                        size_t& total_genes, size_t& total_found_go_terms,
+                        std::string &msg);
+
     bool flank(ChromosomeRegionsList &regions, const Offset start, const Length length, const bool use_strand,
                ChromosomeRegionsList &result, std::string &msg);
 
     bool intersect(ChromosomeRegionsList &regions_data, ChromosomeRegionsList &regions_overlap,
                    ChromosomeRegionsList &intersections);
 
-   bool overlap(ChromosomeRegionsList &regions_data, ChromosomeRegionsList &regions_overlap,
-                const bool overlap, const double amount, const std::string amount_type,
-                ChromosomeRegionsList &intersections);
+    bool overlap(ChromosomeRegionsList &regions_data, ChromosomeRegionsList &regions_overlap,
+                 const bool overlap, const double amount, const std::string amount_type,
+                 ChromosomeRegionsList &intersections);
 
     ChromosomeRegionsList merge_chromosome_regions(ChromosomeRegionsList& chrregions_a, ChromosomeRegionsList& chrregions_b);
   } // namespace algorithms

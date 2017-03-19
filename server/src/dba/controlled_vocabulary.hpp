@@ -24,61 +24,14 @@
 #include <iostream>
 #include <vector>
 
+#include "../cache/connected_cache.hpp"
 #include "../extras/utils.hpp"
 
 namespace epidb {
   namespace dba {
     namespace cv {
 
-      class BiosourceConnectedCache {
-      private:
-        typedef std::map<std::string, bool> BiosourcesCached;
-        typedef std::map<std::string, BiosourcesCached> CacheMapList;
-
-        CacheMapList __cache_is_connected;
-
-        void add_connection(const std::string &bs1, const std::string &bs2)
-        {
-          CacheMapList::iterator it = __cache_is_connected.find(bs1);
-          if (it != __cache_is_connected.end()) {
-            BiosourcesCached &biosources = it->second;
-            biosources[bs2] = true;
-          } else {
-            BiosourcesCached biosources;
-            biosources[bs2] = true;
-            __cache_is_connected[bs2] = biosources;
-          }
-        }
-
-        void add_pair(const std::string &bs1, const std::string &bs2)
-        {
-          add_connection(bs1, bs2);
-          add_connection(bs2, bs1);
-        }
-
-      public:
-        void set_connection(const std::string &bs1, const std::string &bs2)
-        {
-          add_pair(bs1, bs2);
-        }
-
-        bool is_connected(const std::string &bs1, const std::string &bs2)
-        {
-          CacheMapList::iterator it = __cache_is_connected.find(bs1);
-          if (it != __cache_is_connected.end()) {
-            return it->second.find(bs2) != it->second.end();
-          }
-          return false;
-        }
-
-        void invalidate()
-        {
-          __cache_is_connected.clear();
-        }
-      };
-
-
-      extern BiosourceConnectedCache biosources_cache;
+      extern ConnectedCache biosources_cache;
 
       bool set_biosource_synonym_complete(const std::string &biosource_name, const std::string &synonym_name,
                                           const std::string& user_key, std::string& msg);

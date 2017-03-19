@@ -76,10 +76,11 @@ namespace epidb {
 
       bool gene_models(const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg);
 
-      bool genes(const std::string &user_key, const std::vector<std::string> &genes_id_or_name,
+      bool genes(const std::string &user_key,
+                const std::vector<std::string> &genes_id_or_name, const std::vector<std::string> &go_terms,
                  const std::vector<std::string> &chromosomes,
                  const Position start, const Position end,
-                 const std::vector<std::string> &norm_gene_models,  std::vector<mongo::BSONObj> &genes, std::string &msg);
+                 const std::string &norm_gene_model,  std::vector<mongo::BSONObj> &genes, std::string &msg);
 
       /**
        * List similars

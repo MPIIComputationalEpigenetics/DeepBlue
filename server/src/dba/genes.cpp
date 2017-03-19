@@ -28,6 +28,7 @@
 #include "../connection/connection.hpp"
 
 #include "../datatypes/metadata.hpp"
+#include "../datatypes/gene_ontology_terms.hpp"
 
 #include "../extras/utils.hpp"
 
@@ -276,15 +277,28 @@ namespace epidb {
           total_genes++;
         }
 
-        mongo::BSONObjBuilder index_name;
-        index_name.append(KeyMapper::CHROMOSOME(), 1);
-        index_name.append(KeyMapper::START(), 1);
-        index_name.append(KeyMapper::DATASET(), 1);
-        c->createIndex(helpers::collection_name(Collections::GENES()), index_name.obj());
-        if (!c->getLastError().empty()) {
-          msg = c->getLastError();
-          c.done();
-          return false;
+        {
+          mongo::BSONObjBuilder index_name;
+          index_name.append(KeyMapper::CHROMOSOME(), 1);
+          index_name.append(KeyMapper::START(), 1);
+          index_name.append(KeyMapper::DATASET(), 1);
+          c->createIndex(helpers::collection_name(Collections::GENES()), index_name.obj());
+          if (!c->getLastError().empty()) {
+            msg = c->getLastError();
+            c.done();
+            return false;
+          }
+        }
+
+        {
+          mongo::BSONObjBuilder index_name;
+          index_name.append(KeyMapper::ATTRIBUTES() + ".gene_id", 1);
+          c->createIndex(helpers::collection_name(Collections::GENES()), index_name.obj());
+          if (!c->getLastError().empty()) {
+            msg = c->getLastError();
+            c.done();
+            return false;
+          }
         }
 
         c->insert(helpers::collection_name(Collections::GENES()), rows_obj_bulk);
@@ -306,19 +320,29 @@ namespace epidb {
         return true;
       }
 
-      bool build_genes_database_query(const std::vector<std::string> &chromosomes, const int start, const int end, const std::string& strand,
-                                      const std::vector<std::string>& genes, const std::vector<std::string>& norm_gene_models,
-                                      const bool exactly,
-                                      mongo::Query& query, std::string& msg)
+      bool get_gene_model_obj(const std::string& norm_gene_model,
+                              mongo::BSONObj& gene_model_obj, std::string& msg)
       {
-
         Connection c;
-        mongo::BSONObj gene_model_obj = c->findOne(dba::helpers::collection_name(dba::Collections::GENE_MODELS()),
-                                        BSON("norm_name" << BSON("$in" << utils::build_array(norm_gene_models))));
+        gene_model_obj = c->findOne(dba::helpers::collection_name(dba::Collections::GENE_MODELS()),
+                                    BSON("norm_name" << norm_gene_model));
         c.done();
 
         if (gene_model_obj.isEmpty()) {
-          msg = "gene model " + utils::vector_to_string<std::string>(norm_gene_models) + " does not exists";
+          msg = "gene model " + norm_gene_model + " does not exists";
+          return false;
+        }
+        return true;
+      }
+
+      bool build_genes_database_query(const std::vector<std::string> &chromosomes, const int start, const int end, const std::string& strand,
+                                      const std::vector<std::string>& genes, const std::vector<std::string>& go_terms,
+                                      const std::string& norm_gene_model,
+                                      const bool exactly,
+                                      mongo::BSONObj& filter, std::string& msg)
+      {
+        mongo::BSONObj gene_model_obj;
+        if (!get_gene_model_obj(norm_gene_model, gene_model_obj, msg)) {
           return false;
         }
 
@@ -333,6 +357,15 @@ namespace epidb {
           mongo::BSONObj b_in_gene_name = BSON((KeyMapper::ATTRIBUTES() + ".gene_name") << BSON("$in" << genes_array));
           mongo::BSONObj b_in_gene_id = BSON((KeyMapper::ATTRIBUTES() + ".gene_id") << BSON("$in" << genes_array_2));
           bob.append("$or", BSON_ARRAY(b_in_gene_name << b_in_gene_id));
+        }
+
+        if (!go_terms.empty()) {
+          mongo::BSONArray go_array = utils::build_array(go_terms);
+          mongo::BSONArray go_array_2 = go_array;
+
+          mongo::BSONObj b_in_go_name = BSON("go_annotation.go_id" << BSON("$in" << go_array));
+          mongo::BSONObj b_in_go_id = BSON("go_annotation.go_label" << BSON("$in" << go_array_2));
+          bob.append("$or", BSON_ARRAY(b_in_go_name << b_in_go_id));
         }
 
         if (!chromosomes.empty()) {
@@ -359,7 +392,26 @@ namespace epidb {
           bob.append(KeyMapper::STRAND(), strand);
         }
 
-        mongo::BSONObj filter = bob.obj();
+        filter = bob.obj();
+
+        return true;
+      }
+
+
+      bool build_genes_database_query(const std::vector<std::string> &chromosomes, const int start, const int end, const std::string& strand,
+                                      const std::vector<std::string>& genes, const std::vector<std::string>& go_terms,
+                                      const std::string& norm_gene_model,
+                                      const bool exactly,
+                                      mongo::Query& query, std::string& msg)
+      {
+
+        mongo::BSONObj filter;
+        if (!build_genes_database_query(chromosomes, start, end, strand,
+                                        genes, go_terms,
+                                        norm_gene_model, exactly,
+                                        filter, msg)) {
+          return false;
+        }
 
         query = mongo::Query(filter).sort(BSON(KeyMapper::CHROMOSOME() << 1 << KeyMapper::START() << 1));
 
@@ -371,6 +423,7 @@ namespace epidb {
                               std::string& attibute_value, std::string& msg)
       {
         std::string norm_gene_model = utils::normalize_name(gene_model);
+        // TODO: Change to GeneRegion*
         RegionPtr gene;
         if (!get_gene_by_location(chromosome, start, end, strand, norm_gene_model, gene, msg)) {
           return false;
@@ -383,6 +436,23 @@ namespace epidb {
         }
 
         attibute_value = it->second;
+
+        return true;
+      }
+
+      bool get_gene_gene_ontology_annotations(const std::string& chromosome, const Position start, const Position end, const std::string& strand,
+                                              const std::string& gene_model,
+                                              std::vector<datatypes::GeneOntologyTermPtr>& go_annotations, std::string& msg)
+      {
+        std::string norm_gene_model = utils::normalize_name(gene_model);
+        // TODO: Change to GeneRegion*
+        RegionPtr gene;
+        if (!get_gene_by_location(chromosome, start, end, strand, norm_gene_model, gene, msg)) {
+          return false;
+        }
+
+        const GeneRegion* gene_region = static_cast<const GeneRegion*>(gene.get());
+        go_annotations = gene_region->get_gene_ontology_terms();
 
         return true;
       }
@@ -406,11 +476,14 @@ namespace epidb {
       }
 
 
-      bool get_genes(const std::vector<std::string> &chromosomes, const Position start, const Position end, const std::string& strand, const std::vector<std::string>& genes_names_or_id,
-                     const std::string &user_key, const std::vector<std::string> &norm_gene_models,  std::vector<mongo::BSONObj>& genes, std::string &msg)
+      bool get_genes(const std::vector<std::string> &chromosomes, const Position start, const Position end,
+                     const std::string& strand,
+                     const std::vector<std::string>& genes_names_or_id, const std::vector<std::string>& go_terms,
+                     const std::string &user_key, const std::string &norm_gene_model,
+                     std::vector<mongo::BSONObj>& genes, std::string &msg)
       {
         mongo::Query query;
-        if (!dba::genes::build_genes_database_query(chromosomes, start, end, strand, genes_names_or_id, norm_gene_models, false, query, msg)) {
+        if (!dba::genes::build_genes_database_query(chromosomes, start, end, strand, genes_names_or_id, go_terms, norm_gene_model, false, query, msg)) {
           return false;
         }
 
@@ -427,15 +500,12 @@ namespace epidb {
       }
 
       bool get_genes_from_database(const std::vector<std::string> &chromosomes, const Position start, const Position end, const std::string& strand,
-                                   const std::vector<std::string>& genes, const std::string& norm_gene_model,
+                                   const std::vector<std::string>& genes, const std::vector<std::string>& go_terms, const std::string& norm_gene_model,
                                    ChromosomeRegionsList& chromosomeRegionsList, std::string& msg )
       {
-        std::vector<std::string> gene_models;
-        gene_models.push_back(norm_gene_model);
-
         mongo::Query query;
 
-        if (!build_genes_database_query(chromosomes, start, end, strand, genes, gene_models, false, query, msg)) {
+        if (!build_genes_database_query(chromosomes, start, end, strand, genes, go_terms, norm_gene_model, false, query, msg)) {
           return false;
         }
 
@@ -463,6 +533,19 @@ namespace epidb {
           std::string frame = e_it.next().String();
           datatypes::Metadata attributes = datatypes::bson_to_metadata(gene[KeyMapper::ATTRIBUTES()].Obj());
 
+          std::vector<datatypes::GeneOntologyTermPtr> go_terms;
+          if (gene.hasElement("go_annotation")) {
+            std::vector<mongo::BSONElement> go_annotations = gene["go_annotation"].Array();
+
+            for (auto go_term : go_annotations) {
+              std::string go_id = go_term["go_id"].String();
+              std::string go_label = go_term["go_label"].String();
+              std::string go_namespace = go_term["go_namespace"].String();
+              datatypes::GeneOntologyTermPtr go_term_ptr = datatypes::GeneOntolyTermsPool::get_go_term(go_id, go_label, go_namespace);
+              go_terms.emplace_back(go_term_ptr);
+            }
+          }
+
           if (chromosome != actual_chromosome) {
             if (!actual_chromosome.empty() && !actual_regions.empty()) {
               chromosomeRegionsList.emplace_back(std::move(actual_chromosome), std::move(actual_regions));
@@ -471,7 +554,7 @@ namespace epidb {
             actual_regions = Regions();
           }
 
-          actual_regions.emplace_back(build_gene_region(start, end, dataset_id, source, score, feature,  strand, frame, attributes));
+          actual_regions.emplace_back(build_gene_region(start, end, dataset_id, source, score, feature,  strand, frame, attributes, go_terms));
         }
 
         if (!actual_chromosome.empty()) {
@@ -529,9 +612,10 @@ namespace epidb {
       {
         std::vector<std::string> chromosomes;
         std::vector<std::string> genes;
+        std::vector<std::string> go_terms;
         ChromosomeRegionsList chromosomeRegionsList;
 
-        if (!get_genes_from_database(chromosomes, -1, -1, "", genes, norm_gene_model, chromosomeRegionsList, msg)) {
+        if (!get_genes_from_database(chromosomes, -1, -1, "", genes, go_terms, norm_gene_model, chromosomeRegionsList, msg)) {
           return false;
         }
 
@@ -569,7 +653,8 @@ namespace epidb {
       GeneModelsCache gene_models_cache_gene_name;
       GeneLocationsCache gene_locations_cache;
 
-      void invalidate_cache() {
+      void invalidate_cache()
+      {
         gene_models_cache_tracking_id.clear();
         gene_models_cache_gene_name.clear();
         gene_locations_cache.clear();
@@ -651,6 +736,15 @@ namespace epidb {
         strand = region.strand;
 
         return true;
+      }
+
+      bool exists_gene_ensg(const std::string& gene_ensg_id)
+      {
+        mongo::BSONObjBuilder bob;
+        bob.appendRegex(KeyMapper::ATTRIBUTES() + ".gene_id", "^"+gene_ensg_id);
+        mongo::BSONObj query = bob.obj();
+
+        return helpers::check_exist(Collections::GENES(), query);
       }
     }
   }

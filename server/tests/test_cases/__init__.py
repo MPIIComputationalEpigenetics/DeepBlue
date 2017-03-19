@@ -19,6 +19,7 @@ import faceting
 import filters
 import flank
 import gene_models
+import gene_ontology
 import gene_expressions
 import genomes
 import info

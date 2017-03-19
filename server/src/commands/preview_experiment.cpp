@@ -160,18 +160,17 @@ namespace epidb {
           }
         } while(chromosomeRegionsList.empty() && ++chrom_pos < chroms_vector.size());
 
-        processing::StatusPtr status = processing::build_dummy_status();
-
         mongo::BSONObj experiment_bson;
         if (!dba::experiments::by_name(experiment_norm_name, experiment_bson, msg)) {
           result.add_error(msg);
           return false;
         }
 
+        processing::StatusPtr status = processing::build_dummy_status();
         std::string experiment_format = experiment_bson["format"].str();
-
         StringBuilder sb;
         if (!epidb::processing::format_regions(experiment_format, chromosomeRegionsList, status, sb, msg)) {
+          result.add_error(msg);
           return false;
         }
 

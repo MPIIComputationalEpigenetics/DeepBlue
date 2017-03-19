@@ -75,10 +75,13 @@ namespace epidb {
     const Parameter ExpressionType("expression_type", serialize::STRING, "expression type (supported: 'gene')");
     const Parameter ExtraMetadata("extra_metadata", serialize::MAP, "Metadata that must be matched");
     const Parameter Genes("genes", serialize::STRING, "Name(s) or ENSEMBL ID (ENSGXXXXXXXXXXX.X ) of the gene(s).", true);
-    const Parameter GeneModels("gene_models", serialize::STRING, "the gene model", true);
+    const Parameter GeneModel("gene_model", serialize::STRING, "the gene model");
+    const Parameter GeneModels("gene_models", serialize::STRING, "the selected gene models", true);
+    const Parameter GeneOntologyTerms("go_terms", serialize::STRING, "gene ontology terms - ID or label", true);
     const Parameter Genome("genome", serialize::STRING, "the target genome");
     const Parameter GenomeMultiple("genome", serialize::STRING, "the target genome", true);
     const Parameter IDs("id", serialize::STRING, "ID or an array of IDs", true);
+    const Parameter QueryId("query_id", serialize::STRING, "Query ID");
     const Parameter UserKey("user_key", serialize::STRING, "users token key");
   }
 } // namespace epidb

@@ -1,0 +1,21 @@
+{
+    "configurations": [
+        {
+            "name": "Mac",
+            "includePath": ["/usr/include"]
+        },
+        {
+            "name": "Linux",
+            "includePath": ["/usr/include", "/usr/lib/x86_64-linux-gnu/","/opt/mongodb/drivers/include", "/home/albrecht/DeepBlue/DeepBlue/server/src"]
+        },
+        {
+            "name": "Win32",
+            "includePath": ["c:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/include"]
+        }
+    ],
+    "clang_format" : {
+        "style" : "file",
+        "fallback-style" : "LLVM",
+        "sort-includes" : "false"
+    }
+}

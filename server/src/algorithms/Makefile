@@ -4,7 +4,7 @@ ROOT		= $(shell pwd)/../..
 CXXFLAGS	= $(DEFCXXFLAGS) -I..
 
 OBJLIBS	= ../libalgorithms.a
-OBJS    = accumulator.o aggregate.o extend.o flank.o intersection.o merge.o levenshtein.o patterns.o
+OBJS    = count_go_terms.o accumulator.o aggregate.o extend.o flank.o intersection.o merge.o levenshtein.o patterns.o
 
 all : $(OBJLIBS)
 

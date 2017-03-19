@@ -53,14 +53,6 @@ namespace epidb {
       {
         Connection c;
 
-        // XXX
-        // It was a bug in older C++ driver that came with mongodb version 2.4
-        // Delete these lines if the bug does not happen anymore
-        // if the collection is dropped MongoDB doesn't realize the index is deleted
-        // and will not recreate it even though it's missing. So we have to reset the
-        // index cache manually.
-        // c->resetIndexCache();
-
         if (!c->getLastError().empty()) {
           msg = c->getLastError();
           c.done();
@@ -119,7 +111,7 @@ namespace epidb {
             norm_biosource_name = data["norm_biosource_name"].str();
           }
           auto cursor = c->query(helpers::collection_name(Collections::TEXT_SEARCH()),
-              mongo::fromjson("{\"norm_name\": \"" + norm_biosource_name + "\", \"type\": \"biosources\"}"));
+                                 mongo::fromjson("{\"norm_name\": \"" + norm_biosource_name + "\", \"type\": \"biosources\"}"));
 
           if (!cursor->more()) {
             std::string s = Error::m(ERR_DATABASE_INVALID_BIOSOURCE, norm_biosource_name);
@@ -150,19 +142,42 @@ namespace epidb {
         return true;
       }
 
+      bool get_related_terms(const std::string& name, const std::string& norm_name,
+                             const std::string& key_name, const std::string& type,
+                             std::vector<std::string>& related_terms,
+                             std::string& msg)
+      {
+        Connection c;
+        mongo::BSONObj term_bson = c->findOne(helpers::collection_name(Collections::TEXT_SEARCH()),
+                                              BSON(key_name << norm_name << "type" << type));
+        c.done();
+
+        if (term_bson.isEmpty()) {
+          msg = "Internal error: '" + type + "' '" + name + "' not found.";
+          return false;
+        }
+
+        if (!term_bson.hasElement("related_terms")) {
+          return true;
+        }
+
+        std::vector<mongo::BSONElement> e = term_bson["related_terms"].Array();
+        for (const mongo::BSONElement & be : e) {
+          related_terms.push_back(be.str());
+        }
+
+        return true;
+      }
+
       bool insert_related_term(const utils::IdName &id_name, const std::vector<std::string> &related_terms,
                                std::string &msg)
       {
-        Connection c;
-
-        mongo::BSONObjBuilder query_builder;
-        query_builder.append("epidb_id", id_name.id);
-        mongo::BSONObj query = query_builder.obj();
-
+        mongo::BSONObj query = BSON("epidb_id" << id_name.id);
         mongo::BSONArray related_terms_arr = utils::build_array(related_terms);
         mongo::BSONObj append_value = BSON("$addToSet" << BSON("related_terms" << BSON("$each" << related_terms_arr)));
 
         // Update the biosource term (that were informed in the id_names.name)
+        Connection c;
         c->update(helpers::collection_name(Collections::TEXT_SEARCH()), query, append_value, false, true);
         if (!c->getLastError().empty()) {
           msg = c->getLastError();
@@ -187,6 +202,36 @@ namespace epidb {
         update_related_query_builder_for_experiments.append("sample_info_norm_biosource_name", id_name.name);
         mongo::BSONObj update_related_query_for_experiments = update_related_query_builder_for_experiments.obj();
         c->update(helpers::collection_name(Collections::TEXT_SEARCH()), update_related_query_for_experiments, append_value, false, true);
+        if (!c->getLastError().empty()) {
+          msg = c->getLastError();
+          c.done();
+          return false;
+        }
+
+        c.done();
+        return true;
+      }
+
+      bool insert_related_gene_ontology_term(const std::string& go_term_id, const std::vector<std::string>& terms_to_include,
+                                             std::string& msg)
+      {
+        Connection c;
+        {
+          mongo::BSONObjBuilder index_name;
+          index_name.append("type", 1);
+          index_name.append("go_id", 1);
+          c->createIndex(helpers::collection_name(Collections::TEXT_SEARCH()), index_name.obj());
+          if (!c->getLastError().empty()) {
+            msg = c->getLastError();
+            c.done();
+            return false;
+          }
+        }
+
+        mongo::BSONArray terms_to_include_arr = utils::build_array(terms_to_include);
+        mongo::BSONObj append_value = BSON("$addToSet" << BSON("related_terms" << BSON("$each" << terms_to_include_arr)));
+
+        c->update(helpers::collection_name(Collections::TEXT_SEARCH()), BSON("type" << "gene_ontology" << "go_id" << go_term_id), append_value);
         if (!c->getLastError().empty()) {
           msg = c->getLastError();
           c.done();

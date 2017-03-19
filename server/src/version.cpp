@@ -23,7 +23,7 @@
 
 namespace epidb {
   const std::string Version::name = "DeepBlue Epigenomic Data Server";
-  const std::string Version::copyright = "Copyright Copyright (c) 2016 Max Planck Institute for Informatics. All rights reserved.";
+  const std::string Version::copyright = "Copyright Copyright (c) 2015,2016,2017 Max Planck Institute for Informatics. All rights reserved.";
   const std::string Version::license = "This program comes with ABSOLUTELY NO WARRANTY.\nThis is free software, and you are welcome to redistribute it under certain conditions.\n";
   const std::string Version::terms = "This program is free software: you can redistribute it and/or modify\n"
     "it under the terms of the GNU General Public License as published by\n"
@@ -38,8 +38,7 @@ namespace epidb {
     "You should have received a copy of the GNU General Public License\n"
     "along with this program.  If not, see <http://www.gnu.org/licenses/>.";
   const std::string Version::author = "Felipe Albrecht - felipe.albrecht@mpi-inf.mpg.de";
-  const std::string Version::coauthors = "Fabian Reinartz, Natalie Wirth";
   const size_t Version::major_version = 1;
-  const size_t Version::minor_version = 10;
-  const size_t Version::fix_version = 3;
+  const size_t Version::minor_version = 11;
+  const size_t Version::fix_version = 1;
 }
