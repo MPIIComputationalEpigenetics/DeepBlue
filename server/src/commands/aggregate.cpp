@@ -54,23 +54,19 @@ namespace epidb {
 
       static Parameters parameters_()
       {
-        Parameter p[] = {
+        return {
           Parameter("data_id", serialize::STRING, "id of the query with the data"),
           Parameter("ranges_id", serialize::STRING, "id of the query with the regions range"),
           Parameter("column", serialize::STRING, "name of the column that will be used in the aggregation"),
           parameters::UserKey
         };
-        Parameters params(&p[0], &p[0] + 4);
-        return params;
       }
 
       static Parameters results_()
       {
-        Parameter p[] = {
+        return {
           Parameter("regions", serialize::STRING, "query id of this aggregation operation")
         };
-        Parameters results(&p[0], &p[0] + 1);
-        return results;
       }
 
     public:

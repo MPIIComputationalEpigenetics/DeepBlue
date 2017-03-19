@@ -99,7 +99,7 @@ namespace epidb {
           return false;
         }
 
-        int dataset_id = annotation[KeyMapper::DATASET()].Int();
+        DatasetId dataset_id = annotation[KeyMapper::DATASET()].Int();
         std::string genome_name = annotation["norm_genome"].String();
 
         // find others annotations with the same id
@@ -145,7 +145,7 @@ namespace epidb {
           return false;
         }
 
-        int dataset_id = gene_model[KeyMapper::DATASET()].Int();
+        DatasetId dataset_id = gene_model[KeyMapper::DATASET()].Int();
 
         if (!helpers::remove_all(helpers::collection_name(Collections::GENES()), BSON(KeyMapper::DATASET() << dataset_id), msg)) {
           return false;
