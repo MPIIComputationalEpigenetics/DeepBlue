@@ -79,7 +79,6 @@ namespace epidb {
           continue;
         }
 
-        // TODO: use the generic version that will be put in processing.cpp
         processing::RunningOp runningOp = status->start_operation(processing::FORMAT_OUTPUT,
                                           BSON("format" << output_format << "chromosome" << chromosome << "regions" << (long long) regions.size()));
 
@@ -102,6 +101,13 @@ namespace epidb {
             return false;
           }
           // ***
+
+          if (!status->is_allowed_size(sb.size())) {
+            msg = "The output string is bigger than the size that you are allowed to use: '" + utils::size_t_to_string(status->maximum_size()) +
+                  "'. We recomend you to select fewer experiments, chromosomes, or check the metafields that you are using, for example the @SEQUENCE metafield.";
+                  std::cerr <<  "SHIT" << std::endl;
+            return false;
+          }
 
           RegionPtr region = std::move(*cit);
           DatasetId dataset_id = region->dataset_id();

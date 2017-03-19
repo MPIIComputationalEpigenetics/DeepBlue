@@ -247,8 +247,13 @@ namespace epidb {
         return false;
       }
 
+      status->start_operation(processing::BUILDING_OUTPUT,
+                              BSON("string_builder_size" << (long long) sb.size()));
+
       std::string result_string = sb.to_string();
 
+      status->start_operation(processing::COMPRESSING_OUTPUT,
+                              BSON("string_size" << (long long) result_string.size()));
       std::stringbuf inStream(std::move(result_string));
       std::stringbuf outStream;
       boost::iostreams::filtering_streambuf< boost::iostreams::input> in;
