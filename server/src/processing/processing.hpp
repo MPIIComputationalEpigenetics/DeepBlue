@@ -53,7 +53,9 @@ namespace epidb {
       RETRIEVE_EXPRESSIONS_DATA = 39,
       RETRIEVE_OVERLAP_QUERY = 40,
       PROCESS_AGGREGATE = 50,
-      FORMAT_OUTPUT = 80
+      FORMAT_OUTPUT = 80,
+      BUILDING_OUTPUT = 82,
+      COMPRESSING_OUTPUT = 84
     };
 
     extern std::map<OP, std::string> OP_names;
@@ -107,6 +109,7 @@ namespace epidb {
       long long total_regions();
       long long total_size();
       long long maximum_size();
+      bool is_allowed_size(size_t size);
       bool is_canceled(bool& ret, std::string& msg);
       std::unique_ptr<RunningCache>& running_cache();
     };
