@@ -208,6 +208,14 @@ namespace epidb {
       c.done();
     }
 
+    bool Status::is_allowed_size(size_t output_size)
+    {
+      if (_request_id == DUMMY_REQUEST) {
+        return true;
+      }
+      return (output_size <= _maximum_memory);
+    }
+
     long long Status::total_regions()
     {
       return _total_regions;

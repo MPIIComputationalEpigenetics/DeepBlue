@@ -92,4 +92,9 @@ namespace epidb {
   {
     return total_size == 0;
   }
+
+  size_t StringBuilder::size()
+  {
+    return total_size;
+  }
 }

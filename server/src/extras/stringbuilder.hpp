@@ -47,6 +47,8 @@ namespace epidb {
     std::string to_string();
 
     bool empty();
+
+    size_t size();
   };
 }
 
