@@ -50,9 +50,11 @@ namespace epidb {
           is_sample = true;
         } else if (id.compare(0, 1, "e") == 0) {
           collection = Collections::EXPERIMENTS();
+        } else if (id.compare(0, 1, "g") == 0) {
+          collection = Collections::GENOMES();
         } else {
           msg = Error::m(ERR_INVALID_IDENTIFIER, id);
-          msg += ". It is accepted only data ID from experiments, annotations, biosources, and samples";
+          msg += " It is accepted only data ID from genomes, experiments, annotations, biosources, and samples";
           return false;
         }
 
