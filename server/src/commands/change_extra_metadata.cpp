@@ -39,23 +39,19 @@ namespace epidb {
 
       static  Parameters parameters_()
       {
-        Parameter p[] = {
+        return {
           Parameter("id", serialize::STRING, "id of the data"),
           Parameter("key", serialize::STRING, "extra_metadata key"),
           Parameter("value", serialize::STRING, "extra_metadata key (empty for delete this key)"),
           parameters::UserKey
         };
-        Parameters params(&p[0], &p[0] + 4);
-        return params;
       }
 
       static Parameters results_()
       {
-        Parameter p[] = {
+        return {
           Parameter("id", serialize::STRING, "id of the modified data")
         };
-        Parameters results(&p[0], &p[0] + 1);
-        return results;
       }
 
     public:

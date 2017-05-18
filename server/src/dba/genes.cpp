@@ -348,7 +348,7 @@ namespace epidb {
         }
 
         mongo::BSONObjBuilder bob;
-        auto dataset_id = gene_model_obj[KeyMapper::DATASET()].Int();
+        DatasetId dataset_id = gene_model_obj[KeyMapper::DATASET()].Int();
         bob.append(KeyMapper::DATASET(), dataset_id);
 
         if (!genes.empty()) {
