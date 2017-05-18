@@ -80,6 +80,7 @@ namespace epidb {
         mongo::BSONObjBuilder bob;
 
         bob.append(data_obj["_id"]);
+        bob.append(data_obj["name"]);
         bob.append(data_obj["description"]);
         bob.append(data_obj["genome"]);
         bob.append(data_obj["format"]);
