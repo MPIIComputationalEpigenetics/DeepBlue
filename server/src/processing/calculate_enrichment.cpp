@@ -129,7 +129,8 @@ namespace epidb {
         mongo::BSONObjBuilder bob;
         bob.append("id", kv.first);
         bob.append("name", id_to_name[kv.first]);
-        bob.append("go_colocated", (long long) total_counts[kv.first]);
+        bob.append("go_overlap", (long long) kv.second);
+        bob.append("go_total", (long long) total_counts[kv.first]);
         bob.append("ratio", (float(kv.second) / float(total_counts[kv.first])));
         bob.append("p_value", (fisher_test(aa, bb, cc, dd)));
 
