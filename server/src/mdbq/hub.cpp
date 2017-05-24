@@ -228,6 +228,26 @@ namespace epidb {
     {
       Connection c;
       mongo::BSONObj o = c->findOne(dba::helpers::collection_name(dba::Collections::JOBS()), BSON("_id" << id));
+
+      boost::posix_time::ptime now = epidb::extras::universal_date_time();
+
+      mongo::BSONObj cmd = BSON(
+                             "findAndModify" << dba::Collections::JOBS() <<
+                             "query" << BSON("_id" << id) <<
+                             "update" << BSON(
+                                 "$set" << BSON( "last_access" << epidb::extras::to_mongo_date(now)) <<
+                                 "$inc" << BSON("times_accessed" << 1)
+                             )
+                           );
+
+      mongo::BSONObj res;
+      c->runCommand(m_ptr->m_prefix, cmd, res);
+      if (!res["value"].isABSONObj()) {
+        c.done();
+        std::cerr << "No request available, cmd:" + cmd.toString() << std::endl;
+        return res;
+      }
+
       c.done();
       return o;
     }
