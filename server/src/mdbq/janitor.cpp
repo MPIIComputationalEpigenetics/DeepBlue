@@ -1,5 +1,5 @@
 //
-//  janitor.hpp
+//  janitor.cpp
 //  DeepBlue Epigenomic Data Server
 //  File created by Felipe Albrecht on 24.05.17.
 //  Copyright (c) 2016 Max Planck Institute for Informatics. All rights reserved.
@@ -28,8 +28,8 @@
 #include "../dba/helpers.hpp"
 
 #include "janitor.hpp"
-
 #include "common.hpp"
+#include "cleaner.hpp"
 
 #include "../log.hpp"
 
@@ -68,8 +68,18 @@ namespace epidb {
       EPIDB_LOG_TRACE(query.toString());
 
       while (cursor->more()) {
-        mongo::BSONObj job = cursor->next();
+        const mongo::BSONObj job = cursor->next();
         std::cerr << "CLEARING JOB " << job.toString() << std::endl;
+        const std::string& id = job["_id"].String();
+
+        std::string msg;
+
+        bool o = remove_request_data(id, TS_CLEARED, msg);
+        if (o) {
+          std::cerr << " job " << id << " cleared with success" << std::endl;
+        } else {
+          std::cerr << " problem clearing job: " << id << " - " << msg << std::endl;
+        }
       }
       c.done();
 

@@ -1,5 +1,5 @@
 //
-//  janitor.cpp
+//  cleaner.hpp
 //  DeepBlue Epigenomic Data Server
 //  File created by Felipe Albrecht on 24.05.17.
 //  Copyright (c) 2016 Max Planck Institute for Informatics. All rights reserved.
@@ -17,21 +17,14 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <boost/asio.hpp>
+#include "../datatypes/user.hpp"
+
+#include "common.hpp"
 
 namespace epidb {
   namespace mdbq {
-    class Janitor {
-    public:
-      Janitor(float interval) : m_interval(interval) {}
-      void run();
-
-    private:
-      float m_interval;
-      std::auto_ptr<boost::asio::deadline_timer> m_timer;
-      boost::asio::io_service ios;
-      bool clean_oldest(const boost::system::error_code &error);
-      void reg(boost::asio::io_service &io_service, float interval);
-    };
+    bool cancel_request(const datatypes::User& user, const std::string& request_id, std::string& msg);
+    void remove_result(const std::string request_id);
+    bool remove_request_data(const std::string& request_id, TaskState state, std::string& msg);
   }
 }
