@@ -313,6 +313,8 @@ namespace epidb {
         return TS_REMOVED;
       } else if (name == "renew") {
         return TS_RENEW;
+      } else if (name == "cleared") {
+        return TS_CLEARED;
       } else {
         return _TS_END;
       }
@@ -340,6 +342,8 @@ namespace epidb {
         return "removed";
       case TS_RENEW:
         return "renew";
+      case TS_CLEARED:
+        return "cleared";
       default :
         return "Invalid State: " + epidb::utils::integer_to_string(state);
       }
@@ -356,6 +360,7 @@ namespace epidb {
       case TS_CANCELLED:
       case TS_REMOVED:
       case TS_RENEW:
+      case TS_CLEARED:
         return "";
       case TS_FAILED:
         return o["error"].str();
@@ -483,7 +488,7 @@ namespace epidb {
 
       // 2.
       mongo::BSONObj query = BSON("request_id" << request_id);
-      mongo::BSONObj update = BSON("$set" << BSON("status" << TS_REMOVED));
+      mongo::BSONObj update = BSON("$set" << BSON("status" << state));
       c->update(epidb::dba::helpers::collection_name(dba::Collections::PROCESSING()), query, update, false, true);
       if (!c->getLastError().empty()) {
         msg = c->getLastError();

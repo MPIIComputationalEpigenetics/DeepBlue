@@ -31,6 +31,7 @@ namespace epidb {
       TS_CANCELLED, // 4
       TS_REMOVED,   // 5
       TS_RENEW,     // 6
+      TS_CLEARED,   // 7
       _TS_END,
       _TS_FIRST = TS_NEW
     };
