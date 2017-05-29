@@ -166,8 +166,6 @@ namespace epidb {
       return true;
     }
 
-    bool Hub::reprocess_job(const mongo::BSONObj &joba)
-
  /*
 
       mongo::BSONObjBuilder queryb;

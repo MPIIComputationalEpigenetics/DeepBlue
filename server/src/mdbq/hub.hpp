@@ -145,6 +145,11 @@ namespace epidb {
 
 
       /**
+       *
+       */
+      bool reprocess_job(const mongo::BSONObj &job);
+
+      /**
        * register with the main loop
        *
        * @param interval querying interval

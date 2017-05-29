@@ -397,8 +397,8 @@ namespace epidb {
         threads[i] = new boost::thread(boost::bind(&QueueHandler::run, clients[i]));
       }
 
-      mdbq::Janitor *janitor = new mdbq::Janitor(5);
-      boost::thread *t = new boost::thread(boost::bind(&mdbq::Janitor::run, janitor));
+      //mdbq::Janitor *janitor = new mdbq::Janitor(5);
+      //boost::thread *t = new boost::thread(boost::bind(&mdbq::Janitor::run, janitor));
     }
   }
 }
