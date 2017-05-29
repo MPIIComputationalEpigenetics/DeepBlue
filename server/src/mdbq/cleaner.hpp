@@ -1,6 +1,8 @@
 //
-//  common.hpp
+//  cleaner.hpp
 //  DeepBlue Epigenomic Data Server
+//  File created by Felipe Albrecht on 24.05.17.
+//  Copyright (c) 2016 Max Planck Institute for Informatics. All rights reserved.
 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -14,27 +16,15 @@
 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-//
-// Code from https://github.com/temporaer/MDBQ/
-// adapted to DeepBlue by Felipe Albrecht on 22.01.2015
 
-#ifndef __MDBQ_COMMON_HPP__
-#define __MDBQ_COMMON_HPP__
+#include "../datatypes/user.hpp"
+
+#include "common.hpp"
 
 namespace epidb {
   namespace mdbq {
-    enum TaskState {
-      TS_NEW,       // 0
-      TS_RUNNING,   // 1
-      TS_DONE,      // 2
-      TS_FAILED,    // 3
-      TS_CANCELLED, // 4
-      TS_REMOVED,   // 5
-      TS_RENEW,     // 6
-      TS_CLEARED,   // 7
-      _TS_END,
-      _TS_FIRST = TS_NEW
-    };
+    bool cancel_request(const datatypes::User& user, const std::string& request_id, std::string& msg);
+    void remove_result(const std::string request_id);
+    bool remove_request_data(const std::string& request_id, TaskState state, std::string& msg);
   }
 }
-#endif /* __MDBQ_COMMON_HPP__ */

@@ -228,6 +228,26 @@ namespace epidb {
     {
       Connection c;
       mongo::BSONObj o = c->findOne(dba::helpers::collection_name(dba::Collections::JOBS()), BSON("_id" << id));
+
+      boost::posix_time::ptime now = epidb::extras::universal_date_time();
+
+      mongo::BSONObj cmd = BSON(
+                             "findAndModify" << dba::Collections::JOBS() <<
+                             "query" << BSON("_id" << id) <<
+                             "update" << BSON(
+                                 "$set" << BSON( "last_access" << epidb::extras::to_mongo_date(now)) <<
+                                 "$inc" << BSON("times_accessed" << 1)
+                             )
+                           );
+
+      mongo::BSONObj res;
+      c->runCommand(m_ptr->m_prefix, cmd, res);
+      if (!res["value"].isABSONObj()) {
+        c.done();
+        std::cerr << "No request available, cmd:" + cmd.toString() << std::endl;
+        return res;
+      }
+
       c.done();
       return o;
     }
@@ -293,6 +313,8 @@ namespace epidb {
         return TS_REMOVED;
       } else if (name == "renew") {
         return TS_RENEW;
+      } else if (name == "cleared") {
+        return TS_CLEARED;
       } else {
         return _TS_END;
       }
@@ -320,6 +342,8 @@ namespace epidb {
         return "removed";
       case TS_RENEW:
         return "renew";
+      case TS_CLEARED:
+        return "cleared";
       default :
         return "Invalid State: " + epidb::utils::integer_to_string(state);
       }
@@ -336,6 +360,7 @@ namespace epidb {
       case TS_CANCELLED:
       case TS_REMOVED:
       case TS_RENEW:
+      case TS_CLEARED:
         return "";
       case TS_FAILED:
         return o["error"].str();
@@ -431,101 +456,6 @@ namespace epidb {
       c.done();
       content = ss.str();
       return true;
-    }
-
-    bool Hub::remove_request_data(const std::string& request_id, TaskState state, std::string& msg)
-    {
-      // This function has 3 steps:
-      // 1. Mark the request as removed.
-      // 2. Mark the processing as removed, but keep it for future reference.
-      // 3. Delete the data from gridfs
-
-      // 1.
-      epidb::Connection c;
-      boost::posix_time::ptime now = epidb::extras::universal_date_time();
-      mongo::BSONObj cmd = BSON(
-                             "findAndModify" << dba::Collections::JOBS() <<
-                             "query" << BSON("_id" << request_id) <<
-                             "update" << BSON("$set" <<
-                                              BSON("state" << state
-                                                  << "refresh_time" << epidb::extras::to_mongo_date(now)
-                                                  )
-                                             )
-                           );
-      mongo::BSONObj res;
-      c->runCommand(m_ptr->m_prefix, cmd, res);
-      if (!res["value"].isABSONObj()) {
-        c.done();
-        msg =  "No request available, cmd:" + cmd.toString();
-        return false;
-      }
-
-
-      // 2.
-      mongo::BSONObj query = BSON("request_id" << request_id);
-      mongo::BSONObj update = BSON("$set" << BSON("status" << TS_REMOVED));
-      c->update(epidb::dba::helpers::collection_name(dba::Collections::PROCESSING()), query, update, false, true);
-      if (!c->getLastError().empty()) {
-        msg = c->getLastError();
-        c.done();
-        return false;
-      }
-
-      // 3.
-      remove_result(request_id);
-
-      c.done();
-      return true;
-    }
-
-    bool Hub::cancel_request(const datatypes::User& user, const std::string& request_id, std::string& msg)
-    {
-      boost::posix_time::ptime now = epidb::extras::universal_date_time();
-
-      mongo::BSONObjBuilder queryb;
-      mongo::BSONObj res, cmd, query;
-      queryb.append("_id", request_id);
-
-      if (!user.is_admin()) {
-        queryb.append("misc.user_id", user.get_id());
-      }
-
-      query = queryb.obj();
-
-      cmd = BSON(
-              "findAndModify" << dba::Collections::JOBS() <<
-              "query" << query <<
-              "update" << BSON("$set" <<
-                               BSON("finish_time" << epidb::extras::to_mongo_date(now)
-                                    << "state" << TS_CANCELLED
-                                    << "refresh_time" << epidb::extras::to_mongo_date(now)
-                                   )
-                              )
-            );
-
-      epidb::Connection c;
-      c->runCommand(m_ptr->m_prefix, cmd, res);
-
-      if (!res["value"].isABSONObj()) {
-        msg = Error::m(ERR_REQUEST_ID_INVALID, request_id);
-        return false;
-      }
-
-      mongo::BSONObj task_info = res["value"].Obj();
-      TaskState task_state = static_cast<TaskState>(task_info["state"].numberInt());
-
-      if (task_state == TS_DONE || task_state == TS_FAILED) {
-        remove_request_data(request_id, TS_REMOVED, msg);
-      }
-      return true;
-    }
-
-    void Hub::remove_result(const std::string request_id)
-    {
-      Connection c;
-      EPIDB_LOG_DBG("Removing data for the request: " + request_id);
-      mongo::GridFS gridfs(c.conn(), dba::config::DATABASE_NAME(), "fs");
-      gridfs.removeFile(request_id);
     }
 
   }

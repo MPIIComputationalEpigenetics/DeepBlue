@@ -1,6 +1,8 @@
 //
-//  common.hpp
+//  janitor.cpp
 //  DeepBlue Epigenomic Data Server
+//  File created by Felipe Albrecht on 24.05.17.
+//  Copyright (c) 2016 Max Planck Institute for Informatics. All rights reserved.
 
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -14,27 +16,22 @@
 
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-//
-// Code from https://github.com/temporaer/MDBQ/
-// adapted to DeepBlue by Felipe Albrecht on 22.01.2015
 
-#ifndef __MDBQ_COMMON_HPP__
-#define __MDBQ_COMMON_HPP__
+#include <boost/asio.hpp>
 
 namespace epidb {
   namespace mdbq {
-    enum TaskState {
-      TS_NEW,       // 0
-      TS_RUNNING,   // 1
-      TS_DONE,      // 2
-      TS_FAILED,    // 3
-      TS_CANCELLED, // 4
-      TS_REMOVED,   // 5
-      TS_RENEW,     // 6
-      TS_CLEARED,   // 7
-      _TS_END,
-      _TS_FIRST = TS_NEW
+    class Janitor {
+    public:
+      Janitor(float interval) : m_interval(interval) {}
+      void run();
+
+    private:
+      float m_interval;
+      std::auto_ptr<boost::asio::deadline_timer> m_timer;
+      boost::asio::io_service ios;
+      bool clean_oldest(const boost::system::error_code &error);
+      void reg(boost::asio::io_service &io_service, float interval);
     };
   }
 }
-#endif /* __MDBQ_COMMON_HPP__ */

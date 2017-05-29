@@ -86,12 +86,13 @@ namespace epidb {
 
         if (!error) {
           unsigned int ms;
-          if (m_interval <= 1.f)
+          if (m_interval <= 1.f) {
             ms = 1000 * (m_interval / 2 + drand48() * (m_interval / 2));
-          else
+          }else{
             ms = 1000 * (1 + drand48() * (m_interval - 1));
-          m_timer->expires_at(m_timer->expires_at() + boost::posix_time::millisec(ms));
-          m_timer->async_wait(boost::bind(&ClientImpl::update_check, this, c, boost::asio::placeholders::error));
+            m_timer->expires_at(m_timer->expires_at() + boost::posix_time::millisec(ms));
+            m_timer->async_wait(boost::bind(&ClientImpl::update_check, this, c, boost::asio::placeholders::error));
+          }
         }
       }
     };

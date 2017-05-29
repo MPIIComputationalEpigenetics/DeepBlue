@@ -41,6 +41,8 @@
 #include "../processing/processing.hpp"
 
 #include "../mdbq/common.hpp"
+#include "../mdbq/cleaner.hpp"
+
 
 #include "../log.hpp"
 #include "../version.hpp"
@@ -376,11 +378,11 @@ namespace epidb {
 
   bool Engine::cancel_request(const datatypes::User& user, const std::string & request_id, std::string & msg)
   {
-    return _hub.cancel_request(user, request_id, msg);
+    return mdbq::cancel_request(user, request_id, msg);
   }
 
   bool Engine::remove_request_data(const std::string & request_id, mdbq::TaskState state, std::string & msg)
   {
-    return _hub.remove_request_data(request_id, state, msg);
+    return mdbq::remove_request_data(request_id, state, msg);
   }
 }
