@@ -291,6 +291,11 @@ namespace epidb {
       return false;
     }
 
+    if (mdbq::Hub::is_cleared(o)) {
+      msg = "Request ID " + request_id + " was cleared. We are going to reprocess this request. Please, check its status.";
+      return false;
+    }
+
     if (!mdbq::Hub::is_done(o)) {
       msg = "Request ID " + request_id + " was not finished. Please, check its status.";
       return false;
@@ -325,9 +330,6 @@ namespace epidb {
   {
     std::string msg;
     if (!check_request(request_id, user_key, msg)) {
-
-      std::cerr << "msg" << std::endl;
-      std::cerr << msg << std::endl;
       request_data.add_error(msg);
       return false;
     }

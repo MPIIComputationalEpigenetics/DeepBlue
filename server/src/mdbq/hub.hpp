@@ -183,6 +183,8 @@ namespace epidb {
 
       static bool is_done(const mongo::BSONObj& o);
 
+      static bool is_cleared(const mongo::BSONObj& o);
+
       static bool is_failed(const mongo::BSONObj& o);
 
       /**
