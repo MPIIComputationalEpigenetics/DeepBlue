@@ -145,6 +145,11 @@ namespace epidb {
 
 
       /**
+       *
+       */
+      bool reprocess_job(const mongo::BSONObj &job);
+
+      /**
        * register with the main loop
        *
        * @param interval querying interval
@@ -182,6 +187,8 @@ namespace epidb {
       static std::string get_id(const mongo::BSONObj& o);
 
       static bool is_done(const mongo::BSONObj& o);
+
+      static bool is_cleared(const mongo::BSONObj& o);
 
       static bool is_failed(const mongo::BSONObj& o);
 

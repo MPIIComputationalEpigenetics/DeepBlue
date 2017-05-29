@@ -166,10 +166,34 @@ namespace epidb {
       return true;
     }
 
+ /*
+
+      mongo::BSONObjBuilder queryb;
+      mongo::BSONObj res, cmd, query;
+      queryb.append("state", BSON("$in" << BSON_ARRAY(TS_NEW << TS_RENEW)));
+      if (! m_ptr->m_task_selector.isEmpty())
+        queryb.appendElements(m_ptr->m_task_selector);
+      query = queryb.obj();
+      cmd = BSON(
+              "findAndModify" << dba::Collections::JOBS() <<
+              "query" << query <<
+              "update" << BSON("$set" <<
+                               BSON("book_time" << epidb::extras::to_mongo_date(now)
+                                    << "state" << TS_RUNNING
+                                    << "refresh_time" << epidb::extras::to_mongo_date(now)
+                                    << "owner" << hostname_pid)));
+
+      Connection c;
+      c->runCommand(m_db, cmd, res);
+      CHECK_DB_ERR(c);
+      c.done();
+
+      */
+
     size_t Hub::get_n_open()
     {
       Connection c;
-      size_t count = c->count(dba::helpers::collection_name(dba::Collections::JOBS()), BSON( "state" << TS_NEW));
+      size_t count = c->count(dba::helpers::collection_name(dba::Collections::JOBS()), BSON( "state" << BSON("$in" << BSON_ARRAY(TS_NEW << TS_REPROCESS))));
       c.done();
       return count;
     }
@@ -315,6 +339,8 @@ namespace epidb {
         return TS_RENEW;
       } else if (name == "cleared") {
         return TS_CLEARED;
+      } else if (name == "reprocess") {
+        return TS_REPROCESS;
       } else {
         return _TS_END;
       }
@@ -344,6 +370,8 @@ namespace epidb {
         return "renew";
       case TS_CLEARED:
         return "cleared";
+      case TS_REPROCESS:
+        return "cleared";
       default :
         return "Invalid State: " + epidb::utils::integer_to_string(state);
       }
@@ -361,6 +389,7 @@ namespace epidb {
       case TS_REMOVED:
       case TS_RENEW:
       case TS_CLEARED:
+      case TS_REPROCESS:
         return "";
       case TS_FAILED:
         return o["error"].str();
@@ -399,6 +428,12 @@ namespace epidb {
     {
       TaskState task_state = (TaskState) o["state"].numberInt();
       return task_state == TS_FAILED;
+    }
+
+    bool Hub::is_cleared(const mongo::BSONObj &o)
+    {
+      TaskState task_state = (TaskState) o["state"].numberInt();
+      return task_state == TS_CLEARED;
     }
 
     bool Hub::get_file_info(const std::string &filename, mongo::OID &oid, size_t &chunk_size, size_t &file_size, std::string &msg)
