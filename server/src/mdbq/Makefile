@@ -4,7 +4,7 @@ ROOT		= $(shell pwd)/../..
 CXXFLAGS	= $(DEFCXXFLAGS) -I..
 
 OBJLIBS	= ../libmdbq.a
-OBJS		= client.o hub.o
+OBJS		= cleaner.o client.o hub.o janitor.o
 
 all : $(OBJLIBS)
 
