@@ -227,7 +227,7 @@ namespace epidb {
       {
         std::string collection;
         if (!dba::Collections::get_collection_for_id(id, collection)) {
-          msg = "Datatype of '" << id << "' not accepted for this function";
+          msg = "Datatype of '" + id + "' not accepted for this function";
           return false;
         }
         mongo::BSONObj result;
