@@ -30,6 +30,8 @@
 
 #include "../algorithms/patterns.hpp"
 
+#include "../dba/genomes.hpp"
+
 #include "../cache/column_dataset_cache.hpp"
 #include "../cache/queries_cache.hpp"
 
@@ -1254,84 +1256,63 @@ namespace epidb {
       return true;
     }
 
-    bool process_pattern(const std::string &genome, const std::string &pattern, const bool overlap,
-                         const std::string &user_key, const std::string &ip,
-                         utils::IdName &annotation_id_name, std::string &msg)
+    bool process_pattern(const std::string &genome, const std::string &motif, const bool overlap,
+                         std::vector<std::string> &chromosomes, const size_t start, const size_t end,
+                         ChromosomeRegionsList& pattern_regions, std::string &msg)
     {
       std::string norm_genome = utils::normalize_name(genome);
-      std::string name = annotations::build_pattern_annotation_name(pattern, genome, overlap);
-      std::string norm_name = utils::normalize_annotation_name(name);
-
-      mongo::BSONObjBuilder builder;
-      builder.append("norm_name", norm_name);
-      builder.append("norm_genome", norm_genome);
-      mongo::BSONObj o = builder.obj();
-
-      std::vector<mongo::BSONObj> results;
-      if (!helpers::get(Collections::ANNOTATIONS(), o, results, msg)) {
-        return false;
-      }
-
-      if (!results.empty()) {
-        annotation_id_name.id = results[0]["_id"].str();
-        annotation_id_name.name = results[0]["name"].str();
-        return true;
-      }
-
-      std::vector<genomes::ChromosomeInfo> chromosomes;
-      if (!get_chromosomes(norm_genome, chromosomes, msg)) {
-        return false;
-      }
 
       retrieve::SequenceRetriever retriever;
       std::vector<std::string> missing;
-      for (const genomes::ChromosomeInfo &chromosome_info : chromosomes) {
-        if (!retriever.exists(genome, chromosome_info.name)) {
-          missing.push_back(chromosome_info.name);
+      for (const std::string &chromosome_name : chromosomes) {
+        if (!retriever.exists(genome, chromosome_name)) {
+          missing.push_back(chromosome_name);
+          break;
         }
       }
       if (!missing.empty()) {
         msg = "There is not sequence for the chromosomes '" + utils::vector_to_string(missing) + "'' of the genome " + genome + ". Please upload using 'upload_chromosome' command.";
       }
 
-      ChromosomeRegionsList pattern_regions;
-      for (const genomes::ChromosomeInfo &chromosome_info : chromosomes) {
-        std::string sequence;
-        if (!retriever.retrieve(norm_genome, chromosome_info.name, 0, chromosome_info.size, sequence, msg)) {
+      for (const std::string &chromosome_name : chromosomes) {
+        size_t chromosome_size;
+        if (!genomes::chromosome_size(genome, chromosome_name, chromosome_size, msg)) {
           return false;
         }
 
-        algorithms::PatternFinder pf(sequence, pattern);
+        std::string sequence;
+        if (!retriever.retrieve(norm_genome, chromosome_name, 0, chromosome_size, sequence, msg)) {
+          return false;
+        }
+
+        size_t real_start;
+        if (start >= sequence.length()) {
+          real_start = sequence.length() - 1;
+        } else {
+          real_start = start;
+        }
+
+        size_t real_end;
+        if (end >= sequence.length()) {
+          real_end = sequence.length() - 1;
+        } else {
+          real_end = end;
+        }
+
+        if (real_end > real_start) {
+          real_end = real_start;
+        }
+
+        algorithms::PatternFinder pf(sequence, motif, start, real_end);
         Regions regions;
         if (overlap) {
           regions = pf.overlap_regions();
         } else {
           regions = pf.non_overlap_regions();
         }
-        ChromosomeRegions chromosome_regions(chromosome_info.name, std::move(regions));
+        ChromosomeRegions chromosome_regions(chromosome_name, std::move(regions));
         pattern_regions.push_back(std::move(chromosome_regions));
       }
-
-      std::string description = "All localization of the pattern '" + pattern + "' in the genome " + genome;
-      std::string norm_description = utils::normalize_name(description);
-
-      datatypes::Metadata extra_metadata;
-      extra_metadata["pattern"] = pattern;
-      if (overlap) {
-        extra_metadata["overlap-style"] = "overlap";
-      } else {
-        extra_metadata["overlap-style"] = "non-overlap";
-      }
-
-      std::string annotation_id;
-      if (!insert_annotation(name, norm_name, genome, norm_genome, description, norm_description, extra_metadata,
-                             user_key, ip, pattern_regions, parser::FileFormat::default_format(),
-                             annotation_id, msg)) {
-        return false;
-      }
-
-      annotation_id_name.name = name;
-      annotation_id_name.id = annotation_id;
 
       return true;
     }

@@ -42,7 +42,8 @@ namespace epidb {
     {
       non_overlap_localizations = Regions();
       boost::regex expression(pattern);
-      boost::sregex_iterator m1(chromosome.begin(), chromosome.end(), expression);
+
+      boost::sregex_iterator m1(chromosome.begin() + this->start, chromosome.begin() + this->end, expression);
       boost::sregex_iterator m2;
 
       std::for_each(m1, m2,
@@ -61,18 +62,18 @@ namespace epidb {
     bool PatternFinder::overlap_pattern_location(const std::string &chromosome, const std::string &pattern)
     {
       overlap_localizations = Regions();
-      std::string::const_iterator start, end;
-      start = chromosome.begin();
-      end = chromosome.end();
+      std::string::const_iterator it_start, it_end;
+      it_start = chromosome.begin() + this->start;
+      it_end = chromosome.end() + this->end;
       boost::regex expression(pattern);
       boost::match_results<std::string::const_iterator> what;
       boost::match_flag_type flags = boost::match_default;
       int pos = 0;
-      while (boost::regex_search(start, end, what, expression, flags)) {
+      while (boost::regex_search(it_start, it_end, what, expression, flags)) {
         overlap_localizations.emplace_back(
           build_simple_region(pos, pos + what.str().size(), DATASET_EMPTY_ID)
         );
-        start = what[0].first + 1;
+        it_start = what[0].first + 1;
         pos += (what.position() + 1);
         flags |= boost::match_prev_avail;
         flags |= boost::match_not_bob;

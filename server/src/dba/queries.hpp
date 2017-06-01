@@ -85,8 +85,11 @@ namespace epidb {
       bool retrieve_genes_select_query(const std::string &user_key, const mongo::BSONObj &query,
                                        processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg);
 
+      bool retrieve_find_motif_query(const std::string &user_key, const mongo::BSONObj &query,
+                                     processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg);
+
       bool retrieve_expression_select_query(const std::string &user_key, const mongo::BSONObj &query,
-          processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg);
+                                            processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg);
 
       bool retrieve_intersection_query(const std::string &user_key, const mongo::BSONObj &query,
                                        processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg);
@@ -122,10 +125,6 @@ namespace epidb {
                              processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg);
 
       bool is_canceled(processing::StatusPtr status, std::string msg);
-
-      bool find_annotation_pattern(const std::string &genome, const std::string &pattern, const bool overlap,
-                                   DatasetId &dataset_id, std::string &msg);
-
 
       /* These two functions must not be accessed directly. Use the cache:: methods */
       /* TODO: move to another file */

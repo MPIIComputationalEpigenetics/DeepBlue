@@ -35,6 +35,8 @@ namespace epidb {
     private:
       const std::string &sequence;
       const std::string &pattern;
+      const size_t start;
+      const size_t end;
 
       Regions non_overlap_localizations;
       Regions overlap_localizations;
@@ -45,8 +47,8 @@ namespace epidb {
       bool overlap_pattern_location(const std::string &chromosome, const std::string &pattern);
 
     public:
-      PatternFinder(const std::string &s, const std::string &p) :
-        sequence(s), pattern(p) {}
+      PatternFinder(const std::string &s, const std::string &p, const size_t st, const size_t e) :
+        sequence(s), pattern(p), start(st), end(e) {}
 
       Regions non_overlap_regions();
       Regions overlap_regions();
