@@ -227,7 +227,7 @@ class TestExpressions(helpers.TestCase):
 
     (s, info) = epidb.info(ss, self.admin_key)
 
-    self.assertEquals(info[0], {'total_genes': 57820, '_id': 'gs1', 'genome': 'hg19', 'description': 'Test One Description', 'format': 'GTF'})
+    self.assertEquals(info[0], {'total_genes': 57820, '_id': 'gs1', 'genome': 'hg19', 'description': 'Test One Description', 'format': 'GTF', 'name': 'gencode v19'})
 
     (status, gene_info) = epidb.info("gn1", self.admin_key)
     self.assertEquals(gene_info[0], {'transcript_status': 'KNOWN', 'gene_name': 'DDX11L1', 'gene_type': 'pseudogene', 'end': 14412, 'source': 'HAVANA', 'frame': '.', 'level': '2', 'gene_id': 'ENSG00000223972.4', 'start': 11869, 'transcript_id': 'ENSG00000223972.4', 'score': 0.0, 'strand': '+', 'havana_gene': 'OTTHUMG00000000961.2', 'transcript_name': 'DDX11L1', '_id': 'gn1', 'gene_status': 'KNOWN', 'transcript_type': 'pseudogene', 'chromosome': 'chr1'})
