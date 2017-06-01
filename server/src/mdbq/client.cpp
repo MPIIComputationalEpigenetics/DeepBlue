@@ -64,6 +64,8 @@ namespace epidb {
       std::vector<mongo::BSONObj> m_log;
       float              m_interval;
       std::auto_ptr<boost::asio::deadline_timer> m_timer;
+
+
       void update_check(Client *c, const boost::system::error_code &error)
       {
         std::string _id;
@@ -88,11 +90,11 @@ namespace epidb {
           unsigned int ms;
           if (m_interval <= 1.f) {
             ms = 1000 * (m_interval / 2 + drand48() * (m_interval / 2));
-          }else{
+          } else {
             ms = 1000 * (1 + drand48() * (m_interval - 1));
-            m_timer->expires_at(m_timer->expires_at() + boost::posix_time::millisec(ms));
-            m_timer->async_wait(boost::bind(&ClientImpl::update_check, this, c, boost::asio::placeholders::error));
           }
+          m_timer->expires_at(m_timer->expires_at() + boost::posix_time::millisec(ms));
+          m_timer->async_wait(boost::bind(&ClientImpl::update_check, this, c, boost::asio::placeholders::error));
         }
       }
     };
@@ -127,7 +129,7 @@ namespace epidb {
                               "update" << BSON("$set" << BSON(
                                     "state" << TS_RENEW <<
                                     "version" << version + 1
-                              )));
+                                  )));
       mongo::BSONObj info;
       Connection c;
       bool result = c->runCommand(dba::config::DATABASE_NAME(), o, info);
@@ -160,9 +162,12 @@ namespace epidb {
 
       mongo::BSONObjBuilder queryb;
       mongo::BSONObj res, cmd, query;
-      queryb.append("state", BSON("$in" << BSON_ARRAY(TS_NEW << TS_RENEW)));
-      if (! m_ptr->m_task_selector.isEmpty())
+      queryb.append("state", BSON("$in" << BSON_ARRAY(TS_NEW << TS_RENEW << TS_REPROCESS)));
+
+      if (! m_ptr->m_task_selector.isEmpty()) {
         queryb.appendElements(m_ptr->m_task_selector);
+      }
+
       query = queryb.obj();
       cmd = BSON(
               "findAndModify" << dba::Collections::JOBS() <<
@@ -198,6 +203,7 @@ namespace epidb {
 
       // start logging
       m_ptr->m_log.clear();
+
       return true;
     }
 
@@ -289,8 +295,8 @@ namespace epidb {
       mongo::BSONObjBuilder bob;
       bob.appendElements(ret);
       c->update(m_fscol + ".files",
-                           BSON("filename" << ret.getField("filename")),
-                           bob.obj(), false, false);
+                BSON("filename" << ret.getField("filename")),
+                bob.obj(), false, false);
 
       CHECK_DB_ERR(c);
 
