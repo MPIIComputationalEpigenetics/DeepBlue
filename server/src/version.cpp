@@ -39,6 +39,6 @@ namespace epidb {
     "along with this program.  If not, see <http://www.gnu.org/licenses/>.";
   const std::string Version::author = "Felipe Albrecht - felipe.albrecht@mpi-inf.mpg.de";
   const size_t Version::major_version = 1;
-  const size_t Version::minor_version = 11;
-  const size_t Version::fix_version = 1;
+  const size_t Version::minor_version = 12;
+  const size_t Version::fix_version = 0;
 }
