@@ -796,9 +796,9 @@ namespace epidb {
         mongo::BSONObj args = query["args"].Obj();
 
         std::vector<std::string> chromosomes = utils::build_vector(args["chromosomes"].Array());
-        std::string genome = args["genome"].String();
         std::string motif = args["motif"].String();
-        bool overlap = args["motif"].Bool();
+        std::string genome = args["genome"].String();
+        bool overlap = args["overlap"].Bool();
         long long start = args["start"].Number();
         long long end = args["end"].Number();
 

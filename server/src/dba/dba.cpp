@@ -1257,7 +1257,7 @@ namespace epidb {
     }
 
     bool process_pattern(const std::string &genome, const std::string &motif, const bool overlap,
-                         std::vector<std::string> &chromosomes, const size_t start, const size_t end,
+                         std::vector<std::string> &chromosomes, const long long start, const long long end,
                          ChromosomeRegionsList& pattern_regions, std::string &msg)
     {
       std::string norm_genome = utils::normalize_name(genome);
@@ -1272,6 +1272,7 @@ namespace epidb {
       }
       if (!missing.empty()) {
         msg = "There is not sequence for the chromosomes '" + utils::vector_to_string(missing) + "'' of the genome " + genome + ". Please upload using 'upload_chromosome' command.";
+        return false;
       }
 
       for (const std::string &chromosome_name : chromosomes) {
@@ -1280,30 +1281,34 @@ namespace epidb {
           return false;
         }
 
-        std::string sequence;
-        if (!retriever.retrieve(norm_genome, chromosome_name, 0, chromosome_size, sequence, msg)) {
-          return false;
-        }
-
         size_t real_start;
-        if (start >= sequence.length()) {
-          real_start = sequence.length() - 1;
+        if (start < 0) {
+          real_start = 0;
+        } else if (start >= chromosome_size) {
+          real_start = chromosome_size - 1;
         } else {
           real_start = start;
         }
 
         size_t real_end;
-        if (end >= sequence.length()) {
-          real_end = sequence.length() - 1;
+        if (end < 0) {
+          real_end = chromosome_size - 1;
+        } else if (end >= chromosome_size) {
+          real_end = chromosome_size - 1;
         } else {
           real_end = end;
         }
 
-        if (real_end > real_start) {
+        if (real_start > real_end) {
           real_end = real_start;
         }
 
-        algorithms::PatternFinder pf(sequence, motif, start, real_end);
+        std::string sequence;
+        if (!retriever.retrieve(norm_genome, chromosome_name, real_start, real_end, sequence, msg)) {
+          return false;
+        }
+
+        algorithms::PatternFinder pf(sequence, motif);
         Regions regions;
         if (overlap) {
           regions = pf.overlap_regions();

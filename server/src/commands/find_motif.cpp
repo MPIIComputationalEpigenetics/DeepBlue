@@ -47,7 +47,7 @@ namespace epidb {
 
       static Parameters parameters_()
       {
-        Parameter p[] = {
+        return {
           Parameter("motif", serialize::STRING, "motif (PERL regular expression)"),
           parameters::Genome,
           parameters::ChromosomeMultiple,
@@ -56,17 +56,13 @@ namespace epidb {
           Parameter("overlap", serialize::BOOLEAN, "if the matching should do overlap search"),
           parameters::UserKey
         };
-        Parameters params(&p[0], &p[0] + 4);
-        return params;
       }
 
       static Parameters results_()
       {
-        Parameter p[] = {
+        return {
           Parameter("id", serialize::STRING, "id of the annotation that contains the positions of the given motif")
         };
-        Parameters results(&p[0], &p[0] + 1);
-        return results;
       }
 
     public:
@@ -109,17 +105,8 @@ namespace epidb {
         mongo::BSONObjBuilder args_builder;
 
         args_builder.append("motif", motif);
-        args_builder.append("genome", norm_genome);
-
-        if (start > 0) {
-        args_builder.append("start", (int) start);
-        }
-        if (end > 0) {
-        args_builder.append("end", (int) end);
-        }
-
-        args_builder.append("overlap", overlap);
-
+        args_builder.append("genome", genome);
+        args_builder.append("norm_genome", norm_genome);
 
         std::set<std::string> chroms;
         if (chromosomes.empty()) {
@@ -133,9 +120,22 @@ namespace epidb {
             chroms.insert((**it).as_string());
           }
         }
+
         args_builder.append("chromosomes", chroms);
-        args_builder.append("genomes", genome);
-        args_builder.append("norm_genomes", norm_genome);
+
+        if (start > 0) {
+          args_builder.append("start", (int) start);
+        } else {
+          args_builder.append("start", -1);
+        }
+
+        if (end > 0) {
+          args_builder.append("end", (int) end);
+        } else {
+          args_builder.append("end", -1);
+        }
+
+        args_builder.append("overlap", overlap);
 
         std::string query_id;
         if (!dba::query::store_query("find_motif", args_builder.obj(), user_key, query_id, msg)) {

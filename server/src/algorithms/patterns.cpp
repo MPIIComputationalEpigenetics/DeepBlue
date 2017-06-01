@@ -43,7 +43,7 @@ namespace epidb {
       non_overlap_localizations = Regions();
       boost::regex expression(pattern);
 
-      boost::sregex_iterator m1(chromosome.begin() + this->start, chromosome.begin() + this->end, expression);
+      boost::sregex_iterator m1(chromosome.begin(), chromosome.end(), expression);
       boost::sregex_iterator m2;
 
       std::for_each(m1, m2,
@@ -63,12 +63,13 @@ namespace epidb {
     {
       overlap_localizations = Regions();
       std::string::const_iterator it_start, it_end;
-      it_start = chromosome.begin() + this->start;
-      it_end = chromosome.end() + this->end;
+      it_start = chromosome.begin();
+      it_end = chromosome.end();
       boost::regex expression(pattern);
       boost::match_results<std::string::const_iterator> what;
       boost::match_flag_type flags = boost::match_default;
       int pos = 0;
+
       while (boost::regex_search(it_start, it_end, what, expression, flags)) {
         overlap_localizations.emplace_back(
           build_simple_region(pos, pos + what.str().size(), DATASET_EMPTY_ID)
