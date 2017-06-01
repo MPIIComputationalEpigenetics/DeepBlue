@@ -85,7 +85,7 @@ namespace epidb {
       bool insert_job(const mongo::BSONObj &job, unsigned int timeout, const int version_value, std::string &id, std::string &msg);
 
 
-      mongo::BSONObj get_job(const std::string& id);
+      mongo::BSONObj get_job(const std::string& id, bool update_access = false);
 
       /*
        * \brief Get all jobs in given state owned by given user. If no valid mdbq::TaskState is given,
@@ -97,12 +97,6 @@ namespace epidb {
       std::list<mongo::BSONObj> get_jobs(const mdbq::TaskState& state, const std::string &user_id);
 
       bool job_has_user_id(const std::string& request_id, const std::string& user_id);
-
-      /**
-       * get newest finished job (primarily for testing)
-       */
-      mongo::BSONObj get_newest_finished();
-
 
       /**
        * get number of pending jobs
@@ -155,8 +149,6 @@ namespace epidb {
        * @param interval querying interval
        */
       void reg(boost::asio::io_service &io_service, unsigned int interval);
-
-      virtual void got_new_results();
 
       static mdbq::TaskState state_number(const std::string& name);
 
