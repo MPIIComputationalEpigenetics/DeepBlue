@@ -93,12 +93,12 @@ namespace epidb {
           return false;
         }
 
-        if (annotations.size() == 0) {
+        if (annotations.empty()) {
           result.add_error(Error::m(ERR_USER_ANNOTATION_MISSING));
           return false;
         }
 
-        if (genomes.size() == 0) {
+        if (genomes.empty()) {
           result.add_error(Error::m(ERR_USER_GENOME_MISSING));
           return false;
         }
@@ -142,7 +142,7 @@ namespace epidb {
         }
 
         std::set<std::string> chroms;
-        if (chromosomes.size() == 0) {
+        if (chromosomes.empty()) {
           if (!dba::genomes::get_chromosomes(genomes_s, chroms, msg)) {
             result.add_error(msg);
             return false;

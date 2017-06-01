@@ -81,7 +81,7 @@ namespace epidb {
           return false;
         }
 
-        if (genomes.size() == 0) {
+        if (genomes.empty()) {
           result.add_error(Error::m(ERR_USER_GENOME_MISSING));
           return false;
         }

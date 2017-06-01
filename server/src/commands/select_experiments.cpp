@@ -156,7 +156,7 @@ namespace epidb {
         }
 
         std::set<std::string> chroms;
-        if (chromosomes.size() == 0) {
+        if (chromosomes.empty()) {
           if (!dba::genomes::get_chromosomes(genomes_s, chroms, msg)) {
             result.add_error(msg);
             return false;

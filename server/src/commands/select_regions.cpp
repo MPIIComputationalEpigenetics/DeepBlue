@@ -18,9 +18,11 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <string>
 #include <sstream>
 #include <map>
 #include <set>
+#include <vector>
 
 #include "../dba/dba.hpp"
 #include "../dba/experiments.hpp"
@@ -235,7 +237,7 @@ namespace epidb {
         }
 
         std::set<std::string> chroms;
-        if (chromosomes.size() == 0) {
+        if (chromosomes.empty()) {
           if (!dba::genomes::get_chromosomes(genomes_s, chroms, msg)) {
             result.add_error(msg);
             return false;
