@@ -166,29 +166,35 @@ namespace epidb {
       return true;
     }
 
- /*
+    bool reprocess_job(const mongo::BSONObj &job)
+    {
 
-      mongo::BSONObjBuilder queryb;
-      mongo::BSONObj res, cmd, query;
-      queryb.append("state", BSON("$in" << BSON_ARRAY(TS_NEW << TS_RENEW)));
-      if (! m_ptr->m_task_selector.isEmpty())
-        queryb.appendElements(m_ptr->m_task_selector);
-      query = queryb.obj();
-      cmd = BSON(
-              "findAndModify" << dba::Collections::JOBS() <<
-              "query" << query <<
-              "update" << BSON("$set" <<
-                               BSON("book_time" << epidb::extras::to_mongo_date(now)
-                                    << "state" << TS_RUNNING
-                                    << "refresh_time" << epidb::extras::to_mongo_date(now)
-                                    << "owner" << hostname_pid)));
+    }
 
-      Connection c;
-      c->runCommand(m_db, cmd, res);
-      CHECK_DB_ERR(c);
-      c.done();
 
-      */
+    /*
+
+         mongo::BSONObjBuilder queryb;
+         mongo::BSONObj res, cmd, query;
+         queryb.append("state", BSON("$in" << BSON_ARRAY(TS_NEW << TS_RENEW)));
+         if (! m_ptr->m_task_selector.isEmpty())
+           queryb.appendElements(m_ptr->m_task_selector);
+         query = queryb.obj();
+         cmd = BSON(
+                 "findAndModify" << dba::Collections::JOBS() <<
+                 "query" << query <<
+                 "update" << BSON("$set" <<
+                                  BSON("book_time" << epidb::extras::to_mongo_date(now)
+                                       << "state" << TS_RUNNING
+                                       << "refresh_time" << epidb::extras::to_mongo_date(now)
+                                       << "owner" << hostname_pid)));
+
+         Connection c;
+         c->runCommand(m_db, cmd, res);
+         CHECK_DB_ERR(c);
+         c.done();
+
+         */
 
     size_t Hub::get_n_open()
     {
@@ -236,11 +242,6 @@ namespace epidb {
       c.done();
     }
 
-    void Hub::got_new_results()
-    {
-      std::cout << "New results available!" << std::endl;
-    }
-
     void Hub::reg(boost::asio::io_service &io_service, unsigned int interval)
     {
       m_ptr->m_interval = interval;
@@ -248,28 +249,30 @@ namespace epidb {
       m_ptr->m_timer->async_wait(boost::bind(&HubImpl::update_check, m_ptr.get(), this, boost::asio::placeholders::error));
     }
 
-    mongo::BSONObj Hub::get_job(const std::string &id)
+    mongo::BSONObj Hub::get_job(const std::string &id, bool update_access)
     {
       Connection c;
       mongo::BSONObj o = c->findOne(dba::helpers::collection_name(dba::Collections::JOBS()), BSON("_id" << id));
 
-      boost::posix_time::ptime now = epidb::extras::universal_date_time();
+      if (update_access) {
+        boost::posix_time::ptime now = epidb::extras::universal_date_time();
 
-      mongo::BSONObj cmd = BSON(
-                             "findAndModify" << dba::Collections::JOBS() <<
-                             "query" << BSON("_id" << id) <<
-                             "update" << BSON(
+        mongo::BSONObj cmd = BSON(
+                               "findAndModify" << dba::Collections::JOBS() <<
+                               "query" << BSON("_id" << id) <<
+                               "update" << BSON(
                                  "$set" << BSON( "last_access" << epidb::extras::to_mongo_date(now)) <<
                                  "$inc" << BSON("times_accessed" << 1)
-                             )
-                           );
+                               )
+                             );
 
-      mongo::BSONObj res;
-      c->runCommand(m_ptr->m_prefix, cmd, res);
-      if (!res["value"].isABSONObj()) {
-        c.done();
-        std::cerr << "No request available, cmd:" + cmd.toString() << std::endl;
-        return res;
+        mongo::BSONObj res;
+        c->runCommand(m_ptr->m_prefix, cmd, res);
+        if (!res["value"].isABSONObj()) {
+          c.done();
+          std::cerr << "No request available, cmd:" + cmd.toString() << std::endl;
+          return res;
+        }
       }
 
       c.done();
@@ -310,15 +313,6 @@ namespace epidb {
                         BSON("_id" << request_id << "misc.user_id" << user_id)) > 0;
       c.done();
       return b;
-    }
-
-    mongo::BSONObj Hub::get_newest_finished()
-    {
-      Connection c;
-      mongo::BSONObj o = c->findOne(dba::helpers::collection_name(dba::Collections::JOBS()),
-                                    mongo::Query(BSON("state" << TS_DONE)).sort("finish_time"));
-      c.done();
-      return o;
     }
 
     mdbq::TaskState Hub::state_number(const std::string& name)
@@ -371,7 +365,7 @@ namespace epidb {
       case TS_CLEARED:
         return "cleared";
       case TS_REPROCESS:
-        return "cleared";
+        return "reprocess";
       default :
         return "Invalid State: " + epidb::utils::integer_to_string(state);
       }
