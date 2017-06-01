@@ -52,6 +52,7 @@ namespace epidb {
       m[RETRIEVE_INTERSECTION_QUERY] = "Intersections";
       m[RETRIEVE_OVERLAP_QUERY] = "Overlaps";
       m[RETRIEVE_MERGE_QUERY] = "Merge";
+      m[RETRIEVE_FIND_MOTIF_QUERY] = "Find motif";
       m[RETRIEVE_FILTER_QUERY] = "Filtering";
       m[RETRIEVE_TILING_QUERY] = "Tiling regions";
       m[RETRIEVE_GENES_DATA] = "Getting genes data";

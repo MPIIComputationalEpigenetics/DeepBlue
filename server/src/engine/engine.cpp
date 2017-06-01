@@ -311,7 +311,7 @@ namespace epidb {
       return false;
     }
 
-    mongo::BSONObj o = _hub.get_job(request_id); //TODO still check
+    mongo::BSONObj o = _hub.get_job(request_id, true); //TODO still check
     mongo::BSONObj result = o["result"].Obj();
 
     if (result.hasField("__file__")) {
@@ -334,7 +334,7 @@ namespace epidb {
       return false;
     }
 
-    mongo::BSONObj o = _hub.get_job(request_id);
+    mongo::BSONObj o = _hub.get_job(request_id, true);
     mongo::BSONObj result = o["result"].Obj();
 
     if (result.hasField("__id_names__")) {

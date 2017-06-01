@@ -99,7 +99,7 @@ namespace epidb {
 
         // if no chromosomes were provided, default to all chromosomes of the genome
         std::set<std::string> chroms;
-        if (chromosomes.size() == 0) {
+        if (chromosomes.empty()) {
           if (!dba::genomes::get_chromosomes(norm_genome, chroms, msg)) {
             result.add_error(msg);
             return false;

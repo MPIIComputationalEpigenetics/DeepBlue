@@ -164,7 +164,7 @@ namespace epidb {
       XMLRPCParser* self = reinterpret_cast<XMLRPCParser*>(data);
       if (self->error_) return;
 
-      if (self->stack_.size() == 0) {
+      if (self->stack_.empty()) {
         return;
       }
 

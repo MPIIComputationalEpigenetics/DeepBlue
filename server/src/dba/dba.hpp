@@ -116,9 +116,9 @@ namespace epidb {
     /**
      * Pattern
      **/
-    bool process_pattern(const std::string &genome, const std::string &pattern, const bool overlap,
-                         const std::string &user_key, const std::string &ip,
-                         utils::IdName &annotation_id_name, std::string &msg);
+    bool process_pattern(const std::string &genome, const std::string &motif, const bool overlap,
+                         std::vector<std::string> &chromosomes, const long long start, const long long end,
+                         ChromosomeRegionsList& pattern_regions, std::string &msg);
   }
 }
 

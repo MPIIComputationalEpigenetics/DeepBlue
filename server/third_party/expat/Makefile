@@ -104,7 +104,7 @@ mkdir-init:
 		(mkdir $$d 2> /dev/null || test 1) ; \
 	done
 
-CC = gcc
+CC = gcc -std=gnu99
 CXX = g++
 LIBTOOL = $(SHELL) $(top_builddir)/libtool
 

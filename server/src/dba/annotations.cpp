@@ -103,19 +103,6 @@ namespace epidb {
         annotation_metadata = annotation_data_builder.obj();
         return true;
       }
-
-
-      const std::string build_pattern_annotation_name(const std::string &pattern, const std::string &genome, const bool overlap)
-      {
-        std::string name = "Pattern " + pattern;
-        if (overlap) {
-          name = name + " (overlap)";
-        } else {
-          name = name + " (non-overlap)";
-        }
-        return name + " in the genome " + genome;
-      }
-
     }
   }
 }

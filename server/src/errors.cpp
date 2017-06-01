@@ -65,6 +65,7 @@
  * 30 - Request
  * 31 - Expression
  * 40 - Tiling region
+ * 44 - Motif
  * 50 - Dataset
  * 51 - GSM Identifier
  * 60 - Input
@@ -118,6 +119,7 @@ namespace epidb {
   Error ERR_USER_GENOME_MISSING("111002", "The Genome is missing. Please, specify the Genome.");
   Error ERR_USER_GENE_MISSING("112002", "The Gene is missing. Please, specify the Gene.");
   Error ERR_USER_GENE_MODEL_MISSING("113002", "The Gene Model is missing. Please, specify the Gene Model.");
+  Error ERR_USER_MOTIF_MISSING("144002", "The Motif is missing. Please, specify the Motif.");
 
   Error ERR_FORMAT_CHROMOSOME_MISSING("120002", "The CHROMOSOME is missing in the format. Please, inform the CHROMOSOME column in the Format.");
   Error ERR_FORMAT_START_MISSING("121002", "The START is missing in the format. Please, inform the START column in the Format.");

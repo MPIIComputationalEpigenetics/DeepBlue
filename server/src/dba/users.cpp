@@ -227,10 +227,9 @@ namespace epidb {
       {
         std::string collection;
         if (!dba::Collections::get_collection_for_id(id, collection)) {
-          msg = "Datatype not accepted for this function";
+          msg = "Datatype of '" + id + "' not accepted for this function";
           return false;
         }
-        std::cout << collection << std::endl;
         mongo::BSONObj result;
         if (!helpers::get_one(collection, mongo::Query(BSON("_id" << id)), result)) {
           msg = "Could not get data from database";

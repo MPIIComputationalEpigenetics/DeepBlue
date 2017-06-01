@@ -90,7 +90,7 @@ namespace epidb {
         std::string value = strs[i].substr(pos + 1);
         boost::trim(value);
 
-        if (value.size() == 0) {
+        if (value.empty()) {
           msg = "Value for the key " + key + " was not informed. Line: " + line_str();
           return false;
         }

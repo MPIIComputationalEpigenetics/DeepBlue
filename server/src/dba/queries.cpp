@@ -291,6 +291,10 @@ namespace epidb {
           if (!retrieve_genes_select_query(user_key, query, status, regions, msg)) {
             return false;
           }
+        } else if (type == "find_motif") {
+          if (!retrieve_find_motif_query(user_key, query, status, regions, msg)) {
+            return false;
+          }
         } else if (type == "expressions_select") {
           if (!retrieve_expression_select_query(user_key, query, status, regions, msg)) {
             return false;
@@ -369,7 +373,7 @@ namespace epidb {
         if (!helpers::get(Collections::QUERIES(), "_id", query_id, result, msg)) {
           return false;
         }
-        if (result.size() == 0) {
+        if (result.empty()) {
           msg = "Query key is invalid";
           return false;
         }
@@ -774,6 +778,31 @@ namespace epidb {
         }
 
         if (!expression_type->load_data(sample_ids, replicas, genes, project, gene_model, regions, msg)) {
+          return false;
+        }
+
+        return true;
+      }
+
+      bool retrieve_find_motif_query(const std::string &user_key, const mongo::BSONObj &query,
+                                     processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg)
+      {
+        processing::RunningOp runningOp = status->start_operation(processing::RETRIEVE_FIND_MOTIF_QUERY, query);
+        if (is_canceled(status, msg)) {
+          return false;
+        }
+
+        mongo::BSONObj regions_query;
+        mongo::BSONObj args = query["args"].Obj();
+
+        std::vector<std::string> chromosomes = utils::build_vector(args["chromosomes"].Array());
+        std::string motif = args["motif"].String();
+        std::string genome = args["genome"].String();
+        bool overlap = args["overlap"].Bool();
+        long long start = args["start"].Number();
+        long long end = args["end"].Number();
+
+        if (!process_pattern(genome, motif, overlap, chromosomes, start, end, regions, msg)) {
           return false;
         }
 
@@ -1425,53 +1454,6 @@ namespace epidb {
           return true;
         }
         return false;
-      }
-
-      // TODO: may be remove
-      bool find_annotation_pattern(const std::string & genome, const std::string & pattern, const bool overlap,
-                                   DatasetId & dataset_id, std::string & msg)
-      {
-        std::string __cache__key__ = genome + pattern + (overlap ? "_TRUE" : "_false");
-        if (annotation_pattern_cache.exists_dataset_id(__cache__key__)) {
-          dataset_id = annotation_pattern_cache.get_dataset_id(__cache__key__);
-          return true;
-        }
-
-        mongo::BSONObjBuilder annotations_query_builder;
-
-        std::string name = annotations::build_pattern_annotation_name(pattern, genome, overlap);
-        std::string norm_name = utils::normalize_annotation_name(name);
-        std::string norm_genome = utils::normalize_name(genome);
-
-
-        annotations_query_builder.append("norm_name", norm_name);
-        annotations_query_builder.append("norm_genome", norm_genome);
-        mongo::BSONObjBuilder metadata_builder;
-        if (overlap) {
-          metadata_builder.append("overlap-style", "overlap");
-        } else {
-          metadata_builder.append("overlap-style", "non-overlap");
-        }
-        metadata_builder.append("pattern", pattern);
-        annotations_query_builder.append("extra_metadata", metadata_builder.obj());
-        annotations_query_builder.append("upload_info.done", true);
-
-        Connection c;
-
-        mongo::BSONObj annotation_query = annotations_query_builder.obj();
-        auto cursor = c->query(helpers::collection_name(Collections::ANNOTATIONS()), annotation_query);
-
-        if (cursor->more()) {
-          mongo::BSONObj p = cursor->next();
-          dataset_id = p.getField(KeyMapper::DATASET()).Int();
-          annotation_pattern_cache.set(__cache__key__, dataset_id);
-          c.done();
-          return true;
-        } else {
-          msg = Error::m(ERR_INVALID_PRA_PROCESSED_ANNOTATION_NAME, overlap ? "overlapped pattern" : "non-overlapped pattern", pattern, genome);
-          c.done();
-          return false;
-        }
       }
     }
   }

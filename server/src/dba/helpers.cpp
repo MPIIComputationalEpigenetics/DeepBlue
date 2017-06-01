@@ -216,7 +216,7 @@ namespace epidb {
           return false;
         }
 
-        if (results.size() == 0) {
+        if (results.empty()) {
           msg = Error::m(ERR_INVALID_INTERNAL_NAME, norm_name);
           return false;
         }
@@ -241,7 +241,7 @@ namespace epidb {
           return false;
         }
 
-        if (results.size() == 0) {
+        if (results.empty()) {
           msg = Error::m(ERR_NAME_NOT_FOUND, norm_name, where);
           return false;
         }
