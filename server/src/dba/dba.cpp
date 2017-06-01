@@ -1271,7 +1271,7 @@ namespace epidb {
         }
       }
       if (!missing.empty()) {
-        msg = "There is not sequence for the chromosomes '" + utils::vector_to_string(missing) + "'' of the genome " + genome + ". Please upload using 'upload_chromosome' command.";
+        msg = "There is not sequence for the chromosomes '" + utils::vector_to_string(missing) + " of the genome " + genome + ". Please upload using 'upload_chromosome' command.";
         return false;
       }
 
