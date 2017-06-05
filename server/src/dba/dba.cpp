@@ -35,6 +35,8 @@
 #include "../cache/column_dataset_cache.hpp"
 #include "../cache/queries_cache.hpp"
 
+#include "../config/config.hpp"
+
 #include "../connection/connection.hpp"
 
 #include "../datatypes/metadata.hpp"
@@ -51,7 +53,6 @@
 #include "annotations.hpp"
 #include "dba.hpp"
 #include "users.hpp"
-#include "config.hpp"
 #include "collections.hpp"
 #include "controlled_vocabulary.hpp"
 #include "exists.hpp"
@@ -74,6 +75,7 @@ namespace epidb {
 
     bool is_initialized()
     {
+      std::cerr << "initi" << std::endl;
       return helpers::check_exist(Collections::SETTINGS(), "initialized", true);
     }
 

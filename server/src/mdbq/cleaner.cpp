@@ -19,12 +19,14 @@
 
 #include <mongo/client/dbclient.h>
 
+#include "../config/config.hpp"
+
 #include "../connection/connection.hpp"
 
 #include "../datatypes/user.hpp"
 
 #include "../dba/collections.hpp"
-#include "../dba/config.hpp"
+
 #include "../dba/helpers.hpp"
 
 #include "../extras/date_time.hpp"
@@ -58,7 +60,7 @@ namespace epidb {
                                              )
                            );
       mongo::BSONObj res;
-      c->runCommand(dba::config::DATABASE_NAME(), cmd, res);
+      c->runCommand(config::DATABASE_NAME(), cmd, res);
       if (!res["value"].isABSONObj()) {
         c.done();
         msg =  "No request available, cmd:" + cmd.toString();
@@ -109,7 +111,7 @@ namespace epidb {
             );
 
       epidb::Connection c;
-      c->runCommand(dba::config::DATABASE_NAME(), cmd, res);
+      c->runCommand(config::DATABASE_NAME(), cmd, res);
 
       if (!res["value"].isABSONObj()) {
         msg = Error::m(ERR_REQUEST_ID_INVALID, request_id);
@@ -130,7 +132,7 @@ namespace epidb {
     {
       Connection c;
       EPIDB_LOG_DBG("Removing data for the request: " + request_id);
-      mongo::GridFS gridfs(c.conn(), dba::config::DATABASE_NAME(), "fs");
+      mongo::GridFS gridfs(c.conn(), config::DATABASE_NAME(), "fs");
       gridfs.removeFile(request_id);
       c.done();
     }

@@ -31,7 +31,7 @@
 #include "commands.hpp"
 #include "engine.hpp"
 
-#include "../dba/config.hpp"
+#include "../config/config.hpp"
 #include "../dba/queries.hpp"
 #include "../dba/users.hpp"
 
@@ -50,7 +50,7 @@
 namespace epidb {
 
   Engine::Engine()
-    : _hub(dba::config::get_mongodb_server(), dba::config::DATABASE_NAME())
+    : _hub(config::get_mongodb_server(), config::DATABASE_NAME())
   {
     EPIDB_LOG("Creating Engine");
   }
@@ -88,7 +88,7 @@ namespace epidb {
 
   bool Engine::queue(const mongo::BSONObj &job, unsigned int timeout, std::string &id, std::string &msg)
   {
-    if (_hub.exists_job(job, id)) {
+    if (_hub.exists_job(job, id, true)) {
       return true;
     }
 
@@ -280,7 +280,7 @@ namespace epidb {
       return false;
     }
 
-    mongo::BSONObj o = _hub.get_job(request_id); //TODO still check
+    mongo::BSONObj o = _hub.get_job(request_id, true); //TODO still check
     if (o.isEmpty()) {
       msg = "Request ID " + request_id + " not found.";
       return false;
@@ -292,6 +292,7 @@ namespace epidb {
     }
 
     if (mdbq::Hub::is_cleared(o)) {
+      _hub.reprocess_job(o);
       msg = "Request ID " + request_id + " was cleared. We are going to reprocess this request. Please, check its status.";
       return false;
     }
@@ -311,7 +312,7 @@ namespace epidb {
       return false;
     }
 
-    mongo::BSONObj o = _hub.get_job(request_id, true); //TODO still check
+    mongo::BSONObj o = _hub.get_job(request_id); //TODO still check
     mongo::BSONObj result = o["result"].Obj();
 
     if (result.hasField("__file__")) {

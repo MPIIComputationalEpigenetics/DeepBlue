@@ -25,6 +25,7 @@ import genomes
 import info
 import init
 import intersection
+import janitor
 import list_commands
 import list_similar
 import list_requests

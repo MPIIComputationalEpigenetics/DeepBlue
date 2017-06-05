@@ -9,12 +9,12 @@
 
 #include "../connection/connection.hpp"
 
-#include "../dba/config.hpp"
+#include "../config/config.hpp"
 #include "../log.hpp"
 
 namespace epidb {
   Connection::Connection() :
-    Connection(dba::config::get_mongodb_server_connection())
+    Connection(config::get_mongodb_server_connection())
   {
   }
 

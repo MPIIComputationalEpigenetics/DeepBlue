@@ -19,19 +19,23 @@
 
 #include <boost/asio.hpp>
 
+#include "../config/config_observer.hpp"
+
 namespace epidb {
   namespace mdbq {
-    class Janitor {
+    class Janitor : public config::ConfigObserver {
+
     public:
-      Janitor(float interval) : m_interval(interval) {}
+      Janitor() {}
       void run();
+      void update(config::ConfigSubject & subject) override;
 
     private:
-      float m_interval;
       std::auto_ptr<boost::asio::deadline_timer> m_timer;
       boost::asio::io_service ios;
       bool clean_oldest(const boost::system::error_code &error);
-      void reg(boost::asio::io_service &io_service, float interval);
+      void reg(boost::asio::io_service &io_service);
+      void reset();
     };
   }
 }

@@ -12,7 +12,7 @@
 
 #include "user.hpp"
 
-#include "../dba/config.hpp"
+#include "../config/config.hpp"
 #include "../dba/helpers.hpp"
 
 namespace epidb {
@@ -211,7 +211,7 @@ namespace epidb {
     long long User::get_memory_limit() const
     {
       if (this->memory_limit == -1) {
-        return dba::config::processing_max_memory;
+        return config::processing_max_memory;
       } else {
         return this->memory_limit;
       }

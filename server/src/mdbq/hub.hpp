@@ -73,7 +73,7 @@ namespace epidb {
       /**
        * Check if job with the given parameters already exists.
        */
-      bool exists_job(const mongo::BSONObj &job, std::string &id);
+      bool exists_job(const mongo::BSONObj &job, std::string &id, bool update = false);
 
       /**
        * insert job

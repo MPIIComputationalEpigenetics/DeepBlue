@@ -22,10 +22,14 @@
 #include <mongo/bson/bson.h>
 #include <mongo/client/dbclient.h>
 
+#include "../config/config.hpp"
+
 #include "../connection/connection.hpp"
 
 #include "../dba/collections.hpp"
 #include "../dba/helpers.hpp"
+
+#include "../extras/date_time.hpp"
 
 #include "janitor.hpp"
 #include "common.hpp"
@@ -36,25 +40,49 @@
 namespace epidb {
   namespace mdbq {
 
-    void Janitor::run() {
+    void Janitor::run()
+    {
       EPIDB_LOG_TRACE("Starting Janitor");
-      reg(ios, this->m_interval);
+      reg(ios);
       ios.run();
     }
 
-    void Janitor::reg(boost::asio::io_service &io_service, float interval)
+    void Janitor::reg(boost::asio::io_service &io_service)
     {
-      m_interval = interval;
+      unsigned long long interval = epidb::config::get_old_request_age_in_sec();
+
+      std::cerr << " interval ONE " << interval << std::endl;
+
       m_timer.reset(new boost::asio::deadline_timer(io_service,
-                           boost::posix_time::seconds(interval) +
-                           boost::posix_time::millisec((int)(1000 * (interval - (int)interval)))));
+                    boost::posix_time::seconds(interval)));
+      m_timer->async_wait(boost::bind(&Janitor::clean_oldest, this, boost::asio::placeholders::error));
+    }
+
+    void Janitor::update(config::ConfigSubject & subject)
+    {
+      reset();
+    }
+
+    void Janitor::reset()
+    {
+      std::cout << "Canceling Timer\n";
+      //m_timer->cancel();
+      std::cout << "Resetting Timer\n";
+
+      unsigned long long interval = epidb::config::get_old_request_age_in_sec();
+
+      std::cerr << " interval TWO " << interval << std::endl;
       m_timer->async_wait(boost::bind(&Janitor::clean_oldest, this, boost::asio::placeholders::error));
     }
 
     bool Janitor::clean_oldest(const boost::system::error_code &error)
     {
+      if (error == boost::asio::error::operation_aborted) {
+        std::cerr << "boost::asio::error::operation_aborted" << std::endl;
+        return false;
+      }
+
       EPIDB_LOG_TRACE("CLEAN OLDEST");
-      // {state: 2, "$or":[{"misc.command":"get_regions"}, {"misc.command":"score_matrix"}]}).sort({finish_time: 1}).limit(1)
       mongo::BSONObjBuilder bob;
 
       bob.append("state", TaskState::TS_DONE);
@@ -64,8 +92,6 @@ namespace epidb {
 
       Connection c;
       auto cursor = c->query(dba::helpers::collection_name(dba::Collections::JOBS()), query, 1);
-
-      EPIDB_LOG_TRACE(query.toString());
 
       while (cursor->more()) {
         const mongo::BSONObj job = cursor->next();
@@ -83,7 +109,12 @@ namespace epidb {
       }
       c.done();
 
-      m_timer->expires_at(m_timer->expires_at() + boost::posix_time::millisec(1000 * this->m_interval));
+      unsigned long long interval = epidb::config::get_old_request_age_in_sec();
+
+      std::cerr << " ERRR " << error << std::endl;
+      std::cerr << " interval THREE " << interval << std::endl;
+      std::cerr << "AAA: " << boost::posix_time::seconds(interval) << std::endl;
+      m_timer->expires_at(m_timer->expires_at() + boost::posix_time::seconds(interval));
       m_timer->async_wait(boost::bind(&Janitor::clean_oldest, this, boost::asio::placeholders::error));
 
       return true;

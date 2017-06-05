@@ -26,9 +26,10 @@
 
 #include <mongo/bson/bson.h>
 
+#include "../config/config.hpp"
+
 #include "collections.hpp"
 #include "column_types.hpp"
-#include "config.hpp"
 #include "dba.hpp"
 #include "helpers.hpp"
 #include "list.hpp"

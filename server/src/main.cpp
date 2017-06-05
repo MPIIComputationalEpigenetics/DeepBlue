@@ -41,7 +41,7 @@
 
 #include "log.hpp"
 #include "version.hpp"
-#include "dba/config.hpp"
+#include "config/config.hpp"
 #include "engine/queue_processer.hpp"
 #include "extras/compress.hpp"
 #include "httpd/server.hpp"
@@ -65,7 +65,8 @@ int main(int argc, char *argv[])
   size_t processing_threads;
   std::string mongodb_server;
   std::string database_name;
-  long long processing_max_memory;
+  unsigned long long processing_max_memory;
+  unsigned long long old_request_age_in_sec;
 
   // Declare the supported options.
   po::options_description desc("DeepBlue parameters");
@@ -78,8 +79,8 @@ int main(int argc, char *argv[])
   ("mongodb,M", po::value<std::string>(&mongodb_server)->default_value("mongodb://localhost:27017"), "MongoDB address and port")
   ("database_name,D", po::value<std::string>(&database_name)->default_value("epidb"), "Database name")
   ("processing_threads,R", po::value<size_t>(&processing_threads)->default_value(4), "Number of concurrent threads for processing request data")
-  ("processing_max_memory,O", po::value<long long>(&processing_max_memory)->default_value(8ll * 1024 * 1024 * 1024), "Maximum memory available for request data processing (in bytes) ")
-  ;
+  ("processing_max_memory,O", po::value<unsigned long long>(&processing_max_memory)->default_value(8ll * 1024 * 1024 * 1024), "Maximum memory available for request data processing (in bytes)")
+  ("old_request_age_in_sec,I", po::value<unsigned long long>(&old_request_age_in_sec)->default_value(60l * 60l * 24l * 30l * 1l), "How old is a request to be considered old and cleared (in seconds)");
 
   po::variables_map vm;
   try {
@@ -111,20 +112,21 @@ int main(int argc, char *argv[])
 
   EPIDB_LOG("Connecting to MongoDB server " << mongodb_server << " and using database " << database_name << ".")
 
-  epidb::dba::config::set_sharding(vm.count("sharding"));
-  epidb::dba::config::set_mongodb_server(mongodb_server);
-  epidb::dba::config::set_database_name(database_name);
-  epidb::dba::config::set_processing_max_memory(processing_max_memory);
+  epidb::config::set_sharding(vm.count("sharding"));
+  epidb::config::set_mongodb_server(mongodb_server);
+  epidb::config::set_database_name(database_name);
+  epidb::config::set_processing_max_memory(processing_max_memory);
+  epidb::config::set_old_request_age_in_sec(old_request_age_in_sec);
 
   std::string msg;
-  if (!epidb::dba::config::check_mongodb(msg)) {
+  if (!epidb::config::check_mongodb(msg)) {
     EPIDB_LOG_ERR(msg);
     return 1;
   }
 
-  if (epidb::dba::config::sharding()) {
+  if (epidb::config::sharding()) {
     EPIDB_LOG("Configuring MongoDB Sharding [" << std::string(mongodb_server) << "]");
-    epidb::dba::config::set_shards_tags();
+    epidb::config::set_shards_tags();
   }
 
   EPIDB_LOG("Starting DeepBlue Epigenomics Data Server ");

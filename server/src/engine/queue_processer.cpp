@@ -33,9 +33,10 @@
 
 #include <mongo/client/dbclient.h>
 
+#include "../config/config.hpp"
+
 #include "../datatypes/user.hpp"
 
-#include "../dba/config.hpp"
 #include "../dba/users.hpp"
 
 #include "../extras/stringbuilder.hpp"
@@ -386,8 +387,8 @@ namespace epidb {
     {
       boost::asio::io_service io;
 
-      std::string server = dba::config::get_mongodb_server();
-      std::string collection = dba::config::DATABASE_NAME();
+      std::string server = config::get_mongodb_server();
+      std::string collection = config::DATABASE_NAME();
 
       QueueHandler *clients[num];
       boost::thread   *threads[num];
@@ -397,8 +398,10 @@ namespace epidb {
         threads[i] = new boost::thread(boost::bind(&QueueHandler::run, clients[i]));
       }
 
-      //mdbq::Janitor *janitor = new mdbq::Janitor(5);
-      //boost::thread *t = new boost::thread(boost::bind(&mdbq::Janitor::run, janitor));
+      mdbq::Janitor* janitor = new mdbq::Janitor();
+
+      config::get_config_subject()->attachObserver(janitor);
+      boost::thread *t = new boost::thread(boost::bind(&mdbq::Janitor::run, janitor));
     }
   }
 }

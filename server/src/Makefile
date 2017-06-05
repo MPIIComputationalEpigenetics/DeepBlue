@@ -8,7 +8,7 @@ COMMANDS = $(wildcard commands/*.cpp)
 COMMANDS_OBJS = $(COMMANDS:.cpp=.o)
 
 OBJS	= main.o version.o errors.o
-OBJLIBS	= $(COMMANDS_OBJS) libhttpd.a libdba.a libparser.a libengine.a libextras.a libprocessing.a libalgorithms.a libdatatypes.a liblua.a libexternal.a libmdbq.a  libconnection.a libthreading.a libcache.a
+OBJLIBS	= $(COMMANDS_OBJS) libhttpd.a libdba.a libparser.a libengine.a libextras.a libprocessing.a libalgorithms.a libdatatypes.a liblua.a libexternal.a libmdbq.a  libconnection.a libthreading.a libcache.a libconfig.a
 
 CXXFLAGS	= $(DEFCXXFLAGS)
 
@@ -24,6 +24,10 @@ libcommands.a: force_look
 libconnection.a: force_look
 	@$(ECHO) looking into connection : $(MAKE) $(MFLAGS)
 	cd connection; $(MAKE) $(MFLAGS)
+
+libconfig.a: force_look
+	@$(ECHO) looking into config : $(MAKE) $(MFLAGS)
+	cd config; $(MAKE) $(MFLAGS)
 
 libalgorithms.a: force_look
 	@$(ECHO) looking into algorithms : $(MAKE) $(MFLAGS)

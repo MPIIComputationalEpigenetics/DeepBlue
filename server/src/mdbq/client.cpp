@@ -32,10 +32,12 @@
 #include "client.hpp"
 #include "common.hpp"
 
+#include "../config/config.hpp"
+
 #include "../connection/connection.hpp"
 
 #include "../dba/collections.hpp"
-#include "../dba/config.hpp"
+
 #include "../dba/helpers.hpp"
 
 #include "../engine/engine.hpp"
@@ -93,6 +95,7 @@ namespace epidb {
           } else {
             ms = 1000 * (1 + drand48() * (m_interval - 1));
           }
+          std::cerr << "BBB: " <<boost::posix_time::millisec(ms) << std::endl;
           m_timer->expires_at(m_timer->expires_at() + boost::posix_time::millisec(ms));
           m_timer->async_wait(boost::bind(&ClientImpl::update_check, this, c, boost::asio::placeholders::error));
         }
@@ -132,7 +135,7 @@ namespace epidb {
                                   )));
       mongo::BSONObj info;
       Connection c;
-      bool result = c->runCommand(dba::config::DATABASE_NAME(), o, info);
+      bool result = c->runCommand(config::DATABASE_NAME(), o, info);
       c.done();
 
       EPIDB_LOG_TRACE("Task " << ct["_id"] << " renewed.");
@@ -228,7 +231,7 @@ namespace epidb {
                                       "version" << version + 1 <<
                                       "finish_time" << epidb::extras::to_mongo_date(finish_time) <<
                                       "result" << result)));
-        bool result = c->runCommand(dba::config::DATABASE_NAME(), o, info);
+        bool result = c->runCommand(config::DATABASE_NAME(), o, info);
         if (!result) {
           EPIDB_LOG_ERR(info["errmsg"].toString() << " - " << __FILE__ << ":" << __LINE__);
         }
@@ -250,7 +253,7 @@ namespace epidb {
                                         "failure_time" << epidb::extras::to_mongo_date(finish_time) <<
                                         "error" << result["__error__"].str())));
           mongo::BSONObj info;
-          bool result = c->runCommand(dba::config::DATABASE_NAME(), o, info);
+          bool result = c->runCommand(config::DATABASE_NAME(), o, info);
           if (!result) {
             EPIDB_LOG_ERR(info["errmsg"].toString() << " - " << __FILE__ << ":" << __LINE__);
           }

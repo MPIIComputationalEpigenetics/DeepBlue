@@ -22,10 +22,11 @@
 
 #include <mongo/bson/bson.h>
 
+#include "../config/config.hpp"
+
 #include "../connection/connection.hpp"
 
 #include "../dba/collections.hpp"
-#include "../dba/config.hpp"
 #include "../dba/full_text.hpp"
 #include "../dba/helpers.hpp"
 
@@ -109,7 +110,7 @@ namespace epidb {
 
         Connection c;
         mongo::BSONObj info;
-        bool result = c->runCommand(dba::config::DATABASE_NAME(), o, info);
+        bool result = c->runCommand(config::DATABASE_NAME(), o, info);
         if (!result) {
           // TODO: get info error
           msg = "error setting the project id '" + project_id + "' public.";

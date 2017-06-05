@@ -22,13 +22,15 @@
 
 #include <mongo/bson/bson.h>
 
+#include "../config/config.hpp"
+
 #include "../connection/connection.hpp"
 
 #include "../datatypes/user.hpp"
+
 #include "../dba/collections.hpp"
 
 #include "collections.hpp"
-#include "config.hpp"
 #include "exists.hpp"
 #include "helpers.hpp"
 

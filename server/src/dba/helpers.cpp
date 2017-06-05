@@ -25,13 +25,14 @@
 
 #include <mongo/bson/bson.h>
 
+#include "../config/config.hpp"
+
 #include "../connection/connection.hpp"
 
 #include "../extras/serialize.hpp"
 #include "../extras/utils.hpp"
 
 #include "collections.hpp"
-#include "config.hpp"
 #include "dba.hpp"
 #include "helpers.hpp"
 

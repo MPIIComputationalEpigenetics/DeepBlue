@@ -37,12 +37,13 @@
 #include <mongo/bson/bson.h>
 
 #include "collections.hpp"
-#include "config.hpp"
 #include "helpers.hpp"
 #include "key_mapper.hpp"
 #include "queries.hpp"
 
 #include "../errors.hpp"
+
+#include "../config/config.hpp"
 
 #include "../connection/connection.hpp"
 

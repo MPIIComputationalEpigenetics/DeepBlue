@@ -6,6 +6,7 @@
 #include <iostream>
 #include <sstream>
 
+#include "../config/config.hpp"
 #include "../dba/dba.hpp"
 #include "../dba/users.hpp"
 
@@ -68,6 +69,21 @@ namespace epidb {
         if (!check_permissions(admin_key, datatypes::ADMIN, admin, msg )) {
           result.add_error(msg);
           return false;
+        }
+
+        if (user_id.empty()) {
+          // global parameters, no user
+          if (field == "old_request_age_in_sec") {
+            unsigned long long old_request_age_in_sec;
+            std::stringstream ss(value);
+            ss >> old_request_age_in_sec;
+            epidb::config::set_old_request_age_in_sec(old_request_age_in_sec);
+            result.add_string(field);
+            return true;
+          } else {
+            result.add_error(field + " is invalid");
+            return false;
+          }
         }
 
         datatypes::User user;

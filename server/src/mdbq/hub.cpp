@@ -28,10 +28,12 @@
 
 #include "hub.hpp"
 
+#include "../config/config.hpp"
+
 #include "../connection/connection.hpp"
 
 #include "../dba/collections.hpp"
-#include "../dba/config.hpp"
+
 #include "../dba/helpers.hpp"
 #include "../dba/users.hpp"
 
@@ -122,7 +124,7 @@ namespace epidb {
       c.done();
     }
 
-    bool Hub::exists_job(const mongo::BSONObj &job, std::string &id)
+    bool Hub::exists_job(const mongo::BSONObj &job, std::string &id, bool update)
     {
       epidb::Connection c;
       mongo::BSONObj ret = c->findOne(dba::helpers::collection_name(dba::Collections::JOBS()), BSON("misc" << job));
@@ -131,6 +133,9 @@ namespace epidb {
       if (ret.isEmpty()) {
         return false;
       } else {
+        if (update) {
+          reprocess_job(ret);
+        }
         id = ret["_id"].String();
         return true;
       }
@@ -166,35 +171,37 @@ namespace epidb {
       return true;
     }
 
-    bool reprocess_job(const mongo::BSONObj &job)
+    bool Hub::reprocess_job(const mongo::BSONObj &job)
     {
+      const std::string& _id = job["_id"].str();
 
+      boost::posix_time::ptime now = epidb::extras::universal_date_time();
+
+      mongo::BSONObjBuilder queryb;
+      mongo::BSONObj res, cmd, query;
+      queryb.append("_id", _id);
+
+      query = queryb.obj();
+      cmd = BSON(
+              "findAndModify" << dba::Collections::JOBS() <<
+              "query" << query <<
+              "update" << BSON("$set" <<
+                               BSON("state" << TS_REPROCESS
+                                    << "refresh_time" << epidb::extras::to_mongo_date(now)
+                                   )
+                              )
+            );
+      Connection c;
+      c->runCommand(m_ptr->m_prefix, cmd, res);
+      if (!res["value"].isABSONObj()) {
+        c.done();
+        std::cerr << "No request '" + _id + "' available, cmd:" + cmd.toString() << std::endl;
+        return false;
+      }
+
+      return true;
     }
 
-
-    /*
-
-         mongo::BSONObjBuilder queryb;
-         mongo::BSONObj res, cmd, query;
-         queryb.append("state", BSON("$in" << BSON_ARRAY(TS_NEW << TS_RENEW)));
-         if (! m_ptr->m_task_selector.isEmpty())
-           queryb.appendElements(m_ptr->m_task_selector);
-         query = queryb.obj();
-         cmd = BSON(
-                 "findAndModify" << dba::Collections::JOBS() <<
-                 "query" << query <<
-                 "update" << BSON("$set" <<
-                                  BSON("book_time" << epidb::extras::to_mongo_date(now)
-                                       << "state" << TS_RUNNING
-                                       << "refresh_time" << epidb::extras::to_mongo_date(now)
-                                       << "owner" << hostname_pid)));
-
-         Connection c;
-         c->runCommand(m_db, cmd, res);
-         CHECK_DB_ERR(c);
-         c.done();
-
-         */
 
     size_t Hub::get_n_open()
     {

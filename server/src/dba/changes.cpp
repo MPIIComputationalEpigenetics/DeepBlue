@@ -22,9 +22,10 @@
 
 #include <mongo/bson/bson.h>
 
+#include "../config/config.hpp"
+
 #include "../connection/connection.hpp"
 
-#include "config.hpp"
 #include "collections.hpp"
 #include "helpers.hpp"
 #include "full_text.hpp"
