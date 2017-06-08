@@ -95,7 +95,6 @@ namespace epidb {
           } else {
             ms = 1000 * (1 + drand48() * (m_interval - 1));
           }
-          std::cerr << "BBB: " <<boost::posix_time::millisec(ms) << std::endl;
           m_timer->expires_at(m_timer->expires_at() + boost::posix_time::millisec(ms));
           m_timer->async_wait(boost::bind(&ClientImpl::update_check, this, c, boost::asio::placeholders::error));
         }

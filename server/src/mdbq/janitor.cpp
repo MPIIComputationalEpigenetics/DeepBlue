@@ -51,8 +51,6 @@ namespace epidb {
     {
       unsigned long long interval = epidb::config::get_old_request_age_in_sec();
 
-      std::cerr << " interval ONE " << interval << std::endl;
-
       m_timer.reset(new boost::asio::deadline_timer(io_service,
                     boost::posix_time::seconds(interval)));
       m_timer->async_wait(boost::bind(&Janitor::clean_oldest, this, boost::asio::placeholders::error));
@@ -65,24 +63,19 @@ namespace epidb {
 
     void Janitor::reset()
     {
-      std::cout << "Canceling Timer\n";
-      //m_timer->cancel();
-      std::cout << "Resetting Timer\n";
-
+      m_timer->cancel();
       unsigned long long interval = epidb::config::get_old_request_age_in_sec();
-
-      std::cerr << " interval TWO " << interval << std::endl;
+      m_timer.reset(new boost::asio::deadline_timer(ios, boost::posix_time::seconds(interval)));
       m_timer->async_wait(boost::bind(&Janitor::clean_oldest, this, boost::asio::placeholders::error));
     }
 
     bool Janitor::clean_oldest(const boost::system::error_code &error)
     {
       if (error == boost::asio::error::operation_aborted) {
-        std::cerr << "boost::asio::error::operation_aborted" << std::endl;
+        EPIDB_LOG_DBG("clean_oldest canceled, probably it was reset");
         return false;
       }
 
-      EPIDB_LOG_TRACE("CLEAN OLDEST");
       mongo::BSONObjBuilder bob;
 
       bob.append("state", TaskState::TS_DONE);
@@ -95,25 +88,21 @@ namespace epidb {
 
       while (cursor->more()) {
         const mongo::BSONObj job = cursor->next();
-        std::cerr << "CLEARING JOB " << job.toString() << std::endl;
+        EPIDB_LOG_DBG("CLEARING JOB " << job.toString());
         const std::string& id = job["_id"].String();
 
         std::string msg;
 
         bool o = remove_request_data(id, TS_CLEARED, msg);
         if (o) {
-          std::cerr << " job " << id << " cleared with success" << std::endl;
+          EPIDB_LOG_DBG("Job " << id << " cleared with success");
         } else {
-          std::cerr << " problem clearing job: " << id << " - " << msg << std::endl;
+          EPIDB_LOG_DBG("Problem clearing job: " << id << " - ");
         }
       }
       c.done();
 
       unsigned long long interval = epidb::config::get_old_request_age_in_sec();
-
-      std::cerr << " ERRR " << error << std::endl;
-      std::cerr << " interval THREE " << interval << std::endl;
-      std::cerr << "AAA: " << boost::posix_time::seconds(interval) << std::endl;
       m_timer->expires_at(m_timer->expires_at() + boost::posix_time::seconds(interval));
       m_timer->async_wait(boost::bind(&Janitor::clean_oldest, this, boost::asio::placeholders::error));
 
