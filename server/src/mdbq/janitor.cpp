@@ -49,7 +49,7 @@ namespace epidb {
 
     void Janitor::reg(boost::asio::io_service &io_service)
     {
-      unsigned long long interval = epidb::config::get_old_request_age_in_sec();
+      unsigned long long interval = epidb::config::get_janitor_periodicity();
 
       m_timer.reset(new boost::asio::deadline_timer(io_service,
                     boost::posix_time::seconds(interval)));
@@ -64,7 +64,7 @@ namespace epidb {
     void Janitor::reset()
     {
       m_timer->cancel();
-      unsigned long long interval = epidb::config::get_old_request_age_in_sec();
+      unsigned long long interval = epidb::config::get_janitor_periodicity();
       m_timer.reset(new boost::asio::deadline_timer(ios, boost::posix_time::seconds(interval)));
       m_timer->async_wait(boost::bind(&Janitor::clean_oldest, this, boost::asio::placeholders::error));
     }
@@ -78,10 +78,15 @@ namespace epidb {
 
       mongo::BSONObjBuilder bob;
 
+      boost::posix_time::ptime prev = epidb::extras::time_ago(config::get_old_request_age_in_sec());
+
       bob.append("state", TaskState::TS_DONE);
       bob.append("$or", BSON_ARRAY(BSON("misc.command" << "score_matrix") << BSON("misc.command" << "get_regions")));
+      bob.append("finish_time", BSON("$lte" << epidb::extras::to_mongo_date(prev)));
 
       mongo::Query query = mongo::Query(bob.obj()).sort(BSON("finish_time" << 1));
+
+      std::cerr << query.toString() << std::endl;
 
       Connection c;
       auto cursor = c->query(dba::helpers::collection_name(dba::Collections::JOBS()), query, 1);
@@ -102,7 +107,7 @@ namespace epidb {
       }
       c.done();
 
-      unsigned long long interval = epidb::config::get_old_request_age_in_sec();
+      unsigned long long interval = epidb::config::get_janitor_periodicity();
       m_timer->expires_at(m_timer->expires_at() + boost::posix_time::seconds(interval));
       m_timer->async_wait(boost::bind(&Janitor::clean_oldest, this, boost::asio::placeholders::error));
 

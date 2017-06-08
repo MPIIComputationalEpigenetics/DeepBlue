@@ -67,6 +67,7 @@ int main(int argc, char *argv[])
   std::string database_name;
   unsigned long long processing_max_memory;
   unsigned long long old_request_age_in_sec;
+  unsigned long long janitor_periodicity;
 
   // Declare the supported options.
   po::options_description desc("DeepBlue parameters");
@@ -80,7 +81,8 @@ int main(int argc, char *argv[])
   ("database_name,D", po::value<std::string>(&database_name)->default_value("epidb"), "Database name")
   ("processing_threads,R", po::value<size_t>(&processing_threads)->default_value(4), "Number of concurrent threads for processing request data")
   ("processing_max_memory,O", po::value<unsigned long long>(&processing_max_memory)->default_value(8ll * 1024 * 1024 * 1024), "Maximum memory available for request data processing (in bytes)")
-  ("old_request_age_in_sec,I", po::value<unsigned long long>(&old_request_age_in_sec)->default_value(60l * 60l * 24l * 30l * 1l), "How old is a request to be considered old and cleared (in seconds)");
+  ("old_request_age_in_sec,I", po::value<unsigned long long>(&old_request_age_in_sec)->default_value(60l * 60l * 24l * 30l * 1l), "How old is a request to be considered old and cleared (in seconds)")
+  ("janitor_periodicity,J", po::value<unsigned long long>(&janitor_periodicity)->default_value(60l), "Periodicity that the janitor will be executed (in seconds)");
 
   po::variables_map vm;
   try {
@@ -118,6 +120,8 @@ int main(int argc, char *argv[])
   epidb::config::set_processing_max_memory(processing_max_memory);
   epidb::config::set_old_request_age_in_sec(old_request_age_in_sec);
   epidb::config::set_default_old_request_age_in_sec(old_request_age_in_sec);
+  epidb::config::set_janitor_periodicity(janitor_periodicity);
+  epidb::config::set_default_janitor_periodicity(janitor_periodicity);
 
   std::string msg;
   if (!epidb::config::check_mongodb(msg)) {

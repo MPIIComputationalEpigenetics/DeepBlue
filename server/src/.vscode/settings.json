@@ -2,5 +2,10 @@
 {
     "files.exclude": {
         "**/*.o": true
+    },
+    "files.associations": {
+        "sstream": "cpp",
+        "map": "cpp",
+        "string": "cpp"
     }
-}   
+}

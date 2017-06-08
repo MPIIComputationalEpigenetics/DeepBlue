@@ -12,10 +12,13 @@ class TestJanitor(helpers.TestCase):\
 
     # Test parameters
     s, v = epidb.modify_user_admin(None, "old_request_age_in_sec", None, self.admin_key)
-    self.assertEqual(v, '2592000')
+    self.assertEqual(v, ['old_request_age_in_sec', '2592000'])
     s, v = epidb.modify_user_admin(None, "old_request_age_in_sec", "-1", self.admin_key)
-    self.assertEqual(v, '2592000')
-
+    self.assertEqual(v, ['old_request_age_in_sec', '2592000'])
+    s, v = epidb.modify_user_admin(None, "janitor_periodicity", None, self.admin_key)
+    self.assertEqual(v, ['janitor_periodicity', '60'])
+    s, v = epidb.modify_user_admin(None, "janitor_periodicity", "-1", self.admin_key)
+    self.assertEqual(v, ['janitor_periodicity', '60'])
 
     # Do a simple request
     res, qid = epidb.tiling_regions(1000000, "hg19", ["chr15", "chrX", "chr3"], self.admin_key)
@@ -32,13 +35,18 @@ class TestJanitor(helpers.TestCase):\
     self.assertEqual(len(regions.strip().split('\n')), chr3_tiles + chr15_tiles + chrX_tiles)
 
     # Check removal
-    s, m = epidb.modify_user_admin(None, "old_request_age_in_sec", "1", self.admin_key)
-    time.sleep(1)
+    s, m = epidb.modify_user_admin(None, "janitor_periodicity", "1", self.admin_key)
+    s, v = epidb.modify_user_admin(None, "janitor_periodicity", None, self.admin_key)
+    self.assertEqual(v, ['janitor_periodicity', '1'])
+    s, m = epidb.modify_user_admin(None, "old_request_age_in_sec", "3", self.admin_key)
+    s, v = epidb.modify_user_admin(None, "old_request_age_in_sec", None, self.admin_key)
+    self.assertEqual(v, ['old_request_age_in_sec', '3'])
+    time.sleep(3)
     s, info = epidb.info(req, self.admin_key)
     self.assertEqual(info[0]["state"], "cleared")
 
     # Check reprocessing by re-requesting the data
-    s, m = epidb.modify_user_admin(None, "old_request_age_in_sec", "10", self.admin_key)
+    s, m = epidb.modify_user_admin(None, "janitor_periodicity", "10", self.admin_key)
     s, m = epidb.get_request_data(req, self.admin_key)
     self.assertFailure(s, m)
     self.assertEqual(m, 'Request ID r1 was cleared. We are going to reprocess this request. Please, check its status.')
@@ -55,12 +63,15 @@ class TestJanitor(helpers.TestCase):\
     self.assertEqual(len(regions.strip().split('\n')), chr3_tiles + chr15_tiles + chrX_tiles)
 
     # Check reprocessing by making performing the request again
-    s, m = epidb.modify_user_admin(None, "old_request_age_in_sec", "1", self.admin_key)
+    s, m = epidb.modify_user_admin(None, "janitor_periodicity", "1", self.admin_key)
     time.sleep(1)
+    s, info = epidb.info(req, self.admin_key)
+    self.assertEqual(info[0]["state"], "done")
+    time.sleep(3)
     s, info = epidb.info(req, self.admin_key)
     self.assertEqual(info[0]["state"], "cleared")
 
-    s, m = epidb.modify_user_admin(None, "old_request_age_in_sec", "10", self.admin_key)
+    s, m = epidb.modify_user_admin(None, "janitor_periodicity", "10", self.admin_key)
     res, req = epidb.get_regions(qid, "CHROMOSOME,START,END", self.admin_key)
     s, info = epidb.info(req, self.admin_key)
     self.assertEqual(info[0]["state"], "reprocess")

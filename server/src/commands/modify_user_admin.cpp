@@ -78,16 +78,34 @@ namespace epidb {
             std::stringstream ss(value);
             ss >> old_request_age_in_sec;
 
-            std::cerr << old_request_age_in_sec << std::endl;
-
             // if the value is empty/, just return the actul value
             if (value.empty() || old_request_age_in_sec <= 0) {
               long long actual = epidb::config::get_old_request_age_in_sec();
+              result.add_string(field);
               result.add_string(utils::long_to_string(actual));
               return true;
             } else {
               epidb::config::set_old_request_age_in_sec(old_request_age_in_sec);
               result.add_string(field);
+              result.add_string(value);
+              return true;
+            }
+
+          } else if (field == "janitor_periodicity") {
+            int janitor_periodicity;
+            std::stringstream ss(value);
+            ss >> janitor_periodicity;
+
+            // if the value is empty/, just return the actul value
+            if (value.empty() || janitor_periodicity <= 0) {
+              long long actual = epidb::config::get_janitor_periodicity();
+              result.add_string(field);
+              result.add_string(utils::long_to_string(actual));
+              return true;
+            } else {
+              epidb::config::set_janitor_periodicity(janitor_periodicity);
+              result.add_string(field);
+              result.add_string(value);
               return true;
             }
           } else {

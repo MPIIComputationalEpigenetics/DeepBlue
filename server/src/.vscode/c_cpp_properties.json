@@ -1,21 +1,82 @@
 {
-    "configurations": [
-        {
+    "configurations": [{
             "name": "Mac",
-            "includePath": ["/usr/include"]
+            "includePath": [
+                "/usr/include"
+            ],
+            "browse": {
+                "path": [
+                    "/usr/include"
+                ]
+            }
         },
         {
             "name": "Linux",
-            "includePath": ["/usr/include", "/usr/lib/x86_64-linux-gnu/","/opt/mongodb/drivers/include", "/home/albrecht/DeepBlue/DeepBlue/server/src"]
+            "includePath": [
+                "/opt/mongodb/drivers/include",
+                "/usr/include",
+                "/usr/lib/x86_64-linux-gnu/",
+                "/usr/include/c++/6.3.0/",
+                "/home/albrecht/DeepBlue/DeepBlue/server/src",
+                "/home/albrecht/DeepBlue/DeepBlue/server/src/algorithms/",
+                "/home/albrecht/DeepBlue/DeepBlue/server/src/cache/",
+                "/home/albrecht/DeepBlue/DeepBlue/server/src/commands/",
+                "/home/albrecht/DeepBlue/DeepBlue/server/src/connection/",
+                "/home/albrecht/DeepBlue/DeepBlue/server/src/datatypes/",
+                "/home/albrecht/DeepBlue/DeepBlue/server/src/dba/",
+                "/home/albrecht/DeepBlue/DeepBlue/server/src/_documents/",
+                "/home/albrecht/DeepBlue/DeepBlue/server/src/engine/",
+                "/home/albrecht/DeepBlue/DeepBlue/server/src/external/",
+                "/home/albrecht/DeepBlue/DeepBlue/server/src/extras/",
+                "/home/albrecht/DeepBlue/DeepBlue/server/src/httpd/",
+                "/home/albrecht/DeepBlue/DeepBlue/server/src/interfaces/",
+                "/home/albrecht/DeepBlue/DeepBlue/server/src/lua/",
+                "/home/albrecht/DeepBlue/DeepBlue/server/src/mdbq/",
+                "/home/albrecht/DeepBlue/DeepBlue/server/src/parser/",
+                "/home/albrecht/DeepBlue/DeepBlue/server/src/processing/",
+                "/home/albrecht/DeepBlue/DeepBlue/server/src/threading/"
+            ],
+            "browse": {
+                "path": [
+                    "/opt/mongodb/drivers/include",
+                    "/usr/include",
+                    "/usr/lib/x86_64-linux-gnu/",
+                    "/opt/mongodb/drivers/include",
+                    "/home/albrecht/DeepBlue/DeepBlue/server/src/algorithms/",
+                    "/home/albrecht/DeepBlue/DeepBlue/server/src/cache/",
+                    "/home/albrecht/DeepBlue/DeepBlue/server/src/commands/",
+                    "/home/albrecht/DeepBlue/DeepBlue/server/src/connection/",
+                    "/home/albrecht/DeepBlue/DeepBlue/server/src/datatypes/",
+                    "/home/albrecht/DeepBlue/DeepBlue/server/src/dba/",
+                    "/home/albrecht/DeepBlue/DeepBlue/server/src/_documents/",
+                    "/home/albrecht/DeepBlue/DeepBlue/server/src/engine/",
+                    "/home/albrecht/DeepBlue/DeepBlue/server/src/external/",
+                    "/home/albrecht/DeepBlue/DeepBlue/server/src/extras/",
+                    "/home/albrecht/DeepBlue/DeepBlue/server/src/httpd/",
+                    "/home/albrecht/DeepBlue/DeepBlue/server/src/interfaces/",
+                    "/home/albrecht/DeepBlue/DeepBlue/server/src/lua/",
+                    "/home/albrecht/DeepBlue/DeepBlue/server/src/mdbq/",
+                    "/home/albrecht/DeepBlue/DeepBlue/server/src/parser/",
+                    "/home/albrecht/DeepBlue/DeepBlue/server/src/processing/",
+                    "/home/albrecht/DeepBlue/DeepBlue/server/src/threading/"
+                ]
+            }
         },
         {
             "name": "Win32",
-            "includePath": ["c:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/include"]
+            "includePath": [
+                "c:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/include"
+            ],
+            "browse": {
+                "path": [
+                    "c:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/include"
+                ]
+            }
         }
     ],
-    "clang_format" : {
-        "style" : "file",
-        "fallback-style" : "LLVM",
-        "sort-includes" : "false"
+    "clang_format": {
+        "style": "file",
+        "fallback-style": "LLVM",
+        "sort-includes": "false"
     }
 }
