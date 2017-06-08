@@ -47,6 +47,9 @@ namespace epidb {
     unsigned long long default_old_request_age_in_sec;
     unsigned long long old_request_age_in_sec;
 
+    unsigned long long default_janitor_periodicity;
+    unsigned long long janitor_periodicity;
+
     std::shared_ptr<ConfigSubject> config_subject = std::make_shared<ConfigSubject>();
 
     ConfigSubjectPtr get_config_subject()
@@ -115,7 +118,8 @@ namespace epidb {
       return processing_max_memory;
     }
 
-    void set_default_old_request_age_in_sec(const unsigned long long default_oo) {
+    void set_default_old_request_age_in_sec(const unsigned long long default_oo)
+    {
       default_old_request_age_in_sec = default_oo;
     }
 
@@ -132,7 +136,25 @@ namespace epidb {
     void set_old_request_age_in_sec(const unsigned long long oo)
     {
       old_request_age_in_sec = oo;
+    }
+
+    void set_janitor_periodicity(const unsigned long long jp)
+    {
+      janitor_periodicity = jp;
       config_subject->notifyObservers();
+    }
+
+    unsigned long long get_janitor_periodicity() {
+      return janitor_periodicity;
+    }
+
+    void set_default_janitor_periodicity(const unsigned long long jp)
+    {
+      default_janitor_periodicity = jp;
+    }
+
+    unsigned long long get_default_janitor_periodicity() {
+      return default_janitor_periodicity;
     }
 
     const std::string DATABASE_NAME()

@@ -59,10 +59,17 @@ namespace epidb {
     const std::string DATABASE_NAME();
     void set_processing_max_memory(const long long memory);
     long long get_processing_max_memory();
+
     unsigned long long get_old_request_age_in_sec();
     void set_old_request_age_in_sec(const unsigned long long oo);
     unsigned long long get_default_old_request_age_in_sec();
     void set_default_old_request_age_in_sec(const unsigned long long oo);
+
+    void set_janitor_periodicity(const unsigned long long jp);
+    unsigned long long get_janitor_periodicity();
+    void set_default_janitor_periodicity(const unsigned long long jp);
+    unsigned long long get_default_janitor_periodicity();
+
   }
 }
 
