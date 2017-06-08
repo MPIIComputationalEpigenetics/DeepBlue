@@ -86,8 +86,6 @@ namespace epidb {
 
       mongo::Query query = mongo::Query(bob.obj()).sort(BSON("finish_time" << 1));
 
-      std::cerr << query.toString() << std::endl;
-
       Connection c;
       auto cursor = c->query(dba::helpers::collection_name(dba::Collections::JOBS()), query, 1);
 
