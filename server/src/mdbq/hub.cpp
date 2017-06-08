@@ -133,7 +133,7 @@ namespace epidb {
       if (ret.isEmpty()) {
         return false;
       } else {
-        if (update) {
+        if (update && is_cleared(ret)) {
           reprocess_job(ret);
         }
         id = ret["_id"].String();
