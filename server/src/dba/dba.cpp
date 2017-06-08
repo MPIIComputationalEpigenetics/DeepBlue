@@ -327,6 +327,7 @@ namespace epidb {
       genes::invalidate_cache();
       cache::column_dataset_cache_invalidate();
       cache::queries_cache_invalidate();
+      config::set_old_request_age_in_sec(config::get_default_old_request_age_in_sec());
 
       c.done();
       return true;

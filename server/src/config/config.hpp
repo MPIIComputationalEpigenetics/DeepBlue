@@ -61,7 +61,8 @@ namespace epidb {
     long long get_processing_max_memory();
     unsigned long long get_old_request_age_in_sec();
     void set_old_request_age_in_sec(const unsigned long long oo);
-
+    unsigned long long get_default_old_request_age_in_sec();
+    void set_default_old_request_age_in_sec(const unsigned long long oo);
   }
 }
 

@@ -173,6 +173,7 @@ namespace epidb {
 
     bool Hub::reprocess_job(const mongo::BSONObj &job)
     {
+      std::cerr << "re process job" << std::endl;
       const std::string& _id = job["_id"].str();
 
       boost::posix_time::ptime now = epidb::extras::universal_date_time();
@@ -199,6 +200,7 @@ namespace epidb {
         return false;
       }
 
+      c.done();
       return true;
     }
 

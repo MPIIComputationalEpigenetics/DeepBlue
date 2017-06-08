@@ -43,6 +43,8 @@ namespace epidb {
     std::string database_name;
     mongo::ConnectionString mongodb_server_connection;
     long long processing_max_memory;
+
+    unsigned long long default_old_request_age_in_sec;
     unsigned long long old_request_age_in_sec;
 
     std::shared_ptr<ConfigSubject> config_subject = std::make_shared<ConfigSubject>();
@@ -111,6 +113,15 @@ namespace epidb {
     long long get_processing_max_memory()
     {
       return processing_max_memory;
+    }
+
+    void set_default_old_request_age_in_sec(const unsigned long long default_oo) {
+      default_old_request_age_in_sec = default_oo;
+    }
+
+    unsigned long long get_default_old_request_age_in_sec()
+    {
+      return default_old_request_age_in_sec;
     }
 
     unsigned long long get_old_request_age_in_sec()

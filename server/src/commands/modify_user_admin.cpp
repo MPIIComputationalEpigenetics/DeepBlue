@@ -74,12 +74,22 @@ namespace epidb {
         if (user_id.empty()) {
           // global parameters, no user
           if (field == "old_request_age_in_sec") {
-            unsigned long long old_request_age_in_sec;
+            int old_request_age_in_sec;
             std::stringstream ss(value);
             ss >> old_request_age_in_sec;
-            epidb::config::set_old_request_age_in_sec(old_request_age_in_sec);
-            result.add_string(field);
-            return true;
+
+            std::cerr << old_request_age_in_sec << std::endl;
+
+            // if the value is empty/, just return the actul value
+            if (value.empty() || old_request_age_in_sec <= 0) {
+              long long actual = epidb::config::get_old_request_age_in_sec();
+              result.add_string(utils::long_to_string(actual));
+              return true;
+            } else {
+              epidb::config::set_old_request_age_in_sec(old_request_age_in_sec);
+              result.add_string(field);
+              return true;
+            }
           } else {
             result.add_error(field + " is invalid");
             return false;
