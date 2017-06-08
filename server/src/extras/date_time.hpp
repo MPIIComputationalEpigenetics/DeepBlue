@@ -37,6 +37,12 @@ namespace epidb {
       return boost::posix_time::ptime(date, dur);
     }
 
+    inline boost::posix_time::ptime time_ago(unsigned long seconds)
+    {
+      return  universal_date_time() - boost::posix_time::seconds(seconds);
+    }
+
+
     inline std::string dt_format(const boost::posix_time::ptime& t)
     {
       std::stringstream ss;
