@@ -328,6 +328,7 @@ namespace epidb {
       cache::column_dataset_cache_invalidate();
       cache::queries_cache_invalidate();
       config::set_old_request_age_in_sec(config::get_default_old_request_age_in_sec());
+      config::set_janitor_periodicity(config::get_default_janitor_periodicity());
 
       c.done();
       return true;
