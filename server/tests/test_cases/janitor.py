@@ -12,9 +12,9 @@ class TestJanitor(helpers.TestCase):\
 
     # Test parameters
     s, v = epidb.modify_user_admin(None, "old_request_age_in_sec", None, self.admin_key)
-    self.assertEqual(v, '20')
+    self.assertEqual(v, '2592000')
     s, v = epidb.modify_user_admin(None, "old_request_age_in_sec", "-1", self.admin_key)
-    self.assertEqual(v, '20')
+    self.assertEqual(v, '2592000')
 
 
     # Do a simple request
