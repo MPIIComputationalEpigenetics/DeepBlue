@@ -117,6 +117,7 @@ int main(int argc, char *argv[])
   epidb::config::set_database_name(database_name);
   epidb::config::set_processing_max_memory(processing_max_memory);
   epidb::config::set_old_request_age_in_sec(old_request_age_in_sec);
+  epidb::config::set_default_old_request_age_in_sec(old_request_age_in_sec);
 
   std::string msg;
   if (!epidb::config::check_mongodb(msg)) {
