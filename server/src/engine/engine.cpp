@@ -119,6 +119,18 @@ namespace epidb {
     return true;
   }
 
+  bool Engine::queue_distinct(const std::string &query_id, const std::string &column_name, const std::string &user_key, std::string &id, std::string &msg)
+  {
+    utils::IdName user;
+    if (!dba::users::get_user(user_key, user, msg)) {
+      return false;
+    }
+    if (!queue(BSON("command" << "distinct" << "query_id" << query_id << "column_name" << column_name << "user_id" << user.id), 60 * 60, id, msg)) {
+      return false;
+    }
+    return true;
+  }
+
   bool Engine::queue_calculate_enrichment(const std::string &query_id, const std::string &gene_model, const std::string &user_key, std::string &id, std::string &msg)
   {
     utils::IdName user;

@@ -11,6 +11,7 @@ import clone
 import column_types
 import complex_queries
 import coverage
+import distinct
 import epigenetic_marks
 import experiments
 import experiment_sets

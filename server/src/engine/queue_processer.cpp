@@ -105,6 +105,9 @@ namespace epidb {
       if (command == "binning") {
         return process_binning(job["query_id"].str(), job["column_name"].str(), job["bars"].Int(), user_key, status, result);
       }
+      if (command == "binning") {
+        return process_distinct(job["query_id"].str(), job["column_name"].str(), user_key, status, result);
+      }
       if (command == "calculate_enrichment") {
         return process_calculate_enrichment(job["query_id"].str(), job["gene_model"].str(), user_key, status, result);
       }
@@ -159,6 +162,33 @@ namespace epidb {
 
       int size = binning.objsize();
       bob.append("binning", binning);
+      status->set_total_stored_data(size);
+      status->set_total_stored_data_compressed(size);
+      result = bob.obj();
+
+      if (is_canceled(status, msg)) {
+        return false;
+      }
+
+      return true;
+    }
+
+    bool QueueHandler::process_distinct(const std::string &query_id, const std::string& column_name,
+                                       const std::string &user_key,
+                                       processing::StatusPtr status, mongo::BSONObj& result)
+    {
+      std::string msg;
+      mongo::BSONObjBuilder bob;
+      mongo::BSONObj distinct;
+
+      if (!processing::distinct(query_id, column_name, user_key, status, distinct, msg)) {
+        bob.append("__error__", msg);
+        result = bob.obj();
+        return false;
+      }
+
+      int size = distinct.objsize();
+      bob.append("distinct", distinct);
       status->set_total_stored_data(size);
       status->set_total_stored_data_compressed(size);
       result = bob.obj();
