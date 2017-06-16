@@ -105,7 +105,7 @@ namespace epidb {
       if (command == "binning") {
         return process_binning(job["query_id"].str(), job["column_name"].str(), job["bars"].Int(), user_key, status, result);
       }
-      if (command == "binning") {
+      if (command == "distinct") {
         return process_distinct(job["query_id"].str(), job["column_name"].str(), user_key, status, result);
       }
       if (command == "calculate_enrichment") {
@@ -115,7 +115,7 @@ namespace epidb {
       else {
         mongo::BSONObjBuilder bob;
         bob.append("__error__", "Invalid command " + command);
-        result = BSON("__error__" << "Invalid command ");
+        result = BSON("__error__" << ("Invalid command " + command));
         return false;
       }
     }

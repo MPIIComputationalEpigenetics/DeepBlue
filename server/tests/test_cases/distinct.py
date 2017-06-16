@@ -26,6 +26,5 @@ class TestDistinct(helpers.TestCase):
     status, req = epidb.distinct_column_values(qid, "NAME", self.admin_key)
     self.assertSuccess(status, req)
 
-    binning = self.get_regions_request(req)
-
-    print binning
+    distinct = self.get_regions_request(req)
+    self.assertEqual(distinct, {'distinct': {'13_Heterochrom/lo': 75112, '2_Weak_Promoter': 35065, '7_Weak_Enhancer': 109468, '15_Repetitive/CNV': 6128, '12_Repressed': 25483, '4_Strong_Enhancer': 25486, '5_Strong_Enhancer': 38604, '11_Weak_Txn': 82312, '3_Poised_Promoter': 5263, '8_Insulator': 33265, '14_Repetitive/CNV': 8028, '1_Active_Promoter': 15278, '6_Weak_Enhancer': 69111, '10_Txn_Elongation': 26509, '9_Txn_Transition': 16227}})
