@@ -30,7 +30,25 @@
 #include "../datatypes/regions.hpp"
 #include "../extras/utils.hpp"
 
+#include "../errors.hpp"
+
 namespace epidb {
+
+  #define INIT_PROCESSING(_WHAT, _STATUS) {                  \
+    IS_PROCESSING_CANCELLED(_STATUS)                         \
+    status->start_operation(_WHAT);                          \
+  }                                                          \
+
+  #define IS_PROCESSING_CANCELLED(_STATUS) {                 \
+    bool is_canceled = false;                                \
+    if (!_STATUS->is_canceled(is_canceled, msg)) {           \
+      return false;                                          \
+    }                                                        \
+    if (is_canceled) {                                       \
+      msg = Error::m(ERR_REQUEST_CANCELED);                  \
+      return false;                                          \
+    }                                                        \
+  }                                                          \
 
   class StringBuilder;
 
@@ -39,6 +57,7 @@ namespace epidb {
     extern std::string DUMMY_REQUEST;
 
     enum OP {
+      PROCESS_QUERY = 1,
       GET_EXPERIMENT_BY_QUERY = 10,
       COUNT_REGIONS = 11,
       RETRIEVE_EXPERIMENT_SELECT_QUERY = 30,
@@ -54,6 +73,14 @@ namespace epidb {
       RETRIEVE_OVERLAP_QUERY = 40,
       RETRIEVE_FIND_MOTIF_QUERY = 41,
       PROCESS_AGGREGATE = 50,
+      PROCESS_DISTINCT = 60,
+      PROCESS_BINNING = 61,
+      PROCESS_CALCULATE_ENRICHMENT = 62,
+      PROCESS_COUNT = 63,
+      PROCESS_COVERAGE = 64,
+      PROCESS_GET_EXPERIMENTS_BY_QUERY = 65,
+      PROCESS_GET_REGIONS = 66,
+      PROCESS_SCORE_MATRIX = 67,
       FORMAT_OUTPUT = 80,
       BUILDING_OUTPUT = 82,
       COMPRESSING_OUTPUT = 84

@@ -25,10 +25,13 @@
 
 #include "../dba/queries.hpp"
 
+#include "processing.hpp"
+
 namespace epidb {
   namespace processing {
-    bool binning(const std::string& query_id, const std::string& column_name, const int bars, const std::string& user_key, processing::StatusPtr status, mongo::BSONObj& result, std::string& msg) {
-
+    bool binning(const std::string& query_id, const std::string& column_name, const int bars, const std::string& user_key, processing::StatusPtr status, mongo::BSONObj& result, std::string& msg)
+    {
+      INIT_PROCESSING(PROCESS_BINNING, status)
 
       if (bars <= 0) {
         msg = "There must be at least one bar in the binning";
@@ -55,8 +58,8 @@ namespace epidb {
       for (const auto& chromosomeRegions: chromosomeRegionsList) {
         Regions to_move = std::move(chromosomeRegions.second);
         all_regions.insert(all_regions.end(),
-          std::make_move_iterator(to_move.begin()), std::make_move_iterator(to_move.end())
-        );
+                           std::make_move_iterator(to_move.begin()), std::make_move_iterator(to_move.end())
+                          );
       }
 
       if (all_regions.empty() ) {
@@ -64,20 +67,21 @@ namespace epidb {
       }
 
       std::sort(all_regions.begin(), all_regions.end(),
-        [column_name](const RegionPtr & a, const RegionPtr & b) -> bool
-          {
-            std::string msg;
-            int pos_a;
-            int pos_b;
-            if (!cache::get_column_position_from_dataset(a->dataset_id(), column_name, pos_a, msg)) {
-              return false;
-            }
-            if (!cache::get_column_position_from_dataset(b->dataset_id(), column_name, pos_b, msg)) {
-              return false;
-            }
-            return a->value(pos_a) <  b->value(pos_b);
-          }
-      );
+      [column_name](const RegionPtr & a, const RegionPtr & b) -> bool {
+        std::string msg;
+        int pos_a;
+        int pos_b;
+        if (!cache::get_column_position_from_dataset(a->dataset_id(), column_name, pos_a, msg))
+        {
+          return false;
+        }
+        if (!cache::get_column_position_from_dataset(b->dataset_id(), column_name, pos_b, msg))
+        {
+          return false;
+        }
+        return a->value(pos_a) <  b->value(pos_b);
+      }
+               );
 
       int min_column_pos;
       cache::get_column_position_from_dataset(all_regions.front()->dataset_id(), column_name, min_column_pos, msg);

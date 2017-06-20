@@ -31,14 +31,13 @@
 #include "../algorithms/filter.hpp"
 
 #include "../cache/column_dataset_cache.hpp"
+#include "../cache/queries_cache.hpp"
 
 #include "../connection/connection.hpp"
 
 #include "../datatypes/column_types_def.hpp"
 #include "../datatypes/expressions_manager.hpp"
 #include "../datatypes/regions.hpp"
-
-#include "../cache/queries_cache.hpp"
 
 #include "../dba/experiments.hpp"
 
@@ -246,6 +245,11 @@ namespace epidb {
       bool retrieve_query(const std::string &user_key, const std::string &query_id,
                           processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg)
       {
+        processing::RunningOp runningOp = status->start_operation(processing::PROCESS_QUERY);
+        if (is_canceled(status, msg)) {
+          return false;
+        }
+
         mongo::BSONObj query;
         if (!helpers::get_one(Collections::QUERIES(), BSON("_id" << query_id), query)) {
           msg = Error::m(ERR_INVALID_QUERY_ID, query_id);

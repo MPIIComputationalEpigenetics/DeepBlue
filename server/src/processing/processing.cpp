@@ -45,6 +45,7 @@ namespace epidb {
     {
       std::map<OP, std::string> m;
 
+      m[PROCESS_QUERY] = "Process query";
       m[GET_EXPERIMENT_BY_QUERY] =  "Get experiments by query";
       m[COUNT_REGIONS] = "Count regions";
       m[RETRIEVE_EXPERIMENT_SELECT_QUERY] = "Retrieve experiments data";
@@ -57,6 +58,14 @@ namespace epidb {
       m[RETRIEVE_TILING_QUERY] = "Tiling regions";
       m[RETRIEVE_GENES_DATA] = "Getting genes data";
       m[PROCESS_AGGREGATE] = "Aggregate";
+      m[PROCESS_DISTINCT] = "Process distinct";
+      m[PROCESS_BINNING] = "Process binning";
+      m[PROCESS_CALCULATE_ENRICHMENT] = "Process calculate enrichment";
+      m[PROCESS_COUNT] = "Process count";
+      m[PROCESS_COVERAGE] = "Process coverage";
+      m[PROCESS_GET_EXPERIMENTS_BY_QUERY] = "Process get experiments by query";
+      m[PROCESS_GET_REGIONS] = "Process get regions";
+      m[PROCESS_SCORE_MATRIX] = "Process score matrix";
       m[RETRIEVE_QUERY_REGION_SET] = "Retrieve query regions set";
       m[RETRIEVE_FLANK_QUERY] = "Flanking";
       m[RETRIEVE_EXPRESSIONS_DATA] = "Getting expressions data";
@@ -214,7 +223,7 @@ namespace epidb {
       if (_request_id == DUMMY_REQUEST) {
         return true;
       }
-      return (output_size <= _maximum_memory);
+      return (output_size <= static_cast<size_t>(_maximum_memory));
     }
 
     long long Status::total_regions()

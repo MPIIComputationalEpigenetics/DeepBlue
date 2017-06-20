@@ -60,6 +60,7 @@ namespace epidb {
                               const std::string& user_key,
                               processing::StatusPtr status, mongo::BSONObj& result, std::string& msg)
     {
+      INIT_PROCESSING(PROCESSING_CALCULATE_ENRICHMENT, status)
 
       const std::string norm_gene_model = utils::normalize_name(gene_model);
 
