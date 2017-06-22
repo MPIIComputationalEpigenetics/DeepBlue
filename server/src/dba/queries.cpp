@@ -489,8 +489,14 @@ namespace epidb {
 
         mongo::BSONObjBuilder regions_query_builder;
         regions_query_builder.append(KeyMapper::DATASET(), dataset_id);
-        regions_query_builder.append(KeyMapper::START(), BSON("$lte" << end));
-        regions_query_builder.append(KeyMapper::END(), BSON("$gte" << start));
+
+        if (end > -1) {
+          regions_query_builder.append(KeyMapper::START(), BSON("$lte" << end));
+        }
+
+        if (start > -1) {
+          regions_query_builder.append(KeyMapper::END(), BSON("$gte" << start));
+        }
 
         regions_query = regions_query_builder.obj();
 
