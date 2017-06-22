@@ -384,16 +384,12 @@ namespace epidb {
         mongo::BSONObj query = result[0];
         mongo::BSONObj args = query["args"].Obj();
 
-        count = 0;
         ChromosomeRegionsList regions;
         if (!retrieve_query(user_key, query_id, status, regions, msg)) {
           return false;
         }
 
-        count = 0;
-        for (const auto& chromosome : regions) {
-          count += chromosome.second.size();
-        }
+        count = count_regions(regions);
 
         return true;
       }

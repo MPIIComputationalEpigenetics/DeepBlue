@@ -427,4 +427,16 @@ namespace epidb {
   {
     return std::unique_ptr<AggregateRegion>(new AggregateRegion(s, e, _id, min, max, sum, median, mean, var, sd, count));
   }
+
+  // Auxiliar functions
+
+  size_t count_regions(const ChromosomeRegionsList& regions)
+  {
+    size_t count = 0;
+    for (const auto& chromosome : regions) {
+      count += chromosome.second.size();
+    }
+    return count;
+  }
+
 } // namespace epidb
