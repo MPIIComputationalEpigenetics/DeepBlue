@@ -36,7 +36,9 @@ using namespace std;
 
 namespace epidb {
   namespace processing {
-    bool lola(const std::string& query_id, const std::string& universe_query_id, const mongo::BSONObj& datasets,
+    bool lola(const std::string& query_id, const std::string& universe_query_id,
+              const mongo::BSONObj& databases,
+              const std::string& genome,
               const std::string& user_key,
               processing::StatusPtr status, mongo::BSONObj& result, std::string& msg)
     {
@@ -50,18 +52,32 @@ namespace epidb {
       if (!dba::query::retrieve_query(user_key, query_id, status, queryChromosomeRegionsList, msg)) {
         return false;
       }
-
       size_t total_query_regions = count_regions(queryChromosomeRegionsList);
-
       std::cerr << total_query_regions << std::endl;
 
+      /*
       ChromosomeRegionsList universeChromosomeRegionsList;
       if (!dba::query::retrieve_query(user_key, universe_query_id, status, universeChromosomeRegionsList, msg)) {
         return false;
       }
-
       size_t total_universe_regions = count_regions(universeChromosomeRegionsList);
       std::cerr << total_universe_regions << std::endl;
+      */
+
+      auto databases_it = databases.begin();
+      while ( databases_it.more() ) {
+        const mongo::BSONElement &database = databases_it.next();
+        const std::string& database_name = std::string(database.fieldName());
+
+        const auto& datasets = database.Obj();
+
+        auto datasets_it = datasets.begin();
+        while (datasets_it.more()) {
+          const auto& dataset = datasets_it.next();
+          std::cerr << dataset.str() << std::endl;
+          ///
+        }
+      }
 
       return true;
     }

@@ -112,7 +112,7 @@ namespace epidb {
         return process_calculate_enrichment(job["query_id"].str(), job["gene_model"].str(), user_key, status, result);
       }
       if (command == "lola") {
-        return process_lola(job["query_id"].str(), job["universe_query_id"].str(), job["databases"].Obj(), user_key, status, result);
+        return process_lola(job["query_id"].str(), job["universe_query_id"].str(), job["databases"].Obj(), job["genome"].str(), user_key, status, result);
       }
 
       else {
@@ -230,14 +230,16 @@ namespace epidb {
       return true;
     }
 
-    bool QueueHandler::process_lola(const std::string &query_id, const std::string &universe_query_id, const mongo::BSONObj& datasets,
+    bool QueueHandler::process_lola(const std::string &query_id, const std::string &universe_query_id,
+                                    const mongo::BSONObj& datasets,
+                                    const std::string& genome,
                                     const std::string &user_key, processing::StatusPtr status, mongo::BSONObj& result)
     {
       std::string msg;
       mongo::BSONObjBuilder bob;
       mongo::BSONObj enrichment;
 
-      if (!processing::lola(query_id, universe_query_id, datasets, user_key, status, enrichment, msg)) {
+      if (!processing::lola(query_id, universe_query_id, datasets, genome, user_key, status, enrichment, msg)) {
         bob.append("__error__", msg);
         result = bob.obj();
         return false;

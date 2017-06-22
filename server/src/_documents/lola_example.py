@@ -43,6 +43,7 @@ ss, universe_query_id = server.select_regions(None, "grch38", None, None, "chip-
 print query_id
 print ss, universe_query_id
 
-s, request = server.lola(query_id, universe_query_id, databases, uk)
+s, request = server.lola(query_id, universe_query_id, databases, "grch38", uk)
 
 print request
+

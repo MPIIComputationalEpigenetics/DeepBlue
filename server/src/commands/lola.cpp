@@ -49,23 +49,20 @@ namespace epidb {
 
       static Parameters parameters_()
       {
-        Parameter p[] = {
+        return {
           parameters::QueryId,
           Parameter("universe_query_id", serialize::STRING, "map with experiments names and columns to be processed. Example : {'wgEncodeBroadHistoneDnd41H3k27acSig.wig':'VALUE', 'wgEncodeBroadHistoneCd20ro01794H3k27acSig.wig':'VALUE'}"),
           Parameter("databases", serialize::MAP, "aggregation function name: min, max, sum, mean, var, sd, median, count, boolean"),
+          parameters::Genome,
           parameters::UserKey
         };
-        Parameters params(&p[0], &p[0] + 4);
-        return params;
       }
 
       static Parameters results_()
       {
-        Parameter p[] = {
+        return {
           Parameter("lola", serialize::STRING, "the score matrix containing the summarized data")
         };
-        Parameters results(&p[0], &p[0] + 1);
-        return results;
       }
 
     public:
@@ -76,7 +73,8 @@ namespace epidb {
       {
         const std::string query_id = parameters[0]->as_string();
         const std::string universe_query_id = parameters[1]->as_string();
-        const std::string user_key = parameters[3]->as_string();
+        const std::string genome = parameters[3]->as_string();
+        const std::string user_key = parameters[4]->as_string();
 
         std::unordered_map<std::string, std::vector<std::string>> database_experiments;
 
@@ -95,6 +93,12 @@ namespace epidb {
 
         if (!dba::exists::query(universe_query_id, user_key, msg)) {
           result.add_error(Error::m(ERR_INVALID_QUERY_ID, universe_query_id));
+          return false;
+        }
+
+        const std::string norm_genome = utils::normalize_name(genome);
+        if (!dba::exists::genome(norm_genome)) {
+          result.add_error(Error::m(ERR_INVALID_GENOME_NAME, genome));
           return false;
         }
 
@@ -117,7 +121,7 @@ namespace epidb {
         }
 
         std::string request_id;
-        if (!epidb::Engine::instance().queue_lola(query_id, universe_query_id, database_experiments, user_key, request_id, msg)) {
+        if (!epidb::Engine::instance().queue_lola(query_id, universe_query_id, database_experiments, genome, user_key, request_id, msg)) {
           result.add_error(msg);
           return false;
         }

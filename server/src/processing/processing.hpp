@@ -168,7 +168,7 @@ namespace epidb {
 
     bool score_matrix(const std::vector<std::pair<std::string, std::string>> &experiments_formats, const std::string &aggregation_function, const std::string &regions_query_id, const std::string &user_key, processing::StatusPtr status, std::string &matrix, std::string &msg);
 
-    bool lola(const std::string& query_id, const std::string& universe_query_id, const mongo::BSONObj& datasets, const std::string& user_key, processing::StatusPtr status, mongo::BSONObj& result, std::string& msg);
+    bool lola(const std::string& query_id, const std::string& universe_query_id, const mongo::BSONObj& datasets, const std::string& genome, const std::string& user_key, processing::StatusPtr status, mongo::BSONObj& result, std::string& msg);
 
     bool get_experiments_by_query(const std::string &query_id, const std::string &user_key, processing::StatusPtr status, std::vector<utils::IdName>& experiments, std::string &msg);
 

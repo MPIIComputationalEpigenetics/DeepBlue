@@ -191,6 +191,7 @@ namespace epidb {
 
   bool Engine::queue_lola(const std::string& query_id, const std::string& universe_query_id,
                                 const std::unordered_map<std::string, std::vector<std::string>> &databases,
+                                const std::string& genome,
                                 const std::string &user_key,
                                 std::string &id, std::string &msg)
   {
@@ -216,6 +217,7 @@ namespace epidb {
           "query_id" << query_id <<
           "universe_query_id" << universe_query_id <<
           "databases" << databases_builder.obj() <<
+          "genome" << genome <<
           "user_id" << user.id),
         60 * 60, id, msg)) {
       return false;

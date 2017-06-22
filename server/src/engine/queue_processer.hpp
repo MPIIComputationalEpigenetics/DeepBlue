@@ -50,7 +50,7 @@ namespace epidb {
       bool process_get_regions(const std::string &query_id, const std::string &format, const std::string &user_key, processing::StatusPtr status, mongo::BSONObj& result);
       bool process_score_matrix(const mongo::BSONObj &experiments_formats, const std::string &aggregation_function, const std::string &regions_query_id, const std::string &user_key, processing::StatusPtr status, mongo::BSONObj& result);
       bool process_get_experiments_by_query(const std::string &query_id, const std::string &user_key, processing::StatusPtr status, mongo::BSONObj& result);
-      bool process_lola(const std::string &query_id, const std::string &universe_query_id, const mongo::BSONObj& datasets, const std::string &user_key, processing::StatusPtr status, mongo::BSONObj& result);
+      bool process_lola(const std::string &query_id, const std::string &universe_query_id, const mongo::BSONObj& datasets, const std::string& genome, const std::string &user_key, processing::StatusPtr status, mongo::BSONObj& result);
       bool is_canceled(processing::StatusPtr status, std::string msg);
     };
   }
