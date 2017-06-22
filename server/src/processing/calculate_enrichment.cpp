@@ -21,8 +21,6 @@
 #include <iterator>
 #include <string>
 
-#include <boost/math/distributions/hypergeometric.hpp>
-
 #include "../algorithms/algorithms.hpp"
 
 #include "../dba/genes.hpp"
@@ -31,28 +29,9 @@
 
 #include "../extras/utils.hpp"
 
+#include "../extras/math.hpp"
 
-#include <algorithm> // for min and max
-
-using namespace boost::math;
-using namespace std;
-
-double fisher_test(unsigned a, unsigned b, unsigned c, unsigned d)
-{
-  unsigned N = a + b + c + d;
-  unsigned r = a + c;
-  unsigned n = c + d;
-  unsigned max_for_k = min(r, n);
-  unsigned min_for_k = (unsigned)max(0, int(r + n - N));
-  hypergeometric_distribution<> hgd(r, n, N);
-  double cutoff = pdf(hgd, c);
-  double tmp_p = 0.0;
-  for(unsigned k = min_for_k; k < max_for_k + 1; k++) {
-    double p = pdf(hgd, k);
-    if(p <= cutoff) tmp_p += p;
-  }
-  return tmp_p;
-}
+#include "processing.hpp"
 
 namespace epidb {
   namespace processing {
@@ -60,7 +39,7 @@ namespace epidb {
                               const std::string& user_key,
                               processing::StatusPtr status, mongo::BSONObj& result, std::string& msg)
     {
-      INIT_PROCESSING(PROCESSING_CALCULATE_ENRICHMENT, status)
+      INIT_PROCESSING(PROCESS_CALCULATE_ENRICHMENT, status)
 
       const std::string norm_gene_model = utils::normalize_name(gene_model);
 
@@ -133,7 +112,7 @@ namespace epidb {
         bob.append("go_overlap", (long long) kv.second);
         bob.append("go_total", (long long) total_counts[kv.first]);
         bob.append("ratio", (float(kv.second) / float(total_counts[kv.first])));
-        bob.append("p_value", (fisher_test(aa, bb, cc, dd)));
+        bob.append("p_value", (math::fisher_test(aa, bb, cc, dd)));
 
         ab.append(bob.obj());
       }
