@@ -94,7 +94,12 @@ namespace epidb {
           experiments_ptr->children(experiments_list);
           std::vector<std::string> experiments;
           for (const auto& exp_: experiments_list) {
-            experiments.push_back(exp_->as_string());
+            const std::string& experiment_name = exp_->as_string();
+            if (!dba::exists::experiment(utils::normalize_name(experiment_name))) {
+              result.add_error(Error::m(ERR_INVALID_EXPERIMENT, experiment_name));
+              return false;
+            }
+            experiments.push_back(experiment_name);
           }
           database_experiments[name] = experiments;
         }
