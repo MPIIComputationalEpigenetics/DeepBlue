@@ -111,6 +111,9 @@ namespace epidb {
       if (command == "calculate_enrichment") {
         return process_calculate_enrichment(job["query_id"].str(), job["gene_model"].str(), user_key, status, result);
       }
+      if (command == "lola") {
+        return process_lola(job["query_id"].str(), job["universe_query_id"].str(), job["databases"].Obj(), user_key, status, result);
+      }
 
       else {
         mongo::BSONObjBuilder bob;
@@ -174,8 +177,8 @@ namespace epidb {
     }
 
     bool QueueHandler::process_distinct(const std::string &query_id, const std::string& column_name,
-                                       const std::string &user_key,
-                                       processing::StatusPtr status, mongo::BSONObj& result)
+                                        const std::string &user_key,
+                                        processing::StatusPtr status, mongo::BSONObj& result)
     {
       std::string msg;
       mongo::BSONObjBuilder bob;
@@ -226,6 +229,33 @@ namespace epidb {
 
       return true;
     }
+
+    bool QueueHandler::process_lola(const std::string &query_id, const std::string &universe_query_id, const mongo::BSONObj& datasets,
+                                    const std::string &user_key, processing::StatusPtr status, mongo::BSONObj& result)
+    {
+      std::string msg;
+      mongo::BSONObjBuilder bob;
+      mongo::BSONObj enrichment;
+
+      if (!processing::lola(query_id, universe_query_id, datasets, user_key, status, enrichment, msg)) {
+        bob.append("__error__", msg);
+        result = bob.obj();
+        return false;
+      }
+
+      int size = enrichment.objsize();
+      bob.append("enrichment", enrichment);
+      status->set_total_stored_data(size);
+      status->set_total_stored_data_compressed(size);
+      result = bob.obj();
+
+      if (is_canceled(status, msg)) {
+        return false;
+      }
+
+      return true;
+    }
+
 
     bool QueueHandler::process_coverage(const std::string &query_id, const std::string &genome,
                                         const std::string &user_key,

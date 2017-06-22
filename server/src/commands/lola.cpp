@@ -1,7 +1,7 @@
 //
-//  score_matrix.cpp
+//  lola.cpp
 //  DeepBlue Epigenomic Data Server
-//  File created by Felipe Albrecht on 08.11.14.
+//  File created by Felipe Albrecht on 22.06.17.
 //  Copyright (c) 2016 Max Planck Institute for Informatics. All rights reserved.
 
 //  This program is free software: you can redistribute it and/or modify

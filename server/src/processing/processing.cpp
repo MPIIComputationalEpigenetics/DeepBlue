@@ -66,6 +66,7 @@ namespace epidb {
       m[PROCESS_GET_EXPERIMENTS_BY_QUERY] = "Process get experiments by query";
       m[PROCESS_GET_REGIONS] = "Process get regions";
       m[PROCESS_SCORE_MATRIX] = "Process score matrix";
+      m[PROCESS_LOLA] = "Process LOLA";
       m[RETRIEVE_QUERY_REGION_SET] = "Retrieve query regions set";
       m[RETRIEVE_FLANK_QUERY] = "Flanking";
       m[RETRIEVE_EXPRESSIONS_DATA] = "Getting expressions data";

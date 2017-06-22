@@ -81,6 +81,7 @@ namespace epidb {
       PROCESS_GET_EXPERIMENTS_BY_QUERY = 65,
       PROCESS_GET_REGIONS = 66,
       PROCESS_SCORE_MATRIX = 67,
+      PROCESS_LOLA = 68,
       FORMAT_OUTPUT = 80,
       BUILDING_OUTPUT = 82,
       COMPRESSING_OUTPUT = 84
@@ -166,6 +167,8 @@ namespace epidb {
     bool get_regions(const std::string &query_id, const std::string &format, const std::string &user_key, processing::StatusPtr status, StringBuilder &sb, std::string &msg);
 
     bool score_matrix(const std::vector<std::pair<std::string, std::string>> &experiments_formats, const std::string &aggregation_function, const std::string &regions_query_id, const std::string &user_key, processing::StatusPtr status, std::string &matrix, std::string &msg);
+
+    bool lola(const std::string& query_id, const std::string& universe_query_id, const mongo::BSONObj& datasets, const std::string& user_key, processing::StatusPtr status, mongo::BSONObj& result, std::string& msg);
 
     bool get_experiments_by_query(const std::string &query_id, const std::string &user_key, processing::StatusPtr status, std::vector<utils::IdName>& experiments, std::string &msg);
 
