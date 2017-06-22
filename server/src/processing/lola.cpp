@@ -42,6 +42,27 @@ namespace epidb {
     {
       INIT_PROCESSING(PROCESS_LOLA, status)
 
+      std::cerr << query_id << std::endl;
+
+      std::cerr << universe_query_id << std::endl;
+
+      ChromosomeRegionsList queryChromosomeRegionsList;
+      if (!dba::query::retrieve_query(user_key, query_id, status, queryChromosomeRegionsList, msg)) {
+        return false;
+      }
+
+      size_t total_query_regions = count_regions(queryChromosomeRegionsList);
+
+      std::cerr << total_query_regions << std::endl;
+
+      ChromosomeRegionsList universeChromosomeRegionsList;
+      if (!dba::query::retrieve_query(user_key, universe_query_id, status, universeChromosomeRegionsList, msg)) {
+        return false;
+      }
+
+      size_t total_universe_regions = count_regions(universeChromosomeRegionsList);
+      std::cerr << total_universe_regions << std::endl;
+
       return true;
     }
   }

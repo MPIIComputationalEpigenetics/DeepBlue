@@ -86,6 +86,18 @@ namespace epidb {
           return false;
         }
 
+        std::string msg;
+
+        if (!dba::exists::query(query_id, user_key, msg)) {
+          result.add_error(Error::m(ERR_INVALID_QUERY_ID, query_id));
+          return false;
+        }
+
+        if (!dba::exists::query(universe_query_id, user_key, msg)) {
+          result.add_error(Error::m(ERR_INVALID_QUERY_ID, universe_query_id));
+          return false;
+        }
+
         for (const auto& database: databases_ ) {
           const std::string& name = database.first;
           serialize::ParameterPtr experiments_ptr = database.second;
@@ -104,7 +116,6 @@ namespace epidb {
           database_experiments[name] = experiments;
         }
 
-        std::string msg;
         std::string request_id;
         if (!epidb::Engine::instance().queue_lola(query_id, universe_query_id, database_experiments, user_key, request_id, msg)) {
           result.add_error(msg);
