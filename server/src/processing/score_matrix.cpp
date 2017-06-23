@@ -36,6 +36,7 @@
 #include "../dba/experiments.hpp"
 #include "../dba/helpers.hpp"
 #include "../dba/queries.hpp"
+#include "../dba/retrieve.hpp"
 
 #include "../engine/commands.hpp"
 
