@@ -32,31 +32,16 @@
 namespace epidb {
   namespace algorithms {
 
-    ChromosomeRegions overlap_regions(Regions &&regions_data, Regions &&regions_overlap, const std::string& chromosome,
-                                      const bool overlap, const double amount, const std::string amount_type);
-    bool overlap(ChromosomeRegionsList &regions_data, ChromosomeRegionsList &regions_overlap,
+    bool overlap_count(const ChromosomeRegionsList &regions_data, const ChromosomeRegionsList &regions_overlap,
                  const bool overlap, const double amount, const std::string amount_type,
-                 ChromosomeRegionsList &overlaps);
+                 size_t& count);
 
-    bool get_chromosome_regions(ChromosomeRegionsList &qr, const std::string &chr, Regions &chr_regions)
+    size_t overlap_regions_count(const Regions &regions_data, const Regions &regions_overlap, const std::string& chromosome,
+                           const bool overlap, const double amount, const std::string amount_type)
     {
-      for (auto cit = qr.begin(); cit != qr.end(); ++cit) {
-        if (cit->first == chr) {
-          chr_regions = std::move(cit->second);
-          return true;
-        }
-      }
-      return false;
-    }
-
-    ChromosomeRegions overlap_regions(Regions &&regions_data, Regions &&regions_overlap, const std::string& chromosome,
-                                      const bool overlap, const double amount, const std::string amount_type)
-    {
-      Regions regions = Regions();
-
       bool dynamic_overlap_length = amount_type == "bp" ? false : true;
 
-
+      size_t count = 0;
       size_t data_size = regions_data.size();
       size_t data_pos = 0;
 
@@ -85,17 +70,17 @@ namespace epidb {
           if (!overlap) {
             Length distance = calculate_distance(regions_data[data_pos], *it_ranges);
             if ((distance >= min_range_length) && (distance >= min_data_length)) {
-              regions.emplace_back(std::move(regions_data[data_pos]));
+              count++;
             }
           }
           data_pos++;
         }
 
         while ((data_pos < data_size) &&
-              ((*it_ranges)->end() >= regions_data[data_pos]->start()) )  {
+               ((*it_ranges)->end() >= regions_data[data_pos]->start()) )  {
 
           if (((*it_ranges)->start() < regions_data[data_pos]->end()) &&
-             ((*it_ranges)->end() > regions_data[data_pos]->start())) {
+              ((*it_ranges)->end() > regions_data[data_pos]->start())) {
 
             if (overlap) {
               if (dynamic_overlap_length) {
@@ -110,7 +95,7 @@ namespace epidb {
               if (((overlap_one >= min_range_length) || (overlap_two >= min_range_length)) &&
                   ((overlap_one >= min_data_length)  || (overlap_two >= min_data_length))) {
 
-                regions.emplace_back(std::move(regions_data[data_pos]));
+                count++;
               }
             }
           } else {
@@ -122,7 +107,7 @@ namespace epidb {
               if ((distance_one >= min_range_length) && (distance_two >= min_range_length) &&
                   (distance_one >= min_data_length)  && (distance_two >= min_data_length)) {
 
-                regions.emplace_back(std::move(regions_data[data_pos]));
+                count++;
               }
             }
           }
@@ -143,37 +128,51 @@ namespace epidb {
 
           Length distance = calculate_distance(regions_overlap.back(), regions_data[data_pos]);
           if (distance >= min_range_length) {
-            regions.emplace_back(std::move(regions_data[data_pos]));
+            count++;
           }
           data_pos++;
         }
       }
 
-      return ChromosomeRegions(chromosome, std::move(regions));
+      return count;
     }
 
-    bool intersect(ChromosomeRegionsList &regions_data, ChromosomeRegionsList &regions_overlap, ChromosomeRegionsList &intersections)
+    bool intersect_count(const ChromosomeRegionsList &regions_data, const ChromosomeRegionsList &regions_overlap,
+                         size_t& count)
     {
-      return overlap(regions_data, regions_overlap, true, 0.0, "bp", intersections);
+      return overlap_count(regions_data, regions_overlap, true, 0.0, "bp", count);
     }
 
-    bool overlap(ChromosomeRegionsList &regions_data, ChromosomeRegionsList &regions_overlap,
-                 const bool overlap, const double amount, const std::string amount_type,
-                 ChromosomeRegionsList &overlaps)
+    bool overlap_count(const ChromosomeRegionsList &regions_data, const ChromosomeRegionsList &regions_overlap,
+                       const bool overlap, const double amount, const std::string amount_type,
+                       size_t& count)
     {
+      count = 0;
+
       // long times = clock();
       std::set<std::string> chromosomes;
       merge_chromosomes(regions_data, regions_overlap, chromosomes);
 
-      std::vector<std::future<ChromosomeRegions > > threads;
-      std::vector<std::shared_ptr<ChromosomeRegionsList> > result_parts;
+      std::vector<std::future<size_t > > threads;
 
       for (const auto& chr : chromosomes) {
-        Regions chr_regions_data;
-        Regions chr_regions_overlap;
+        bool has_data = false;
+        auto cit_data = regions_data.begin();
+        while (cit_data != regions_data.end()) {
+          if (cit_data->first == chr) {
+            has_data = true;
+            cit_data++;
+          }
+        }
 
-        bool has_data = get_chromosome_regions(regions_data, chr, chr_regions_data);
-        bool has_overlap = get_chromosome_regions(regions_overlap, chr, chr_regions_overlap);
+        bool has_overlap = false;
+        auto cit_overlap = regions_overlap.begin();
+        while (cit_overlap != regions_overlap.end()) {
+          if (cit_overlap->first == chr) {
+            has_overlap = true;
+            cit_overlap++;
+          }
+        }
 
         // If is there no data, nothing to be made.
         if (!has_data) {
@@ -187,25 +186,25 @@ namespace epidb {
 
         // If I do not want overlaps, but nothing to overlap to... Add them all!
         if (!overlap && !has_overlap) {
-            overlaps.emplace_back(ChromosomeRegions(chr, std::move(chr_regions_data)));
-            continue;
+          count += cit_data->second.size();
+          continue;
         }
 
-        auto t = std::async(std::launch::async, &overlap_regions,
-                            std::move(chr_regions_data), std::move(chr_regions_overlap), std::ref(chr),
+        auto t = std::async(std::launch::async, &overlap_regions_count,
+                            cit_data->second, cit_overlap->second, std::ref(chr),
                             std::ref(overlap), std::ref(amount), std::ref(amount_type));
 
         threads.emplace_back(std::move(t));
       }
 
+      size_t total = 0;
       for (size_t i = 0; i < threads.size(); ++i) {
         threads[i].wait();
         auto result = threads[i].get();
-        if (!result.second.empty()) {
-          overlaps.emplace_back(std::move(result));
-        }
+        total += result;
       }
 
+      count = total;
       // long diffticks = clock() - times;
       // "OVERLAP: " << ((diffticks) / (CLOCKS_PER_SEC / 1000)) << std::endl;
       return true;

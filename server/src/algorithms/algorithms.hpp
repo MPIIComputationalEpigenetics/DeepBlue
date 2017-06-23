@@ -32,6 +32,13 @@
 namespace epidb {
   namespace algorithms {
 
+    bool merge_chromosomes(const ChromosomeRegionsList &regions_a, const ChromosomeRegionsList &regions_b,
+                           std::set<std::string> &chromosomes);
+
+    Length calculate_distance(const RegionPtr& r1, const RegionPtr& r2);
+
+    Length calculate_overlap(const RegionPtr& r1, const RegionPtr& r2);
+
     bool aggregate(ChromosomeRegionsList &data, ChromosomeRegionsList &ranges, const std::string &field,
                    processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg);
 
@@ -52,6 +59,14 @@ namespace epidb {
     bool overlap(ChromosomeRegionsList &regions_data, ChromosomeRegionsList &regions_overlap,
                  const bool overlap, const double amount, const std::string amount_type,
                  ChromosomeRegionsList &intersections);
+
+
+    bool intersect_count(const ChromosomeRegionsList &regions_data, const ChromosomeRegionsList &regions_overlap,
+                         size_t& count);
+
+    bool overlap_count(const ChromosomeRegionsList &regions_data, const ChromosomeRegionsList &regions_overlap,
+                       const bool overlap, const double amount, const std::string amount_type,
+                       size_t& count);
 
     ChromosomeRegionsList merge_chromosome_regions(ChromosomeRegionsList& chrregions_a, ChromosomeRegionsList& chrregions_b);
   } // namespace algorithms
