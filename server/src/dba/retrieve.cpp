@@ -84,7 +84,7 @@ namespace epidb {
           _query_end(query_end)
         { }
 
-        void read_region(const mongo::BSONObj &region_bson)
+        void read_region(const mongo::BSONObj &region_bson, bool reduced_mode)
         {
           if (region_bson.hasField(KeyMapper::WIG_TRACK_TYPE())) {
             DatasetId dataset_id = region_bson[KeyMapper::DATASET()].Int();
@@ -279,7 +279,8 @@ namespace epidb {
       }
 
       bool get_regions_from_collection(const std::string &collection, const mongo::BSONObj &regions_query, const bool full_overlap,
-                                       processing::StatusPtr status, Regions &regions, std::string &msg)
+                                       processing::StatusPtr status, Regions &regions, std::string &msg,
+                                       bool reduced_mode)
       {
         Position start;
         Position end;
@@ -301,7 +302,7 @@ namespace epidb {
         while ( cursor->more() ) {
           while (cursor->moreInCurrentBatch()) {
             mongo::BSONObj o = cursor->nextSafe();
-            rp.read_region(o);
+            rp.read_region(o, reduced_mode);
             status->sum_regions(rp._it_count);
 
             // Check if processing was canceled
@@ -338,7 +339,7 @@ namespace epidb {
       }
 
       std::tuple<bool, std::string> get_regions_job(const std::string &genome, const std::shared_ptr<std::vector<std::string> > chromosomes,
-          const mongo::BSONObj &regions_query, const bool full_overlap,
+          const mongo::BSONObj &regions_query, const bool full_overlap, const bool reduced_mode,
           processing::StatusPtr status, std::shared_ptr<ChromosomeRegionsList> result)
       {
 
@@ -346,7 +347,7 @@ namespace epidb {
           std::string collection = helpers::region_collection_name(genome, *chrom_it);
           Regions regions = Regions();
           std::string msg;
-          if (!get_regions_from_collection(collection, regions_query, full_overlap, status, regions, msg)) {
+          if (!get_regions_from_collection(collection, regions_query, full_overlap, status, regions, msg, reduced_mode)) {
             return std::make_tuple(false, msg);
           }
 
@@ -376,7 +377,7 @@ namespace epidb {
         c.done();
 
         RegionProcess rp(regions, start, end, true);
-        rp.read_region(o);
+        rp.read_region(o, false);
 
         return true;
       }
@@ -384,11 +385,12 @@ namespace epidb {
       bool get_regions(const std::string &genome, const std::string &chromosome,
                        const mongo::BSONObj &regions_query, const bool full_overlap,
                        processing::StatusPtr status,
-                       Regions &regions, std::string &msg)
+                       Regions &regions, std::string &msg,
+                       bool reduced_mode)
       {
         std::string collection = helpers::region_collection_name(genome, chromosome);
         regions = Regions();
-        if (!get_regions_from_collection(collection, regions_query, full_overlap, status, regions, msg)) {
+        if (!get_regions_from_collection(collection, regions_query, full_overlap, status, regions, msg, reduced_mode)) {
           EPIDB_LOG_ERR(msg);
           return false;
         }
@@ -397,7 +399,8 @@ namespace epidb {
 
       bool get_regions(const std::string &genome, std::vector<std::string> &chromosomes,
                        const mongo::BSONObj &regions_query, const bool full_overlap,
-                       processing::StatusPtr status, ChromosomeRegionsList &results, std::string &msg)
+                       processing::StatusPtr status, ChromosomeRegionsList &results, std::string &msg,
+                       bool reduced_mode)
       {
         const size_t max_threads = 8;
         std::vector<std::future<std::tuple<bool, std::string> > > threads;
@@ -421,7 +424,7 @@ namespace epidb {
           auto t = std::async(std::launch::async,
                               &get_regions_job,
                               std::ref(genome), chrs, std::ref(regions_query),
-                              full_overlap, status, result_part);
+                              full_overlap, reduced_mode, status, result_part);
 
           threads.push_back(std::move(t));
           result_parts.push_back(result_part);
@@ -453,7 +456,7 @@ namespace epidb {
         std::string collection_name = helpers::region_collection_name(genome, chromosome);
         std::string msg;
         Regions regions = Regions();
-        if (!get_regions_from_collection(collection_name, regions_query, full_overlap, status, regions, msg)) {
+        if (!get_regions_from_collection(collection_name, regions_query, full_overlap, status, regions, msg, true)) {
           EPIDB_LOG_ERR(msg);
           count = 0;
           return false;
@@ -470,7 +473,7 @@ namespace epidb {
           std::string collection_name = helpers::region_collection_name(genome, *it);
           Regions regions = Regions();
           std::string msg;
-          if (!get_regions_from_collection(collection_name, regions_query, full_overlap, status, regions, msg)) {
+          if (!get_regions_from_collection(collection_name, regions_query, full_overlap, status, regions, msg, true)) {
             EPIDB_LOG_ERR(msg);
             return;
           }

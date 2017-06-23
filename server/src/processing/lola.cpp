@@ -51,7 +51,7 @@ namespace epidb {
       std::cerr << universe_query_id << std::endl;
 
       ChromosomeRegionsList queryChromosomeRegionsList;
-      if (!dba::query::retrieve_query(user_key, query_id, status, queryChromosomeRegionsList, msg)) {
+      if (!dba::query::retrieve_query(user_key, query_id, status, queryChromosomeRegionsList, msg, /* reduced_mode */ true)) {
         return false;
       }
       size_t total_query_regions = count_regions(queryChromosomeRegionsList);

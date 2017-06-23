@@ -243,7 +243,8 @@ namespace epidb {
       }
 
       bool retrieve_query(const std::string &user_key, const std::string &query_id,
-                          processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg)
+                          processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg,
+                          bool reduced_mode)
       {
         processing::RunningOp runningOp = status->start_operation(processing::PROCESS_QUERY);
         if (is_canceled(status, msg)) {
@@ -264,7 +265,7 @@ namespace epidb {
         }
 
         if (type == "experiment_select") {
-          if (!retrieve_experiment_select_query(query, status, regions, msg)) {
+          if (!retrieve_experiment_select_query(query, status, regions, msg, reduced_mode)) {
             return false;
           }
         } else if (type == "intersect") {
@@ -577,7 +578,8 @@ namespace epidb {
       }
 
       bool retrieve_experiment_select_query(const mongo::BSONObj &query,
-                                            processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg)
+                                            processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg,
+                                            bool reduced_mode)
       {
         processing::RunningOp runningOp = status->start_operation(processing::RETRIEVE_EXPERIMENT_SELECT_QUERY, query);
         if (is_canceled(status, msg)) {
@@ -599,7 +601,7 @@ namespace epidb {
         // get region data for all genomes
         for (const auto& genome : genomes) {
           ChromosomeRegionsList reg;
-          if (!retrieve::get_regions(genome, chromosomes, regions_query, false, status, reg, msg)) {
+          if (!retrieve::get_regions(genome, chromosomes, regions_query, false, status, reg, msg, reduced_mode)) {
             return false;
           }
           genome_regions.push_back(std::move(reg));

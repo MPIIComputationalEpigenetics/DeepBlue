@@ -46,13 +46,15 @@ namespace epidb {
                         std::string &new_query_id, std::string &msg);
 
       bool retrieve_query(const std::string &user_key, const std::string &query_id,
-                          processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg);
+                          processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg,
+                          bool reduced_mode = false);
 
       bool get_experiments_by_query(const std::string &user_key, const std::string &query_id,
                                     processing::StatusPtr status, std::vector<utils::IdName> &experiments_name, std::string &msg);
 
       bool retrieve_experiment_select_query(const mongo::BSONObj &query,
-                                            processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg);
+                                            processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg,
+                                            bool reduced_mode = false);
 
       bool count_regions(const std::string &query_id, const std::string &user_key,
                          processing::StatusPtr status, size_t &count, std::string &msg);

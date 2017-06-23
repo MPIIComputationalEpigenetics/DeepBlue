@@ -38,12 +38,14 @@ namespace epidb {
       bool get_regions(const std::string &genome, const std::string &chromosome,
                        const mongo::BSONObj &regions_query, const bool full_overlap,
                        processing::StatusPtr status,
-                       Regions &regions, std::string &msg);
+                       Regions &regions, std::string &msg,
+                       bool reduced_mode = false);
 
       bool get_regions(const std::string &genome, std::vector<std::string> &chromosomes,
                        const mongo::BSONObj &regions_query, const bool full_overlap,
                        processing::StatusPtr status,
-                       ChromosomeRegionsList &results, std::string &msg);
+                       ChromosomeRegionsList &results, std::string &msg,
+                       bool reduced_mode = false);
 
       bool count_regions(const std::string &genome, const std::string &chromosome,
                          const mongo::BSONObj &regions_query, const bool full_overlap,
