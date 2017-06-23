@@ -40,7 +40,7 @@ GIT_URL := $(shell git remote get-url origin)
 
 ifeq ($(host),ubuntu)
  CXX = g++ -DBOOST_LOG_DYN_LINK -DGIT_VERSION=\"$(GIT_VERSION)\" -DGIT_URL=\"$(GIT_URL)\"
- LD  = g++ -g
+ LD  = g++
  LDFLAGS   = -pthread
  MONGOLIBS = /opt/mongodb/drivers/lib/libmongoclient.a
  MONGO_INCLUDE = /opt/mongodb/drivers/include/

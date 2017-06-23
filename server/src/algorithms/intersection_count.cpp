@@ -33,11 +33,11 @@ namespace epidb {
   namespace algorithms {
 
     bool overlap_count(const ChromosomeRegionsList &regions_data, const ChromosomeRegionsList &regions_overlap,
-                 const bool overlap, const double amount, const std::string amount_type,
-                 size_t& count);
+                       const bool overlap, const double amount, const std::string amount_type,
+                       size_t& count);
 
     size_t overlap_regions_count(const Regions &regions_data, const Regions &regions_overlap, const std::string& chromosome,
-                           const bool overlap, const double amount, const std::string amount_type)
+                                 const bool overlap, const double amount, const std::string amount_type)
     {
       bool dynamic_overlap_length = amount_type == "bp" ? false : true;
 
@@ -149,20 +149,21 @@ namespace epidb {
     {
       count = 0;
 
-      // long times = clock();
       std::set<std::string> chromosomes;
       merge_chromosomes(regions_data, regions_overlap, chromosomes);
 
       std::vector<std::future<size_t > > threads;
 
       for (const auto& chr : chromosomes) {
+
         bool has_data = false;
         auto cit_data = regions_data.begin();
         while (cit_data != regions_data.end()) {
           if (cit_data->first == chr) {
             has_data = true;
-            cit_data++;
+            break;
           }
+          cit_data++;
         }
 
         bool has_overlap = false;
@@ -170,8 +171,9 @@ namespace epidb {
         while (cit_overlap != regions_overlap.end()) {
           if (cit_overlap->first == chr) {
             has_overlap = true;
-            cit_overlap++;
+            break;
           }
+          cit_overlap++;
         }
 
         // If is there no data, nothing to be made.
@@ -191,7 +193,7 @@ namespace epidb {
         }
 
         auto t = std::async(std::launch::async, &overlap_regions_count,
-                            cit_data->second, cit_overlap->second, std::ref(chr),
+                            std::ref(cit_data->second), std::ref(cit_overlap->second), std::ref(chr),
                             std::ref(overlap), std::ref(amount), std::ref(amount_type));
 
         threads.emplace_back(std::move(t));
@@ -205,8 +207,7 @@ namespace epidb {
       }
 
       count = total;
-      // long diffticks = clock() - times;
-      // "OVERLAP: " << ((diffticks) / (CLOCKS_PER_SEC / 1000)) << std::endl;
+
       return true;
     }
 

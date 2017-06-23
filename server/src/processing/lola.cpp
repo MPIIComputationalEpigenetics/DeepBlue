@@ -23,9 +23,11 @@
 
 #include "../algorithms/algorithms.hpp"
 
+#include "../dba/genomes.hpp"
 #include "../dba/genes.hpp"
 #include "../dba/gene_ontology.hpp"
 #include "../dba/queries.hpp"
+#include "../dba/retrieve.hpp"
 
 #include "../extras/utils.hpp"
 
@@ -55,14 +57,23 @@ namespace epidb {
       size_t total_query_regions = count_regions(queryChromosomeRegionsList);
       std::cerr << total_query_regions << std::endl;
 
-      /*
+      std::cerr << "LOADING UNIVERSE" << std::endl;
+      long times = clock();
       ChromosomeRegionsList universeChromosomeRegionsList;
       if (!dba::query::retrieve_query(user_key, universe_query_id, status, universeChromosomeRegionsList, msg)) {
         return false;
       }
       size_t total_universe_regions = count_regions(universeChromosomeRegionsList);
       std::cerr << total_universe_regions << std::endl;
-      */
+      long diffticks = clock() - times;
+      std::cerr << "Load universe: " << ((diffticks) / (CLOCKS_PER_SEC / 1000)) << std::endl;
+
+      std::set<std::string> chromosomes_s;
+      const std::string& norm_genome = utils::normalize_name(genome);
+      if (!dba::genomes::get_chromosomes(norm_genome, chromosomes_s, msg)) {
+        return false;
+      }
+      std::vector<std::string> chromosomes(chromosomes_s.begin(), chromosomes_s.end());
 
       auto databases_it = databases.begin();
       while ( databases_it.more() ) {
@@ -73,9 +84,43 @@ namespace epidb {
 
         auto datasets_it = datasets.begin();
         while (datasets_it.more()) {
-          const auto& dataset = datasets_it.next();
-          std::cerr << dataset.str() << std::endl;
-          ///
+          long times = clock();
+          const auto& experiment_name = datasets_it.next().str();
+          std::cerr << experiment_name << " - ";
+
+          mongo::BSONObj regions_query;
+          if (!dba::query::build_experiment_query(-1, -1, experiment_name, regions_query, msg)) {
+            return false;
+          }
+
+          ChromosomeRegionsList reg;
+          if (!dba::retrieve::get_regions(genome, chromosomes, regions_query, false, status, reg, msg)) {
+            return false;
+          }
+
+          size_t total = count_regions(reg);
+          std::cerr << total << " ";
+
+          size_t totalqueryChromosomeRegionsList = count_regions(queryChromosomeRegionsList);
+          std::cerr << totalqueryChromosomeRegionsList << " ";
+
+          size_t query_overlap_total;
+          if (!algorithms::intersect_count(queryChromosomeRegionsList, reg, query_overlap_total)) {
+            return false;
+          }
+          std::cerr << query_overlap_total << " ";
+
+          size_t totaluniverseChromosomeRegionsList = count_regions(universeChromosomeRegionsList);
+          std::cerr << totaluniverseChromosomeRegionsList << " ";
+
+          size_t universe_overlap_total;
+          if (!algorithms::intersect_count(universeChromosomeRegionsList, reg, universe_overlap_total)) {
+            return false;
+          }
+          std::cerr << universe_overlap_total << " ";
+          long diffticks = clock() - times;
+          std::cerr << ((diffticks) / (CLOCKS_PER_SEC / 1000)) << std::endl;
+
         }
       }
 

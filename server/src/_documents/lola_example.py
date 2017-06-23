@@ -38,7 +38,7 @@ databases = {
 print databases
 
 ss, query_id = server.select_annotations("Promoters", "grch38", None, None, None, uk)
-ss, universe_query_id = server.select_regions(None, "grch38", None, None, "chip-seq", None, None, None, None, uk)
+ss, universe_query_id = server.select_regions(None, "grch38", ["h3k27ac", "h3k27me3"], None, "chip-seq", None, None, None, None, uk)
 
 print query_id
 print ss, universe_query_id
