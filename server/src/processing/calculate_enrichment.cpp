@@ -87,10 +87,7 @@ namespace epidb {
         return false;
       }
 
-      size_t total_size = 0;
-      for (const auto& chromosomeRegions: chromosomeRegionsList) {
-        total_size += chromosomeRegions.second.size();
-      }
+      size_t total_size = count_regions(chromosomeRegionsList);
 
       size_t total_found_genes = 0;
       size_t total_found_go_terms = 0;
