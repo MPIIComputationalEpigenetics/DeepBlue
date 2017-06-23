@@ -270,6 +270,7 @@ namespace epidb {
 
     Regions(const Regions& other)
     {
+      std::cerr << " copy constructor " << std::endl;
       _regions.reserve(other._regions.size());
       for (const auto& r : other._regions) {
         _regions.emplace_back(r->clone());
