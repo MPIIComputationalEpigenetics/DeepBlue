@@ -63,20 +63,23 @@ namespace epidb {
     namespace retrieve {
 
       void insert_bed_regions(const mongo::BSONObj& arrobj, Regions &_regions, size_t& _it_count, size_t& _it_size,
-                              const Position _query_start, const Position _query_end, DatasetId dataset_id, const bool full_overlap);
+                              const Position _query_start, const Position _query_end, DatasetId dataset_id,
+                              const bool full_overlap, const bool reduced_mode);
 
       const size_t BULK_SIZE = 20000;
 
       struct RegionProcess {
         bool _full_overlap;
+        bool _reduced_mode;
         size_t _it_count;
         size_t _it_size;
         Regions &_regions;
         Position _query_start;
         Position _query_end;
 
-        RegionProcess(Regions &regions, Position query_start, Position query_end, bool full_overlap) :
+        RegionProcess(Regions &regions, Position query_start, Position query_end, bool full_overlap, bool reduced_mode) :
           _full_overlap(full_overlap),
+          _reduced_mode(reduced_mode),
           _it_count(0),
           _it_size(0),
           _regions(regions),
@@ -84,7 +87,7 @@ namespace epidb {
           _query_end(query_end)
         { }
 
-        void read_region(const mongo::BSONObj &region_bson, bool reduced_mode)
+        void read_region(const mongo::BSONObj &region_bson)
         {
           if (region_bson.hasField(KeyMapper::WIG_TRACK_TYPE())) {
             DatasetId dataset_id = region_bson[KeyMapper::DATASET()].Int();
@@ -204,7 +207,7 @@ namespace epidb {
               mongo::BSONObj arrobj((char *) data);
               // TODO: check uncompressed_size == real_size
 
-              insert_bed_regions(arrobj, _regions, _it_count, _it_size, _query_start, _query_end, dataset_id, _full_overlap);
+              insert_bed_regions(arrobj, _regions, _it_count, _it_size, _query_start, _query_end, dataset_id, _full_overlap, _reduced_mode);
               free(data);
 
               // Grouped in blocks but not compressed
@@ -213,16 +216,18 @@ namespace epidb {
 
               mongo::BSONObj arrobj((char *) data);
 
-              insert_bed_regions(arrobj, _regions, _it_count, _it_size, _query_start, _query_end, dataset_id, _full_overlap);
+              insert_bed_regions(arrobj, _regions, _it_count, _it_size, _query_start, _query_end, dataset_id, _full_overlap, _reduced_mode);
             }
           }
         }
       };
 
       inline void insert_bed_regions(const mongo::BSONObj& arrobj, Regions &_regions, size_t& _it_count, size_t& _it_size,
-                                     const Position _query_start, const Position _query_end, DatasetId dataset_id, bool full_overlap)
+                                     const Position _query_start, const Position _query_end, DatasetId dataset_id,
+                                     bool full_overlap, bool reduced_mode)
       {
         mongo::BSONObj::iterator regions_it = arrobj.begin();
+
         while (regions_it.more()) {
           const mongo::BSONObj &region_bson = regions_it.next().Obj();
 
@@ -240,15 +245,26 @@ namespace epidb {
             }
           }
 
-          RegionPtr region = build_bed_region(start, end, dataset_id);
-
-          while ( i.more() ) {
-            const mongo::BSONElement &e = i.next();
-            switch (e.type()) {
-            case mongo::String : region->insert(e.str()); break;
-            case mongo::NumberDouble : region->insert((float) e._numberDouble()); break;
-            case mongo::NumberInt : region->insert(e._numberInt()); break;
-            default: region->insert(e.toString(false));
+          RegionPtr region;
+          if (reduced_mode) {
+            region = build_simple_region(start, end, dataset_id);
+          } else {
+            region = build_bed_region(start, end, dataset_id);
+            while ( i.more() ) {
+              const mongo::BSONElement &e = i.next();
+              switch (e.type()) {
+              case mongo::String :
+                region->insert(e.str());
+                break;
+              case mongo::NumberDouble :
+                region->insert((float) e._numberDouble());
+                break;
+              case mongo::NumberInt :
+                region->insert(e._numberInt());
+                break;
+              default:
+                region->insert(e.toString(false));
+              }
             }
           }
           _it_size += region->size();
@@ -298,11 +314,11 @@ namespace epidb {
         regions.reserve(count);
         auto cursor( c->query(collection, query, 0, 0, NULL, queryOptions) );
         cursor->setBatchSize(BULK_SIZE);
-        RegionProcess rp(regions, start, end, full_overlap);
+        RegionProcess rp(regions, start, end, full_overlap, reduced_mode);
         while ( cursor->more() ) {
           while (cursor->moreInCurrentBatch()) {
             mongo::BSONObj o = cursor->nextSafe();
-            rp.read_region(o, reduced_mode);
+            rp.read_region(o);
             status->sum_regions(rp._it_count);
 
             // Check if processing was canceled
@@ -376,8 +392,8 @@ namespace epidb {
         mongo::BSONObj o = c->findOne(collection, query);
         c.done();
 
-        RegionProcess rp(regions, start, end, true);
-        rp.read_region(o, false);
+        RegionProcess rp(regions, start, end, true, false);
+        rp.read_region(o);
 
         return true;
       }
