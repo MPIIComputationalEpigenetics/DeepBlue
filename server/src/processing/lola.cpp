@@ -60,7 +60,7 @@ namespace epidb {
       std::cerr << "LOADING UNIVERSE" << std::endl;
       long times = clock();
       ChromosomeRegionsList universeChromosomeRegionsList;
-      if (!dba::query::retrieve_query(user_key, universe_query_id, status, universeChromosomeRegionsList, msg)) {
+      if (!dba::query::retrieve_query(user_key, universe_query_id, status, universeChromosomeRegionsList, msg, /* reduced_mode */ true)) {
         return false;
       }
       size_t total_universe_regions = count_regions(universeChromosomeRegionsList);
@@ -94,7 +94,7 @@ namespace epidb {
           }
 
           ChromosomeRegionsList reg;
-          if (!dba::retrieve::get_regions(genome, chromosomes, regions_query, false, status, reg, msg)) {
+          if (!dba::retrieve::get_regions(genome, chromosomes, regions_query, false, status, reg, msg, /* reduced_mode */ true)) {
             return false;
           }
 
