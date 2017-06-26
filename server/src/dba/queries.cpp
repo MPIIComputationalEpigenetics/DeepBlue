@@ -470,20 +470,15 @@ namespace epidb {
 
         DatasetId dataset_id;
         std::string norm_name = utils::normalize_name(experiment_name);
+
         if (experiment_name_dataset_id_cache.exists_dataset_id(norm_name)) {
           dataset_id = experiment_name_dataset_id_cache.get_dataset_id(norm_name);
         } else {
-          auto cursor =
-            c->query(helpers::collection_name(Collections::EXPERIMENTS()), BSON("norm_name" << norm_name));
-
-          if (!cursor->more()) {
-            msg = Error::m(ERR_INVALID_EXPERIMENT, experiment_name);
-            c.done();
+          mongo::BSONObj experiment_obj;
+          if (!dba::experiments::by_name(experiment_name, experiment_obj, msg)) {
             return false;
           }
-
-          mongo::BSONObj p = cursor->next();
-          mongo::BSONElement dataset_id_elem = p.getField(KeyMapper::DATASET());
+          mongo::BSONElement dataset_id_elem = experiment_obj[KeyMapper::DATASET()];
           dataset_id = dataset_id_elem.Int();
           experiment_name_dataset_id_cache.set(norm_name, dataset_id);
         }

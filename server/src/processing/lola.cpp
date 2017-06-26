@@ -29,6 +29,7 @@
 #include "../dba/queries.hpp"
 #include "../dba/retrieve.hpp"
 
+#include "../extras/math.hpp"
 #include "../extras/utils.hpp"
 
 
@@ -98,29 +99,41 @@ namespace epidb {
             return false;
           }
 
-          size_t total = count_regions(reg);
-          std::cerr << total << " ";
-
-          size_t totalqueryChromosomeRegionsList = count_regions(queryChromosomeRegionsList);
-          std::cerr << totalqueryChromosomeRegionsList << " ";
-
           size_t query_overlap_total;
           if (!algorithms::intersect_count(queryChromosomeRegionsList, reg, query_overlap_total)) {
             return false;
           }
-          std::cerr << query_overlap_total << " ";
-
-          size_t totaluniverseChromosomeRegionsList = count_regions(universeChromosomeRegionsList);
-          std::cerr << totaluniverseChromosomeRegionsList << " ";
 
           size_t universe_overlap_total;
           if (!algorithms::intersect_count(universeChromosomeRegionsList, reg, universe_overlap_total)) {
             return false;
           }
-          std::cerr << universe_overlap_total << " ";
+
+          /*
+           a - [support]. The number in the user query set that overlaps with at least 1 region.
+          */
+          size_t a = query_overlap_total;
+
+          /*
+            b - the # in the universe that overlap at least 1 test region.
+          */
+          size_t b = universe_overlap_total;
+
+          /*
+           c - [non-hits in user query set]. For this I take the size of the user set - support
+           this is the rest of the user set that did not have any overlaps to the test set.
+          */
+          size_t c = total_query_regions - a;
+
+          //# d - [size of universe - b -c -a]
+          size_t d = total_universe_regions - b - c - a;
+
+          std::cerr <<"(" << a << ", " << b << ", " << c << ", " << d << ") log odds: ";
+
+          std::cerr << math::fisher_test(a, b, c, d) << " time: ";
+
           long diffticks = clock() - times;
           std::cerr << ((diffticks) / (CLOCKS_PER_SEC / 1000)) << std::endl;
-
         }
       }
 
