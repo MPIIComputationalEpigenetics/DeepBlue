@@ -105,9 +105,6 @@ namespace epidb {
         return true;
       }
 
-
-
-
       bool build_metadata(const std::string &name, const std::string &norm_name,
                           const std::string &genome, const std::string &norm_genome,
                           const std::string &epigenetic_mark, const std::string &norm_epigenetic_mark,
