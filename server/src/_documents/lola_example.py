@@ -1,5 +1,39 @@
 import xmlrpclib
 
+
+"""
+Lola algorithm in DeepBlue
+
+ ## main variables
+ - query_set -> regions what the user want to anaylize
+ - universe_regions -> background regions
+ - datasets -> set of regions, here, it will be mainly the DeepBlue experiments
+
+ 1. query_overlap_with_universe = regions from query_set that overlap with regions from the universe_regions.
+
+ # We get the regions of each dataset
+ for each dataset_regions in datasets:
+  -
+
+  ## Support
+  support = dataset_regions that overlap with query_overlap_with_universe
+
+  ## Please, here is my main question. Is it right?
+  universe_overlap_total = universe_regions that overlap with the dataset_regions
+  b = universe_overlap_total - a
+
+  ##
+  c = regions count  of query_set minus support
+
+  ##
+  d = regions count of universe_regions - a - b - c
+
+
+  fisher_result = fisher(a, b, c, d)
+  log_score = abs(log(fisher_result)) # Positive value of the log score
+
+"""
+
 server = xmlrpclib.Server("http://localhost:31415", allow_none=True)
 
 uk = 'anonymous_key'

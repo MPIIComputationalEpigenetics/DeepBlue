@@ -80,6 +80,14 @@ namespace epidb {
       long diffticks = clock() - times;
       std::cerr << "Load universe: " << ((diffticks) / (CLOCKS_PER_SEC / 1000)) << std::endl;
 
+
+
+      ChromosomeRegionsList query_overlap_with_universe;
+      if (!algorithms::intersect(queryChromosomeRegionsList, universeChromosomeRegionsList, query_overlap_with_universe)) {
+        return false;
+      }
+
+
       std::set<std::string> chromosomes_s;
       const std::string& norm_genome = utils::normalize_name(genome);
       if (!dba::genomes::get_chromosomes(norm_genome, chromosomes_s, msg)) {
@@ -123,39 +131,41 @@ namespace epidb {
 
           const std::string dataset_id = experiment_obj["_id"].str();
 
-          ChromosomeRegionsList reg;
-          if (!dba::retrieve::get_regions(genome, chromosomes, regions_query, false, status, reg, msg, /* reduced_mode */ true)) {
+          ChromosomeRegionsList database_regions;
+          if (!dba::retrieve::get_regions(genome, chromosomes, regions_query, false, status, database_regions, msg, /* reduced_mode */ true)) {
             return false;
           }
 
           size_t query_overlap_total;
-          if (!algorithms::intersect_count(queryChromosomeRegionsList, reg, query_overlap_total)) {
-            return false;
-          }
-
-          size_t universe_overlap_total;
-          if (!algorithms::intersect_count(universeChromosomeRegionsList, reg, universe_overlap_total)) {
+          if (!algorithms::intersect_count(database_regions, query_overlap_with_universe, query_overlap_total)) {
             return false;
           }
 
           /*
            a - [support]. The number in the user query set that overlaps with at least 1 region.
           */
-          size_t a = query_overlap_total;
+          double a = query_overlap_total;
 
           /*
-            b - the # in the universe that overlap at least 1 test region.
+            b - the # of items *in the universe* that overlap each dbSet less the support;
+            This is the number of items in the universe
+          that are in the dbSet ONLY (not in userSet).
           */
-          size_t b = universe_overlap_total;
+          size_t universe_overlap_total;
+          if (!algorithms::intersect_count(universeChromosomeRegionsList, database_regions, universe_overlap_total)) {
+            return false;
+          }
+
+          double b = universe_overlap_total - a;
 
           /*
            c - [non-hits in user query set]. For this I take the size of the user set - support
            this is the rest of the user set that did not have any overlaps to the test set.
           */
-          size_t c = total_query_regions - a;
+          double c = total_query_regions - a;
 
           //# d - [size of universe - b -c -a]
-          size_t d = total_universe_regions - b - c - a;
+          double d = total_universe_regions - b - c - a;
 
           std::cerr <<"(" << a << ", " << b << ", " << c << ", " << d << ") log odds: ";
 
@@ -167,9 +177,11 @@ namespace epidb {
           long diffticks = clock() - times;
           std::cerr << " time: " << ((diffticks) / (CLOCKS_PER_SEC / 1000)) << std::endl;
 
+          double log_odds_score = log((a/b)/(c/d));
+
           datasets_support.push_back(std::make_tuple(dataset_id, a));
           datasets_log_score.push_back(std::make_tuple(dataset_id, negative_natural_log));
-          datasets_odds_score.push_back(std::make_tuple(dataset_id, 0));
+          datasets_odds_score.push_back(std::make_tuple(dataset_id, log_odds_score));
 
           /*
            @return Data.table with enrichment results.
@@ -193,26 +205,26 @@ namespace epidb {
           */
 
 
-          results.push_back(std::make_tuple(dataset_id, experiment_name, database_name, negative_natural_log, 0, a, b, c, d));
+          results.push_back(std::make_tuple(dataset_id, experiment_name, database_name, negative_natural_log, log_odds_score, a, b, c, d));
         }
       }
 
       std::unordered_map<std::string, size_t> datasets_support_rank;
-      std::sort(begin(datasets_support), end(datasets_support), TupleCompare<0>());
+      std::sort(begin(datasets_support), end(datasets_support), TupleCompare<1>());
       for(size_t i = 0; i < datasets_support.size(); i++) {
         datasets_support_rank[get<0>(datasets_support[i])] = i;
       }
       //
 
       std::unordered_map<std::string, size_t> datasets_log_rank;
-      std::sort(begin(datasets_log_score), end(datasets_log_score), TupleCompare<0>());
+      std::sort(begin(datasets_log_score), end(datasets_log_score), TupleCompare<1>());
       for(size_t i = 0; i < datasets_log_score.size(); i++) {
         datasets_log_rank[get<0>(datasets_log_score[i])] = i;
       }
       //
 
       std::unordered_map<std::string, size_t> datasets_odd_rank;
-      std::sort(begin(datasets_odds_score), end(datasets_odds_score), TupleCompare<0>());
+      std::sort(begin(datasets_odds_score), end(datasets_odds_score), TupleCompare<1>());
       for(size_t i = 0; i < datasets_odds_score.size(); i++) {
         datasets_odd_rank[get<0>(datasets_odds_score[i])] = i;
       }
@@ -223,19 +235,39 @@ namespace epidb {
         std::string database_name;
 
         double negative_natural_log;
-        double oddsRatio;
+        double log_odds_ratio;
 
         double a;
         double b;
         double c;
         double d;
 
-        size_t support_rank;
-        size_t log_rank;
-        size_t odd_rank;
+        int support_rank;
+        int log_rank;
+        int odd_rank;
 
-        size_t max_rank;
+        int max_rank;
         double mean_rank;
+
+        mongo::BSONObj toBSON()
+        {
+          return BSON(
+                   "experiment_id" << dataset_id <<
+                   "experiment_name" << experiment_name <<
+                   "database_name" << database_name <<
+                   "p_value_log" << negative_natural_log <<
+                   "log_odds_ratio" << log_odds_ratio <<
+                   "support" << (int) a <<
+                   "b" << (int) b <<
+                   "c" << (int) c <<
+                   "d" << (int) d <<
+                   "support_rank" << support_rank <<
+                   "log_rank" << log_rank <<
+                   "odd_rank" << odd_rank <<
+                   "max_rank" << max_rank <<
+                   "mean_rank" << mean_rank
+                 );
+        }
       };
 
       struct ERCompare {
@@ -253,7 +285,7 @@ namespace epidb {
         er->experiment_name = get<1>(result);
         er->database_name = get<2>(result);
         er->negative_natural_log = get<3>(result);
-        er->oddsRatio = get<4>(result);
+        er->log_odds_ratio = get<4>(result);
         er->a = get<5>(result);
         er->b = get<6>(result);
         er->c = get<7>(result);
@@ -270,9 +302,15 @@ namespace epidb {
 
       std::sort(begin(experiment_results), end(experiment_results), ERCompare());
 
+
+      mongo::BSONArrayBuilder ab;
+
+
       for (const auto& er: experiment_results) {
-        std::cerr << er->dataset_id << " "  << er->experiment_name << " support rank: " << er->support_rank << " mean_rank: " << er->mean_rank << std::endl;
+        ab.append(er->toBSON());
       }
+
+      std::cerr << ab.obj().toString() << std::endl;
 
       return true;
     }
