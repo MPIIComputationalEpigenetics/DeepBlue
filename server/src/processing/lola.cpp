@@ -76,17 +76,16 @@ namespace epidb {
         return false;
       }
       size_t total_universe_regions = count_regions(universeChromosomeRegionsList);
+
       std::cerr << total_universe_regions << std::endl;
       long diffticks = clock() - times;
       std::cerr << "Load universe: " << ((diffticks) / (CLOCKS_PER_SEC / 1000)) << std::endl;
-
-
 
       ChromosomeRegionsList query_overlap_with_universe;
       if (!algorithms::intersect(queryChromosomeRegionsList, universeChromosomeRegionsList, query_overlap_with_universe)) {
         return false;
       }
-
+      size_t count_query_overlap_with_universe = count_regions(query_overlap_with_universe);
 
       std::set<std::string> chromosomes_s;
       const std::string& norm_genome = utils::normalize_name(genome);
@@ -103,8 +102,8 @@ namespace epidb {
       std::vector<std::tuple<std::string, double>> datasets_odds_score;
 
 
-      // --------------------- dataset_id, dataseset_name, database_name, negative_natural_log, 0, a, b, c, d,)
-      std::vector<std::tuple<std::string, std::string, std::string, double, double, double, double, double, double>> results;
+      // --------------------- dataset_id, dataseset_name, database_name, negative_natural_log, prob, a, b, c, d,)
+      std::vector<std::tuple<std::string, std::string, int, std::string, double, double, int, int, int, int>> results;
 
 
       while ( databases_it.more() ) {
@@ -136,6 +135,8 @@ namespace epidb {
             return false;
           }
 
+          size_t count_database_regions = count_regions(database_regions);
+
           size_t query_overlap_total;
           if (!algorithms::intersect_count(database_regions, query_overlap_with_universe, query_overlap_total)) {
             return false;
@@ -157,6 +158,11 @@ namespace epidb {
           }
 
           double b = universe_overlap_total - a;
+
+          if (b < 0) {
+            msg = "Negative b entry in table. This means either: 1) Your user sets contain items outside your universe; or 2) your universe has a region that overlaps multiple user set regions, interfering with the universe set overlap calculation.";
+            return false;
+          }
 
           /*
            c - [non-hits in user query set]. For this I take the size of the user set - support
@@ -205,25 +211,25 @@ namespace epidb {
           */
 
 
-          results.push_back(std::make_tuple(dataset_id, experiment_name, database_name, negative_natural_log, log_odds_score, a, b, c, d));
+          results.push_back(std::make_tuple(dataset_id, experiment_name, count_database_regions, database_name, negative_natural_log, log_odds_score, a, b, c, d));
         }
       }
 
-      std::unordered_map<std::string, size_t> datasets_support_rank;
+      std::unordered_map<std::string, int> datasets_support_rank;
       std::sort(begin(datasets_support), end(datasets_support), TupleCompare<1>());
       for(size_t i = 0; i < datasets_support.size(); i++) {
         datasets_support_rank[get<0>(datasets_support[i])] = i;
       }
       //
 
-      std::unordered_map<std::string, size_t> datasets_log_rank;
+      std::unordered_map<std::string, int> datasets_log_rank;
       std::sort(begin(datasets_log_score), end(datasets_log_score), TupleCompare<1>());
       for(size_t i = 0; i < datasets_log_score.size(); i++) {
         datasets_log_rank[get<0>(datasets_log_score[i])] = i;
       }
       //
 
-      std::unordered_map<std::string, size_t> datasets_odd_rank;
+      std::unordered_map<std::string, int> datasets_odd_rank;
       std::sort(begin(datasets_odds_score), end(datasets_odds_score), TupleCompare<1>());
       for(size_t i = 0; i < datasets_odds_score.size(); i++) {
         datasets_odd_rank[get<0>(datasets_odds_score[i])] = i;
@@ -232,15 +238,18 @@ namespace epidb {
       struct ExperimentResult {
         std::string dataset_id;
         std::string experiment_name;
+
+        int experiment_size;
+
         std::string database_name;
 
         double negative_natural_log;
         double log_odds_ratio;
 
-        double a;
-        double b;
-        double c;
-        double d;
+        int a;
+        int b;
+        int c;
+        int d;
 
         int support_rank;
         int log_rank;
@@ -254,13 +263,14 @@ namespace epidb {
           return BSON(
                    "experiment_id" << dataset_id <<
                    "experiment_name" << experiment_name <<
+                   "experiment_size" << experiment_size <<
                    "database_name" << database_name <<
                    "p_value_log" << negative_natural_log <<
                    "log_odds_ratio" << log_odds_ratio <<
-                   "support" << (int) a <<
-                   "b" << (int) b <<
-                   "c" << (int) c <<
-                   "d" << (int) d <<
+                   "support" << a <<
+                   "b" << b <<
+                   "c" << c <<
+                   "d" << d <<
                    "support_rank" << support_rank <<
                    "log_rank" << log_rank <<
                    "odd_rank" << odd_rank <<
@@ -283,13 +293,14 @@ namespace epidb {
         auto er = std::make_shared<ExperimentResult>();
         er->dataset_id = get<0>(result);
         er->experiment_name = get<1>(result);
-        er->database_name = get<2>(result);
-        er->negative_natural_log = get<3>(result);
-        er->log_odds_ratio = get<4>(result);
-        er->a = get<5>(result);
-        er->b = get<6>(result);
-        er->c = get<7>(result);
-        er->d = get<8>(result);
+        er->experiment_size = get<2>(result);
+        er->database_name = get<3>(result);
+        er->negative_natural_log = get<4>(result);
+        er->log_odds_ratio = get<5>(result);
+        er->a = get<6>(result);
+        er->b = get<7>(result);
+        er->c = get<8>(result);
+        er->d = get<9>(result);
 
         er->support_rank = datasets_support_rank[er->dataset_id];
         er->log_rank = datasets_log_rank[er->dataset_id];
@@ -302,15 +313,19 @@ namespace epidb {
 
       std::sort(begin(experiment_results), end(experiment_results), ERCompare());
 
+      mongo::BSONObjBuilder bob;
+
+      bob.append("count_query_regions", (int) total_query_regions);
+      bob.append("count_universe_regions", (int) total_universe_regions);
+      bob.append("count_query_overlap_with_universe", (int) count_query_overlap_with_universe);
 
       mongo::BSONArrayBuilder ab;
-
-
       for (const auto& er: experiment_results) {
         ab.append(er->toBSON());
       }
+      bob.append("results", ab.obj());
 
-      std::cerr << ab.obj().toString() << std::endl;
+      result = bob.obj();
 
       return true;
     }
