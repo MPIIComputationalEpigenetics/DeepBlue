@@ -32,51 +32,67 @@
 namespace epidb {
   namespace algorithms {
 
-    ChromosomeRegions overlap_regions(Regions &&regions_data, Regions &&regions_overlap, const std::string& chromosome,
-                                      const bool overlap, const double amount, const std::string amount_type);
-    bool overlap(ChromosomeRegionsList &regions_data, ChromosomeRegionsList &regions_overlap,
-                 const bool overlap, const double amount, const std::string amount_type,
-                 ChromosomeRegionsList &overlaps);
-
-    bool get_chromosome_regions(ChromosomeRegionsList &qr, const std::string &chr, Regions &chr_regions)
-    {
-      for (auto cit = qr.begin(); cit != qr.end(); ++cit) {
-        if (cit->first == chr) {
-          chr_regions = std::move(cit->second);
-          return true;
-        }
-      }
-      return false;
-    }
-
     ChromosomeRegions disjoin_regions(Regions &&regions_data, const std::string& chromosome)
     {
       Regions regions = Regions();
 
       RegionPtr& actual = regions_data[0];
       for (size_t i = 1; i < regions_data.size(); i++) {
-        RegionPtr& next = regions_data[1];
+        RegionPtr& next = regions_data[i];
 
-        // If dont overlap
+        // If regions dont overlap:
+        //  just store the actual region
         if (actual->end() <= next->start()) {
           regions.emplace_back(std::move(actual));
           actual = std::move(next);
+
+          // If the actual region is inside the next region:
+          //  we store the actual region and move the starting of the next region to the end of the actual
+        } else if (actual->start() >= next->start() && actual->end() < next->end()) {
+          next->set_start(actual->end());
+          regions.emplace_back(std::move(actual));
+          actual = std::move(next);
+
+          // If the next region is inside the actual region:
+          //  we store the next region and move the starting of the actual regiin to the end of the next
+        } else if (actual->start() >= next->start() && actual->end() >= next->end()) {
+          actual->set_start(next->end());
+          regions.emplace_back(std::move(next));
+
+          // If have the same boundaries:
+          //  remove the actual and replace by next
+        } else if (actual->start() == next->start() && actual->end() == next->end()) {
+          actual.reset(nullptr);
+          actual = std::move(next);
+
+          // The regions overlap and actual is before next
         } else {
           // If overlap, create a new region
           regions.emplace_back(build_simple_region(actual->start(), next->start(), -1));
 
           if (actual->end() > next->end()) {
+            actual->set_start(next->end());
             /// make another region here
-            //actual->set_start()
+            regions.emplace_back(std::move(next));
             next.reset(nullptr);
-          } else {
+
+          } else if (actual->end() < next->end()) {// ac
+            RegionPtr new_region = build_simple_region(next->start(), actual->end(), -1);
+            regions.emplace_back(std::move(new_region));
+            next->set_start(actual->end());
             actual.reset(nullptr);
             actual = std::move(next);
+
+          } else if (actual->end() == next->end()) {
+            actual.reset(nullptr);
+            actual = std::move(next);
+
+          } else {
+            std::cerr <<"??????????????" << std::endl;
+            std::cerr << actual->start() << " : " << actual->end() << "  -   " << next->start() << " : " << next->end() << std::endl;
           }
         }
       }
-
-
 
       return ChromosomeRegions(chromosome, std::move(regions));
     }
@@ -98,9 +114,7 @@ namespace epidb {
       for (size_t i = 0; i < threads.size(); ++i) {
         threads[i].wait();
         auto result = threads[i].get();
-        if (!result.second.empty()) {
-          //overlaps.emplace_back(std::move(result));
-        }
+        disjoin_set.emplace_back(std::move(result));
       }
 
       // long diffticks = clock() - times;
