@@ -77,7 +77,14 @@ namespace epidb {
       }
       size_t total_universe_regions = count_regions(universeChromosomeRegionsList);
 
-      std::cerr << total_universe_regions << std::endl;
+      std::cerr << "total_universe_regions: " << total_universe_regions << std::endl;
+
+      ChromosomeRegionsList disjoin_set;
+      algorithms::disjoin(universeChromosomeRegionsList, disjoin_set);
+
+      size_t disjoin_set_count = count_regions(disjoin_set);
+      std::cerr << "disjoin_set: " << disjoin_set_count << std::endl;
+
       long diffticks = clock() - times;
       std::cerr << "Load universe: " << ((diffticks) / (CLOCKS_PER_SEC / 1000)) << std::endl;
 

@@ -60,6 +60,7 @@ namespace epidb {
                  const bool overlap, const double amount, const std::string amount_type,
                  ChromosomeRegionsList &intersections);
 
+    bool disjoin(ChromosomeRegionsList &regions_data, ChromosomeRegionsList &disjoin_set);
 
     bool intersect_count(const ChromosomeRegionsList &regions_data, const ChromosomeRegionsList &regions_overlap,
                          size_t& count);
