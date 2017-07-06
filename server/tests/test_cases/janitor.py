@@ -41,7 +41,7 @@ class TestJanitor(helpers.TestCase):\
     s, m = epidb.modify_user_admin(None, "old_request_age_in_sec", "3", self.admin_key)
     s, v = epidb.modify_user_admin(None, "old_request_age_in_sec", None, self.admin_key)
     self.assertEqual(v, ['old_request_age_in_sec', '3'])
-    time.sleep(3)
+    time.sleep(4)
     s, info = epidb.info(req, self.admin_key)
     self.assertEqual(info[0]["state"], "cleared")
 

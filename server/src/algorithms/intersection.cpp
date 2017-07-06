@@ -27,6 +27,8 @@
 
 #include "../datatypes/regions.hpp"
 
+#include "algorithms.hpp"
+
 namespace epidb {
   namespace algorithms {
 
@@ -45,32 +47,6 @@ namespace epidb {
         }
       }
       return false;
-    }
-
-    bool merge_chromosomes(const ChromosomeRegionsList &regions_a, const ChromosomeRegionsList &regions_b,
-                           std::set<std::string> &chromosomes)
-    {
-      ChromosomeRegionsList::const_iterator ait;
-      for (ait = regions_a.begin(); ait != regions_a.end(); ++ait) {
-        chromosomes.insert(ait->first);
-      }
-      ChromosomeRegionsList::const_iterator bit;
-      for (bit = regions_b.begin(); bit != regions_b.end(); ++bit) {
-        chromosomes.insert(bit->first);
-      }
-
-      return true;
-    }
-
-
-    Length calculate_distance(const RegionPtr& r1, const RegionPtr& r2)
-    {
-      return r2->start() - r1->end();
-    }
-
-    Length calculate_overlap(const RegionPtr& r1, const RegionPtr& r2)
-    {
-      return r1->end() - r2->start();
     }
 
     ChromosomeRegions overlap_regions(Regions &&regions_data, Regions &&regions_overlap, const std::string& chromosome,

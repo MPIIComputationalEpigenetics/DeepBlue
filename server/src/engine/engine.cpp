@@ -119,6 +119,18 @@ namespace epidb {
     return true;
   }
 
+  bool Engine::queue_distinct(const std::string &query_id, const std::string &column_name, const std::string &user_key, std::string &id, std::string &msg)
+  {
+    utils::IdName user;
+    if (!dba::users::get_user(user_key, user, msg)) {
+      return false;
+    }
+    if (!queue(BSON("command" << "distinct" << "query_id" << query_id << "column_name" << column_name << "user_id" << user.id), 60 * 60, id, msg)) {
+      return false;
+    }
+    return true;
+  }
+
   bool Engine::queue_calculate_enrichment(const std::string &query_id, const std::string &gene_model, const std::string &user_key, std::string &id, std::string &msg)
   {
     utils::IdName user;
@@ -155,7 +167,9 @@ namespace epidb {
     return true;
   }
 
-  bool Engine::queue_score_matrix(const std::vector<std::pair<std::string, std::string>> &experiments_formats, const std::string &aggregation_function, const std::string &regions_query_id, const std::string &user_key, std::string &id, std::string &msg)
+  bool Engine::queue_score_matrix(const std::vector<std::pair<std::string, std::string>> &experiments_formats,
+                                  const std::string &aggregation_function, const std::string &regions_query_id, const std::string &user_key,
+                                  std::string &id, std::string &msg)
   {
     mongo::BSONObjBuilder bob_formats;
 
@@ -175,6 +189,42 @@ namespace epidb {
     return true;
   }
 
+  bool Engine::queue_lola(const std::string& query_id, const std::string& universe_query_id,
+                                const std::unordered_map<std::string, std::vector<std::string>> &databases,
+                                const std::string& genome,
+                                const std::string &user_key,
+                                std::string &id, std::string &msg)
+  {
+    mongo::BSONObjBuilder databases_builder;
+
+    for (const auto &database : databases) {
+      mongo::BSONArrayBuilder bab;
+      const std::string &name = database.first;
+      for (const auto& experiment_name: database.second) {
+        bab.append(experiment_name);
+      }
+      databases_builder.append(name, bab.obj());
+    }
+
+    utils::IdName user;
+    std::cerr << user_key << std::endl;
+    if (!dba::users::get_user(user_key, user, msg)) {
+      return false;
+    }
+
+    if (!queue(
+        BSON("command" << "lola" <<
+          "query_id" << query_id <<
+          "universe_query_id" << universe_query_id <<
+          "databases" << databases_builder.obj() <<
+          "genome" << genome <<
+          "user_id" << user.id),
+        60 * 60, id, msg)) {
+      return false;
+    }
+
+    return true;
+  }
 
   bool Engine::queue_get_experiments_by_query(const std::string &query_id, const std::string &user_key, std::string &request_id, std::string &msg)
   {

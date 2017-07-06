@@ -46,7 +46,7 @@ namespace epidb {
 
       static Parameters parameters_()
       {
-        Parameter p[] = {
+        return {
           parameters::QueryId,
           Parameter("field", serialize::STRING, "field that is filtered by"),
           Parameter("operation", serialize::STRING, "operation used for filtering. For 'string' must be '==' or '!=' and for 'number' must be one of these: " + utils::vector_to_string(algorithms::FilterBuilder::operations())),
@@ -54,17 +54,13 @@ namespace epidb {
           Parameter("type", serialize::STRING, "type of the value: 'number' or 'string' "),
           parameters::UserKey
         };
-        Parameters params(&p[0], &p[0] + 6);
-        return params;
       }
 
       static Parameters results_()
       {
-        Parameter p[] = {
+        return {
           Parameter("id", serialize::STRING, "id of filtered query")
         };
-        Parameters results(&p[0], &p[0] + 1);
-        return results;
       }
 
     public:

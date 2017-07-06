@@ -30,7 +30,25 @@
 #include "../datatypes/regions.hpp"
 #include "../extras/utils.hpp"
 
+#include "../errors.hpp"
+
 namespace epidb {
+
+  #define INIT_PROCESSING(_WHAT, _STATUS) {                  \
+    IS_PROCESSING_CANCELLED(_STATUS)                         \
+    status->start_operation(_WHAT);                          \
+  }                                                          \
+
+  #define IS_PROCESSING_CANCELLED(_STATUS) {                 \
+    bool is_canceled = false;                                \
+    if (!_STATUS->is_canceled(is_canceled, msg)) {           \
+      return false;                                          \
+    }                                                        \
+    if (is_canceled) {                                       \
+      msg = Error::m(ERR_REQUEST_CANCELED);                  \
+      return false;                                          \
+    }                                                        \
+  }                                                          \
 
   class StringBuilder;
 
@@ -39,6 +57,7 @@ namespace epidb {
     extern std::string DUMMY_REQUEST;
 
     enum OP {
+      PROCESS_QUERY = 1,
       GET_EXPERIMENT_BY_QUERY = 10,
       COUNT_REGIONS = 11,
       RETRIEVE_EXPERIMENT_SELECT_QUERY = 30,
@@ -54,6 +73,15 @@ namespace epidb {
       RETRIEVE_OVERLAP_QUERY = 40,
       RETRIEVE_FIND_MOTIF_QUERY = 41,
       PROCESS_AGGREGATE = 50,
+      PROCESS_DISTINCT = 60,
+      PROCESS_BINNING = 61,
+      PROCESS_CALCULATE_ENRICHMENT = 62,
+      PROCESS_COUNT = 63,
+      PROCESS_COVERAGE = 64,
+      PROCESS_GET_EXPERIMENTS_BY_QUERY = 65,
+      PROCESS_GET_REGIONS = 66,
+      PROCESS_SCORE_MATRIX = 67,
+      PROCESS_LOLA = 68,
       FORMAT_OUTPUT = 80,
       BUILDING_OUTPUT = 82,
       COMPRESSING_OUTPUT = 84
@@ -130,6 +158,8 @@ namespace epidb {
 
     bool binning(const std::string& query_id, const std::string& column_name, const int bars, const std::string& user_key, const processing::StatusPtr status, mongo::BSONObj& counts, std::string& msg);
 
+    bool distinct(const std::string& query_id, const std::string& column_name, const std::string& user_key, const processing::StatusPtr status, mongo::BSONObj& counts, std::string& msg);
+
     bool calculate_enrichment(const std::string& query_id, const std::string& gene_model, const std::string& user_key, processing::StatusPtr status, mongo::BSONObj& result, std::string& msg);
 
     bool coverage(const std::string &query_id, const std::string &genome, const std::string &user_key, processing::StatusPtr status, std::vector<CoverageInfo> &coverage_infos, std::string &msg);
@@ -137,6 +167,8 @@ namespace epidb {
     bool get_regions(const std::string &query_id, const std::string &format, const std::string &user_key, processing::StatusPtr status, StringBuilder &sb, std::string &msg);
 
     bool score_matrix(const std::vector<std::pair<std::string, std::string>> &experiments_formats, const std::string &aggregation_function, const std::string &regions_query_id, const std::string &user_key, processing::StatusPtr status, std::string &matrix, std::string &msg);
+
+    bool lola(const std::string& query_id, const std::string& universe_query_id, const mongo::BSONObj& datasets, const std::string& genome, const std::string& user_key, processing::StatusPtr status, mongo::BSONObj& result, std::string& msg);
 
     bool get_experiments_by_query(const std::string &query_id, const std::string &user_key, processing::StatusPtr status, std::vector<utils::IdName>& experiments, std::string &msg);
 

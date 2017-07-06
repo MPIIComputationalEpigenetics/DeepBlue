@@ -36,6 +36,7 @@
 #include "../dba/experiments.hpp"
 #include "../dba/helpers.hpp"
 #include "../dba/queries.hpp"
+#include "../dba/retrieve.hpp"
 
 #include "../engine/commands.hpp"
 
@@ -45,6 +46,7 @@
 
 #include "../errors.hpp"
 #include "../log.hpp"
+#include "processing.hpp"
 
 namespace epidb {
   namespace processing {
@@ -56,6 +58,8 @@ namespace epidb {
                          const ChromosomeRegions& chromosome, threading::SemaphorePtr sem,
                          processing::StatusPtr status)
     {
+      status->start_operation(PROCESS_SCORE_MATRIX);
+
       std::string msg;
       std::shared_ptr<std::vector<algorithms::Accumulator>> regions_accs = std::make_shared<std::vector<algorithms::Accumulator>>();
 

@@ -695,7 +695,6 @@ namespace epidb {
 
       std::string collection = helpers::region_collection_name(genome_norm_name, chromosome);
       std::string collection_name = collection.substr(config::DATABASE_NAME().length() + 1);
-      EPIDB_LOG("Creating collection: " << collection_name);
 
       if (!c->createCollection(collection, 0, false, 0, &info)) {
         EPIDB_LOG_ERR("Problem creating collection '" << collection_name << "' error: " << info.toString());
@@ -709,7 +708,7 @@ namespace epidb {
       unsetPowerOf2SizesBuilder.append("collMod", collection_name);
       unsetPowerOf2SizesBuilder.append("usePowerOf2Sizes", false);
       mongo::BSONObj unsetPowerOf2Sizes = unsetPowerOf2SizesBuilder.obj();
-      EPIDB_LOG_DBG("Unseting PowerOf2Sizes: " << unsetPowerOf2Sizes.toString());
+
       if (!c->runCommand(config::DATABASE_NAME(), unsetPowerOf2Sizes, info)) {
         EPIDB_LOG_ERR("Unseting PowerOf2Sizes '" << collection_name << "' error: " << info.toString());
         msg = "Error while setting data collection";
@@ -718,7 +717,6 @@ namespace epidb {
       }
 
       // Set indexes
-      EPIDB_LOG_DBG("Creating index for " << collection);
       mongo::BSONObjBuilder dataset_start_end_index;
       dataset_start_end_index.append(KeyMapper::DATASET(), 1);
       dataset_start_end_index.append(KeyMapper::START(), 1);
@@ -731,7 +729,6 @@ namespace epidb {
         return false;
       }
 
-      EPIDB_LOG_DBG("Creating index for " << collection);
       mongo::BSONObjBuilder start_end_index;
       start_end_index.append(KeyMapper::START(), 1);
       start_end_index.append(KeyMapper::END(), 1);

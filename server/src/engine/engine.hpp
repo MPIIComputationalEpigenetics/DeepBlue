@@ -84,6 +84,8 @@ namespace epidb {
 
     bool queue_binning(const std::string &query_id, const std::string &column_name, const int bars, const std::string &user_key, std::string &request_id, std::string &msg);
 
+    bool queue_distinct(const std::string &query_id, const std::string &column_name, const std::string &user_key, std::string &request_id, std::string &msg);
+
     bool queue_calculate_enrichment(const std::string &query_id, const std::string &gene_model, const std::string &user_key, std::string &id, std::string &msg);
 
     bool queue_coverage(const std::string &query_id, const std::string &genome, const std::string &user_key, std::string &id, std::string &msg);
@@ -91,6 +93,8 @@ namespace epidb {
     bool queue_get_regions(const std::string &query_id, const std::string &output_format, const std::string &user_key, std::string &id, std::string &msg);
 
     bool queue_score_matrix(const std::vector<std::pair<std::string, std::string>> &experiments_formats, const std::string &aggregation_function, const std::string &regions_query_id, const std::string &user_key, std::string &request_id, std::string &msg);
+
+    bool queue_lola(const std::string& query_id, const std::string& universe_query_id, const std::unordered_map<std::string, std::vector<std::string>> &databases, const std::string& genome, const std::string &user_key, std::string &id, std::string &msg);
 
     bool queue_get_experiments_by_query(const std::string &query_id, const std::string &user_key, std::string &request_id, std::string &msg);
 

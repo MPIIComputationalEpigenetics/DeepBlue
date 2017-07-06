@@ -18,6 +18,9 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#ifndef EPIDB_ENGINE_QUEUE_PROCESSER_HPP
+#define EPIDB_ENGINE_QUEUE_PROCESSER_HPP
+
 #include <boost/asio.hpp>
 
 #include "../mdbq/client.hpp"
@@ -41,12 +44,16 @@ namespace epidb {
       bool process(const mongo::BSONObj &job, processing::StatusPtr status, mongo::BSONObj& result);
       bool process_count(const std::string &request_id, const std::string &user_key, processing::StatusPtr status, mongo::BSONObj& result);
       bool process_binning(const std::string &query_id, const std::string& column_name, const int bars, const std::string &user_key, processing::StatusPtr status, mongo::BSONObj& result);
+      bool process_distinct(const std::string &query_id, const std::string& column_name, const std::string &user_key, processing::StatusPtr status, mongo::BSONObj& result);
       bool process_calculate_enrichment(const std::string &query_id, const std::string& gene_model, const std::string &user_key, processing::StatusPtr status, mongo::BSONObj& result);
       bool process_coverage(const std::string &request_id, const std::string & genome, const std::string &user_key, processing::StatusPtr status, mongo::BSONObj& result);
       bool process_get_regions(const std::string &query_id, const std::string &format, const std::string &user_key, processing::StatusPtr status, mongo::BSONObj& result);
       bool process_score_matrix(const mongo::BSONObj &experiments_formats, const std::string &aggregation_function, const std::string &regions_query_id, const std::string &user_key, processing::StatusPtr status, mongo::BSONObj& result);
       bool process_get_experiments_by_query(const std::string &query_id, const std::string &user_key, processing::StatusPtr status, mongo::BSONObj& result);
+      bool process_lola(const std::string &query_id, const std::string &universe_query_id, const mongo::BSONObj& datasets, const std::string& genome, const std::string &user_key, processing::StatusPtr status, mongo::BSONObj& result);
       bool is_canceled(processing::StatusPtr status, std::string msg);
     };
   }
 }
+
+#endif

@@ -119,7 +119,7 @@ namespace epidb {
         }
 
         if (!has_exp_or_genome) {
-          result.add_error("At least one experiment_name must be informed.");
+          result.add_error("At least one experiment_name or genome must be informed.");
           return false;
         }
 

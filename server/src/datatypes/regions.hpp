@@ -369,6 +369,7 @@ namespace epidb {
   typedef std::pair<std::string, Regions> ChromosomeRegions;
   typedef std::vector<ChromosomeRegions> ChromosomeRegionsList;
 
+  size_t count_regions(const ChromosomeRegionsList& regions);
 
   // The value returned indicates whether the element passed as first argument is considered to go before the second in the specific strict weak ordering it defines.
   static struct {

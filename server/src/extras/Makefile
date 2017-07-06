@@ -4,7 +4,7 @@ ROOT		= $(shell pwd)/../..
 CXXFLAGS	= $(DEFCXXFLAGS) -I..
 
 OBJLIBS	= ../libextras.a
-OBJS		= utils.o xmlrpc.o serialize.o stringbuilder.o compress.o
+OBJS		= math.o utils.o xmlrpc.o serialize.o stringbuilder.o compress.o
 
 all : $(OBJLIBS)
 

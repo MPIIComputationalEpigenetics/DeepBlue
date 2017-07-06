@@ -63,20 +63,23 @@ namespace epidb {
     namespace retrieve {
 
       void insert_bed_regions(const mongo::BSONObj& arrobj, Regions &_regions, size_t& _it_count, size_t& _it_size,
-                              const Position _query_start, const Position _query_end, DatasetId dataset_id, const bool full_overlap);
+                              const Position _query_start, const Position _query_end, DatasetId dataset_id,
+                              const bool full_overlap, const bool reduced_mode);
 
       const size_t BULK_SIZE = 20000;
 
       struct RegionProcess {
         bool _full_overlap;
+        bool _reduced_mode;
         size_t _it_count;
         size_t _it_size;
         Regions &_regions;
         Position _query_start;
         Position _query_end;
 
-        RegionProcess(Regions &regions, Position query_start, Position query_end, bool full_overlap) :
+        RegionProcess(Regions &regions, Position query_start, Position query_end, bool full_overlap, bool reduced_mode) :
           _full_overlap(full_overlap),
+          _reduced_mode(reduced_mode),
           _it_count(0),
           _it_size(0),
           _regions(regions),
@@ -204,7 +207,7 @@ namespace epidb {
               mongo::BSONObj arrobj((char *) data);
               // TODO: check uncompressed_size == real_size
 
-              insert_bed_regions(arrobj, _regions, _it_count, _it_size, _query_start, _query_end, dataset_id, _full_overlap);
+              insert_bed_regions(arrobj, _regions, _it_count, _it_size, _query_start, _query_end, dataset_id, _full_overlap, _reduced_mode);
               free(data);
 
               // Grouped in blocks but not compressed
@@ -213,16 +216,18 @@ namespace epidb {
 
               mongo::BSONObj arrobj((char *) data);
 
-              insert_bed_regions(arrobj, _regions, _it_count, _it_size, _query_start, _query_end, dataset_id, _full_overlap);
+              insert_bed_regions(arrobj, _regions, _it_count, _it_size, _query_start, _query_end, dataset_id, _full_overlap, _reduced_mode);
             }
           }
         }
       };
 
       inline void insert_bed_regions(const mongo::BSONObj& arrobj, Regions &_regions, size_t& _it_count, size_t& _it_size,
-                                     const Position _query_start, const Position _query_end, DatasetId dataset_id, bool full_overlap)
+                                     const Position _query_start, const Position _query_end, DatasetId dataset_id,
+                                     bool full_overlap, bool reduced_mode)
       {
         mongo::BSONObj::iterator regions_it = arrobj.begin();
+
         while (regions_it.more()) {
           const mongo::BSONObj &region_bson = regions_it.next().Obj();
 
@@ -240,15 +245,26 @@ namespace epidb {
             }
           }
 
-          RegionPtr region = build_bed_region(start, end, dataset_id);
-
-          while ( i.more() ) {
-            const mongo::BSONElement &e = i.next();
-            switch (e.type()) {
-            case mongo::String : region->insert(e.str()); break;
-            case mongo::NumberDouble : region->insert((float) e._numberDouble()); break;
-            case mongo::NumberInt : region->insert(e._numberInt()); break;
-            default: region->insert(e.toString(false));
+          RegionPtr region;
+          if (reduced_mode) {
+            region = build_simple_region(start, end, dataset_id);
+          } else {
+            region = build_bed_region(start, end, dataset_id);
+            while ( i.more() ) {
+              const mongo::BSONElement &e = i.next();
+              switch (e.type()) {
+              case mongo::String :
+                region->insert(e.str());
+                break;
+              case mongo::NumberDouble :
+                region->insert((float) e._numberDouble());
+                break;
+              case mongo::NumberInt :
+                region->insert(e._numberInt());
+                break;
+              default:
+                region->insert(e.toString(false));
+              }
             }
           }
           _it_size += region->size();
@@ -279,7 +295,8 @@ namespace epidb {
       }
 
       bool get_regions_from_collection(const std::string &collection, const mongo::BSONObj &regions_query, const bool full_overlap,
-                                       processing::StatusPtr status, Regions &regions, std::string &msg)
+                                       processing::StatusPtr status, Regions &regions, std::string &msg,
+                                       bool reduced_mode)
       {
         Position start;
         Position end;
@@ -297,7 +314,7 @@ namespace epidb {
         regions.reserve(count);
         auto cursor( c->query(collection, query, 0, 0, NULL, queryOptions) );
         cursor->setBatchSize(BULK_SIZE);
-        RegionProcess rp(regions, start, end, full_overlap);
+        RegionProcess rp(regions, start, end, full_overlap, reduced_mode);
         while ( cursor->more() ) {
           while (cursor->moreInCurrentBatch()) {
             mongo::BSONObj o = cursor->nextSafe();
@@ -338,7 +355,7 @@ namespace epidb {
       }
 
       std::tuple<bool, std::string> get_regions_job(const std::string &genome, const std::shared_ptr<std::vector<std::string> > chromosomes,
-          const mongo::BSONObj &regions_query, const bool full_overlap,
+          const mongo::BSONObj &regions_query, const bool full_overlap, const bool reduced_mode,
           processing::StatusPtr status, std::shared_ptr<ChromosomeRegionsList> result)
       {
 
@@ -346,7 +363,7 @@ namespace epidb {
           std::string collection = helpers::region_collection_name(genome, *chrom_it);
           Regions regions = Regions();
           std::string msg;
-          if (!get_regions_from_collection(collection, regions_query, full_overlap, status, regions, msg)) {
+          if (!get_regions_from_collection(collection, regions_query, full_overlap, status, regions, msg, reduced_mode)) {
             return std::make_tuple(false, msg);
           }
 
@@ -375,7 +392,7 @@ namespace epidb {
         mongo::BSONObj o = c->findOne(collection, query);
         c.done();
 
-        RegionProcess rp(regions, start, end, true);
+        RegionProcess rp(regions, start, end, true, false);
         rp.read_region(o);
 
         return true;
@@ -384,11 +401,12 @@ namespace epidb {
       bool get_regions(const std::string &genome, const std::string &chromosome,
                        const mongo::BSONObj &regions_query, const bool full_overlap,
                        processing::StatusPtr status,
-                       Regions &regions, std::string &msg)
+                       Regions &regions, std::string &msg,
+                       bool reduced_mode)
       {
         std::string collection = helpers::region_collection_name(genome, chromosome);
         regions = Regions();
-        if (!get_regions_from_collection(collection, regions_query, full_overlap, status, regions, msg)) {
+        if (!get_regions_from_collection(collection, regions_query, full_overlap, status, regions, msg, reduced_mode)) {
           EPIDB_LOG_ERR(msg);
           return false;
         }
@@ -397,7 +415,8 @@ namespace epidb {
 
       bool get_regions(const std::string &genome, std::vector<std::string> &chromosomes,
                        const mongo::BSONObj &regions_query, const bool full_overlap,
-                       processing::StatusPtr status, ChromosomeRegionsList &results, std::string &msg)
+                       processing::StatusPtr status, ChromosomeRegionsList &results, std::string &msg,
+                       bool reduced_mode)
       {
         const size_t max_threads = 8;
         std::vector<std::future<std::tuple<bool, std::string> > > threads;
@@ -421,7 +440,7 @@ namespace epidb {
           auto t = std::async(std::launch::async,
                               &get_regions_job,
                               std::ref(genome), chrs, std::ref(regions_query),
-                              full_overlap, status, result_part);
+                              full_overlap, reduced_mode, status, result_part);
 
           threads.push_back(std::move(t));
           result_parts.push_back(result_part);
@@ -453,7 +472,7 @@ namespace epidb {
         std::string collection_name = helpers::region_collection_name(genome, chromosome);
         std::string msg;
         Regions regions = Regions();
-        if (!get_regions_from_collection(collection_name, regions_query, full_overlap, status, regions, msg)) {
+        if (!get_regions_from_collection(collection_name, regions_query, full_overlap, status, regions, msg, true)) {
           EPIDB_LOG_ERR(msg);
           count = 0;
           return false;
@@ -470,7 +489,7 @@ namespace epidb {
           std::string collection_name = helpers::region_collection_name(genome, *it);
           Regions regions = Regions();
           std::string msg;
-          if (!get_regions_from_collection(collection_name, regions_query, full_overlap, status, regions, msg)) {
+          if (!get_regions_from_collection(collection_name, regions_query, full_overlap, status, regions, msg, true)) {
             EPIDB_LOG_ERR(msg);
             return;
           }

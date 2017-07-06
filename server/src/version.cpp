@@ -40,5 +40,5 @@ namespace epidb {
   const std::string Version::author = "Felipe Albrecht - felipe.albrecht@mpi-inf.mpg.de";
   const size_t Version::major_version = 1;
   const size_t Version::minor_version = 12;
-  const size_t Version::fix_version = 13;
+const size_t Version::fix_version = 17;
 }

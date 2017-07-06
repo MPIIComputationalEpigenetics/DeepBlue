@@ -31,14 +31,13 @@
 #include "../algorithms/filter.hpp"
 
 #include "../cache/column_dataset_cache.hpp"
+#include "../cache/queries_cache.hpp"
 
 #include "../connection/connection.hpp"
 
 #include "../datatypes/column_types_def.hpp"
 #include "../datatypes/expressions_manager.hpp"
 #include "../datatypes/regions.hpp"
-
-#include "../cache/queries_cache.hpp"
 
 #include "../dba/experiments.hpp"
 
@@ -244,8 +243,14 @@ namespace epidb {
       }
 
       bool retrieve_query(const std::string &user_key, const std::string &query_id,
-                          processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg)
+                          processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg,
+                          bool reduced_mode)
       {
+        processing::RunningOp runningOp = status->start_operation(processing::PROCESS_QUERY);
+        if (is_canceled(status, msg)) {
+          return false;
+        }
+
         mongo::BSONObj query;
         if (!helpers::get_one(Collections::QUERIES(), BSON("_id" << query_id), query)) {
           msg = Error::m(ERR_INVALID_QUERY_ID, query_id);
@@ -260,7 +265,7 @@ namespace epidb {
         }
 
         if (type == "experiment_select") {
-          if (!retrieve_experiment_select_query(query, status, regions, msg)) {
+          if (!retrieve_experiment_select_query(query, status, regions, msg, reduced_mode)) {
             return false;
           }
         } else if (type == "intersect") {
@@ -380,16 +385,12 @@ namespace epidb {
         mongo::BSONObj query = result[0];
         mongo::BSONObj args = query["args"].Obj();
 
-        count = 0;
         ChromosomeRegionsList regions;
         if (!retrieve_query(user_key, query_id, status, regions, msg)) {
           return false;
         }
 
-        count = 0;
-        for (const auto& chromosome : regions) {
-          count += chromosome.second.size();
-        }
+        count = count_regions(regions);
 
         return true;
       }
@@ -469,28 +470,29 @@ namespace epidb {
 
         DatasetId dataset_id;
         std::string norm_name = utils::normalize_name(experiment_name);
+
         if (experiment_name_dataset_id_cache.exists_dataset_id(norm_name)) {
           dataset_id = experiment_name_dataset_id_cache.get_dataset_id(norm_name);
         } else {
-          auto cursor =
-            c->query(helpers::collection_name(Collections::EXPERIMENTS()), BSON("norm_name" << norm_name));
-
-          if (!cursor->more()) {
-            msg = Error::m(ERR_INVALID_EXPERIMENT, experiment_name);
-            c.done();
+          mongo::BSONObj experiment_obj;
+          if (!dba::experiments::by_name(experiment_name, experiment_obj, msg)) {
             return false;
           }
-
-          mongo::BSONObj p = cursor->next();
-          mongo::BSONElement dataset_id_elem = p.getField(KeyMapper::DATASET());
+          mongo::BSONElement dataset_id_elem = experiment_obj[KeyMapper::DATASET()];
           dataset_id = dataset_id_elem.Int();
           experiment_name_dataset_id_cache.set(norm_name, dataset_id);
         }
 
         mongo::BSONObjBuilder regions_query_builder;
         regions_query_builder.append(KeyMapper::DATASET(), dataset_id);
-        regions_query_builder.append(KeyMapper::START(), BSON("$lte" << end));
-        regions_query_builder.append(KeyMapper::END(), BSON("$gte" << start));
+
+        if (end > -1) {
+          regions_query_builder.append(KeyMapper::START(), BSON("$lte" << end));
+        }
+
+        if (start > -1) {
+          regions_query_builder.append(KeyMapper::END(), BSON("$gte" << start));
+        }
 
         regions_query = regions_query_builder.obj();
 
@@ -571,7 +573,8 @@ namespace epidb {
       }
 
       bool retrieve_experiment_select_query(const mongo::BSONObj &query,
-                                            processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg)
+                                            processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg,
+                                            bool reduced_mode)
       {
         processing::RunningOp runningOp = status->start_operation(processing::RETRIEVE_EXPERIMENT_SELECT_QUERY, query);
         if (is_canceled(status, msg)) {
@@ -593,7 +596,7 @@ namespace epidb {
         // get region data for all genomes
         for (const auto& genome : genomes) {
           ChromosomeRegionsList reg;
-          if (!retrieve::get_regions(genome, chromosomes, regions_query, false, status, reg, msg)) {
+          if (!retrieve::get_regions(genome, chromosomes, regions_query, false, status, reg, msg, reduced_mode)) {
             return false;
           }
           genome_regions.push_back(std::move(reg));
