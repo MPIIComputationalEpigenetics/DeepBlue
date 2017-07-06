@@ -36,7 +36,8 @@ URDL=$(ROOT)/third_party/urdl-0.1/include
 JEMALLOC=$(ROOT)/third_party/jemalloc-4.2.1
 
 GIT_VERSION := $(shell git describe --abbrev=8 --dirty --always --tags)
-GIT_URL := $(shell git remote get-url origin)
+#GIT_URL := $(shell git remote get-url origin)
+GIT_URL = github
 
 ifeq ($(host),ubuntu)
  CXX = g++ -DBOOST_LOG_DYN_LINK -DGIT_VERSION=\"$(GIT_VERSION)\" -DGIT_URL=\"$(GIT_URL)\"
