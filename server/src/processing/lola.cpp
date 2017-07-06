@@ -80,7 +80,7 @@ namespace epidb {
       std::cerr << "total_universe_regions: " << total_universe_regions << std::endl;
 
       ChromosomeRegionsList disjoin_set;
-      algorithms::disjoin(universeChromosomeRegionsList, disjoin_set);
+      algorithms::disjoin(std::move(universeChromosomeRegionsList), disjoin_set);
 
       size_t disjoin_set_count = count_regions(disjoin_set);
       std::cerr << "disjoin_set: " << disjoin_set_count << std::endl;

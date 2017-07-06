@@ -36,69 +36,83 @@ namespace epidb {
     {
       Regions regions = Regions();
 
-      RegionPtr& actual = regions_data[0];
+      RegionPtr&& actual = std::move(regions_data[0]);
       for (size_t i = 1; i < regions_data.size(); i++) {
-        RegionPtr& next = regions_data[i];
+        RegionPtr&& next = std::move(regions_data[i]);
 
-        // If regions dont overlap:
-        //  just store the actual region
-        if (actual->end() <= next->start()) {
+        // The regions have the same boundaries:
+        if (actual->start() == next->start() && actual->end() == next->end()) {
+          actual.reset(nullptr);
+          actual = std::move(next);
+
+          // Regions dont overlap:
+        } else if (actual->end() <= next->start()) {
           regions.emplace_back(std::move(actual));
           actual = std::move(next);
 
-          // If the actual region is inside the next region:
-          //  we store the actual region and move the starting of the next region to the end of the actual
+          // The actual region is inside the next region:
         } else if (actual->start() >= next->start() && actual->end() < next->end()) {
+          if (actual->start() > next->start()) {
+            RegionPtr new_region = build_simple_region(next->start(), actual->start(), -1);
+            regions.emplace_back(std::move(new_region));
+          }
           next->set_start(actual->end());
           regions.emplace_back(std::move(actual));
           actual = std::move(next);
 
-          // If the next region is inside the actual region:
-          //  we store the next region and move the starting of the actual regiin to the end of the next
-        } else if (actual->start() >= next->start() && actual->end() >= next->end()) {
+          // The actual is after the next region and is overlaped:
+        } else if (actual->start() >= next->start() && actual->end() > next->end()) {
+          if (actual->start() > next->start()) {
+            RegionPtr pre_new_region = build_simple_region(next->start(), actual->start(), -1);
+            regions.emplace_back(std::move(pre_new_region));
+          }
+          RegionPtr mid_new_region = build_simple_region(actual->start(), next->end(), -1);
+          regions.emplace_back(std::move(mid_new_region));
+          actual->set_start(next->end());
+
+          // The actual is after but end in the same place
+        } else if (actual->start() > next->start() && actual->end() == next->end()) {
+          RegionPtr pre_new_region = build_simple_region(next->start(), actual->start(), -1);
+          regions.emplace_back(std::move(pre_new_region));
+
+          // The next region is inside the actual region:
+        } else if (actual->start() <= next->start() && actual->end() > next->end()) {
+          if (actual->start() < next->start()) {
+            RegionPtr pre_new_region = build_simple_region(actual->start(), next->start(), -1);
+            regions.emplace_back(std::move(pre_new_region));
+          }
           actual->set_start(next->end());
           regions.emplace_back(std::move(next));
 
-          // If have the same boundaries:
-          //  remove the actual and replace by next
-        } else if (actual->start() == next->start() && actual->end() == next->end()) {
-          actual.reset(nullptr);
+          // If the actual is before and overlap with the next
+        } else if (actual->start() <= next->start() && actual->end() < next->end()) {
+          if (actual->start() < next->start()) {
+            RegionPtr pre_new_region = build_simple_region(actual->start(), next->start(), -1);
+            regions.emplace_back(std::move(pre_new_region));
+          }
+          RegionPtr mid_new_region = build_simple_region(next->start(), actual->end(), -1);
+          regions.emplace_back(std::move(mid_new_region));
+          next->set_start(actual->end());
           actual = std::move(next);
 
-          // The regions overlap and actual is before next
+          // if the actual is before and end in the same place
+        } else if (actual->start() <= next->start() && actual->end() == next->end()) {
+          RegionPtr pre_new_region = build_simple_region(actual->start(), next->start(), -1);
+          regions.emplace_back(std::move(pre_new_region));
+          actual->set_start(next->start());
+
         } else {
-          // If overlap, create a new region
-          regions.emplace_back(build_simple_region(actual->start(), next->start(), -1));
-
-          if (actual->end() > next->end()) {
-            actual->set_start(next->end());
-            /// make another region here
-            regions.emplace_back(std::move(next));
-            next.reset(nullptr);
-
-          } else if (actual->end() < next->end()) {// ac
-            RegionPtr new_region = build_simple_region(next->start(), actual->end(), -1);
-            regions.emplace_back(std::move(new_region));
-            next->set_start(actual->end());
-            actual.reset(nullptr);
-            actual = std::move(next);
-
-          } else if (actual->end() == next->end()) {
-            actual.reset(nullptr);
-            actual = std::move(next);
-
-          } else {
-            std::cerr <<"??????????????" << std::endl;
-            std::cerr << actual->start() << " : " << actual->end() << "  -   " << next->start() << " : " << next->end() << std::endl;
-          }
+          std::cerr <<"??????????????" << std::endl;
+          std::cerr << actual->start() << " : " << actual->end() << "  -   " << next->start() << " : " << next->end() << std::endl;
         }
       }
+      regions.emplace_back(std::move(actual));
 
       return ChromosomeRegions(chromosome, std::move(regions));
     }
 
 
-    bool disjoin(ChromosomeRegionsList &regions_data, ChromosomeRegionsList &disjoin_set)
+    bool disjoin(ChromosomeRegionsList &&regions_data, ChromosomeRegionsList &disjoin_set)
     {
       // long times = clock();
       std::vector<std::future<ChromosomeRegions > > threads;
@@ -121,6 +135,5 @@ namespace epidb {
       // "OVERLAP: " << ((diffticks) / (CLOCKS_PER_SEC / 1000)) << std::endl;
       return true;
     }
-
   }
 }
