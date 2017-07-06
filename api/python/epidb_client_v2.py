@@ -301,7 +301,7 @@ class DeepBlueClient(object):
     @key_required
     def add_expression(self, expression_type, sample_id, replica, data,
                        _format, project, extra_metadata):
-        return self.server.add_gene_expression(expression_type, sample_id,
+        return self.server.add_expression(expression_type, sample_id,
                                                replica, data, _format,
                                                project, extra_metadata,
                                                self.key)
