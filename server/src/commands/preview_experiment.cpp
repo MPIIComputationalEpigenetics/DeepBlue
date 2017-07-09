@@ -131,15 +131,12 @@ namespace epidb {
         args_builder.append("norm_genomes", norm_genome);
 
         mongo::BSONObj args = args_builder.obj();
-        std::cerr << args.toString() << std::endl;
 
         mongo::BSONObj regions_query;
         if (!dba::query::build_experiment_query(args, regions_query, msg)) {
           result.add_error(msg);
           return false;
         }
-
-        std::cerr << regions_query.toString() << std::endl;
 
         std::vector<std::string> chroms_vector;
         std::copy(chroms.begin(), chroms.end(), std::back_inserter(chroms_vector));

@@ -120,8 +120,6 @@ namespace epidb {
           result.add_error(msg);
         }
 
-        std::cerr << experiments_count.size() << std::endl;
-
         result.set_as_array(true);
 
         for (const auto& value : experiments_count) {

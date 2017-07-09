@@ -376,7 +376,6 @@ namespace epidb {
         std::string internal_chromosome;
         if (!genome_info->internal_chromosome(track->chromosome(), internal_chromosome, msg)) {
           if (ignore_unknow_chromosomes) {
-            std::cerr << "ignore_unknow_chromosome " << track->chromosome() << std::endl;
             msg = "";
             continue;
           }
@@ -573,7 +572,6 @@ namespace epidb {
         std::string internal_chromosome;
         if (!genome_info->internal_chromosome(chrom_lines.first, internal_chromosome, msg)) {
           if (ignore_unknow_chromosomes) {
-            std::cerr << "ignore_unknow_chromosome " << chrom_lines.first << std::endl;
             msg = "";
             continue;
           }

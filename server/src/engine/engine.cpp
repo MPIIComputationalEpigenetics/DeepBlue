@@ -207,7 +207,6 @@ namespace epidb {
     }
 
     utils::IdName user;
-    std::cerr << user_key << std::endl;
     if (!dba::users::get_user(user_key, user, msg)) {
       return false;
     }

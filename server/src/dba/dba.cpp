@@ -75,7 +75,6 @@ namespace epidb {
 
     bool is_initialized()
     {
-      std::cerr << "initi" << std::endl;
       return helpers::check_exist(Collections::SETTINGS(), "initialized", true);
     }
 

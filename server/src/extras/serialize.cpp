@@ -117,7 +117,7 @@ namespace epidb {
 
     void Parameter::set_type(Type type)
     {
-      std::cerr << "Nothing." << std::endl;
+      //
     }
 
     bool Parameter::add_child(const std::shared_ptr<Parameter> &p)

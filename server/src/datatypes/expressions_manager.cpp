@@ -41,8 +41,6 @@ namespace epidb {
     const ExpressionTypePtr& ExpressionManager::GENE_EXPRESSION() const
     {
       static const ExpressionTypePtr& etp_ref = ExpressionManager::get_manager("gene");
-      std::cerr << "leaving" << std::endl;
-      std::cerr << etp_ref->name() << std::endl;
       return etp_ref;
     }
 

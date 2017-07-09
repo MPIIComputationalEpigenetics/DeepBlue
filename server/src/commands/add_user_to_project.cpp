@@ -116,7 +116,6 @@ namespace epidb {
         }
 
         // Is the command operator admin or project owner ?
-        std::cerr << user.is_admin() << std::endl;
         if ((!user.is_admin()) && // Is not ADMIN
             (user.get_id() != owner_id)) { // Neither the owner
           result.add_error(Error::m(ERR_PERMISSION_PROJECT, project));

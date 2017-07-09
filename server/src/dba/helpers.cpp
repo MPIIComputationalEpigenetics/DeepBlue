@@ -331,7 +331,6 @@ namespace epidb {
         Connection c;
         mongo::BSONArrayBuilder datasets_array_builder;
 
-        std::cerr << query.toString() << std::endl;
         auto cursor = c->query(helpers::collection_name(where), query);
         while (cursor->more()) {
           mongo::BSONObj p = cursor->next();
