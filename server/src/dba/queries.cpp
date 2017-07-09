@@ -1066,6 +1066,8 @@ namespace epidb {
               saved.emplace_back(std::move(region));
               keep++;
             } else {
+              status->subtract_size(region->size());
+              status->subtract_regions(1);
               removed++;
             }
           }
