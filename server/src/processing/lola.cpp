@@ -58,9 +58,12 @@ namespace epidb {
     {
       INIT_PROCESSING(PROCESS_LOLA, status)
 
-      std::cerr << query_id << std::endl;
+      std::cerr << "math :: " << math::fisher_test(68, 37981, 32, 2851474) << std::endl;
+      std::cerr << "math :: " << math::fisher_test(33, 21989, 67, 2867466) << std::endl;
 
-      std::cerr << universe_query_id << std::endl;
+
+      std::cerr << "math :: " << log10(math::fisher_test(68, 37981, 32, 2851474)) << std::endl;
+      std::cerr << "math :: " << log10(math::fisher_test(33, 21989, 67, 2867466)) << std::endl;
 
       ChromosomeRegionsList queryChromosomeRegionsList;
       if (!dba::query::retrieve_query(user_key, query_id, status, queryChromosomeRegionsList, msg, /* reduced_mode */ true)) {
@@ -76,15 +79,12 @@ namespace epidb {
         return false;
       }
       size_t total_universe_regions = count_regions(universeChromosomeRegionsList);
+      std::cerr << "before " << total_universe_regions << std::endl;
 
-      std::cerr << "total_universe_regions: " << total_universe_regions << std::endl;
-
-      ChromosomeRegionsList disjoin_set;
-      algorithms::disjoin(std::move(universeChromosomeRegionsList), disjoin_set);
-
+      ChromosomeRegionsList disjoin_set = algorithms::disjoin(std::move(universeChromosomeRegionsList));
       size_t disjoin_set_count = count_regions(disjoin_set);
       std::cerr << "disjoin_set: " << disjoin_set_count << std::endl;
-
+      universeChromosomeRegionsList = std::move(disjoin_set);
       long diffticks = clock() - times;
       std::cerr << "Load universe: " << ((diffticks) / (CLOCKS_PER_SEC / 1000)) << std::endl;
 
@@ -93,6 +93,7 @@ namespace epidb {
         return false;
       }
       size_t count_query_overlap_with_universe = count_regions(query_overlap_with_universe);
+      std::cerr << "query overlap with universe: " << count_query_overlap_with_universe << std::endl;
 
       std::set<std::string> chromosomes_s;
       const std::string& norm_genome = utils::normalize_name(genome);
@@ -103,15 +104,12 @@ namespace epidb {
 
       auto databases_it = databases.begin();
 
-
       std::vector<std::tuple<std::string, size_t>> datasets_support;
       std::vector<std::tuple<std::string, double>> datasets_log_score;
       std::vector<std::tuple<std::string, double>> datasets_odds_score;
 
-
       // --------------------- dataset_id, dataseset_name, database_name, negative_natural_log, prob, a, b, c, d,)
       std::vector<std::tuple<std::string, std::string, int, std::string, double, double, int, int, int, int>> results;
-
 
       while ( databases_it.more() ) {
         const mongo::BSONElement &database = databases_it.next();
@@ -136,35 +134,30 @@ namespace epidb {
           }
 
           const std::string dataset_id = experiment_obj["_id"].str();
-
           ChromosomeRegionsList database_regions;
           if (!dba::retrieve::get_regions(genome, chromosomes, regions_query, false, status, database_regions, msg, /* reduced_mode */ true)) {
             return false;
           }
 
           size_t count_database_regions = count_regions(database_regions);
-
           size_t query_overlap_total;
-          if (!algorithms::intersect_count(database_regions, query_overlap_with_universe, query_overlap_total)) {
+          if (!algorithms::intersect_count(query_overlap_with_universe, database_regions,  query_overlap_total)) {
             return false;
           }
 
-          /*
-           a - [support]. The number in the user query set that overlaps with at least 1 region.
-          */
+          // a = #query_overlap_with_universe overlapping with at least one region in dataset_regions
           double a = query_overlap_total;
 
           /*
             b - the # of items *in the universe* that overlap each dbSet less the support;
-            This is the number of items in the universe
-          that are in the dbSet ONLY (not in userSet).
+            This is the number of items in the universe that are in the dbSet ONLY (not in userSet).
+            b = #query_overlap_with_universe NOT overlapping with at least one region in dataset_regions
           */
-          size_t universe_overlap_total;
-          if (!algorithms::intersect_count(universeChromosomeRegionsList, database_regions, universe_overlap_total)) {
+          size_t testSetsOverlapUniverse;
+          if (!algorithms::intersect_count(universeChromosomeRegionsList, database_regions, testSetsOverlapUniverse)) {
             return false;
           }
-
-          double b = universe_overlap_total - a;
+          double b = testSetsOverlapUniverse - a;
 
           if (b < 0) {
             msg = "Negative b entry in table. This means either: 1) Your user sets contain items outside your universe; or 2) your universe has a region that overlaps multiple user set regions, interfering with the universe set overlap calculation.";
@@ -175,26 +168,29 @@ namespace epidb {
            c - [non-hits in user query set]. For this I take the size of the user set - support
            this is the rest of the user set that did not have any overlaps to the test set.
           */
-          double c = total_query_regions - a;
+          // c = #universe_overlap_with_dataset that are NOT contained in query_overlap_with_universe
+          double c = count_query_overlap_with_universe  - a;
 
           //# d - [size of universe - b -c -a]
-          double d = total_universe_regions - b - c - a;
+          //#universe_regions - a - b - c = #universe_regions that do NOT overlap with query_set and that do NOT overlap with dataset_regions
+          double d = total_universe_regions - a - b - c;
 
-          std::cerr <<"(" << a << ", " << b << ", " << c << ", " << d << ") log odds: ";
+          std::cerr <<"(" << a << ", " << b << ", " << c << ", " << d << ") negative natural log: ";
 
           double p_value = math::fisher_test(a, b, c, d);
-          double negative_natural_log = abs(log(p_value));
+          double negative_natural_log = abs(log10(p_value));
 
-          std::cerr << negative_natural_log << " ";
+          std::cerr << "p_value: " << p_value << " " << "negative_natural_log: " << negative_natural_log;
 
           long diffticks = clock() - times;
-          std::cerr << " time: " << ((diffticks) / (CLOCKS_PER_SEC / 1000)) << std::endl;
 
-          double log_odds_score = log((a/b)/(c/d));
-
+          double log_odds_score = (a/b)/(c/d);
+          std::cerr << " log odds: " << log_odds_score;
           datasets_support.push_back(std::make_tuple(dataset_id, a));
           datasets_log_score.push_back(std::make_tuple(dataset_id, negative_natural_log));
           datasets_odds_score.push_back(std::make_tuple(dataset_id, log_odds_score));
+
+          std::cerr << " time: " << ((diffticks) / (CLOCKS_PER_SEC / 1000)) << std::endl;
 
           /*
            @return Data.table with enrichment results.
