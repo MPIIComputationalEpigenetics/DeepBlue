@@ -14,9 +14,7 @@
 PATH=/bin:/usr/bin
 DESC="deepblue deamon"
 NAME=server
-BIN=/Users/albrecht/mpi/DeepBlue/server/src/$NAME
-CONF=/Users/albrecht/mpi/DeepBlue/conf/deepblue/deepblue.conf
-
+BIN=/local/data/DeepBlue/server/src/$NAME
 # Exit if the binary is not installed
 [ -x "$BIN" ] || { echo "$BIN not found"; exit 0; }
 

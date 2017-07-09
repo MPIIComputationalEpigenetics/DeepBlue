@@ -41,6 +41,9 @@ start_shard()
     echo "mongodb shard $1 already running"
     return 2
   else
+    echo "ulimit -n 16384"
+    ulimit -n 16384
+    echo $? 
     echo "starting mongodb shard on port $PORT"
     echo "cmd: numactl --interleave=all $BIN -fork -port $PORT -dbpath $DBPATH -logpath $LOGPATH -pidfilepath $PIDFILEPATH --directoryperdb"
     numactl --interleave=all $BIN -fork -port $PORT -dbpath $DBPATH -logpath $LOGPATH -pidfilepath $PIDFILEPATH --directoryperdb
