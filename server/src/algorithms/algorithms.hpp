@@ -60,14 +60,14 @@ namespace epidb {
                  const bool overlap, const double amount, const std::string amount_type,
                  ChromosomeRegionsList &intersections);
 
-    bool disjoin(ChromosomeRegionsList &&regions_data, ChromosomeRegionsList &disjoin_set);
-
     bool intersect_count(const ChromosomeRegionsList &regions_data, const ChromosomeRegionsList &regions_overlap,
                          size_t& count);
 
     bool overlap_count(const ChromosomeRegionsList &regions_data, const ChromosomeRegionsList &regions_overlap,
                        const bool overlap, const double amount, const std::string amount_type,
                        size_t& count);
+
+    ChromosomeRegionsList disjoin(ChromosomeRegionsList &&regions_data);
 
     ChromosomeRegionsList merge_chromosome_regions(ChromosomeRegionsList& chrregions_a, ChromosomeRegionsList& chrregions_b);
   } // namespace algorithms

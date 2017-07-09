@@ -36,6 +36,10 @@ namespace epidb {
     {
       Regions regions = Regions();
 
+      if (regions_data.empty()) {
+        return ChromosomeRegions(chromosome, std::move(regions));
+      }
+
       RegionPtr&& actual = std::move(regions_data[0]);
       for (size_t i = 1; i < regions_data.size(); i++) {
         RegionPtr&& next = std::move(regions_data[i]);
@@ -108,11 +112,12 @@ namespace epidb {
       }
       regions.emplace_back(std::move(actual));
 
+      std::sort(regions.begin(), regions.end(), RegionPtrComparer);
+
       return ChromosomeRegions(chromosome, std::move(regions));
     }
 
-
-    bool disjoin(ChromosomeRegionsList &&regions_data, ChromosomeRegionsList &disjoin_set)
+    ChromosomeRegionsList disjoin(ChromosomeRegionsList &&regions_data)
     {
       // long times = clock();
       std::vector<std::future<ChromosomeRegions > > threads;
@@ -125,15 +130,14 @@ namespace epidb {
         threads.emplace_back(std::move(t));
       }
 
+      ChromosomeRegionsList disjoin_set;
       for (size_t i = 0; i < threads.size(); ++i) {
         threads[i].wait();
         auto result = threads[i].get();
         disjoin_set.emplace_back(std::move(result));
       }
 
-      // long diffticks = clock() - times;
-      // "OVERLAP: " << ((diffticks) / (CLOCKS_PER_SEC / 1000)) << std::endl;
-      return true;
+      return disjoin_set;
     }
   }
 }
