@@ -111,8 +111,8 @@ namespace epidb {
           std::vector<std::string> experiments;
           for (const auto& exp_: experiments_list) {
             const std::string& experiment_name = exp_->as_string();
-            if (!dba::exists::experiment(utils::normalize_name(experiment_name))) {
-              result.add_error(Error::m(ERR_INVALID_EXPERIMENT, experiment_name));
+            if (!dba::exists::experiment(utils::normalize_name(experiment_name)) && !(utils::is_id(experiment_name, "q"))) {
+              result.add_error(experiment_name + " is not a experiment name or valid query ID");
               return false;
             }
             experiments.push_back(experiment_name);

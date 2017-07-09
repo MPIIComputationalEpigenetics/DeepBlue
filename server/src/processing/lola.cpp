@@ -58,13 +58,6 @@ namespace epidb {
     {
       INIT_PROCESSING(PROCESS_LOLA, status)
 
-      std::cerr << "math :: " << math::fisher_test(68, 37981, 32, 2851474) << std::endl;
-      std::cerr << "math :: " << math::fisher_test(33, 21989, 67, 2867466) << std::endl;
-
-
-      std::cerr << "math :: " << log10(math::fisher_test(68, 37981, 32, 2851474)) << std::endl;
-      std::cerr << "math :: " << log10(math::fisher_test(33, 21989, 67, 2867466)) << std::endl;
-
       ChromosomeRegionsList queryChromosomeRegionsList;
       if (!dba::query::retrieve_query(user_key, query_id, status, queryChromosomeRegionsList, msg, /* reduced_mode */ true)) {
         return false;
@@ -108,8 +101,8 @@ namespace epidb {
       std::vector<std::tuple<std::string, double>> datasets_log_score;
       std::vector<std::tuple<std::string, double>> datasets_odds_score;
 
-      // --------------------- dataset_id, dataseset_name, database_name, negative_natural_log, prob, a, b, c, d,)
-      std::vector<std::tuple<std::string, std::string, int, std::string, double, double, int, int, int, int>> results;
+      // --------------------- dataseset, database_name, negative_natural_log, prob, a, b, c, d,)
+      std::vector<std::tuple<std::string, int, std::string, double, double, int, int, int, int>> results;
 
       while ( databases_it.more() ) {
         const mongo::BSONElement &database = databases_it.next();
@@ -120,23 +113,22 @@ namespace epidb {
         auto datasets_it = datasets.begin();
         while (datasets_it.more()) {
           long times = clock();
-          const auto& experiment_name = datasets_it.next().str();
-          std::cerr << experiment_name << " - ";
+          const auto& dataset = datasets_it.next().str();
+          std::cerr << dataset << " - ";
 
-          mongo::BSONObj regions_query;
-          if (!dba::query::build_experiment_query(-1, -1, experiment_name, regions_query, msg)) {
-            return false;
-          }
-
-          mongo::BSONObj experiment_obj;
-          if (!dba::experiments::by_name(experiment_name, experiment_obj, msg)) {
-            return false;
-          }
-
-          const std::string dataset_id = experiment_obj["_id"].str();
           ChromosomeRegionsList database_regions;
-          if (!dba::retrieve::get_regions(genome, chromosomes, regions_query, false, status, database_regions, msg, /* reduced_mode */ true)) {
-            return false;
+          if (utils::is_id(dataset, "q")) {
+            if (!dba::query::retrieve_query(user_key, dataset, status, database_regions, msg, /* reduced_mode */ true)) {
+              return false;
+            }
+          } else {
+            mongo::BSONObj regions_query;
+            if (!dba::query::build_experiment_query(-1, -1, dataset, regions_query, msg)) {
+              return false;
+            }
+            if (!dba::retrieve::get_regions(genome, chromosomes, regions_query, false, status, database_regions, msg, /* reduced_mode */ true)) {
+              return false;
+            }
           }
 
           size_t count_database_regions = count_regions(database_regions);
@@ -186,9 +178,9 @@ namespace epidb {
 
           double log_odds_score = (a/b)/(c/d);
           std::cerr << " log odds: " << log_odds_score;
-          datasets_support.push_back(std::make_tuple(dataset_id, a));
-          datasets_log_score.push_back(std::make_tuple(dataset_id, negative_natural_log));
-          datasets_odds_score.push_back(std::make_tuple(dataset_id, log_odds_score));
+          datasets_support.push_back(std::make_tuple(dataset, a));
+          datasets_log_score.push_back(std::make_tuple(dataset, negative_natural_log));
+          datasets_odds_score.push_back(std::make_tuple(dataset, log_odds_score));
 
           std::cerr << " time: " << ((diffticks) / (CLOCKS_PER_SEC / 1000)) << std::endl;
 
@@ -214,7 +206,14 @@ namespace epidb {
           */
 
 
-          results.push_back(std::make_tuple(dataset_id, experiment_name, count_database_regions, database_name, negative_natural_log, log_odds_score, a, b, c, d));
+          results.push_back(std::make_tuple(dataset, count_database_regions, database_name, negative_natural_log, log_odds_score, a, b, c, d));
+
+          status->subtract_regions(count_database_regions);
+          for (const auto& chr : database_regions) {
+            for (const auto& rs :chr.second) {
+              status->subtract_size(rs->size());
+            }
+          }
         }
       }
 
@@ -239,8 +238,7 @@ namespace epidb {
       }
 
       struct ExperimentResult {
-        std::string dataset_id;
-        std::string experiment_name;
+        std::string dataset;
 
         int experiment_size;
 
@@ -264,8 +262,7 @@ namespace epidb {
         mongo::BSONObj toBSON()
         {
           return BSON(
-                   "experiment_id" << dataset_id <<
-                   "experiment_name" << experiment_name <<
+                   "dataset" << dataset <<
                    "experiment_size" << experiment_size <<
                    "database_name" << database_name <<
                    "p_value_log" << negative_natural_log <<
@@ -294,20 +291,19 @@ namespace epidb {
 
       for (const auto& result : results) {
         auto er = std::make_shared<ExperimentResult>();
-        er->dataset_id = get<0>(result);
-        er->experiment_name = get<1>(result);
-        er->experiment_size = get<2>(result);
-        er->database_name = get<3>(result);
-        er->negative_natural_log = get<4>(result);
-        er->log_odds_ratio = get<5>(result);
-        er->a = get<6>(result);
-        er->b = get<7>(result);
-        er->c = get<8>(result);
-        er->d = get<9>(result);
+        er->dataset = get<0>(result);
+        er->experiment_size = get<1>(result);
+        er->database_name = get<2>(result);
+        er->negative_natural_log = get<3>(result);
+        er->log_odds_ratio = get<4>(result);
+        er->a = get<5>(result);
+        er->b = get<6>(result);
+        er->c = get<7>(result);
+        er->d = get<8>(result);
 
-        er->support_rank = datasets_support_rank[er->dataset_id];
-        er->log_rank = datasets_log_rank[er->dataset_id];
-        er->odd_rank = datasets_odd_rank[er->dataset_id];
+        er->support_rank = datasets_support_rank[er->dataset];
+        er->log_rank = datasets_log_rank[er->dataset];
+        er->odd_rank = datasets_odd_rank[er->dataset];
         er->max_rank = std::max(er->support_rank, std::max(er->log_rank, er->odd_rank));
         er->mean_rank = (er->support_rank + er->log_rank + er->odd_rank) / 3.0;
 
