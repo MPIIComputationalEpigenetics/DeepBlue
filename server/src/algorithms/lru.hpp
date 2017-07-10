@@ -22,6 +22,8 @@
 #include <boost/function.hpp>
 #include <cassert>
 
+#include <mutex>
+
 // Class providing fixed-size (by number of records)
 // LRU-replacement cache of a function with signature
 // V f(K).
@@ -36,9 +38,9 @@ public:
   typedef V value_type;
 
   typedef boost::bimaps::bimap <
-    SET<key_type>,
-    boost::bimaps::list_of<value_type>
-  > container_type;
+  SET<key_type>,
+      boost::bimaps::list_of<value_type>
+      > container_type;
 
   // Constuctor specifies the cached function and
   // the maximum number of records to be stored.
@@ -55,7 +57,6 @@ public:
   // Obtain value of the cached function for k
   value_type operator()(const key_type& k)
   {
-
     // Attempt to find existing record
     const typename container_type::left_iterator it = _container.left.find(k);
     if (it == _container.left.end()) {
@@ -69,10 +70,13 @@ public:
 
       // We do have it:
       // Update the access record view.
-      _container.right.relocate(
-        _container.right.end(),
-        _container.project_right(it)
-      );
+      {
+       // std::lock_guard<std::mutex> guard(m);
+        _container.right.relocate(
+          _container.right.end(),
+          _container.project_right(it)
+        );
+      }
 
       // Return the retrieved value
       return it->second;
@@ -91,7 +95,8 @@ public:
     }
   }
 
-  void clear() {
+  void clear()
+  {
     _container.clear();
   }
 
@@ -99,6 +104,7 @@ private:
 
   void insert(const key_type& k, const value_type& v)
   {
+    std::lock_guard<std::mutex> guard(m);
     assert(_container.size() <= _capacity);
     // If necessary, make space
     if (_container.size() == _capacity) {
@@ -114,6 +120,7 @@ private:
   const boost::function<value_type(const key_type&)> _fn;
   const size_t _capacity;
   container_type _container;
+  std::mutex m;
 };
 
 #endif
