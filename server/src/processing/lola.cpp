@@ -120,16 +120,16 @@ namespace epidb {
       //#universe_regions - a - b - c = #universe_regions that do NOT overlap with query_set and that do NOT overlap with dataset_regions
       double d = total_universe_regions - a - b - c;
 
-      std::cerr << "[starting] " << dataset;
-      std::cerr <<"(" << a << ", " << b << ", " << c << ", " << d << ") negative natural log: ";
+      //std::cerr << "[starting] " << dataset;
+      //std::cerr <<"(" << a << ", " << b << ", " << c << ", " << d << ") negative natural log: ";
 
       double p_value = math::fisher_test(a, b, c, d);
       double negative_natural_log = abs(log10(p_value));
 
-      std::cerr << "p_value: " << p_value << " " << "negative_natural_log: " << negative_natural_log;
+      //std::cerr << "p_value: " << p_value << " " << "negative_natural_log: " << negative_natural_log;
 
       double log_odds_score = (a/b)/(c/d);
-      std::cerr << " log odds: " << log_odds_score << std::endl;
+      //std::cerr << " log odds: " << log_odds_score << std::endl;
 
       status->subtract_regions(count_database_regions);
       for (const auto& chr : database_regions) {
