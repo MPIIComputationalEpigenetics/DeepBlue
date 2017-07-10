@@ -18,6 +18,8 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <condition_variable>
+#include <mutex>
 #include <string>
 
 #include <boost/bimap/set_of.hpp>
@@ -33,10 +35,13 @@
 namespace epidb {
   namespace cache {
 
+    std::condition_variable cv;
+    std::set<std::string> waiting_list;
+    std::mutex m;
+
     query::QUERY_RESULT fn(const query::QUERY_KEY& qk)
     {
-      ChromosomeRegionsList regions;
-      std::string msg;
+      std::cerr << "LOADING " << qk.query_id << std::endl;
 
       query::QUERY_RESULT result;
       result.success = dba::query::retrieve_query(qk.user_key, qk.query_id, qk.status, result.regions, result.msg);
@@ -44,7 +49,7 @@ namespace epidb {
       return result;
     }
 
-    lru_cache_using_boost<query::QUERY_KEY, query::QUERY_RESULT, boost::bimaps::set_of> QUERY_CACHE(fn, 10);
+    lru_cache_using_boost<query::QUERY_KEY, query::QUERY_RESULT, boost::bimaps::set_of> QUERY_CACHE(fn, 32);
 
 
     bool get_query_cache(const std::string &user_key, const std::string &query_id,
@@ -55,7 +60,24 @@ namespace epidb {
       qk.query_id = query_id;
       qk.status = status;
 
+      // this query is being processed
+      if (waiting_list.find(qk.query_id) != waiting_list.end()) {
+        std::unique_lock<std::mutex> lk(m);
+        cv.wait(lk, [qk]{
+          return waiting_list.find(qk.query_id) == waiting_list.end();
+        });
+      }
+
+      {
+        std::lock_guard<std::mutex> guard(m);
+        waiting_list.insert(qk.query_id);
+      }
       query::QUERY_RESULT qr = QUERY_CACHE(qk);
+      {
+        std::lock_guard<std::mutex> guard(m);
+        waiting_list.erase(qk.query_id);
+        cv.notify_all();
+      }
 
       regions = std::move(qr.regions);
       msg = qr.msg;
@@ -63,7 +85,8 @@ namespace epidb {
       return qr.success;
     }
 
-    void queries_cache_invalidate() {
+    void queries_cache_invalidate()
+    {
       QUERY_CACHE.clear();
     }
   }
