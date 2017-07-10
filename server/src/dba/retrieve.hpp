@@ -41,7 +41,7 @@ namespace epidb {
                        Regions &regions, std::string &msg,
                        bool reduced_mode = false);
 
-      bool get_regions(const std::string &genome, std::vector<std::string> &chromosomes,
+      bool get_regions(const std::string &genome, const std::vector<std::string> &chromosomes,
                        const mongo::BSONObj &regions_query, const bool full_overlap,
                        processing::StatusPtr status,
                        ChromosomeRegionsList &results, std::string &msg,
