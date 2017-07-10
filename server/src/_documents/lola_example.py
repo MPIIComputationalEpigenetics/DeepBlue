@@ -1,83 +1,79 @@
 import xmlrpclib
+import time
 
+from collections import defaultdict
 
-"""
-Lola algorithm in DeepBlue
-
- ## main variables
- - query_set -> regions what the user want to anaylize
- - universe_regions -> background regions
- - datasets -> set of regions, here, it will be mainly the DeepBlue experiments
-
- 1. query_overlap_with_universe = regions from query_set that overlap with regions from the universe_regions.
-
- # We get the regions of each dataset
- for each dataset_regions in datasets:
-  -
-
-  ## Support
-  support = dataset_regions that overlap with query_overlap_with_universe
-
-  ## Please, here is my main question. Is it right?
-  universe_overlap_total = universe_regions that overlap with the dataset_regions
-  b = universe_overlap_total - a
-
-  ##
-  c = regions count  of query_set minus support
-
-  ##
-  d = regions count of universe_regions - a - b - c
-
-
-  fisher_result = fisher(a, b, c, d)
-  log_score = abs(log(fisher_result)) # Positive value of the log score
-
-"""
-
-server = xmlrpclib.Server("http://localhost:31415", allow_none=True)
-
-uk = 'anonymous_key'
-
-print server.echo(uk)
-
-def request_data(request_id):
-  (status, info) = server.info(request_id, user_key)
-  request_status = info[0]["state"]
-
-  while request_status != "done" and request_status != "failed":
-    print request_status
-    time.sleep(1)
-    (status, info) = server.info(request_id, user_key)
+def request_data(request_id, uk):
+    (status, info) = server.info(request_id, uk)
     request_status = info[0]["state"]
 
-  (status, data) = server.get_request_data(request_id, user_key)
-  if status != "okay":
-    print data
-    return None
+    while request_status != "done" and request_status != "failed":
+        time.sleep(1)
+        (status, info) = server.info(request_id, uk)
+        request_status = info[0]["state"]
 
-  return data
+    (status, data) = server.get_request_data(request_id, uk)
+    if status != "okay":
+        print data
+        return None
+
+    return data
 
 
-h3k27ac = server.list_experiments ("GRCh38", "peaks", "h3k27ac", None, None, "ChIP-seq", None, uk)
-h3k27ac_ids = server.extract_names(h3k27ac[1])[1]
+def get_chromatin_stes(genome, uk):
 
-h3k27me3 = server.list_experiments ("GRCh38", "peaks", "h3k27me3", None, None, "ChIP-seq", None, uk)
-h3k27me3_ids = server.extract_names(h3k27me3[1])[1]
+    status, csss_query_id = server.select_regions(
+        None, genome, "Chromatin State Segmentation", None, None, None, None, None, None, uk)
+    print status, csss_query_id
 
-databases = {
-  "h3k27ac" : h3k27ac_ids,
-  "h3k27me3" : h3k27ac_ids
-}
+    status, csss_names_request_id = server.distinct_column_values(
+        csss_query_id, "NAME", uk)
+    distinct_values = request_data(csss_names_request_id, uk)
+    print distinct_values['distinct']
 
-print databases
+    return distinct_values['distinct']
 
-ss, query_id = server.select_annotations("Promoters", "grch38", None, None, None, uk)
-ss, universe_query_id = server.select_regions(None, "grch38", None, None, "chip-seq", None, None, None, None, uk)
 
-print query_id
-print ss, universe_query_id
+def build_chromatin_state_files(uk):
+    datasets = defaultdict(list)
+    css_files = server.list_experiments(
+        "GRCh38", "peaks", "Chromatin State Segmentation", None, None, None, None, uk)
+    css_files_names = server.extract_names(css_files[1])[1]
+    states = get_chromatin_stes('GRCh38', uk)
+    for css_file in css_files_names:
+        for state in states:
+            ss, css_file_query_id = server.select_experiments(
+                css_file, None, None, None, uk)
+            ss, css_file_query_cache_id = server.query_cache(css_file_query_id, True, uk)
+            ss, css_file_filter_query_id = server.filter_regions(
+                css_file_query_cache_id, "NAME", "==", state, "string", uk)
+            datasets[css_file].append(css_file_filter_query_id)
+    return dict(datasets)
 
-s, request = server.lola(query_id, universe_query_id, databases, "grch38", uk)
 
+####
+uk = 'anonymous_key'
+server = xmlrpclib.Server("http://localhost:31415", allow_none=True)
+print server.echo(uk)
+
+# Query data
+# Select the hypo methilated regions where the AVG methyl level is lower than 0.0025
+ss, query_id = server.select_experiments(
+    "S00VEQA1.hypo_meth.bs_call.GRCh38.20150707.bed", None, None, None, uk)
+ss, query_id = server.filter_regions(
+    query_id, "AVG_METHYL_LEVEL", "<", "0.0025", "number", uk)
+
+
+# Universe will be tiling regions of 1000bp
+ss, universe_query_id = server.tiling_regions(1000, "grch38", None, uk)
+
+# Datasets will be the chromatin segmentation files divided by segments
+datasets = build_chromatin_state_files(uk)
+print "total of " + str(len(datasets)) + " datasets"
+
+s, request = server.lola(query_id, universe_query_id, datasets, "grch38", uk)
 print request
 
+distinct_values = request_data(request, uk)
+
+print distinct_values
