@@ -413,7 +413,7 @@ namespace epidb {
         return true;
       }
 
-      bool get_regions(const std::string &genome, std::vector<std::string> &chromosomes,
+      bool get_regions(const std::string &genome, const std::vector<std::string> &chromosomes,
                        const mongo::BSONObj &regions_query, const bool full_overlap,
                        processing::StatusPtr status, ChromosomeRegionsList &results, std::string &msg,
                        bool reduced_mode)
@@ -425,11 +425,11 @@ namespace epidb {
         size_t chunk_size = ceil(double(chromosomes.size()) / double(max_threads));
 
         for (size_t i = 0; i < max_threads; ++i) {
-          std::vector<std::string>::iterator start = chromosomes.begin() + i * chunk_size;
+          std::vector<std::string>::const_iterator start = chromosomes.begin() + i * chunk_size;
           if (start >= chromosomes.end()) {
             break;
           }
-          std::vector<std::string>::iterator end = start + chunk_size;
+          std::vector<std::string>::const_iterator end = start + chunk_size;
           if (end > chromosomes.end()) {
             end = chromosomes.end();
           }
