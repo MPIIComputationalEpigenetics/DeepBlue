@@ -52,7 +52,7 @@ namespace epidb {
         return {
           parameters::QueryId,
           Parameter("background_query_id", serialize::STRING, "query_id containing the regions that will be used as the background data."),
-          Parameter("datasets", serialize::MAP, "map of datasets - each key name is an identifier and the value is a list containing experiment names or query_ids (you can use both together)."),
+          Parameter("datasets", serialize::MAP, "a map where each key is an identifier and the value is a list containing experiment names or query_ids (you can use both together)."),
           parameters::Genome,
           parameters::UserKey
         };
