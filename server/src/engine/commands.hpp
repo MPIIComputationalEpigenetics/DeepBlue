@@ -63,14 +63,14 @@ namespace epidb {
     static const CommandCategory COLUMN_TYPES("Column Types", "Inserting and listing different column types");
     static const CommandCategory DATA_MODIFICATION("Data Modification", "Operations that modify the data content");
     static const CommandCategory EPIGENETIC_MARKS("Epigenetic marks", "Inserting and listing epigenetic marks");
-    static const CommandCategory ENRICHMENT("Regions Enrichment", "Enrich the genome regions");
+    static const CommandCategory ENRICHMENT("Genomic Regions Enrichment", "Enrich the genome regions");
     static const CommandCategory EXPERIMENTS("Experiments", "Inserting and listing experiments");
     static const CommandCategory EXPRESSIONS("Expressions", "Expression data");
     static const CommandCategory GENERAL_INFORMATION("General Information", "Commands for all types of data");
     static const CommandCategory GENOMES("Genomes", "Inserting and listing genomes");
     static const CommandCategory GENES("Genes", "Gene models and genes identifiers");
     static const CommandCategory HELP("Help", "Help information about DeepBlue usage");
-    static const CommandCategory OPERATIONS("Regions Operations", "Operating on the data regions");
+    static const CommandCategory OPERATIONS("Genomic Regions Operations", "Operating on the data regions");
     static const CommandCategory REQUESTS("Requests", "Requests status information and results");
     static const CommandCategory PROJECTS("Projects", "Inserting and listing projects");
     static const CommandCategory SAMPLES("Samples", "Inserting and listing samples");
