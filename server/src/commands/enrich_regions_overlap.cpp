@@ -39,20 +39,20 @@
 namespace epidb {
   namespace command {
 
-    class LolaCommand: public Command {
+    class EnrichRegionsGoTermsCommand: public Command {
 
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::OPERATIONS, "Build a matrix containing the aggregation result of the the experiments data by the aggregation boundaries.");
+        return CommandDescription(categories::ENRICHMENT, "Enrich the regions based on regions overlap analysis.");
       }
 
       static Parameters parameters_()
       {
         return {
           parameters::QueryId,
-          Parameter("universe_query_id", serialize::STRING, "map with experiments names and columns to be processed. Example : {'wgEncodeBroadHistoneDnd41H3k27acSig.wig':'VALUE', 'wgEncodeBroadHistoneCd20ro01794H3k27acSig.wig':'VALUE'}"),
-          Parameter("databases", serialize::MAP, "aggregation function name: min, max, sum, mean, var, sd, median, count, boolean"),
+          Parameter("background_query_id", serialize::STRING, "query_id containing the regions that will be used as the background regions"),
+          Parameter("databases", serialize::MAP, "map of datasets, where map item is a string with the dataset name and a list with experiment names or query_ids."),
           parameters::Genome,
           parameters::UserKey
         };
@@ -61,12 +61,12 @@ namespace epidb {
       static Parameters results_()
       {
         return {
-          Parameter("lola", serialize::STRING, "the score matrix containing the summarized data")
+          Parameter("lola", serialize::STRING, "Request ID - Use it to retrieve the result with info() and get_request_data(). The result is a list containing the datasets that overlap with the query_id regions.")
         };
       }
 
     public:
-      LolaCommand() : Command("lola", parameters_(), results_(), desc_()) {}
+      EnrichRegionsGoTermsCommand() : Command("enrich_region_overlap", parameters_(), results_(), desc_()) {}
 
       virtual bool run(const std::string &ip,
                        const serialize::Parameters &parameters, serialize::Parameters &result) const
@@ -130,6 +130,6 @@ namespace epidb {
         return true;
       }
 
-    } lolaCommand;
+    } enrichRegionsOverlap;
   }
 }

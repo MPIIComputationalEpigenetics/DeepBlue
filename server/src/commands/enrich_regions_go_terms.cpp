@@ -32,12 +32,12 @@
 namespace epidb {
   namespace command {
 
-    class CalculateEnrichmentCommand: public Command {
+    class EnrichRegionsGoTermsCommand: public Command {
 
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::OPERATIONS, " Enrich the regions based on Gene Ontology terms.");
+        return CommandDescription(categories::ENRICHMENT, "Enrich the regions based on Gene Ontology terms.");
       }
 
       static  Parameters parameters_()
@@ -52,12 +52,12 @@ namespace epidb {
       static Parameters results_()
       {
         return {
-          Parameter("request_id", serialize::STRING, "Request ID - Use it to retrieve the result with info() and get_request_data()")
+          Parameter("request_id", serialize::STRING, "Request ID - Use it to retrieve the result with info() and get_request_data(). The result is a list containing the GO terms that overlap with the query_id regions.")
         };
       }
 
     public:
-      CalculateEnrichmentCommand() : Command("calculate_enrichment", parameters_(), results_(), desc_()) {}
+      EnrichRegionsGoTermsCommand() : Command("enrich_regions_go_terms", parameters_(), results_(), desc_()) {}
 
       virtual bool run(const std::string &ip,
                        const serialize::Parameters &parameters, serialize::Parameters &result) const
@@ -89,6 +89,6 @@ namespace epidb {
         result.add_string(request_id);
         return true;
       }
-    } calculateEnrichmentCommand;
+    } enrichRegionsGoTermsCommand;
   }
 }
