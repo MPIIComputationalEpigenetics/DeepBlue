@@ -39,7 +39,7 @@
 namespace epidb {
   namespace command {
 
-    class EnrichRegionsGoTermsCommand: public Command {
+    class EnrichRegionsOverlapCommand: public Command {
 
     private:
       static CommandDescription desc_()
@@ -66,7 +66,7 @@ namespace epidb {
       }
 
     public:
-      EnrichRegionsGoTermsCommand() : Command("enrich_region_overlap", parameters_(), results_(), desc_()) {}
+      EnrichRegionsOverlapCommand() : Command("enrich_region_overlap", parameters_(), results_(), desc_()) {}
 
       virtual bool run(const std::string &ip,
                        const serialize::Parameters &parameters, serialize::Parameters &result) const
@@ -130,6 +130,6 @@ namespace epidb {
         return true;
       }
 
-    } enrichRegionsOverlap;
+    } enrichRegionsOverlapCommand;
   }
 }
