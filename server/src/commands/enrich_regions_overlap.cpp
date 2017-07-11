@@ -61,7 +61,7 @@ namespace epidb {
       static Parameters results_()
       {
         return {
-          Parameter("lola", serialize::STRING, "Request ID - Use it to retrieve the result with info() and get_request_data(). The result is a list containing the datasets that overlap with the query_id regions.")
+          Parameter("request_id", serialize::STRING, "Request ID - Use it to retrieve the result with info() and get_request_data(). The result is a list containing the datasets that overlap with the query_id regions.")
         };
       }
 
