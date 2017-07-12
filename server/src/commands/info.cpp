@@ -244,13 +244,13 @@ namespace epidb {
               ok = ok && dba::info::id_to_name(upload_info, msg);
               type = "experiment";
             } else if (id.compare(0, 1, "q") == 0) {
-              ok = dba::info::get_query(id, metadata, msg);
+              ok = dba::info::get_query(id, obj_metadata, msg);
               if (!user.is_admin() && metadata["user"] != user.get_id()) {
                 result.add_error(Error::m(ERR_PERMISSION_QUERY, id));
                 return false;
               }
-              ok = ok && dba::info::id_to_name(metadata, msg);
               type = "query";
+              std::cerr << obj_metadata.toString() << std::endl;
             } else if (id.compare(0, 2, "tr") == 0) {
               ok = dba::info::get_tiling_region(id, metadata, msg);
               ok = ok && dba::info::id_to_name(metadata, msg);

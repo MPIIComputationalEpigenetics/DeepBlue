@@ -488,9 +488,16 @@ namespace epidb {
 
     serialize::ParameterPtr bson_to_parameters(const mongo::BSONObj & o)
     {
-      serialize::ParameterPtr parameter(new serialize::MapParameter());
+      serialize::ParameterPtr parameter;
 
-      for (mongo::BSONObj::iterator it = o.begin(); it.more(); ) {
+      bool isArray = o.couldBeArray() && !o.isEmpty();
+      if (isArray) {
+        parameter = serialize::ParameterPtr(new serialize::ListParameter());
+      } else {
+        parameter = serialize::ParameterPtr(new serialize::MapParameter());
+      }
+
+      for (auto it = o.begin(); it.more(); ) {
         mongo::BSONElement e = it.next();
 
         std::string fieldname = e.fieldName();
@@ -499,7 +506,12 @@ namespace epidb {
           continue;
         }
 
-        parameter->add_child(fieldname, element_to_parameter(e));
+        if (isArray) {
+          parameter->add_child(element_to_parameter(e));
+        } else {
+          std::cerr << "field name: " << fieldname << " - ";
+          parameter->add_child(fieldname, element_to_parameter(e));
+        }
       }
 
       return parameter;

@@ -326,33 +326,41 @@ namespace epidb {
         return true;
       }
 
-      bool get_query(const std::string &id, std::map<std::string, std::string> &res, std::string &msg)
+      bool get_query(const std::string &id, mongo::BSONObj &res, std::string &msg)
       {
         mongo::BSONObj result;
         if (!data::query(id, result, msg))  {
           return false;
         }
 
-        res["_id"] = utils::bson_to_string(result["_id"]);
-        res["user"] = utils::bson_to_string(result["user"]);
-        res["type"] = utils::bson_to_string(result["type"]);
+
+        mongo::BSONObjBuilder bob;
+        std::cerr << result.toString() << std::endl;
+
+        bob.append(result["_id"]);
+        bob.append(result["type"]);
+
+
+        const std::string user_id = result["user"].String();
+        std::string user_name;
+        if (!dba::users::get_user_name_by_id(user_id, user_name, msg)) {
+          return false;
+        }
+        bob.append("user", user_name);
 
         mongo::BSONObjBuilder arg_builder;
-        mongo::BSONObj args = result.getField("args").Obj();
-        mongo::BSONObj::iterator it = args.begin();
+        auto it = result.getField("args").Obj().begin();
         while (it.more()) {
           mongo::BSONElement e = it.next();
           std::string fieldName = std::string(e.fieldName());
-          if (fieldName == "start") {
-            arg_builder.appendNumber("start", e.Int());
-          } else if (fieldName == "end") {
-            arg_builder.appendNumber("end", e.Int());
-          } else if (fieldName.compare(0, 5, "norm_") != 0) {
+          if (fieldName.compare(0, 5, "norm_") != 0) {
             arg_builder.append(e);
           }
         }
 
-        res["args"] = arg_builder.obj().jsonString(mongo::Strict, false);
+        bob.append("args", arg_builder.obj());
+        res = bob.obj();
+
         return true;
       }
 
