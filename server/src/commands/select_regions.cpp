@@ -206,15 +206,10 @@ namespace epidb {
           args_builder.append("end", (int) end);
         }
 
-
-        std::set<std::string> genomes_s;
         std::set<std::string> norm_genomes_s;
-
-        std::vector<serialize::ParameterPtr>::iterator git;
-        for (git = genomes.begin(); git != genomes.end(); ++git) {
+        for (auto git = genomes.begin(); git != genomes.end(); ++git) {
           std::string genome = (*git)->as_string();
           std::string norm_genome = utils::normalize_name(genome);
-          genomes_s.insert(genome);
           norm_genomes_s.insert(norm_genome);
           has_exp_or_genome = true;
         }
@@ -224,32 +219,17 @@ namespace epidb {
           return false;
         }
 
-        // We have to load the genomes from the experiments if the user did not specify the genome in the query
-        if (genomes_s.empty()) {
-          for (auto experiment_norm_name : norm_names) {
-            std::string genome;
-            if (!dba::experiments::get_genome(experiment_norm_name, genome, msg)) {
-              return false;
-            }
-            genomes_s.insert(genome);
-            norm_genomes_s.insert(genome);
-          }
+        if (!norm_genomes_s.empty()) {
+          args_builder.append("norm_genomes", norm_genomes_s);
         }
 
         std::set<std::string> chroms;
-        if (chromosomes.empty()) {
-          if (!dba::genomes::get_chromosomes(genomes_s, chroms, msg)) {
-            result.add_error(msg);
-            return false;
-          }
-        } else {
+        if (!chromosomes.empty()) {
           for (auto parameter_ptr : chromosomes) {
             chroms.insert(parameter_ptr->as_string());
           }
+          args_builder.append("chromosomes", chroms);
         }
-        args_builder.append("chromosomes", chroms);
-        args_builder.append("genomes", genomes_s);
-        args_builder.append("norm_genomes", norm_genomes_s);
 
         std::string query_id;
         if (!dba::query::store_query("experiment_select", args_builder.obj(), user_key, query_id, msg)) {

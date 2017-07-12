@@ -97,20 +97,13 @@ namespace epidb {
         args_builder.append("norm_genome", norm_genome);
         args_builder.append("size", size);
 
-        // if no chromosomes were provided, default to all chromosomes of the genome
         std::set<std::string> chroms;
-        if (chromosomes.empty()) {
-          if (!dba::genomes::get_chromosomes(norm_genome, chroms, msg)) {
-            result.add_error(msg);
-            return false;
+        if (!chromosomes.empty()) {
+          for (auto parameter_ptr : chromosomes) {
+            chroms.insert(parameter_ptr->as_string());
           }
-        } else {
-          std::vector<serialize::ParameterPtr>::iterator it;
-          for (it = chromosomes.begin(); it != chromosomes.end(); ++it) {
-            chroms.insert((**it).as_string());
-          }
+          args_builder.append("chromosomes", chroms);
         }
-        args_builder.append("chromosomes", chroms);
 
         std::string query_id;
         if (!dba::query::store_query("tiling", args_builder.obj(), user_key, query_id, msg)) {

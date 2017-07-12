@@ -129,7 +129,6 @@ namespace epidb {
           return false;
         }
 
-
         std::vector<std::string> user_projects_names;
         for (const auto& project : user_projects) {
           user_projects_names.push_back(project.name);
@@ -144,32 +143,13 @@ namespace epidb {
           args_builder.append("end", (int) end);
         }
 
-        std::set<std::string> genomes_s;
-        std::set<std::string> norm_genomes_s;
-        for (auto experiment_norm_name : norm_names) {
-          std::string genome;
-          if (!dba::experiments::get_genome(experiment_norm_name, genome, msg)) {
-            return false;
-          }
-          genomes_s.insert(genome);
-          norm_genomes_s.insert(genome);
-        }
-
         std::set<std::string> chroms;
-        if (chromosomes.empty()) {
-          if (!dba::genomes::get_chromosomes(genomes_s, chroms, msg)) {
-            result.add_error(msg);
-            return false;
-          }
-        } else {
+        if (!chromosomes.empty()) {
           for (auto parameter_ptr : chromosomes) {
             chroms.insert(parameter_ptr->as_string());
           }
+          args_builder.append("chromosomes", chroms);
         }
-
-        args_builder.append("chromosomes", chroms);
-        args_builder.append("genomes", genomes_s);
-        args_builder.append("norm_genomes", norm_genomes_s);
 
         std::string query_id;
         if (!dba::query::store_query("experiment_select", args_builder.obj(), user_key, query_id, msg)) {

@@ -588,14 +588,37 @@ namespace epidb {
           return false;
         }
 
-        std::vector<std::string> chromosomes = utils::build_vector(args["chromosomes"].Array());
-        std::set<std::string> genomes = utils::build_set(args["norm_genomes"].Array());
+        std::set<std::string> genomes;
+        if (args.hasField("norm_genomes")) {
+          genomes = utils::build_set(args["norm_genomes"].Array());
+        } else {
+          std::vector<std::string> norm_names = utils::build_vector(args["norm_experiment_name"].Array());
+          for (auto experiment_norm_name : norm_names) {
+            std::string genome;
+            if (!dba::experiments::get_genome(experiment_norm_name, genome, msg)) {
+              return false;
+            }
+            genomes.insert(genome);
+          }
+        }
+
+        std::vector<std::string> chromosomes;
+        if (args.hasField("chromosomes")) {
+          chromosomes = utils::build_vector(args["chromosomes"].Array());
+        } else {
+          std::set<std::string> chrom;
+          if (!dba::genomes::get_chromosomes(genomes, chrom, msg)) {
+            return false;
+          }
+          chromosomes = std::vector<std::string>(chrom.begin(), chrom.end());
+        }
 
         std::vector<ChromosomeRegionsList> genome_regions;
 
         // get region data for all genomes
         for (const auto& genome : genomes) {
           ChromosomeRegionsList reg;
+          std::cerr << "GENOME: " << genome << std::endl;
           if (!retrieve::get_regions(genome, chromosomes, regions_query, false, status, reg, msg, reduced_mode)) {
             return false;
           }
@@ -798,12 +821,22 @@ namespace epidb {
         mongo::BSONObj regions_query;
         mongo::BSONObj args = query["args"].Obj();
 
-        std::vector<std::string> chromosomes = utils::build_vector(args["chromosomes"].Array());
         std::string motif = args["motif"].String();
         std::string genome = args["genome"].String();
         bool overlap = args["overlap"].Bool();
         long long start = args["start"].Number();
         long long end = args["end"].Number();
+
+        std::vector<std::string> chromosomes;
+        if (args.hasField("chromosomes")) {
+          chromosomes = utils::build_vector(args["chromosomes"].Array());
+        } else {
+          std::set<std::string> chrom;
+          if (!dba::genomes::get_chromosomes(genome, chrom, msg)) {
+            return false;
+          }
+          chromosomes = std::vector<std::string>(chrom.begin(), chrom.end());
+        }
 
         if (!process_pattern(genome, motif, overlap, chromosomes, start, end, regions, msg)) {
           return false;
@@ -1153,10 +1186,14 @@ namespace epidb {
         const size_t tiling_size = args["size"].Int();
 
         std::vector<std::string> chromosomes;
-        std::vector<mongo::BSONElement> chr_arr = args["chromosomes"].Array();
-        std::vector<mongo::BSONElement>::iterator it;
-        for (it = chr_arr.begin(); it != chr_arr.end(); ++it) {
-          chromosomes.push_back(it->str());
+        if (args.hasField("chromosomes")) {
+          chromosomes = utils::build_vector(args["chromosomes"].Array());
+        } else {
+          std::set<std::string> chrom;
+          if (!dba::genomes::get_chromosomes(genome, chrom, msg)) {
+            return false;
+          }
+          chromosomes = std::vector<std::string>(chrom.begin(), chrom.end());
         }
 
         genomes::GenomeInfoPtr genome_info;

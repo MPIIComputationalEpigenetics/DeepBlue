@@ -109,19 +109,12 @@ namespace epidb {
         args_builder.append("norm_genome", norm_genome);
 
         std::set<std::string> chroms;
-        if (chromosomes.empty()) {
-          if (!dba::genomes::get_chromosomes(norm_genome, chroms, msg)) {
-            result.add_error(msg);
-            return false;
+        if (!chromosomes.empty()) {
+          for (auto parameter_ptr : chromosomes) {
+            chroms.insert(parameter_ptr->as_string());
           }
-        } else {
-          std::vector<serialize::ParameterPtr>::iterator it;
-          for (it = chromosomes.begin(); it != chromosomes.end(); ++it) {
-            chroms.insert((**it).as_string());
-          }
+          args_builder.append("chromosomes", chroms);
         }
-
-        args_builder.append("chromosomes", chroms);
 
         if (start > 0) {
           args_builder.append("start", (int) start);

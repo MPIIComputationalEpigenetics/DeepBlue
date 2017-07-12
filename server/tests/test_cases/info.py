@@ -131,9 +131,8 @@ class TestGetInfoCommand(helpers.TestCase):
     self.assertSuccess(res, data)
     self.assertEqual(data[0]['_id'], qid)
     self.assertEqual(data[0]['type'], 'experiment_select')
-    self.assertEqual(data[0]['args'], '{ "experiment_name" : [ "hg19_chr1_1" ], "epigenetic_mark" : [ "Methylation" ], "sample_id" : [ "s1" ], "project" : [ "ENCODE" ], "technique" : [ "tech1" ], "start" : 713500, "end" : 850000, "chromosomes" : [ "chr1" ], "genomes" : [ "hg19" ] }')
+    self.assertEqual(data[0]['args'], { "experiment_name" : [ "hg19_chr1_1" ], "epigenetic_mark" : [ "Methylation" ], "sample_id" : [ "s1" ], "project" : [ "ENCODE" ], "technique" : [ "tech1" ], "start" : 713500, "end" : 850000, "chromosomes" : [ "chr1" ]})
     self.assertEqual(data[0]['user'], 'test_admin')
-
 
   def test_biosource_info(self):
     epidb = DeepBlueClient(address="localhost", port=31415)
