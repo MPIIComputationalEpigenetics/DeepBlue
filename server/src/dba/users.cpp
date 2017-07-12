@@ -135,12 +135,26 @@ namespace epidb {
           return false;
         }
 
+        std::vector<utils::IdName> private_projects;
+        if (result.hasField(datatypes::User::FIELD_PROJECTS)) {
+          mongo::BSONObj user_projects_bson = BSON("_id" << BSON("$in" << result[datatypes::User::FIELD_PROJECTS]));
+          if (!helpers::get(Collections::PROJECTS(), user_projects_bson, private_projects, msg)) {
+            return false;
+          }
+        }
+
         std::vector<std::string> public_projects_names;
         for (const auto& pp: public_projects) {
           public_projects_names.push_back(pp.name);
         }
 
-        user = datatypes::User(result, public_projects_names);
+        std::vector<std::string> private_projects_names;
+        for (const auto& pp: private_projects) {
+          private_projects_names.push_back(pp.name);
+        }
+
+
+        user = datatypes::User(result, public_projects_names, private_projects_names);
 
         return true;
       }

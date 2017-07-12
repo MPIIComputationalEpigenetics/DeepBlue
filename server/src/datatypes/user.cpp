@@ -66,7 +66,7 @@ namespace epidb {
     }
 
 
-    User::User(mongo::BSONObj bsonobj, std::vector<std::string>& public_projects)
+    User::User(mongo::BSONObj bsonobj, std::vector<std::string>& public_projects, std::vector<std::string>& private_projects)
     {
       _name = bsonobj[FIELD_NAME].str();
       _email = bsonobj[FIELD_EMAIL].str();
@@ -80,11 +80,10 @@ namespace epidb {
       if (bsonobj.hasElement(FIELD_MEMORY_LIMIT)) {
         _memory_limit = bsonobj[FIELD_MEMORY_LIMIT].safeNumberLong();
       }
-      if (bsonobj.hasElement(FIELD_PROJECTS)) {
-        _projects_member = utils::build_vector(bsonobj[FIELD_PROJECTS].Array());
-        _all_projects = _projects_member;
-        _all_projects.insert(_all_projects.end(), _projects_member.begin(), _projects_member.end());
-      }
+
+      _projects_member = private_projects;
+      _all_projects = _projects_member;
+      _all_projects.insert(_all_projects.end(), public_projects.begin(), public_projects.end());
     }
 
     void User::write_to_BSONObjBuilder(mongo::BSONObjBuilder& builder)
@@ -223,6 +222,11 @@ namespace epidb {
     std::vector<std::string> User::projects() const
     {
       return _all_projects;
+    }
+
+    std::vector<std::string> User::projects_member() const
+    {
+      return _projects_member;
     }
 
     bool User::is_admin() const
