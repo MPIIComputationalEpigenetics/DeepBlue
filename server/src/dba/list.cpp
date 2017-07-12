@@ -119,10 +119,10 @@ namespace epidb {
         mongo::BSONObj private_projects = BSON("public" << false);
         mongo::BSONObj full_query;
 
-        std::vector<std::string> user_projects = user.projects();
+        std::vector<std::string> user_member_projects = user.projects_member();
 
-        if (!user_projects.empty()) {
-          mongo::BSONObj user_projects_bson = BSON("_id" << BSON("$nin" << utils::build_normalized_array(user_projects)));
+        if (!user_member_projects.empty()) {
+          mongo::BSONObj user_projects_bson = BSON("_id" << BSON("$nin" << utils::build_normalized_array(user_member_projects)));
           full_query = BSON("$and" << BSON_ARRAY(private_projects << user_projects_bson));
         } else {
           full_query = private_projects;
@@ -394,8 +394,8 @@ namespace epidb {
           }
         } else {
           std::vector<std::string> user_projects_names = user.projects();
-          experiments_query_builder.append("norm_project", utils::build_normalized_array(user_projects_names));
-          experiments_query_builder.append("project", utils::build_array(user_projects_names));
+          experiments_query_builder.append("norm_project", BSON("$in" << utils::build_normalized_array(user_projects_names)));
+          experiments_query_builder.append("project", BSON("$in" << utils::build_array(user_projects_names)));
         }
         if (args.hasField("technique")) {
           if (args["technique"].type() == mongo::Array) {
@@ -423,6 +423,8 @@ namespace epidb {
         }
         experiments_query_builder.append("upload_info.done", true);
         query = experiments_query_builder.obj();
+
+  std::cerr << "  query.toString() : " << query.toString() << std::endl;
 
         return true;
       }
