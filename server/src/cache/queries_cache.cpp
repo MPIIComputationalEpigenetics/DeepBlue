@@ -44,7 +44,7 @@ namespace epidb {
       std::cerr << "LOADING " << qk.query_id << std::endl;
 
       query::QUERY_RESULT result;
-      result.success = dba::query::retrieve_query(qk.user_key, qk.query_id, qk.status, result.regions, result.msg);
+      result.success = dba::query::retrieve_query(qk.user, qk.query_id, qk.status, result.regions, result.msg);
 
       return result;
     }
@@ -52,18 +52,19 @@ namespace epidb {
     lru_cache_using_boost<query::QUERY_KEY, query::QUERY_RESULT, boost::bimaps::set_of> QUERY_CACHE(fn, 32);
 
 
-    bool get_query_cache(const std::string &user_key, const std::string &query_id,
+    bool get_query_cache(const datatypes::User& user,
+                         const std::string &query_id,
                          processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg)
     {
       query::QUERY_KEY qk;
-      qk.user_key = user_key;
+      qk.user = user;
       qk.query_id = query_id;
       qk.status = status;
 
       // this query is being processed
       if (waiting_list.find(qk.query_id) != waiting_list.end()) {
         std::unique_lock<std::mutex> lk(m);
-        cv.wait(lk, [qk]{
+        cv.wait(lk, [qk] {
           return waiting_list.find(qk.query_id) == waiting_list.end();
         });
       }

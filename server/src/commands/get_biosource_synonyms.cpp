@@ -91,7 +91,7 @@ namespace epidb {
         }
 
         std::vector<utils::IdName> syns;
-        if (!dba::cv::get_biosource_synonyms("", biosource_name, norm_biosource_name, is_biosource, user_key, syns, msg)) {
+        if (!dba::cv::get_biosource_synonyms("", biosource_name, norm_biosource_name, is_biosource, syns, msg)) {
           result.add_error(msg);
           return false;
         }

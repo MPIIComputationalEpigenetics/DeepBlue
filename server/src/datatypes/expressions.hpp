@@ -27,6 +27,7 @@
 
 #include "metadata.hpp"
 #include "regions.hpp"
+#include "user.hpp"
 
 #include "../extras/utils.hpp"
 
@@ -41,9 +42,14 @@ namespace epidb {
 
     protected:
       virtual bool build_expression_type_metadata(const std::string &sample_id, const int replica,
-          const std::string &format, const std::string &project, const std::string &norm_project,
-          const mongo::BSONObj& extra_metadata_obj, const std::string &user_key, const std::string &ip,
-          int &dataset_id, std::string &model_id, mongo::BSONObj &gene_model_metadata,
+          const std::string &format,
+          const std::string &project,
+          const std::string &norm_project,
+          const mongo::BSONObj& extra_metadata_obj,
+          const std::string &ip,
+          int &dataset_id,
+          std::string &gene_model_id,
+          mongo::BSONObj &gene_model_metadata,
           std::string &msg);
 
     public:
@@ -65,11 +71,12 @@ namespace epidb {
                              const std::vector<std::string> &genes, const std::vector<std::string> &project,
                              const std::string& norm_gene_model,  ChromosomeRegionsList& chromosomeRegionsList, std::string& msg) =0;
 
-      virtual bool build_upload_info(const std::string &user_key, const std::string &client_address, const std::string &content_format,
+      virtual bool build_upload_info(const datatypes::User& user, const std::string &client_address, const std::string &content_format,
                                      mongo::BSONObj &upload_info, std::string &msg);
 
-      virtual bool build_list_expressions_query(const std::vector<serialize::ParameterPtr> sample_ids, const std::vector<serialize::ParameterPtr> replicas,
-          const std::vector<serialize::ParameterPtr> projects, const std::string user_key,
+      virtual bool build_list_expressions_query(const datatypes::User& user,
+          const std::vector<serialize::ParameterPtr> sample_ids, const std::vector<serialize::ParameterPtr> replicas,
+          const std::vector<serialize::ParameterPtr> projects,
           mongo::BSONObj& query, std::string& msg);
 
       virtual mongo::BSONObj to_bson(const int dataset_id, const std::string& gene_id, const ISerializablePtr& row) =0;
@@ -77,10 +84,11 @@ namespace epidb {
       virtual bool update_upload_info(const std::string &collection, const std::string &annotation_id,
                                       const size_t total_size, const size_t total_genes, std::string &msg) =0;
 
-      virtual bool insert(const std::string& sample_id, const int replica, datatypes::Metadata extra_metadata,
+      virtual bool insert(const datatypes::User& user,
+                          const std::string& sample_id, const int replica, datatypes::Metadata extra_metadata,
                           const ISerializableFilePtr file, const std::string &format,
                           const std::string& project, const std::string& norm_project,
-                          const std::string &user_key, const std::string &ip,
+                          const std::string &ip,
                           std::string &expression_id, std::string &msg) =0;
 
       virtual bool list(const mongo::BSONObj& query, std::vector<utils::IdName> &result, std::string &msg) =0;

@@ -76,11 +76,12 @@ namespace epidb {
       }
 
 
-      bool add_gene_ontology_term(const std::string &go_id,
+      bool add_gene_ontology_term(const datatypes::User& user,
+                                  const std::string &go_id,
                                   const std::string &go_label,
                                   const std::string &description, const std::string &norm_description,
                                   const std::string &go_namespace,
-                                  const std::string &user_key,
+
                                   std::string &gene_ontology_term_id, std::string &msg)
       {
         {
@@ -107,12 +108,7 @@ namespace epidb {
         mongo::BSONObjBuilder create_gene_ontology_term_builder;
         create_gene_ontology_term_builder.appendElements(search_data);
 
-
-        utils::IdName user;
-        if (!users::get_user(user_key, user, msg)) {
-          return false;
-        }
-        create_gene_ontology_term_builder.append("user", user.id);
+        create_gene_ontology_term_builder.append("user", user.id());
         mongo::BSONObj cem = create_gene_ontology_term_builder.obj();
 
         Connection c;

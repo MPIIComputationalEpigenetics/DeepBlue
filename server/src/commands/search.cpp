@@ -106,7 +106,7 @@ namespace epidb {
         }
 
         std::vector<utils::IdName> private_projects_id_names;
-        if (!dba::list::private_projects(user_key, private_projects_id_names, msg)) {
+        if (!dba::list::private_projects(user, private_projects_id_names, msg)) {
           result.add_error(msg);
           return false;
         }

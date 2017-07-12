@@ -261,17 +261,13 @@ namespace epidb {
       return true;
     }
 
-    bool build_upload_info(const std::string &user_key, const std::string &client_address, const std::string &content_format,
+    bool build_upload_info(const datatypes::User& user,
+                           const std::string &client_address, const std::string &content_format,
                            mongo::BSONObj &upload_info, std::string &msg)
     {
-      utils::IdName user;
-      if (!users::get_user(user_key, user, msg)) {
-        return false;
-      }
-
       mongo::BSONObjBuilder upload_info_builder;
 
-      upload_info_builder.append("user", user.id);
+      upload_info_builder.append("user", user.id());
       upload_info_builder.append("content_format", content_format);
       upload_info_builder.append("done", false);
       upload_info_builder.append("client_address", client_address);
@@ -302,14 +298,15 @@ namespace epidb {
     }
 
 
-    bool insert_experiment(const std::string &name, const std::string &norm_name,
+    bool insert_experiment(const datatypes::User& user,
+                           const std::string &name, const std::string &norm_name,
                            const std::string &genome, const std::string &norm_genome,
                            const std::string &epigenetic_mark, const std::string &norm_epigenetic_mark,
                            const std::string &sample_id, const std::string &technique, const std::string &norm_technique,
                            const std::string &project, const std::string &norm_project,
                            const std::string &description, const std::string &norm_description,
                            const datatypes::Metadata &extra_metadata,
-                           const std::string &user_key, const std::string &ip,
+                           const std::string &ip,
                            const parser::WigPtr &wig,
                            std::string &experiment_id, std::string &msg)
     {
@@ -321,12 +318,12 @@ namespace epidb {
       int dataset_id;
       if (!experiments::build_metadata(name, norm_name, genome, norm_genome, epigenetic_mark, norm_epigenetic_mark,
                                        sample_id, technique, norm_technique, project, norm_project, description, norm_description, extra_metadata_obj,
-                                       user_key, ip, parser::FileFormat::wig_format(), dataset_id,  experiment_id, experiment_metadata, msg)) {
+                                       ip, parser::FileFormat::wig_format(), dataset_id,  experiment_id, experiment_metadata, msg)) {
         return false;
       }
 
       mongo::BSONObj upload_info;
-      if (!build_upload_info(user_key, ip, "signal", upload_info, msg)) {
+      if (!build_upload_info(user, ip, "signal", upload_info, msg)) {
         return false;
       }
       mongo::BSONObjBuilder experiment_builder;
@@ -345,7 +342,7 @@ namespace epidb {
       if (!search::insert_full_text(Collections::EXPERIMENTS(), experiment_id, experiment_metadata, msg)) {
         c.done();
         std::string new_msg;
-        if (!remove::experiment(experiment_id, user_key, new_msg)) {
+        if (!remove::experiment(user, experiment_id, new_msg)) {
           msg = msg + " " + new_msg;
         }
         return false;
@@ -355,7 +352,7 @@ namespace epidb {
       if (!genomes::get_genome_info(genome, genome_info, msg)) {
         c.done();
         std::string new_msg;
-        if (!remove::experiment(experiment_id, user_key, new_msg)) {
+        if (!remove::experiment(user, experiment_id, new_msg)) {
           msg = msg + " " + new_msg;
         }
         return false;
@@ -381,7 +378,7 @@ namespace epidb {
           }
           c.done();
           std::string new_msg;
-          if (!remove::experiment(experiment_id, user_key, new_msg)) {
+          if (!remove::experiment(user, experiment_id, new_msg)) {
             msg = msg + " " + new_msg;
           }
           return false;
@@ -427,7 +424,7 @@ namespace epidb {
         if (!genome_info->chromosome_size(internal_chromosome, size, msg)) {
           c.done();
           std::string new_msg;
-          if (!remove::experiment(experiment_id, user_key, new_msg)) {
+          if (!remove::experiment(user, experiment_id, new_msg)) {
             msg = msg + " " + new_msg;
           }
           return false;
@@ -443,7 +440,7 @@ namespace epidb {
               msg = c->getLastError();
               c.done();
               std::string new_msg;
-              if (!remove::experiment(experiment_id, user_key, new_msg)) {
+              if (!remove::experiment(user, experiment_id, new_msg)) {
                 msg = msg + " " + new_msg;
               }
               return false;
@@ -463,7 +460,7 @@ namespace epidb {
             msg = c->getLastError();
             c.done();
             std::string new_msg;
-            if (!remove::experiment(experiment_id, user_key, new_msg)) {
+            if (!remove::experiment(user, experiment_id, new_msg)) {
               msg = msg + " " + new_msg;
             }
             return false;
@@ -479,7 +476,7 @@ namespace epidb {
           msg = c->getLastError();
           c.done();
           std::string new_msg;
-          if (!remove::experiment(experiment_id, user_key, new_msg)) {
+          if (!remove::experiment(user, experiment_id, new_msg)) {
             msg = msg + " " + new_msg;
           }
           return false;
@@ -489,7 +486,7 @@ namespace epidb {
 
       if (!update_upload_info(Collections::EXPERIMENTS(), experiment_id, total_size, msg)) {
         std::string new_msg;
-        if (!remove::experiment(experiment_id, user_key, new_msg)) {
+        if (!remove::experiment(user, experiment_id, new_msg)) {
           msg = msg + " " + new_msg;
         }
         return false;
@@ -499,14 +496,15 @@ namespace epidb {
       return true;
     }
 
-    bool insert_experiment(const std::string &name, const std::string &norm_name,
+    bool insert_experiment(const datatypes::User& user,
+                           const std::string &name, const std::string &norm_name,
                            const std::string &genome, const std::string &norm_genome,
                            const std::string &epigenetic_mark, const std::string &norm_epigenetic_mark,
                            const std::string &sample_id, const std::string &technique, const std::string &norm_technique,
                            const std::string &project, const std::string &norm_project,
                            const std::string &description, const std::string &norm_description,
                            const datatypes::Metadata &extra_metadata,
-                           const std::string &user_key, const std::string &ip,
+                           const std::string &ip,
                            const parser::ChromosomeRegionsMap &map_regions,
                            const parser::FileFormat &format,
                            std::string &experiment_id, std::string &msg)
@@ -518,7 +516,7 @@ namespace epidb {
                                        epigenetic_mark, norm_epigenetic_mark,
                                        sample_id, technique, norm_technique, project, norm_project,
                                        description, norm_description, extra_metadata_obj,
-                                       user_key, ip, format,
+                                       ip, format,
                                        dataset_id,  experiment_id, experiment_metadata, msg)) {
         return false;
       }
@@ -527,7 +525,7 @@ namespace epidb {
       bool trim_to_chromosome_size = extra_metadata.find("__trim_to_chromosome_size__") != extra_metadata.end();
 
       mongo::BSONObj upload_info;
-      if (!build_upload_info(user_key, ip, "peaks", upload_info, msg)) {
+      if (!build_upload_info(user, ip, "peaks", upload_info, msg)) {
         return false;
       }
 
@@ -548,7 +546,7 @@ namespace epidb {
       if (!search::insert_full_text(Collections::EXPERIMENTS(), experiment_id, experiment_metadata, msg)) {
         c.done();
         std::string new_msg;
-        if (!remove::experiment(experiment_id, user_key, new_msg)) {
+        if (!remove::experiment(user, experiment_id, new_msg)) {
           msg = msg + " " + new_msg;
         }
         return false;
@@ -558,7 +556,7 @@ namespace epidb {
       if (!genomes::get_genome_info(genome, genome_info, msg)) {
         c.done();
         std::string new_msg;
-        if (!remove::experiment(experiment_id, user_key, new_msg)) {
+        if (!remove::experiment(user, experiment_id, new_msg)) {
           msg = msg + " " + new_msg;
         }
         return false;
@@ -577,7 +575,7 @@ namespace epidb {
           }
           c.done();
           std::string new_msg;
-          if (!remove::experiment(experiment_id, user_key, new_msg)) {
+          if (!remove::experiment(user, experiment_id, new_msg)) {
             msg = msg + " " + new_msg;
           }
           return false;
@@ -587,7 +585,7 @@ namespace epidb {
         if (!genome_info->chromosome_size(internal_chromosome, size, msg)) {
           c.done();
           std::string new_msg;
-          if (!remove::experiment(experiment_id, user_key, new_msg)) {
+          if (!remove::experiment(user, experiment_id, new_msg)) {
             msg = msg + " " + new_msg;
           }
           return false;
@@ -609,7 +607,7 @@ namespace epidb {
             msg = out_of_range_message(bed_line.start, bed_line.end, bed_line.chromosome);
             c.done();
             std::string new_msg;
-            if (!remove::experiment(experiment_id, user_key, new_msg)) {
+            if (!remove::experiment(user, experiment_id, new_msg)) {
               msg = msg + " " + new_msg;
             }
             return false;
@@ -619,7 +617,7 @@ namespace epidb {
           if (!fill_region_builder(region_builder, bed_line, format, msg)) {
             c.done();
             std::string new_msg;
-            if (!remove::experiment(experiment_id, user_key, new_msg)) {
+            if (!remove::experiment(user, experiment_id, new_msg)) {
               msg = msg + " " + new_msg;
             }
             return false;
@@ -633,7 +631,7 @@ namespace epidb {
           if (!check_bulk_size(dataset_id, collection, count, block, blocks_bulk, bulk_size, total_size, msg)) {
             c.done();
             std::string new_msg;
-            if (!remove::experiment(experiment_id, user_key, new_msg)) {
+            if (!remove::experiment(user, experiment_id, new_msg)) {
               msg = msg + " " + new_msg;
             }
             return false;
@@ -643,7 +641,7 @@ namespace epidb {
         if (!check_remainings(dataset_id, collection, count, block, blocks_bulk, bulk_size, total_size, msg)) {
           c.done();
           std::string new_msg;
-          if (!remove::experiment(experiment_id, user_key, new_msg)) {
+          if (!remove::experiment(user, experiment_id, new_msg)) {
             msg = msg + " " + new_msg;
           }
           return false;
@@ -652,7 +650,7 @@ namespace epidb {
 
       if (!update_upload_info(Collections::EXPERIMENTS(), experiment_id, total_size, msg)) {
         std::string new_msg;
-        if (!remove::experiment(experiment_id, user_key, new_msg)) {
+        if (!remove::experiment(user, experiment_id, new_msg)) {
           msg = msg + " " + new_msg;
         }
         return false;
@@ -662,11 +660,12 @@ namespace epidb {
       return true;
     }
 
-    bool insert_annotation(const std::string &name, const std::string &norm_name,
+    bool insert_annotation(const datatypes::User& user,
+                           const std::string &name, const std::string &norm_name,
                            const std::string &genome, const std::string &norm_genome,
                            const std::string &description, const std::string &norm_description,
                            const datatypes::Metadata &extra_metadata,
-                           const std::string &user_key, const std::string &ip,
+                           const std::string &ip,
                            const parser::ChromosomeRegionsMap &map_regions,
                            const parser::FileFormat &format,
                            std::string &annotation_id, std::string &msg)
@@ -676,13 +675,13 @@ namespace epidb {
       mongo::BSONObj extra_metadata_obj = datatypes::metadata_to_bson(extra_metadata);
       if (!annotations::build_metadata(name, norm_name, genome, norm_genome,
                                        description, norm_description, extra_metadata_obj,
-                                       user_key, ip, format,
+                                       ip, format,
                                        dataset_id, annotation_id, annotation_metadata, msg)) {
         return false;
       }
 
       mongo::BSONObj upload_info;
-      if (!build_upload_info(user_key, ip, "peaks", upload_info, msg)) {
+      if (!build_upload_info(user, ip, "peaks", upload_info, msg)) {
         return false;
       }
 
@@ -703,7 +702,7 @@ namespace epidb {
       if (!search::insert_full_text(Collections::ANNOTATIONS(), annotation_id, annotation_metadata, msg)) {
         c.done();
         std::string new_msg;
-        if (!remove::annotation(annotation_id, user_key, new_msg)) {
+        if (!remove::annotation(user, annotation_id, new_msg)) {
           msg = msg + " " + new_msg;
         }
         return false;
@@ -713,7 +712,7 @@ namespace epidb {
       if (!genomes::get_genome_info(genome, genome_info, msg)) {
         c.done();
         std::string new_msg;
-        if (!remove::annotation(annotation_id, user_key, new_msg)) {
+        if (!remove::annotation(user, annotation_id, new_msg)) {
           msg = msg + " " + new_msg;
         }
         return false;
@@ -731,7 +730,7 @@ namespace epidb {
         if (!genome_info->internal_chromosome(chrom_lines.first, internal_chromosome, msg)) {
           c.done();
           std::string new_msg;
-          if (!remove::annotation(annotation_id, user_key, new_msg)) {
+          if (!remove::annotation(user, annotation_id, new_msg)) {
             msg = msg + " " + new_msg;
           }
           return false;
@@ -741,7 +740,7 @@ namespace epidb {
         if (!genome_info->chromosome_size(internal_chromosome, size, msg)) {
           c.done();
           std::string new_msg;
-          if (!remove::annotation(annotation_id, user_key, new_msg)) {
+          if (!remove::annotation(user, annotation_id, new_msg)) {
             msg = msg + " " + new_msg;
           }
           return false;
@@ -756,7 +755,7 @@ namespace epidb {
             msg = out_of_range_message(bed_line.start, bed_line.end, bed_line.chromosome);
             c.done();
             std::string new_msg;
-            if (!remove::annotation(annotation_id, user_key, new_msg)) {
+            if (!remove::annotation(user, annotation_id, new_msg)) {
               msg = msg + " " + new_msg;
             }
             return false;
@@ -766,7 +765,7 @@ namespace epidb {
           if (!fill_region_builder(region_builder, bed_line, format, msg)) {
             c.done();
             std::string new_msg;
-            if (!remove::annotation(annotation_id, user_key, new_msg)) {
+            if (!remove::annotation(user, annotation_id, new_msg)) {
               msg = msg + " " + new_msg;
             }
             return false;
@@ -777,7 +776,7 @@ namespace epidb {
           if (!check_bulk_size(dataset_id, collection, count, block, blocks_bulk, bulk_size, total_size, msg)) {
             c.done();
             std::string new_msg;
-            if (!remove::annotation(annotation_id, user_key, new_msg)) {
+            if (!remove::annotation(user, annotation_id, new_msg)) {
               msg = msg + " " + new_msg;
             }
             return false;
@@ -787,7 +786,7 @@ namespace epidb {
         if (!check_remainings(dataset_id, collection, count, block, blocks_bulk, bulk_size, total_size, msg)) {
           c.done();
           std::string new_msg;
-          if (!remove::annotation(annotation_id, user_key, new_msg)) {
+          if (!remove::annotation(user, annotation_id, new_msg)) {
             msg = msg + " " + new_msg;
           }
           return false;
@@ -797,7 +796,7 @@ namespace epidb {
 
       if (!update_upload_info(Collections::ANNOTATIONS(), annotation_id, total_size, msg)) {
         std::string new_msg;
-        if (!remove::annotation(annotation_id, user_key, new_msg)) {
+        if (!remove::annotation(user, annotation_id, new_msg)) {
           msg = msg + " " + new_msg;
         }
         return false;
@@ -807,11 +806,12 @@ namespace epidb {
       return true;
     }
 
-    bool insert_annotation(const std::string &name, const std::string &norm_name,
+    bool insert_annotation(const datatypes::User& user,
+                           const std::string &name, const std::string &norm_name,
                            const std::string &genome, const std::string &norm_genome,
                            const std::string &description, const std::string &norm_description,
                            const datatypes::Metadata &extra_metadata,
-                           const std::string &user_key, const std::string &ip,
+                           const std::string &ip,
                            const ChromosomeRegionsList &regions,
                            const parser::FileFormat &format,
                            std::string &annotation_id, std::string &msg)
@@ -821,13 +821,13 @@ namespace epidb {
       mongo::BSONObj extra_metadata_obj = datatypes::metadata_to_bson(extra_metadata);
       if (!annotations::build_metadata(name, norm_name, genome, norm_genome,
                                        description, norm_description, extra_metadata_obj,
-                                       user_key, ip, format,
+                                       ip, format,
                                        dataset_id, annotation_id, annotation_metadata, msg)) {
         return false;
       }
 
       mongo::BSONObj upload_info;
-      if (!build_upload_info(user_key, ip, "regions", upload_info, msg)) {
+      if (!build_upload_info(user, ip, "regions", upload_info, msg)) {
         return false;
       }
 
@@ -848,7 +848,7 @@ namespace epidb {
       if (!search::insert_full_text(Collections::ANNOTATIONS(), annotation_id, annotation_metadata, msg)) {
         c.done();
         std::string new_msg;
-        if (!remove::annotation(annotation_id, user_key, new_msg)) {
+        if (!remove::annotation(user, annotation_id, new_msg)) {
           msg = msg + " " + new_msg;
         }
         return false;
@@ -858,7 +858,7 @@ namespace epidb {
       if (!genomes::get_genome_info(genome, genome_info, msg)) {
         c.done();
         std::string new_msg;
-        if (!remove::annotation(annotation_id, user_key, new_msg)) {
+        if (!remove::annotation(user, annotation_id, new_msg)) {
           msg = msg + " " + new_msg;
         }
         return false;
@@ -878,7 +878,7 @@ namespace epidb {
         if (!genome_info->internal_chromosome(chromosome, internal_chromosome, msg)) {
           c.done();
           std::string new_msg;
-          if (!remove::annotation(annotation_id, user_key, new_msg)) {
+          if (!remove::annotation(user, annotation_id, new_msg)) {
             msg = msg + " " + new_msg;
           }
           return false;
@@ -887,7 +887,7 @@ namespace epidb {
         if (!genome_info->chromosome_size(internal_chromosome, chromosome_size, msg)) {
           c.done();
           std::string new_msg;
-          if (!remove::annotation(annotation_id, user_key, new_msg)) {
+          if (!remove::annotation(user, annotation_id, new_msg)) {
             msg = msg + " " + new_msg;
           }
           return false;
@@ -902,7 +902,7 @@ namespace epidb {
             msg = out_of_range_message(region->start(), region->end(), chromosome);
             c.done();
             std::string new_msg;
-            if (!remove::annotation(annotation_id, user_key, new_msg)) {
+            if (!remove::annotation(user, annotation_id, new_msg)) {
               msg = msg + " " + new_msg;
             }
             return false;
@@ -917,7 +917,7 @@ namespace epidb {
           if (!check_bulk_size(dataset_id, collection, count, block, blocks_bulk, bulk_size, total_size, msg)) {
             c.done();
             std::string new_msg;
-            if (!remove::annotation(annotation_id, user_key, new_msg)) {
+            if (!remove::annotation(user, annotation_id, new_msg)) {
               msg = msg + " " + new_msg;
             }
             return false;
@@ -926,7 +926,7 @@ namespace epidb {
         if (!check_remainings(dataset_id, collection, count, block, blocks_bulk, bulk_size, total_size, msg)) {
           c.done();
           std::string new_msg;
-          if (!remove::annotation(annotation_id, user_key, new_msg)) {
+          if (!remove::annotation(user, annotation_id, new_msg)) {
             msg = msg + " " + new_msg;
           }
           return false;
@@ -935,7 +935,7 @@ namespace epidb {
 
       if (!update_upload_info(Collections::ANNOTATIONS(), annotation_id, total_size, msg)) {
         std::string new_msg;
-        if (!remove::annotation(annotation_id, user_key, new_msg)) {
+        if (!remove::annotation(user, annotation_id, new_msg)) {
           msg = msg + " " + new_msg;
         }
         return false;
@@ -945,11 +945,12 @@ namespace epidb {
       return true;
     }
 
-    bool insert_annotation(const std::string &name, const std::string &norm_name,
+    bool insert_annotation(const datatypes::User& user,
+                           const std::string &name, const std::string &norm_name,
                            const std::string &genome, const std::string &norm_genome,
                            const std::string &description, const std::string &norm_description,
                            const datatypes::Metadata &extra_metadata,
-                           const std::string &user_key, const std::string &ip,
+                           const std::string &ip,
                            const parser::WigPtr &wig,
                            std::string &annotation_id, std::string &msg)
     {
@@ -959,13 +960,13 @@ namespace epidb {
       int dataset_id;
       if (!annotations::build_metadata(name, norm_name, genome, norm_genome,
                                        description, norm_description, extra_metadata_obj,
-                                       user_key, ip, parser::FileFormat::wig_format(),
+                                       ip, parser::FileFormat::wig_format(),
                                        dataset_id, annotation_id, annotation_metadata, msg)) {
         return false;
       }
 
       mongo::BSONObj upload_info;
-      if (!build_upload_info(user_key, ip, "signal", upload_info, msg)) {
+      if (!build_upload_info(user, ip, "signal", upload_info, msg)) {
         return false;
       }
       mongo::BSONObjBuilder annotation_builder;
@@ -984,7 +985,7 @@ namespace epidb {
       if (!search::insert_full_text(Collections::ANNOTATIONS(), annotation_id, annotation_metadata, msg)) {
         c.done();
         std::string new_msg;
-        if (!remove::annotation(annotation_id, user_key, new_msg)) {
+        if (!remove::annotation(user, annotation_id, new_msg)) {
           msg = msg + " " + new_msg;
         }
         return false;
@@ -994,7 +995,7 @@ namespace epidb {
       if (!genomes::get_genome_info(genome, genome_info, msg)) {
         c.done();
         std::string new_msg;
-        if (!remove::annotation(annotation_id, user_key, new_msg)) {
+        if (!remove::annotation(user, annotation_id, new_msg)) {
           msg = msg + " " + new_msg;
         }
         return false;
@@ -1016,7 +1017,7 @@ namespace epidb {
         if (!genome_info->internal_chromosome(track->chromosome(), internal_chromosome, msg)) {
           c.done();
           std::string new_msg;
-          if (!remove::annotation(annotation_id, user_key, new_msg)) {
+          if (!remove::annotation(user, annotation_id, new_msg)) {
             msg = msg + " " + new_msg;
           }
           return false;
@@ -1062,7 +1063,7 @@ namespace epidb {
         if (!genome_info->chromosome_size(internal_chromosome, size, msg)) {
           c.done();
           std::string new_msg;
-          if (!remove::annotation(annotation_id, user_key, new_msg)) {
+          if (!remove::annotation(user, annotation_id, new_msg)) {
             msg = msg + " " + new_msg;
           }
           return false;
@@ -1078,7 +1079,7 @@ namespace epidb {
               msg = c->getLastError();
               c.done();
               std::string new_msg;
-              if (!remove::annotation(annotation_id, user_key, new_msg)) {
+              if (!remove::annotation(user, annotation_id, new_msg)) {
                 msg = msg + " " + new_msg;
               }
               return false;
@@ -1098,7 +1099,7 @@ namespace epidb {
             msg = c->getLastError();
             c.done();
             std::string new_msg;
-            if (!remove::annotation(annotation_id, user_key, new_msg)) {
+            if (!remove::annotation(user, annotation_id, new_msg)) {
               msg = msg + " " + new_msg;
             }
             return false;
@@ -1114,7 +1115,7 @@ namespace epidb {
           msg = c->getLastError();
           c.done();
           std::string new_msg;
-          if (!remove::annotation(annotation_id, user_key, new_msg)) {
+          if (!remove::annotation(user, annotation_id, new_msg)) {
             msg = msg + " " + new_msg;
           }
           return false;
@@ -1124,7 +1125,7 @@ namespace epidb {
 
       if (!update_upload_info(Collections::ANNOTATIONS(), annotation_id, total_size, msg)) {
         std::string new_msg;
-        if (!remove::annotation(annotation_id, user_key, new_msg)) {
+        if (!remove::annotation(user, annotation_id, new_msg)) {
           msg = msg + " " + new_msg;
         }
         return false;
@@ -1134,8 +1135,9 @@ namespace epidb {
       return true;
     }
 
-    bool insert_query_region_set(const std::string &genome, const std::string &norm_genome,
-                                 const std::string &user_key, const std::string &ip,
+    bool insert_query_region_set(const datatypes::User& user,
+                                 const std::string &genome, const std::string &norm_genome,
+                                 const std::string &ip,
                                  const parser::ChromosomeRegionsMap &map_regions,
                                  const parser::FileFormat &format,
                                  int& dataset_id, std::string &msg)

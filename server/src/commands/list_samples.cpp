@@ -127,7 +127,7 @@ namespace epidb {
         }
 
         std::vector<std::string> ids;
-        if (!dba::list::samples(user_key, s_array, metadata, ids, msg)) {
+        if (!dba::list::samples(s_array, metadata, ids, msg)) {
           result.add_error(msg);
           return false;
         }

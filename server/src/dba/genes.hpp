@@ -27,6 +27,7 @@
 
 #include "../datatypes/metadata.hpp"
 #include "../datatypes/regions.hpp"
+#include "../datatypes/user.hpp"
 
 #include "../parser/fpkm.hpp"
 #include "../parser/gtf.hpp"
@@ -45,18 +46,19 @@ namespace epidb {
                           const std::string &description, const std::string &norm_description,
                           const std::string &format,
                           datatypes::Metadata extra_metadata,
-                          const std::string &user_key, const std::string &ip,
+                          const std::string &ip,
                           std::string &geneset_id,
                           mongo::BSONObj &geneset_metadata,
                           std::string &msg);
 
 
-      bool insert(const std::string &name, const std::string &norm_name,
+      bool insert(const datatypes::User& user,
+                  const std::string &name, const std::string &norm_name,
                   const std::string &genome, const std::string &norm_genome,
                   const std::string &description, const std::string &norm_description,
                   datatypes::Metadata extra_metadata,
                   const parser::GTFPtr &gtf,
-                  const std::string &user_key, const std::string &ip,
+                  const std::string &ip,
                   std::string &gene_model_id, std::string &msg);
 
       bool get_gene_attribute(const std::string& chromosome, const Position start, const Position end, const std::string& strand,
@@ -73,7 +75,7 @@ namespace epidb {
       bool get_genes(const std::vector<std::string> &chromosomes, const Position start, const Position end,
                      const std::string& strand,
                      const std::vector<std::string>& genes_names_or_id, const std::vector<std::string>& go_terms,
-                     const std::string &user_key, const std::string &norm_gene_model,
+                     const std::string &norm_gene_model,
                      std::vector<mongo::BSONObj>& genes, std::string &msg);
 
       bool get_gene_model_obj(const std::string& norm_gene_model,

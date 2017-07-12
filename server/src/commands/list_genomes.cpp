@@ -77,7 +77,7 @@ namespace epidb {
         }
 
         std::vector<utils::IdName> names;
-        bool ret = dba::list::genomes(user_key, names, msg);
+        bool ret = dba::list::genomes(names, msg);
 
         if (!ret) {
           result.add_error(msg);

@@ -85,7 +85,7 @@ namespace epidb {
         }
 
         request::Job job;
-        if (user.is_admin() || epidb::Engine::instance().user_owns_request(id, user.get_id())) {
+        if (user.is_admin() || epidb::Engine::instance().user_owns_request(id, user.id())) {
           if (!epidb::Engine::instance().request_job(id, job, msg)) {
             return false;
           }
@@ -126,12 +126,12 @@ namespace epidb {
         if (!dba::users::get_user_by_key(key, user, msg)) {
           return false;
         }
-        metadata["id"] = user.get_id();
-        metadata["name"] = user.get_name();
-        metadata["email"] = user.get_email();
-        metadata["institution"] = user.get_institution();
+        metadata["id"] = user.id();
+        metadata["name"] = user.name();
+        metadata["email"] = user.email();
+        metadata["institution"] = user.institution();
 
-        datatypes::PermissionLevel pl = user.get_permission_level();
+        datatypes::PermissionLevel pl = user.permission_level();
         std::string pl_string;
 
         metadata["permission_level"] = datatypes::permission_level_to_string(pl);
@@ -158,15 +158,9 @@ namespace epidb {
           err_msg = msg;
         }
 
-        std::vector<utils::IdName> user_projects_id_names;
-        if (!dba::list::projects(user_key, user_projects_id_names, msg)) {
-          result.add_error(msg);
-          return false;
-        }
-
         std::vector<std::string> user_projects;
-        for (const auto& project : user_projects_id_names) {
-          user_projects.push_back(utils::normalize_name(project.name));
+        for (const auto& project : user.projects()) {
+          user_projects.push_back(utils::normalize_name(project));
         }
 
         std::vector<serialize::ParameterPtr> ids_param;
@@ -245,7 +239,7 @@ namespace epidb {
               type = "experiment";
             } else if (id.compare(0, 1, "q") == 0) {
               ok = dba::info::get_query(id, obj_metadata, msg);
-              if (!user.is_admin() && obj_metadata["user"].String() != user.get_name()) {
+              if (!user.is_admin() && obj_metadata["user"].String() != user.name()) {
                 result.add_error(Error::m(ERR_PERMISSION_QUERY, id));
                 return false;
               }

@@ -77,27 +77,27 @@ namespace epidb {
 
         bool ok = false;
         if (id.compare(0, 1, "a") == 0) {
-          ok = dba::remove::annotation(id, user_key, msg);
+          ok = dba::remove::annotation(user, id, msg);
         } else if (id.compare(0, 2, "gx") == 0) {
-          ok = dba::remove::gene_expression(id, user_key, msg);
+          ok = dba::remove::gene_expression(user, id, msg);
         } else if (id.compare(0, 2, "gs") == 0) {
-          ok = dba::remove::gene_model(id, user_key, msg);
+          ok = dba::remove::gene_model(user, id, msg);
         } else if (id.compare(0, 1, "g") == 0) {
-          ok = dba::remove::genome(id, user_key, msg);
+          ok = dba::remove::genome(user, id, msg);
         } else if (id.compare(0, 1, "p") == 0) {
-          ok = dba::remove::project(id, user_key, msg);
+          ok = dba::remove::project(user, id, msg);
         } else if (id.compare(0, 2, "bs") == 0) {
-          ok = dba::remove::biosource(id, user_key, msg);
+          ok = dba::remove::biosource(user, id, msg);
         } else if (id.compare(0, 1, "s") == 0) {
-          ok = dba::remove::sample(id, user_key, msg);
+          ok = dba::remove::sample(user, id, msg);
         } else if (id.compare(0, 2, "em") == 0) {
-          ok = dba::remove::epigenetic_mark(id, user_key, msg);
+          ok = dba::remove::epigenetic_mark(user, id, msg);
         } else if (id.compare(0, 1, "e") == 0) {
-          ok = dba::remove::experiment(id, user_key, msg);
+          ok = dba::remove::experiment(user, id, msg);
         } else if (id.compare(0, 1, "t") == 0) {
-          ok = dba::remove::technique(id, user_key, msg);
+          ok = dba::remove::technique(user, id, msg);
         } else if (id.compare(0, 2, "ct") == 0) {
-          ok = dba::remove::column_type(id, user_key, msg);
+          ok = dba::remove::column_type(user, id, msg);
         } else {
           result.add_error(Error::m(ERR_INVALID_IDENTIFIER, id));
           return false;

@@ -86,7 +86,7 @@ namespace epidb {
           return false;
         }
 
-        if (!dba::exists::query(regions_query_id, user_key, msg)) {
+        if (!dba::exists::query(user, regions_query_id, msg)) {
           if (msg.empty()) {
             result.add_error(Error::m(ERR_INVALID_QUERY_ID, regions_query_id));
           } else {
@@ -120,7 +120,7 @@ namespace epidb {
         }
 
         std::string request_id;
-        if (!epidb::Engine::instance().queue_score_matrix(experiments_formats, aggregation_function, regions_query_id, user_key, request_id, msg)) {
+        if (!epidb::Engine::instance().queue_score_matrix(user, experiments_formats, aggregation_function, regions_query_id, request_id, msg)) {
           result.add_error(msg);
           return false;
         }

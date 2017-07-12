@@ -19,7 +19,6 @@ namespace epidb {
   namespace datatypes {
 
     const std::string User::PREFIX = "u";
-    const std::string User::COLLECTION = "users";
     const std::string User::FIELD_ID = "_id";
     const std::string User::FIELD_KEY = "key";
     const std::string User::FIELD_NAME = "name";
@@ -34,73 +33,75 @@ namespace epidb {
     std::string permission_level_to_string(PermissionLevel pl)
     {
       switch (pl) {
-      case datatypes::ADMIN: return "ADMIN";
-      case datatypes::INCLUDE_COLLECTION_TERMS: return "INCLUDE_COLLECTION_TERMS";
-      case datatypes::INCLUDE_EXPERIMENTS: return "INCLUDE_EXPERIMENTS";
-      case datatypes::INCLUDE_ANNOTATIONS: return "INCLUDE_ANNOTATIONS";
-      case datatypes::GET_DATA: return "GET_DATA";
-      case datatypes::LIST_COLLECTIONS: return "LIST_COLLECTIONS";
-      case datatypes::NONE: return "NONE";
-      default: return "Unknown permission level: " + utils::integer_to_string(pl);
+      case datatypes::ADMIN:
+        return "ADMIN";
+      case datatypes::INCLUDE_COLLECTION_TERMS:
+        return "INCLUDE_COLLECTION_TERMS";
+      case datatypes::INCLUDE_EXPERIMENTS:
+        return "INCLUDE_EXPERIMENTS";
+      case datatypes::INCLUDE_ANNOTATIONS:
+        return "INCLUDE_ANNOTATIONS";
+      case datatypes::GET_DATA:
+        return "GET_DATA";
+      case datatypes::LIST_COLLECTIONS:
+        return "LIST_COLLECTIONS";
+      case datatypes::NONE:
+        return "NONE";
+      default:
+        return "Unknown permission level: " + utils::integer_to_string(pl);
       }
     }
 
-    int User::seed = rand();
+    int User::_seed = rand();
 
     User::User()
     {
     }
 
-    User::User(std::string name, std::string email, std::string institution)
+    User::User(std::string n, std::string e, std::string i):
+      _name(n),
+      _email(e),
+      _institution(i)
     {
-      set_name(name);
-      set_email(email);
-      set_institution(institution);
-      generate_key();
     }
 
-    User::User(mongo::BSONObj bsonobj)
+
+    User::User(mongo::BSONObj bsonobj, std::vector<std::string>& public_projects)
     {
-      set_name(bsonobj[FIELD_NAME].str());
-      set_email(bsonobj[FIELD_EMAIL].str());
-      set_institution(bsonobj[FIELD_INSTITUTION].str());
-      set_id(bsonobj[FIELD_ID].str());
-      set_key(bsonobj[FIELD_KEY].str());
-      set_password(bsonobj[FIELD_PASSWORD].str());
+      _name = bsonobj[FIELD_NAME].str();
+      _email = bsonobj[FIELD_EMAIL].str();
+      _institution = bsonobj[FIELD_INSTITUTION].str();
+      _id = bsonobj[FIELD_ID].str();
+      _key = bsonobj[FIELD_KEY].str();
+      _password= bsonobj[FIELD_PASSWORD].str();
       if (bsonobj.hasElement(FIELD_PERMISSION_LEVEL)) {
-        set_permission_level(bsonobj[FIELD_PERMISSION_LEVEL].safeNumberLong());
+        _permission_level = static_cast<PermissionLevel>(bsonobj[FIELD_PERMISSION_LEVEL].safeNumberLong());
       }
       if (bsonobj.hasElement(FIELD_MEMORY_LIMIT)) {
-        memory_limit = bsonobj[FIELD_MEMORY_LIMIT].safeNumberLong();
+        _memory_limit = bsonobj[FIELD_MEMORY_LIMIT].safeNumberLong();
       }
       if (bsonobj.hasElement(FIELD_PROJECTS)) {
-        set_projects(utils::build_vector(bsonobj[FIELD_PROJECTS].Array()));
+        _projects_member = utils::build_vector(bsonobj[FIELD_PROJECTS].Array());
+        _all_projects = _projects_member;
+        _all_projects.insert(_all_projects.end(), _projects_member.begin(), _projects_member.end());
       }
-    }
-
-    User::User(const User& orig)
-    {
-    }
-
-    User::~User()
-    {
     }
 
     void User::write_to_BSONObjBuilder(mongo::BSONObjBuilder& builder)
     {
-      builder.append(FIELD_KEY, get_key());
-      builder.append(FIELD_NAME, get_name());
-      builder.append(FIELD_EMAIL, get_email());
-      builder.append(FIELD_INSTITUTION, get_institution());
-      builder.append(FIELD_PASSWORD, get_password());
-      if (memory_limit != -1) {
-        builder.append(FIELD_MEMORY_LIMIT, get_memory_limit());
+      builder.append(FIELD_KEY, key());
+      builder.append(FIELD_NAME, name());
+      builder.append(FIELD_EMAIL, email());
+      builder.append(FIELD_INSTITUTION, institution());
+      builder.append(FIELD_PASSWORD, password());
+      builder.append(FIELD_PERMISSION_LEVEL, permission_level());
+
+      if (_memory_limit != -1) {
+        builder.append(FIELD_MEMORY_LIMIT, memory_limit());
       }
-      if (permission_level != NOT_SET) {
-        builder.append(FIELD_PERMISSION_LEVEL, get_permission_level());
-      }
-      if (!projects.empty()) {
-        builder.append(FIELD_PROJECTS, utils::build_array(get_projects()));
+
+      if (!projects().empty()) {
+        builder.append(FIELD_PROJECTS, utils::build_array(projects()));
       }
     }
 
@@ -111,132 +112,126 @@ namespace epidb {
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         "abcdefghijklmnopqrstuvwxyz";
 
-      srand(time(NULL)^seed);
-      seed = rand();
+      srand(time(NULL)^_seed);
+      _seed = rand();
 
       std::stringstream ss;
       for (size_t i = 0; i < KEY_LENGTH; ++i) {
         ss << alphanum[rand() % (sizeof(alphanum) - 1)];
       }
 
-      key = ss.str();
+      _key = ss.str();
     }
 
     bool User::has_permission(PermissionLevel permission)
     {
-      return static_cast<int>(get_permission_level()) <= static_cast<int>(permission);
+      return static_cast<int>(permission_level()) <= static_cast<int>(permission);
     }
 
-    void User::set_id(std::string id)
+    void User::id(std::string id)
     {
-      this->id = id;
+      this->_id = id;
     }
-    void User::set_key(std::string key)
+    void User::key(std::string key)
     {
-      this->key = key;
+      this->_key = key;
     }
-    void User::set_name(std::string name)
+    void User::name(std::string name)
     {
-      this->name = name;
+      this->_name = name;
     }
-    void User::set_email(std::string email)
+    void User::email(std::string email)
     {
-      this->email = email;
+      this->_email = email;
     }
-    void User::set_institution(std::string institution)
+    void User::institution(std::string institution)
     {
-      this->institution = institution;
-    }
-
-    void User::set_password(std::string password)
-    {
-      this->password = password;
+      this->_institution = institution;
     }
 
-    void User::set_memory_limit(long long memory_limit)
+    void User::password(std::string password)
     {
-      this->memory_limit = memory_limit;
+      this->_password = password;
     }
 
-    void User::set_permission_level(PermissionLevel permission_level)
+    void User::memory_limit(long long memory_limit)
     {
-      this->permission_level = permission_level;
+      this->_memory_limit = memory_limit;
     }
 
-    void User::set_permission_level(int permission_level)
+    void User::permission_level(PermissionLevel permission_level)
     {
-      set_permission_level(static_cast<PermissionLevel>(permission_level));
+      this->_permission_level = permission_level;
     }
 
-    void User::set_projects(std::vector<std::string> projects)
+    void User::permission_level(int permission_level)
     {
-      this->projects = projects;
+      _permission_level = static_cast<PermissionLevel>(permission_level);
     }
 
-    std::string User::get_id() const
+    std::string User::id() const
     {
-      return id;
+      return _id;
     }
 
-    std::string User::get_key() const
+    std::string User::key() const
     {
-      return key;
+      return _key;
     }
 
-    std::string User::get_name() const
+    std::string User::name() const
     {
-      return name;
+      return _name;
     }
 
-    utils::IdName User::get_id_name() const
+    utils::IdName User::id_name() const
     {
-      return utils::IdName(this->get_id(), this->get_name());
+      return utils::IdName(this->id(), this->name());
     }
 
-    std::string User::get_email() const
+    std::string User::email() const
     {
-      return email;
+      return _email;
     }
 
-    std::string User::get_institution() const
+    std::string User::institution() const
     {
-      return institution;
+      return _institution;
     }
 
-    std::string User::get_password() const
+    std::string User::password() const
     {
-      return password;
+      return _password;
     }
 
-    long long User::get_memory_limit() const
+    long long User::memory_limit() const
     {
-      if (this->memory_limit == -1) {
+      if (this->_memory_limit == -1) {
         return config::processing_max_memory;
-      } else {
-        return this->memory_limit;
       }
+      return this->_memory_limit;
     }
 
-    PermissionLevel User::get_permission_level() const
+    PermissionLevel User::permission_level() const
     {
-      if (permission_level == NOT_SET) {
+      if (_permission_level == NOT_SET) {
         return LIST_COLLECTIONS;
-      } else {
-        return permission_level;
       }
+      return _permission_level;
     }
 
-    std::vector<std::string> User::get_projects() const
+    std::vector<std::string> User::projects() const
     {
-      return projects;
+      return _all_projects;
     }
 
     bool User::is_admin() const
     {
-      return get_permission_level() == PermissionLevel::ADMIN;
+      return permission_level() == PermissionLevel::ADMIN;
     }
 
-    const std::string& User::ANONYMOUS_USER() {
+    const std::string& User::ANONYMOUS_USER()
+    {
       static std::string anonymous("anonymous");
       return anonymous;
     }

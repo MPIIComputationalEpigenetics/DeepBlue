@@ -99,7 +99,7 @@ namespace epidb {
               result.add_error("Fatal error, it was expected only one BioSource with the ontology_id:" + ontology_id->second + ". But more than one was found. Please, contact us. Meanwhile, you can use the equivalent biosource \"" + names[0].name + "\".");
               return false;
             }
-            bool ret = dba::cv::set_biosource_synonym_complete(names[0].name, name, user_key, msg);
+            bool ret = dba::cv::set_biosource_synonym_complete(user, names[0].name, name, msg);
             if (!ret) {
               result.add_error(msg);
             } else {
@@ -120,7 +120,7 @@ namespace epidb {
         std::string norm_description = utils::normalize_name(description);
 
         std::string id;
-        bool ret = dba::add_biosource(name, norm_name, description, norm_description, extra_metadata, user_key, id, msg);
+        bool ret = dba::add_biosource(user, name, norm_name, description, norm_description, extra_metadata, id, msg);
         if (!ret) {
           result.add_error(msg);
         } else {

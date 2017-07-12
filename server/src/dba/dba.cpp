@@ -79,7 +79,7 @@ namespace epidb {
     }
 
     bool init_system(const std::string &name, const std::string &email, const std::string &institution,
-                     std::string &user_key, std::string &msg)
+                     datatypes::User& admin_user, std::string &msg)
     {
       Connection c;
 
@@ -113,19 +113,18 @@ namespace epidb {
         }
       }
 
-      datatypes::User user = datatypes::User(name, email, institution);
-      user.generate_key();
-      user.set_permission_level(datatypes::PermissionLevel::ADMIN);
-      user_key = user.get_key();
-      if (!dba::users::add_user(user, msg)) {
+      admin_user = datatypes::User(name, email, institution);
+      admin_user.generate_key();
+      admin_user.permission_level(datatypes::PermissionLevel::ADMIN);
+      if (!dba::users::add_user(admin_user, msg)) {
         return false;
       }
 
       {
         datatypes::User anon_user = datatypes::User("anonymous", "anonymous.deepblue@mpi-inf.mpg.de", "DeepBlue Epigenomic Data Server");
-        anon_user.set_key("anonymous_key");
-        anon_user.set_password("anonymous");
-        anon_user.set_permission_level(datatypes::PermissionLevel::GET_DATA);
+        anon_user.key("anonymous_key");
+        anon_user.password("anonymous");
+        anon_user.permission_level(datatypes::PermissionLevel::GET_DATA);
         if (!dba::users::add_user(anon_user, msg)) {
           return false;
         }
@@ -149,172 +148,172 @@ namespace epidb {
 
       std::string column_id;
 
-      if (!dba::columns::create_column_type_simple("CHROMOSOME", utils::normalize_name("CHROMOSOME"),
+      if (!dba::columns::create_column_type_simple(admin_user, "CHROMOSOME", utils::normalize_name("CHROMOSOME"),
           "Chromosome name column. This column should be used to store the Chromosome value in all experiments and annotations",
           utils::normalize_name("Chromosome name column. This column should be used to store the Chromosome value in all experiments and annotations"),
-          "string", user_key, column_id, msg)) {
+          "string", column_id, msg)) {
         return false;
       }
-      if (!dba::columns::create_column_type_simple("START", utils::normalize_name("START"),
+      if (!dba::columns::create_column_type_simple(admin_user, "START", utils::normalize_name("START"),
           "Region Start column. This column should be used to store the Region Start position all experiments and annotations",
           utils::normalize_name("Region Start column. This column should be used to store the Region Start position all experiments and annotations"),
-          "integer", user_key, column_id, msg)) {
+          "integer", column_id, msg)) {
         return false;
       }
-      if (!dba::columns::create_column_type_simple("END", utils::normalize_name("END"),
+      if (!dba::columns::create_column_type_simple(admin_user, "END", utils::normalize_name("END"),
           "Region End column. This column should be used to store the Region End position all experiments and annotations",
           utils::normalize_name("Region End column. This column should be used to store the Region End position all experiments and annotations"),
-          "integer", user_key, column_id, msg)) {
+          "integer", column_id, msg)) {
         return false;
       }
-      if (!dba::columns::create_column_type_simple("VALUE", utils::normalize_name("VALUE"),
+      if (!dba::columns::create_column_type_simple(admin_user, "VALUE", utils::normalize_name("VALUE"),
           "Region Value. This column should be used to store the Wig Files Region Values",
           utils::normalize_name("Region Value. This column should be used to store the Wig Files Region Values"),
-          "double", user_key, column_id, msg)) {
+          "double", column_id, msg)) {
         return false;
       }
-      if (!dba::columns::create_column_type_simple("GTF_SCORE", utils::normalize_name("GTF_SCORE"),
+      if (!dba::columns::create_column_type_simple(admin_user, "GTF_SCORE", utils::normalize_name("GTF_SCORE"),
           "A floating point score. The type is a string because the value '.' is also acceptable.",
           utils::normalize_name("A floating point score. The type is a string because the value '.' is also acceptable."),
-          "string", user_key, column_id, msg)) {
+          "string", column_id, msg)) {
         return false;
       }
-      if (!dba::columns::create_column_type_simple("FEATURE", utils::normalize_name("FEATURE"),
+      if (!dba::columns::create_column_type_simple(admin_user, "FEATURE", utils::normalize_name("FEATURE"),
           "A floating point score. The type is a string because the value '.' is also acceptable.",
           utils::normalize_name("A floating point score. The type is a string because the value '.' is also acceptable."),
-          "string", user_key, column_id, msg)) {
+          "string", column_id, msg)) {
         return false;
       }
-      if (!dba::columns::create_column_type_simple("SOURCE", utils::normalize_name("SOURCE"),
+      if (!dba::columns::create_column_type_simple(admin_user, "SOURCE", utils::normalize_name("SOURCE"),
           "Name of the program that generated this feature, or the data source (database or project name).",
           utils::normalize_name("Name of the program that generated this feature, or the data source (database or project name)."),
-          "string", user_key, column_id, msg)) {
+          "string", column_id, msg)) {
         return false;
       }
-      if (!dba::columns::create_column_type_simple("FRAME", utils::normalize_name("FRAME"),
+      if (!dba::columns::create_column_type_simple(admin_user, "FRAME", utils::normalize_name("FRAME"),
           "One of '0', '1' or '2'. '0' indicates that the first base of the feature is the first base of a codon, '1' that the second base is the first base of a codon, and so on.. The type is a string because the value '.' is also acceptable.",
           utils::normalize_name("One of '0', '1' or '2'. '0' indicates that the first base of the feature is the first base of a codon, '1' that the second base is the first base of a codon, and so on.. The type is a string because the value '.' is also acceptable."),
-          "string", user_key, column_id, msg)) {
+          "string", column_id, msg)) {
         return false;
       }
-      if (!dba::columns::create_column_type_simple("GTF_ATTRIBUTES", utils::normalize_name("GTF_ATTRIBUTES"),
+      if (!dba::columns::create_column_type_simple(admin_user, "GTF_ATTRIBUTES", utils::normalize_name("GTF_ATTRIBUTES"),
           "A semicolon-separated list of tag-value pairs, providing additional information about each feature.",
           utils::normalize_name("A semicolon-separated list of tag-value pairs, providing additional information about each feature."),
-          "string", user_key, column_id, msg)) {
+          "string", column_id, msg)) {
         return false;
       }
-      if (!dba::columns::create_column_type_simple("TRACKING_ID", utils::normalize_name("TRACKING_ID"),
+      if (!dba::columns::create_column_type_simple(admin_user, "TRACKING_ID", utils::normalize_name("TRACKING_ID"),
           "ID used for tracking data.",
           utils::normalize_name("ID used for tracking data."),
-          "string", user_key, column_id, msg)) {
+          "string", column_id, msg)) {
         return false;
       }
-      if (!dba::columns::create_column_type_simple("GENE_SHORT_NAME", utils::normalize_name("GENE_SHORT_NAME"),
+      if (!dba::columns::create_column_type_simple(admin_user, "GENE_SHORT_NAME", utils::normalize_name("GENE_SHORT_NAME"),
           "Gene short name.",
           utils::normalize_name("Gene short name."),
-          "string", user_key, column_id, msg)) {
+          "string", column_id, msg)) {
         return false;
       }
-      if (!dba::columns::create_column_type_simple("GENE_ID", utils::normalize_name("GENE_ID"),
+      if (!dba::columns::create_column_type_simple(admin_user, "GENE_ID", utils::normalize_name("GENE_ID"),
           "Gene ID.",
           utils::normalize_name("Gene ID."),
-          "string", user_key, column_id, msg)) {
+          "string", column_id, msg)) {
         return false;
       }
-      if (!dba::columns::create_column_type_simple("FPKM", utils::normalize_name("FPKM"),
+      if (!dba::columns::create_column_type_simple(admin_user, "FPKM", utils::normalize_name("FPKM"),
           "Fragments Per Kilobase of transcript per Million mapped reads. In RNA-Seq, the relative expression of a transcript is proportional to the number of cDNA fragments that originate from it.",
           utils::normalize_name("Fragments Per Kilobase of transcript per Million mapped reads. In RNA-Seq, the relative expression of a transcript is proportional to the number of cDNA fragments that originate from it."),
-          "double", user_key, column_id, msg)) {
+          "double", column_id, msg)) {
         return false;
       }
-      if (!dba::columns::create_column_type_simple("FPKM_CONF_LO", utils::normalize_name("FPKM_CONF_LO"),
+      if (!dba::columns::create_column_type_simple(admin_user, "FPKM_CONF_LO", utils::normalize_name("FPKM_CONF_LO"),
           "FPKM confidence interval - low value.",
           utils::normalize_name("FPKM confidence interval - low value."),
-          "double", user_key, column_id, msg)) {
+          "double", column_id, msg)) {
         return false;
       }
-      if (!dba::columns::create_column_type_simple("FPKM_CONF_HI", utils::normalize_name("FPKM_CONF_HI"),
+      if (!dba::columns::create_column_type_simple(admin_user, "FPKM_CONF_HI", utils::normalize_name("FPKM_CONF_HI"),
           "FPKM confidence interval - high value.",
           utils::normalize_name("FPKM confidence interval - high value."),
-          "double", user_key, column_id, msg)) {
+          "double", column_id, msg)) {
         return false;
       }
-      if (!dba::columns::create_column_type_simple("FPKM_STATUS", utils::normalize_name("FPKM_STATUS"),
+      if (!dba::columns::create_column_type_simple(admin_user, "FPKM_STATUS", utils::normalize_name("FPKM_STATUS"),
           "FPKM status.",
           utils::normalize_name("FPKM status"),
-          "string", user_key, column_id, msg)) {
+          "string", column_id, msg)) {
         return false;
       }
-      if (!dba::columns::create_column_type_simple("TRANSCRIPT_IDS", utils::normalize_name("TRANSCRIPT_IDS"),
+      if (!dba::columns::create_column_type_simple(admin_user, "TRANSCRIPT_IDS", utils::normalize_name("TRANSCRIPT_IDS"),
           "IDs of the transcripts.",
           utils::normalize_name("IDs of the transcripts"),
-          "string", user_key, column_id, msg)) {
+          "string", column_id, msg)) {
         return false;
       }
-      if (!dba::columns::create_column_type_simple("EFFECTIVE_LENGTH", utils::normalize_name("EFFECTIVE_LENGTH"),
+      if (!dba::columns::create_column_type_simple(admin_user, "EFFECTIVE_LENGTH", utils::normalize_name("EFFECTIVE_LENGTH"),
           "Effective length.",
           utils::normalize_name("Effective length"),
-          "double", user_key, column_id, msg)) {
+          "double", column_id, msg)) {
         return false;
       }
-      if (!dba::columns::create_column_type_simple("EXPECTED_COUNT", utils::normalize_name("EXPECTED_COUNT"),
+      if (!dba::columns::create_column_type_simple(admin_user, "EXPECTED_COUNT", utils::normalize_name("EXPECTED_COUNT"),
           "Expected count.",
           utils::normalize_name("Expected count"),
-          "double", user_key, column_id, msg)) {
+          "double", column_id, msg)) {
         return false;
       }
-      if (!dba::columns::create_column_type_simple("TPM", utils::normalize_name("TPM"),
+      if (!dba::columns::create_column_type_simple(admin_user, "TPM", utils::normalize_name("TPM"),
           "Transcripts per kilobase million",
           utils::normalize_name("Transcripts per kilobase million"),
-          "double", user_key, column_id, msg)) {
+          "double", column_id, msg)) {
         return false;
       }
-      if (!dba::columns::create_column_type_simple("POSTERIOR_MEAN_COUNT", utils::normalize_name("POSTERIOR_MEAN_COUNT"),
+      if (!dba::columns::create_column_type_simple(admin_user, "POSTERIOR_MEAN_COUNT", utils::normalize_name("POSTERIOR_MEAN_COUNT"),
           "Posterior mean count.",
           utils::normalize_name("Posterior mean count"),
-          "double", user_key, column_id, msg)) {
+          "double", column_id, msg)) {
         return false;
       }
-      if (!dba::columns::create_column_type_simple("POSTERIOR_STANDARD_DEVIATION_OF_COUNT", utils::normalize_name("POSTERIOR_STANDARD_DEVIATION_OF_COUNT"),
+      if (!dba::columns::create_column_type_simple(admin_user, "POSTERIOR_STANDARD_DEVIATION_OF_COUNT", utils::normalize_name("POSTERIOR_STANDARD_DEVIATION_OF_COUNT"),
           "Posterior standard deviation of count.",
           utils::normalize_name("Posterior standard deviation of count"),
-          "double", user_key, column_id, msg)) {
+          "double", column_id, msg)) {
         return false;
       }
-      if (!dba::columns::create_column_type_simple("PME_TPM", utils::normalize_name("PME_TPM"),
+      if (!dba::columns::create_column_type_simple(admin_user, "PME_TPM", utils::normalize_name("PME_TPM"),
           "Posterior mean estimate - Transcripts per kilobase million.",
           utils::normalize_name("Posterior mean estimate - Transcripts per kilobase million"),
-          "double", user_key, column_id, msg)) {
+          "double", column_id, msg)) {
         return false;
       }
-      if (!dba::columns::create_column_type_simple("PME_FPKM", utils::normalize_name("PME_FPKM"),
+      if (!dba::columns::create_column_type_simple(admin_user, "PME_FPKM", utils::normalize_name("PME_FPKM"),
           "Posterior mean estimate - Fragments Per Kilobase of transcript per Million mapped reads.",
           utils::normalize_name("Posterior mean estimate - Fragments Per Kilobase of transcript per Million mapped reads"),
-          "double", user_key, column_id, msg)) {
+          "double", column_id, msg)) {
         return false;
       }
-      if (!dba::columns::create_column_type_simple("TPM_CI_LOWER_BOUND", utils::normalize_name("TPM_CI_LOWER_BOUND"),
+      if (!dba::columns::create_column_type_simple(admin_user, "TPM_CI_LOWER_BOUND", utils::normalize_name("TPM_CI_LOWER_BOUND"),
           "TPM - Credibility interval - lower bound.",
           utils::normalize_name("TPM - Credibility interval - lower bound"),
-          "double", user_key, column_id, msg)) {
+          "double", column_id, msg)) {
         return false;
       }
-      if (!dba::columns::create_column_type_simple("TPM_CI_UPPER_BOUND", utils::normalize_name("TPM_CI_UPPER_BOUND"),
+      if (!dba::columns::create_column_type_simple(admin_user, "TPM_CI_UPPER_BOUND", utils::normalize_name("TPM_CI_UPPER_BOUND"),
           "TPM - Credibility interval - upper bound.",
           utils::normalize_name("TPM - Credibility interval - upper bound"),
-          "double", user_key, column_id, msg)) {
+          "double", column_id, msg)) {
         return false;
       }
-      if (!dba::columns::create_column_type_simple("FPKM_CI_LOWER_BOUND", utils::normalize_name("FPKM_CI_LOWER_BOUND"),
+      if (!dba::columns::create_column_type_simple(admin_user, "FPKM_CI_LOWER_BOUND", utils::normalize_name("FPKM_CI_LOWER_BOUND"),
           "FPKM - Credibility interval - lower bound.",
           utils::normalize_name("FPKM - Credibility interval - lower bound."),
-          "double", user_key, column_id, msg)) {
+          "double", column_id, msg)) {
         return false;
       }
-      if (!dba::columns::create_column_type_simple("FPKM_CI_UPPER_BOUND", utils::normalize_name("FPKM_CI_UPPER_BOUND"),
+      if (!dba::columns::create_column_type_simple(admin_user, "FPKM_CI_UPPER_BOUND", utils::normalize_name("FPKM_CI_UPPER_BOUND"),
           "FPKM - Credibility interval - upper bound.",
           utils::normalize_name("FPKM - Credibility interval - upper bound"),
-          "double", user_key, column_id, msg)) {
+          "double", column_id, msg)) {
         return false;
       }
 
@@ -762,10 +761,11 @@ namespace epidb {
       return true;
     }
 
-    bool add_genome(const std::string &name, const std::string &norm_name,
+    bool add_genome(const datatypes::User& user,
+                    const std::string &name, const std::string &norm_name,
                     const std::string &description, const std::string &norm_description,
                     const parser::ChromosomesInfo &genome_info,
-                    const std::string &user_key, const std::string &ip,
+                    const std::string &ip,
                     std::string &genome_id, std::string &msg)
     {
       {
@@ -800,12 +800,7 @@ namespace epidb {
         }
       }
       create_genome_builder.append("chromosomes", ab.arr());
-
-      utils::IdName user;
-      if (!users::get_user(user_key, user, msg)) {
-        return false;
-      }
-      create_genome_builder.append("user", user.id);
+      create_genome_builder.append("user", user.id());
       mongo::BSONObj cem = create_genome_builder.obj();
 
       Connection c;
@@ -838,8 +833,8 @@ namespace epidb {
       datatypes::Metadata extra_metadata;
       std::string annotation_id;
 
-      if (!insert_annotation(ann_name, ann_norm_name, name, norm_name, ann_description, ann_norm_description, extra_metadata,
-                             user_key, ip, chromosome_regions_list, parser::FileFormat::default_format(),
+      if (!insert_annotation(user, ann_name, ann_norm_name, name, norm_name, ann_description, ann_norm_description, extra_metadata,
+                             ip, chromosome_regions_list, parser::FileFormat::default_format(),
                              annotation_id, msg)) {
         return false;
       }
@@ -847,10 +842,10 @@ namespace epidb {
       return true;
     }
 
-    bool add_epigenetic_mark(const std::string &name, const std::string &norm_name,
+    bool add_epigenetic_mark(const datatypes::User& user,
+                             const std::string &name, const std::string &norm_name,
                              const std::string &description, const std::string &norm_description,
                              const datatypes::Metadata &extra_metadata,
-                             const std::string &user_key,
                              std::string &epigenetic_mark_id, std::string &msg)
     {
       {
@@ -879,11 +874,7 @@ namespace epidb {
       mongo::BSONObjBuilder create_epi_mark_builder;
       create_epi_mark_builder.appendElements(search_data);
 
-      utils::IdName user;
-      if (!users::get_user(user_key, user, msg)) {
-        return false;
-      }
-      create_epi_mark_builder.append("user", user.id);
+      create_epi_mark_builder.append("user", user.id());
       mongo::BSONObj cem = create_epi_mark_builder.obj();
 
       Connection c;
@@ -902,10 +893,10 @@ namespace epidb {
       return true;
     }
 
-    bool add_biosource(const std::string &name, const std::string &norm_name,
+    bool add_biosource(const datatypes::User& user,
+                       const std::string &name, const std::string &norm_name,
                        const std::string &description, const std::string &norm_description,
                        const datatypes::Metadata &extra_metadata,
-                       const std::string &user_key,
                        std::string &biosource_id, std::string &msg)
     {
       {
@@ -934,11 +925,7 @@ namespace epidb {
       mongo::BSONObjBuilder create_biosource_builder;
       create_biosource_builder.appendElements(search_data);
 
-      utils::IdName user;
-      if (!users::get_user(user_key, user, msg)) {
-        return false;
-      }
-      create_biosource_builder.append("user", user.id);
+      create_biosource_builder.append("user", user.id());
       mongo::BSONObj cem = create_biosource_builder.obj();
 
       Connection c;
@@ -958,10 +945,10 @@ namespace epidb {
       return true;
     }
 
-    bool add_technique(const std::string &name, const std::string &norm_name,
+    bool add_technique(const datatypes::User& user,
+                       const std::string &name, const std::string &norm_name,
                        const std::string &description, const std::string &norm_description,
                        const datatypes::Metadata &extra_metadata,
-                       const std::string &user_key,
                        std::string &technique_id, std::string &msg)
     {
       {
@@ -992,11 +979,7 @@ namespace epidb {
       mongo::BSONObjBuilder create_technique_builder;
       create_technique_builder.appendElements(search_data);
 
-      utils::IdName user;
-      if (!users::get_user(user_key, user, msg)) {
-        return false;
-      }
-      create_technique_builder.append("user", user.id);
+      create_technique_builder.append("user", user.id());
       mongo::BSONObj cem = create_technique_builder.obj();
 
       Connection c;
@@ -1016,9 +999,9 @@ namespace epidb {
       return true;
     }
 
-    bool add_sample(const std::string &biosource_name, const std::string &norm_biosource_name,
+    bool add_sample(const datatypes::User& user,
+                    const std::string &biosource_name, const std::string &norm_biosource_name,
                     const datatypes::Metadata &metadata,
-                    const std::string &user_key,
                     std::string &sample_id, std::string &msg)
     {
       mongo::BSONObjBuilder data_builder;
@@ -1073,12 +1056,7 @@ namespace epidb {
       mongo::BSONObjBuilder create_sample_builder;
       create_sample_builder.append("_id", sample_id);
       create_sample_builder.appendElements(data);
-
-      utils::IdName user;
-      if (!users::get_user(user_key, user, msg)) {
-        return false;
-      }
-      create_sample_builder.append("user", user.id);
+      create_sample_builder.append("user", user.id());
       mongo::BSONObj cem = create_sample_builder.obj();
 
       c->insert(helpers::collection_name(Collections::SAMPLES()), cem);
@@ -1096,10 +1074,11 @@ namespace epidb {
       return true;
     }
 
-    bool add_chromosome_sequence(const std::string &genome, const std::string &norm_genome,
+    bool add_chromosome_sequence(const datatypes::User& user,
+                                 const std::string &genome, const std::string &norm_genome,
                                  const std::string &chromosome,
                                  const std::string &sequence,
-                                 const std::string &user_key, std::string &msg)
+                                 std::string &msg)
     {
       std::string filename = norm_genome + "." + chromosome;
 
@@ -1206,23 +1185,24 @@ namespace epidb {
       return true;
     }
 
-    bool set_biosource_parent(const std::string &biosource_more_embracing, const std::string &norm_biosource_more_embracing,
+    bool set_biosource_parent(const datatypes::User user,
+                              const std::string &biosource_more_embracing, const std::string &norm_biosource_more_embracing,
                               const std::string &biosource_less_embracing, const std::string &norm_biosource_less_embracing,
                               bool more_embracing_is_syn, const bool less_embracing_is_syn,
-                              const std::string &user_key, std::string &msg)
+                              std::string &msg)
     {
-      return cv::set_biosource_parent(biosource_more_embracing, norm_biosource_more_embracing,
+      return cv::set_biosource_parent(user, biosource_more_embracing, norm_biosource_more_embracing,
                                       biosource_less_embracing, norm_biosource_less_embracing,
-                                      more_embracing_is_syn, less_embracing_is_syn, user_key, msg);
+                                      more_embracing_is_syn, less_embracing_is_syn, msg);
     }
 
     bool get_biosource_children(const std::string &biosource_name, const std::string &norm_biosource_name,
-                                bool is_biosource, const std::string &user_key,
+                                bool is_biosource,
                                 std::vector<utils::IdName> &related_biosources, std::string &msg)
     {
       std::vector<std::string> norm_subs;
 
-      if (!cv::get_biosource_children(biosource_name, norm_biosource_name, is_biosource, user_key, norm_subs, msg)) {
+      if (!cv::get_biosource_children(biosource_name, norm_biosource_name, is_biosource, norm_subs, msg)) {
         return false;
       }
 
@@ -1237,12 +1217,12 @@ namespace epidb {
     }
 
     bool get_biosource_parents(const std::string &biosource_name, const std::string &norm_biosource_name,
-                               bool is_biosource, const std::string &user_key,
+                               bool is_biosource,
                                std::vector<utils::IdName> &related_biosources, std::string &msg)
     {
       std::vector<std::string> norm_subs;
 
-      if (!cv::get_biosource_parents(biosource_name, norm_biosource_name, is_biosource, user_key, norm_subs, msg)) {
+      if (!cv::get_biosource_parents(biosource_name, norm_biosource_name, is_biosource, norm_subs, msg)) {
         return false;
       }
 

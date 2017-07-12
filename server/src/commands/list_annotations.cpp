@@ -95,7 +95,7 @@ namespace epidb {
             std::string norm_genome = utils::normalize_name(genome);
 
             std::vector<utils::IdName> res;
-            if (!dba::list::annotations(norm_genome, user_key, res, msg)) {
+            if (!dba::list::annotations(norm_genome, res, msg)) {
               result.add_error(msg);
             }
             names.insert(names.end(), res.begin(), res.end());

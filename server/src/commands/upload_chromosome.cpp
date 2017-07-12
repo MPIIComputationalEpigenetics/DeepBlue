@@ -22,6 +22,7 @@
 #include "../dba/exists.hpp"
 #include "../dba/genomes.hpp"
 #include "../dba/helpers.hpp"
+#include "../dba/users.hpp"
 
 #include "../engine/commands.hpp"
 
@@ -73,8 +74,11 @@ namespace epidb {
         const std::string data = parameters[2]->as_string();
         const std::string user_key = parameters[3]->as_string();
 
+
         std::string msg;
-        if (!Command::checks(user_key, msg)) {
+        datatypes::User user;
+
+        if (!check_permissions(user_key, datatypes::INCLUDE_COLLECTION_TERMS, user, msg )) {
           result.add_error(msg);
           return false;
         }
@@ -116,7 +120,7 @@ namespace epidb {
           return false;
         }
 
-        bool ret = dba::add_chromosome_sequence(genome, norm_genome, chromosome, clear_data, user_key, msg);
+        bool ret = dba::add_chromosome_sequence(user, genome, norm_genome, chromosome, clear_data, msg);
 
         if (!ret) {
           result.add_error(msg);

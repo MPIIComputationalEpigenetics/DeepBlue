@@ -29,12 +29,14 @@
 namespace epidb {
   namespace processing {
 
-    bool coverage(const std::string &query_id, const std::string &genome, const std::string &user_key, processing::StatusPtr status, std::vector<CoverageInfo> &coverage_infos, std::string &msg)
+    bool coverage(const datatypes::User& user,
+                  const std::string &query_id, const std::string &genome,
+                  processing::StatusPtr status, std::vector<CoverageInfo> &coverage_infos, std::string &msg)
     {
       INIT_PROCESSING(PROCESS_COVERAGE, status)
 
       ChromosomeRegionsList chromosomeRegionsList;
-      if (!dba::query::retrieve_query(user_key, query_id, status, chromosomeRegionsList, msg)) {
+      if (!dba::query::retrieve_query(user, query_id, status, chromosomeRegionsList, msg)) {
         return false;
       }
 

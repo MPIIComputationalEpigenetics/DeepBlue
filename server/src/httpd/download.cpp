@@ -63,17 +63,17 @@ namespace epidb {
       const std::string user_key = key[1];
 
       std::string msg;
-      utils::IdName user;
-      if (!dba::users::get_user(user_key, user, msg)) {
+      datatypes::User user;
+      if (!dba::users::get_user_by_key(user_key, user, msg)) {
         return Reply::stock_reply(Reply::bad_request, "Invalid request: " + msg);
       }
 
-      if (!epidb::Engine::instance().user_owns_request(request_id, user.id)) {
-        return Reply::stock_reply(Reply::bad_request, "Invalid request: User " + user.name + "/" + user.id + " does not have the request " + request_id);
+      if (!epidb::Engine::instance().user_owns_request(request_id, user.id())) {
+        return Reply::stock_reply(Reply::bad_request, "Invalid request: User " + user.name() + "/" + user.id() + " does not have the request " + request_id);
       }
 
       std::string content;
-      if (!epidb::Engine::instance().request_download_data(request_id, user_key, content, msg)) {
+      if (!epidb::Engine::instance().request_download_data(user, request_id, content, msg)) {
         return Reply::stock_reply(Reply::bad_request, "Invalid request: " + msg);
       }
 

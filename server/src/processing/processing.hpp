@@ -28,18 +28,20 @@
 #include <vector>
 
 #include "../datatypes/regions.hpp"
+#include "../datatypes/user.hpp"
+
 #include "../extras/utils.hpp"
 
 #include "../errors.hpp"
 
 namespace epidb {
 
-  #define INIT_PROCESSING(_WHAT, _STATUS) {                  \
+#define INIT_PROCESSING(_WHAT, _STATUS) {                  \
     IS_PROCESSING_CANCELLED(_STATUS)                         \
     status->start_operation(_WHAT);                          \
   }                                                          \
 
-  #define IS_PROCESSING_CANCELLED(_STATUS) {                 \
+#define IS_PROCESSING_CANCELLED(_STATUS) {                 \
     bool is_canceled = false;                                \
     if (!_STATUS->is_canceled(is_canceled, msg)) {           \
       return false;                                          \
@@ -154,23 +156,43 @@ namespace epidb {
     StatusPtr build_status(const std::string& _id, const long long maximum_memory);
     StatusPtr build_dummy_status();
 
-    bool count_regions(const std::string &query_id, const std::string &user_key, processing::StatusPtr status, size_t &count, std::string &msg);
+    bool count_regions(const datatypes::User& user,
+                       const std::string &query_id,
+                       processing::StatusPtr status, size_t &count, std::string &msg);
 
-    bool binning(const std::string& query_id, const std::string& column_name, const int bars, const std::string& user_key, const processing::StatusPtr status, mongo::BSONObj& counts, std::string& msg);
+    bool binning(const datatypes::User& user,
+                 const std::string& query_id, const std::string& column_name, const int bars,
+                 const processing::StatusPtr status, mongo::BSONObj& counts, std::string& msg);
 
-    bool distinct(const std::string& query_id, const std::string& column_name, const std::string& user_key, const processing::StatusPtr status, mongo::BSONObj& counts, std::string& msg);
+    bool distinct(const datatypes::User& user,
+                  const std::string& query_id, const std::string& column_name,
+                  const processing::StatusPtr status, mongo::BSONObj& counts, std::string& msg);
 
-    bool calculate_enrichment(const std::string& query_id, const std::string& gene_model, const std::string& user_key, processing::StatusPtr status, mongo::BSONObj& result, std::string& msg);
+    bool calculate_enrichment(const datatypes::User& user,
+                              const std::string& query_id, const std::string& gene_model,
+                              processing::StatusPtr status, mongo::BSONObj& result, std::string& msg);
 
-    bool coverage(const std::string &query_id, const std::string &genome, const std::string &user_key, processing::StatusPtr status, std::vector<CoverageInfo> &coverage_infos, std::string &msg);
+    bool coverage(const datatypes::User& user,
+                  const std::string &query_id, const std::string &genome,
+                  processing::StatusPtr status, std::vector<CoverageInfo> &coverage_infos, std::string &msg);
 
-    bool get_regions(const std::string &query_id, const std::string &format, const std::string &user_key, processing::StatusPtr status, StringBuilder &sb, std::string &msg);
+    bool get_regions(const datatypes::User& user,
+                     const std::string &query_id, const std::string &format,
+                     processing::StatusPtr status, StringBuilder &sb, std::string &msg);
 
-    bool score_matrix(const std::vector<std::pair<std::string, std::string>> &experiments_formats, const std::string &aggregation_function, const std::string &regions_query_id, const std::string &user_key, processing::StatusPtr status, std::string &matrix, std::string &msg);
+    bool score_matrix(const datatypes::User& user,
+                      const std::vector<std::pair<std::string, std::string>> &experiments_formats, const std::string &aggregation_function,
+                      const std::string &regions_query_id,
+                      processing::StatusPtr status, std::string &matrix, std::string &msg);
 
-    bool lola(const std::string& query_id, const std::string& universe_query_id, const mongo::BSONObj& datasets, const std::string& genome, const std::string& user_key, processing::StatusPtr status, mongo::BSONObj& result, std::string& msg);
+    bool lola(const datatypes::User& user,
+              const std::string& query_id, const std::string& universe_query_id,
+              const mongo::BSONObj& datasets, const std::string& genome,
+              processing::StatusPtr status, mongo::BSONObj& result, std::string& msg);
 
-    bool get_experiments_by_query(const std::string &query_id, const std::string &user_key, processing::StatusPtr status, std::vector<utils::IdName>& experiments, std::string &msg);
+    bool get_experiments_by_query(const datatypes::User& user,
+                                  const std::string &query_id,
+                                  processing::StatusPtr status, std::vector<utils::IdName>& experiments, std::string &msg);
 
     bool format_regions(const std::string &output_format, ChromosomeRegionsList &chromosomeRegionsList, processing::StatusPtr status, StringBuilder &sb, std::string &msg);
   }

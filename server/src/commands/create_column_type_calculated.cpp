@@ -90,8 +90,9 @@ namespace epidb {
         std::string norm_description = utils::normalize_name(description);
 
         std::string id;
-        bool ret = dba::columns::create_column_type_calculated(name, norm_name, description, norm_description,
-                   code, user_key, id, msg);
+        bool ret = dba::columns::create_column_type_calculated(user, name, norm_name,
+                   description, norm_description,
+                   code, id, msg);
 
         if (!ret) {
           result.add_error(msg);

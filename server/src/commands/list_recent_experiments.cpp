@@ -129,7 +129,10 @@ namespace epidb {
         sub.done();
 
         mongo::BSONObj o = args_builder.obj();
-        const mongo::BSONObj q = dba::query::build_query(o);
+        mongo::BSONObj q;
+        if (!dba::list::build_list_experiments_bson_query(user, o, q, msg)) {
+          return false;
+        }
         mongo::Query query = mongo::Query(q).sort("upload_info.upload_end", -1);
 
         std::vector<utils::IdName> names;

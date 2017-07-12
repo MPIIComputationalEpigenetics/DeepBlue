@@ -76,7 +76,7 @@ namespace epidb {
         }
 
         std::vector<utils::IdName> names;
-        if (!dba::list::techniques(user_key, names, msg)) {
+        if (!dba::list::techniques(names, msg)) {
           result.add_error(msg);
           return false;
         }

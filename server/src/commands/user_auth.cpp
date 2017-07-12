@@ -59,7 +59,7 @@ namespace epidb {
           return false;
         }
 
-        result.add_string(user.get_key());
+        result.add_string(user.key());
         return true;
       }
     } userAuthCommand;

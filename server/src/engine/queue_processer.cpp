@@ -70,68 +70,68 @@ namespace epidb {
     void QueueHandler::handle_task(const std::string& id, const mongo::BSONObj &o)
     {
       datatypes::User user;
-      std::string user_key = o["user_id"].str();
+      std::string user_id = o["user_id"].str();
       std::string msg;
-      if (!dba::users::get_user_by_id(user_key, user, msg)) {
+      if (!dba::users::get_user_by_id(user_id, user, msg)) {
         finish(BSON("error" << msg), false);
       }
 
-      processing::StatusPtr status = processing::build_status(id, user.get_memory_limit());
+      processing::StatusPtr status = processing::build_status(id, user.memory_limit());
       mongo::BSONObj result;
-      bool success = process(o, status, result);
+      bool success = process(user, o, status, result);
       finish(result, success);
     }
 
-    bool QueueHandler::process(const mongo::BSONObj &job, processing::StatusPtr status, mongo::BSONObj& result)
+    bool QueueHandler::process(const datatypes::User &user, const mongo::BSONObj &job, processing::StatusPtr status, mongo::BSONObj& result)
     {
       std::string command = job["command"].str();
-      std::string user_key = job["user_key"].str();
 
       if (command == "count_regions") {
-        return process_count(job["query_id"].str(), user_key, status, result);
+        return process_count(user, job["query_id"].str(), status, result);
       }
       if (command == "coverage") {
-        return process_coverage(job["query_id"].str(), job["genome"].str(), user_key, status, result);
+        return process_coverage(user, job["query_id"].str(), job["genome"].str(), status, result);
       }
       if (command == "get_regions") {
-        return process_get_regions(job["query_id"].str(), job["format"].str(), user_key, status, result);
+        return process_get_regions(user, job["query_id"].str(), job["format"].str(), status, result);
       }
       if (command == "score_matrix") {
-        return process_score_matrix(job["experiments_formats"].Obj(), job["aggregation_function"].str(), job["query_id"].str(), user_key, status, result);
+        return process_score_matrix(user, job["experiments_formats"].Obj(), job["aggregation_function"].str(), job["query_id"].str(), status, result);
       }
       if (command == "get_experiments_by_query") {
-        return process_get_experiments_by_query(job["query_id"].str(), user_key, status, result);
+        return process_get_experiments_by_query(user, job["query_id"].str(), status, result);
       }
       if (command == "binning") {
-        return process_binning(job["query_id"].str(), job["column_name"].str(), job["bars"].Int(), user_key, status, result);
+        return process_binning(user, job["query_id"].str(), job["column_name"].str(), job["bars"].Int(), status, result);
       }
       if (command == "distinct") {
-        return process_distinct(job["query_id"].str(), job["column_name"].str(), user_key, status, result);
+        return process_distinct(user, job["query_id"].str(), job["column_name"].str(), status, result);
       }
       if (command == "calculate_enrichment") {
-        return process_calculate_enrichment(job["query_id"].str(), job["gene_model"].str(), user_key, status, result);
+        return process_calculate_enrichment(user, job["query_id"].str(), job["gene_model"].str(),  status, result);
       }
       if (command == "lola") {
-        return process_lola(job["query_id"].str(), job["universe_query_id"].str(), job["databases"].Obj(), job["genome"].str(), user_key, status, result);
+        return process_lola(user, job["query_id"].str(), job["universe_query_id"].str(), job["databases"].Obj(), job["genome"].str(), status, result);
       }
 
       else {
-        mongo::BSONObjBuilder bob;
+        mongo::BSONObjBuilder bob;      datatypes::User user;
+
         bob.append("__error__", "Invalid command " + command);
         result = BSON("__error__" << ("Invalid command " + command));
         return false;
       }
     }
 
-    bool QueueHandler::process_count(const std::string &query_id,
-                                     const std::string &user_key,
+    bool QueueHandler::process_count(const datatypes::User &user,
+                                     const std::string &query_id,
                                      processing::StatusPtr status, mongo::BSONObj& result)
     {
       std::string msg;
       mongo::BSONObjBuilder bob;
       size_t count = 0;
 
-      if (!processing::count_regions(query_id, user_key, status, count, msg)) {
+      if (!processing::count_regions(user, query_id, status, count, msg)) {
         bob.append("__error__", msg);
         result = bob.obj();
         return false;
@@ -149,15 +149,16 @@ namespace epidb {
       return true;
     }
 
-    bool QueueHandler::process_binning(const std::string &query_id, const std::string& column_name, const int bars,
-                                       const std::string &user_key,
+    bool QueueHandler::process_binning(const datatypes::User &user,
+                                       const std::string &query_id, const std::string& column_name, const int bars,
+
                                        processing::StatusPtr status, mongo::BSONObj& result)
     {
       std::string msg;
       mongo::BSONObjBuilder bob;
       mongo::BSONObj binning;
 
-      if (!processing::binning(query_id, column_name, bars, user_key, status, binning, msg)) {
+      if (!processing::binning(user, query_id, column_name, bars, status, binning, msg)) {
         bob.append("__error__", msg);
         result = bob.obj();
         return false;
@@ -176,15 +177,15 @@ namespace epidb {
       return true;
     }
 
-    bool QueueHandler::process_distinct(const std::string &query_id, const std::string& column_name,
-                                        const std::string &user_key,
+    bool QueueHandler::process_distinct(const datatypes::User &user,
+                                        const std::string &query_id, const std::string& column_name,
                                         processing::StatusPtr status, mongo::BSONObj& result)
     {
       std::string msg;
       mongo::BSONObjBuilder bob;
       mongo::BSONObj distinct;
 
-      if (!processing::distinct(query_id, column_name, user_key, status, distinct, msg)) {
+      if (!processing::distinct(user, query_id, column_name, status, distinct, msg)) {
         bob.append("__error__", msg);
         result = bob.obj();
         return false;
@@ -203,15 +204,15 @@ namespace epidb {
       return true;
     }
 
-    bool QueueHandler::process_calculate_enrichment(const std::string &query_id, const std::string& gene_model,
-        const std::string &user_key,
+    bool QueueHandler::process_calculate_enrichment(const datatypes::User &user,
+        const std::string &query_id, const std::string& gene_model,
         processing::StatusPtr status, mongo::BSONObj& result)
     {
       std::string msg;
       mongo::BSONObjBuilder bob;
       mongo::BSONObj enrichment;
 
-      if (!processing::calculate_enrichment(query_id, gene_model, user_key, status, enrichment, msg)) {
+      if (!processing::calculate_enrichment(user, query_id, gene_model, status, enrichment, msg)) {
         bob.append("__error__", msg);
         result = bob.obj();
         return false;
@@ -230,16 +231,17 @@ namespace epidb {
       return true;
     }
 
-    bool QueueHandler::process_lola(const std::string &query_id, const std::string &universe_query_id,
+    bool QueueHandler::process_lola(const datatypes::User &user,
+                                    const std::string &query_id, const std::string &universe_query_id,
                                     const mongo::BSONObj& datasets,
                                     const std::string& genome,
-                                    const std::string &user_key, processing::StatusPtr status, mongo::BSONObj& result)
+                                    processing::StatusPtr status, mongo::BSONObj& result)
     {
       std::string msg;
       mongo::BSONObjBuilder bob;
       mongo::BSONObj enrichment;
 
-      if (!processing::lola(query_id, universe_query_id, datasets, genome, user_key, status, enrichment, msg)) {
+      if (!processing::lola(user, query_id, universe_query_id, datasets, genome, status, enrichment, msg)) {
         bob.append("__error__", msg);
         result = bob.obj();
         return false;
@@ -259,15 +261,15 @@ namespace epidb {
     }
 
 
-    bool QueueHandler::process_coverage(const std::string &query_id, const std::string &genome,
-                                        const std::string &user_key,
+    bool QueueHandler::process_coverage(const datatypes::User &user,
+                                        const std::string &query_id, const std::string &genome,
                                         processing::StatusPtr status, mongo::BSONObj& result)
     {
       std::string msg;
       mongo::BSONObjBuilder bob;
       std::vector<processing::CoverageInfo> coverage_infos;
 
-      if (!processing::coverage(query_id, genome, user_key, status, coverage_infos, msg)) {
+      if (!processing::coverage(user, query_id, genome, status, coverage_infos, msg)) {
         bob.append("__error__", msg);
         result = bob.obj();
         return false;
@@ -298,15 +300,17 @@ namespace epidb {
       return true;
     }
 
-    bool QueueHandler::process_get_regions(const std::string &query_id, const std::string &format,
-                                           const std::string &user_key,
+    bool QueueHandler::process_get_regions(const datatypes::User &user,
+                                           const std::string &query_id, const std::string &format,
+
                                            processing::StatusPtr status, mongo::BSONObj& result)
     {
+
       std::string msg;
       StringBuilder sb;
       mongo::BSONObjBuilder bob;
 
-      if (!processing::get_regions(query_id, format, user_key, status, sb, msg)) {
+      if (!processing::get_regions(user, query_id, format, status, sb, msg)) {
         bob.append("__error__", msg);
         result = bob.obj();
         return false;
@@ -346,8 +350,8 @@ namespace epidb {
       return true;
     }
 
-    bool QueueHandler::process_score_matrix(const mongo::BSONObj &experiments_formats_bson, const std::string &aggregation_function, const std::string &regions_query_id,
-                                            const std::string &user_key,
+    bool QueueHandler::process_score_matrix(const datatypes::User &user,
+                                            const mongo::BSONObj &experiments_formats_bson, const std::string &aggregation_function, const std::string &regions_query_id,
                                             processing::StatusPtr status, mongo::BSONObj& result)
     {
       std::string msg;
@@ -366,7 +370,7 @@ namespace epidb {
       }
 
       std::string matrix;
-      if (!processing::score_matrix(experiments_formats, aggregation_function, regions_query_id, user_key, status, matrix, msg)) {
+      if (!processing::score_matrix(user, experiments_formats, aggregation_function, regions_query_id, status, matrix, msg)) {
         bob.append("__error__", msg);
         result = bob.obj();
         return false;
@@ -399,14 +403,14 @@ namespace epidb {
       return true;
     }
 
-    bool QueueHandler::process_get_experiments_by_query(const std::string &query_id,
-        const std::string &user_key,
+    bool QueueHandler::process_get_experiments_by_query(const datatypes::User &user,
+        const std::string &query_id,
         processing::StatusPtr status, mongo::BSONObj& result)
     {
       std::string msg;
       mongo::BSONObjBuilder bob;
       std::vector<utils::IdName> experiments;
-      if (!processing::get_experiments_by_query(query_id, user_key, status, experiments, msg)) {
+      if (!processing::get_experiments_by_query(user, query_id, status, experiments, msg)) {
         bob.append("__error__", msg);
         result = bob.obj();
         return false;

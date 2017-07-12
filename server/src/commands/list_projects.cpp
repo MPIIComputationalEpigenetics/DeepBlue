@@ -24,6 +24,7 @@
 #include "../dba/list.hpp"
 
 #include "../datatypes/user.hpp"
+#include "../datatypes/projects.hpp"
 
 #include "../extras/utils.hpp"
 #include "../extras/serialize.hpp"
@@ -75,12 +76,16 @@ namespace epidb {
           return false;
         }
 
+        std::vector<std::string> project_names = user.projects();
         std::vector<utils::IdName> names;
-        bool ret = dba::list::projects(user_key, names, msg);
 
-        if (!ret) {
-          result.add_error(msg);
-          return false;
+        for (const auto& p_name: project_names) {
+          std::string id;
+          if (!datatypes::projects::get_id(p_name, id, msg)) {
+            result.add_error(msg);
+            return false;
+          }
+          names.emplace_back(id, p_name);
         }
 
         set_id_names_return(names, result);

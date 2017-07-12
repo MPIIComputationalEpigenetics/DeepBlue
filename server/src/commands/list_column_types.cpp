@@ -77,7 +77,7 @@ namespace epidb {
         }
 
         std::vector<utils::IdName> names;
-        bool ret = dba::list::column_types(user_key, names, msg);
+        bool ret = dba::list::column_types(names, msg);
 
         if (!ret) {
           result.add_error(msg);

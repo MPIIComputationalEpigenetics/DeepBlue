@@ -26,6 +26,7 @@
 #include "../dba/dba.hpp"
 #include "../dba/insert.hpp"
 #include "../dba/queries.hpp"
+#include "../dba/users.hpp"
 
 #include "../engine/commands.hpp"
 
@@ -49,22 +50,18 @@ namespace epidb {
 
       static Parameters parameters_()
       {
-        Parameter p[] = {
+        return {
           parameters::Genome,
           Parameter("region_set", serialize::DATASTRING, "Regions in CHROMOSOME\tSTART\tEND format"),
           parameters::UserKey
         };
-        Parameters params(&p[0], &p[0] + 3);
-        return params;
       }
 
       static Parameters results_()
       {
-        Parameter p[] = {
+        return {
           Parameter("id", serialize::STRING, "query id")
         };
-        Parameters results(&p[0], &p[0] + 1);
-        return results;
       }
 
     public:
@@ -150,7 +147,7 @@ namespace epidb {
         map_regions.finish();
 
         int dataset_id;
-        if (!dba::insert_query_region_set(genome, norm_genome, user_key, ip, map_regions, fileFormat, dataset_id, msg)) {
+        if (!dba::insert_query_region_set(user, genome, norm_genome,ip, map_regions, fileFormat, dataset_id, msg)) {
           result.add_error(msg);
           return false;
         }
@@ -164,7 +161,7 @@ namespace epidb {
         args_builder.append("chromosomes", utils::build_array(chromosomes));
 
         std::string query_id;
-        if (!dba::query::store_query("input_regions", args_builder.obj(), user_key, query_id, msg)) {
+        if (!dba::query::store_query(user, "input_regions", args_builder.obj(), query_id, msg)) {
           result.add_error(msg);
           return false;
         }

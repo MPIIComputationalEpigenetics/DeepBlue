@@ -76,7 +76,7 @@ namespace epidb {
         }
 
         std::vector<utils::IdName> names;
-        bool ret = dba::list::users(user.get_key(), names, msg);
+        bool ret = dba::list::users(names, msg);
 
         if (!ret) {
           result.add_error(msg);

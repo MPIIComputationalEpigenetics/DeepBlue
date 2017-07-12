@@ -43,7 +43,6 @@ namespace epidb {
 
       bool __get_synonyms_from_biosource(const std::string &id,
                                          const std::string &biosource_name, const std::string &norm_biosource_name,
-                                         const std::string &user_key,
                                          std::vector<utils::IdName> &syns, std::string &msg)
       {
         utils::IdName id_name_biosource;
@@ -85,7 +84,7 @@ namespace epidb {
           mongo::BSONObj e_syn = syns_names_cursor->next();
           mongo::BSONElement syn = e_syn["synonym"];
           std::string syn_name = syn.str();
-          utils::IdName id_syn_name(id_name_biosource.id , syn_name);
+          utils::IdName id_syn_name(id_name_biosource.id, syn_name);
           syns.push_back(id_syn_name);
         }
 
@@ -94,7 +93,6 @@ namespace epidb {
       }
 
       bool __get_synonyms_from_synonym(const std::string &synonym, const std::string &norm_synonym,
-                                       const std::string &user_key,
                                        std::vector<utils::IdName> &syns, std::string &msg)
       {
         Connection c;
@@ -118,7 +116,7 @@ namespace epidb {
 
         c.done();
 
-        if (!__get_synonyms_from_biosource("", biosource_name, norm_biosource_name, user_key, syns, msg)) {
+        if (!__get_synonyms_from_biosource("", biosource_name, norm_biosource_name, syns, msg)) {
           return false;
         }
 
@@ -133,7 +131,7 @@ namespace epidb {
 
         // Get the synonyms from this term
         std::vector<utils::IdName> syns;
-        if (!__get_synonyms_from_biosource("", term, norm_term, "", syns, msg)) {
+        if (!__get_synonyms_from_biosource("", term, norm_term, syns, msg)) {
           return false;
         }
 
@@ -149,10 +147,10 @@ namespace epidb {
 
         // Get the sub terms
         std::vector<std::string> norm_subs;
-        if (!get_biosource_children(biosource, norm_biosource,
-                                    true, "", norm_subs, msg)) {
+        if (!get_biosource_children(biosource, norm_biosource, true, norm_subs, msg)) {
           return false;
         }
+
         std::vector<utils::IdName> id_names;
         for (const std::string & norm_sub : norm_subs) {
           std::string biosource_id;
@@ -200,9 +198,9 @@ namespace epidb {
       }
 
 
-      bool __set_biosource_synonym(const std::string &input_biosource_name, const std::string &synonym,
-                                   bool is_biosource, const bool is_syn, const std::string &user_key,
-                                   std::string &msg)
+      bool __set_biosource_synonym(const datatypes::User& user,
+                                   const std::string &input_biosource_name, const std::string &synonym,
+                                   bool is_biosource, const bool is_syn, std::string &msg)
       {
         std::string biosource_name;
         std::string norm_biosource_name;
@@ -250,7 +248,7 @@ namespace epidb {
         syn_builder.append("norm_synonym", norm_synonym);
         syn_builder.append("biosource_name", biosource_name);
         syn_builder.append("norm_biosource_name", norm_biosource_name);
-        syn_builder.append("user_key", user_key);
+        syn_builder.append("user", user.id());
         syn_builder.append("public", true);
         c->insert(helpers::collection_name(Collections::BIOSOURCE_SYNONYM_NAMES()), syn_builder.obj());
         if (!c->getLastError().empty()) {
@@ -270,7 +268,9 @@ namespace epidb {
         return true;
       }
 
-      bool set_biosource_synonym_complete(const std::string &biosource_name, const std::string &synonym_name, const std::string& user_key, std::string& msg)
+      bool set_biosource_synonym_complete(const datatypes::User& user,
+                                          const std::string &biosource_name, const std::string &synonym_name,
+                                          std::string& msg)
       {
 
         const std::string norm_biosource_name = utils::normalize_name(biosource_name);
@@ -296,18 +296,18 @@ namespace epidb {
           return false;
         }
 
-        return __set_biosource_synonym(biosource_name, synonym_name, is_biosource, is_syn, user_key, msg);
+        return __set_biosource_synonym(user, biosource_name, synonym_name, is_biosource, is_syn, msg);
       }
 
       bool get_biosource_synonyms(const std::string &id, const std::string &biosource_name,
                                   const std::string &norm_biosource_name,
-                                  bool is_biosource, const std::string &user_key,
+                                  bool is_biosource,
                                   std::vector<utils::IdName> &syns, std::string &msg)
       {
         if (is_biosource) {
-          return __get_synonyms_from_biosource(id, biosource_name, norm_biosource_name, user_key, syns, msg);
+          return __get_synonyms_from_biosource(id, biosource_name, norm_biosource_name, syns, msg);
         } else {
-          return __get_synonyms_from_synonym(biosource_name, norm_biosource_name, user_key, syns, msg);
+          return __get_synonyms_from_synonym(biosource_name, norm_biosource_name, syns, msg);
         }
       }
 
@@ -372,10 +372,11 @@ namespace epidb {
         return true;
       }
 
-      bool set_biosource_parent(const std::string &biosource_more_embracing, const std::string &norm_biosource_more_embracing,
+      bool set_biosource_parent(const datatypes::User& user,
+                                const std::string &biosource_more_embracing, const std::string &norm_biosource_more_embracing,
                                 const std::string &biosource_less_embracing, const std::string &norm_biosource_less_embracing,
                                 bool more_embracing_is_syn, const bool less_embracing_is_syn,
-                                const std::string &user_key, std::string &msg)
+                                std::string &msg)
       {
         std::string more_embracing_root;
         std::string norm_more_embracing_root;
@@ -495,7 +496,7 @@ namespace epidb {
       }
 
       bool get_biosource_children(const std::string &biosource_name, const std::string &norm_biosource_name,
-                                  bool is_biosource, const std::string &user_key,
+                                  bool is_biosource,
                                   std::vector<std::string> &norm_subs, std::string &msg)
       {
         std::string more_embracing_root;
@@ -539,7 +540,6 @@ namespace epidb {
 
       bool get_biosource_parents(const std::string &biosource_name, const std::string &norm_biosource_name,
                                  bool is_biosource,
-                                 const std::string &user_key,
                                  std::vector<std::string> &norm_uppers, std::string &msg)
       {
         std::string more_embracing_root;
@@ -560,7 +560,7 @@ namespace epidb {
         return true;
       }
 
-      bool remove_biosouce(const std::string &id, const std::string &biosource_name , const std::string &norm_biosource_name, std::string &msg)
+      bool remove_biosouce(const std::string &id, const std::string &biosource_name, const std::string &norm_biosource_name, std::string &msg)
       {
         Connection c;
 

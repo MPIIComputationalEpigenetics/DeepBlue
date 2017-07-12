@@ -86,9 +86,9 @@ namespace epidb {
         }
 
         std::string id;
-        bool ret = dba::gene_ontology::add_gene_ontology_term(go_id, go_label,
+        bool ret = dba::gene_ontology::add_gene_ontology_term(user, go_id, go_label,
                    description, norm_description,
-                   go_namespace, user_key, id, msg);
+                   go_namespace, id, msg);
         if (!ret) {
           result.add_error(msg);
         } else {

@@ -94,8 +94,7 @@ namespace epidb {
         }
 
         std::vector<mongo::BSONObj> genes;
-        if (!dba::list::genes(user_key,
-                              utils::build_vector(gene_id_or_name), utils::build_vector(go_terms),
+        if (!dba::list::genes(utils::build_vector(gene_id_or_name), utils::build_vector(go_terms),
                               utils::build_vector(chromosomes), start, end,
                               norm_gene_model, genes, msg)) {
           result.add_error(msg);

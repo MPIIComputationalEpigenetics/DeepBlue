@@ -83,7 +83,7 @@ namespace epidb {
           return false;
         }
 
-        if (!dba::exists::query(flanked_query_id, user_key, msg)) {
+        if (!dba::exists::query(user, flanked_query_id, msg)) {
           if (msg.empty()) {
             result.add_error(Error::m(ERR_INVALID_QUERY_ID, flanked_query_id));
           } else {
@@ -101,7 +101,7 @@ namespace epidb {
         args_builder.append("use_strand", use_strand);
 
         std::string query_id;
-        if (!dba::query::store_query("extend", args_builder.obj(), user_key, query_id, msg)) {
+        if (!dba::query::store_query(user, "extend", args_builder.obj(), query_id, msg)) {
           result.add_error(msg);
           return false;
         }

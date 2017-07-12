@@ -64,20 +64,20 @@ namespace epidb {
           return false;
         }
 
-        if (user.get_name() == datatypes::User::ANONYMOUS_USER()) {
+        if (user.name() == datatypes::User::ANONYMOUS_USER()) {
           msg = "It is not allowed to change the attributes of the anonymous user";
           result.add_error(msg);
           return false;
         }
 
         if (field == "email") {
-          user.set_email(value);
+          user.email(value);
         } else if (field == "name") {
-          user.set_name(value);
+          user.name(value);
         } else if (field == "password") {
-          user.set_password(value);
+          user.password(value);
         } else if (field == "institution") {
-          user.set_institution(value);
+          user.institution(value);
         } else {
           result.add_error("Invalid field name");
           return false;
@@ -88,7 +88,7 @@ namespace epidb {
           return false;
         }
 
-        result.add_string(user.get_id());
+        result.add_string(user.id());
         return true;
       }
     } modifyUserCommand;

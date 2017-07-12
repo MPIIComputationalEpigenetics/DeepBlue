@@ -73,7 +73,7 @@ namespace epidb {
                 result.add_error(msg);
                 return false;
             }
-            if (user.get_id() != user2.get_id()) {
+            if (user.id() != user2.id()) {
                 result.add_error(msg);
                 return false;
             }

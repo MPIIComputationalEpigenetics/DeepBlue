@@ -94,11 +94,6 @@ namespace epidb {
         return helpers::check_exist(Collections::USERS(), "norm_name", name);
       }
 
-      bool user_by_key(const std::string &user_key)
-      {
-        return helpers::check_exist(Collections::USERS(), "key", user_key);
-      }
-
       bool technique(const std::string &name)
       {
         return helpers::check_exist(Collections::TECHNIQUES(), "norm_name", name);
@@ -109,18 +104,9 @@ namespace epidb {
         return helpers::check_exist(Collections::COLUMN_TYPES(), "norm_name", name);
       }
 
-      bool query(const std::string &query_id, const std::string &user_key, std::string &msg)
+      bool query(const datatypes::User& user, const std::string &query_id, std::string &msg)
       {
-        utils::IdName user;
-        if (!users::get_user(user_key, user, msg)) {
-          return false;
-        }
-
-        if (user.name.empty()) {
-          return false;
-        }
-
-        mongo::BSONObj query = BSON("_id" << query_id << "user" << user.id);
+        mongo::BSONObj query = BSON("_id" << query_id << "user" << user.id());
         return helpers::check_exist(Collections::QUERIES(), query);
       }
     }

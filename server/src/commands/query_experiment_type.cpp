@@ -90,7 +90,7 @@ namespace epidb {
         }
 
         std::string new_query_id;
-        if (!dba::query::modify_query(query_id, "upload_info.content_format", type, user_key, new_query_id, msg)) {
+        if (!dba::query::modify_query(user, query_id, "upload_info.content_format", type, new_query_id, msg)) {
           result.add_error(msg);
           return false;
         }

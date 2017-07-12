@@ -30,12 +30,14 @@
 
 namespace epidb {
   namespace processing {
-    bool distinct(const std::string& query_id, const std::string& column_name, const std::string& user_key, processing::StatusPtr status, mongo::BSONObj& result, std::string& msg)
+    bool distinct(const datatypes::User& user,
+                  const std::string& query_id, const std::string& column_name,
+                  processing::StatusPtr status, mongo::BSONObj& result, std::string& msg)
     {
       INIT_PROCESSING(PROCESS_DISTINCT, status)
 
       ChromosomeRegionsList chromosomeRegionsList;
-      if (!dba::query::retrieve_query(user_key, query_id, status, chromosomeRegionsList, msg)) {
+      if (!dba::query::retrieve_query(user, query_id, status, chromosomeRegionsList, msg)) {
         return false;
       }
 

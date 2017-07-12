@@ -99,7 +99,7 @@ namespace epidb {
         std::string norm_description = utils::normalize_name(description);
 
         std::string id;
-        bool ret = dba::add_genome(name, norm_name, description, norm_description, gi, user_key, ip, id, msg);
+        bool ret = dba::add_genome(user, name, norm_name, description, norm_description, gi, ip, id, msg);
 
         if (!ret) {
           result.add_error(msg);

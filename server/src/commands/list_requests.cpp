@@ -97,7 +97,7 @@ namespace epidb {
 
         std::vector<request::Job> jobs;
 
-        if (! Engine::instance().request_jobs(status_find, user_key, jobs, msg)) {
+        if (! Engine::instance().request_jobs(user, status_find, jobs, msg)) {
           return false;
         }
 

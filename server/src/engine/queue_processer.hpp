@@ -41,16 +41,38 @@ namespace epidb {
       void handle_task(const std::string& _id, const mongo::BSONObj &o);
       void run();
 
-      bool process(const mongo::BSONObj &job, processing::StatusPtr status, mongo::BSONObj& result);
-      bool process_count(const std::string &request_id, const std::string &user_key, processing::StatusPtr status, mongo::BSONObj& result);
-      bool process_binning(const std::string &query_id, const std::string& column_name, const int bars, const std::string &user_key, processing::StatusPtr status, mongo::BSONObj& result);
-      bool process_distinct(const std::string &query_id, const std::string& column_name, const std::string &user_key, processing::StatusPtr status, mongo::BSONObj& result);
-      bool process_calculate_enrichment(const std::string &query_id, const std::string& gene_model, const std::string &user_key, processing::StatusPtr status, mongo::BSONObj& result);
-      bool process_coverage(const std::string &request_id, const std::string & genome, const std::string &user_key, processing::StatusPtr status, mongo::BSONObj& result);
-      bool process_get_regions(const std::string &query_id, const std::string &format, const std::string &user_key, processing::StatusPtr status, mongo::BSONObj& result);
-      bool process_score_matrix(const mongo::BSONObj &experiments_formats, const std::string &aggregation_function, const std::string &regions_query_id, const std::string &user_key, processing::StatusPtr status, mongo::BSONObj& result);
-      bool process_get_experiments_by_query(const std::string &query_id, const std::string &user_key, processing::StatusPtr status, mongo::BSONObj& result);
-      bool process_lola(const std::string &query_id, const std::string &universe_query_id, const mongo::BSONObj& datasets, const std::string& genome, const std::string &user_key, processing::StatusPtr status, mongo::BSONObj& result);
+      bool process(const datatypes::User &user, const mongo::BSONObj &job,
+                   processing::StatusPtr status, mongo::BSONObj& result);
+
+      bool process_count(const datatypes::User &user, const std::string &request_id,
+                         processing::StatusPtr status, mongo::BSONObj& result);
+
+      bool process_binning(const datatypes::User &user, const std::string &query_id, const std::string& column_name, const int bars,
+                           processing::StatusPtr status, mongo::BSONObj& result);
+
+      bool process_distinct(const datatypes::User &user, const std::string &query_id, const std::string& column_name,
+                            processing::StatusPtr status, mongo::BSONObj& result);
+
+      bool process_calculate_enrichment(const datatypes::User &user, const std::string &query_id, const std::string& gene_model,
+                                        processing::StatusPtr status, mongo::BSONObj& result);
+
+      bool process_coverage(const datatypes::User &user, const std::string &request_id, const std::string & genome,
+                            processing::StatusPtr status, mongo::BSONObj& result);
+
+      bool process_get_regions(const datatypes::User &user, const std::string &query_id, const std::string &format,
+                               processing::StatusPtr status, mongo::BSONObj& result);
+
+      bool process_score_matrix(const datatypes::User &user, const mongo::BSONObj &experiments_formats,
+                                const std::string &aggregation_function, const std::string &regions_query_id,
+                                processing::StatusPtr status, mongo::BSONObj& result);
+
+      bool process_get_experiments_by_query(const datatypes::User &user, const std::string &query_id,
+                                            processing::StatusPtr status, mongo::BSONObj& result);
+
+      bool process_lola(const datatypes::User &user, const std::string &query_id, const std::string &universe_query_id,
+                        const mongo::BSONObj& datasets, const std::string& genome,
+                        processing::StatusPtr status, mongo::BSONObj& result);
+
       bool is_canceled(processing::StatusPtr status, std::string msg);
     };
   }

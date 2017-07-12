@@ -109,14 +109,14 @@ namespace epidb {
 
         mongo::BSONObj query;
 
-        if (!dba::list::build_list_experiments_query(genomes, types, epigenetic_marks, biosources, sample_ids, techniques,
-            projects, user_key, query, msg)) {
+        if (!dba::list::build_list_experiments_query(user, genomes, types, epigenetic_marks, biosources, sample_ids, techniques,
+            projects, query, msg)) {
           result.add_error(msg);
           return false;
         }
 
         std::vector<utils::IdNameCount> experiments_count;
-        if (!dba::list::collection_experiments_count(controlled_vocabulary, query, user_key, experiments_count, msg)) {
+        if (!dba::list::collection_experiments_count(user, controlled_vocabulary, query, experiments_count, msg)) {
           result.add_error(msg);
         }
 

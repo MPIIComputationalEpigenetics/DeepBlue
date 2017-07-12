@@ -66,7 +66,7 @@ namespace epidb {
       virtual bool run(const std::string &ip,
                        const serialize::Parameters &parameters, serialize::Parameters &result) const
       {
-        const std::string name = parameters[0]->as_string();
+        const std::string technique = parameters[0]->as_string();
         const std::string user_key = parameters[1]->as_string();
 
         std::string msg;
@@ -78,7 +78,7 @@ namespace epidb {
         }
 
         std::vector<utils::IdName> names;
-        if (!dba::list::similar_techniques(name, user_key, names, msg)) {
+        if (!dba::list::similar_techniques(technique, names, msg)) {
           result.add_error(msg);
           return false;
         }

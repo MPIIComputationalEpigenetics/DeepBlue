@@ -40,7 +40,6 @@
 
 #include "../dba/genes.hpp"
 #include "../dba/users.hpp"
-#include "../dba/queries.hpp"
 
 #include "../datatypes/metadata.hpp"
 #include "../datatypes/user.hpp"
@@ -53,12 +52,12 @@ namespace epidb {
   namespace dba {
     namespace list {
 
-      bool users(const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg)
+      bool users(std::vector<utils::IdName> &result, std::string &msg)
       {
         return helpers::get(Collections::USERS(), result, msg);
       }
 
-      bool genomes(const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg)
+      bool genomes(std::vector<utils::IdName> &result, std::string &msg)
       {
         return helpers::get(Collections::GENOMES(), result, msg);
       }
@@ -74,12 +73,12 @@ namespace epidb {
         return helpers::get(Collections::BIOSOURCES(), query_builder.obj(), result, msg);
       }
 
-      bool techniques(const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg)
+      bool techniques(std::vector<utils::IdName> &result, std::string &msg)
       {
         return helpers::get(Collections::TECHNIQUES(), result, msg);
       }
 
-      bool samples(const std::string &user_key, const mongo::BSONArray &biosources, const datatypes::Metadata &metadata,
+      bool samples(const mongo::BSONArray &biosources, const datatypes::Metadata &metadata,
                    std::vector<std::string> &result, std::string &msg)
       {
         mongo::BSONObjBuilder query_builder;
@@ -110,13 +109,8 @@ namespace epidb {
       /*
       * \brief List all projects that MUST NOT be available to the user
       */
-      bool private_projects(const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg)
+      bool private_projects(const datatypes::User& user, std::vector<utils::IdName> &result, std::string &msg)
       {
-        datatypes::User user;
-        if (!dba::users::get_user_by_key(user_key, user, msg)) {
-          return false;
-        }
-
         if (user.is_admin()) {
           result.clear();
           return true;
@@ -125,10 +119,10 @@ namespace epidb {
         mongo::BSONObj private_projects = BSON("public" << false);
         mongo::BSONObj full_query;
 
-        std::vector<std::string> user_projects = user.get_projects();
+        std::vector<std::string> user_projects = user.projects();
 
         if (!user_projects.empty()) {
-          mongo::BSONObj user_projects_bson = BSON("_id" << BSON("$nin" << utils::build_array(user_projects)));
+          mongo::BSONObj user_projects_bson = BSON("_id" << BSON("$nin" << utils::build_normalized_array(user_projects)));
           full_query = BSON("$and" << BSON_ARRAY(private_projects << user_projects_bson));
         } else {
           full_query = private_projects;
@@ -147,22 +141,10 @@ namespace epidb {
       /*
       * \brief List all projects that are available to the user
       */
-      bool projects(const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg)
+      bool public_projects(std::vector<utils::IdName> &result, std::string &msg)
       {
-        datatypes::User user;
-        if (!dba::users::get_user_by_key(user_key, user, msg)) {
-          return false;
-        }
-        mongo::BSONObj full_query;
-
-        // list all project if is admin
-        if (!user.is_admin()) {
-          mongo::BSONObj public_projects = BSON("public" << true);
-          full_query = BSON("$or" << BSON_ARRAY(public_projects << BSON("_id" << BSON("$in" << utils::build_array(user.get_projects())))));
-        }
-
         std::vector<mongo::BSONObj> projects;
-        if (!helpers::get(Collections::PROJECTS(), full_query, projects, msg)) {
+        if (!helpers::get(Collections::PROJECTS(), BSON("public" << true), projects, msg)) {
           return false;
         }
 
@@ -206,7 +188,7 @@ namespace epidb {
         return true;
       }
 
-      bool annotations(const std::string &genome, const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg)
+      bool annotations(const std::string &genome, std::vector<utils::IdName> &result, std::string &msg)
       {
         std::vector<mongo::BSONObj> objects;
         if (!helpers::get(Collections::ANNOTATIONS(), "norm_genome", genome, objects, msg)) {
@@ -221,19 +203,19 @@ namespace epidb {
         return true;
       }
 
-      bool annotations(const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg)
+      bool annotations(std::vector<utils::IdName> &result, std::string &msg)
       {
         return helpers::get(Collections::ANNOTATIONS(), result, msg);
       }
 
-      bool column_types(const std::string &user_key, std::vector<utils::IdName> &content, std::string  &msg)
+      bool column_types(std::vector<utils::IdName> &content, std::string  &msg)
       {
-        return dba::columns::list_column_types(user_key, content, msg);
+        return dba::columns::list_column_types(content, msg);
       }
 
       //-----
 
-      bool column_types(const std::string &user_key, std::vector<std::string> &content, std::string  &msg)
+      bool column_types(std::vector<std::string> &content, std::string  &msg)
       {
         Connection c;
         auto data_cursor = c->query(helpers::collection_name(Collections::COLUMN_TYPES()), mongo::BSONObj());
@@ -255,58 +237,59 @@ namespace epidb {
 
       // --
 
-      bool gene_models(const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg)
+      bool gene_models(std::vector<utils::IdName> &result, std::string &msg)
       {
         return helpers::get(Collections::GENE_MODELS(), result, msg);
       }
 
-      bool genes(const std::string &user_key,
-                 const std::vector<std::string> &genes_id_or_name, const std::vector<std::string> &go_terms,
+      bool genes(const std::vector<std::string> &genes_id_or_name, const std::vector<std::string> &go_terms,
                  const std::vector<std::string> &chromosomes,
                  const Position start, const Position end,
                  const std::string &norm_gene_model,  std::vector<mongo::BSONObj> &genes, std::string &msg)
       {
-        return dba::genes::get_genes(chromosomes, start, end, "", genes_id_or_name, go_terms, user_key, norm_gene_model, genes, msg);
+        return dba::genes::get_genes(chromosomes, start, end, "", genes_id_or_name, go_terms, norm_gene_model, genes, msg);
       }
 
-      bool similar_biosources(const std::string &name, const std::string &user_key,
-                              std::vector<utils::IdName> &result, std::string &msg)
+      bool get_genes(const datatypes::User& user,
+                     const std::vector<std::string> &chromosomes, const Position start, const Position end,
+                     const std::string& strand,
+                     const std::vector<std::string>& genes_names_or_id, const std::vector<std::string>& go_terms,
+                     const std::string &norm_gene_model,
+                     std::vector<mongo::BSONObj>& genes, std::string &msg);
+
+      bool similar_biosources(const std::string &name, std::vector<utils::IdName> &result, std::string &msg)
       {
-        return similar(Collections::BIOSOURCES(), utils::normalize_name(name), user_key, result, msg);
+        return similar(Collections::BIOSOURCES(), utils::normalize_name(name), result, msg);
       }
 
-      bool similar_techniques(const std::string &name, const std::string &user_key,
-                              std::vector<utils::IdName> &result, std::string &msg)
+      bool similar_techniques(const std::string &name, std::vector<utils::IdName> &result, std::string &msg)
       {
-        return similar(Collections::TECHNIQUES(), utils::normalize_name(name), user_key, result, msg);
+        return similar(Collections::TECHNIQUES(), utils::normalize_name(name), result, msg);
       }
 
-      bool similar_projects(const std::string &name, const std::string &user_key,
-                            std::vector<utils::IdName> &result, std::string &msg)
+      bool similar_projects(const std::string &name, std::vector<utils::IdName> &result, std::string &msg)
       {
-        return similar(Collections::PROJECTS(), utils::normalize_name(name), user_key, result, msg);
+        return similar(Collections::PROJECTS(), utils::normalize_name(name), result, msg);
       }
 
-      bool similar_epigenetic_marks(const std::string &name, const std::string &user_key,
-                                    std::vector<utils::IdName> &result, std::string &msg)
+      bool similar_epigenetic_marks(const std::string &name, std::vector<utils::IdName> &result, std::string &msg)
       {
-        return similar(Collections::EPIGENETIC_MARKS(),  utils::normalize_epigenetic_mark(name), user_key, result, msg);
+        return similar(Collections::EPIGENETIC_MARKS(),  utils::normalize_epigenetic_mark(name), result, msg);
       }
 
-      bool similar_genomes(const std::string &name, const std::string &user_key,
-                           std::vector<utils::IdName> &result, std::string &msg)
+      bool similar_genomes(const std::string &name, std::vector<utils::IdName> &result, std::string &msg)
       {
-        return similar(Collections::GENOMES(), utils::normalize_epigenetic_mark(name), user_key, result, msg);
+        return similar(Collections::GENOMES(), utils::normalize_epigenetic_mark(name), result, msg);
       }
 
-      bool similar_experiments(const std::string &name, const std::string &genome, const std::string &user_key,
+      bool similar_experiments(const std::string &name, const std::string &genome,
                                std::vector<utils::IdName> &result, std::string &msg)
       {
-        return similar(Collections::EXPERIMENTS(), "name", name, "genome", genome, user_key, result, msg);
+        return similar(Collections::EXPERIMENTS(), "name", name, "genome", genome, result, msg);
       }
 
       bool similar(const std::string &where, const std::string &what,
-                   const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg,
+                   std::vector<utils::IdName> &result, std::string &msg,
                    const size_t total)
       {
         std::vector<utils::IdName> id_names;
@@ -337,7 +320,7 @@ namespace epidb {
 
       bool similar(const std::string &where, const std::string &field, const std::string &what,
                    const std::string &filter_field, const std::string &filter_what,
-                   const std::string &user_key, std::vector<utils::IdName> &result, std::string &msg,
+                   std::vector<utils::IdName> &result, std::string &msg,
                    const size_t total)
       {
         std::vector<mongo::BSONObj> docs;
@@ -369,10 +352,86 @@ namespace epidb {
         return true;
       }
 
-      bool build_list_experiments_query(const std::vector<serialize::ParameterPtr> genomes, const std::vector<serialize::ParameterPtr> types,
+      bool build_list_experiments_bson_query(const datatypes::User& user, const mongo::BSONObj &args,
+                                             mongo::BSONObj& query, std::string& msg)
+      {
+        // Get the experiments
+        mongo::BSONObjBuilder experiments_query_builder;
+
+        if (args.hasField("genome")) {
+          if (args["genome"].type() == mongo::Array) {
+            experiments_query_builder.append("norm_genome", BSON("$in" << args["norm_genome"]));
+          } else {
+            experiments_query_builder.append("norm_genome", args["norm_genome"].str());
+          }
+        }
+        if (args.hasField("experiment_name")) {
+          if (args["experiment_name"].type() == mongo::Array) {
+            experiments_query_builder.append("norm_name", BSON("$in" << args["norm_experiment_name"]));
+          } else {
+            experiments_query_builder.append("norm_name", args["norm_experiment_name"].str());
+          }
+        }
+        if (args.hasField("epigenetic_mark")) {
+          if (args["epigenetic_mark"].type() == mongo::Array) {
+            experiments_query_builder.append("norm_epigenetic_mark", BSON("$in" << args["norm_epigenetic_mark"]));
+          } else {
+            experiments_query_builder.append("norm_epigenetic_mark", args["norm_epigenetic_mark"].str());
+          }
+        }
+        if (args.hasField("sample_id")) {
+          if (args["sample_id"].type() == mongo::Array) {
+            experiments_query_builder.append("sample_id", BSON("$in" << args["sample_id"]));
+          } else {
+            experiments_query_builder.append("sample_id", args["sample_id"].str());
+          }
+        }
+        if (args.hasField("project")) {
+          if (args["project"].type() == mongo::Array) {
+            experiments_query_builder.append("norm_project", BSON("$in" << args["norm_project"]));
+          } else {
+            experiments_query_builder.append("norm_project", args["norm_project"].str());
+          }
+        } else {
+          std::vector<std::string> user_projects_names = user.projects();
+          experiments_query_builder.append("norm_project", utils::build_normalized_array(user_projects_names));
+          experiments_query_builder.append("project", utils::build_array(user_projects_names));
+        }
+        if (args.hasField("technique")) {
+          if (args["technique"].type() == mongo::Array) {
+            experiments_query_builder.append("norm_technique", BSON("$in" << args["norm_technique"]));
+          } else {
+            experiments_query_builder.append("norm_technique", args["norm_technique"].str());
+          }
+        }
+        if (args.hasField("sample_info.biosource_name")) {
+          if (args["sample_info.biosource_name"].type() == mongo::Array) {
+            experiments_query_builder.append("sample_info.norm_biosource_name", BSON("$in" << args["sample_info.norm_biosource_name"]));
+          } else {
+            experiments_query_builder.append("sample_info.norm_biosource_name", args["sample_info.norm_biosource_name"].str());
+          }
+        }
+        if (args.hasField("upload_info.content_format")) {
+          if (args["upload_info.content_format"].type() == mongo::Array) {
+            experiments_query_builder.append("upload_info.content_format", BSON("$in" << args["upload_info.content_format"]));
+          } else {
+            experiments_query_builder.append("upload_info.content_format", args["upload_info.content_format"].str());
+          }
+        }
+        if (args.hasField("upload_info.upload_end")) {
+          experiments_query_builder.append(args["upload_info.upload_end"]);
+        }
+        experiments_query_builder.append("upload_info.done", true);
+        query = experiments_query_builder.obj();
+
+        return true;
+      }
+
+      bool build_list_experiments_query(const datatypes::User& user,
+                                        const std::vector<serialize::ParameterPtr> genomes, const std::vector<serialize::ParameterPtr> types,
                                         const std::vector<serialize::ParameterPtr> epigenetic_marks, const std::vector<serialize::ParameterPtr> biosources,
                                         const std::vector<serialize::ParameterPtr> sample_ids, const std::vector<serialize::ParameterPtr> techniques,
-                                        const std::vector<serialize::ParameterPtr> projects, const std::string user_key,
+                                        const std::vector<serialize::ParameterPtr> projects,
                                         mongo::BSONObj& query, std::string& msg)
       {
         mongo::BSONObjBuilder args_builder;
@@ -402,22 +461,18 @@ namespace epidb {
           args_builder.append("sample_id", utils::build_array(sample_ids));
         }
 
-        std::vector<utils::IdName> user_projects;
-        if (!dba::list::projects(user_key, user_projects, msg)) {
-          return false;
-        }
+        std::vector<std::string> user_projects_names = user.projects();
 
         // project.
         if (!projects.empty()) {
-
           // Filter the projects that are available to the user
           std::vector<serialize::ParameterPtr> filtered_projects;
           for (const auto& project : projects) {
             std::string project_name = project->as_string();
             std::string norm_project = utils::normalize_name(project_name);
             bool found = false;
-            for (const auto& user_project : user_projects) {
-              std::string norm_user_project = utils::normalize_name(user_project.name);
+            for (const auto& user_project : user_projects_names) {
+              std::string norm_user_project = utils::normalize_name(user_project);
               if (norm_project == norm_user_project) {
                 filtered_projects.push_back(project);
                 found = true;
@@ -434,8 +489,8 @@ namespace epidb {
           args_builder.append("norm_project", utils::build_normalized_array(filtered_projects));
         } else {
           std::vector<std::string> user_projects_names;
-          for (const auto& project : user_projects) {
-            user_projects_names.push_back(project.name);
+          for (const auto& project : user_projects_names) {
+            user_projects_names.push_back(project);
           }
 
           args_builder.append("project", utils::build_array(user_projects_names));
@@ -448,7 +503,9 @@ namespace epidb {
           args_builder.append("norm_technique", utils::build_normalized_array(techniques));
         }
 
-        query = dba::query::build_query(args_builder.obj());
+        if(!build_list_experiments_bson_query(user, args_builder.obj(), query, msg)) {
+          return false;
+        }
 
         return true;
       }
@@ -500,24 +557,15 @@ namespace epidb {
       }
 
 
-      bool in_use(const std::string &collection, const std::string &key_name, const std::string &user_key,
+      bool in_use(const datatypes::User& user, const std::string &collection, const std::string &key_name,
                   std::vector<utils::IdNameCount> &names, std::string &msg)
       {
-        std::vector<utils::IdName> user_projects;
-        if (!projects(user_key, user_projects, msg)) {
-          return false;
-        }
-
-        std::vector<std::string> project_names;
-        for (const auto& project : user_projects) {
-          project_names.push_back(project.name);
-        }
-
-        mongo::BSONArray projects_array = utils::build_array(project_names);
+        std::vector<std::string> project_names = user.projects();
+        mongo::BSONArray projects_array = utils::build_normalized_array(project_names);
 
         // Select experiments that are uploaded and from πublic projects or that the user has permission
         mongo::BSONObj done = BSON("upload_info.done" << true);
-        mongo::BSONObj user_projects_bson = BSON("project" << BSON("$in" << projects_array));
+        mongo::BSONObj user_projects_bson = BSON("norm_project" << BSON("$in" << projects_array));
         mongo::BSONObj query = BSON("$and" << BSON_ARRAY(done <<  user_projects_bson));
         mongo::BSONObj match = BSON("$match" << query);
 
@@ -616,25 +664,17 @@ namespace epidb {
         return std::make_tuple(true, std::string(""));
       }
 
-      bool collection_experiments_count(const std::string controlled_vocabulary,
-                                        const mongo::BSONObj & experiments_query, const std::string &user_key,
+      bool collection_experiments_count(const datatypes::User& user, const std::string controlled_vocabulary,
+                                        const mongo::BSONObj & experiments_query,
                                         std::vector<utils::IdNameCount> &experiments_count, std::string& msg)
       {
-        std::vector<utils::IdName> user_projects;
-        if (!projects(user_key, user_projects, msg)) {
-          return false;
-        }
-        std::vector<std::string> project_names;
-        for (const auto& project : user_projects) {
-          project_names.push_back(project.name);
-        }
-        mongo::BSONArray projects_array = utils::build_array(project_names);
+        std::vector<std::string> project_names = user.projects();
+        mongo::BSONArray projects_array = utils::build_normalized_array(project_names);
 
         std::string key_name;
         if (!get_controlled_vocabulary_key(controlled_vocabulary, key_name, msg)) {
           return false;
         }
-
 
         std::unordered_map<std::string, std::vector<utils::IdNameCount>> faceting_result;
         auto result = __collection_experiments_count(experiments_query, projects_array,
@@ -647,19 +687,12 @@ namespace epidb {
         return true;
       }
 
-      bool faceting(const mongo::BSONObj& experiments_query, const std::string &user_key,
+      bool faceting(const datatypes::User& user, const mongo::BSONObj& experiments_query,
                     std::unordered_map<std::string, std::vector<utils::IdNameCount>> &faceting_result,
                     std::string &msg)
       {
-        std::vector<utils::IdName> user_projects;
-        if (!projects(user_key, user_projects, msg)) {
-          return false;
-        }
-        std::vector<std::string> project_names;
-        for (const auto& project : user_projects) {
-          project_names.push_back(project.name);
-        }
-        mongo::BSONArray projects_array = utils::build_array(project_names);
+        std::vector<std::string> project_names = user.projects();
+        mongo::BSONArray projects_array = utils::build_normalized_array(project_names);
 
         std::vector<std::pair<std::string, std::string> > collums = {
           {"epigenetic_marks", "$norm_epigenetic_mark"},

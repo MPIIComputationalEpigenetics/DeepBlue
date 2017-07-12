@@ -33,6 +33,7 @@
 #include "collections.hpp"
 #include "exists.hpp"
 #include "helpers.hpp"
+#include "list.hpp"
 
 #include "../errors.hpp"
 #include "users.hpp"
@@ -83,8 +84,8 @@ namespace epidb {
         if (!dba::helpers::get_increment_counter("users", result, msg)) {
           return false;
         }
-        user.set_id(datatypes::User::PREFIX + std::to_string(result));
-        create_user_builder.append(datatypes::User::FIELD_ID, user.get_id());
+        user.id(datatypes::User::PREFIX + std::to_string(result));
+        create_user_builder.append(datatypes::User::FIELD_ID, user.id());
 
         mongo::BSONObj cu = create_user_builder.obj();
 
@@ -116,7 +117,7 @@ namespace epidb {
 
         Connection c;
         c->update(dba::helpers::collection_name(dba::Collections::USERS()),
-                  BSON("_id" << user.get_id()),
+                  BSON("_id" << user.id()),
                   BSON("$set" << create_user_builder.obj()));
         if (!c->getLastError().empty()) {
           msg = c->getLastError();
@@ -127,9 +128,26 @@ namespace epidb {
         return true;
       }
 
+      bool __load_user(const mongo::BSONObj& result, datatypes::User& user, std::string& msg)
+      {
+        std::vector<utils::IdName> public_projects;
+        if (!list::public_projects(public_projects, msg)) {
+          return false;
+        }
+
+        std::vector<std::string> public_projects_names;
+        for (const auto& pp: public_projects) {
+          public_projects_names.push_back(pp.name);
+        }
+
+        user = datatypes::User(result, public_projects_names);
+
+        return true;
+      }
+
       bool remove_user(const datatypes::User& user, std::string& msg)
       {
-        if (!dba::helpers::remove_one(helpers::collection_name(datatypes::User::COLLECTION), user.get_id(), msg)) {
+        if (!dba::helpers::remove_one(helpers::collection_name(dba::Collections::USERS()), user.id(), msg)) {
           return false;
         }
         return true;
@@ -138,36 +156,33 @@ namespace epidb {
       bool get_user_by_key(const std::string& key, datatypes::User& user, std::string& msg)
       {
         mongo::BSONObj result;
-        if (!dba::helpers::get_one(datatypes::User::COLLECTION, BSON(datatypes::User::FIELD_KEY << key), result)) {
+        if (!dba::helpers::get_one(dba::Collections::USERS(), BSON(datatypes::User::FIELD_KEY << key), result)) {
           msg = Error::m(ERR_INVALID_USER_KEY);
           return false;
         }
-        user = datatypes::User(result);
-        return true;
+        return __load_user(result, user, msg);
       }
 
       bool get_user_by_email(const std::string& email, const std::string& password, datatypes::User& user, std::string& msg)
       {
         mongo::BSONObj result;
-        if (!dba::helpers::get_one(datatypes::User::COLLECTION,
+        if (!dba::helpers::get_one(dba::Collections::USERS(),
                                    BSON(datatypes::User::FIELD_EMAIL << email << datatypes::User::FIELD_PASSWORD << password),
                                    result)) {
           msg = Error::m(ERR_INVALID_USER_EMAIL_PASSWORD);
           return false;
         }
-        user = datatypes::User(result);
-        return true;
+        return __load_user(result, user, msg);
       }
 
       bool get_user_by_id(const std::string& id, datatypes::User& user, std::string& msg)
       {
         mongo::BSONObj result;
-        if (!dba::helpers::get_one(datatypes::User::COLLECTION, BSON(datatypes::User::FIELD_ID << id), result)) {
+        if (!dba::helpers::get_one(dba::Collections::USERS(), BSON(datatypes::User::FIELD_ID << id), result)) {
           msg = Error::m(ERR_INVALID_USER_ID, id);
           return false;
         }
-        user = datatypes::User(result);
-        return true;
+        return __load_user(result, user, msg);
       }
 
       bool is_valid_email(const std::string &email, std::string &msg)
@@ -196,11 +211,6 @@ namespace epidb {
 
         id = obj["_id"].str();
         return true;
-      }
-
-      bool get_user(const std::string &user_key, utils::IdName &id_name, std::string &msg)
-      {
-        return helpers::get_name(Collections::USERS(), user_key, id_name, msg);
       }
 
       bool get_user_name_by_id(const std::string &user_id, std::string &user_name, std::string &msg)

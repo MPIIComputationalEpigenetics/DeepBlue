@@ -29,6 +29,7 @@
 #include "dba.hpp"
 
 #include "../datatypes/regions.hpp"
+#include "../datatypes/user.hpp"
 
 #include "../extras/utils.hpp"
 
@@ -38,30 +39,35 @@ namespace epidb {
 
       void invalidate_cache();
 
-      bool store_query(const std::string &type,
-                       const mongo::BSONObj &args, const std::string &user_key,
+      bool store_query(const datatypes::User& user,
+                       const std::string &type,
+                       const mongo::BSONObj &args,
                        std::string &query_id, std::string &msg);
 
-      bool modify_query(const std::string &query_id, const std::string &key, const std::string &value, const std::string &user_key,
+      bool modify_query(const datatypes::User& user,
+                        const std::string &query_id, const std::string &key, const std::string &value,
                         std::string &new_query_id, std::string &msg);
 
-      bool retrieve_query(const std::string &user_key, const std::string &query_id,
+      bool retrieve_query(const datatypes::User& user,
+                          const std::string &query_id,
                           processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg,
                           bool reduced_mode = false);
 
-      bool get_experiments_by_query(const std::string &user_key, const std::string &query_id,
+      bool get_experiments_by_query(const datatypes::User& user,
+                                    const std::string &query_id,
                                     processing::StatusPtr status, std::vector<utils::IdName> &experiments_name, std::string &msg);
 
-      bool retrieve_experiment_select_query(const mongo::BSONObj &query,
+      bool retrieve_experiment_select_query(const datatypes::User& user,
+                                            const mongo::BSONObj &query,
                                             processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg,
                                             bool reduced_mode = false);
 
-      bool count_regions(const std::string &query_id, const std::string &user_key,
+      bool count_regions(const datatypes::User& user,
+                         const std::string &query_id,
                          processing::StatusPtr status, size_t &count, std::string &msg);
 
-      const mongo::BSONObj build_query(const mongo::BSONObj &args);
-
-      bool build_annotation_query(const std::string &user_key, const mongo::BSONObj &query,
+      bool build_annotation_query(const datatypes::User& user,
+                                  const mongo::BSONObj &query,
                                   mongo::BSONObj &regions_query, std::vector<std::string> &annotations_id,
                                   std::string &msg);
 
@@ -81,40 +87,51 @@ namespace epidb {
       bool build_experiment_query(const mongo::BSONObj &query,
                                   mongo::BSONObj &regions_query, std::string &msg);
 
-      bool retrieve_annotation_select_query(const std::string &user_key, const mongo::BSONObj &query,
+      bool retrieve_annotation_select_query(const datatypes::User& user,
+                                            const mongo::BSONObj &query,
                                             processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg);
 
-      bool retrieve_genes_select_query(const std::string &user_key, const mongo::BSONObj &query,
+      bool retrieve_genes_select_query(const datatypes::User& user,
+                                       const mongo::BSONObj &query,
                                        processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg);
 
-      bool retrieve_find_motif_query(const std::string &user_key, const mongo::BSONObj &query,
+      bool retrieve_find_motif_query(const datatypes::User& user,
+                                     const mongo::BSONObj &query,
                                      processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg);
 
-      bool retrieve_expression_select_query(const std::string &user_key, const mongo::BSONObj &query,
+      bool retrieve_expression_select_query(const datatypes::User& user,
+                                            const mongo::BSONObj &query,
                                             processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg);
 
-      bool retrieve_intersection_query(const std::string &user_key, const mongo::BSONObj &query,
+      bool retrieve_intersection_query(const datatypes::User& user,
+                                       const mongo::BSONObj &query,
                                        processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg);
 
-      bool retrieve_overlap_query(const std::string &user_key, const mongo::BSONObj &query,
+      bool retrieve_overlap_query(const datatypes::User& user,
+                                  const mongo::BSONObj &query,
                                   processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg);
 
-      bool retrieve_flank_query(const std::string &user_key, const mongo::BSONObj &query,
+      bool retrieve_flank_query(const datatypes::User& user,
+                                const mongo::BSONObj &query,
                                 processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg);
 
-      bool retrieve_extend_query(const std::string &user_key, const mongo::BSONObj &query,
+      bool retrieve_extend_query(const datatypes::User& user,
+                                 const mongo::BSONObj &query,
                                  processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg);
 
-      bool retrieve_merge_query(const std::string &user_key, const mongo::BSONObj &query,
+      bool retrieve_merge_query(const datatypes::User& user,
+                                const mongo::BSONObj &query,
                                 processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg);
 
       bool retrieve_query_region_set(const mongo::BSONObj &query,
                                      processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg);
 
-      bool retrieve_annotation_select_query(const std::string &user_key, const mongo::BSONObj &query,
+      bool retrieve_annotation_select_query(const datatypes::User& user,
+                                            const mongo::BSONObj &query,
                                             processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg);
 
-      bool retrieve_filter_query(const std::string &user_key, const mongo::BSONObj &query,
+      bool retrieve_filter_query(const datatypes::User& user,
+                                 const mongo::BSONObj &query,
                                  processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg);
 
       bool add_tiling(const std::string &genome, const size_t &tiling_size,
@@ -123,7 +140,8 @@ namespace epidb {
       bool retrieve_tiling_query(const mongo::BSONObj &query,
                                  processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg);
 
-      bool process_aggregate(const std::string &user_key, const mongo::BSONObj &query,
+      bool process_aggregate(const datatypes::User& user,
+                             const mongo::BSONObj &query,
                              processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg);
 
       bool is_canceled(processing::StatusPtr status, std::string msg);

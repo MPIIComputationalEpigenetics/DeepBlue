@@ -67,7 +67,7 @@ namespace epidb {
       virtual bool run(const std::string &ip,
                        const serialize::Parameters &parameters, serialize::Parameters &result) const
       {
-        std::string name = parameters[0]->as_string();
+        std::string experiment_name = parameters[0]->as_string();
         const std::string user_key = parameters[2]->as_string();
 
         std::vector<serialize::ParameterPtr> genomes;
@@ -93,7 +93,7 @@ namespace epidb {
           std::string genome = (**it).as_string();
 
           std::vector<utils::IdName> res;
-          if (!dba::list::similar_experiments(name, genome, user_key, res, msg)) {
+          if (!dba::list::similar_experiments(experiment_name, genome, res, msg)) {
             result.add_error(msg);
           }
           names.insert(names.end(), res.begin(), res.end());

@@ -93,7 +93,7 @@ namespace epidb {
         std::vector<utils::IdName> related_biosources;
 
         if (!dba::get_biosource_children(biosource_name, norm_biosource_name,
-                                         is_biosource, user_key, related_biosources, msg)) {
+                                         is_biosource, related_biosources, msg)) {
           result.add_error(msg);
           return false;
         }
@@ -106,7 +106,7 @@ namespace epidb {
 
           is_biosource = dba::exists::biosource(norm_related_biosource);
 
-          if (!dba::cv::get_biosource_synonyms("", related_biosource.name, norm_related_biosource, is_biosource, user_key, related_syns, msg)) {
+          if (!dba::cv::get_biosource_synonyms("", related_biosource.name, norm_related_biosource, is_biosource, related_syns, msg)) {
             result.add_error(msg);
             return false;
           }

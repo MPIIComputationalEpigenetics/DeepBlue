@@ -64,13 +64,11 @@ namespace epidb {
 
       bool user(const std::string &name);
 
-      bool user_by_key(const std::string &user_key);
-
       bool technique(const std::string &name);
 
       bool column_type(const std::string &name);
 
-      bool query(const std::string &query_id, const std::string &user_key, std::string& msg);
+      bool query(const datatypes::User& user, const std::string &query_id, std::string &msg);
     }
   }
 }

@@ -35,7 +35,7 @@ namespace epidb {
                           const std::string &genome, const std::string &norm_genome,
                           const std::string &description, const std::string &norm_description,
                           const mongo::BSONObj &extra_metadata_obj,
-                          const std::string &user_key, const std::string &ip,
+                          const std::string &ip,
                           const parser::FileFormat &format,
                           int &dataset_id,
                           std::string &annotation_id,
@@ -46,7 +46,7 @@ namespace epidb {
                                        const std::string &genome, const std::string &norm_genome,
                                        const std::string &description, const std::string &norm_description,
                                        const mongo::BSONObj &extra_metadata_obj,
-                                       const std::string &user_key, const std::string &ip,
+                                       const std::string &ip,
                                        const parser::FileFormat &format,
                                        const int dataset_id,
                                        std::string &annotation_id,
@@ -54,7 +54,7 @@ namespace epidb {
                                        std::string &msg);
 
       bool build_query_region_set_metadata(const std::string &genome, const std::string &norm_genome,
-                                           const std::string &user_key, const std::string &ip,
+                                           const std::string &ip,
                                            const parser::FileFormat &format,
                                            int& dataset_id,
                                            std::string &query_region_set_id,

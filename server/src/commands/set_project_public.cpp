@@ -90,23 +90,13 @@ namespace epidb {
                 result.add_error(msg);
                 return false;
             }
-            if (user.get_id() != user2.get_id()) {
+            if (user.id() != user2.id()) {
                 result.add_error(msg);
                 return false;
             }
         }
 
-
-        std::vector<utils::IdName> user_projects_id_names;
-        if (!dba::list::projects(user_key, user_projects_id_names, msg)) {
-          result.add_error(msg);
-          return false;
-        }
-
-        std::vector<std::string> user_projects;
-        for (const auto& project : user_projects_id_names) {
-          user_projects.push_back(utils::normalize_name(project.name));
-        }
+        std::vector<std::string> user_projects = user.projects();
 
         datatypes::Metadata project_res;
         if (!dba::info::get_project(id, user_projects, project_res, msg)) {
@@ -115,7 +105,7 @@ namespace epidb {
         }
         std::string owner = project_res["user"];
 
-        if (!user.is_admin() && user.get_id() != owner) {
+        if (!user.is_admin() && user.id() != owner) {
           result.add_error(Error::m(ERR_PERMISSION_PROJECT, project));
           return false;
         }

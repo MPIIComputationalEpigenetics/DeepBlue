@@ -138,8 +138,8 @@ namespace epidb {
 
           std::string id;
 
-          ret = dba::insert_annotation(name, norm_name, genome, norm_genome, description, norm_description, extra_metadata,
-                                       user_key, ip, wig, id, msg);
+          ret = dba::insert_annotation(user, name, norm_name, genome, norm_genome, description, norm_description, extra_metadata,
+                                       ip, wig, id, msg);
           if (ret) {
             result.add_string(id);
             return true;
@@ -205,8 +205,8 @@ namespace epidb {
 
           map_regions.finish();
 
-          ret = dba::insert_annotation(name, norm_name, genome, norm_genome, description, norm_description, extra_metadata,
-                                       user_key, ip, map_regions, fileFormat, id, msg);
+          ret = dba::insert_annotation(user, name, norm_name, genome, norm_genome, description, norm_description, extra_metadata,
+                                       ip, map_regions, fileFormat, id, msg);
         }
 
         if (ret) {

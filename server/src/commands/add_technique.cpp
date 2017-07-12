@@ -93,7 +93,7 @@ namespace epidb {
         std::string norm_description = utils::normalize_name(description);
 
         std::string id;
-        bool ret = dba::add_technique(name, norm_name, description, norm_description, extra_metadata, user_key, id, msg);
+        bool ret = dba::add_technique(user, name, norm_name, description, norm_description, extra_metadata, id, msg);
         if (!ret) {
           result.add_error(msg);
         } else {

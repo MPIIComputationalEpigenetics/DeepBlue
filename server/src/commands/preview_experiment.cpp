@@ -98,16 +98,7 @@ namespace epidb {
           return false;
         }
 
-
-        std::vector<utils::IdName> user_projects;
-        if (!dba::list::projects(user_key, user_projects, msg)) {
-          result.add_error(msg);
-          return false;
-        }
-        std::vector<std::string> user_projects_names;
-        for (const auto& project : user_projects) {
-          user_projects_names.push_back(project.name);
-        }
+        std::vector<std::string> user_projects_names = user.projects();
 
         std::string genome;
         if (!dba::experiments::get_genome(experiment_norm_name, genome, msg)) {
@@ -131,9 +122,8 @@ namespace epidb {
         args_builder.append("norm_genomes", norm_genome);
 
         mongo::BSONObj args = args_builder.obj();
-
         mongo::BSONObj regions_query;
-        if (!dba::query::build_experiment_query(args, regions_query, msg)) {
+        if (!dba::list::build_list_experiments_bson_query(user, args,regions_query, msg)) {
           result.add_error(msg);
           return false;
         }

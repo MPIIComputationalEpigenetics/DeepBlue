@@ -29,7 +29,10 @@
 
 namespace epidb {
   namespace processing {
-    bool binning(const std::string& query_id, const std::string& column_name, const int bars, const std::string& user_key, processing::StatusPtr status, mongo::BSONObj& result, std::string& msg)
+    bool binning(const datatypes::User& user,
+                 const std::string& query_id,
+                 const std::string& column_name, const int bars,
+                 processing::StatusPtr status, mongo::BSONObj& result, std::string& msg)
     {
       INIT_PROCESSING(PROCESS_BINNING, status)
 
@@ -44,7 +47,7 @@ namespace epidb {
       }
 
       ChromosomeRegionsList chromosomeRegionsList;
-      if (!dba::query::retrieve_query(user_key, query_id, status, chromosomeRegionsList, msg)) {
+      if (!dba::query::retrieve_query(user, query_id, status, chromosomeRegionsList, msg)) {
         return false;
       }
 

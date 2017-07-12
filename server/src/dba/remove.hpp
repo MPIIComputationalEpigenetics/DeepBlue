@@ -23,32 +23,34 @@
 
 #include <string>
 
+#include "../datatypes/user.hpp"
+
 namespace epidb {
   namespace dba {
     namespace remove {
       bool dataset(const int dataset_id, const std::string& genome, std::string& msg);
 
-      bool annotation(const std::string &id, const std::string &user_id, std::string &msg);
+      bool annotation(const datatypes::User& user, const std::string &id, std::string &msg);
 
-      bool gene_model(const std::string &id, const std::string &user_id, std::string &msg);
+      bool gene_model(const datatypes::User& user, const std::string &id, std::string &msg);
 
-      bool gene_expression(const std::string &id, const std::string &user_id, std::string &msg);
+      bool gene_expression(const datatypes::User& user, const std::string &id, std::string &msg);
 
-      bool genome(const std::string &id, const std::string &user_id, std::string &msg);
+      bool genome(const datatypes::User& user, const std::string &id, std::string &msg);
 
-      bool project(const std::string &id, const std::string &user_id, std::string &msg);
+      bool project(const datatypes::User& user, const std::string &id, std::string &msg);
 
-      bool biosource(const std::string &id, const std::string &user_id, std::string &msg);
+      bool biosource(const datatypes::User& user, const std::string &id, std::string &msg);
 
-      bool sample(const std::string &id, const std::string &user_id, std::string &msg);
+      bool sample(const datatypes::User& user, const std::string &id, std::string &msg);
 
-      bool epigenetic_mark(const std::string &id, const std::string &user_id, std::string &msg);
+      bool epigenetic_mark(const datatypes::User& user, const std::string &id, std::string &msg);
 
-      bool experiment(const std::string &id, const std::string &user_id, std::string &msg);
+      bool experiment(const datatypes::User& user, const std::string &id, std::string &msg);
 
-      bool technique(const std::string &id, const std::string &user_id, std::string &msg);
+      bool technique(const datatypes::User& user, const std::string &id, std::string &msg);
 
-      bool column_type(const std::string &id, const std::string &user_id, std::string &msg);
+      bool column_type(const datatypes::User& user, const std::string &id, std::string &msg);
     }
   }
 }

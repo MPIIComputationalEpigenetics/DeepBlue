@@ -58,7 +58,8 @@ namespace epidb {
     bool execute(const std::string &name, const std::string &ip, unsigned long long id,
                  serialize::Parameters &parameters, serialize::Parameters &result) const;
 
-    bool request_status(const std::string &request_id, const std::string &user_key, request::Status &status, std::string &msg);
+    bool request_status(const datatypes::User& user, const std::string &request_id,
+                        request::Status &status, std::string &msg);
 
     /*
     * \brief Get job with given id
@@ -72,31 +73,31 @@ namespace epidb {
     *           user_key   Key of the owning user
     *           ret        Return: All requested jobs
     */
-    bool request_jobs(const std::string& status, const std::string& user_key, std::vector<request::Job>& ret, std::string &msg);
+    bool request_jobs(const datatypes::User& user, const std::string& status, std::vector<request::Job>& ret, std::string &msg);
 
-    bool check_request(const std::string & request_id, const std::string & user_key, std::string& msg);
+    bool check_request(const datatypes::User& user, const std::string & request_id, std::string& msg);
 
-    bool request_download_data(const std::string & request_id, const std::string & user_key, std::string &request_data, std::string& msg);
+    bool request_download_data(const datatypes::User& user, const std::string & request_id, std::string &request_data, std::string& msg);
 
-    bool request_data(const std::string & request_id, const std::string & user_key, serialize::Parameters &request_data);
+    bool request_data(const datatypes::User& user, const std::string & request_id,  serialize::Parameters &request_data);
 
-    bool queue_count_regions(const std::string &query_id, const std::string &user_key, std::string &request_id, std::string &msg);
+    bool queue_count_regions(const datatypes::User& user, const std::string &query_id, std::string &request_id, std::string &msg);
 
-    bool queue_binning(const std::string &query_id, const std::string &column_name, const int bars, const std::string &user_key, std::string &request_id, std::string &msg);
+    bool queue_binning(const datatypes::User& user, const std::string &query_id, const std::string &column_name, const int bars,  std::string &request_id, std::string &msg);
 
-    bool queue_distinct(const std::string &query_id, const std::string &column_name, const std::string &user_key, std::string &request_id, std::string &msg);
+    bool queue_distinct(const datatypes::User& user, const std::string &query_id, const std::string &column_name, std::string &request_id, std::string &msg);
 
-    bool queue_calculate_enrichment(const std::string &query_id, const std::string &gene_model, const std::string &user_key, std::string &id, std::string &msg);
+    bool queue_calculate_enrichment(const datatypes::User& user, const std::string &query_id, const std::string &gene_model, std::string &id, std::string &msg);
 
-    bool queue_coverage(const std::string &query_id, const std::string &genome, const std::string &user_key, std::string &id, std::string &msg);
+    bool queue_coverage(const datatypes::User& user, const std::string &query_id, const std::string &genome, std::string &id, std::string &msg);
 
-    bool queue_get_regions(const std::string &query_id, const std::string &output_format, const std::string &user_key, std::string &id, std::string &msg);
+    bool queue_get_regions(const datatypes::User& user, const std::string &query_id, const std::string &output_format, std::string &id, std::string &msg);
 
-    bool queue_score_matrix(const std::vector<std::pair<std::string, std::string>> &experiments_formats, const std::string &aggregation_function, const std::string &regions_query_id, const std::string &user_key, std::string &request_id, std::string &msg);
+    bool queue_score_matrix(const datatypes::User& user, const std::vector<std::pair<std::string, std::string>> &experiments_formats, const std::string &aggregation_function, const std::string &regions_query_id, std::string &request_id, std::string &msg);
 
-    bool queue_lola(const std::string& query_id, const std::string& universe_query_id, const std::unordered_map<std::string, std::vector<std::string>> &databases, const std::string& genome, const std::string &user_key, std::string &id, std::string &msg);
+    bool queue_lola(const datatypes::User& user, const std::string& query_id, const std::string& universe_query_id, const std::unordered_map<std::string, std::vector<std::string>> &databases, const std::string& genome, std::string &id, std::string &msg);
 
-    bool queue_get_experiments_by_query(const std::string &query_id, const std::string &user_key, std::string &request_id, std::string &msg);
+    bool queue_get_experiments_by_query(const datatypes::User& user, const std::string &query_id, std::string &request_id, std::string &msg);
 
     /*
     * \brief Returns whether given user owns given request

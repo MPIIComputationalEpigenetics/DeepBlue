@@ -73,7 +73,7 @@ namespace epidb {
         std::string msg;
         datatypes::User user;
 
-        if (!check_permissions(user_key, datatypes::GET_DATA, user, msg )) {
+        if (!check_permissions(user_key, datatypes::LIST_COLLECTIONS, user, msg )) {
           result.add_error(msg);
           return false;
         }
@@ -91,7 +91,7 @@ namespace epidb {
         std::vector<utils::IdName> related_biosources;
 
         if (!dba::get_biosource_children(biosource_name, norm_biosource_name,
-                                         is_biosource, user_key, related_biosources, msg)) {
+                                         is_biosource, related_biosources, msg)) {
           result.add_error(msg);
           return false;
         }

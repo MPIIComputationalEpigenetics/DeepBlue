@@ -112,7 +112,8 @@ namespace epidb {
       return true;
     }
 
-    bool clone_dataset(const std::string &dataset_id,
+    bool clone_dataset(const datatypes::User& user,
+                       const std::string &dataset_id,
                        const std::string &clone_name, const std::string &norm_clone_name,
                        const std::string &epigenetic_mark, const std::string &norm_epigenetic_mark,
                        const std::string &sample_id,
@@ -120,7 +121,7 @@ namespace epidb {
                        const std::string &project, const std::string &norm_project,
                        const std::string &description, const std::string &norm_description,
                        const std::string &format, const datatypes::Metadata &extra_metadata,
-                       const std::string &user_key, const std::string &ip,
+                       const std::string &ip,
                        std::string &_id, std::string &msg)
     {
       Connection c;
@@ -252,7 +253,7 @@ namespace epidb {
       if (dataset_id[0] == 'a') {
         if (!annotations::build_metadata_with_dataset(clone_name, norm_clone_name, clone_genome, clone_norm_genome,
             clone_description, clone_norm_description, extra_metadata_obj,
-            user_key, ip, clone_format,
+            ip, clone_format,
             internal_dataset_id, _id, cloned_metadata, msg)) {
           return false;
         }
@@ -263,7 +264,7 @@ namespace epidb {
             clone_sample_id, clone_technique, clone_norm_technique,
             clone_project, clone_norm_project,
             clone_description, clone_norm_description,
-            extra_metadata_obj, user_key, ip,
+            extra_metadata_obj, ip,
             clone_format, internal_dataset_id,
             _id, cloned_metadata, msg)) {
           return false;
@@ -278,11 +279,6 @@ namespace epidb {
       mongo::BSONObjBuilder clone_final_builder;
       clone_final_builder.appendElements(cloned_metadata);
 
-      utils::IdName user;
-      if (!users::get_user(user_key, user, msg)) {
-        c.done();
-        return false;
-      }
 
       mongo::BSONObj original_upload_info = original["upload_info"].Obj();
 
@@ -290,7 +286,7 @@ namespace epidb {
       for (mongo::BSONObj::iterator it = original_upload_info.begin(); it.more(); ) {
         mongo::BSONElement e = it.next();
         if (strncmp(e.fieldName(), "user", strlen("user")) == 0) {
-          upload_info_builder.append("user", user.id);
+          upload_info_builder.append("user", user.id());
         } else if (strncmp(e.fieldName(), "upload_end", strlen("upload_end")) == 0) {
           upload_info_builder.append("upload_end", mongo::jsTime());
         } else if (strncmp(e.fieldName(), "client_address", strlen("client_address")) == 0) {

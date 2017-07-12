@@ -111,7 +111,7 @@ namespace epidb {
         }
 
         std::string s_id;
-        if (!dba::add_sample(sample_biosource_name, norm_sample_biosource_name, metadata, user_key, s_id, msg)) {
+        if (!dba::add_sample(user, sample_biosource_name, norm_sample_biosource_name, metadata, s_id, msg)) {
           result.add_error(msg);
           return false;
         }

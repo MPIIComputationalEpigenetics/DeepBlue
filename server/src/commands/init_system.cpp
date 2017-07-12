@@ -94,15 +94,15 @@ namespace epidb {
           return false;
         }
 
-        std::string user_key;
-        if (!dba::init_system(name, email, institution, user_key, msg)) {
+        datatypes::User admin_user;
+        if (!dba::init_system(name, email, institution, admin_user, msg)) {
           result.add_error(msg);
           return false;
         }
 
         epidb::Engine::instance().init();
 
-        result.add_string(user_key);
+        result.add_string(admin_user.key());
         return true;
       }
 

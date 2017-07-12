@@ -95,23 +95,19 @@ namespace epidb {
 
         const std::string user_key = parameters[9]->as_string();
 
-        utils::IdName user;
-        if (!dba::exists::user_by_key(user_key)) {
-          user.name = "a Stranger";
-        } else {
-          if (!dba::users::get_user(user_key, user, msg)) {
-            result.add_error(msg);
-            return false;
-          }
+        datatypes::User user;
+        if (!check_permissions(user_key, datatypes::LIST_COLLECTIONS, user, msg )) {
+          result.add_error(msg);
+          return false;
         }
 
         size_t size;
         std::vector<std::vector<std::string>> results;
 
-        if (!dba::datatable::datatable(collection, columns, start, length,
-                            global_search, sort_column, sort_direction,
-                            has_filter,  columns_filters,
-                            user_key, size, results, msg)) {
+        if (!dba::datatable::datatable(user, collection, columns, start, length,
+                                       global_search, sort_column, sort_direction,
+                                       has_filter,  columns_filters,
+                                       size, results, msg)) {
           result.add_error(msg);
           return false;
         }

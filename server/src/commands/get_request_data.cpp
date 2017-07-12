@@ -84,12 +84,12 @@ namespace epidb {
         }
 
         std::string file_content;
-        if (!epidb::Engine::instance().user_owns_request(request_id, user.get_id())) {
+        if (!epidb::Engine::instance().user_owns_request(request_id, user.id())) {
           result.add_error("Request ID " + request_id + " not found.");
           return false;
         }
 
-        return epidb::Engine::instance().request_data(request_id, user_key, result);
+        return epidb::Engine::instance().request_data(user, request_id, result);
       }
     } getRequestDataCommand;
   }

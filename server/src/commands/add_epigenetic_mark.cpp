@@ -89,7 +89,7 @@ namespace epidb {
         const std::string norm_description = utils::normalize_name(description);
 
         std::string id;
-        bool ret = dba::add_epigenetic_mark(name, norm_name, description, norm_description, extra_metadata, user_key, id, msg);
+        bool ret = dba::add_epigenetic_mark(user, name, norm_name, description, norm_description, extra_metadata, id, msg);
 
         if (!ret) {
           result.add_error(msg);

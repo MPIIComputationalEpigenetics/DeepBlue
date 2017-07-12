@@ -78,7 +78,7 @@ namespace epidb {
           return false;
         }
 
-        if (!dba::cv::set_biosource_synonym_complete(biosource_name, synonym_name, user_key, msg)) {
+        if (!dba::cv::set_biosource_synonym_complete(user, biosource_name, synonym_name, msg)) {
           result.add_error(msg);
           return false;
         }

@@ -70,6 +70,7 @@ namespace epidb {
   bool Command::check_permissions(const std::string& user_key, const datatypes::PermissionLevel& permission, datatypes::User &user, std::string& msg ) const
   {
     if (!dba::users::get_user_by_key(user_key, user, msg)) {
+      std::cerr << "get user by key fail: " << msg << std::endl;
       return false;
     }
 
@@ -84,20 +85,6 @@ namespace epidb {
   bool Command::check_local(const std::string &ip, bool &r, std::string &msg) const
   {
     r = true;
-    return true;
-  }
-
-  bool Command::checks(const std::string &user_key, std::string &msg)
-  {
-    if (!dba::is_initialized()) {
-      msg = "The system was not initialized.";
-      return false;
-    }
-
-    if (!dba::exists::user_by_key(user_key)) {
-      msg = Error::m(ERR_INVALID_USER_KEY);
-      return false;
-    }
     return true;
   }
 

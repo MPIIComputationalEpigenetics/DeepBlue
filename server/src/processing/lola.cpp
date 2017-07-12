@@ -57,16 +57,17 @@ namespace epidb {
     // [0] dataseset, [1] size, [2] database_name, [3] negative_natural_log, [4] log_odds_score, [5] a, [6] b, [7] c, [8] d,)
     using ProcessOverlapResult = std::tuple<std::string, int, std::string, double, double, int, int, int, int>;
 
-    ProcessOverlapResult process_overlap(const std::string& genome, const std::vector<std::string>& chromosomes,
+    ProcessOverlapResult process_overlap(const datatypes::User& user,
+                                         const std::string& genome, const std::vector<std::string>& chromosomes,
                                          const ChromosomeRegionsList &query_regions, const long total_query_regions,
                                          const std::string dataset, const std::string database_name,
                                          const ChromosomeRegionsList &universe_regions, const long total_universe_regions,
                                          processing::StatusPtr status, threading::SemaphorePtr sem,
-                                         const std::string& user_key, std::string& msg)
+                                         std::string& msg)
     {
       ChromosomeRegionsList database_regions;
       if (utils::is_id(dataset, "q")) {
-        if (!dba::query::retrieve_query(user_key, dataset, status, database_regions, msg, /* reduced_mode */ true)) {
+        if (!dba::query::retrieve_query(user, dataset, status, database_regions, msg, /* reduced_mode */ true)) {
           sem->up();
           return std::make_tuple(msg, -1.0, "", -1.0, -1.0, -1.0, -1.0, -1.0, -1.0);
         }
@@ -143,16 +144,16 @@ namespace epidb {
     }
 
 
-    bool lola(const std::string& query_id, const std::string& universe_query_id,
+    bool lola(const datatypes::User& user,
+              const std::string& query_id, const std::string& universe_query_id,
               const mongo::BSONObj& databases,
               const std::string& genome,
-              const std::string& user_key,
               processing::StatusPtr status, mongo::BSONObj& result, std::string& msg)
     {
       INIT_PROCESSING(PROCESS_LOLA, status)
 
       ChromosomeRegionsList query_regions;
-      if (!dba::query::retrieve_query(user_key, query_id, status, query_regions, msg, /* reduced_mode */ true)) {
+      if (!dba::query::retrieve_query(user, query_id, status, query_regions, msg, /* reduced_mode */ true)) {
         return false;
       }
       size_t total_query_regions = count_regions(query_regions);
@@ -161,7 +162,7 @@ namespace epidb {
       std::cerr << "LOADING UNIVERSE" << std::endl;
       long times = clock();
       ChromosomeRegionsList universe_regions;
-      if (!dba::query::retrieve_query(user_key, universe_query_id, status, universe_regions, msg, /* reduced_mode */ true)) {
+      if (!dba::query::retrieve_query(user, universe_query_id, status, universe_regions, msg, /* reduced_mode */ true)) {
         return false;
       }
       size_t total_universe_regions = count_regions(universe_regions);
@@ -204,12 +205,13 @@ namespace epidb {
 
           sem->down();
           auto t = std::async(std::launch::async, &process_overlap,
+                              std::ref(user),
                               std::ref(genome), std::ref(chromosomes),
                               std::ref(query_regions), total_query_regions,
                               dataset, database_name,
                               std::ref(universe_regions), total_universe_regions,
                               status, sem,
-                              std::ref(user_key), std::ref(msg));
+                              std::ref(msg));
 
           threads.emplace_back(std::move(t));
         }

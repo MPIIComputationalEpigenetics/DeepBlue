@@ -81,7 +81,7 @@ namespace epidb {
         }
 
         std::vector<utils::IdNameCount> names;
-        if (!dba::list::in_use(controlled_vocabulary, collection_key, user_key, names, msg)) {
+        if (!dba::list::in_use(user, controlled_vocabulary, collection_key, names, msg)) {
           result.add_error(msg);
           return false;
         }

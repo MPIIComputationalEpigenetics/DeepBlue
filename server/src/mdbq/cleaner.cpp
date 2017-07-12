@@ -94,7 +94,7 @@ namespace epidb {
       queryb.append("_id", request_id);
 
       if (!user.is_admin()) {
-        queryb.append("misc.user_id", user.get_id());
+        queryb.append("misc.user_id", user.id());
       }
 
       query = queryb.obj();

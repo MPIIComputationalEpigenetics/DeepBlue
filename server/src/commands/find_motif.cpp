@@ -131,7 +131,7 @@ namespace epidb {
         args_builder.append("overlap", overlap);
 
         std::string query_id;
-        if (!dba::query::store_query("find_motif", args_builder.obj(), user_key, query_id, msg)) {
+        if (!dba::query::store_query(user, "find_motif", args_builder.obj(), query_id, msg)) {
           result.add_error(msg);
           return false;
         }

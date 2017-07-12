@@ -77,7 +77,7 @@ namespace epidb {
           return false;
         }
 
-        if (!dba::exists::query(query_a_id, user_key, msg)) {
+        if (!dba::exists::query(user, query_a_id, msg)) {
           if (msg.empty()) {
             result.add_error("Invalid first query ID: " + query_a_id);
           } else {
@@ -86,7 +86,7 @@ namespace epidb {
           return false;
         }
 
-        if (!dba::exists::query(query_b_id, user_key, msg)) {
+        if (!dba::exists::query(user, query_b_id, msg)) {
           if (msg.empty()) {
             result.add_error("Invalid second query ID: " + query_b_id);
           } else {
@@ -101,7 +101,7 @@ namespace epidb {
         args_builder.append("qid_2", query_b_id);
 
         std::string query_id;
-        if (!dba::query::store_query("merge", args_builder.obj(), user_key, query_id, msg)) {
+        if (!dba::query::store_query(user, "merge", args_builder.obj(), query_id, msg)) {
           result.add_error(msg);
           return false;
         }

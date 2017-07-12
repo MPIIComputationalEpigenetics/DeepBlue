@@ -29,6 +29,7 @@
 
 #include "../datatypes/regions.hpp"
 #include "../datatypes/metadata.hpp"
+#include "../datatypes/user.hpp"
 
 #include "../parser/genome_data.hpp"
 #include "../parser/parser_factory.hpp"
@@ -42,42 +43,44 @@ namespace epidb {
                                        std::string &experiment_name, std::string &msg);
 
     bool init_system(const std::string &name, const std::string &email, const std::string &institution,
-                     std::string &key, std::string &msg);
+                     datatypes::User& admin_user, std::string &msg);
 
     bool create_indexes(std::string &msg);
 
-    bool add_genome(const std::string &name, const std::string &norm_name,
+    bool add_genome(const datatypes::User& user,
+                    const std::string &name, const std::string &norm_name,
                     const std::string &description, const std::string &norm_description,
                     const parser::ChromosomesInfo &g,
-                    const std::string &user_key, const std::string &ip,
+                    const std::string &ip,
                     std::string &genome_id, std::string &msg);
 
-    bool add_chromosome_sequence(const std::string &genome, const std::string &norm_genome,
+    bool add_chromosome_sequence(const datatypes::User& user,
+                                 const std::string &genome, const std::string &norm_genome,
                                  const std::string &chromosome,
                                  const std::string &sequence,
-                                 const std::string &user_key, std::string &msg);
+                                 std::string &msg);
 
-    bool add_epigenetic_mark(const std::string &name, const std::string &norm_name,
+    bool add_epigenetic_mark(const datatypes::User& user,
+                             const std::string &name, const std::string &norm_name,
                              const std::string &description, const std::string &norm_description,
                              const datatypes::Metadata &extra_metadata,
-                             const std::string &user_key,
                              std::string &epigenetic_mark_id, std::string &msg);
 
-    bool add_biosource(const std::string &name, const std::string &norm_name,
+    bool add_biosource(const datatypes::User& user,
+                       const std::string &name, const std::string &norm_name,
                        const std::string &description, const std::string &norm_description,
                        const datatypes::Metadata &extra_metadata,
-                       const std::string &user_key,
                        std::string &biosource_id, std::string &msg);
 
-    bool add_sample(const std::string &biosource_name, const std::string &norm_biosource_name,
+    bool add_sample(const datatypes::User& user,
+                    const std::string &biosource_name, const std::string &norm_biosource_name,
                     const datatypes::Metadata &metadata,
-                    const std::string &user_key,
                     std::string &sample_id, std::string &msg);
 
-    bool add_technique(const std::string &name, const std::string &norm_name,
+    bool add_technique(const datatypes::User& user,
+                       const std::string &name, const std::string &norm_name,
                        const std::string &description, const std::string &norm_description,
                        const datatypes::Metadata &extra_metadata,
-                       const std::string &user_key,
                        std::string &biosource_id, std::string &msg);
     /**
      * Validation
@@ -99,16 +102,16 @@ namespace epidb {
      * Getters
      */
     bool get_biosource_children(const std::string &biosource_name, const std::string &norm_biosource_name,
-                                bool is_biosource, const std::string &user_key,
+                                bool is_biosource,
                                 std::vector<utils::IdName> &biosources, std::string &msg);
 
 
     bool get_biosource_parents(const std::string &biosource_name, const std::string &norm_biosource_name,
-                               bool is_biosource, const std::string &user_key,
+                               bool is_biosource,
                                std::vector<utils::IdName> &related_biosources, std::string &msg);
 
     bool get_biosource_synonyms(const std::string &biosource_name, const std::string &norm_biosource_name,
-                                bool is_biosource, const std::string &user_key,
+                                bool is_biosource,
                                 std::vector<utils::IdName> &syns, std::string &msg);
 
     bool collection_size(const std::string collection, mongo::BSONObj query, size_t& count, std::string& msg);

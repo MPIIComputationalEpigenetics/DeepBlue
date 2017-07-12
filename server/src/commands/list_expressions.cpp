@@ -93,7 +93,7 @@ namespace epidb {
 
         mongo::BSONObj query;
 
-        if (!expression_type->build_list_expressions_query(sample_ids, replicas, projects, user_key, query, msg)) {
+        if (!expression_type->build_list_expressions_query(user, sample_ids, replicas, projects, query, msg)) {
           result.add_error(msg);
           return false;
         }

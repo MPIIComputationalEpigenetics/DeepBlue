@@ -88,12 +88,12 @@ namespace epidb {
           return false;
         }
 
-        if (!dba::exists::query(data_id, user_key, msg)) {
+        if (!dba::exists::query(user, data_id, msg)) {
           result.add_error("Invalid data query id." + msg);
           return false;
         }
 
-        if (!dba::exists::query(ranges_id, user_key, msg)) {
+        if (!dba::exists::query(user, ranges_id, msg)) {
           result.add_error("Invalid regions query id." + msg);
           return false;
         }
@@ -109,7 +109,7 @@ namespace epidb {
         args_builder.append("field", field);
 
         std::string aggregate_query_id;
-        if (!dba::query::store_query("aggregate", args_builder.obj(), user_key, aggregate_query_id, msg)) {
+        if (!dba::query::store_query(user, "aggregate", args_builder.obj(), aggregate_query_id, msg)) {
           result.add_error(msg);
           return false;
         }

@@ -77,7 +77,7 @@ namespace epidb {
           return false;
         }
 
-        if (!dba::exists::query(query_id, user_key, msg)) {
+        if (!dba::exists::query(user, query_id, msg)) {
           if (msg.empty()) {
             result.add_error("Invalid query ID: " + query_id);
           } else {
@@ -87,7 +87,7 @@ namespace epidb {
         }
 
         std::string request_id;
-        if (!epidb::Engine::instance().queue_get_experiments_by_query(query_id, user_key, request_id, msg)) {
+        if (!epidb::Engine::instance().queue_get_experiments_by_query(user, query_id, request_id, msg)) {
           result.add_error(msg);
           return false;
         }

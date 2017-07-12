@@ -29,6 +29,7 @@
 
 #include "../datatypes/metadata.hpp"
 #include "../datatypes/gene_ontology_terms.hpp"
+#include "../datatypes/user.hpp"
 
 #include "../extras/utils.hpp"
 
@@ -106,17 +107,13 @@ namespace epidb {
         return true;
       }
 
-      bool build_upload_info(const std::string &user_key, const std::string &client_address, const std::string &content_format,
+      bool build_upload_info(const datatypes::User& user,
+                             const std::string &client_address, const std::string &content_format,
                              mongo::BSONObj &upload_info, std::string &msg)
       {
-        utils::IdName user;
-        if (!users::get_user(user_key, user, msg)) {
-          return false;
-        }
-
         mongo::BSONObjBuilder upload_info_builder;
 
-        upload_info_builder.append("user", user.id);
+        upload_info_builder.append("user", user.id());
         upload_info_builder.append("content_format", content_format);
         upload_info_builder.append("done", false);
         upload_info_builder.append("client_address", client_address);
@@ -134,7 +131,7 @@ namespace epidb {
                           const std::string &description, const std::string &norm_description,
                           const std::string &format,
                           const mongo::BSONObj& extra_metadata_obj,
-                          const std::string &user_key, const std::string &ip,
+                          const std::string &ip,
                           int &dataset_id,
                           std::string &gene_model_id,
                           mongo::BSONObj &gene_model_metadata,
@@ -214,12 +211,13 @@ namespace epidb {
       }
 
 
-      bool insert(const std::string &name, const std::string &norm_name,
+      bool insert(const datatypes::User& user,
+                  const std::string &name, const std::string &norm_name,
                   const std::string &genome, const std::string &norm_genome,
                   const std::string &description, const std::string &norm_description,
                   datatypes::Metadata extra_metadata,
                   const parser::GTFPtr &gtf,
-                  const std::string &user_key, const std::string &ip,
+                  const std::string &ip,
                   std::string &gene_model_id, std::string &msg)
       {
         mongo::BSONObj gene_model_metadata;
@@ -228,12 +226,12 @@ namespace epidb {
 
         if (!build_metadata(name, norm_name, genome, norm_genome,
                             description, norm_description, "GTF", extra_metadata_obj,
-                            user_key, ip, dataset_id, gene_model_id, gene_model_metadata, msg)) {
+                            ip, dataset_id, gene_model_id, gene_model_metadata, msg)) {
           return false;
         }
 
         mongo::BSONObj upload_info;
-        if (!build_upload_info(user_key, ip, "GTF", upload_info, msg)) {
+        if (!build_upload_info(user, ip, "GTF", upload_info, msg)) {
           return false;
         }
         mongo::BSONObjBuilder gene_model_builder;
@@ -252,7 +250,7 @@ namespace epidb {
         if (!search::insert_full_text(Collections::GENE_MODELS(), gene_model_id, gene_model_metadata, msg)) {
           c.done();
           std::string new_msg;
-          if (!remove::gene_model(gene_model_id, user_key, new_msg)) {
+          if (!remove::gene_model(user, gene_model_id, new_msg)) {
             msg = msg + " " + new_msg;
           }
           return false;
@@ -311,7 +309,7 @@ namespace epidb {
 
         if (!update_upload_info(Collections::GENE_MODELS(), gene_model_id, total_size, total_genes, msg)) {
           std::string new_msg;
-          if (!remove::gene_model(gene_model_id, user_key, new_msg)) {
+          if (!remove::gene_model(user, gene_model_id, new_msg)) {
             msg = msg + " " + new_msg;
           }
           return false;
@@ -480,7 +478,7 @@ namespace epidb {
       bool get_genes(const std::vector<std::string> &chromosomes, const Position start, const Position end,
                      const std::string& strand,
                      const std::vector<std::string>& genes_names_or_id, const std::vector<std::string>& go_terms,
-                     const std::string &user_key, const std::string &norm_gene_model,
+                     const std::string &norm_gene_model,
                      std::vector<mongo::BSONObj>& genes, std::string &msg)
       {
         mongo::Query query;

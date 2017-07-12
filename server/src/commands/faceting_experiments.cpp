@@ -119,15 +119,15 @@ namespace epidb {
 
         mongo::BSONObj query;
 
-        if (!dba::list::build_list_experiments_query(genomes, types, epigenetic_marks, biosources, sample_ids, techniques,
-            projects, user_key, query, msg)) {
+        if (!dba::list::build_list_experiments_query(user, genomes, types, epigenetic_marks, biosources, sample_ids, techniques,
+            projects, query, msg)) {
           result.add_error(msg);
           return false;
         }
 
         std::unordered_map<std::string, std::vector<utils::IdNameCount>> faceting_result;
 
-        if (!dba::list::faceting(query, user_key, faceting_result, msg)) {
+        if (!dba::list::faceting(user, query, faceting_result, msg)) {
           result.add_error(msg);
         }
 

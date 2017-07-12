@@ -95,18 +95,16 @@ namespace epidb {
           return false;
         }
 
-        if (dba::cv::set_biosource_parent(bigger_scope, norm_bigger_scope,
+        if (dba::cv::set_biosource_parent(user, bigger_scope, norm_bigger_scope,
                                           smaller_scope, norm_smaller_scope,
                                           bigger_scope_is_syn, smaller_scope_is_syn,
-                                          user_key, msg)) {
+                                          msg)) {
           result.add_string(bigger_scope);
           result.add_string(smaller_scope);
           return true;
-        } else {
-          result.add_error(msg);
-          return false;
         }
-
+        result.add_error(msg);
+        return false;
       }
 
     } setBioSourceParentCommand;

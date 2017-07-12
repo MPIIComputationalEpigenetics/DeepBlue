@@ -28,6 +28,7 @@
 #include "../algorithms/lru.hpp"
 
 #include "../datatypes/regions.hpp"
+#include "../datatypes/user.hpp"
 
 #include "../dba/queries.hpp"
 
@@ -35,7 +36,7 @@ namespace epidb {
   namespace cache {
     namespace query {
       struct QUERY_KEY {
-        std::string user_key;
+        datatypes::User user;
         std::string query_id;
         processing::StatusPtr status;
 
@@ -52,7 +53,8 @@ namespace epidb {
       };
     }
 
-    bool get_query_cache(const std::string &user_key, const std::string &query_id,
+    bool get_query_cache(const datatypes::User& user,
+                         const std::string &query_id,
                          processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg);
 
     void queries_cache_invalidate();

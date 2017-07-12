@@ -106,7 +106,7 @@ namespace epidb {
         }
 
         std::string query_id;
-        if (!dba::query::store_query("tiling", args_builder.obj(), user_key, query_id, msg)) {
+        if (!dba::query::store_query(user, "tiling", args_builder.obj(), query_id, msg)) {
           result.add_error(msg);
           return false;
         }

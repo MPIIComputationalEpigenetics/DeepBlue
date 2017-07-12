@@ -87,8 +87,8 @@ namespace epidb {
         new_user.generate_key();
 
         if (dba::users::add_user(new_user, msg)) {
-          result.add_string(new_user.get_id());
-          result.add_string(new_user.get_key());
+          result.add_string(new_user.id());
+          result.add_string(new_user.key());
           return true;
         } else {
           result.add_error(msg);

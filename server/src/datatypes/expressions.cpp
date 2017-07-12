@@ -51,7 +51,7 @@ namespace epidb {
         const std::string &project,
         const std::string &norm_project,
         const mongo::BSONObj& extra_metadata_obj,
-        const std::string &user_key, const std::string &ip,
+        const std::string &ip,
         int &dataset_id,
         std::string &gene_model_id,
         mongo::BSONObj &gene_model_metadata,
@@ -99,17 +99,13 @@ namespace epidb {
       return true;
     }
 
-    bool AbstractExpressionType::build_upload_info(const std::string &user_key, const std::string &client_address, const std::string &content_format,
+    bool AbstractExpressionType::build_upload_info(const datatypes::User& user,
+        const std::string &client_address, const std::string &content_format,
         mongo::BSONObj &upload_info, std::string &msg)
     {
-      utils::IdName user;
-      if (!dba::users::get_user(user_key, user, msg)) {
-        return false;
-      }
-
       mongo::BSONObjBuilder upload_info_builder;
 
-      upload_info_builder.append("user", user.id);
+      upload_info_builder.append("user", user.id());
       upload_info_builder.append("content_format", content_format);
       upload_info_builder.append("done", false);
       upload_info_builder.append("client_address", client_address);
@@ -123,8 +119,9 @@ namespace epidb {
     }
 
 
-    bool AbstractExpressionType::build_list_expressions_query(const std::vector<serialize::ParameterPtr> sample_ids, const std::vector<serialize::ParameterPtr> replicas,
-        const std::vector<serialize::ParameterPtr> projects, const std::string user_key,
+    bool AbstractExpressionType::build_list_expressions_query(const datatypes::User& user,
+        const std::vector<serialize::ParameterPtr> sample_ids, const std::vector<serialize::ParameterPtr> replicas,
+        const std::vector<serialize::ParameterPtr> projects,
         mongo::BSONObj& query, std::string& msg)
     {
       mongo::BSONObjBuilder args_builder;
@@ -139,10 +136,6 @@ namespace epidb {
 
       // TODO: move to a more generic function
       // project
-      std::vector<utils::IdName> user_projects;
-      if (!dba::list::projects(user_key, user_projects, msg)) {
-        return false;
-      }
 
       if (!projects.empty()) {
         // Filter the projects that are available to the user
@@ -151,8 +144,8 @@ namespace epidb {
           std::string project_name = project->as_string();
           std::string norm_project = utils::normalize_name(project_name);
           bool found = false;
-          for (const auto& user_project : user_projects) {
-            std::string norm_user_project = utils::normalize_name(user_project.name);
+          for (const auto& user_project : user.projects()) {
+            std::string norm_user_project = utils::normalize_name(user_project);
             if (norm_project == norm_user_project) {
               filtered_projects.push_back(project);
               found = true;
@@ -167,12 +160,7 @@ namespace epidb {
         }
         args_builder.append("norm_project", BSON("$in" << utils::build_normalized_array(filtered_projects)));
       } else {
-        std::vector<std::string> user_projects_names;
-        for (const auto& project : user_projects) {
-          user_projects_names.push_back(project.name);
-        }
-
-        args_builder.append("norm_project", BSON("$in" << utils::build_normalized_array(user_projects_names)));
+        args_builder.append("norm_project", BSON("$in" << utils::build_normalized_array(user.projects())));
       }
 
       query = args_builder.obj();

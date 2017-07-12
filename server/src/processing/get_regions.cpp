@@ -45,12 +45,14 @@ namespace epidb {
     static inline bool format_region(StringBuilder &sb, const std::string &chromosome, RegionPtr region,
                                      const parser::FileFormat &format, dba::Metafield &metafield, processing::StatusPtr status, std::string &msg);
 
-    bool get_regions(const std::string &query_id, const std::string &format, const std::string &user_key, processing::StatusPtr status, StringBuilder &sb, std::string &msg)
+    bool get_regions(const datatypes::User& user,
+                     const std::string &query_id, const std::string &format,
+                     processing::StatusPtr status, StringBuilder &sb, std::string &msg)
     {
       INIT_PROCESSING(PROCESS_GET_REGIONS, status)
 
       ChromosomeRegionsList chromosomeRegionsList;
-      if (!dba::query::retrieve_query(user_key, query_id, status, chromosomeRegionsList, msg)) {
+      if (!dba::query::retrieve_query(user, query_id, status, chromosomeRegionsList, msg)) {
         return false;
       }
 

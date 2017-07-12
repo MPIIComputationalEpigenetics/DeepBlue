@@ -84,7 +84,7 @@ namespace epidb {
           return false;
         }
 
-        if (!dba::exists::query(query_id, user_key, msg)) {
+        if (!dba::exists::query(user, query_id, msg)) {
           result.add_error("Invalid query id: '" + query_id + "'" + msg);
           return false;
         }
@@ -113,13 +113,13 @@ namespace epidb {
         args_builder.append("value", value);
         args_builder.append("type", type);
 
-        std::string fquery_id;
-        if (!dba::query::store_query("filter", args_builder.obj(), user_key, fquery_id, msg)) {
+        std::string filtered_query_id;
+        if (!dba::query::store_query(user, "filter", args_builder.obj(), filtered_query_id, msg)) {
           result.add_error(msg);
           return false;
         }
 
-        result.add_string(fquery_id);
+        result.add_string(filtered_query_id);
         return true;
       }
 

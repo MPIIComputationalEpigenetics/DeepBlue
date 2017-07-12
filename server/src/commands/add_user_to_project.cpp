@@ -91,15 +91,9 @@ namespace epidb {
           return false;
         }
 
-        std::vector<utils::IdName> user_projects_id_names;
-        if (!dba::list::projects(user_key, user_projects_id_names, msg)) {
-          result.add_error(msg);
-          return false;
-        }
-
         std::vector<std::string> user_projects;
-        for (const auto& project : user_projects_id_names) {
-          user_projects.push_back(utils::normalize_name(project.name));
+        for (const auto& project : user.projects()) {
+          user_projects.push_back(utils::normalize_name(project));
         }
 
         datatypes::Metadata project_res;
@@ -117,7 +111,7 @@ namespace epidb {
 
         // Is the command operator admin or project owner ?
         if ((!user.is_admin()) && // Is not ADMIN
-            (user.get_id() != owner_id)) { // Neither the owner
+            (user.id() != owner_id)) { // Neither the owner
           result.add_error(Error::m(ERR_PERMISSION_PROJECT, project));
           return false;
         }

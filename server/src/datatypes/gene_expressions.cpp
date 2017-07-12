@@ -123,10 +123,11 @@ namespace epidb {
       return bob.obj();
     }
 
-    bool GeneExpressionType::insert(const std::string & sample_id, const int replica, datatypes::Metadata extra_metadata,
+    bool GeneExpressionType::insert(const datatypes::User& user,
+                                    const std::string & sample_id, const int replica, datatypes::Metadata extra_metadata,
                                     const ISerializableFilePtr file, const std::string & format,
                                     const std::string & project, const std::string & norm_project,
-                                    const std::string & user_key, const std::string & ip,
+                                    const std::string & ip,
                                     std::string & expression_id, std::string & msg)
     {
 
@@ -135,12 +136,12 @@ namespace epidb {
       int dataset_id;
 
       if (!build_expression_type_metadata(sample_id, replica, format, project, norm_project, extra_metadata_obj,
-                                          user_key, ip, dataset_id, expression_id, gene_expression_metadata, msg)) {
+                                          ip, dataset_id, expression_id, gene_expression_metadata, msg)) {
         return false;
       }
 
       mongo::BSONObj upload_info;
-      if (!build_upload_info(user_key, ip, format, upload_info, msg)) {
+      if (!build_upload_info(user, ip, format, upload_info, msg)) {
         return false;
       }
       mongo::BSONObjBuilder gene_expression_builder;
@@ -159,7 +160,7 @@ namespace epidb {
       if (!dba::search::insert_full_text(dba::Collections::GENE_EXPRESSIONS(), expression_id, gene_expression_metadata, msg)) {
         c.done();
         std::string new_msg;
-        if (!dba::remove::gene_expression(expression_id, user_key, new_msg)) {
+        if (!dba::remove::gene_expression(user, expression_id, new_msg)) {
           msg = msg + " " + new_msg;
         }
         return false;
@@ -193,7 +194,7 @@ namespace epidb {
 
       if (!update_upload_info(dba::Collections::GENE_EXPRESSIONS(), expression_id, total_size, total_genes, msg)) {
         std::string new_msg;
-        if (!dba::remove::gene_model(expression_id, user_key, new_msg)) {
+        if (!dba::remove::gene_model(user, expression_id, new_msg)) {
           msg = msg + " " + new_msg;
         }
         return false;
@@ -290,10 +291,17 @@ namespace epidb {
         while ( it.more() ) {
           const mongo::BSONElement &e = it.next();
           switch (e.type()) {
-          case mongo::String : region->insert(e.str()); break;
-          case mongo::NumberDouble : region->insert((float) e._numberDouble()); break;
-          case mongo::NumberInt : region->insert(e._numberInt()); break;
-          default: region->insert(e.toString(false));
+          case mongo::String :
+            region->insert(e.str());
+            break;
+          case mongo::NumberDouble :
+            region->insert((float) e._numberDouble());
+            break;
+          case mongo::NumberInt :
+            region->insert(e._numberInt());
+            break;
+          default:
+            region->insert(e.toString(false));
           }
         }
 

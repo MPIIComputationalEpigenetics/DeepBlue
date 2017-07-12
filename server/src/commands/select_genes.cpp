@@ -118,7 +118,7 @@ namespace epidb {
         args_builder.append("gene_model", utils::normalize_name(gene_model));
 
         std::string query_id;
-        if (!dba::query::store_query("genes_select", args_builder.obj(), user_key, query_id, msg)) {
+        if (!dba::query::store_query(user, "genes_select", args_builder.obj(), query_id, msg)) {
           result.add_error(msg);
           return false;
         }

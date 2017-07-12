@@ -35,8 +35,8 @@
 
 namespace epidb {
   namespace processing {
-    bool calculate_enrichment(const std::string& query_id, const std::string& gene_model,
-                              const std::string& user_key,
+    bool calculate_enrichment(const datatypes::User& user,
+                              const std::string& query_id, const std::string& gene_model,
                               processing::StatusPtr status, mongo::BSONObj& result, std::string& msg)
     {
       INIT_PROCESSING(PROCESS_CALCULATE_ENRICHMENT, status)
@@ -44,7 +44,7 @@ namespace epidb {
       const std::string norm_gene_model = utils::normalize_name(gene_model);
 
       ChromosomeRegionsList chromosomeRegionsList;
-      if (!dba::query::retrieve_query(user_key, query_id, status, chromosomeRegionsList, msg)) {
+      if (!dba::query::retrieve_query(user, query_id, status, chromosomeRegionsList, msg)) {
         return false;
       }
 

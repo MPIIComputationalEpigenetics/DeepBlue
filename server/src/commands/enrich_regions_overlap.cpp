@@ -84,14 +84,20 @@ namespace epidb {
           return false;
         }
 
-        std::string msg;
 
-        if (!dba::exists::query(query_id, user_key, msg)) {
+        std::string msg;
+        datatypes::User user;
+        if (!check_permissions(user_key, datatypes::GET_DATA, user, msg )) {
+          result.add_error(msg);
+          return false;
+        }
+
+        if (!dba::exists::query(user, query_id, msg)) {
           result.add_error(Error::m(ERR_INVALID_QUERY_ID, query_id));
           return false;
         }
 
-        if (!dba::exists::query(universe_query_id, user_key, msg)) {
+        if (!dba::exists::query(user, universe_query_id, msg)) {
           result.add_error(Error::m(ERR_INVALID_QUERY_ID, universe_query_id));
           return false;
         }
@@ -121,7 +127,7 @@ namespace epidb {
         }
 
         std::string request_id;
-        if (!epidb::Engine::instance().queue_lola(query_id, universe_query_id, database_experiments, genome, user_key, request_id, msg)) {
+        if (!epidb::Engine::instance().queue_lola(user, query_id, universe_query_id, database_experiments, genome, request_id, msg)) {
           result.add_error(msg);
           return false;
         }

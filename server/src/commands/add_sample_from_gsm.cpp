@@ -89,7 +89,7 @@ namespace epidb {
         std::vector<std::string> existing_ids;
         datatypes::Metadata verify_metadata;
         verify_metadata["GSM_SAMPLE"] = gsm_id;
-        if (!dba::list::samples(user_key, s_array, verify_metadata, existing_ids, msg)) {
+        if (!dba::list::samples(s_array, verify_metadata, existing_ids, msg)) {
           result.add_error(msg);
           return false;
         }
@@ -141,7 +141,7 @@ namespace epidb {
         }
 
         std::string s_id;
-        if (!dba::add_sample(sample_biosource_name, norm_sample_biosource_name, metadata, user_key, s_id, msg)) {
+        if (!dba::add_sample(user, sample_biosource_name, norm_sample_biosource_name, metadata, s_id, msg)) {
           result.add_error(msg);
           return false;
         }

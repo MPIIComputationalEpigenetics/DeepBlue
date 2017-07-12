@@ -158,7 +158,7 @@ namespace epidb {
         args_builder.append("norm_genomes", norm_genomes_s);
 
         std::string query_id;
-        if (!dba::query::store_query("annotation_select", args_builder.obj(), user_key, query_id, msg)) {
+        if (!dba::query::store_query(user, "annotation_select", args_builder.obj(), query_id, msg)) {
           result.add_error(msg);
           return false;
         }

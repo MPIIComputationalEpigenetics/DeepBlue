@@ -64,16 +64,18 @@ namespace epidb {
         const std::string user_key = parameters[0]->as_string();
 
         std::string msg;
-        utils::IdName user;
-        if (!dba::exists::user_by_key(user_key)) {
-          user.name = "a Stranger";
+        datatypes::User user;
+
+        std::string name;
+        if (!check_permissions(user_key, datatypes::LIST_COLLECTIONS, user, msg )) {
+          name = "a Stranger";
         } else {
-          if (!dba::users::get_user(user_key, user, msg)) {
-            result.add_error(msg);
-          }
+          name = user.name();
         }
 
-        std::string echo = "DeepBlue (" + Version::version() + ")" + " says hi to " + user.name;
+        std::cerr << user.name() << " " << user.id() << std::endl;
+
+        std::string echo = "DeepBlue (" + Version::version() + ")" + " says hi to " + name;
         result.add_string(echo);
         return true;
       }

@@ -143,7 +143,7 @@ namespace epidb {
 
         if (!dba::exists::epigenetic_mark(norm_epigenetic_mark)) {
           std::vector<utils::IdName> names;
-          if (!dba::list::similar_epigenetic_marks(epigenetic_mark, user_key, names, msg)) {
+          if (!dba::list::similar_epigenetic_marks(epigenetic_mark, names, msg)) {
             result.add_error(msg);
             return false;
           }
@@ -161,7 +161,7 @@ namespace epidb {
 
         if (!dba::exists::technique(norm_technique)) {
           std::vector<utils::IdName> names;
-          if (!dba::list::similar_techniques(technique, user_key, names, msg)) {
+          if (!dba::list::similar_techniques(technique, names, msg)) {
             result.add_error(msg);
             return false;
           }
@@ -181,7 +181,7 @@ namespace epidb {
 
         if (!dba::exists::project(norm_project)) {
           std::vector<utils::IdName> names;
-          if (!dba::list::similar_projects(project, user_key, names, msg)) {
+          if (!dba::list::similar_projects(project, names, msg)) {
             result.add_error(msg);
             return false;
           }
@@ -226,9 +226,9 @@ namespace epidb {
           }
 
           std::string id;
-          bool ret = dba::insert_experiment(name, norm_name, genome, norm_genome, epigenetic_mark, norm_epigenetic_mark, sample,
+          bool ret = dba::insert_experiment(user, name, norm_name, genome, norm_genome, epigenetic_mark, norm_epigenetic_mark, sample,
                                             technique, norm_technique, project, norm_project, description, norm_description,
-                                            extra_metadata, user_key, ip, wig, id, msg);
+                                            extra_metadata, ip, wig, id, msg);
           if (ret) {
             result.add_string(id);
             return true;
@@ -295,9 +295,9 @@ namespace epidb {
           map_regions.finish();
 
           std::string id;
-          bool ret = dba::insert_experiment(name, norm_name, genome, norm_genome, epigenetic_mark, norm_epigenetic_mark, sample,
+          bool ret = dba::insert_experiment(user, name, norm_name, genome, norm_genome, epigenetic_mark, norm_epigenetic_mark, sample,
                                             technique, norm_technique, project, norm_project, description, norm_description,
-                                            extra_metadata, user_key, ip, map_regions, fileFormat, id, msg);
+                                            extra_metadata, ip, map_regions, fileFormat, id, msg);
           if (ret) {
             result.add_string(id);
           } else {

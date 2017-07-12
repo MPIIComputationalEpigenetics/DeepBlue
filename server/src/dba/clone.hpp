@@ -28,14 +28,15 @@
 
 namespace epidb {
   namespace dba {
-    bool clone_dataset(const std::string &dataset_id, const std::string &name, const std::string &norm_name,
+    bool clone_dataset(const datatypes::User& user,
+                       const std::string &dataset_id, const std::string &name, const std::string &norm_name,
                        const std::string &epigenetic_mark, const std::string &norm_epigenetic_mark,
                        const std::string &sample_id,
                        const std::string &technique, const std::string &norm_technique,
                        const std::string &project, const std::string &norm_project,
                        const std::string &description, const std::string &norm_description,
                        const std::string &format, const datatypes::Metadata &extra_metadata,
-                       const std::string &user_key, const std::string &ip,
+                       const std::string &ip,
                        std::string &_id, std::string &msg);
 
   }

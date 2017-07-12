@@ -101,8 +101,8 @@ namespace epidb {
 
         mongo::BSONObj query;
 
-        if (!dba::list::build_list_experiments_query(genomes, types, epigenetic_marks, biosources, sample_ids, techniques,
-                                          projects, user_key, query, msg)) {
+        if (!dba::list::build_list_experiments_query(user, genomes, types, epigenetic_marks, biosources, sample_ids, techniques,
+                                          projects, query, msg)) {
           result.add_error(msg);
           return false;
         }

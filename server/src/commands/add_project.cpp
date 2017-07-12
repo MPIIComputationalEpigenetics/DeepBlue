@@ -89,14 +89,14 @@ namespace epidb {
         const std::string norm_description = utils::normalize_name(description);
 
         std::string project_id;
-        bool ret = datatypes::projects::add_project(name, norm_name, description, norm_description, user.get_id_name(),
+        bool ret = datatypes::projects::add_project(name, norm_name, description, norm_description, user.id_name(),
                    project_id, msg);
         if (!ret) {
           result.add_error(msg);
         }
 
         // Include user in its own project
-        if (!datatypes::projects::add_user_to_project(user.get_id(), project_id, true, msg)) {
+        if (!datatypes::projects::add_user_to_project(user.id(), project_id, true, msg)) {
           result.add_error(msg);
           return false;
         }

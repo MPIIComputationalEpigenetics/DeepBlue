@@ -122,7 +122,7 @@ namespace epidb {
 
         if (!dba::exists::project(norm_project)) {
           std::vector<utils::IdName> names;
-          if (!dba::list::similar_projects(project, user_key, names, msg)) {
+          if (!dba::list::similar_projects(project, names, msg)) {
             result.add_error(msg);
             return false;
           }
@@ -159,7 +159,8 @@ namespace epidb {
         }
 
         std::string id;
-        bool ret = expression_type->insert(sample_id, replica, extra_metadata, serializable_file, format, project, norm_project, user_key, ip, id, msg);
+        bool ret = expression_type->insert(user, sample_id, replica, extra_metadata, serializable_file,
+                                           format, project, norm_project, ip, id, msg);
         if (ret) {
           result.add_string(id);
         } else {

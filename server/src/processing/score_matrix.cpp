@@ -140,11 +140,14 @@ namespace epidb {
       return std::make_tuple(true, "", experiment_format.first, chromosome.first, regions_accs);
     }
 
-    bool score_matrix(const std::vector<std::pair<std::string, std::string>> &experiments_formats, const std::string & aggregation_function, const std::string & regions_query_id, const std::string & user_key, processing::StatusPtr status, std::string & matrix, std::string & msg)
+    bool score_matrix(const datatypes::User& user,
+                      const std::vector<std::pair<std::string, std::string>> &experiments_formats,
+                      const std::string & aggregation_function, const std::string & regions_query_id,
+                      processing::StatusPtr status, std::string & matrix, std::string & msg)
     {
 
       ChromosomeRegionsList range_regions;
-      if (!dba::query::retrieve_query(user_key, regions_query_id, status, range_regions, msg)) {
+      if (!dba::query::retrieve_query(user, regions_query_id, status, range_regions, msg)) {
         return false;
       }
 

@@ -76,13 +76,13 @@ namespace epidb {
           return false;
         }
 
-        if (!dba::exists::query(query_id, user_key, msg)) {
+        if (!dba::exists::query(user, query_id, msg)) {
           result.add_error(Error::m(ERR_INVALID_QUERY_ID, query_id));
           return false;
         }
 
         std::string request_id;
-        if (!epidb::Engine::instance().queue_count_regions(query_id, user_key, request_id, msg)) {
+        if (!epidb::Engine::instance().queue_count_regions(user, query_id, request_id, msg)) {
           result.add_error(msg);
           return false;
         }

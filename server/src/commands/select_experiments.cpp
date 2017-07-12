@@ -123,19 +123,6 @@ namespace epidb {
           return false;
         }
 
-        std::vector<utils::IdName> user_projects;
-        if (!dba::list::projects(user_key, user_projects, msg)) {
-          result.add_error(msg);
-          return false;
-        }
-
-        std::vector<std::string> user_projects_names;
-        for (const auto& project : user_projects) {
-          user_projects_names.push_back(project.name);
-        }
-        args_builder.append("project", utils::build_array(user_projects_names));
-        args_builder.append("norm_project", utils::build_normalized_array(user_projects_names));
-
         if (start >= 0) {
           args_builder.append("start", (int) start);
         }
@@ -152,7 +139,7 @@ namespace epidb {
         }
 
         std::string query_id;
-        if (!dba::query::store_query("experiment_select", args_builder.obj(), user_key, query_id, msg)) {
+        if (!dba::query::store_query(user, "experiment_select", args_builder.obj(), query_id, msg)) {
           result.add_error(msg);
           return false;
         }

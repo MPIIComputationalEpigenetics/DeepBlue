@@ -266,11 +266,11 @@ namespace epidb {
         return true;
       }
 
-      bool datatable(const std::string collection, const std::vector<std::string> columns,
+      bool datatable(const datatypes::User& user,
+                     const std::string collection, const std::vector<std::string> columns,
                      const long long start, const long long length,
                      const std::string& global_search, const std::string& sort_column, const std::string& sort_direction,
                      const bool has_filter, const datatypes::Metadata& columns_filters,
-                     const std::string& user_key,
                      size_t& total_elements, std::vector<std::vector<std::string>>& results,
                      std::string& msg)
       {
@@ -346,15 +346,7 @@ namespace epidb {
             collection == Collections::PROJECTS() ||
             collection == Collections::GENE_EXPRESSIONS()) {
 
-          std::vector<utils::IdName> user_projects;
-          if (!dba::list::projects(user_key, user_projects, msg)) {
-            return false;
-          }
-
-          std::vector<std::string> user_projects_names;
-          for (const auto& project : user_projects) {
-            user_projects_names.push_back(project.name);
-          }
+          std::vector<std::string> user_projects_names = user.projects();
 
           if (collection == Collections::PROJECTS()) {
             query_builder.append("norm_name", BSON("$in" << utils::build_normalized_array(user_projects_names)));

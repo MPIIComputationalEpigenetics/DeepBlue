@@ -25,6 +25,7 @@
 #include <vector>
 
 #include "../cache/connected_cache.hpp"
+#include "../datatypes/user.hpp"
 #include "../extras/utils.hpp"
 
 namespace epidb {
@@ -33,32 +34,32 @@ namespace epidb {
 
       extern ConnectedCache biosources_cache;
 
-      bool set_biosource_synonym_complete(const std::string &biosource_name, const std::string &synonym_name,
-                                          const std::string& user_key, std::string& msg);
+      bool set_biosource_synonym_complete(const datatypes::User& user,
+                                          const std::string &biosource_name, const std::string &synonym_name,
+                                          std::string& msg);
 
-      bool get_biosource_synonyms(const std::string &id, const std::string &biosource_name, const std::string &norm_biosource_name,
-                                  bool is_biosource, const std::string &user_key,
+      bool get_biosource_synonyms(const std::string &id, const std::string &biosource_name,
+                                  const std::string &norm_biosource_name, bool is_biosource,
                                   std::vector<utils::IdName> &syns, std::string &msg);
 
-      bool set_biosource_parent(const std::string &biosource_more_embracing, const std::string &norm_biosource_more_embracing,
+      bool set_biosource_parent(const datatypes::User& user,
+                                const std::string &biosource_more_embracing, const std::string &norm_biosource_more_embracing,
                                 const std::string &biosource_less_embracing, const std::string &norm_biosource_less_embracing,
                                 bool more_embracing_is_syn, const bool less_embracing_is_syn,
-                                const std::string &user_key, std::string &msg);
+                                std::string &msg);
 
       bool get_biosource_parents(const std::string &biosource_name, const std::string &norm_biosource_name,
                                  bool is_biosource,
-                                 const std::string &user_key,
                                  std::vector<std::string> &norm_uppers, std::string &msg);
 
       bool get_biosource_children(const std::string &biosource_name, const std::string &norm_biosource_name,
                                   bool is_biosource,
-                                  const std::string &user_key,
                                   std::vector<std::string> &norm_subs, std::string &msg);
 
       bool get_synonym_root(const std::string &synonym, const std::string &norm_synonym,
                             std::string &biosource_name, std::string &norm_biosource_name, std::string &msg);
 
-      bool remove_biosouce(const std::string &id, const std::string &biosource_name , const std::string &norm_biosource_name, std::string &msg);
+      bool remove_biosouce(const std::string &id, const std::string &biosource_name, const std::string &norm_biosource_name, std::string &msg);
     }
   }
 }

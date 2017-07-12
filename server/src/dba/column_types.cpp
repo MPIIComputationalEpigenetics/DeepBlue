@@ -316,9 +316,10 @@ namespace epidb {
         return false;
       }
 
-      bool __create_column_base(const std::string &name, const std::string &norm_name,
+      bool __create_column_base(const datatypes::User& user,
+                                const std::string &name, const std::string &norm_name,
                                 const std::string &description, const std::string &norm_description,
-                                const std::string &type, const std::string &user_key,
+                                const std::string &type,
                                 std::string &column_type_id, mongo::BSONObj &obj, std::string &msg)
       {
         int id;
@@ -336,20 +337,17 @@ namespace epidb {
         create_column_type_builder.append("norm_description", norm_description);
         create_column_type_builder.append("column_type", type);
 
-        utils::IdName user;
-        if (!users::get_user(user_key, user, msg)) {
-          return false;
-        }
-        create_column_type_builder.append("user", user.id);
+        create_column_type_builder.append("user", user.id());
 
         obj = create_column_type_builder.obj();
         return true;
 
       }
 
-      bool create_column_type_simple(const std::string &name, const std::string &norm_name,
+      bool create_column_type_simple(const datatypes::User& user,
+                                     const std::string &name, const std::string &norm_name,
                                      const std::string &description, const std::string &norm_description,
-                                     const std::string &type, const std::string &user_key,
+                                     const std::string &type,
                                      std::string &column_type_id, std::string &msg)
       {
         std::string norm_type = type;
@@ -361,7 +359,7 @@ namespace epidb {
         }
 
         mongo::BSONObj obj;
-        if (!__create_column_base(name, norm_name, description, norm_description, norm_type, user_key, column_type_id, obj, msg)) {
+        if (!__create_column_base(user, name, norm_name, description, norm_description, norm_type, column_type_id, obj, msg)) {
           return false;
         }
 
@@ -384,10 +382,10 @@ namespace epidb {
       }
 
 
-      bool create_column_type_calculated(const std::string &name, const std::string &norm_name,
+      bool create_column_type_calculated(const datatypes::User& user,
+                                         const std::string &name, const std::string &norm_name,
                                          const std::string &description, const std::string &norm_description,
                                          const std::string &code,
-                                         const std::string &user_key,
                                          std::string &column_type_id, std::string &msg)
       {
         processing::StatusPtr status = processing::build_dummy_status();
@@ -397,8 +395,8 @@ namespace epidb {
         }
 
         mongo::BSONObj obj;
-        if (!__create_column_base(name, norm_name, description, norm_description,
-                                  "calculated", user_key, column_type_id, obj, msg)) {
+        if (!__create_column_base(user, name, norm_name, description, norm_description,
+                                  "calculated", column_type_id, obj, msg)) {
           return false;
         }
 
@@ -427,14 +425,14 @@ namespace epidb {
       }
 
 
-      bool create_column_type_category(const std::string &name, const std::string &norm_name,
+      bool create_column_type_category(const datatypes::User& user,
+                                       const std::string &name, const std::string &norm_name,
                                        const std::string &description, const std::string &norm_description,
                                        const std::vector<std::string> &items,
-                                       const std::string &user_key,
                                        std::string &column_type_id, std::string &msg)
       {
         mongo::BSONObj obj;
-        if (!__create_column_base(name, norm_name, description, norm_description, "category", user_key, column_type_id, obj, msg)) {
+        if (!__create_column_base(user, name, norm_name, description, norm_description, "category", column_type_id, obj, msg)) {
           return false;
         }
 
@@ -462,14 +460,14 @@ namespace epidb {
         return true;
       }
 
-      bool create_column_type_range(const std::string &name, const std::string &norm_name,
+      bool create_column_type_range(const datatypes::User& user,
+                                    const std::string &name, const std::string &norm_name,
                                     const std::string &description, const std::string &norm_description,
                                     const Score minimum, const Score maximum,
-                                    const std::string &user_key,
                                     std::string &column_type_id, std::string &msg)
       {
         mongo::BSONObj obj;
-        if (!__create_column_base(name, norm_name, description, norm_description, "range", user_key, column_type_id, obj, msg)) {
+        if (!__create_column_base(user, name, norm_name, description, norm_description, "range", column_type_id, obj, msg)) {
           return false;
         }
 
@@ -496,7 +494,7 @@ namespace epidb {
         return true;
       }
 
-      bool list_column_types(const std::string &user_key, std::vector<utils::IdName> &content, std::string  &msg)
+      bool list_column_types(std::vector<utils::IdName> &content, std::string  &msg)
       {
         Connection c;
         auto data_cursor = c->query(helpers::collection_name(Collections::COLUMN_TYPES()), mongo::BSONObj());

@@ -39,13 +39,8 @@ namespace epidb {
   namespace dba {
     namespace remove {
 
-      bool has_permission(mongo::BSONObj entity, const std::string &user_key, bool is_exp_ann, std::string &msg)
+      bool has_permission(const datatypes::User& user, mongo::BSONObj entity, bool is_exp_ann, std::string &msg)
       {
-        datatypes::User user;
-        if (!users::get_user_by_key(user_key, user, msg)) {
-          return false;
-        }
-
         if (user.is_admin()) {
           return true;
         }
@@ -57,7 +52,7 @@ namespace epidb {
           owner = entity["user"].String();
         }
 
-        if (owner == user.get_id()) {
+        if (owner == user.id()) {
           return true;
         } else {
           msg = "You do not have permission to delete this.";
@@ -87,7 +82,7 @@ namespace epidb {
         return true;
       }
 
-      bool annotation(const std::string &id, const std::string &user_key, std::string &msg)
+      bool annotation(const datatypes::User& user, const std::string &id, std::string &msg)
       {
         mongo::BSONObj annotation;
         if (!data::annotation(id, annotation, msg)) {
@@ -95,7 +90,7 @@ namespace epidb {
           return false;
         }
 
-        if (!has_permission(annotation, user_key, true, msg)) {
+        if (!has_permission(user, annotation, true, msg)) {
           return false;
         }
 
@@ -133,7 +128,7 @@ namespace epidb {
         return true;
       }
 
-      bool gene_model(const std::string &id, const std::string &user_key, std::string &msg)
+      bool gene_model(const datatypes::User& user, const std::string &id, std::string &msg)
       {
         mongo::BSONObj gene_model;
         if (!data::gene_model(id, gene_model, msg)) {
@@ -141,7 +136,7 @@ namespace epidb {
           return false;
         }
 
-        if (!has_permission(gene_model, user_key, true, msg)) {
+        if (!has_permission(user, gene_model, true, msg)) {
           return false;
         }
 
@@ -173,7 +168,7 @@ namespace epidb {
       }
 
       // TODO: move to GeneExpression class
-      bool gene_expression(const std::string &id, const std::string &user_key, std::string &msg)
+      bool gene_expression(const datatypes::User& user, const std::string &id, std::string &msg)
       {
         mongo::BSONObj gene_expression;
         if (!datatypes::ExpressionManager::INSTANCE()->GENE_EXPRESSION()->data(id, gene_expression, msg)) {
@@ -181,7 +176,7 @@ namespace epidb {
           return false;
         }
 
-        if (!has_permission(gene_expression, user_key, true, msg)) {
+        if (!has_permission(user, gene_expression, true, msg)) {
           return false;
         }
 
@@ -198,7 +193,7 @@ namespace epidb {
 
         // Delete from collection
         if (!helpers::remove_one(helpers::collection_name(Collections::GENE_EXPRESSIONS()), id, msg)) {
-            return false;
+          return false;
         }
 
         if (!helpers::notify_change_occurred(Collections::GENE_EXPRESSIONS(), msg)) {
@@ -213,16 +208,11 @@ namespace epidb {
       }
 
 
-      bool experiment(const std::string &id, const std::string &user_key, std::string &msg)
+      bool experiment(const datatypes::User& user, const std::string &id, std::string &msg)
       {
-        std::vector<utils::IdName> user_projects_id_names;
-        if (!dba::list::projects(user_key, user_projects_id_names, msg)) {
-          return false;
-        }
-
         std::vector<std::string> user_projects;
-        for (const auto& project : user_projects_id_names) {
-          user_projects.push_back(utils::normalize_name(project.name));
+        for (const auto& project : user.projects()) {
+          user_projects.push_back(utils::normalize_name(project));
         }
 
         mongo::BSONObj experiment;
@@ -231,7 +221,7 @@ namespace epidb {
           return false;
         }
 
-        if (!has_permission(experiment, user_key, true, msg)) {
+        if (!has_permission(user, experiment, true, msg)) {
           return false;
         }
 
@@ -269,7 +259,7 @@ namespace epidb {
         return true;
       }
 
-      bool genome(const std::string &id, const std::string &user_key, std::string &msg)
+      bool genome(const datatypes::User& user, const std::string &id, std::string &msg)
       {
         mongo::BSONObj genome;
         if (!data::genome(id, genome, msg)) {
@@ -277,7 +267,7 @@ namespace epidb {
           return false;
         }
 
-        if (!has_permission(genome, user_key, false, msg)) {
+        if (!has_permission(user, genome, false, msg)) {
           return false;
         }
 
@@ -312,7 +302,7 @@ namespace epidb {
             return false;
           }
           std::string own_annotation_id = annotations[0]["_id"].String();
-          if (!remove::annotation(own_annotation_id, user_key, msg)) {
+          if (!remove::annotation(user, own_annotation_id, msg)) {
             return false;
           }
         }
@@ -362,17 +352,9 @@ namespace epidb {
         return true;
       }
 
-      bool project(const std::string &id, const std::string &user_key, std::string &msg)
+      bool project(const datatypes::User& user, const std::string &id, std::string &msg)
       {
-        std::vector<utils::IdName> user_projects_id_names;
-        if (!dba::list::projects(user_key, user_projects_id_names, msg)) {
-          return false;
-        }
-
-        std::vector<std::string> user_projects;
-        for (const auto& project : user_projects_id_names) {
-          user_projects.push_back(utils::normalize_name(project.name));
-        }
+        std::vector<std::string> user_projects = user.projects();
 
         mongo::BSONObj project;
         if (!data::project(id, user_projects, project, msg)) {
@@ -380,7 +362,7 @@ namespace epidb {
           return false;
         }
 
-        if (!has_permission(project, user_key, false, msg)) {
+        if (!has_permission(user, project, false, msg)) {
           return false;
         }
 
@@ -415,7 +397,7 @@ namespace epidb {
         return true;
       }
 
-      bool biosource(const std::string &id, const std::string &user_key, std::string &msg)
+      bool biosource(const datatypes::User& user, const std::string &id, std::string &msg)
       {
         mongo::BSONObj biosource;
         if (!data::biosource(id, biosource, msg)) {
@@ -423,7 +405,7 @@ namespace epidb {
           return false;
         }
 
-        if (!has_permission(biosource, user_key, false, msg)) {
+        if (!has_permission(user, biosource, false, msg)) {
           return false;
         }
 
@@ -442,7 +424,7 @@ namespace epidb {
         }
 
         std::vector<std::string> norm_subs;
-        if (!cv::get_biosource_children(biosource_name, norm_biosource_name, true, user_key, norm_subs, msg)) {
+        if (!cv::get_biosource_children(biosource_name, norm_biosource_name, true, norm_subs, msg)) {
           return false;
         }
 
@@ -452,7 +434,7 @@ namespace epidb {
           return false;
         }
 
-        if (!cv::remove_biosouce(id, biosource_name , norm_biosource_name, msg)) {
+        if (!cv::remove_biosouce(id, biosource_name, norm_biosource_name, msg)) {
           return false;
         }
 
@@ -463,7 +445,7 @@ namespace epidb {
         return true;
       }
 
-      bool sample(const std::string &id, const std::string &user_key, std::string &msg)
+      bool sample(const datatypes::User& user, const std::string &id, std::string &msg)
       {
         mongo::BSONObj sample;
         if (!data::sample(id, sample, msg)) {
@@ -471,7 +453,7 @@ namespace epidb {
           return false;
         }
 
-        if (!has_permission(sample, user_key, false, msg)) {
+        if (!has_permission(user, sample, false, msg)) {
           return false;
         }
 
@@ -506,7 +488,7 @@ namespace epidb {
         return true;
       }
 
-      bool epigenetic_mark(const std::string &id, const std::string &user_key, std::string &msg)
+      bool epigenetic_mark(const datatypes::User& user, const std::string &id, std::string &msg)
       {
         mongo::BSONObj epigenetic_mark;
         if (!data::epigenetic_mark(id, epigenetic_mark, msg)) {
@@ -514,7 +496,7 @@ namespace epidb {
           return false;
         }
 
-        if (!has_permission(epigenetic_mark, user_key, false, msg)) {
+        if (!has_permission(user, epigenetic_mark, false, msg)) {
           return false;
         }
 
@@ -549,7 +531,7 @@ namespace epidb {
         return true;
       }
 
-      bool technique(const std::string &id, const std::string &user_key, std::string &msg)
+      bool technique(const datatypes::User& user, const std::string &id, std::string &msg)
       {
         mongo::BSONObj technique;
         if (!data::technique(id, technique, msg)) {
@@ -557,7 +539,7 @@ namespace epidb {
           return false;
         }
 
-        if (!has_permission(technique, user_key, false, msg)) {
+        if (!has_permission(user, technique, false, msg)) {
           return false;
         }
 
@@ -593,7 +575,7 @@ namespace epidb {
       }
 
 
-      bool column_type(const std::string &id, const std::string &user_key, std::string &msg)
+      bool column_type(const datatypes::User& user, const std::string &id, std::string &msg)
       {
         mongo::BSONObj column_type;
         if (!data::column_type(id, column_type, msg)) {
@@ -601,7 +583,7 @@ namespace epidb {
           return false;
         }
 
-        if (!has_permission(column_type, user_key, false, msg)) {
+        if (!has_permission(user, column_type, false, msg)) {
           return false;
         }
 

@@ -119,13 +119,6 @@ namespace epidb {
         }
         args_builder.append("gene_model", utils::normalize_name(gene_model));
 
-        // project
-
-        std::vector<utils::IdName> user_projects;
-        if (!dba::list::projects(user_key, user_projects, msg)) {
-          result.add_error(msg);
-          return false;
-        }
 
         if (projects.size() > 0) {
           // Filter the projects that are available to the user
@@ -133,8 +126,8 @@ namespace epidb {
           for (const auto& project : projects) {
             std::string norm_project = utils::normalize_name(project->as_string());
             bool found = false;
-            for (const auto& user_project : user_projects) {
-              std::string norm_user_project = utils::normalize_name(user_project.name);
+            for (const auto& user_project : user.projects()) {
+              std::string norm_user_project = utils::normalize_name(user_project);
               if (norm_project == norm_user_project) {
                 filtered_projects.push_back(project);
                 found = true;
@@ -150,17 +143,10 @@ namespace epidb {
 
           args_builder.append("project", utils::build_array(filtered_projects));
           args_builder.append("norm_project", utils::build_normalized_array(filtered_projects));
-        } else {
-          std::vector<std::string> user_projects_names;
-          for (const auto& project : user_projects) {
-            user_projects_names.push_back(project.name);
-          }
-          args_builder.append("project", utils::build_array(user_projects_names));
-          args_builder.append("norm_project", utils::build_normalized_array(user_projects_names));
         }
 
         std::string query_id;
-        if (!dba::query::store_query("expressions_select", args_builder.obj(), user_key, query_id, msg)) {
+        if (!dba::query::store_query(user, "expressions_select", args_builder.obj(), query_id, msg)) {
           result.add_error(msg);
           return false;
         }

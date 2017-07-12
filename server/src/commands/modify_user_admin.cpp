@@ -124,22 +124,22 @@ namespace epidb {
           long long converted;
           std::stringstream ss(value);
           ss >> converted;
-          user.set_memory_limit(converted);
+          user.memory_limit(converted);
         } else if (field == "permission_level") {
           if (value == "ADMIN") {
-            user.set_permission_level(datatypes::ADMIN);
+            user.permission_level(datatypes::ADMIN);
           } else if (value == "INCLUDE_COLLECTION_TERMS") {
-            user.set_permission_level(datatypes::INCLUDE_COLLECTION_TERMS);
+            user.permission_level(datatypes::INCLUDE_COLLECTION_TERMS);
           } else if (value == "INCLUDE_EXPERIMENTS") {
-            user.set_permission_level(datatypes::INCLUDE_EXPERIMENTS);
+            user.permission_level(datatypes::INCLUDE_EXPERIMENTS);
           } else if (value == "INCLUDE_ANNOTATIONS") {
-            user.set_permission_level(datatypes::INCLUDE_ANNOTATIONS);
+            user.permission_level(datatypes::INCLUDE_ANNOTATIONS);
           } else if (value == "GET_DATA") {
-            user.set_permission_level(datatypes::GET_DATA);
+            user.permission_level(datatypes::GET_DATA);
           } else if (value == "LIST_COLLECTIONS") {
-            user.set_permission_level(datatypes::LIST_COLLECTIONS);
+            user.permission_level(datatypes::LIST_COLLECTIONS);
           } else if (value == "NONE") {
-            user.set_permission_level(datatypes::NONE);
+            user.permission_level(datatypes::NONE);
           } else {
             result.add_error("Invalid key");
             return false;
@@ -154,7 +154,7 @@ namespace epidb {
           return false;
         }
 
-        result.add_string(user.get_id());
+        result.add_string(user.id());
         return true;
       }
     } modifyUserAdminCommand;

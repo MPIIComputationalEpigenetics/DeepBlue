@@ -37,12 +37,9 @@ namespace epidb {
       User(std::string _id, std::string key, std::string name, std::string email,
            std::string institution);
       User(std::string name, std::string email, std::string institution);
-      User(mongo::BSONObj bsonobj);
-      User(const User& orig);
-      ~User();
+      User(mongo::BSONObj bsonobj, std::vector<std::string>& public_projects);
 
       static const std::string PREFIX;
-      static const std::string COLLECTION;
       static const std::string FIELD_ID;
       static const std::string FIELD_KEY;
       static const std::string FIELD_NAME;
@@ -58,27 +55,26 @@ namespace epidb {
 
       void write_to_BSONObjBuilder(mongo::BSONObjBuilder& builder);
 
-      std::string get_id() const;
-      std::string get_key() const;
-      std::string get_name() const;
-      utils::IdName get_id_name() const;
-      std::string get_email() const;
-      std::string get_institution() const;
-      std::string get_password() const;
-      long long get_memory_limit() const;
-      PermissionLevel get_permission_level() const;
-      std::vector<std::string> get_projects() const;
+      std::string id() const;
+      std::string key() const;
+      std::string name() const;
+      utils::IdName id_name() const;
+      std::string email() const;
+      std::string institution() const;
+      std::string password() const;
+      long long memory_limit() const;
+      PermissionLevel permission_level() const;
+      std::vector<std::string> projects() const;
       bool is_admin() const;
 
-      void set_id(std::string id_);
-      void set_key(std::string key_);
-      void set_name(std::string name_);
-      void set_email(std::string email_);
-      void set_institution(std::string institution_);
-      void set_password(std::string password_);
-      void set_memory_limit(long long memory_limit);
-      void set_permission_level(PermissionLevel permission_level);
-      void set_projects(std::vector<std::string> projects);
+      void id(std::string id_);
+      void key(std::string key_);
+      void name(std::string name_);
+      void email(std::string email_);
+      void institution(std::string institution_);
+      void password(std::string password_);
+      void memory_limit(long long memory_limit);
+      void permission_level(PermissionLevel permission_level);
 
       void generate_key();
       bool generate_id(std::string msg);
@@ -87,20 +83,20 @@ namespace epidb {
 
       static const std::string& ANONYMOUS_USER();
     private:
-      void set_permission_level(int permission_level);
+      void permission_level(int permission_level);
 
-      std::string id;
-      std::string key;
-      std::string name;
-      std::string email;
-      std::string institution;
-      std::string password;
-      bool admin = false;
-      long long memory_limit = -1;
-      PermissionLevel permission_level = NOT_SET;
-      std::vector<std::string> projects;
+      std::string _id;
+      std::string _key;
+      std::string _name;
+      std::string _email;
+      std::string _institution;
+      std::string _password;
+      long long _memory_limit = -1;
+      PermissionLevel _permission_level = NOT_SET;
+      std::vector<std::string> _projects_member;
+      std::vector<std::string> _all_projects;
 
-      static int seed;
+      static int _seed;
 
     };
 

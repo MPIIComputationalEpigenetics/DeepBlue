@@ -32,6 +32,8 @@
 #include "key_mapper.hpp"
 
 #include "../datatypes/column_types_def.hpp"
+#include "../datatypes/user.hpp"
+
 #include "../extras/utils.hpp"
 #include "../lua/sandbox.hpp"
 #include "../log.hpp"
@@ -204,7 +206,7 @@ namespace epidb {
       template<>
       const mongo::BSONObj ColumnType<Code>::BSONObj() const;
 
-      bool list_column_types(const std::string &user_key, std::vector<utils::IdName> &content, std::string  &msg);
+      bool list_column_types(std::vector<utils::IdName> &content, std::string  &msg);
 
       bool column_type_simple(const std::string &name, datatypes::COLUMN_TYPES type, ColumnTypePtr &column_type, std::string &msg);
 
@@ -217,26 +219,28 @@ namespace epidb {
       bool is_column_type_name_valid(const std::string &name, const std::string &norm_name,
                                      std::string &msg);
 
-      bool create_column_type_simple(const std::string &name, const std::string &norm_name,
+      bool create_column_type_simple(const datatypes::User& user,
+                                     const std::string &name, const std::string &norm_name,
                                      const std::string &description, const std::string &norm_description,
-                                     const std::string &type, const std::string &user_key,
+                                     const std::string &type,
                                      std::string &id, std::string &msg);
 
-      bool create_column_type_category(const std::string &name, const std::string &norm_name,
+      bool create_column_type_category(const datatypes::User& user,
+                                       const std::string &name, const std::string &norm_name,
                                        const std::string &description, const std::string &norm_description,
-                                       const std::vector<std::string> &items, const std::string &user_key,
+                                       const std::vector<std::string> &items,
                                        std::string &id, std::string &msg);
 
-      bool create_column_type_range(const std::string &name, const std::string &norm_name,
+      bool create_column_type_range(const datatypes::User& user,
+                                    const std::string &name, const std::string &norm_name,
                                     const std::string &description, const std::string &norm_description,
                                     const Score minimum, const Score maximum,
-                                    const std::string &user_key,
                                     std::string &id, std::string &msg);
 
-      bool create_column_type_calculated(const std::string &name, const std::string &norm_name,
+      bool create_column_type_calculated(const datatypes::User& user,
+                                         const std::string &name, const std::string &norm_name,
                                          const std::string &description, const std::string &norm_description,
                                          const std::string &code,
-                                         const std::string &user_key,
                                          std::string &id, std::string &msg);
 
       bool column_type_bsonobj_to_class(const mongo::BSONObj &obj, processing::StatusPtr status, ColumnTypePtr &column_type, std::string &msg);

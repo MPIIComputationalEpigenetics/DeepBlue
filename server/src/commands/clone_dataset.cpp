@@ -121,7 +121,7 @@ namespace epidb {
         if (!epigenetic_mark.empty()) {
           if (!dba::exists::epigenetic_mark(norm_epigenetic_mark)) {
             std::vector<utils::IdName> names;
-            if (!dba::list::similar_epigenetic_marks(epigenetic_mark, user_key, names, msg)) {
+            if (!dba::list::similar_epigenetic_marks(epigenetic_mark, names, msg)) {
               result.add_error(msg);
               return false;
             }
@@ -141,7 +141,7 @@ namespace epidb {
         if (!technique.empty()) {
           if (!dba::exists::technique(norm_technique)) {
             std::vector<utils::IdName> names;
-            if (!dba::list::similar_techniques(technique, user_key, names, msg)) {
+            if (!dba::list::similar_techniques(technique, names, msg)) {
               result.add_error(msg);
               return false;
             }
@@ -163,7 +163,7 @@ namespace epidb {
         if (!project.empty()) {
           if (!dba::exists::project(norm_project)) {
             std::vector<utils::IdName> names;
-            if (!dba::list::similar_projects(project, user_key, names, msg)) {
+            if (!dba::list::similar_projects(project, names, msg)) {
               result.add_error(msg);
               return false;
             }
@@ -181,7 +181,14 @@ namespace epidb {
         }
 
         std::string id_clone;
-        if (!dba::clone_dataset(id, name, norm_name, epigenetic_mark, norm_epigenetic_mark, sample, technique, norm_technique, project, norm_project, description, norm_description, format, extra_metadata, user_key, ip, id_clone, msg)) {
+        if (!dba::clone_dataset(user, id, name, norm_name,
+                                epigenetic_mark, norm_epigenetic_mark,
+                                sample,
+                                technique, norm_technique,
+                                project, norm_project,
+                                description, norm_description,
+                                format, extra_metadata,
+                                ip, id_clone, msg)) {
           result.add_error(msg);
           return false;
         }
