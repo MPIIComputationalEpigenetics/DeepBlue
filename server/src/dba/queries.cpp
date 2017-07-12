@@ -614,11 +614,8 @@ namespace epidb {
         }
 
         std::vector<ChromosomeRegionsList> genome_regions;
-
-        // get region data for all genomes
         for (const auto& genome : genomes) {
           ChromosomeRegionsList reg;
-          std::cerr << "GENOME: " << genome << std::endl;
           if (!retrieve::get_regions(genome, chromosomes, regions_query, false, status, reg, msg, reduced_mode)) {
             return false;
           }
