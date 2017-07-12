@@ -490,11 +490,6 @@ namespace epidb {
           args_builder.append("project", utils::build_array(filtered_projects));
           args_builder.append("norm_project", utils::build_normalized_array(filtered_projects));
         } else {
-          std::vector<std::string> user_projects_names;
-          for (const auto& project : user_projects_names) {
-            user_projects_names.push_back(project);
-          }
-
           args_builder.append("project", utils::build_array(user_projects_names));
           args_builder.append("norm_project", utils::build_normalized_array(user_projects_names));
         }
