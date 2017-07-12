@@ -46,7 +46,6 @@ class TestJanitor(helpers.TestCase):\
     self.assertEqual(info[0]["state"], "cleared")
 
     # Check reprocessing by re-requesting the data
-    s, m = epidb.modify_user_admin(None, "janitor_periodicity", "10", self.admin_key)
     s, m = epidb.get_request_data(req, self.admin_key)
     self.assertFailure(s, m)
     self.assertEqual(m, 'Request ID r1 was cleared. We are going to reprocess this request. Please, check its status.')
