@@ -245,7 +245,7 @@ namespace epidb {
               type = "experiment";
             } else if (id.compare(0, 1, "q") == 0) {
               ok = dba::info::get_query(id, obj_metadata, msg);
-              if (!user.is_admin() && metadata["user"] != user.get_id()) {
+              if (!user.is_admin() && obj_metadata["user"].String() != user.get_name()) {
                 result.add_error(Error::m(ERR_PERMISSION_QUERY, id));
                 return false;
               }
