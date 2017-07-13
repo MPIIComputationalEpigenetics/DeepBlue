@@ -31,6 +31,8 @@
 
 #include "column_dataset_cache.hpp"
 
+#include "../errors.hpp"
+
 namespace epidb {
   namespace cache {
 
@@ -120,7 +122,7 @@ namespace epidb {
 
       // Give a nice error message when we do not find the column in the given dataset.
       result.success = false;
-      result.msg =  obj["name"].str() + "does not have the column '" + qk.column_name +"'";
+      result.msg = Error::m(ERR_INVALID_EXPERIMENT_COLUMN, obj["name"].str(), qk.column_name);
       result.pos = -1;
 
       return result;
