@@ -56,7 +56,7 @@ class TestBinning(helpers.TestCase):
 
     msg = self.get_regions_request_error(req)
     status, msg = epidb.get_request_data(req, self.admin_key)
-    self.assertEqual(msg, "hg19_big_1does not have the column 'QEERR'")
+    self.assertEqual(msg, "101007:The experiment 'hg19_big_1' does not have the column 'QEERR'.")
 
 
   def test_big_file(self):
