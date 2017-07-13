@@ -26,6 +26,8 @@
 
 #include "../cache/connected_cache.hpp"
 
+#include "../datatypes/user.hpp"
+
 #include "../extras/utils.hpp"
 
 namespace epidb {
