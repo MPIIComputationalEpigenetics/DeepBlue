@@ -328,6 +328,10 @@ namespace epidb {
   bool Engine::request_data(const datatypes::User& user, const std::string & request_id, serialize::Parameters &request_data)
   {
     std::string msg;
+    if (!check_request(user, request_id, msg)) {
+      request_data.add_error(msg);
+      return false;
+    }
 
     mongo::BSONObj o = _hub.get_job(request_id, true);
     mongo::BSONObj result = o["result"].Obj();
@@ -359,6 +363,8 @@ namespace epidb {
       request_data.add_string_content(outStream.str());
       return true;
     }
+
+    std::cerr << "AAAAAAAAAAAAAAA" << std::endl;
 
     request_data.add_param(utils::bson_to_parameters(result));
     return true;
