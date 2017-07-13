@@ -509,7 +509,6 @@ namespace epidb {
         if (isArray) {
           parameter->add_child(element_to_parameter(e));
         } else {
-          std::cerr << "field name: " << fieldname << " - ";
           parameter->add_child(fieldname, element_to_parameter(e));
         }
       }
