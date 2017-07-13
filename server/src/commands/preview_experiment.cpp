@@ -92,7 +92,6 @@ namespace epidb {
           return false;
         }
 
-
         if (!dba::exists::experiment(experiment_norm_name)) {
           result.add_error(Error::m(ERR_INVALID_EXPERIMENT, experiment_name));
           return false;
@@ -117,13 +116,11 @@ namespace epidb {
         args_builder.append("norm_experiment_name", experiment_norm_name);
         args_builder.append("project", utils::build_array(user_projects_names));
         args_builder.append("norm_project", utils::build_normalized_array(user_projects_names));
-        args_builder.append("chromosomes", chroms);
-        args_builder.append("genomes", genome);
-        args_builder.append("norm_genomes", norm_genome);
 
         mongo::BSONObj args = args_builder.obj();
         mongo::BSONObj regions_query;
-        if (!dba::list::build_list_experiments_bson_query(user, args,regions_query, msg)) {
+
+        if (!dba::query::build_experiment_query(user, args, regions_query, msg)) {
           result.add_error(msg);
           return false;
         }
