@@ -84,7 +84,7 @@ namespace epidb {
 
         if (genomes.empty()) {
           std::vector<utils::IdName> res;
-          if (!dba::list::annotations(user_key, res, msg)) {
+          if (!dba::list::annotations(res, msg)) {
             result.add_error(msg);
           }
           names.insert(names.end(), res.begin(), res.end());
