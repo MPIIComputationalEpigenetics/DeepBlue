@@ -57,6 +57,8 @@ namespace epidb {
 
       bool public_projects(std::vector<utils::IdName> &result, std::string &msg);
 
+      bool all_projects(std::vector<utils::IdName> &result, std::string &msg);
+
       bool epigenetic_marks(const datatypes::Metadata &metadata,
                             std::vector<utils::IdName> &result, std::string &msg);
 

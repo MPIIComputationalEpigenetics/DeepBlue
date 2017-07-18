@@ -72,10 +72,12 @@ namespace epidb {
         return true;
       }
 
-      bool get_project(const std::string &id, const std::vector<std::string>& user_projects, std::map<std::string, std::string> &res, std::string &msg, bool full = false)
+      bool get_project(const datatypes::User& user, const std::string &id,
+                       std::map<std::string, std::string> &res, std::string &msg, bool full = false)
       {
+
         mongo::BSONObj result;
-        if (!data::project(id, user_projects, result, msg))  {
+        if (!data::project(id, user.projects(), result, msg))  {
           return false;
         }
 

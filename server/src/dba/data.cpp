@@ -56,7 +56,7 @@ namespace epidb {
                                     BSON_ARRAY(
                                       BSON("_id" << id) <<
                                       BSON("norm_name" <<
-                                           BSON("$in" << utils::build_array(user_projects))
+                                           BSON("$in" << utils::build_normalized_array(user_projects))
                                           )
                                     )
                                    );

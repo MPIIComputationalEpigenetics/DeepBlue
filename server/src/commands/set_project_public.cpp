@@ -96,10 +96,8 @@ namespace epidb {
             }
         }
 
-        std::vector<std::string> user_projects = user.projects();
-
         datatypes::Metadata project_res;
-        if (!dba::info::get_project(id, user_projects, project_res, msg)) {
+        if (!dba::info::get_project(user, id, project_res, msg)) {
           result.add_error(msg);
           return false;
         }

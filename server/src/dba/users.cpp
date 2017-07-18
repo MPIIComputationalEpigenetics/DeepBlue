@@ -128,24 +128,30 @@ namespace epidb {
         return true;
       }
 
-      bool __load_user(const mongo::BSONObj& result, datatypes::User& user, std::string& msg)
+      bool __load_user(const mongo::BSONObj& user_bson_object, datatypes::User& user, std::string& msg)
       {
         std::vector<utils::IdName> public_projects;
-        if (!list::public_projects(public_projects, msg)) {
-          return false;
-        }
 
-        std::vector<utils::IdName> private_projects;
-        if (result.hasField(datatypes::User::FIELD_PROJECTS)) {
-          mongo::BSONObj user_projects_bson = BSON("_id" << BSON("$in" << result[datatypes::User::FIELD_PROJECTS]));
-          if (!helpers::get(Collections::PROJECTS(), user_projects_bson, private_projects, msg)) {
+        if (user_bson_object[datatypes::User::FIELD_PERMISSION_LEVEL].safeNumberLong() == 0) {
+          if (!list::all_projects(public_projects, msg)) {
+            return false;
+          }
+        } else {
+          if (!list::public_projects(public_projects, msg)) {
             return false;
           }
         }
-
         std::vector<std::string> public_projects_names;
         for (const auto& pp: public_projects) {
           public_projects_names.push_back(pp.name);
+        }
+
+        std::vector<utils::IdName> private_projects;
+        if (user_bson_object.hasField(datatypes::User::FIELD_PROJECTS)) {
+          mongo::BSONObj user_projects_bson = BSON("_id" << BSON("$in" << user_bson_object[datatypes::User::FIELD_PROJECTS]));
+          if (!helpers::get(Collections::PROJECTS(), user_projects_bson, private_projects, msg)) {
+            return false;
+          }
         }
 
         std::vector<std::string> private_projects_names;
@@ -153,8 +159,7 @@ namespace epidb {
           private_projects_names.push_back(pp.name);
         }
 
-
-        user = datatypes::User(result, public_projects_names, private_projects_names);
+        user = datatypes::User(user_bson_object, public_projects_names, private_projects_names);
 
         return true;
       }

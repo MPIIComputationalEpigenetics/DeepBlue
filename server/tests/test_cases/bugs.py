@@ -393,11 +393,11 @@ chrY\t12345\t1234567"""
 
     (s, t1) = epidb.tiling_regions(100, "hg19", "chr1", user_one[1])
     s = epidb.info(t1, user_one[1])
-    self.assertEquals(s,  ['okay', [{'_id': 'q1', 'type': 'tiling', 'user': 'user1', 'args': '{ "genome" : "hg19", "size" : 100, "chromosomes" : [ "chr1" ] }'}]])
+    self.assertEquals(s,  ['okay', [{'_id': 'q1', 'type': 'tiling', 'user': 'user1', 'args': {"genome" : "hg19", "size" : 100, "chromosomes" : [ "chr1" ] }}]])
     s = epidb.info(t1, user_two[1])
     self.assertEquals(s,  ['error', "111003:You are not the query ID 'q1' owner and neither an administrator."])
     s = epidb.info(t1, self.admin_key)
-    self.assertEquals(s,  ['okay', [{'_id': 'q1', 'type': 'tiling', 'user': 'user1', 'args': '{ "genome" : "hg19", "size" : 100, "chromosomes" : [ "chr1" ] }'}]])
+    self.assertEquals(s,  ['okay', [{'_id': 'q1', 'type': 'tiling', 'user': 'user1', 'args': { "genome" : "hg19", "size" : 100, "chromosomes" : [ "chr1" ] }}]])
 
 
   def test_bug_do_not_reuse_existing_query(self):

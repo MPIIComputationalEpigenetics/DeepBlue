@@ -32,8 +32,8 @@ namespace epidb {
 
       bool get_genome(const std::string &id, datatypes::Metadata &res, mongo::BSONObj& chromosomes, std::string &msg, bool full = false);
 
-      bool get_project(const std::string &id, const std::vector<std::string>& user_projects,
-                       datatypes::Metadata &res, std::string &msg, bool full = false);
+      bool get_project(const datatypes::User& user, const std::string &id,
+                       std::map<std::string, std::string> &res, std::string &msg, bool full = false);
 
       bool get_biosource(const std::string &id,
                          std::map<std::string, std::string> &metadata,

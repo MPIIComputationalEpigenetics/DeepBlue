@@ -364,8 +364,6 @@ namespace epidb {
       return true;
     }
 
-    std::cerr << "AAAAAAAAAAAAAAA" << std::endl;
-
     request_data.add_param(utils::bson_to_parameters(result));
     return true;
   }

@@ -106,8 +106,14 @@ namespace epidb {
         return true;
       }
 
+
+      bool all_projects(std::vector<utils::IdName> &result, std::string &msg)
+      {
+        return helpers::get(Collections::PROJECTS(), result, msg);
+      }
+
       /*
-      * \brief List all projects that MUST NOT be available to the user
+      * List all projects that MUST NOT be available to the user
       */
       bool private_projects(const datatypes::User& user, std::vector<utils::IdName> &result, std::string &msg)
       {
@@ -139,7 +145,7 @@ namespace epidb {
       }
 
       /*
-      * \brief List all projects that are available to the user
+      * List all projects that are available to the user
       */
       bool public_projects(std::vector<utils::IdName> &result, std::string &msg)
       {
@@ -612,7 +618,7 @@ namespace epidb {
       {
         // Select experiments that are uploaded and from πublic projects or that the user has permission
         mongo::BSONObj done = BSON("upload_info.done" << true);
-        mongo::BSONObj user_projects_bson = BSON("project" << BSON("$in" << projects_array));
+        mongo::BSONObj user_projects_bson = BSON("norm_project" << BSON("$in" << projects_array));
         mongo::BSONObj query = BSON("$and" << BSON_ARRAY(done <<  user_projects_bson << experiments_query));
         mongo::BSONObj match = BSON("$match" << query);
 
@@ -686,8 +692,7 @@ namespace epidb {
                     std::unordered_map<std::string, std::vector<utils::IdNameCount>> &faceting_result,
                     std::string &msg)
       {
-        std::vector<std::string> project_names = user.projects();
-        mongo::BSONArray projects_array = utils::build_normalized_array(project_names);
+        mongo::BSONArray projects_array = utils::build_normalized_array(user.projects());
 
         std::vector<std::pair<std::string, std::string> > collums = {
           {"epigenetic_marks", "$norm_epigenetic_mark"},

@@ -91,13 +91,9 @@ namespace epidb {
           return false;
         }
 
-        std::vector<std::string> user_projects;
-        for (const auto& project : user.projects()) {
-          user_projects.push_back(utils::normalize_name(project));
-        }
 
         datatypes::Metadata project_res;
-        if (!dba::info::get_project(project_id, user_projects, project_res, msg)) {
+        if (!dba::info::get_project(user, project_id, project_res, msg)) {
           result.add_error(msg);
           return false;
         }

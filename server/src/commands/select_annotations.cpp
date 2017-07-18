@@ -51,7 +51,7 @@ namespace epidb {
       {
         Parameter p[] = {
           Parameter("annotation_name", serialize::STRING, "name(s) of selected annotation(s)", true),
-          parameters::GenomeMultiple,
+          parameters::Genome,
           Parameter("chromosome", serialize::STRING, "chromosome name(s)", true),
           Parameter("start", serialize::INTEGER, "minimum start region"),
           Parameter("end", serialize::INTEGER, "maximum end region"),
@@ -77,12 +77,12 @@ namespace epidb {
                        const serialize::Parameters &parameters, serialize::Parameters &result) const
       {
         std::vector<serialize::ParameterPtr> annotations;
-        std::vector<serialize::ParameterPtr> genomes;
         std::vector<serialize::ParameterPtr> chromosomes;
+
         parameters[0]->children(annotations);
-        parameters[1]->children(genomes);
         parameters[2]->children(chromosomes);
 
+        std::string genome = parameters[1]->as_string();
         const std::string user_key = parameters[5]->as_string();
 
         std::string msg;
@@ -98,28 +98,23 @@ namespace epidb {
           return false;
         }
 
-        if (genomes.empty()) {
+        if (genome.empty()) {
           result.add_error(Error::m(ERR_USER_GENOME_MISSING));
           return false;
         }
 
-        for (auto param_genome : genomes) {
-          auto genome_name = param_genome->as_string();
-          for (auto param_annotation : annotations) {
-            auto annotation_name =  param_annotation->as_string();
 
-            if (!dba::exists::annotation(utils::normalize_annotation_name(annotation_name), utils::normalize_name(genome_name))) {
-              result.add_error(Error::m(ERR_INVALID_ANNOTATION_NAME, annotation_name, genome_name));
-              return false;
-            }
+        for (auto param_annotation : annotations) {
+          auto annotation_name =  param_annotation->as_string();
+          if (!dba::exists::annotation(utils::normalize_annotation_name(annotation_name), utils::normalize_name(genome))) {
+            result.add_error(Error::m(ERR_INVALID_ANNOTATION_NAME, annotation_name, genome));
+            return false;
           }
         }
 
         mongo::BSONObjBuilder args_builder;
-        if (annotations.size() > 0) {
-          args_builder.append("annotation", utils::build_array(annotations));
-          args_builder.append("norm_annotation", utils::build_annotation_normalized_array(annotations));
-        }
+        args_builder.append("annotation", utils::build_array(annotations));
+        args_builder.append("norm_annotation", utils::build_annotation_normalized_array(annotations));
 
         const int start = parameters[3]->isNull() ? -1 : parameters[3]->as_long();
         const int end = parameters[4]->isNull() ? -1 : parameters[4]->as_long();
@@ -131,31 +126,17 @@ namespace epidb {
           args_builder.append("end", (int) end);
         }
 
-        std::vector<std::string> genomes_s;
-        std::vector<std::string> norm_genomes_s;
-        std::vector<serialize::ParameterPtr>::iterator git;
-        for (git = genomes.begin(); git != genomes.end(); ++git) {
-          std::string genome = (*git)->as_string();
-          std::string norm_genome = utils::normalize_name(genome);
-          genomes_s.push_back(genome);
-          norm_genomes_s.push_back(norm_genome);
-        }
-
-        std::set<std::string> chroms;
-        if (chromosomes.empty()) {
-          if (!dba::genomes::get_chromosomes(genomes_s, chroms, msg)) {
-            result.add_error(msg);
-            return false;
-          }
-        } else {
+        if (!chromosomes.empty()) {
+          std::set<std::string> chroms;
           std::vector<serialize::ParameterPtr>::iterator it;
           for (it = chromosomes.begin(); it != chromosomes.end(); ++it) {
             chroms.insert((**it).as_string());
           }
+          args_builder.append("chromosomes", chroms);
         }
-        args_builder.append("chromosomes", chroms);
-        args_builder.append("genomes", genomes_s);
-        args_builder.append("norm_genomes", norm_genomes_s);
+
+        args_builder.append("genome", genome);
+        args_builder.append("norm_genome", utils::normalize_name(genome));
 
         std::string query_id;
         if (!dba::query::store_query(user, "annotation_select", args_builder.obj(), query_id, msg)) {

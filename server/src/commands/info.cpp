@@ -218,7 +218,7 @@ namespace epidb {
               ok = ok && dba::info::id_to_name(metadata, msg);
               type = "genome";
             } else if (id.compare(0, 1, "p") == 0) {
-              ok = dba::info::get_project(id, user_projects, metadata, msg);
+              ok = dba::info::get_project(user, id, metadata, msg);
               ok = ok && dba::info::id_to_name(metadata, msg);
               type = "project";
             } else if (id.compare(0, 2, "bs") == 0) {

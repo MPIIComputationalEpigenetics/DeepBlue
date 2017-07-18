@@ -608,16 +608,35 @@ namespace epidb {
         }
 
         mongo::BSONObj args = query["args"].Obj();
-        std::vector<std::string> chromosomes = utils::build_vector(args["chromosomes"].Array());
+
+
+
+        std::vector<mongo::BSONElement> genome_arr;
+        if (args.hasField("norm_genomes")) {
+          genome_arr = args["norm_genomes"].Array();
+        } else if (args.hasField("norm_genome")) {
+          genome_arr.push_back(args["norm_genome"]);
+        }
 
         std::vector<ChromosomeRegionsList> genome_regions;
-
-        // get region data for all genomes
-        std::vector<mongo::BSONElement> genome_arr = args["norm_genomes"].Array();
         std::vector<mongo::BSONElement>::iterator git;
+
         for (git = genome_arr.begin(); git != genome_arr.end(); ++git) {
+          std::string genome = git->str();
+
+          std::vector<std::string> chromosomes;
+          if (args.hasField("chromosomes")) {
+            chromosomes = utils::build_vector(args["chromosomes"].Array());
+          } else {
+            std::set<std::string> chrom;
+            if (!dba::genomes::get_chromosomes(genome, chrom, msg)) {
+              return false;
+            }
+            chromosomes = std::vector<std::string>(chrom.begin(), chrom.end());
+          }
+
           ChromosomeRegionsList reg;
-          if (!retrieve::get_regions(git->str(), chromosomes, regions_query, false, status, reg, msg)) {
+          if (!retrieve::get_regions(genome, chromosomes, regions_query, false, status, reg, msg)) {
             return false;
           }
           genome_regions.push_back(std::move(reg));

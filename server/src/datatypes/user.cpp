@@ -82,8 +82,12 @@ namespace epidb {
       }
 
       _projects_member = private_projects;
-      _all_projects = _projects_member;
-      _all_projects.insert(_all_projects.end(), public_projects.begin(), public_projects.end());
+
+      std::set<std::string> all;
+      all.insert(public_projects.begin(), public_projects.end());
+      all.insert(private_projects.begin(), private_projects.end());
+
+      _all_projects = std::vector<std::string>(all.begin(), all.end());
     }
 
     void User::write_to_BSONObjBuilder(mongo::BSONObjBuilder& builder)
