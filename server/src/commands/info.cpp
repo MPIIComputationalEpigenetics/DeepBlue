@@ -244,7 +244,6 @@ namespace epidb {
                 return false;
               }
               type = "query";
-              std::cerr << obj_metadata.toString() << std::endl;
             } else if (id.compare(0, 2, "tr") == 0) {
               ok = dba::info::get_tiling_region(id, metadata, msg);
               ok = ok && dba::info::id_to_name(metadata, msg);
