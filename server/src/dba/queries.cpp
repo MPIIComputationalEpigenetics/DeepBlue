@@ -152,8 +152,12 @@ namespace epidb {
         mongo::BSONObj query_args = reduce_args(args);
 
         search_query_builder.append("type", type);
-        search_query_builder.append("query_args", query_args);
         search_query_builder.append("user", user.id());
+        search_query_builder.append("query_args", query_args);
+
+        if (query_args.hasField("norm_experiment_name")) {
+          search_query_builder.append("query_args.norm_experiment_name", query_args["norm_experiment_name"].Array());
+        }
 
         mongo::BSONObj result;
         if (helpers::get_one(Collections::QUERIES(), search_query_builder.obj(), result)) {
@@ -172,9 +176,9 @@ namespace epidb {
         mongo::BSONObjBuilder stored_query_builder;
 
         stored_query_builder.append("_id", query_id);
+        stored_query_builder.append("type", type);
         stored_query_builder.append("user", user.id());
         stored_query_builder.appendTimeT("time", time_);
-        stored_query_builder.append("type", type);
         stored_query_builder.append("args", args);
         stored_query_builder.append("query_args", query_args);
 
@@ -215,8 +219,8 @@ namespace epidb {
 
         // Check if the modified query document already exists
         mongo::BSONObjBuilder search_query_builder;
-        search_query_builder.append("user", user.id());
         search_query_builder.append("type", old_query["type"].String());
+        search_query_builder.append("user", user.id());
         search_query_builder.append("derived_from", query_id);
         search_query_builder.append("args", new_args);
 

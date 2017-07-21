@@ -583,6 +583,43 @@ namespace epidb {
 
       {
         mongo::BSONObjBuilder index_name;
+        index_name.append("query_args.norm_experiment_name", 1);
+        c->createIndex(helpers::collection_name(Collections::QUERIES()), index_name.obj());
+        if (!c->getLastError().empty()) {
+          msg = c->getLastError();
+          c.done();
+          return false;
+        }
+      }
+
+      {
+        mongo::BSONObjBuilder index_name;
+        index_name.append("type", 1);
+        index_name.append("user", 1);
+        index_name.append("derived_from", 1);
+        c->createIndex(helpers::collection_name(Collections::QUERIES()), index_name.obj());
+        if (!c->getLastError().empty()) {
+          msg = c->getLastError();
+          c.done();
+          return false;
+        }
+      }
+
+      {
+        mongo::BSONObjBuilder index_name;
+        index_name.append("type", 1);
+        index_name.append("user", 1);
+        index_name.append("query_args.norm_experiment_name", 1);
+        c->createIndex(helpers::collection_name(Collections::QUERIES()), index_name.obj());
+        if (!c->getLastError().empty()) {
+          msg = c->getLastError();
+          c.done();
+          return false;
+        }
+      }
+
+      {
+        mongo::BSONObjBuilder index_name;
         index_name.append("key", "hashed");
         c->createIndex(helpers::collection_name(Collections::USERS()), index_name.obj());
         if (!c->getLastError().empty()) {
