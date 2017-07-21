@@ -84,26 +84,26 @@ namespace epidb {
     }
 
 
-    bool RunningCache::get_sequence(const std::string & genome, const std::string & chromosome,
+    bool RunningCache::get_sequence(const std::string & norm_genome, const std::string & chromosome,
                                     const Position start, const Position end, std::string & sequence,
                                     StatusPtr status, std::string & msg)
     {
-      if (caches.find(genome) == caches.end()) {
-        caches[genome] = std::unique_ptr<DatasetCache>(new DatasetCache(genome, status));
+      if (caches.find(norm_genome) == caches.end()) {
+        caches[norm_genome] = std::unique_ptr<DatasetCache>(new DatasetCache(norm_genome, status));
       }
 
-      return caches[genome]->get_sequence(chromosome, start, end, sequence, msg);
+      return caches[norm_genome]->get_sequence(chromosome, start, end, sequence, msg);
     }
 
-    bool RunningCache::count_regions(const std::string & genome, const std::string & chromosome, const std::string & pattern,
+    bool RunningCache::count_regions(const std::string & norm_genome, const std::string & chromosome, const std::string & pattern,
                                      const Position start, const Position end, size_t& count,
                                      StatusPtr status, std::string & msg)
     {
-      if (caches.find(genome) == caches.end()) {
-        caches[genome] = std::unique_ptr<DatasetCache>(new DatasetCache(genome, status));
+      if (caches.find(norm_genome) == caches.end()) {
+        caches[norm_genome] = std::unique_ptr<DatasetCache>(new DatasetCache(norm_genome, status));
       }
 
-      return caches[genome]->count_regions(pattern, chromosome, start, end, count, msg);
+      return caches[norm_genome]->count_regions(pattern, chromosome, start, end, count, msg);
     }
   }
 }

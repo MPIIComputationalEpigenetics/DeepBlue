@@ -73,7 +73,7 @@ namespace epidb {
         }
       } else {
         mongo::BSONObj regions_query;
-        if (!dba::query::build_experiment_query(-1, -1, dataset, regions_query, msg)) {
+        if (!dba::query::build_experiment_query(-1, -1, utils::normalize_name(dataset), regions_query, msg)) {
           sem->up();
           return std::make_tuple(msg, -1.0, "", -1.0, -1.0, -1.0, -1.0, -1.0, -1.0);
         }

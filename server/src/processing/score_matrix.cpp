@@ -86,7 +86,8 @@ namespace epidb {
         }
 
         mongo::BSONObj regions_query;
-        if (!dba::query::build_experiment_query(ranges[0]->start(), ranges[ranges.size() - 1]->end(), experiment_format.first, regions_query, msg)) {
+        if (!dba::query::build_experiment_query(ranges[0]->start(), ranges[ranges.size() - 1]->end(),
+                                                utils::normalize_name(experiment_format.first), regions_query, msg)) {
           sem->up();
           return std::make_tuple(false, msg, "", "", regions_accs);
         }

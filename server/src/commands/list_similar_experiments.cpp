@@ -90,10 +90,10 @@ namespace epidb {
 
         std::vector<serialize::ParameterPtr>::iterator it;
         for (it = genomes.begin(); it != genomes.end(); ++it) {
-          std::string genome = (**it).as_string();
+          std::string norm_genome = utils::normalize_name((**it).as_string());
 
           std::vector<utils::IdName> res;
-          if (!dba::list::similar_experiments(experiment_name, genome, res, msg)) {
+          if (!dba::list::similar_experiments(experiment_name, norm_genome, res, msg)) {
             result.add_error(msg);
           }
           names.insert(names.end(), res.begin(), res.end());

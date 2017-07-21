@@ -248,7 +248,7 @@ namespace epidb {
     bool Metafield::sequence(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion *region_ref,
                              processing::StatusPtr status, std::string &result, std::string &msg)
     {
-      std::string genome = get_by_region_set(obj, "genome");
+      std::string genome = get_by_region_set(obj, "norm_genome");
 
       if (!status->running_cache()->get_sequence(genome, chrom,
           region_ref->start(), region_ref->end(), result, status, msg)) {

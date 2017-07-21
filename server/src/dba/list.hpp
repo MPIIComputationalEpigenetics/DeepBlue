@@ -102,7 +102,7 @@ namespace epidb {
       bool similar_genomes(const std::string &name,
                            std::vector<utils::IdName> &result, std::string &msg);
 
-      bool similar_experiments(const std::string &name, const std::string &genome,
+      bool similar_experiments(const std::string &name, const std::string &norm_genome,
                                std::vector<utils::IdName> &result, std::string &msg);
 
 

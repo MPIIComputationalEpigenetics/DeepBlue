@@ -288,10 +288,10 @@ namespace epidb {
         return similar(Collections::GENOMES(), utils::normalize_epigenetic_mark(name), result, msg);
       }
 
-      bool similar_experiments(const std::string &name, const std::string &genome,
+      bool similar_experiments(const std::string &name, const std::string &norm_genome,
                                std::vector<utils::IdName> &result, std::string &msg)
       {
-        return similar(Collections::EXPERIMENTS(), "name", name, "genome", genome, result, msg);
+        return similar(Collections::EXPERIMENTS(), "name", name, "norm_genome", norm_genome, result, msg);
       }
 
       bool similar(const std::string &where, const std::string &what,
@@ -364,22 +364,22 @@ namespace epidb {
         // Get the experiments
         mongo::BSONObjBuilder experiments_query_builder;
 
-        if (args.hasField("genome")) {
-          if (args["genome"].type() == mongo::Array) {
+        if (args.hasField("norm_genome")) {
+          if (args["norm_genome"].type() == mongo::Array) {
             experiments_query_builder.append("norm_genome", BSON("$in" << args["norm_genome"]));
           } else {
             experiments_query_builder.append("norm_genome", args["norm_genome"].str());
           }
         }
-        if (args.hasField("experiment_name")) {
-          if (args["experiment_name"].type() == mongo::Array) {
+        if (args.hasField("norm_experiment_name")) {
+          if (args["norm_experiment_name"].type() == mongo::Array) {
             experiments_query_builder.append("norm_name", BSON("$in" << args["norm_experiment_name"]));
           } else {
             experiments_query_builder.append("norm_name", args["norm_experiment_name"].str());
           }
         }
-        if (args.hasField("epigenetic_mark")) {
-          if (args["epigenetic_mark"].type() == mongo::Array) {
+        if (args.hasField("norm_epigenetic_mark")) {
+          if (args["norm_epigenetic_mark"].type() == mongo::Array) {
             experiments_query_builder.append("norm_epigenetic_mark", BSON("$in" << args["norm_epigenetic_mark"]));
           } else {
             experiments_query_builder.append("norm_epigenetic_mark", args["norm_epigenetic_mark"].str());
@@ -392,8 +392,8 @@ namespace epidb {
             experiments_query_builder.append("sample_id", args["sample_id"].str());
           }
         }
-        if (args.hasField("project")) {
-          if (args["project"].type() == mongo::Array) {
+        if (args.hasField("norm_project")) {
+          if (args["norm_project"].type() == mongo::Array) {
             experiments_query_builder.append("norm_project", BSON("$in" << args["norm_project"]));
           } else {
             experiments_query_builder.append("norm_project", args["norm_project"].str());
@@ -401,10 +401,9 @@ namespace epidb {
         } else {
           std::vector<std::string> user_projects_names = user.projects();
           experiments_query_builder.append("norm_project", BSON("$in" << utils::build_normalized_array(user_projects_names)));
-          experiments_query_builder.append("project", BSON("$in" << utils::build_array(user_projects_names)));
         }
-        if (args.hasField("technique")) {
-          if (args["technique"].type() == mongo::Array) {
+        if (args.hasField("norm_technique")) {
+          if (args["norm_technique"].type() == mongo::Array) {
             experiments_query_builder.append("norm_technique", BSON("$in" << args["norm_technique"]));
           } else {
             experiments_query_builder.append("norm_technique", args["norm_technique"].str());
@@ -447,19 +446,16 @@ namespace epidb {
         }
 
         if (!genomes.empty()) {
-          args_builder.append("genome", utils::build_array(genomes));
           args_builder.append("norm_genome", utils::build_normalized_array(genomes));
         }
 
 
         if (!biosources.empty()) {
-          args_builder.append("sample_info.biosource_name", utils::build_array(biosources));
           args_builder.append("sample_info.norm_biosource_name", utils::build_normalized_array(biosources));
         }
 
         // epigenetic mark
         if (!epigenetic_marks.empty()) {
-          args_builder.append("epigenetic_mark", utils::build_array(epigenetic_marks));
           args_builder.append("norm_epigenetic_mark", utils::build_epigenetic_normalized_array(epigenetic_marks));
         }
         // sample id
@@ -491,16 +487,13 @@ namespace epidb {
               return false;
             }
           }
-          args_builder.append("project", utils::build_array(filtered_projects));
           args_builder.append("norm_project", utils::build_normalized_array(filtered_projects));
         } else {
-          args_builder.append("project", utils::build_array(user_projects_names));
           args_builder.append("norm_project", utils::build_normalized_array(user_projects_names));
         }
 
         // technique
         if (!techniques.empty()) {
-          args_builder.append("technique", utils::build_array(techniques));
           args_builder.append("norm_technique", utils::build_normalized_array(techniques));
         }
 
