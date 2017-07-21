@@ -88,7 +88,7 @@ namespace epidb {
 
         std::string norm_genome = utils::normalize_name(genome);
         if (!dba::exists::genome(norm_genome)) {
-          result.add_error("Invalid genome '" + genome + "'");
+          result.add_error(Error::m(ERR_INVALID_GENOME_NAME, genome));
           return false;
         }
 
