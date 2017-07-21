@@ -156,11 +156,17 @@ namespace epidb {
         search_query_builder.append("query_args", query_args);
 
         if (query_args.hasField("norm_experiment_name")) {
-          search_query_builder.append("query_args.norm_experiment_name", query_args["norm_experiment_name"].Array());
+          search_query_builder.append("query_args.norm_experiment_name",
+                                      utils::build_array(
+                                        utils::build_vector(
+                                          query_args["norm_experiment_name"].Array()
+                                        )
+                                      ));
         }
 
+        auto search_query = search_query_builder.obj();
         mongo::BSONObj result;
-        if (helpers::get_one(Collections::QUERIES(), search_query_builder.obj(), result)) {
+        if (helpers::get_one(Collections::QUERIES(), search_query, result)) {
           query_id = result["_id"].String();
           return true;
         }
