@@ -123,7 +123,6 @@ namespace epidb {
 
       mongo::BSONObj reduce_args(const mongo::BSONObj &args)
       {
-        std::cerr << "intput: " << args.toString() << std::endl;
         // Keys to be removed
         std::set<std::string> keys = {"annotation",
                                       "genome", "genomes",
@@ -132,7 +131,7 @@ namespace epidb {
                                      };
         mongo::BSONObjBuilder bob;
 
-        for (mongo::BSONObj::iterator it = args.begin(); it.more(); ) {
+        for (auto it = args.begin(); it.more(); ) {
           mongo::BSONElement e = it.next();
           std::string field_name = std::string(e.fieldName());
           if (keys.find(field_name) == keys.end()) {

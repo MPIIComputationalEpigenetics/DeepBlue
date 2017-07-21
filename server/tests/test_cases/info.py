@@ -131,7 +131,37 @@ class TestGetInfoCommand(helpers.TestCase):
     self.assertSuccess(res, data)
     self.assertEqual(data[0]['_id'], qid)
     self.assertEqual(data[0]['type'], 'experiment_select')
-    self.assertEqual(data[0]['args'], { "experiment_name" : [ "hg19_chr1_1" ], "epigenetic_mark" : [ "Methylation" ], "sample_id" : [ "s1" ], "project" : [ "ENCODE" ], "technique" : [ "tech1" ], "start" : 713500, "end" : 850000, "chromosomes" : [ "chr1" ]})
+    self.assertEqual(data[0]['args'], { "experiment_name" : [ "hg19_chr1_1" ], "genomes": ["hg19"], "epigenetic_mark" : [ "Methylation" ], "sample_id" : [ "s1" ], "project" : [ "ENCODE" ], "technique" : [ "tech1" ], "start" : 713500, "end" : 850000, "chromosomes" : [ "chr1" ]})
+    self.assertEqual(data[0]['user'], 'test_admin')
+
+
+    res, qid = epidb.select_experiments("hg19_chr1_1", ["chr1", "chr2"], 1713500, 1850000, self.admin_key)
+    self.assertSuccess(res, qid)
+
+    res, data = epidb.info(qid, self.admin_key)
+    self.assertSuccess(res, data)
+    self.assertEqual(data[0]['_id'], qid)
+    self.assertEqual(data[0]['type'], 'experiment_select')
+    self.assertEqual(data[0]['args'], { "experiment_name" : [ "hg19_chr1_1" ],  "start" : 1713500, "end" : 1850000, "chromosomes" : [ "chr1", "chr2" ]})
+    self.assertEqual(data[0]['user'], 'test_admin')
+
+    res, qid = epidb.select_experiments("hg19_chr1_1", ["chr1", "chr2"], None, 1850000, self.admin_key)
+    self.assertSuccess(res, qid)
+    res, data = epidb.info(qid, self.admin_key)
+    self.assertSuccess(res, data)
+    self.assertEqual(data[0]['_id'], qid)
+    self.assertEqual(data[0]['type'], 'experiment_select')
+    self.assertEqual(data[0]['args'], { "experiment_name" : [ "hg19_chr1_1" ],  "end" : 1850000, "chromosomes" : [ "chr1", "chr2" ]})
+    self.assertEqual(data[0]['user'], 'test_admin')
+
+
+    res, qid = epidb.select_experiments("hg19_chr1_1", "chr1", 10000, None, self.admin_key)
+    self.assertSuccess(res, qid)
+    res, data = epidb.info(qid, self.admin_key)
+    self.assertSuccess(res, data)
+    self.assertEqual(data[0]['_id'], qid)
+    self.assertEqual(data[0]['type'], 'experiment_select')
+    self.assertEqual(data[0]['args'], { "experiment_name" : [ "hg19_chr1_1" ],  "start" : 10000, "chromosomes" : ["chr1"]})
     self.assertEqual(data[0]['user'], 'test_admin')
 
   def test_biosource_info(self):

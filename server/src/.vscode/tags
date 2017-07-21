@@ -4,3 +4,11 @@
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+build_chromatin_state_files	../_documents/lola_example.py	/^def build_chromatin_state_files(uk):$/;"	kind:function	line:40
+datasets	../_documents/lola_example.py	/^datasets = build_chromatin_state_files(uk)$/;"	kind:variable	line:81
+distinct_values	../_documents/lola_example.py	/^distinct_values = request_data(request, uk)$/;"	kind:variable	line:87
+get_chromatin_stes	../_documents/lola_example.py	/^def get_chromatin_stes(genome, uk):$/;"	kind:function	line:25
+lola_example.py	../_documents/lola_example.py	1;"	kind:file	line:1
+request_data	../_documents/lola_example.py	/^def request_data(request_id, uk):$/;"	kind:function	line:7
+server	../_documents/lola_example.py	/^server = xmlrpclib.Server($/;"	kind:variable	line:63
+uk	../_documents/lola_example.py	/^uk = 'anonymous_key'$/;"	kind:variable	line:61

@@ -1,0 +1,473 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+ANNOTATIONS	../data_info.py	/^ANNOTATIONS = {$/;"	kind:variable	line:12
+BIOSOURCES	../data_info.py	/^BIOSOURCES = {$/;"	kind:variable	line:42
+COLUMNS	../data_info.py	/^COLUMNS = [$/;"	kind:variable	line:297
+DATABASE_NAME	../settings.py	/^DATABASE_NAME = "tests_suite"$/;"	kind:variable	line:8
+DeepBlueClient	../deepblue_client.py	/^class DeepBlueClient:$/;"	kind:class	line:24
+EPIDB_BIN	../settings.py	/^EPIDB_BIN = "..\/server\/server"$/;"	kind:variable	line:7
+EPIDB_TEST_ADMIN	../settings.py	/^EPIDB_TEST_ADMIN = ("test_admin", "deepblue@mpi-inf.mpg.de", "MPI-Inf")$/;"	kind:variable	line:10
+EPIGENETIC_MARKS	../data_info.py	/^EPIGENETIC_MARKS = {$/;"	kind:variable	line:63
+EXPERIMENTS	../data_info.py	/^EXPERIMENTS = {$/;"	kind:variable	line:101
+GENOMES	../data_info.py	/^GENOMES = {$/;"	kind:variable	line:1
+MONGODB_SCRIPTS	../settings.py	/^MONGODB_SCRIPTS = {$/;"	kind:variable	line:1
+PROJECTS	../data_info.py	/^PROJECTS = {$/;"	kind:variable	line:54
+SAMPLES	../data_info.py	/^SAMPLES = {$/;"	kind:variable	line:74
+SAMPLE_FIELDS	../data_info.py	/^SAMPLE_FIELDS = {$/;"	kind:variable	line:90
+TECHNIQUES	../data_info.py	/^TECHNIQUES = {$/;"	kind:variable	line:31
+TestAdminCommands	../test_cases/admin.py	/^class TestAdminCommands(helpers.TestCase):$/;"	kind:class	line:7
+TestAggregateCommand	../test_cases/aggregate.py	/^class TestAggregateCommand(helpers.TestCase):$/;"	kind:class	line:6
+TestAggregateCommand	../test_cases/cancel.py	/^class TestAggregateCommand(helpers.TestCase):$/;"	kind:class	line:6
+TestAnnotationCommands	../test_cases/annotations.py	/^class TestAnnotationCommands(helpers.TestCase):$/;"	kind:class	line:6
+TestBedgraphFiles	../test_cases/bedgraph_parser.py	/^class TestBedgraphFiles(helpers.TestCase):$/;"	kind:class	line:7
+TestBinning	../test_cases/binning.py	/^class TestBinning(helpers.TestCase):$/;"	kind:class	line:7
+TestBioSourceCommands	../test_cases/biosources.py	/^class TestBioSourceCommands(helpers.TestCase):$/;"	kind:class	line:6
+TestBugs	../test_cases/bugs.py	/^class TestBugs(helpers.TestCase):$/;"	kind:class	line:6
+TestCase	../helpers.py	/^class TestCase(unittest.TestCase):$/;"	kind:class	line:114
+TestChanges	../test_cases/changes.py	/^class TestChanges(helpers.TestCase):$/;"	kind:class	line:5
+TestClone	../test_cases/clone.py	/^class TestClone(helpers.TestCase):$/;"	kind:class	line:7
+TestColumnTypes	../test_cases/column_types.py	/^class TestColumnTypes(helpers.TestCase):$/;"	kind:class	line:6
+TestComplexQueries	../test_cases/complex_queries.py	/^class TestComplexQueries(helpers.TestCase):$/;"	kind:class	line:6
+TestCoverageCommand	../test_cases/coverage.py	/^class TestCoverageCommand(helpers.TestCase):$/;"	kind:class	line:5
+TestDistinct	../test_cases/distinct.py	/^class TestDistinct(helpers.TestCase):$/;"	kind:class	line:7
+TestEpigeneticMarkCommands	../test_cases/epigenetic_marks.py	/^class TestEpigeneticMarkCommands(helpers.TestCase):$/;"	kind:class	line:7
+TestExperimentSets	../test_cases/experiment_sets.py	/^class TestExperimentSets(helpers.TestCase):$/;"	kind:class	line:8
+TestExperiments	../test_cases/experiments.py	/^class TestExperiments(helpers.TestCase):$/;"	kind:class	line:10
+TestExperiments	../test_cases/lua.py	/^class TestExperiments(helpers.TestCase):$/;"	kind:class	line:9
+TestExpressions	../test_cases/gene_expressions.py	/^class TestExpressions(helpers.TestCase):$/;"	kind:class	line:8
+TestExtend	../test_cases/extend.py	/^class TestExtend(helpers.TestCase):$/;"	kind:class	line:6
+TestFacetingCommand	../test_cases/faceting.py	/^class TestFacetingCommand(helpers.TestCase):$/;"	kind:class	line:5
+TestFilterCommand	../test_cases/filters.py	/^class TestFilterCommand(helpers.TestCase):$/;"	kind:class	line:6
+TestFlank	../test_cases/flank.py	/^class TestFlank(helpers.TestCase):$/;"	kind:class	line:6
+TestGenes	../test_cases/gene_models.py	/^class TestGenes(helpers.TestCase):$/;"	kind:class	line:8
+TestGenes	../test_cases/gene_ontology.py	/^class TestGenes(helpers.TestCase):$/;"	kind:class	line:8
+TestGenomeCommands	../test_cases/genomes.py	/^class TestGenomeCommands(helpers.TestCase):$/;"	kind:class	line:6
+TestGetInfoCommand	../test_cases/info.py	/^class TestGetInfoCommand(helpers.TestCase):$/;"	kind:class	line:6
+TestInitCommands	../test_cases/init.py	/^class TestInitCommands(helpers.TestCase):$/;"	kind:class	line:7
+TestIntersection	../test_cases/intersection.py	/^class TestIntersection(helpers.TestCase):$/;"	kind:class	line:6
+TestJanitor	../test_cases/janitor.py	/^  def test_janitor(self):$/;"	kind:class	line:9
+TestListCommandsCommand	../test_cases/list_commands.py	/^class TestListCommandsCommand(helpers.TestCase):$/;"	kind:class	line:6
+TestListRequests	../test_cases/list_requests.py	/^class TestListRequests(helpers.TestCase):$/;"	kind:class	line:7
+TestListSimilarCommands	../test_cases/list_similar.py	/^class TestListSimilarCommands(helpers.TestCase):$/;"	kind:class	line:6
+TestMerge	../test_cases/merge.py	/^class TestMerge(helpers.TestCase):$/;"	kind:class	line:6
+TestModifyUserCommand	../test_cases/modify_user.py	/^class TestModifyUserCommand(helpers.TestCase):$/;"	kind:class	line:6
+TestOutput	../test_cases/output.py	/^class TestOutput(helpers.TestCase):$/;"	kind:class	line:6
+TestOverlaps	../test_cases/overlaps.py	/^class TestOverlaps(helpers.TestCase):$/;"	kind:class	line:4
+TestPattern	../test_cases/patterns.py	/^class TestPattern(helpers.TestCase):$/;"	kind:class	line:6
+TestPermissions	../test_cases/permissions.py	/^class TestPermissions(helpers.TestCase):$/;"	kind:class	line:7
+TestProjects	../test_cases/projects.py	/^class TestProjects(helpers.TestCase):$/;"	kind:class	line:5
+TestRemoveCommands	../test_cases/remove.py	/^class TestRemoveCommands(helpers.TestCase):$/;"	kind:class	line:8
+TestSamples	../test_cases/samples.py	/^class TestSamples(helpers.TestCase):$/;"	kind:class	line:6
+TestScoreMatrixCommand	../test_cases/score_matrix.py	/^class TestScoreMatrixCommand(helpers.TestCase):$/;"	kind:class	line:7
+TestSearch	../test_cases/search.py	/^class TestSearch(helpers.TestCase):$/;"	kind:class	line:6
+TestSelectRegions	../test_cases/select_regions.py	/^class TestSelectRegions(helpers.TestCase):$/;"	kind:class	line:6
+TestSequence	../test_cases/sequence.py	/^class TestSequence(helpers.TestCase):$/;"	kind:class	line:5
+TestState	../test_cases/states.py	/^class TestState(helpers.TestCase):$/;"	kind:class	line:7
+TestTechniques	../test_cases/techniques.py	/^class TestTechniques(helpers.TestCase):$/;"	kind:class	line:6
+TestTilingRegions	../test_cases/tiling.py	/^class TestTilingRegions(helpers.TestCase):$/;"	kind:class	line:6
+TestUserAuthCommand	../test_cases/user_auth.py	/^class TestUserAuthCommand(helpers.TestCase):$/;"	kind:class	line:6
+TestWigFiles	../test_cases/wig_parser.py	/^class TestWigFiles(helpers.TestCase):$/;"	kind:class	line:8
+TestXML	../test_cases/xml.py	/^class TestXML(helpers.TestCase):$/;"	kind:class	line:5
+USERS	../data_info.py	/^USERS = {$/;"	kind:variable	line:83
+__get_regions_request	../helpers.py	/^  def __get_regions_request(self, req, status=["done"]):$/;"	kind:member	line:344
+__getattr__	../deepblue_client.py	/^    def __getattr__(self, name):$/;"	kind:member	line:55
+__init__	../deepblue_client.py	/^    def __init__(self, user_key=None, address="deepblue.mpi-inf.mpg.de\/xmlrpc", port=None):$/;"	kind:member	line:27
+__init__.py	../__init__.py	1;"	kind:file	line:1
+__init__.py	../test_cases/__init__.py	1;"	kind:file	line:1
+__nonzero__	../deepblue_client.py	/^    def __nonzero__(self):$/;"	kind:member	line:52
+_call	../deepblue_client.py	/^      def _call(*args, **kwargs):$/;"	kind:function	line:57
+_get_data_names	../test_cases/states.py	/^    def _get_data_names(self):$/;"	kind:member	line:122
+_test_upload_sequence	../test_cases/patterns.py	/^  def _test_upload_sequence(self):$/;"	kind:member	line:115
+admin.py	../test_cases/admin.py	1;"	kind:file	line:1
+admin_key	../helpers.py	/^  admin_key = None$/;"	kind:variable	line:116
+aggregate.py	../test_cases/aggregate.py	1;"	kind:file	line:1
+ann_names	../untitled.py	/^ann_names = [x[1] for x in ann]$/;"	kind:variable	line:13
+annotations.py	../test_cases/annotations.py	1;"	kind:file	line:1
+assertFailure	../helpers.py	/^  def assertFailure(self, result, data=None):$/;"	kind:member	line:159
+assertSuccess	../helpers.py	/^  def assertSuccess(self, result, data=None):$/;"	kind:member	line:146
+bedgraph_parser.py	../test_cases/bedgraph_parser.py	1;"	kind:file	line:1
+binning.py	../test_cases/binning.py	1;"	kind:file	line:1
+biosources.py	../test_cases/biosources.py	1;"	kind:file	line:1
+bugs.py	../test_cases/bugs.py	1;"	kind:file	line:1
+cancel.py	../test_cases/cancel.py	1;"	kind:file	line:1
+changes.py	../test_cases/changes.py	1;"	kind:file	line:1
+chr15_tiles	../test_cases/janitor.py	/^    chr15_tiles = 102531392 \/ 1000000$/;"	kind:variable	line:32
+chr15_tiles	../test_cases/janitor.py	/^    chr15_tiles = 102531392 \/ 1000000$/;"	kind:variable	line:59
+chr15_tiles	../test_cases/janitor.py	/^    chr15_tiles = 102531392 \/ 1000000$/;"	kind:variable	line:81
+chr3_tiles	../test_cases/janitor.py	/^    chr3_tiles = 198022430 \/ 1000000$/;"	kind:variable	line:31
+chr3_tiles	../test_cases/janitor.py	/^    chr3_tiles = 198022430 \/ 1000000$/;"	kind:variable	line:58
+chr3_tiles	../test_cases/janitor.py	/^    chr3_tiles = 198022430 \/ 1000000$/;"	kind:variable	line:80
+chrX_tiles	../test_cases/janitor.py	/^    chrX_tiles = 155270560 \/ 1000000$/;"	kind:variable	line:33
+chrX_tiles	../test_cases/janitor.py	/^    chrX_tiles = 155270560 \/ 1000000$/;"	kind:variable	line:60
+chrX_tiles	../test_cases/janitor.py	/^    chrX_tiles = 155270560 \/ 1000000/;"	kind:variable	line:82
+clone.py	../test_cases/clone.py	1;"	kind:file	line:1
+column_types.py	../test_cases/column_types.py	1;"	kind:file	line:1
+complex_queries.py	../test_cases/complex_queries.py	1;"	kind:file	line:1
+count_request	../helpers.py	/^  def count_request(self, req):$/;"	kind:member	line:325
+coverage.py	../test_cases/coverage.py	1;"	kind:file	line:1
+cpg_island	../performance/load.py	/^cpg_island =  ",".join([$/;"	kind:variable	line:23
+d_hav	../histones.py	/^d_hav = "Histone variant "$/;"	kind:variable	line:3
+d_ptm	../histones.py	/^d_ptm = "Post-translational histone modification "$/;"	kind:variable	line:2
+data	../performance/load.py	/^data = f.read()$/;"	kind:variable	line:19
+data	../performance/load.py	/^data = open("cpgIslandExtFull.bed").read()$/;"	kind:variable	line:45
+data_info.py	../data_info.py	1;"	kind:file	line:1
+deepblue_client.py	../deepblue_client.py	1;"	kind:file	line:1
+distinct.py	../test_cases/distinct.py	1;"	kind:file	line:1
+epidb	../test_cases/biosources.py	/^	epidb = DeepBlueClient(address="localhost", port=31415)$/;"	kind:variable	line:121
+epidb	../test_cases/janitor.py	/^    epidb = DeepBlueClient(address="localhost", port=31415)$/;"	kind:variable	line:10
+epigenetic_mark	../experiments.py	/^epigenetic_mark = "Methylation"$/;"	kind:variable	line:13
+epigenetic_marks.py	../test_cases/epigenetic_marks.py	1;"	kind:file	line:1
+experiment_ids	../helpers.py	/^  experiment_ids = []$/;"	kind:variable	line:119
+experiment_sets.py	../test_cases/experiment_sets.py	1;"	kind:file	line:1
+experiments.py	../experiments.py	1;"	kind:file	line:1
+experiments.py	../test_cases/experiments.py	1;"	kind:file	line:1
+extend.py	../test_cases/extend.py	1;"	kind:file	line:1
+f	../performance/load.py	/^f = gzip.open("bigwig.bg.gz")$/;"	kind:variable	line:18
+faceting.py	../test_cases/faceting.py	1;"	kind:file	line:1
+filters.py	../test_cases/filters.py	1;"	kind:file	line:1
+flank.py	../test_cases/flank.py	1;"	kind:file	line:1
+gene_expressions.py	../test_cases/gene_expressions.py	1;"	kind:file	line:1
+gene_models.py	../test_cases/gene_models.py	1;"	kind:file	line:1
+gene_ontology.py	../test_cases/gene_ontology.py	1;"	kind:file	line:1
+genome	../experiments.py	/^genome = "hg19"$/;"	kind:variable	line:12
+genomes.py	../test_cases/genomes.py	1;"	kind:file	line:1
+get_new_user	../test_cases/permissions.py	/^    def get_new_user(self, epidb):$/;"	kind:member	line:9
+get_regions_request	../helpers.py	/^  def get_regions_request(self, req):$/;"	kind:member	line:364
+get_regions_request_error	../helpers.py	/^  def get_regions_request_error(self, req):$/;"	kind:member	line:369
+get_result	../helpers.py	/^def get_result(test, name=None):$/;"	kind:function	line:85
+get_state	../test_cases/states.py	/^    def get_state(self, name, epidb):$/;"	kind:member	line:113
+get_states	../test_cases/states.py	/^    def get_states(self, epidb, exceptions):$/;"	kind:member	line:101
+helpers.py	../helpers.py	1;"	kind:file	line:1
+hg19_info	../performance/load.py	/^hg19_info = open("..\/data\/genomes\/hg19").read().replace(",", "")$/;"	kind:variable	line:15
+histones.py	../histones.py	1;"	kind:file	line:1
+info.py	../test_cases/info.py	1;"	kind:file	line:1
+init	../helpers.py	/^  def init(self, epidb=None):$/;"	kind:member	line:271
+init.py	../test_cases/init.py	1;"	kind:file	line:1
+init_base	../helpers.py	/^  def init_base(self, epidb=None):$/;"	kind:member	line:281
+init_full	../helpers.py	/^  def init_full(self, epidb=None):$/;"	kind:member	line:310
+insert_all	../test_cases/states.py	/^    def insert_all(self, epidb, data, name, insert):$/;"	kind:member	line:68
+insert_annotation	../helpers.py	/^  def insert_annotation(self, epidb, name):$/;"	kind:member	line:186
+insert_biosource	../helpers.py	/^  def insert_biosource(self, epidb, name):$/;"	kind:member	line:218
+insert_column	../helpers.py	/^  def insert_column(self, epidb, column):$/;"	kind:member	line:181
+insert_epigenetic_mark	../helpers.py	/^  def insert_epigenetic_mark(self, epidb, name):$/;"	kind:member	line:210
+insert_experiment	../helpers.py	/^  def insert_experiment(self, epidb, exp, sample_id=None):$/;"	kind:member	line:242
+insert_experiments	../helpers.py	/^  def insert_experiments(self, epidb, experiments):$/;"	kind:member	line:267
+insert_genome	../helpers.py	/^  def insert_genome(self, epidb, name):$/;"	kind:member	line:169
+insert_project	../helpers.py	/^  def insert_project(self, epidb, name):$/;"	kind:member	line:234
+insert_random	../test_cases/states.py	/^    def insert_random(self, epidb, data, vocab, insert):$/;"	kind:member	line:39
+insert_samples	../helpers.py	/^  def insert_samples(self, epidb, name):$/;"	kind:member	line:200
+insert_technique	../helpers.py	/^  def insert_technique(self, epidb, name):$/;"	kind:member	line:226
+insert_user	../helpers.py	/^  def insert_user(self, epidb, name):$/;"	kind:member	line:258
+intersection.py	../test_cases/intersection.py	1;"	kind:file	line:1
+janitor.py	../test_cases/janitor.py	1;"	kind:file	line:1
+list_commands.py	../test_cases/list_commands.py	1;"	kind:file	line:1
+list_requests.py	../test_cases/list_requests.py	1;"	kind:file	line:1
+list_similar.py	../test_cases/list_similar.py	1;"	kind:file	line:1
+load.py	../performance/load.py	1;"	kind:file	line:1
+load_bed	../helpers.py	/^def load_bed(name):$/;"	kind:function	line:98
+load_bedgraph	../helpers.py	/^def load_bedgraph(name):$/;"	kind:function	line:109
+load_wig	../helpers.py	/^def load_wig(name):$/;"	kind:function	line:103
+lua.py	../test_cases/lua.py	1;"	kind:file	line:1
+maxDiff	../test_cases/clone.py	/^  maxDiff = None$/;"	kind:variable	line:8
+maxDiff	../test_cases/info.py	/^  maxDiff = None$/;"	kind:variable	line:7
+merge.py	../test_cases/merge.py	1;"	kind:file	line:1
+modify_user.py	../test_cases/modify_user.py	1;"	kind:file	line:1
+modify_user_permission	../test_cases/permissions.py	/^    def modify_user_permission(self, epidb, user_id, permission):$/;"	kind:member	line:14
+mongo	../performance/load.py	/^mongo = MongoClient("localhost", 27017)$/;"	kind:variable	line:10
+output.py	../test_cases/output.py	1;"	kind:file	line:1
+overlaps.py	../test_cases/overlaps.py	1;"	kind:file	line:1
+parse_result_file	../helpers.py	/^def parse_result_file(f):$/;"	kind:function	line:65
+patterns.py	../test_cases/patterns.py	1;"	kind:file	line:1
+permissions.py	../test_cases/permissions.py	1;"	kind:file	line:1
+project	../experiments.py	/^project = "ENCODE"$/;"	kind:variable	line:17
+project	../experiments.py	/^project = 'Blueprint Epigenetics'$/;"	kind:variable	line:16
+projects.py	../test_cases/projects.py	1;"	kind:file	line:1
+regions	../test_cases/janitor.py	/^    regions = self.get_regions_request(req)$/;"	kind:variable	line:29
+regions	../test_cases/janitor.py	/^    regions = self.get_regions_request(req)$/;"	kind:variable	line:56
+regions	../test_cases/janitor.py	/^    regions = self.get_regions_request(req)$/;"	kind:variable	line:78
+remove	../test_cases/states.py	/^    def remove(self, epidb, name, ids):$/;"	kind:member	line:86
+remove.py	../test_cases/remove.py	1;"	kind:file	line:1
+removeest_remove_experiment	../test_cases/remove.py	/^  def removeest_remove_experiment(self):$/;"	kind:member	line:127
+res	../test_cases/biosources.py	/^	res = epidb.add_biosource("A", None, {}, self.admin_key)$/;"	kind:variable	line:124
+res	../test_cases/biosources.py	/^	res = epidb.add_biosource("B", None, {}, self.admin_key)$/;"	kind:variable	line:130
+res	../test_cases/biosources.py	/^	res = epidb.add_biosource("C", None, {}, self.admin_key)$/;"	kind:variable	line:133
+res	../test_cases/biosources.py	/^	res = epidb.get_biosource_related("A", self.admin_key)$/;"	kind:variable	line:139
+res	../test_cases/biosources.py	/^	res = epidb.get_biosource_related("C", self.admin_key)$/;"	kind:variable	line:143
+res	../test_cases/biosources.py	/^	res = epidb.set_biosource_parent("B", "C", self.admin_key)$/;"	kind:variable	line:136
+res	../test_cases/biosources.py	/^	res = epidb.set_biosource_synonym("A", "B", self.admin_key)$/;"	kind:variable	line:127
+sample	../experiments.py	/^sample = "s1"$/;"	kind:variable	line:19
+sample	../experiments.py	/^sample = None$/;"	kind:variable	line:14
+sample_ids	../helpers.py	/^  sample_ids = []$/;"	kind:variable	line:118
+samples.py	../test_cases/samples.py	1;"	kind:file	line:1
+score_matrix.py	../test_cases/score_matrix.py	1;"	kind:file	line:1
+search.py	../test_cases/search.py	1;"	kind:file	line:1
+select_regions.py	../test_cases/select_regions.py	1;"	kind:file	line:1
+sequence.py	../test_cases/sequence.py	1;"	kind:file	line:1
+server	../experiments.py	/^server = xmlrpclib.Server(url, encoding='UTF-8', allow_none=True, verbose=False)$/;"	kind:variable	line:6
+server	../performance/load.py	/^server = xmlrpclib.Server(url, allow_none=True)$/;"	kind:variable	line:7
+server	../speed.py	/^server = xmlrpclib.Server(url, encoding='UTF-8', allow_none=True, verbose=False)$/;"	kind:variable	line:8
+server	../untitled.py	/^server = xmlrpclib.Server(url, encoding='UTF-8', allow_none=True, verbose=False)$/;"	kind:variable	line:9
+setUp	../helpers.py	/^  def setUp(self):$/;"	kind:member	line:132
+setUp	../helpers.py	/^def setUp():$/;"	kind:function	line:19
+setUpClass	../helpers.py	/^  def setUpClass(cls):$/;"	kind:member	line:122
+settings.py	../settings.py	1;"	kind:file	line:1
+source	../histones.py	/^source = "Source: HIstome: The Histone Infobase (http:\/\/www.actrec.gov.in\/histome\/)."$/;"	kind:variable	line:1
+speed.py	../speed.py	1;"	kind:file	line:1
+states.py	../test_cases/states.py	1;"	kind:file	line:1
+tearDown	../helpers.py	/^  def tearDown(self):$/;"	kind:member	line:139
+tearDown	../helpers.py	/^def tearDown(epidb_process=None):$/;"	kind:function	line:50
+tearDownClass	../helpers.py	/^  def tearDownClass(cls):$/;"	kind:member	line:128
+technique	../experiments.py	/^technique = None$/;"	kind:variable	line:15
+techniques.py	../test_cases/techniques.py	1;"	kind:file	line:1
+test	../test.py	/^def test(names):$/;"	kind:function	line:7
+test.py	../test.py	1;"	kind:file	line:1
+test_add_techniques	../test_cases/techniques.py	/^    def test_add_techniques(self):$/;"	kind:member	line:8
+test_add_user_by_non_admin	../test_cases/admin.py	/^  def test_add_user_by_non_admin(self):$/;"	kind:member	line:75
+test_add_with_invalid_chromosome	../test_cases/experiments.py	/^  def test_add_with_invalid_chromosome(self):$/;"	kind:member	line:246
+test_add_with_invalid_epigenetic_mark	../test_cases/experiments.py	/^  def test_add_with_invalid_epigenetic_mark(self):$/;"	kind:member	line:297
+test_add_with_invalid_genome	../test_cases/experiments.py	/^  def test_add_with_invalid_genome(self):$/;"	kind:member	line:220
+test_add_with_invalid_project	../test_cases/experiments.py	/^  def test_add_with_invalid_project(self):$/;"	kind:member	line:233
+test_add_with_invalid_sample	../test_cases/experiments.py	/^  def test_add_with_invalid_sample(self):$/;"	kind:member	line:207
+test_add_with_out_of_bound_region	../test_cases/experiments.py	/^  def test_add_with_out_of_bound_region(self):$/;"	kind:member	line:271
+test_admin	../test_cases/permissions.py	/^    def test_admin(self):$/;"	kind:member	line:18
+test_aggregation	../test_cases/aggregate.py	/^  def test_aggregation(self):$/;"	kind:member	line:43
+test_aggregation_bug_on_normalfields	../test_cases/aggregate.py	/^  def test_aggregation_bug_on_normalfields(self):$/;"	kind:member	line:106
+test_aggregation_bug_on_normalfields_better_data	../test_cases/aggregate.py	/^  def test_aggregation_bug_on_normalfields_better_data(self):$/;"	kind:member	line:168
+test_all	../test.py	/^def test_all():$/;"	kind:function	line:22
+test_annotation	../test_cases/annotations.py	/^  def test_annotation(self):$/;"	kind:member	line:8
+test_annotation_full_cpg_islands	../test_cases/annotations.py	/^  def test_annotation_full_cpg_islands(self):$/;"	kind:member	line:104
+test_annotation_info	../test_cases/info.py	/^  def test_annotation_info(self):$/;"	kind:member	line:51
+test_annotation_shuffle	../test_cases/annotations.py	/^  def test_annotation_shuffle(self):$/;"	kind:member	line:135
+test_annotation_signal_bedgraph	../test_cases/annotations.py	/^  def test_annotation_signal_bedgraph(self):$/;"	kind:member	line:193
+test_annotation_signal_wig	../test_cases/annotations.py	/^  def test_annotation_signal_wig(self):$/;"	kind:member	line:225
+test_anonymous	../test_cases/admin.py	/^  def test_anonymous(self):$/;"	kind:member	line:26
+test_argument_normalization	../test_cases/select_regions.py	/^  def test_argument_normalization(self):$/;"	kind:member	line:268
+test_ascore_simple	../test_cases/score_matrix.py	/^  def test_ascore_simple(self):$/;"	kind:member	line:9
+test_basic_binning	../test_cases/binning.py	/^  def test_basic_binning(self):$/;"	kind:member	line:9
+test_basic_column_types	../test_cases/column_types.py	/^  def test_basic_column_types(self):$/;"	kind:member	line:18
+test_basic_distinct	../test_cases/distinct.py	/^  def test_basic_distinct(self):$/;"	kind:member	line:9
+test_bed_graph_files	../test_cases/bedgraph_parser.py	/^  def test_bed_graph_files(self):$/;"	kind:member	line:9
+test_better_names	../test_cases/clone.py	/^  def test_better_names(self):$/;"	kind:member	line:98
+test_big_file	../test_cases/binning.py	/^  def test_big_file(self):$/;"	kind:member	line:62
+test_big_files_intersect	../test_cases/intersection.py	/^  def test_big_files_intersect(self):$/;"	kind:member	line:231
+test_biosource	../test_cases/biosources.py	/^  def test_biosource(self):$/;"	kind:member	line:7
+test_biosource	../test_cases/search.py	/^  def test_biosource(self):$/;"	kind:member	line:100
+test_biosource_info	../test_cases/info.py	/^  def test_biosource_info(self):$/;"	kind:member	line:167
+test_biosource_related	../test_cases/biosources.py	/^  def test_biosource_related(self):$/;"	kind:member	line:89
+test_biosource_scope	../test_cases/biosources.py	/^  def test_biosource_scope(self):$/;"	kind:member	line:42
+test_biosource_true_hierarchy	../test_cases/bugs.py	/^  def test_biosource_true_hierarchy(self):$/;"	kind:member	line:262
+test_biosource_true_hierarchy	../test_cases/bugs.py	/^  def test_biosource_true_hierarchy(self):$/;"	kind:member	line:302
+test_bug_do_not_reuse_existing_query	../test_cases/bugs.py	/^  def test_bug_do_not_reuse_existing_query(self):$/;"	kind:member	line:403
+test_calculated_get_region	../test_cases/lua.py	/^  def test_calculated_get_region(self):$/;"	kind:member	line:114
+test_calculated_math	../test_cases/lua.py	/^  def test_calculated_math(self):$/;"	kind:member	line:35
+test_calculated_metafield	../test_cases/lua.py	/^  def test_calculated_metafield(self):$/;"	kind:member	line:71
+test_calculated_string	../test_cases/lua.py	/^  def test_calculated_string(self):$/;"	kind:member	line:11
+test_cancel_aggregation	../test_cases/cancel.py	/^  def test_cancel_aggregation(self):$/;"	kind:member	line:8
+test_category_fail	../test_cases/column_types.py	/^  def test_category_fail(self):$/;"	kind:member	line:145
+test_change_extra_metadata	../test_cases/changes.py	/^  def test_change_extra_metadata(self):$/;"	kind:member	line:7
+test_change_extra_metadata	../test_cases/permissions.py	/^    def test_change_extra_metadata(self):$/;"	kind:member	line:111
+test_check_embracing_bug	../test_cases/biosources.py	/^  def test_check_embracing_bug(self):$/;"	kind:member	line:120
+test_chromosome_explicit	../test_cases/select_regions.py	/^  def test_chromosome_explicit(self):$/;"	kind:member	line:156
+test_chromosomes	../test_cases/genomes.py	/^  def test_chromosomes(self):$/;"	kind:member	line:31
+test_chromosomes	../test_cases/tiling.py	/^  def test_chromosomes(self):$/;"	kind:member	line:20
+test_clone_annotatation	../test_cases/clone.py	/^  def test_clone_annotatation(self):$/;"	kind:member	line:49
+test_clone_experiment	../test_cases/clone.py	/^  def test_clone_experiment(self):$/;"	kind:member	line:9
+test_collection_experiments_count	../test_cases/faceting.py	/^  def test_collection_experiments_count(self):$/;"	kind:member	line:25
+test_column_complex_types	../test_cases/column_types.py	/^  def test_column_complex_types(self):$/;"	kind:member	line:30
+test_column_types_search	../test_cases/search.py	/^  def test_column_types_search(self):$/;"	kind:member	line:387
+test_commands	../test_cases/list_commands.py	/^  def test_commands(self):$/;"	kind:member	line:8
+test_complex1	../test_cases/complex_queries.py	/^  def test_complex1(self):$/;"	kind:member	line:8
+test_complex2	../test_cases/complex_queries.py	/^  def test_complex2(self):$/;"	kind:member	line:41
+test_complex_input_regions	../test_cases/complex_queries.py	/^  def test_complex_input_regions(self):$/;"	kind:member	line:123
+test_correct_limits	../test_cases/aggregate.py	/^  def test_correct_limits(self):$/;"	kind:member	line:8
+test_correction_score	../test_cases/aggregate.py	/^  def test_correction_score(self):$/;"	kind:member	line:25
+test_coverage	../test_cases/coverage.py	/^  def test_coverage(self):$/;"	kind:member	line:7
+test_double_experiment_fail	../test_cases/experiments.py	/^  def test_double_experiment_fail(self):$/;"	kind:member	line:150
+test_double_experiment_same_user_fail	../test_cases/experiments.py	/^  def test_double_experiment_same_user_fail(self):$/;"	kind:member	line:126
+test_double_upload	../test_cases/sequence.py	/^  def test_double_upload(self):$/;"	kind:member	line:54
+test_duplicate	../test_cases/techniques.py	/^    def test_duplicate(self):$/;"	kind:member	line:56
+test_duplicate_column_type	../test_cases/column_types.py	/^  def test_duplicate_column_type(self):$/;"	kind:member	line:8
+test_duplicated	../test_cases/gene_expressions.py	/^  def test_duplicated(self):$/;"	kind:member	line:10
+test_duplicated_biosource_with_synonym	../test_cases/biosources.py	/^  def test_duplicated_biosource_with_synonym(self):$/;"	kind:member	line:29
+test_echo	../test_cases/admin.py	/^  def test_echo(self):$/;"	kind:member	line:37
+test_empty_info	../test_cases/info.py	/^  def test_empty_info(self):$/;"	kind:member	line:9
+test_empty_no_permission_column_type	../test_cases/bugs.py	/^  def test_empty_no_permission_column_type(self):$/;"	kind:member	line:343
+test_empty_result	../test_cases/bugs.py	/^  def test_empty_result(self):$/;"	kind:member	line:326
+test_epigenetic_mark	../test_cases/epigenetic_marks.py	/^  def test_epigenetic_mark(self):$/;"	kind:member	line:9
+test_epigenetic_mark	../test_cases/search.py	/^  def test_epigenetic_mark(self):$/;"	kind:member	line:62
+test_epigenetic_mark_info	../test_cases/info.py	/^  def test_epigenetic_mark_info(self):$/;"	kind:member	line:36
+test_error_calculated_get_region	../test_cases/lua.py	/^  def test_error_calculated_get_region(self):$/;"	kind:member	line:141
+test_error_maximum_number_of_instructions	../test_cases/lua.py	/^  def test_error_maximum_number_of_instructions(self):$/;"	kind:member	line:166
+test_exclude	../test_cases/search.py	/^  def test_exclude(self):$/;"	kind:member	line:204
+test_experiment	../test_cases/search.py	/^  def test_experiment(self):$/;"	kind:member	line:165
+test_experiment_info	../test_cases/info.py	/^  def test_experiment_info(self):$/;"	kind:member	line:73
+test_experiment_metadata	../test_cases/search.py	/^  def test_experiment_metadata(self):$/;"	kind:member	line:178
+test_experiment_name_metacolumn	../test_cases/select_regions.py	/^  def test_experiment_name_metacolumn(self):$/;"	kind:member	line:115
+test_experiment_name_metacolumn2	../test_cases/select_regions.py	/^  def test_experiment_name_metacolumn2(self):$/;"	kind:member	line:133
+test_experiment_sets	../test_cases/experiment_sets.py	/^  def test_experiment_sets(self):$/;"	kind:member	line:10
+test_experiments_pass	../test_cases/experiments.py	/^  def test_experiments_pass(self):$/;"	kind:member	line:61
+test_experiments_preview	../test_cases/experiments.py	/^  def test_experiments_preview(self):$/;"	kind:member	line:45
+test_extend	../test_cases/extend.py	/^  def test_extend(self):$/;"	kind:member	line:8
+test_faceting	../test_cases/faceting.py	/^  def test_faceting(self):$/;"	kind:member	line:7
+test_filter_regions	../test_cases/filters.py	/^  def test_filter_regions(self):$/;"	kind:member	line:8
+test_filter_tiling	../test_cases/tiling.py	/^  def test_filter_tiling(self):$/;"	kind:member	line:38
+test_filter_two_genomes	../test_cases/filters.py	/^  def test_filter_two_genomes(self):$/;"	kind:member	line:63
+test_find_sample	../test_cases/samples.py	/^  def test_find_sample(self):$/;"	kind:member	line:8
+test_find_samples	../test_cases/samples.py	/^  def test_find_samples(self):$/;"	kind:member	line:22
+test_flank_genes	../test_cases/flank.py	/^  def test_flank_genes(self):$/;"	kind:member	line:8
+test_full_genome	../test_cases/tiling.py	/^  def test_full_genome(self):$/;"	kind:member	line:8
+test_gene_case_insensitive	../test_cases/gene_models.py	/^  def test_gene_case_insensitive(self):$/;"	kind:member	line:122
+test_gene_expression	../test_cases/gene_expressions.py	/^  def test_gene_expression(self):$/;"	kind:member	line:93
+test_gene_retrieve	../test_cases/gene_expressions.py	/^  def test_gene_retrieve(self):$/;"	kind:member	line:56
+test_gene_retrieve	../test_cases/gene_models.py	/^  def test_gene_retrieve(self):$/;"	kind:member	line:10
+test_gene_retrieve	../test_cases/gene_ontology.py	/^    def test_gene_retrieve(self):$/;"	kind:member	line:10
+test_genes_location	../test_cases/gene_models.py	/^  def test_genes_location(self):$/;"	kind:member	line:47
+test_genome	../test_cases/search.py	/^  def test_genome(self):$/;"	kind:member	line:39
+test_genome_duplicate	../test_cases/genomes.py	/^  def test_genome_duplicate(self):$/;"	kind:member	line:105
+test_genome_empty	../test_cases/genomes.py	/^  def test_genome_empty(self):$/;"	kind:member	line:64
+test_genome_hg19	../test_cases/genomes.py	/^  def test_genome_hg19(self):$/;"	kind:member	line:9
+test_genome_info	../test_cases/genomes.py	/^  def test_genome_info(self):$/;"	kind:member	line:88
+test_genome_info	../test_cases/info.py	/^  def test_genome_info(self):$/;"	kind:member	line:18
+test_get_by_query	../test_cases/experiments.py	/^  def test_get_by_query(self):$/;"	kind:member	line:325
+test_get_data	../test_cases/permissions.py	/^    def test_get_data(self):$/;"	kind:member	line:66
+test_get_sequences	../test_cases/sequence.py	/^  def test_get_sequences(self):$/;"	kind:member	line:128
+test_include_annotations	../test_cases/permissions.py	/^    def test_include_annotations(self):$/;"	kind:member	line:44
+test_include_collection_terms	../test_cases/permissions.py	/^    def test_include_collection_terms(self):$/;"	kind:member	line:30
+test_include_invalid_regions	../test_cases/bugs.py	/^  def test_include_invalid_regions(self):$/;"	kind:member	line:363
+test_incomplete_chromosome	../test_cases/genomes.py	/^  def test_incomplete_chromosome(self):$/;"	kind:member	line:119
+test_info_on_user_queries	../test_cases/bugs.py	/^  def test_info_on_user_queries(self):$/;"	kind:member	line:380
+test_init_system	../test_cases/init.py	/^  def test_init_system(self):$/;"	kind:member	line:17
+test_insert_experiment_fail	../test_cases/column_types.py	/^  def test_insert_experiment_fail(self):$/;"	kind:member	line:94
+test_insert_histone_modifications	../test_cases/epigenetic_marks.py	/^  def test_insert_histone_modifications(self):$/;"	kind:member	line:35
+test_insert_local_file	../test_cases/experiments.py	/^  def test_insert_local_file(self):$/;"	kind:member	line:94
+test_int_for_string	../test_cases/xml.py	/^  def test_int_for_string(self):$/;"	kind:member	line:16
+test_intersect_tiling	../test_cases/tiling.py	/^  def test_intersect_tiling(self):$/;"	kind:member	line:56
+test_intersection	../test_cases/intersection.py	/^  def test_intersection(self):$/;"	kind:member	line:8
+test_intersection_two_genomes	../test_cases/intersection.py	/^  def test_intersection_two_genomes(self):$/;"	kind:member	line:30
+test_invalid_annotation	../test_cases/annotations.py	/^  def test_invalid_annotation(self):$/;"	kind:member	line:47
+test_invalid_column	../test_cases/clone.py	/^  def test_invalid_column(self):$/;"	kind:member	line:64
+test_invalid_eamp_character	../test_cases/bugs.py	/^  def test_invalid_eamp_character(self):$/;"	kind:member	line:67
+test_invalid_format_size	../test_cases/clone.py	/^  def test_invalid_format_size(self):$/;"	kind:member	line:78
+test_invalid_format_types	../test_cases/clone.py	/^  def test_invalid_format_types(self):$/;"	kind:member	line:110
+test_invalid_search	../test_cases/search.py	/^  def test_invalid_search(self):$/;"	kind:member	line:224
+test_list_annotations	../test_cases/annotations.py	/^  def test_list_annotations(self):$/;"	kind:member	line:60
+test_list_annotations2	../test_cases/annotations.py	/^  def test_list_annotations2(self):$/;"	kind:member	line:245
+test_list_collections	../test_cases/permissions.py	/^    def test_list_collections(self):$/;"	kind:member	line:80
+test_list_column_types	../test_cases/column_types.py	/^  def test_list_column_types(self):$/;"	kind:member	line:41
+test_list_recent	../test_cases/experiments.py	/^  def test_list_recent(self):$/;"	kind:member	line:169
+test_list_samples	../test_cases/samples.py	/^  def test_list_samples(self):$/;"	kind:member	line:54
+test_list_similar_experiments	../test_cases/list_similar.py	/^  def test_list_similar_experiments(self):$/;"	kind:member	line:8
+test_list_similar_techniques	../test_cases/techniques.py	/^    def test_list_similar_techniques(self):$/;"	kind:member	line:44
+test_list_techniques	../test_cases/techniques.py	/^    def test_list_techniques(self):$/;"	kind:member	line:21
+test_load_bedgraph	../test_cases/experiments.py	/^  def test_load_bedgraph(self):$/;"	kind:member	line:12
+test_long_sequence_content	../test_cases/sequence.py	/^  def test_long_sequence_content(self):$/;"	kind:member	line:154
+test_malformed_format	../test_cases/select_regions.py	/^  def test_malformed_format(self):$/;"	kind:member	line:201
+test_me_info	../test_cases/info.py	/^  def test_me_info(self):$/;"	kind:member	line:198
+test_merge_different_chromosomes	../test_cases/merge.py	/^  def test_merge_different_chromosomes(self):$/;"	kind:member	line:30
+test_merge_queries	../test_cases/merge.py	/^  def test_merge_queries(self):$/;"	kind:member	line:8
+test_merge_tiling	../test_cases/tiling.py	/^  def test_merge_tiling(self):$/;"	kind:member	line:77
+test_metacolumn_experiment_name	../test_cases/tiling.py	/^  def test_metacolumn_experiment_name(self):$/;"	kind:member	line:103
+test_metacolumn_sequence	../test_cases/tiling.py	/^  def test_metacolumn_sequence(self):$/;"	kind:member	line:123
+test_minimum_parameters	../test_cases/select_regions.py	/^  def test_minimum_parameters(self):$/;"	kind:member	line:49
+test_missing_annotation_name	../test_cases/annotations.py	/^  def test_missing_annotation_name(self):$/;"	kind:member	line:54
+test_multiple_biosources_samples	../test_cases/samples.py	/^  def test_multiple_biosources_samples(self):$/;"	kind:member	line:82
+test_multiple_experiments	../test_cases/select_regions.py	/^  def test_multiple_experiments(self):$/;"	kind:member	line:308
+test_multiple_genomes	../test_cases/select_regions.py	/^  def test_multiple_genomes(self):$/;"	kind:member	line:329
+test_multiple_genomes_2	../test_cases/select_regions.py	/^  def test_multiple_genomes_2(self):$/;"	kind:member	line:355
+test_multiple_overlap	../test_cases/overlaps.py	/^  def test_multiple_overlap(self):$/;"	kind:member	line:92
+test_multiple_sequences	../test_cases/sequence.py	/^  def test_multiple_sequences(self):$/;"	kind:member	line:66
+test_no_ignore_if	../test_cases/column_types.py	/^  def test_no_ignore_if(self):$/;"	kind:member	line:74
+test_no_start_position	../test_cases/bugs.py	/^  def test_no_start_position(self):$/;"	kind:member	line:9
+test_nonexisting_chromosome	../test_cases/sequence.py	/^  def test_nonexisting_chromosome(self):$/;"	kind:member	line:86
+test_nonexisting_genome	../test_cases/sequence.py	/^  def test_nonexisting_genome(self):$/;"	kind:member	line:76
+test_nonexisting_key	../test_cases/modify_user.py	/^    def test_nonexisting_key(self):$/;"	kind:member	line:27
+test_normalize_histone_modifications	../test_cases/epigenetic_marks.py	/^  def test_normalize_histone_modifications(self):$/;"	kind:member	line:61
+test_not_find_genome_and_in_order_chromosoms	../test_cases/bugs.py	/^  def test_not_find_genome_and_in_order_chromosoms(self):$/;"	kind:member	line:218
+test_output_format	../test_cases/output.py	/^  def test_output_format(self):$/;"	kind:member	line:8
+test_overlap	../test_cases/intersection.py	/^  def test_overlap(self):$/;"	kind:member	line:52
+test_overlap_experiment_annotation	../test_cases/overlaps.py	/^  def test_overlap_experiment_annotation(self):$/;"	kind:member	line:61
+test_overlap_simple	../test_cases/overlaps.py	/^  def test_overlap_simple(self):$/;"	kind:member	line:6
+test_pattern_chromosome	../test_cases/patterns.py	/^  def test_pattern_chromosome(self):$/;"	kind:member	line:8
+test_performance	../test_cases/gene_expressions.py	/^  def test_performance(self):$/;"	kind:member	line:34
+test_project	../test_cases/search.py	/^  def test_project(self):$/;"	kind:member	line:141
+test_query_info	../test_cases/info.py	/^  def test_query_info(self):$/;"	kind:member	line:119
+test_range_fail	../test_cases/column_types.py	/^  def test_range_fail(self):$/;"	kind:member	line:116
+test_remove_annotation	../test_cases/remove.py	/^  def test_remove_annotation(self):$/;"	kind:member	line:56
+test_remove_biosource	../test_cases/remove.py	/^  def test_remove_biosource(self):$/;"	kind:member	line:185
+test_remove_column	../test_cases/column_types.py	/^  def test_remove_column(self):$/;"	kind:member	line:173
+test_remove_epigenetic_mark	../test_cases/remove.py	/^  def test_remove_epigenetic_mark(self):$/;"	kind:member	line:227
+test_remove_full_chromosome_data	../test_cases/filters.py	/^  def test_remove_full_chromosome_data(self):$/;"	kind:member	line:43
+test_remove_genome	../test_cases/remove.py	/^  def test_remove_genome(self):$/;"	kind:member	line:10
+test_remove_project	../test_cases/remove.py	/^  def test_remove_project(self):$/;"	kind:member	line:161
+test_remove_sample	../test_cases/remove.py	/^  def test_remove_sample(self):$/;"	kind:member	line:205
+test_remove_technique	../test_cases/remove.py	/^  def test_remove_technique(self):$/;"	kind:member	line:252
+test_request_info_permission	../test_cases/info.py	/^  def test_request_info_permission(self):$/;"	kind:member	line:210
+test_result	../test_cases/sequence.py	/^  def test_result(self):$/;"	kind:member	line:97
+test_result_ids_new	../test_cases/list_requests.py	/^    def test_result_ids_new(self):$/;"	kind:member	line:38
+test_result_ids_reuse	../test_cases/list_requests.py	/^    def test_result_ids_reuse(self):$/;"	kind:member	line:9
+test_retrieve_with_defaults	../test_cases/select_regions.py	/^  def test_retrieve_with_defaults(self):$/;"	kind:member	line:98
+test_sample	../test_cases/search.py	/^  def test_sample(self):$/;"	kind:member	line:124
+test_sample_info	../test_cases/info.py	/^  def test_sample_info(self):$/;"	kind:member	line:181
+test_sample_search_from_synonym	../test_cases/bugs.py	/^  def test_sample_search_from_synonym(self):$/;"	kind:member	line:231
+test_score_matrix_wrong_experiment	../test_cases/score_matrix.py	/^  def test_score_matrix_wrong_experiment(self):$/;"	kind:member	line:80
+test_search_embracing	../test_cases/search.py	/^  def test_search_embracing(self):$/;"	kind:member	line:256
+test_search_experiment_related	../test_cases/search.py	/^  def test_search_experiment_related(self):$/;"	kind:member	line:352
+test_search_sample_related	../test_cases/search.py	/^  def test_search_sample_related(self):$/;"	kind:member	line:314
+test_search_synonyms	../test_cases/search.py	/^  def test_search_synonyms(self):$/;"	kind:member	line:230
+test_select_all	../test_cases/select_regions.py	/^  def test_select_all(self):$/;"	kind:member	line:226
+test_select_full_experiment	../test_cases/select_regions.py	/^  def test_select_full_experiment(self, format=None):$/;"	kind:member	line:8
+test_select_genes	../test_cases/gene_models.py	/^  def test_select_genes(self):$/;"	kind:member	line:80
+test_select_only_peaks_cached	../test_cases/complex_queries.py	/^  def test_select_only_peaks_cached(self):$/;"	kind:member	line:225
+test_select_only_peaks_not_cached	../test_cases/complex_queries.py	/^  def test_select_only_peaks_not_cached(self):$/;"	kind:member	line:201
+test_select_only_signal	../test_cases/complex_queries.py	/^  def test_select_only_signal(self):$/;"	kind:member	line:145
+test_select_range	../test_cases/select_regions.py	/^  def test_select_range(self):$/;"	kind:member	line:288
+test_set_project_public	../test_cases/projects.py	/^  def test_set_project_public(self):$/;"	kind:member	line:28
+test_set_project_public	../test_cases/projects.py	/^  def test_set_project_public(self):$/;"	kind:member	line:51
+test_set_project_public	../test_cases/projects.py	/^  def test_set_project_public(self):$/;"	kind:member	line:90
+test_set_project_public_by_user	../test_cases/projects.py	/^  def test_set_project_public_by_user(self):$/;"	kind:member	line:116
+test_set_project_public_by_user_no_permission	../test_cases/projects.py	/^  def test_set_project_public_by_user_no_permission(self):$/;"	kind:member	line:134
+test_set_project_public_no_permisson	../test_cases/projects.py	/^  def test_set_project_public_no_permisson(self):$/;"	kind:member	line:107
+test_set_project_publictest_project	../test_cases/projects.py	/^  def test_set_project_publictest_project(self):$/;"	kind:member	line:7
+test_shitty_deep_file	../test_cases/experiments.py	/^  def test_shitty_deep_file(self):$/;"	kind:member	line:309
+test_state	../test_cases/states.py	/^    def test_state(self):$/;"	kind:member	line:9
+test_state_experiments	../test_cases/states.py	/^    def test_state_experiments(self):$/;"	kind:member	line:26
+test_success	../test_cases/modify_user.py	/^    def test_success(self):$/;"	kind:member	line:8
+test_success	../test_cases/user_auth.py	/^    def test_success(self):$/;"	kind:member	line:8
+test_tiling_regions	../test_cases/sequence.py	/^  def test_tiling_regions(self):$/;"	kind:member	line:26
+test_type_restricted	../test_cases/search.py	/^  def test_type_restricted(self):$/;"	kind:member	line:8
+test_types	../test_cases/xml.py	/^  def test_types(self):$/;"	kind:member	line:7
+test_unequal_keys	../test_cases/admin.py	/^  def test_unequal_keys(self):$/;"	kind:member	line:44
+test_uninitialized_system	../test_cases/init.py	/^  def test_uninitialized_system(self):$/;"	kind:member	line:9
+test_unknown_parameters	../test_cases/select_regions.py	/^  def test_unknown_parameters(self):$/;"	kind:member	line:236
+test_upload_sequence	../test_cases/sequence.py	/^  def test_upload_sequence(self):$/;"	kind:member	line:7
+test_users	../test_cases/admin.py	/^  def test_users(self):$/;"	kind:member	line:9
+test_wig_clone	../test_cases/clone.py	/^  def test_wig_clone(self):$/;"	kind:member	line:169
+test_wig_clone_calculated	../test_cases/clone.py	/^  def test_wig_clone_calculated(self):$/;"	kind:member	line:196
+test_wig_files	../test_cases/wig_parser.py	/^  def test_wig_files(self):$/;"	kind:member	line:10
+test_wig_files_fail	../test_cases/wig_parser.py	/^  def test_wig_files_fail(self):$/;"	kind:member	line:50
+test_wig_files_pass	../test_cases/wig_parser.py	/^  def test_wig_files_pass(self):$/;"	kind:member	line:33
+test_wrong_chromosomes_usage	../test_cases/bugs.py	/^  def test_wrong_chromosomes_usage(self):$/;"	kind:member	line:85
+test_wrong_column_creation	../test_cases/lua.py	/^  def test_wrong_column_creation(self):$/;"	kind:member	line:95
+test_wrong_email	../test_cases/user_auth.py	/^    def test_wrong_email(self):$/;"	kind:member	line:34
+test_wrong_password	../test_cases/user_auth.py	/^    def test_wrong_password(self):$/;"	kind:member	line:27
+test_wrong_sequence_length	../test_cases/sequence.py	/^  def test_wrong_sequence_length(self):$/;"	kind:member	line:45
+tiling.py	../test_cases/tiling.py	1;"	kind:file	line:1
+uk	../experiments.py	/^uk = "bnuEsTzM3l640iOl"$/;"	kind:variable	line:3
+uk	../performance/load.py	/^uk= "lsUz0a5NbqXbmXaj"$/;"	kind:variable	line:8
+uk	../speed.py	/^uk = "ov8yw7gg8JmO4V6W"$/;"	kind:variable	line:6
+uk	../untitled.py	/^uk = "ov8yw7gg8JmO4V6W"$/;"	kind:variable	line:6
+untitled.py	../untitled.py	1;"	kind:file	line:1
+url	../experiments.py	/^url = "http:\/\/deepblue.mpi-inf.mpg.de\/xmlrpc"$/;"	kind:variable	line:4
+url	../performance/load.py	/^url = "http:\/\/localhost:31415"$/;"	kind:variable	line:6
+url	../speed.py	/^url = "http:\/\/deepblue.mpi-inf.mpg.de\/xmlrpc"$/;"	kind:variable	line:7
+url	../untitled.py	/^url = "http:\/\/deepblue.mpi-inf.mpg.de\/xmlrpc"$/;"	kind:variable	line:7
+user_auth.py	../test_cases/user_auth.py	1;"	kind:file	line:1
+wig_parser.py	../test_cases/wig_parser.py	1;"	kind:file	line:1
+x	../speed.py	/^x = server.get_regions(qid_hoxgenes, "CHROMOSOME,START,END", uk)$/;"	kind:variable	line:18
+x	../untitled.py	/^x = server.get_regions(qid_h3k27me3_gm12878, "CHROMOSOME,START,END,@NAME", uk)$/;"	kind:variable	line:22
+x	../untitled.py	/^x = server.get_regions(qid_hoxgenes, "CHROMOSOME,START,END", uk)$/;"	kind:variable	line:16
+xml.py	../test_cases/xml.py	1;"	kind:file	line:1
