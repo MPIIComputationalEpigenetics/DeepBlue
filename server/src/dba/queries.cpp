@@ -121,19 +121,43 @@ namespace epidb {
         annotation_pattern_cache.invalidate();
       }
 
+      mongo::BSONObj reduce_args(const mongo::BSONObj &args)
+      {
+        std::cerr << "intput: " << args.toString() << std::endl;
+        // Keys to be removed
+        std::set<std::string> keys = {"annotation",
+                                      "genome", "genomes",
+                                      "experiment_name", "epigenetic_mark",
+                                      "project", "technique"
+                                     };
+        mongo::BSONObjBuilder bob;
+
+        for (mongo::BSONObj::iterator it = args.begin(); it.more(); ) {
+          mongo::BSONElement e = it.next();
+          std::string field_name = std::string(e.fieldName());
+          if (keys.find(field_name) == keys.end()) {
+            bob.append(e);
+          }
+        }
+
+        return bob.obj();
+      }
+
 
       bool store_query(const datatypes::User& user,
                        const std::string &type, const mongo::BSONObj &args,
                        std::string &query_id, std::string &msg)
       {
         mongo::BSONObjBuilder search_query_builder;
+
+        mongo::BSONObj query_args = reduce_args(args);
+
         search_query_builder.append("type", type);
-        search_query_builder.append("args", args);
+        search_query_builder.append("query_args", query_args);
         search_query_builder.append("user", user.id());
-        mongo::BSONObj search_query = search_query_builder.obj();
 
         mongo::BSONObj result;
-        if (helpers::get_one(Collections::QUERIES(), search_query, result)) {
+        if (helpers::get_one(Collections::QUERIES(), search_query_builder.obj(), result)) {
           query_id = result["_id"].String();
           return true;
         }
@@ -153,6 +177,7 @@ namespace epidb {
         stored_query_builder.appendTimeT("time", time_);
         stored_query_builder.append("type", type);
         stored_query_builder.append("args", args);
+        stored_query_builder.append("query_args", query_args);
 
         Connection c;
 
@@ -390,24 +415,23 @@ namespace epidb {
         return true;
       }
 
-      bool build_experiment_query(const int start, const int end, const std::string &experiment_name,
+      bool build_experiment_query(const int start, const int end, const std::string &norm_experiment_name,
                                   mongo::BSONObj &regions_query, std::string &msg)
       {
         Connection c;
 
         DatasetId dataset_id;
-        std::string norm_name = utils::normalize_name(experiment_name);
 
-        if (experiment_name_dataset_id_cache.exists_dataset_id(norm_name)) {
-          dataset_id = experiment_name_dataset_id_cache.get_dataset_id(norm_name);
+        if (experiment_name_dataset_id_cache.exists_dataset_id(norm_experiment_name)) {
+          dataset_id = experiment_name_dataset_id_cache.get_dataset_id(norm_experiment_name);
         } else {
           mongo::BSONObj experiment_obj;
-          if (!dba::experiments::by_name(experiment_name, experiment_obj, msg)) {
+          if (!dba::experiments::by_name(norm_experiment_name, experiment_obj, msg)) {
             return false;
           }
           mongo::BSONElement dataset_id_elem = experiment_obj[KeyMapper::DATASET()];
           dataset_id = dataset_id_elem.Int();
-          experiment_name_dataset_id_cache.set(norm_name, dataset_id);
+          experiment_name_dataset_id_cache.set(norm_experiment_name, dataset_id);
         }
 
         mongo::BSONObjBuilder regions_query_builder;
@@ -775,7 +799,7 @@ namespace epidb {
         mongo::BSONObj args = query["args"].Obj();
 
         std::string motif = args["motif"].String();
-        std::string genome = args["genome"].String();
+        std::string genome = args["norm_genome"].String();
         bool overlap = args["overlap"].Bool();
         long long start = args["start"].Number();
         long long end = args["end"].Number();
@@ -1112,7 +1136,6 @@ namespace epidb {
         tiling_data_builder.append("_id", tiling_id);
         tiling_data_builder.append(KeyMapper::DATASET(), dataset_id);
         tiling_data_builder.append("name", name.str());
-        tiling_data_builder.append("genome", genome);
         tiling_data_builder.append("norm_genome", norm_genome);
         tiling_data_builder.append("tiling_size", (int) tiling_size);
         mongo::BSONArrayBuilder ab;
@@ -1139,7 +1162,6 @@ namespace epidb {
 
         mongo::BSONObj args = query["args"].Obj();
 
-        const std::string genome = args["genome"].str();
         const std::string norm_genome = args["norm_genome"].str();
         const size_t tiling_size = args["size"].Int();
 
@@ -1148,7 +1170,7 @@ namespace epidb {
           chromosomes = utils::build_vector(args["chromosomes"].Array());
         } else {
           std::set<std::string> chrom;
-          if (!dba::genomes::get_chromosomes(genome, chrom, msg)) {
+          if (!dba::genomes::get_chromosomes(norm_genome, chrom, msg)) {
             return false;
           }
           chromosomes = std::vector<std::string>(chrom.begin(), chrom.end());
@@ -1163,13 +1185,13 @@ namespace epidb {
         dba::genomes::ChromosomeInfo chromosome_info;
 
         DatasetId tiling_id;
-        if (!add_tiling(genome, tiling_size, tiling_id, msg)) {
+        if (!add_tiling(norm_genome, tiling_size, tiling_id, msg)) {
           return false;
         }
 
         for (cit = chromosomes.begin(); cit != chromosomes.end(); ++cit) {
           if (!genome_info->get_chromosome(*cit, chromosome_info, msg)) {
-            msg = "Chromosome " + *cit + " does not exist on genome " + genome + ".";
+            msg = "Chromosome " + *cit + " does not exist on genome " + norm_genome + ".";
             return false;
           }
           Regions regs = Regions();
@@ -1432,7 +1454,7 @@ namespace epidb {
         if (data_cursor->more()) {
           mongo::BSONObj query_obj = data_cursor->next().getOwned();
           obj = BSON("name" << ("Query " + query_obj["_id"].String() + " regions set") <<
-                     "genome" << query_obj["args"]["genome"].String()
+                     "norm_genome" << query_obj["args"]["norm_genome"].String()
                     );
           c.done();
           return true;
