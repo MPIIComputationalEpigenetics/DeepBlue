@@ -664,7 +664,7 @@ namespace epidb {
       std::map<std::string, std::string> dataset_column_to_map(const mongo::BSONObj &o)
       {
         std::map<std::string, std::string> res;
-        for (mongo::BSONObj::iterator it = o.begin(); it.more(); ) {
+        for (auto it = o.begin(); it.more(); ) {
           mongo::BSONElement e = it.next();
           std::string content = utils::bson_to_string(e);
           if (!content.empty()) {

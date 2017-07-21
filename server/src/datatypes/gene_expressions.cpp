@@ -281,7 +281,7 @@ namespace epidb {
 
         RegionPtr region = build_stranded_region(start, end, dataset_id, strand);
 
-        mongo::BSONObj::iterator it = gene.begin();
+        auto it = gene.begin();
 
         // Jump the _id field
         it.next();

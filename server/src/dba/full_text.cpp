@@ -77,7 +77,7 @@ namespace epidb {
           return false;
         }
         mongo::BSONObjBuilder create_text_search_builder;
-        for (mongo::BSONObj::iterator it = data.begin(); it.more(); ) {
+        for (auto it = data.begin(); it.more(); ) {
           mongo::BSONElement e = it.next();
           // don't write the _id field
           std::string field_name = std::string(e.fieldName());
@@ -95,7 +95,7 @@ namespace epidb {
           }
 
           if (field_name == "extra_metadata" || field_name == "sample_info") {
-            for (mongo::BSONObj::iterator itt = e.Obj().begin(); itt.more(); ) {
+            for (auto itt = e.Obj().begin(); itt.more(); ) {
               mongo::BSONElement em = itt.next();
               if (em.isSimpleType()) {
                 create_text_search_builder.append(field_name + "_" + em.fieldName(), em.str());

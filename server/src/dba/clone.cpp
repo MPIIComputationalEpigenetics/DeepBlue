@@ -283,7 +283,7 @@ namespace epidb {
       mongo::BSONObj original_upload_info = original["upload_info"].Obj();
 
       mongo::BSONObjBuilder upload_info_builder;
-      for (mongo::BSONObj::iterator it = original_upload_info.begin(); it.more(); ) {
+      for (auto it = original_upload_info.begin(); it.more(); ) {
         mongo::BSONElement e = it.next();
         if (strncmp(e.fieldName(), "user", strlen("user")) == 0) {
           upload_info_builder.append("user", user.id());

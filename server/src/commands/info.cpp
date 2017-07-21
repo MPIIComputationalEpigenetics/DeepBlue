@@ -310,7 +310,7 @@ namespace epidb {
 
           if (!chromosomes.isEmpty()) {
             serialize::ParameterPtr chromosomes_parameter(new serialize::ListParameter());
-            for (mongo::BSONObj::iterator it = chromosomes.begin(); it.more(); ) {
+            for (auto it = chromosomes.begin(); it.more(); ) {
               mongo::BSONElement e = it.next();
               serialize::ParameterPtr chromosome_parameter(new serialize::MapParameter());
               chromosome_parameter->add_child("name", serialize::ParameterPtr(new serialize::SimpleParameter(e["name"].String())));

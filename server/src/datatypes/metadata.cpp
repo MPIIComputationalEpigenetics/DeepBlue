@@ -41,7 +41,7 @@ namespace epidb {
     {
       Metadata extra_metadata;
 
-      mongo::BSONObj::iterator i = obj.begin();
+      auto i = obj.begin();
       while (i.more() ) {
         const mongo::BSONElement &e = i.next();
         extra_metadata[e.fieldName()] = utils::bson_to_string(e);

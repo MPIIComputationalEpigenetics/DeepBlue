@@ -360,7 +360,7 @@ namespace epidb {
 
       std::vector<std::pair<std::string, std::string>> experiments_formats;
 
-      for ( mongo::BSONObj::iterator i = experiments_formats_bson.begin(); i.more(); ) {
+      for ( auto i = experiments_formats_bson.begin(); i.more(); ) {
         mongo::BSONElement e = i.next();
 
         std::string experiment_name = e.fieldName();

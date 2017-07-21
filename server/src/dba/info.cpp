@@ -45,7 +45,7 @@ namespace epidb {
           return false;
         }
 
-        for (mongo::BSONObj::iterator it = result.begin(); it.more(); ) {
+        for (auto it = result.begin(); it.more(); ) {
           mongo::BSONElement e = it.next();
           if (full || (strncmp("norm_", e.fieldName(), 5) != 0)) {
             res[e.fieldName()] = utils::bson_to_string(e);
@@ -61,7 +61,7 @@ namespace epidb {
           return false;
         }
 
-        for (mongo::BSONObj::iterator it = result.begin(); it.more(); ) {
+        for (auto it = result.begin(); it.more(); ) {
           mongo::BSONElement e = it.next();
           if (e.fieldName() == std::string("chromosomes")) {
             chromosomes = e.Obj().getOwned();
@@ -81,7 +81,7 @@ namespace epidb {
           return false;
         }
 
-        for (mongo::BSONObj::iterator it = result.begin(); it.more(); ) {
+        for (auto it = result.begin(); it.more(); ) {
           mongo::BSONElement e = it.next();
           if (full || (strncmp("norm_", e.fieldName(), 5) != 0)) {
             res[e.fieldName()] = utils::bson_to_string(e);
@@ -98,10 +98,10 @@ namespace epidb {
           return false;
         }
 
-        for (mongo::BSONObj::iterator it = result.begin(); it.more(); ) {
+        for (auto it = result.begin(); it.more(); ) {
           mongo::BSONElement e = it.next();
           if (std::string(e.fieldName()) == "extra_metadata") {
-            mongo::BSONObj::iterator itt = e.Obj().begin();
+            auto itt = e.Obj().begin();
             while (itt.more()) {
               mongo::BSONElement ee = itt.next();
               metadata[ee.fieldName()] = utils::bson_to_string(ee);
@@ -126,10 +126,10 @@ namespace epidb {
 
         std::string biosource_name = result["name"].String();
 
-        for (mongo::BSONObj::iterator it = result.begin(); it.more(); ) {
+        for (auto it = result.begin(); it.more(); ) {
           mongo::BSONElement e = it.next();
           if (std::string(e.fieldName()) == "extra_metadata") {
-            mongo::BSONObj::iterator itt = e.Obj().begin();
+            auto itt = e.Obj().begin();
             while (itt.more()) {
               mongo::BSONElement ee = itt.next();
               metadata[ee.fieldName()] = utils::bson_to_string(ee);
@@ -165,10 +165,10 @@ namespace epidb {
           return false;
         }
 
-        for (mongo::BSONObj::iterator it = result.begin(); it.more(); ) {
+        for (auto it = result.begin(); it.more(); ) {
           mongo::BSONElement e = it.next();
           if (std::string(e.fieldName()) == "extra_metadata") {
-            mongo::BSONObj::iterator itt = e.Obj().begin();
+            auto itt = e.Obj().begin();
             while (itt.more()) {
               mongo::BSONElement ee = itt.next();
               metadata[ee.fieldName()] = utils::bson_to_string(ee);
@@ -192,13 +192,13 @@ namespace epidb {
           return false;
         }
 
-        for (mongo::BSONObj::iterator it = result.begin(); it.more(); ) {
+        for (auto it = result.begin(); it.more(); ) {
           mongo::BSONElement e = it.next();
           if (std::string(e.fieldName()) == "D") {
             continue;
           }
           if (std::string(e.fieldName()) == "extra_metadata") {
-            mongo::BSONObj::iterator itt = e.Obj().begin();
+            auto itt = e.Obj().begin();
             while (itt.more()) {
               mongo::BSONElement ee = itt.next();
               std::string field_name = ee.fieldName();
@@ -207,7 +207,7 @@ namespace epidb {
               }
             }
           } else if (std::string(e.fieldName()) == "upload_info") {
-            mongo::BSONObj::iterator itt = e.Obj().begin();
+            auto itt = e.Obj().begin();
             while (itt.more()) {
               mongo::BSONElement ee = itt.next();
               std::string field_name = ee.fieldName();
@@ -216,7 +216,7 @@ namespace epidb {
               }
             }
           } else if (std::string(e.fieldName()) == "columns") {
-            mongo::BSONObj::iterator itt = e.Obj().begin();
+            auto itt = e.Obj().begin();
             while (itt.more()) {
               mongo::BSONElement ee = itt.next();
               std::string field_name = ee.fieldName();
@@ -247,13 +247,13 @@ namespace epidb {
           return false;
         }
 
-        for (mongo::BSONObj::iterator it = result.begin(); it.more(); ) {
+        for (auto it = result.begin(); it.more(); ) {
           mongo::BSONElement e = it.next();
           if (std::string(e.fieldName()) == "D") {
             continue;
           }
           if (std::string(e.fieldName()) == "sample_info") {
-            mongo::BSONObj::iterator itt = e.Obj().begin();
+            auto itt = e.Obj().begin();
             while (itt.more()) {
               mongo::BSONElement ee = itt.next();
               std::string field_name = ee.fieldName();
@@ -262,7 +262,7 @@ namespace epidb {
               }
             }
           } else if (std::string(e.fieldName()) == "extra_metadata") {
-            mongo::BSONObj::iterator itt = e.Obj().begin();
+            auto itt = e.Obj().begin();
             while (itt.more()) {
               mongo::BSONElement ee = itt.next();
               std::string field_name = ee.fieldName();
@@ -274,7 +274,7 @@ namespace epidb {
 
             }
           } else if (std::string(e.fieldName()) == "upload_info") {
-            mongo::BSONObj::iterator itt = e.Obj().begin();
+            auto itt = e.Obj().begin();
             while (itt.more()) {
               mongo::BSONElement ee = itt.next();
               std::string field_name = ee.fieldName();
@@ -288,7 +288,7 @@ namespace epidb {
               }
             }
           } else if (std::string(e.fieldName()) == "columns") {
-            mongo::BSONObj::iterator itt = e.Obj().begin();
+            auto itt = e.Obj().begin();
             while (itt.more()) {
               mongo::BSONElement ee = itt.next();
               std::string field_name = ee.fieldName();
@@ -373,7 +373,7 @@ namespace epidb {
           return false;
         }
 
-        mongo::BSONObj::iterator it = result.begin();
+        auto it = result.begin();
         while (it.more()) {
           mongo::BSONElement e = it.next();
           std::string field_name = e.fieldName();

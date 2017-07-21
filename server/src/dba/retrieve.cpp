@@ -226,12 +226,12 @@ namespace epidb {
                                      const Position _query_start, const Position _query_end, DatasetId dataset_id,
                                      bool full_overlap, bool reduced_mode)
       {
-        mongo::BSONObj::iterator regions_it = arrobj.begin();
+        auto regions_it = arrobj.begin();
 
         while (regions_it.more()) {
           const mongo::BSONObj &region_bson = regions_it.next().Obj();
 
-          mongo::BSONObj::iterator i = region_bson.begin();
+          auto i = region_bson.begin();
           Position start = i.next().Int();
           Position end = i.next().Int();
 

@@ -518,7 +518,7 @@ namespace epidb {
 
         while (data_cursor->more()) {
           mongo::BSONObj gene = data_cursor->next().getOwned();
-          mongo::BSONObj::iterator e_it = gene.begin();
+          auto e_it = gene.begin();
 
           std::string gene_id = e_it.next().String();
           DatasetId dataset_id = e_it.next().numberInt();
