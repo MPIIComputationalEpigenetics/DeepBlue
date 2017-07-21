@@ -173,7 +173,6 @@ namespace epidb {
               return false;
             }
           }
-
           args_builder.append("project", utils::build_array(filtered_projects));
           args_builder.append("norm_project", utils::build_normalized_array(filtered_projects));
         }
@@ -195,10 +194,12 @@ namespace epidb {
           args_builder.append("end", (int) end);
         }
 
+        std::set<std::string> genomes_s;
         std::set<std::string> norm_genomes_s;
         for (auto git = genomes.begin(); git != genomes.end(); ++git) {
           std::string genome = (*git)->as_string();
           std::string norm_genome = utils::normalize_name(genome);
+          genomes_s.insert(genome);
           norm_genomes_s.insert(norm_genome);
           has_exp_or_genome = true;
         }
@@ -209,6 +210,7 @@ namespace epidb {
         }
 
         if (!norm_genomes_s.empty()) {
+          args_builder.append("genomes", genomes_s);
           args_builder.append("norm_genomes", norm_genomes_s);
         }
 

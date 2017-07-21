@@ -135,7 +135,6 @@ namespace epidb {
           args_builder.append("chromosomes", chroms);
         }
 
-        args_builder.append("genome", genome);
         args_builder.append("norm_genome", utils::normalize_name(genome));
 
         std::string query_id;
