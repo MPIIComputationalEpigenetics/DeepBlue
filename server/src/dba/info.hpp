@@ -22,6 +22,7 @@
 #define EPIDB_DBA_INFO_HPP
 
 #include "../datatypes/metadata.hpp"
+#include "../datatypes/user.hpp"
 
 #include <string>
 #include <map>
