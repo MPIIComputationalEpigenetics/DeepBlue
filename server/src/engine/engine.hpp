@@ -95,7 +95,7 @@ namespace epidb {
 
     bool queue_score_matrix(const datatypes::User& user, const std::vector<std::pair<std::string, std::string>> &experiments_formats, const std::string &aggregation_function, const std::string &regions_query_id, std::string &request_id, std::string &msg);
 
-    bool queue_lola(const datatypes::User& user, const std::string& query_id, const std::string& universe_query_id, const std::unordered_map<std::string, std::vector<std::string>> &databases, const std::string& genome, std::string &id, std::string &msg);
+    bool queue_lola(const datatypes::User& user, const std::string& query_id, const std::string& universe_query_id, const std::unordered_map<std::string, std::vector<std::pair<std::string, std::string>>> &databases, const std::string& genome, std::string &id, std::string &msg);
 
     bool queue_get_experiments_by_query(const datatypes::User& user, const std::string &query_id, std::string &request_id, std::string &msg);
 

@@ -76,8 +76,6 @@ namespace epidb {
         const std::string genome = parameters[3]->as_string();
         const std::string user_key = parameters[4]->as_string();
 
-        std::unordered_map<std::string, std::vector<std::string>> database_experiments;
-
         std::map<std::string, serialize::ParameterPtr> databases_;
         if (!parameters[2]->children(databases_)) {
           result.add_error("unable to read metadata");
@@ -108,20 +106,38 @@ namespace epidb {
           return false;
         }
 
+
+        std::unordered_map<std::string, std::vector<std::pair<std::string, std::string>>> database_experiments;
         for (const auto& database: databases_ ) {
+          std::vector<std::pair<std::string, std::string>> experiments;
+
           const std::string& name = database.first;
           serialize::ParameterPtr experiments_ptr = database.second;
 
           std::vector<serialize::ParameterPtr> experiments_list;
           experiments_ptr->children(experiments_list);
-          std::vector<std::string> experiments;
           for (const auto& exp_: experiments_list) {
-            const std::string& experiment_name = exp_->as_string();
+            std::string experiment_name;
+            std::string description;
+            if (exp_->isString()) {
+              experiment_name = exp_->as_string();
+            } else if (exp_->isList()) {
+              std::vector<serialize::ParameterPtr> exp_description;
+              exp_->children(exp_description);
+              if (exp_description.size() > 0) {
+                experiment_name = exp_description[0]->as_string();
+              }
+              if (exp_description.size() > 1) {
+                description = exp_description[1]->as_string();
+              }
+            }
+
             if (!dba::exists::experiment(utils::normalize_name(experiment_name)) && !(utils::is_id(experiment_name, "q"))) {
               result.add_error(experiment_name + " is not a experiment name or valid query ID");
               return false;
             }
-            experiments.push_back(experiment_name);
+
+            experiments.push_back(std::make_pair(experiment_name, description));
           }
           database_experiments[name] = experiments;
         }

@@ -163,7 +163,7 @@ namespace epidb {
 
   bool Engine::queue_lola(const datatypes::User& user,
                           const std::string& query_id, const std::string& universe_query_id,
-                          const std::unordered_map<std::string, std::vector<std::string>> &databases,
+                          const std::unordered_map<std::string, std::vector<std::pair<std::string, std::string>>> &databases,
                           const std::string& genome,
                           std::string &id, std::string &msg)
   {
@@ -172,8 +172,8 @@ namespace epidb {
     for (const auto &database : databases) {
       mongo::BSONArrayBuilder bab;
       const std::string &name = database.first;
-      for (const auto& experiment_name: database.second) {
-        bab.append(experiment_name);
+      for (const auto& experiment: database.second) {
+        bab.append(BSON("name" << experiment.first << "description" <<  experiment.second));
       }
       databases_builder.append(name, bab.obj());
     }
