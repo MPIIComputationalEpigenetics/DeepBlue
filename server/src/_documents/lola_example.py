@@ -1,6 +1,7 @@
 import xmlrpclib
 import time
 import os.path
+import errno
 
 from collections import defaultdict
 from pprint import pprint
@@ -111,9 +112,17 @@ def build_chromatin_state_files(server, genome, user_key):
 
         pool.close()
         pool.join()
-        os.makedirs(CACHE_PATH)
+
+        try:
+            os.makedirs(CACHE_PATH)
+        except OSError as exc:  # Python >2.5
+            if exc.errno == errno.EEXIST and os.path.isdir(CACHE_PATH):
+                pass
+            else:
+                raise
+
         _file = open(cache_file, "w+")
-        #print queries
+        # print queries
         cPickle.dump(datasets, _file)
         return datasets
 
