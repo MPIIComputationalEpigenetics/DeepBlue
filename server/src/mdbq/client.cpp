@@ -121,41 +121,8 @@ namespace epidb {
       m_db = prefix;
     }
 
-    bool Client::renew_current_task()
-    {
-      const mongo::BSONObj &ct = m_ptr->m_current_task;
-      int version = ct["version"].numberInt();
-
-      mongo::BSONObj o = BSON("findandmodify" << dba::Collections::JOBS() <<
-                              "query"  << BSON("_id" << ct["_id"] << "version" << version) <<
-                              "update" << BSON("$set" << BSON(
-                                    "state" << TS_RENEW <<
-                                    "version" << version + 1
-                                  )));
-      mongo::BSONObj info;
-      Connection c;
-      bool result = c->runCommand(config::DATABASE_NAME(), o, info);
-      c.done();
-
-      EPIDB_LOG_TRACE("Task " << ct["_id"] << " renewed.");
-
-      if (!result) {
-        EPIDB_LOG_ERR(info["errmsg"].toString() << " - " << __FILE__ << ":" << __LINE__);
-        return false;
-      }
-
-      m_ptr->m_current_task = mongo::BSONObj(); // empty, call get_next_task.
-
-      return true;
-    }
-
-
     bool Client::get_next_task(std::string& _id, mongo::BSONObj &o)
     {
-      if (!m_ptr->m_current_task.isEmpty()) {
-        EPIDB_LOG_ERR("Renewing task: " << m_ptr->m_current_task);
-        renew_current_task();
-      }
       boost::posix_time::ptime now = epidb::extras::universal_date_time();
 
       std::string hostname(256, '\0');
