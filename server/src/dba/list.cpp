@@ -409,8 +409,8 @@ namespace epidb {
             experiments_query_builder.append("norm_technique", args["norm_technique"].str());
           }
         }
-        if (args.hasField("sample_info.biosource_name")) {
-          if (args["sample_info.biosource_name"].type() == mongo::Array) {
+        if (args.hasField("sample_info.norm_biosource_name")) {
+          if (args["sample_info.norm_biosource_name"].type() == mongo::Array) {
             experiments_query_builder.append("sample_info.norm_biosource_name", BSON("$in" << args["sample_info.norm_biosource_name"]));
           } else {
             experiments_query_builder.append("sample_info.norm_biosource_name", args["sample_info.norm_biosource_name"].str());
@@ -428,6 +428,8 @@ namespace epidb {
         }
         experiments_query_builder.append("upload_info.done", true);
         query = experiments_query_builder.obj();
+
+        std::cerr << query.toString() << std::endl;
 
         return true;
       }

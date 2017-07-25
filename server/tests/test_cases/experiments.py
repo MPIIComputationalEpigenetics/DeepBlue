@@ -75,6 +75,14 @@ class TestExperiments(helpers.TestCase):
               "ENCODE", "desc1", regions_data, format, None, self.admin_key)
     self.assertSuccess(res)
 
+    res, experiments = epidb.list_experiments("hg19", "peaks", None, "NO_BIOSOURCE", None, None, None, self.admin_key)
+    self.assertSuccess(res, experiments)
+    self.assertEqual(len(experiments), 0)
+
+    res, experiments = epidb.list_experiments(None, None, None, None, None, None, None, self.admin_key)
+    self.assertSuccess(res, experiments)
+    self.assertEqual(len(experiments), 2)
+
     res, experiments = epidb.list_experiments("hg19", "peaks", None, "K562", None, None, None, self.admin_key)
     self.assertSuccess(res, experiments)
     self.assertEqual(len(experiments), 2)
