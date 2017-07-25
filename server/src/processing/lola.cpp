@@ -47,7 +47,7 @@ struct TupleCompare {
   template<typename T>
   bool operator()(T const &t1, T const &t2)
   {
-    return F<typename tuple_element<M, T>::type>()(std::get<M>(t1), std::get<M>(t2));
+    return F<typename tuple_element<M, T>::type>()(std::get<M>(t2), std::get<M>(t1));
   }
 };
 
@@ -56,6 +56,58 @@ namespace epidb {
 
     // [0] dataseset, [1] size, [2] database_name, [3] negative_natural_log, [4] log_odds_score, [5] a, [6] b, [7] c, [8] d,)
     using ProcessOverlapResult = std::tuple<std::string, std::string, int, std::string, double, double, int, int, int, int>;
+
+    struct ExperimentResult {
+      std::string dataset;
+      std::string description;
+
+      int experiment_size;
+
+      std::string database_name;
+
+      double negative_natural_log;
+      double log_odds_ratio;
+
+      int a;
+      int b;
+      int c;
+      int d;
+
+      int support_rank;
+      int log_rank;
+      int odd_rank;
+
+      int max_rank;
+      double mean_rank;
+
+      mongo::BSONObj toBSON()
+      {
+        return BSON(
+                 "dataset" << dataset <<
+                 "description" << description <<
+                 "experiment_size" << experiment_size <<
+                 "database_name" << database_name <<
+                 "p_value_log" << negative_natural_log <<
+                 "log_odds_ratio" << log_odds_ratio <<
+                 "support" << a <<
+                 "b" << b <<
+                 "c" << c <<
+                 "d" << d <<
+                 "support_rank" << support_rank <<
+                 "log_rank" << log_rank <<
+                 "odd_rank" << odd_rank <<
+                 "max_rank" << max_rank <<
+                 "mean_rank" << mean_rank
+               );
+      }
+    };
+
+    struct ERCompare {
+      bool operator()(std::shared_ptr<ExperimentResult> const &er, std::shared_ptr<ExperimentResult> const &er2)
+      {
+        return er->mean_rank < er2->mean_rank;
+      }
+    };
 
     ProcessOverlapResult process_overlap(const datatypes::User& user,
                                          const std::string& genome, const std::vector<std::string>& chromosomes,
@@ -144,6 +196,53 @@ namespace epidb {
       return std::make_tuple(dataset_name, description, count_database_regions, database_name, negative_natural_log, log_odds_score, a, b, c, d);
     }
 
+    void sort_values(std::vector<std::tuple<std::string, size_t>>& datasets_support,
+                     std::vector<std::tuple<std::string, double>>& datasets_log_score,
+                     std::vector<std::tuple<std::string, double>>& datasets_odds_score,
+                     std::unordered_map<std::string, int>& datasets_support_rank,
+                     std::unordered_map<std::string, int>& datasets_log_rank,
+                     std::unordered_map<std::string, int>& datasets_odd_rank)
+    {
+      if (datasets_support.empty()) {
+        return;
+      }
+
+      size_t position = 0;
+      size_t s_value = get<1>(datasets_support[0]);
+      std::sort(begin(datasets_support), end(datasets_support), TupleCompare<1>());
+      for(size_t i = 0; i < datasets_support.size(); i++) {
+        if (get<1>(datasets_support[i]) != s_value) {
+          position = i;
+          s_value = get<1>(datasets_support[i]);
+        }
+        datasets_support_rank[get<0>(datasets_support[i])] = position + 1;
+      }
+
+      //
+      position = 0;
+      double d_value = get<1>(datasets_log_score[0]);
+      std::sort(begin(datasets_log_score), end(datasets_log_score), TupleCompare<1>());
+      for(size_t i = 0; i < datasets_log_score.size(); i++) {
+        if (get<1>(datasets_log_score[i]) != d_value) {
+          position = i;
+          d_value = get<1>(datasets_log_score[i]);
+        }
+        datasets_log_rank[get<0>(datasets_log_score[i])] = position + 1;
+      }
+
+      //
+      position = 0;
+      d_value = get<1>(datasets_odds_score[0]);
+      std::sort(begin(datasets_odds_score), end(datasets_odds_score), TupleCompare<1>());
+      for(size_t i = 0; i < datasets_odds_score.size(); i++) {
+        if (get<1>(datasets_odds_score[i]) != d_value) {
+          position = i;
+          d_value = get<1>(datasets_odds_score[i]);
+        }
+        datasets_odd_rank[get<0>(datasets_odds_score[i])] = position + 1;
+      }
+    }
+
 
     bool lola(const datatypes::User& user,
               const std::string& query_id, const std::string& universe_query_id,
@@ -183,8 +282,6 @@ namespace epidb {
       }
       std::vector<std::string> chromosomes(chromosomes_s.begin(), chromosomes_s.end());
 
-      auto databases_it = databases.begin();
-
       std::vector<std::tuple<std::string, size_t>> datasets_support;
       std::vector<std::tuple<std::string, double>> datasets_log_score;
       std::vector<std::tuple<std::string, double>> datasets_odds_score;
@@ -193,6 +290,7 @@ namespace epidb {
 
       threading::SemaphorePtr sem = threading::build_semaphore(128);
 
+      auto databases_it = databases.begin();
       while ( databases_it.more() ) {
         const mongo::BSONElement &database = databases_it.next();
         const std::string& database_name = std::string(database.fieldName());
@@ -220,7 +318,6 @@ namespace epidb {
         }
       }
 
-
       std::vector<ProcessOverlapResult> results;
 
       for (size_t i = 0; i < threads.size(); ++i) {
@@ -238,85 +335,17 @@ namespace epidb {
         datasets_odds_score.push_back(std::make_tuple(dataset, std::get<5>(result)));
         datasets_support.push_back(std::make_tuple(dataset, std::get<6>(result)));
 
-
-
         results.emplace_back(std::move(result));
       }
 
       std::unordered_map<std::string, int> datasets_support_rank;
-      std::sort(begin(datasets_support), end(datasets_support), TupleCompare<1>());
-      for(size_t i = 0; i < datasets_support.size(); i++) {
-        datasets_support_rank[get<0>(datasets_support[i])] = i;
-      }
-      //
-
       std::unordered_map<std::string, int> datasets_log_rank;
-      std::sort(begin(datasets_log_score), end(datasets_log_score), TupleCompare<1>());
-      for(size_t i = 0; i < datasets_log_score.size(); i++) {
-        datasets_log_rank[get<0>(datasets_log_score[i])] = i;
-      }
-      //
-
       std::unordered_map<std::string, int> datasets_odd_rank;
-      std::sort(begin(datasets_odds_score), end(datasets_odds_score), TupleCompare<1>());
-      for(size_t i = 0; i < datasets_odds_score.size(); i++) {
-        datasets_odd_rank[get<0>(datasets_odds_score[i])] = i;
-      }
 
-      struct ExperimentResult {
-        std::string dataset;
-        std::string description;
-
-        int experiment_size;
-
-        std::string database_name;
-
-        double negative_natural_log;
-        double log_odds_ratio;
-
-        int a;
-        int b;
-        int c;
-        int d;
-
-        int support_rank;
-        int log_rank;
-        int odd_rank;
-
-        int max_rank;
-        double mean_rank;
-
-        mongo::BSONObj toBSON()
-        {
-          return BSON(
-                   "dataset" << dataset <<
-                   "description" << description <<
-                   "experiment_size" << experiment_size <<
-                   "database_name" << database_name <<
-                   "p_value_log" << negative_natural_log <<
-                   "log_odds_ratio" << log_odds_ratio <<
-                   "support" << a <<
-                   "b" << b <<
-                   "c" << c <<
-                   "d" << d <<
-                   "support_rank" << support_rank <<
-                   "log_rank" << log_rank <<
-                   "odd_rank" << odd_rank <<
-                   "max_rank" << max_rank <<
-                   "mean_rank" << mean_rank
-                 );
-        }
-      };
-
-      struct ERCompare {
-        bool operator()(std::shared_ptr<ExperimentResult> const &er, std::shared_ptr<ExperimentResult> const &er2)
-        {
-          return er->mean_rank < er2->mean_rank;
-        }
-      };
+      sort_values(datasets_support, datasets_log_score, datasets_odds_score,
+                  datasets_support_rank, datasets_log_rank, datasets_odd_rank);
 
       std::vector<std::shared_ptr<ExperimentResult>> experiment_results;
-
       for (const auto& result : results) {
         auto er = std::make_shared<ExperimentResult>();
         er->dataset = get<0>(result);
