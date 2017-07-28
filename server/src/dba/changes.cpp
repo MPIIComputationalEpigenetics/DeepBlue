@@ -44,7 +44,7 @@ namespace epidb {
           collection = Collections::ANNOTATIONS();
         } else if (id.compare(0, 2, "bs") == 0) {
           collection = Collections::BIOSOURCES();
-        } else if (id.compare(0, 1, "em") == 0) {
+        } else if (id.compare(0, 2, "em") == 0) {
           collection = Collections::EPIGENETIC_MARKS();
         } else if (id.compare(0, 1, "s") == 0) {
           collection = Collections::SAMPLES();
