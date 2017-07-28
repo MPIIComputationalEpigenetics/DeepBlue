@@ -245,18 +245,17 @@ namespace epidb {
     boost::posix_time::ptime last_checked;
     bool Status::is_canceled(bool& ret, std::string& msg)
     {
-      boost::posix_time::ptime now(epidb::extras::universal_date_time());
-      if (last_checked + boost::posix_time::seconds(5) < now) {
+      auto current_second = std::chrono::duration_cast< std::chrono::seconds >(std::chrono::system_clock::now().time_since_epoch());
+      if (current_second - _last_update > _update_time_out) {
         mongo::BSONObj result;
 
-        if (!dba::helpers::get_one(dba::Collections::PROCESSING(),
-                                   mongo::Query(BSON("_id" << _processing_id)), result)) {
+        if (!dba::helpers::get_one(dba::Collections::JOBS(),
+                                   mongo::Query(BSON("_id" << _request_id)), result)) {
           msg = Error::m(ERR_REQUEST_CANCELED);
           return false;
         }
         _canceled = (result["state"].Int() == mdbq::TS_CANCELLED);
       }
-
       ret = _canceled;
 
       return true;
