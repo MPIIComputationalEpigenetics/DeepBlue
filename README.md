@@ -1,7 +1,7 @@
 DeepBlue Epigenomic Data Server
 ========
 
-Copyright (c) 2016 Max Planck Institute for Informatics. All rights reserved.
+Copyright (c) 2014,2015,2016,2017 Max Planck Institute for Informatics. All rights reserved.
 
 Author: Felipe Albrecht (felipe.albrecht@mpi-inf.mpg.de)
 
