@@ -96,7 +96,7 @@ namespace epidb {
         }
 
         if (!dba::exists::query(user, universe_query_id, msg)) {
-          result.add_error(Error::m(ERR_INVALID_QUERY_ID, universe_query_id));
+          result.add_error(Error::m(ERR_INVALID_UNIVERSE_ID, universe_query_id));
           return false;
         }
 
