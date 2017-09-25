@@ -275,6 +275,9 @@ namespace epidb {
 
     std::string score_to_string(const Score s)
     {
+      if (s == std::numeric_limits<Score>::infinity()) {
+        return "Infinity";
+      }
       return fmt::format("{:-.4f}", s);
     }
 
