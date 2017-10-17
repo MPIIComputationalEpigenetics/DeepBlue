@@ -29,7 +29,7 @@ server/third_party/expat/libtool
 server/third_party/libexpat_linux.a
 server/third_party/luajit-2.0
 server/third_party/bzip2-1.0.6/
-server/third_party/jemalloc-4.2.1/
+server/third_party/jemalloc*
 server/third_party/mongo-cxx-driver-legacy-1.1.2/
 server/third_party/mongo-cxx-driver/
 server/tests/.vscode/tags
