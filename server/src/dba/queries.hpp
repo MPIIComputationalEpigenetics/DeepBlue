@@ -142,6 +142,9 @@ namespace epidb {
 
       bool is_canceled(processing::StatusPtr status, std::string msg);
 
+      bool get_main_experiment_data(const datatypes::User& user, const std::string &query_id, const std::string field_key,
+                                    processing::StatusPtr status, std::vector<std::string>& values, std::string &msg);
+
       /* These two functions must not be accessed directly. Use the cache:: methods */
       /* TODO: move to another file */
       bool __get_columns_from_dataset(const DatasetId & dataset_id, std::vector<mongo::BSONObj> &columns, std::string & msg);

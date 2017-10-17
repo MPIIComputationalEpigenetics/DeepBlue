@@ -594,7 +594,6 @@ namespace epidb {
           res = res * 31 + hash<std::string>()( k.chromosome );
           res = res * 31 + hash<Position>()( k.start );
           res = res * 31 + hash<Position>()( k.end );
-          res = res * 31 + hash<std::string>()( k.strand );
           return res;
         }
       };

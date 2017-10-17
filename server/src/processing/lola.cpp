@@ -55,10 +55,12 @@ namespace epidb {
   namespace processing {
 
     // [0] dataseset, [1] size, [2] database_name, [3] negative_natural_log, [4] log_odds_score, [5] a, [6] b, [7] c, [8] d,)
-    using ProcessOverlapResult = std::tuple<std::string, std::string, int, std::string, double, double, int, int, int, int>;
+    using ProcessOverlapResult = std::tuple<std::string, std::string, std::string, std::string, int, std::string, double, double, int, int, int, int>;
 
     struct ExperimentResult {
       std::string dataset;
+      std::string biosource;
+      std::string epigenetic_mark;
       std::string description;
 
       int experiment_size;
@@ -84,11 +86,13 @@ namespace epidb {
       {
         return BSON(
                  "dataset" << dataset <<
+                 "biosource" << biosource <<
+                 "epigenetic_mark" << epigenetic_mark <<
                  "description" << description <<
                  "experiment_size" << experiment_size <<
                  "database_name" << database_name <<
                  "p_value_log" << negative_natural_log <<
-                 "log_odds_ratio" << log_odds_ratio <<
+                 "odds_ratio" << log_odds_ratio <<
                  "support" << a <<
                  "b" << b <<
                  "c" << c <<
@@ -119,20 +123,52 @@ namespace epidb {
                                          std::string& msg)
     {
       ChromosomeRegionsList database_regions;
+
+      std::string biosource;
+      std::string epigenetic_mark;
+
       if (utils::is_id(dataset_name, "q")) {
         if (!dba::query::retrieve_query(user, dataset_name, status, database_regions, msg, /* reduced_mode */ true)) {
           sem->up();
-          return std::make_tuple(msg, "",  -1.0, "", -1.0, -1.0, -1.0, -1.0, -1.0, -1.0);
+          return std::make_tuple(msg, "", "", "", -1.0, "", -1.0, -1.0, -1.0, -1.0, -1.0, -1.0);
         }
+
+        std::vector<std::string> exp_biosources;
+        const std::string bs_field_name = "sample_info.biosource_name";
+        if (!dba::query::get_main_experiment_data(user, dataset_name, bs_field_name, status, exp_biosources, msg)) {
+          return std::make_tuple(msg, "", "", "", -1.0, "", -1.0, -1.0, -1.0, -1.0, -1.0, -1.0);
+        }
+
+        std::vector<std::string> exp_epigenetic_marks;
+        const std::string em_field_name = "epigenetic_mark";
+        if (!dba::query::get_main_experiment_data(user, dataset_name, em_field_name, status, exp_epigenetic_marks, msg)) {
+          return std::make_tuple(msg, "", "", "", -1.0, "", -1.0, -1.0, -1.0, -1.0, -1.0, -1.0);
+        }
+
+        biosource = utils::vector_to_string(exp_biosources);
+        epigenetic_mark = utils::vector_to_string(exp_epigenetic_marks);
       } else {
         mongo::BSONObj regions_query;
+
         if (!dba::query::build_experiment_query(-1, -1, utils::normalize_name(dataset_name), regions_query, msg)) {
           sem->up();
-          return std::make_tuple(msg, "", -1.0, "", -1.0, -1.0, -1.0, -1.0, -1.0, -1.0);
+          return std::make_tuple(msg, "", "", "", -1.0, "", -1.0, -1.0, -1.0, -1.0, -1.0, -1.0);
         }
+
         if (!dba::retrieve::get_regions(genome, chromosomes, regions_query, false, status, database_regions, msg, /* reduced_mode */ true)) {
           sem->up();
-          return std::make_tuple(msg, "", -1.0, "", -1.0, -1.0, -1.0, -1.0, -1.0, -1.0);
+          return std::make_tuple(msg, "", "", "", -1.0, "", -1.0, -1.0, -1.0, -1.0, -1.0, -1.0);
+        }
+
+        mongo::BSONObj experiment_obj;
+        if (!dba::experiments::by_name(dataset_name, experiment_obj, msg)) {
+          sem->up();
+          return std::make_tuple(msg, "", "", "", -1.0, "", -1.0, -1.0, -1.0, -1.0, -1.0, -1.0);
+        }
+
+        if (!experiment_obj.isEmpty()) {
+          biosource = experiment_obj["sample_info"]["biosource_name"].str();
+          epigenetic_mark = experiment_obj["epigenetic_mark"].str();
         }
       }
 
@@ -140,7 +176,7 @@ namespace epidb {
       size_t query_overlap_total;
       if (!algorithms::intersect_count(query_regions, database_regions, query_overlap_total)) {
         sem->up();
-        return std::make_tuple(msg, "", -1.0, "", -1.0, -1.0, -1.0, -1.0, -1.0, -1.0);
+        return std::make_tuple(msg, "", "", "", -1.0, "", -1.0, -1.0, -1.0, -1.0, -1.0, -1.0);
       }
 
       // a = #query_overlap_with_universe overlapping with at least one region in dataset_regions
@@ -160,7 +196,7 @@ namespace epidb {
       if (b < 0) {
         sem->up();
         msg = "Negative b entry in table. This means either: 1) Your user sets contain items outside your universe; or 2) your universe has a region that overlaps multiple user set regions, interfering with the universe set overlap calculation.";
-        return std::make_tuple(msg, "", -1.0, "", -1.0, -1.0, -1.0, -1.0, -1.0, -1.0);
+        return std::make_tuple(msg, "", "", "", -1.0, "", -1.0, -1.0, -1.0, -1.0, -1.0, -1.0);
       }
 
       /*
@@ -174,16 +210,11 @@ namespace epidb {
       //#universe_regions - a - b - c = #universe_regions that do NOT overlap with query_set and that do NOT overlap with dataset_regions
       double d = total_universe_regions - a - b - c;
 
-      //std::cerr << "[starting] " << dataset;
-      //std::cerr <<"(" << a << ", " << b << ", " << c << ", " << d << ") negative natural log: ";
-
       double p_value = math::fisher_test(a, b, c, d);
+
       double negative_natural_log = abs(log10(p_value));
 
-      //std::cerr << "p_value: " << p_value << " " << "negative_natural_log: " << negative_natural_log;
-
       double log_odds_score = (a/b)/(c/d);
-      //std::cerr << " log odds: " << log_odds_score << std::endl;
 
       status->subtract_regions(count_database_regions);
       for (const auto& chr : database_regions) {
@@ -193,7 +224,7 @@ namespace epidb {
       }
 
       sem->up();
-      return std::make_tuple(dataset_name, description, count_database_regions, database_name, negative_natural_log, log_odds_score, a, b, c, d);
+      return std::make_tuple(dataset_name, biosource, epigenetic_mark, description, count_database_regions, database_name, negative_natural_log, log_odds_score, a, b, c, d);
     }
 
     void sort_values(std::vector<std::tuple<std::string, size_t>>& datasets_support,
@@ -330,10 +361,10 @@ namespace epidb {
 
         std::string dataset = std::get<0>(result);
 
-        // --------------------- [0] dataseset, [1] description, [2] size, [3] database_name, [4] negative_natural_log, [5] log_odds_score, [6] a, [7] b, [8] c, [9] d)
-        datasets_log_score.push_back(std::make_tuple(dataset, std::get<4>(result)));
-        datasets_odds_score.push_back(std::make_tuple(dataset, std::get<5>(result)));
-        datasets_support.push_back(std::make_tuple(dataset, std::get<6>(result)));
+        // --------------------- [0] dataseset, [1] biosource, [2] epi mark, [1] description, [2] size, [3] database_name, [4] negative_natural_log, [5] log_odds_score, [6] a, [7] b, [8] c, [9] d)
+        datasets_log_score.push_back(std::make_tuple(dataset, std::get<6>(result)));
+        datasets_odds_score.push_back(std::make_tuple(dataset, std::get<7>(result)));
+        datasets_support.push_back(std::make_tuple(dataset, std::get<8>(result)));
 
         results.emplace_back(std::move(result));
       }
@@ -349,15 +380,17 @@ namespace epidb {
       for (const auto& result : results) {
         auto er = std::make_shared<ExperimentResult>();
         er->dataset = get<0>(result);
-        er->description = get<1>(result);
-        er->experiment_size = get<2>(result);
-        er->database_name = get<3>(result);
-        er->negative_natural_log = get<4>(result);
-        er->log_odds_ratio = get<5>(result);
-        er->a = get<6>(result);
-        er->b = get<7>(result);
-        er->c = get<8>(result);
-        er->d = get<9>(result);
+        er->biosource = get<1>(result);
+        er->epigenetic_mark = get<2>(result);
+        er->description = get<3>(result);
+        er->experiment_size = get<4>(result);
+        er->database_name = get<5>(result);
+        er->negative_natural_log = get<6>(result);
+        er->log_odds_ratio = get<7>(result);
+        er->a = get<8>(result);
+        er->b = get<9>(result);
+        er->c = get<10>(result);
+        er->d = get<11>(result);
 
         er->support_rank = datasets_support_rank[er->dataset];
         er->log_rank = datasets_log_rank[er->dataset];

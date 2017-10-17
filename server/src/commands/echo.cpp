@@ -73,8 +73,6 @@ namespace epidb {
           name = user.name();
         }
 
-        std::cerr << user.name() << " " << user.id() << std::endl;
-
         std::string echo = "DeepBlue (" + Version::version() + ")" + " says hi to " + name;
         result.add_string(echo);
         return true;

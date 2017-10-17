@@ -429,8 +429,6 @@ namespace epidb {
         experiments_query_builder.append("upload_info.done", true);
         query = experiments_query_builder.obj();
 
-        std::cerr << query.toString() << std::endl;
-
         return true;
       }
 

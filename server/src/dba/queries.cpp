@@ -285,12 +285,12 @@ namespace epidb {
           return false;
         }
 
-        const std::string& type = query["type"].str();
-
         const mongo::BSONObj& args = query["args"].Obj();
         if (args.hasField("cache") && args["cache"].String() == "yes") {
           return cache::get_query_cache(user, query["derived_from"].String(), status, regions, msg);
         }
+
+        const std::string& type = query["type"].str();
 
         if (type == "experiment_select") {
           if (!retrieve_experiment_select_query(user, query, status, regions, msg, reduced_mode)) {
@@ -641,8 +641,6 @@ namespace epidb {
         }
 
         mongo::BSONObj args = query["args"].Obj();
-
-
 
         std::vector<mongo::BSONElement> genome_arr;
         if (args.hasField("norm_genomes")) {
@@ -1242,6 +1240,128 @@ namespace epidb {
 
         return algorithms::aggregate(data, ranges, field, status, regions, msg);
       }
+
+      //
+      bool get_main_experiment_data(const datatypes::User& user, const std::string &query_id, const std::string field_key,
+                                    processing::StatusPtr status, std::vector<std::string>& values, std::string &msg)
+      {
+        mongo::BSONObj query;
+        if (!helpers::get_one(Collections::QUERIES(), BSON("_id" << query_id), query)) {
+          msg = Error::m(ERR_INVALID_QUERY_ID, query_id);
+          return false;
+        }
+
+        const std::string& type = query["type"].str();
+        const mongo::BSONObj& args = query["args"].Obj();
+
+        if (type == "experiment_select") {
+          std::vector<std::string> norm_names = utils::build_vector(args["norm_experiment_name"].Array());
+          if (!norm_names.empty()) {
+            for(const auto& exp_name: norm_names) {
+              mongo::BSONObj exp_obj;
+              if (!dba::experiments::by_name(exp_name, exp_obj, msg)) {
+                return false;
+              }
+              auto value = exp_obj.getFieldDotted(field_key).String();
+              values.push_back(value);
+            }
+
+            return true;
+          }
+
+          if (args.hasField(field_key)) {
+            if (args[field_key].type() == mongo::Array) {
+              values = utils::build_vector(args[field_key].Array());
+            } else {
+              values.push_back(args[field_key].String());
+            }
+          }
+
+        } else if (type == "intersect") {
+          const std::string query_id = args["qid_1"].str();
+          return get_main_experiment_data(user, query_id, field_key, status, values, msg);
+
+        } else if (type == "overlap") {
+          const std::string query_id = args["qid_1"].str();
+          return get_main_experiment_data(user, query_id, field_key, status, values, msg);
+
+        } else if (type == "flank") {
+          const std::string query_id = args["query_id"].str();
+          return get_main_experiment_data(user, query_id, field_key, status, values, msg);
+
+        } else if (type == "extend") {
+          const std::string query_id = args["query_id"].str();
+          return get_main_experiment_data(user, query_id, field_key, status, values, msg);
+
+        } else if (type == "merge") {
+          const std::string query_id = args["qid_1"].str();
+          return get_main_experiment_data(user, query_id, field_key, status, values, msg);
+
+        } else if (type == "annotation_select") {
+          std::string name = args["name"].String() + " (annotation)";
+          values.push_back(name);
+          return true;
+
+        } else if (type == "genes_select") {
+          if (args.hasElement("genes")) {
+            auto genes = utils::build_vector(args["genes"].Array());
+            values.insert(values.end(), genes.begin(), genes.end());
+          }
+
+          std::vector<std::string> go_terms;
+          if (args.hasElement("go_terms")) {
+            go_terms = utils::build_vector(args["go_terms"].Array());
+            values.insert(values.end(), go_terms.begin(), go_terms.end());
+          }
+
+          // Honestly I dont like it, but since we changed these parameters and we already have a database with queries...
+          // TODO: manually change the database.
+          std::string gene_model;
+          if (args.hasField("gene_set")) {
+            gene_model = args["gene_set"].str();
+          } else {
+            gene_model = args["gene_model"].str();
+          }
+          values.push_back(gene_model);
+          return true;
+
+        } else if (type == "find_motif") {
+          std::string name = args["motif"].String() + " (motif)";
+          values.push_back(name);
+          return true;
+
+        } else if (type == "expressions_select") {
+          if (args.hasElement("genes")) {
+            auto genes = utils::build_vector(args["genes"].Array());
+            values.insert(values.end(), genes.begin(), genes.end());
+          }
+
+        } else if (type == "filter") {
+          const std::string query_id = args["query"].str();
+          return get_main_experiment_data(user, query_id, field_key, status, values, msg);
+
+
+        } else if (type == "tiling") {
+          std::string name = utils::integer_to_string(args["size"].Int()) + " (tiling regions)";
+          values.push_back(name);
+
+        } else if (type == "aggregate") {
+          const std::string query_id = args["query_id"].str();
+          return get_main_experiment_data(user, query_id, field_key, status, values, msg);
+
+        } else if (type == "input_regions") {
+          values.push_back("input_regions");
+          return true;
+
+        } else {
+          msg = Error::m(ERR_UNKNOW_QUERY_TYPE, type);
+          return false;
+        }
+
+        msg = "It must not be here";
+        return false;
+      }
+
 
       // TODO: move to another file
       bool __get_columns_from_dataset(const DatasetId & dataset_id, std::vector<mongo::BSONObj> &columns, std::string & msg)
