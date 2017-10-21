@@ -32,17 +32,19 @@
 #include "engine.hpp"
 
 #include "../config/config.hpp"
+
 #include "../dba/queries.hpp"
 #include "../dba/users.hpp"
 
 #include "../extras/stringbuilder.hpp"
 #include "../extras/utils.hpp"
 
-#include "../processing/processing.hpp"
-
 #include "../mdbq/common.hpp"
 #include "../mdbq/cleaner.hpp"
 
+#include "../processing/processing.hpp"
+
+#include "../storage/storage.hpp"
 
 #include "../log.hpp"
 #include "../version.hpp"
@@ -317,7 +319,7 @@ namespace epidb {
       std::string file_name = result["__file__"].str();
       std::string file_content;
       // Get compressed file from mongo filesystem
-      return _hub.get_result(file_name, request_data, msg);
+      return storage::load(file_name, request_data, msg);
     }
 
     msg = "Request ID " + request_id + " does not contain a file has result.";
@@ -346,7 +348,7 @@ namespace epidb {
       std::string file_name = result["__file__"].str();
       std::string file_content;
       // Get compressed file from mongo filesystem
-      if (!_hub.get_result(file_name, file_content, msg)) {
+      if (!storage::load(file_name, file_content, msg)) {
         request_data.add_error(msg);
         return false;
       }

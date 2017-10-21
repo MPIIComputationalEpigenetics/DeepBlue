@@ -24,7 +24,6 @@
 #include <boost/bind.hpp>
 
 #include <mongo/client/dbclient.h>
-#include <mongo/client/gridfs.h>
 
 #include "hub.hpp"
 
@@ -438,63 +437,5 @@ namespace epidb {
       TaskState task_state = (TaskState) o["state"].numberInt();
       return task_state == TS_CLEARED;
     }
-
-    bool Hub::get_file_info(const std::string &filename, mongo::OID &oid, size_t &chunk_size, size_t &file_size, std::string &msg)
-    {
-      Connection c;
-      auto data_cursor = c->query(m_ptr->m_prefix + ".fs.files", mongo::Query(BSON("filename" << filename)));
-
-      if (data_cursor->more()) {
-        auto fileinfo = data_cursor->next();
-        oid = fileinfo["_id"].OID();
-        chunk_size = fileinfo["chunkSize"].numberLong();
-        file_size = fileinfo["length"].numberLong();
-        c.done();
-        return true;
-      }
-
-      msg = "The result data under the request '" + filename + "'' was not found";
-      c.done();
-      return false;
-    }
-
-    bool Hub::get_result(const std::string &filename, std::string &content, std::string &msg)
-    {
-      mongo::OID oid;
-      size_t file_size;
-      size_t chunk_size;
-      if (!get_file_info(filename, oid, chunk_size, file_size, msg)) {
-        return false;
-      }
-
-      mongo::BSONObj projection = BSON("data" << 1);
-
-      size_t remaining = file_size;
-      size_t n = 0;
-
-      std::stringstream ss;
-
-      Connection c;
-      while (remaining > 0) {
-        mongo::Query q(BSON("files_id" << oid << "n" << (long long) n));
-        auto data_cursor = c->query(m_ptr->m_prefix + ".fs.chunks", q, 0, 0, &projection);
-        if (data_cursor->more()) {
-          int read;
-          char* compressed_data = (char *) data_cursor->next().getField("data").binData(read);
-          ss.write(compressed_data, read);
-
-          n++;
-          remaining -= read;
-        } else {
-          msg = "Chunk for file " + filename + " not found.";
-          c.done();
-          return false;
-        }
-      }
-      c.done();
-      content = ss.str();
-      return true;
-    }
-
   }
 }

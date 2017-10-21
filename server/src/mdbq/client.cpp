@@ -37,12 +37,13 @@
 #include "../connection/connection.hpp"
 
 #include "../dba/collections.hpp"
-
 #include "../dba/helpers.hpp"
 
 #include "../engine/engine.hpp"
 
 #include "../extras/date_time.hpp"
+
+#include "../storage/storage.hpp"
 
 #include "../errors.hpp"
 
@@ -247,31 +248,17 @@ namespace epidb {
 
     Client::~Client() { }
 
+
     std::string Client::store_result(const char *ptr, size_t len)
     {
       mongo::BSONObj &ct = m_ptr->m_current_task;
       if (ct.isEmpty()) {
         throw std::runtime_error("MDBQC: get a task first before you store something about it!");
       }
-
       std::string filename = ct["_id"].str();
 
-      Connection c;
-      mongo::GridFS gridfs(c.conn(), m_db, "fs");
-      gridfs.setChunkSize(2 << 22); // 8MB
-      mongo::BSONObj ret = gridfs.storeFile(ptr, len, filename);
-
-      mongo::BSONObjBuilder bob;
-      bob.appendElements(ret);
-      c->update(m_fscol + ".files",
-                BSON("filename" << ret.getField("filename")),
-                bob.obj(), false, false);
-
-      CHECK_DB_ERR(c);
-
-      c.done();
-
-      return filename;
+      return storage::store(filename, ptr, len);
     }
+
   }
 }

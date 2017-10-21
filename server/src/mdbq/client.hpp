@@ -108,7 +108,7 @@ namespace epidb {
        * @param ptr pointer to the data
        * @param len data size
        */
-      std::string store_result(const char *ptr, size_t len);
+       std::string store_result(const char *ptr, size_t len);
 
       /**
        * Destroy client.

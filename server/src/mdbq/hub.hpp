@@ -19,7 +19,7 @@
 // adapted to DeepBlue by Felipe Albrecht on 22.01.2015
 
 #ifndef __MDBQ_HUB_HPP__
-#     define __MDBQ_HUB_HPP__
+#define __MDBQ_HUB_HPP__
 
 #include <memory>
 #include "../datatypes/user.hpp"
@@ -59,7 +59,6 @@ namespace epidb {
       /// database plus queue prefix (db.queue)
       const std::string m_prefix;
 
-      bool get_file_info(const std::string &filename, mongo::OID& oid, size_t &chunk_size, size_t &file_size, std::string &msg);
 
     public:
       /**
@@ -123,9 +122,6 @@ namespace epidb {
        */
       void clear_all();
 
-      bool get_result(const std::string &filename, std::string& data, std::string &msg);
-
-
       /**
        * Cancel, stop, or delete a request
        */
@@ -183,15 +179,6 @@ namespace epidb {
       static bool is_cleared(const mongo::BSONObj& o);
 
       static bool is_failed(const mongo::BSONObj& o);
-
-      /**
-       * Remove the request_id data
-       *
-       * @param ptr pointer to the data
-       * @param len data size
-       */
-      void remove_result(const std::string request_id);
-
     };
   }
 }
