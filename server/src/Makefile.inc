@@ -33,15 +33,15 @@ MINILZO=$(ROOT)/third_party/minilzo
 STRTK=$(ROOT)/third_party/strtk
 CPPFORMAT=$(ROOT)/third_party/cppformat
 URDL=$(ROOT)/third_party/urdl-0.1/include
-JEMALLOC=$(ROOT)/third_party/jemalloc-4.2.1
+JEMALLOC=$(ROOT)/third_party/jemalloc
 
 GIT_VERSION := $(shell git describe --abbrev=8 --dirty --always --tags)
 #GIT_URL := $(shell git remote get-url origin)
 GIT_URL = github
 
 ifeq ($(host),ubuntu)
- CXX = g++ -DBOOST_LOG_DYN_LINK -DGIT_VERSION=\"$(GIT_VERSION)\" -DGIT_URL=\"$(GIT_URL)\"
- LD  = g++
+ CXX = g++ -DBOOST_LOG_DYN_LINK -DGIT_VERSION=\"$(GIT_VERSION)\" -DGIT_URL=\"$(GIT_URL)\" -g
+ LD  = g++ -g
  LDFLAGS   = -pthread
  MONGOLIBS = /opt/mongodb/drivers/lib/libmongoclient.a
  MONGO_INCLUDE = /opt/mongodb/drivers/include/
