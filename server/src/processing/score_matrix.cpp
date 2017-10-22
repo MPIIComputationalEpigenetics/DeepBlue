@@ -31,6 +31,7 @@
 #include "../cache/column_dataset_cache.hpp"
 
 #include "../datatypes/regions.hpp"
+#include "../datatypes/user.hpp"
 
 #include "../dba/column_types.hpp"
 #include "../dba/experiments.hpp"
