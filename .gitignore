@@ -35,3 +35,4 @@ server/third_party/mongo-cxx-driver/
 server/tests/.vscode/tags
 server/third_party/luajit-2.0
 server/tests/.vscode/tags
+server/tests/.vscode/tags
