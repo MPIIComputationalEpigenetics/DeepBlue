@@ -15,8 +15,8 @@ import cPickle
 MAX_REQUEST_SIMULTANEOUS = 16
 CACHE_PATH = ".cache"
 STATES_CACHE_FILE = "css_queries_cache.deepblue"
-DEEPBLUE_URL = "http://deepblue.mpi-inf.mpg.de/xmlrpc"
-#DEEPBLUE_URL = "http://localhost:31415"
+#DEEPBLUE_URL = "http://deepblue.mpi-inf.mpg.de/xmlrpc"
+DEEPBLUE_URL = "http://localhost:31415"
 USER_KEY = 'anonymous_key'
 
 # User parameters (TODO: move to args)
