@@ -29,22 +29,22 @@ namespace epidb {
 
     TrackPtr build_fixed_track(std::string &chr, Position start, Length step, Length span)
     {
-      return std::shared_ptr<Track>(new Track(chr, start, step, span));
+      return std::make_shared<Track>(chr, start, step, span);
     }
 
     TrackPtr build_variable_track(std::string &chr, Length span)
     {
-      return std::shared_ptr<Track>(new Track(chr, span));
+      return std::make_shared<Track>(chr, span);
     }
 
     TrackPtr build_bedgraph_track(std::string &chr, Length start, Length end)
     {
-      return std::shared_ptr<Track>(new Track(chr, start, end));
+      return std::make_shared<Track>(chr, start, end);
     }
 
     TrackPtr build_bedgraph_track(std::string &chr)
     {
-      return std::shared_ptr<Track>(new Track(chr));
+      return std::make_shared<Track>(chr);
     }
 
 

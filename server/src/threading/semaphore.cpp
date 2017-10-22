@@ -59,7 +59,7 @@ namespace epidb {
 
     SemaphorePtr build_semaphore(size_t count)
     {
-      return std::shared_ptr<Semaphore>(new Semaphore(count));
+      return std::make_shared<Semaphore>(count);
     }
 
   }

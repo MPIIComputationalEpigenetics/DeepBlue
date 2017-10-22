@@ -255,15 +255,15 @@ namespace epidb {
       {
         switch (type) {
         case datatypes::COLUMN_STRING:
-          column_type = std::shared_ptr<ColumnType<std::string > >(new ColumnType<std::string>(name, "", -1));
+          column_type = std::make_shared<ColumnType<std::string > >(name, "", -1);
           return true;
 
         case datatypes::COLUMN_INTEGER:
-          column_type = std::shared_ptr<ColumnType<size_t> >(new ColumnType<size_t>(name, 0, -1));
+          column_type = std::make_shared<ColumnType<size_t> >(name, 0, -1);
           return true;
 
         case datatypes::COLUMN_DOUBLE:
-          column_type = std::shared_ptr<ColumnType<Score> >(new ColumnType<Score>(name, 0.0, -1));
+          column_type = std::make_shared<ColumnType<Score> >(name, 0.0, -1);
           return true;
 
         case datatypes::COLUMN_RANGE:
@@ -284,13 +284,13 @@ namespace epidb {
       {
         std::string type_l(utils::lower(type));
         if (type_l == "string") {
-          column_type = std::shared_ptr<ColumnType<std::string > >(new ColumnType<std::string>(name, "", -1));
+          column_type = std::make_shared<ColumnType<std::string > >(name, "", -1);
           return true;
         } else if (type_l == "integer") {
-          column_type = std::shared_ptr<ColumnType<long long> >(new ColumnType<long long>(name, 0, -1));
+          column_type = std::make_shared<ColumnType<long long> >(name, 0, -1);
           return true;
         } else if (type_l == "double") {
-          column_type = std::shared_ptr<ColumnType<Score> >(new ColumnType<Score>(name, 0.0, -1));
+          column_type = std::make_shared<ColumnType<Score> >(name, 0.0, -1);
           return true;
         } else {
           msg = Error::m(ERR_COLUMN_TYPE_NAME_MISSING, type);
@@ -524,24 +524,24 @@ namespace epidb {
         }
 
         if (type == "string") {
-          column_type = std::shared_ptr<ColumnType<std::string > >(new ColumnType<std::string>(name, "", pos));
+          column_type = std::make_shared<ColumnType<std::string > >(name, "", pos);
           return true;
         } else if (type == "integer") {
-          column_type = std::shared_ptr<ColumnType<long long > >(new ColumnType<long long>(name, 0, pos));
+          column_type = std::make_shared<ColumnType<long long > >(name, 0, pos);
         } else if (type == "double") {
-          column_type = std::shared_ptr<ColumnType<Score > >(new ColumnType<Score>(name, 0.0, pos));
+          column_type = std::make_shared<ColumnType<Score > >(name, 0.0, pos);
         } else if (type == "category") {
           Category category;
           std::vector<mongo::BSONElement> e = obj["items"].Array();
           for (const mongo::BSONElement & be : e) {
             category.push_back(be.str());
           }
-          column_type = std::shared_ptr<ColumnType<Category > >(new ColumnType<Category>(name, category, pos));
+          column_type = std::make_shared<ColumnType<Category > >(name, category, pos);
         } else if (type == "range") {
           Score minimum = obj["minimum"].Double();
           Score maximum = obj["maximum"].Double();
           Range range(minimum, maximum);
-          column_type = std::shared_ptr<ColumnType<Range > >(new ColumnType<Range>(name, range, pos));
+          column_type = std::make_shared<ColumnType<Range > >(name, range, pos);
         } else if (type == "calculated") {
           std::string code = obj["code"].String();
           lua::Sandbox::LuaPtr lua = lua::Sandbox::new_instance(status);
@@ -549,7 +549,7 @@ namespace epidb {
             return false;
           }
           std::pair<std::string, lua::Sandbox::LuaPtr> p(code, lua);
-          column_type = std::shared_ptr<ColumnType<Code > >(new ColumnType<Code>(name, p, pos));
+          column_type = std::make_shared<ColumnType<Code > >(name, p, pos);
         } else {
           msg = "Column type '" + type + "' is invalid";
           return false;

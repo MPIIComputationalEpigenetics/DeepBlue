@@ -85,7 +85,7 @@ namespace epidb {
 
     bool GTFParser::get(parser::GTFPtr &gtf, std::string &msg)
     {
-      gtf = std::shared_ptr<GTFFile>(new GTFFile());
+      gtf = std::make_shared<GTFFile>();
 
       strtk::for_each_line_conditional(*input_, [&](const std::string & line) -> bool {
 

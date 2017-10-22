@@ -193,7 +193,7 @@ namespace epidb {
           self->error_ = true;
           return;
         }
-        self->request_ = std::shared_ptr<XmlrpcRequest>(new XmlrpcRequest(self->buf_));
+        self->request_ = std::make_shared<XmlrpcRequest>(self->buf_);
         self->buf_.clear();
       }
       else if (strcmp("methodCall", name) == 0) {

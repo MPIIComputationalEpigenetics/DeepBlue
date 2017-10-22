@@ -214,7 +214,7 @@ namespace epidb {
     {
       clock_t init = clock();
 
-      wig = std::shared_ptr<WigFile>(new WigFile());
+      wig = std::make_shared<WigFile>();
       strtk::for_each_line_conditional(*input_, [&](std::string & line) -> bool {
         actual_line_++;
         if (line.empty())

@@ -349,12 +349,12 @@ namespace epidb {
 
         if (op == "==") {
           error = false;
-          return std::shared_ptr<Filter>(new EqualsFilter(value));
+          return std::make_shared<EqualsFilter>(value);
         }
 
         if (op == "!=") {
           error = false;
-          return std::shared_ptr<Filter>(new NotEqualsFilter(value));
+          return std::make_shared<NotEqualsFilter>(value);
         }
 
         error = true;
@@ -372,32 +372,32 @@ namespace epidb {
 
         if (op == "==") {
           error = false;
-          return std::shared_ptr<Filter>(new  EqualsFilter(value));
+          return std::make_shared<EqualsFilter>(value);
         }
 
         if (op == "!=") {
           error = false;
-          return std::shared_ptr<Filter>(new  NotEqualsFilter(value));
+          return std::make_shared<NotEqualsFilter>(value);
         }
 
         if (op == ">") {
           error = false;
-          return std::shared_ptr<Filter>(new  GreaterFilter(value));
+          return std::make_shared<GreaterFilter>(value);
         }
 
         if (op == ">=") {
           error = false;
-          return std::shared_ptr<Filter>(new  GreaterEqualsFilter(value));
+          return std::make_shared<GreaterEqualsFilter>(value);
         }
 
         if (op == "<") {
           error = false;
-          return std::shared_ptr<Filter>(new  LessFilter(value));
+          return std::make_shared<LessFilter>(value);
         }
 
         if (op == "<=") {
           error = false;
-          return std::shared_ptr<Filter>(new  LessEqualsFilter(value));
+          return std::make_shared<LessEqualsFilter>(value);
         }
 
         error = true;

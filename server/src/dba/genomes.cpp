@@ -204,7 +204,7 @@ namespace epidb {
           names_pairs[norm_name] = name;
         }
 
-        gi = std::shared_ptr<GenomeInfo>(new GenomeInfo(genome_name, data, names_pairs));
+        gi = std::make_shared<GenomeInfo>(genome_name, data, names_pairs);
         return true;
       }
 

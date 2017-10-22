@@ -42,7 +42,7 @@ namespace epidb {
 
     bool BedGraphParser::get(parser::WigPtr &wig, std::string &msg)
     {
-      wig = std::shared_ptr<WigFile>(new WigFile());
+      wig = std::make_shared<WigFile>();
 
       clock_t dsysTime = clock();
       clock_t init = clock();

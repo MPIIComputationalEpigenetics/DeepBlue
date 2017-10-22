@@ -270,12 +270,12 @@ namespace epidb {
 
     StatusPtr build_status(const std::string& _id, const long long maximum_memory)
     {
-      return std::shared_ptr<Status>(new Status(_id, maximum_memory));
+      return std::make_shared<Status>(_id, maximum_memory);
     }
 
     StatusPtr build_dummy_status()
     {
-      return std::shared_ptr<Status>(new Status(DUMMY_REQUEST, 0));
+      return std::make_shared<Status>(DUMMY_REQUEST, 0);
     }
 
     std::string DUMMY_REQUEST = "dummy";

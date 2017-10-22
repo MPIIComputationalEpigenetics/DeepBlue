@@ -84,7 +84,7 @@ namespace epidb {
 
     Sandbox::LuaPtr Sandbox::new_instance(processing::StatusPtr status)
     {
-      return std::shared_ptr<Sandbox>(new Sandbox(status));
+      return std::make_shared<Sandbox>(status);
     }
 
     Sandbox::Sandbox(processing::StatusPtr status) :
