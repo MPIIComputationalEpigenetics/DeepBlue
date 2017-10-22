@@ -44,7 +44,7 @@ namespace epidb {
     std::string store(const std::string filename, const char *ptr, size_t len)
     {
       Connection c;
-      mongo::GridFS gridfs(c.conn(), config::get_mongodb_server(), "fs");
+      mongo::GridFS gridfs(c.conn(), config::DATABASE_NAME(), "fs");
       gridfs.setChunkSize(2 << 22); // 8MB
       mongo::BSONObj ret = gridfs.storeFile(ptr, len, filename);
 
