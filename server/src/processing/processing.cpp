@@ -245,6 +245,11 @@ namespace epidb {
     boost::posix_time::ptime last_checked;
     bool Status::is_canceled(bool& ret, std::string& msg)
     {
+      if (_request_id == DUMMY_REQUEST) {
+        ret = false;
+        return true;
+      }
+
       auto current_second = std::chrono::duration_cast< std::chrono::seconds >(std::chrono::system_clock::now().time_since_epoch());
       if (current_second - _last_update > _update_time_out) {
         mongo::BSONObj result;

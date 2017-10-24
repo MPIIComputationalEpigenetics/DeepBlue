@@ -335,7 +335,7 @@ namespace epidb {
             // ***
 
             // Check memory consumption
-            if (status->sum_size(rp._it_size) > status->maximum_size()) {
+            if (!status->is_allowed_size(rp._it_size)) {
               msg = "Memory exhausted. Used "  + utils::size_t_to_string(status->total_size()) + "bytes of " + utils::size_t_to_string(status->maximum_size()) + "bytes allowed. Please, select a smaller initial dataset, for example, selecting fewer chromosomes)"; // TODO: put a better error msg.
               c.done();
               return false;
