@@ -1254,6 +1254,11 @@ namespace epidb {
         const std::string& type = query["type"].str();
         const mongo::BSONObj& args = query["args"].Obj();
 
+        if ((field_key == "norm_genome") || (field_key == "genome")) {
+          values.emplace_back( args["norm_genome"].String() );
+          return true;
+        }
+
         if (type == "experiment_select") {
           std::vector<std::string> norm_names = utils::build_vector(args["norm_experiment_name"].Array());
           if (!norm_names.empty()) {
@@ -1277,6 +1282,26 @@ namespace epidb {
             }
           }
 
+        } else if (type == "annotation_select") {
+
+          std::vector<std::string> ann_names = utils::build_vector(args["annotation"].Array());
+
+          const std::string genome = args["genome"].String();
+
+          for (const auto& ann_name: ann_names) {
+            mongo::BSONObj ann_obj;
+            if(!dba::annotations::by_name(ann_name, genome, ann_obj, msg)) {
+              return false;
+            }
+
+            if (ann_obj.hasField(field_key)) {
+              auto value = ann_obj.getFieldDotted(field_key).String();
+              values.push_back(value);
+            }
+          }
+
+          return true;
+
         } else if (type == "intersect") {
           const std::string query_id = args["qid_1"].str();
           return get_main_experiment_data(user, query_id, field_key, status, values, msg);
@@ -1296,11 +1321,6 @@ namespace epidb {
         } else if (type == "merge") {
           const std::string query_id = args["qid_1"].str();
           return get_main_experiment_data(user, query_id, field_key, status, values, msg);
-
-        } else if (type == "annotation_select") {
-          std::string name = args["name"].String() + " (annotation)";
-          values.push_back(name);
-          return true;
 
         } else if (type == "genes_select") {
           if (args.hasElement("genes")) {
