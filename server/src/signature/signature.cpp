@@ -42,19 +42,40 @@
 #include <boost/archive/binary_oarchive.hpp>
 #include <boost/archive/binary_iarchive.hpp>
 
+#include "signature.hpp"
+
 #define BITMAP_SIZE 1024 * 1024
 
 namespace epidb {
 
   namespace signature {
 
-    bool process_bitmap(const datatypes::User& user, const std::string &experiment_id,
-                        std::bitset<BITMAP_SIZE>& out_bitmap,
-                        processing::StatusPtr status, std::string& msg);
+    bool process_bitmap_query(const datatypes::User& user, const std::string &query_id,
+                              std::bitset<BITMAP_SIZE>& out_bitmap,
+                              processing::StatusPtr status, std::string& msg);
+
+    bool process_bitmap_experiment(const datatypes::User& user, const std::string &id,
+                                   std::bitset<BITMAP_SIZE>& out_bitmap,
+                                   processing::StatusPtr status, std::string& msg);
 
     bool list_similar_experiments(const datatypes::User& user, const std::string& query_id, const std::vector<utils::IdName>& names,
+                                  processing::StatusPtr status,
                                   std::vector<utils::IdNameCount> results, std::string& msg)
     {
+      std::bitset<BITMAP_SIZE> query_bitmap;
+      if (!process_bitmap_query(user, query_id, query_bitmap, status,  msg)) {
+        return false;
+      }
+
+      for (const auto& exp: names) {
+        std::bitset<BITMAP_SIZE> exp_bitmap;
+        if (!process_bitmap_experiment(user, exp.id, exp_bitmap, status, msg)) {
+          return false;
+        }
+
+        size_t count = (query_bitmap & exp_bitmap).count();
+      }
+
 
       return true;
     }
@@ -64,7 +85,7 @@ namespace epidb {
     {
       std::bitset<BITMAP_SIZE> bitmap;
 
-      if (!process_bitmap(user, experiment_id, bitmap, status, msg)) {
+      if (!process_bitmap_experiment(user, experiment_id, bitmap, status, msg)) {
         return false;
       }
 

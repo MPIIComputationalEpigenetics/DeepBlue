@@ -18,8 +18,25 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#ifndef _SIGNATURE_HPP_
+#define _SIGNATURE_HPP_
 
-bool find_similar_experiment(const std::string& query_id, std::vector<std::string>& exps_ids, std::string& msg);
+#include <bitset>
+#include <string>
 
-bool process_bitmap(const std::string &experiment_id, const size_t size, std::vector<bool>& bitmap, std::string& msg);
+#include "../datatypes/user.hpp"
 
+#include "../extras/utils.hpp"
+
+namespace epidb {
+
+  namespace signature {
+
+    bool list_similar_experiments(const datatypes::User& user, const std::string& query_id, const std::vector<utils::IdName>& names,
+                                  processing::StatusPtr status,
+                                  std::vector<utils::IdNameCount> results, std::string& msg);
+  }
+}
+
+
+#endif
