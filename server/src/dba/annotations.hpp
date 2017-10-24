@@ -31,6 +31,9 @@
 namespace epidb {
   namespace dba {
     namespace annotations {
+
+      bool by_name(const std::string &name, const std::string &genome, mongo::BSONObj &annotation, std::string &msg);
+
       bool build_metadata(const std::string &name, const std::string &norm_name,
                           const std::string &genome, const std::string &norm_genome,
                           const std::string &description, const std::string &norm_description,

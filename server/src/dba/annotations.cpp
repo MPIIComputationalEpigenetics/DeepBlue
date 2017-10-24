@@ -35,6 +35,21 @@ namespace epidb {
   namespace dba {
     namespace annotations {
 
+      bool by_name(const std::string &name, const std::string &genome, mongo::BSONObj &annotation, std::string &msg)
+      {
+        const std::string norm_name = utils::normalize_name(name);
+        const std::string norm_genome = utils::normalize_name(genome);
+
+        if (!helpers::get_one(Collections::ANNOTATIONS(),
+                              BSON("norm_name" << norm_name << "norm_genome" << norm_genome),
+                              annotation)) {
+          msg = Error::m(ERR_INVALID_ANNOTATION_NAME, name, genome);
+          return false;
+        }
+        return true;
+      }
+
+
       bool build_metadata(const std::string &name, const std::string &norm_name,
                           const std::string &genome, const std::string &norm_genome,
                           const std::string &description, const std::string &norm_description,
