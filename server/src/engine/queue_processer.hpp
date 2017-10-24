@@ -73,7 +73,7 @@ namespace epidb {
                         const mongo::BSONObj& datasets, const std::string& genome,
                         processing::StatusPtr status, mongo::BSONObj& result);
 
-      bool is_canceled(processing::StatusPtr status, std::string msg);
+      bool is_canceled(processing::StatusPtr status, std::string& msg);
     };
   }
 }
