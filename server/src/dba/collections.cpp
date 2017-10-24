@@ -293,5 +293,11 @@ namespace epidb {
       return processing_ops;
     }
 
+    const std::string &Collections::SIGNATURES()
+    {
+      static std::string signatures("signatures");
+      return signatures;
+    }
+
   }
 }

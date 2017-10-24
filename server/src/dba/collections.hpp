@@ -73,6 +73,9 @@ namespace epidb {
       static const std::string &JOBS();
       static const std::string &PROCESSING();
       static const std::string &PROCESSING_OPS();
+
+      // Data signatures
+      static const std::string &SIGNATURES();
     };
   }
 }
