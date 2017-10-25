@@ -116,13 +116,13 @@ namespace epidb {
 
         auto status = processing::build_dummy_status();
 
-        std::vector<utils::IdNameCount> results;
-        if (!processing::list_similar_experiments(user, query_id, names, status, results, msg)) {
+        mongo::BSONObj results_obj;
+        if (!processing::list_similar_experiments(user, query_id, names, status, results_obj, msg)) {
           result.add_error(msg);
           return false;
         }
 
-        set_id_names_count_return(results, result);
+        result.add_param(utils::bson_to_parameters(results_obj));
 
         return true;
       }

@@ -20,8 +20,10 @@
 
 
 #include <bitset>
+#include <future>
 #include <string>
 #include <sstream>
+#include <thread>
 
 #include <mongo/bson/bson.h>
 
@@ -38,10 +40,14 @@
 #include "../extras/math.hpp"
 #include "../extras/utils.hpp"
 
+#include "../threading/semaphore.hpp"
+
 #include <boost/serialization/bitset.hpp>
 
 #include <boost/archive/binary_oarchive.hpp>
 #include <boost/archive/binary_iarchive.hpp>
+
+#include "enrichment_result.hpp"
 
 #define BITMAP_SIZE (1024 * 1024)
 
@@ -53,12 +59,12 @@ namespace epidb {
 
     bool load(const std::string &id, std::bitset<BITMAP_SIZE>& bitset, std::string& msg);
 
-    bool compare_to(const datatypes::User& user,
-                    const std::bitset<BITMAP_SIZE>& query_bitmap,
-                    const utils::IdName& exp,
-                    const ChromosomeRegionsList& bitmap_regions,
-                    processing::StatusPtr status,
-                    utils::IdNameCount& result, std::string& msg);
+    ProcessOverlapResult compare_to(const datatypes::User& user,
+                                    const std::bitset<BITMAP_SIZE>& query_bitmap,
+                                    const utils::IdName& exp,
+                                    const ChromosomeRegionsList& bitmap_regions,
+                                    processing::StatusPtr status, threading::SemaphorePtr sem,
+                                    std::string& msg);
 
     bool get_bitmap_regions(const datatypes::User& user, const std::string &query_id,
                             ChromosomeRegionsList& bitmap_regions,
@@ -79,7 +85,7 @@ namespace epidb {
 
     bool list_similar_experiments(const datatypes::User& user, const std::string& query_id, const std::vector<utils::IdName>& names,
                                   processing::StatusPtr status,
-                                  std::vector<utils::IdNameCount> results, std::string& msg)
+                                  mongo::BSONObj& result, std::string& msg)
     {
       ChromosomeRegionsList bitmap_regions;
       if (!get_bitmap_regions(user, query_id, bitmap_regions, status, msg)) {
@@ -96,26 +102,71 @@ namespace epidb {
         }
       }
 
-      std::cerr << "query count " << query_bitmap.count() << std::endl;
+      std::vector<std::future<ProcessOverlapResult > > threads;
+
+      threading::SemaphorePtr sem = threading::build_semaphore(1);
 
       for (const auto& exp: names) {
         utils::IdNameCount result;
-        if (!compare_to(user, query_bitmap, exp, bitmap_regions, status, result, msg)) {
+
+        sem->down();
+        auto t = std::async(std::launch::async, &compare_to,
+                            std::ref(user),
+                            std::ref(query_bitmap), std::ref(exp),
+                            std::ref(bitmap_regions),
+                            status, sem,
+                            std::ref(msg));
+
+        threads.emplace_back(std::move(t));
+      }
+
+      std::vector<std::tuple<std::string, size_t>> datasets_support;
+      std::vector<std::tuple<std::string, double>> datasets_log_score;
+      std::vector<std::tuple<std::string, double>> datasets_odds_score;
+
+      std::vector<ProcessOverlapResult> results;
+
+      long t = 1;
+
+      for (size_t i = 0; i < threads.size(); ++i) {
+        threads[i].wait();
+        auto result = threads[i].get();
+        if (std::get<2>(result).empty()) {
+          msg = std::get<0>(result);
           return false;
         }
+        std::string dataset = std::get<0>(result);
 
-        std::cerr << result.name << " exp count: " << result.count << std::endl;
+        // --------------------- [0] dataseset, [1] biosource, [2] epi mark, [1] description, [2] size, [3] database_name, [4] negative_natural_log, [5] log_odds_score, [6] a, [7] b, [8] c, [9] d)
+        datasets_log_score.push_back(std::make_tuple(dataset, std::get<6>(result)));
+        datasets_odds_score.push_back(std::make_tuple(dataset, std::get<7>(result)));
+        datasets_support.push_back(std::make_tuple(dataset, std::get<8>(result)));
+
+        results.emplace_back(std::move(result));
       }
+
+      std::vector<std::shared_ptr<ExperimentResult>> experiment_results =
+            sort_results(results, datasets_support, datasets_log_score, datasets_odds_score);
+
+      mongo::BSONObjBuilder bob;
+
+      mongo::BSONArrayBuilder ab;
+      for (const auto& er: experiment_results) {
+        ab.append(er->toBSON());
+      }
+      bob.append("results", ab.obj());
+
+      result = bob.obj();
 
       return true;
     }
 
     ProcessOverlapResult compare_to(const datatypes::User& user,
-                    const std::bitset<BITMAP_SIZE>& query_bitmap,
-                    const utils::IdName& exp,
-                    const ChromosomeRegionsList& bitmap_regions,
-                    processing::StatusPtr status, threading::SemaphorePtr sem,
-                    std::string& msg)
+                                    const std::bitset<BITMAP_SIZE>& query_bitmap,
+                                    const utils::IdName& exp,
+                                    const ChromosomeRegionsList& bitmap_regions,
+                                    processing::StatusPtr status, threading::SemaphorePtr sem,
+                                    std::string& msg)
     {
       std::bitset<BITMAP_SIZE> exp_bitmap;
 
@@ -130,7 +181,24 @@ namespace epidb {
         }
       }
 
+      mongo::BSONObj experiment_obj;
+      if (!dba::experiments::by_name(exp.name, experiment_obj, msg)) {
+        sem->up();
+        return std::make_tuple(msg, "", "", "", -1.0, "", -1.0, -1.0, -1.0, -1.0, -1.0, -1.0);
+      }
+
+      std::string biosource;
+      std::string epigenetic_mark;
+      std::string description;
+      if (!experiment_obj.isEmpty()) {
+        biosource = experiment_obj["sample_info"]["biosource_name"].String();
+        epigenetic_mark = experiment_obj["epigenetic_mark"].String();
+        description = experiment_obj["description"].String();
+      }
+
       size_t count = (query_bitmap & exp_bitmap).count();
+
+      std::cerr << exp.name << " "  << query_bitmap.count()  << " " << exp_bitmap.count() << " final: " << count  << std::endl;
 
       double a = count;
       double b = exp_bitmap.count() - a;
@@ -150,10 +218,8 @@ namespace epidb {
 
       double log_odds_score = (a/b)/(c/d);
 
-      std::cerr << a << "\t" << b<< "\t" << c<< "\t" << d<< std::endl;
-
       sem->up();
-      return std::make_tuple(dataset_name, biosource, epigenetic_mark, description, count_database_regions, database_name, negative_natural_log, log_odds_score, a, b, c, d);
+      return std::make_tuple(exp.name, biosource, epigenetic_mark, "", BITMAP_SIZE, "", negative_natural_log, log_odds_score, a, b, c, d);
     }
 
     bool store(const std::string &id, const std::bitset<BITMAP_SIZE>& bitmap, std::string& msg)

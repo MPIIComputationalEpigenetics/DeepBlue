@@ -108,3 +108,5 @@ namespace epidb {
           std::vector<std::tuple<std::string, double>>& datasets_odds_score);
   }
 }
+
+#endif

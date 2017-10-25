@@ -188,7 +188,7 @@ namespace epidb {
 
     bool list_similar_experiments(const datatypes::User& user, const std::string& query_id, const std::vector<utils::IdName>& names,
                                   processing::StatusPtr status,
-                                  std::vector<utils::IdNameCount> results, std::string& msg);
+                                  mongo::BSONObj& result, std::string& msg);
 
     bool lola(const datatypes::User& user,
               const std::string& query_id, const std::string& universe_query_id,
