@@ -85,23 +85,24 @@ namespace epidb {
         if (!process_bitmap_query(user, query_id, bitmap_regions, query_bitmap, status,  msg)) {
           return false;
         }
-        std::cerr << "processed and storing: " << query_bitmap.count() << std::endl;
         if (!store(query_id, query_bitmap, msg)) {
           return false;
         }
-      } else {
-        std::cerr << "loaded: " << query_bitmap.count() << std::endl;
       }
-
-      return true;
 
       std::cerr << "query count " << query_bitmap.count() << std::endl;
 
       for (const auto& exp: names) {
         std::bitset<BITMAP_SIZE> exp_bitmap;
-        if (!process_bitmap_experiment(user, exp.id, bitmap_regions, exp_bitmap, status, msg)) {
-          return false;
+        if (!load(exp.id, exp_bitmap, msg)) {
+          if (!process_bitmap_experiment(user, exp.id, bitmap_regions, exp_bitmap, status, msg)) {
+            return false;
+          }
+          if (!store(exp.id, exp_bitmap, msg)) {
+            return false;
+          }
         }
+
         size_t count = (query_bitmap & exp_bitmap).count();
         std::cerr << exp.name << " exp count: " << exp_bitmap.count() << " matches: " << count << std::endl;
       }
@@ -130,29 +131,19 @@ namespace epidb {
 
     bool load(const std::string &id, std::bitset<BITMAP_SIZE>& bitset, std::string& msg)
     {
-      std::cerr << "LOADING" << std::endl;
       auto query = BSON("_id" << id);
       mongo::BSONObj result;
       if (!dba::helpers::get_one(dba::Collections::SIGNATURES(), query, result)) {
         msg = Error::m(ERR_INVALID_EXPERIMENT_ID, id);
-        std::cerr << msg << std::endl;
         return false;
       }
-
-      std::cerr << "WWWW" << std::endl;
 
       int size;
       const auto data = result["data"].binData(size);
       std::istringstream ss(std::string(data,size));
 
-      std::cerr << "XXX" << std::endl;
-
       boost::archive::binary_iarchive ar(ss, boost::archive::no_header);
       ar & bitset;
-
-      std::cerr << "YYYY" << std::endl;
-
-      std::cerr << "loaded!!!" << bitset.count() << std::endl;
 
       return true;
     }
