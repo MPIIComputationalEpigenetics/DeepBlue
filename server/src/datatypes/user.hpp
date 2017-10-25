@@ -78,7 +78,6 @@ namespace epidb {
       void permission_level(PermissionLevel permission_level);
 
       void generate_key();
-      bool generate_id(std::string msg);
 
       bool has_permission(PermissionLevel permission);
 
