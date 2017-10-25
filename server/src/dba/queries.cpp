@@ -1164,7 +1164,6 @@ namespace epidb {
       {
         processing::RunningOp runningOp = status->start_operation(processing::RETRIEVE_TILING_QUERY, query);
         if (is_canceled(status, msg)) {
-          std::cerr << "was cancelled?" << std::endl;
           return false;
         }
 
@@ -1179,7 +1178,6 @@ namespace epidb {
         } else {
           std::set<std::string> chrom;
           if (!dba::genomes::get_chromosomes(norm_genome, chrom, msg)) {
-            std::cerr << "chromo not found" << std::endl;
             return false;
           }
           chromosomes = std::vector<std::string>(chrom.begin(), chrom.end());
@@ -1187,7 +1185,6 @@ namespace epidb {
 
         genomes::GenomeInfoPtr genome_info;
         if (!genomes::get_genome_info(norm_genome, genome_info, msg)) {
-          std::cerr << "get genomeinfo errro" << std::endl;
           return false;
         }
 
@@ -1196,13 +1193,11 @@ namespace epidb {
 
         DatasetId tiling_id;
         if (!add_tiling(norm_genome, tiling_size, tiling_id, msg)) {
-          std::cerr << "not possible to add tiling not found" << std::endl;
           return false;
         }
 
         for (cit = chromosomes.begin(); cit != chromosomes.end(); ++cit) {
           if (!genome_info->get_chromosome(*cit, chromosome_info, msg)) {
-            msg = "Chromosome " + *cit + " does not exist on genome " + norm_genome + ".";
             return false;
           }
           Regions regs = Regions();
