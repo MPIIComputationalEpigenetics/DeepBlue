@@ -44,87 +44,122 @@
 
 #include "signature.hpp"
 
-#define BITMAP_SIZE 1024 * 1024
+#define BITMAP_SIZE (1024 * 1024)
 
 namespace epidb {
 
   namespace signature {
 
+    bool store(const std::string &id, const std::bitset<BITMAP_SIZE>& bitmap, std::string& msg);
+
+    bool load(const std::string &id, std::bitset<BITMAP_SIZE>& bitset, std::string& msg);
+
+    bool get_bitmap_regions(const datatypes::User& user, const std::string &query_id,
+                            ChromosomeRegionsList& bitmap_regions,
+                            processing::StatusPtr status, std::string& msg);
+
     bool process_bitmap_query(const datatypes::User& user, const std::string &query_id,
+                              const ChromosomeRegionsList& bitmap_regions,
                               std::bitset<BITMAP_SIZE>& out_bitmap,
                               processing::StatusPtr status, std::string& msg);
 
     bool process_bitmap_experiment(const datatypes::User& user, const std::string &id,
+                                   const ChromosomeRegionsList& bitmap_regions,
                                    std::bitset<BITMAP_SIZE>& out_bitmap,
                                    processing::StatusPtr status, std::string& msg);
+
+
+
 
     bool list_similar_experiments(const datatypes::User& user, const std::string& query_id, const std::vector<utils::IdName>& names,
                                   processing::StatusPtr status,
                                   std::vector<utils::IdNameCount> results, std::string& msg)
     {
-      std::bitset<BITMAP_SIZE> query_bitmap;
-      if (!process_bitmap_query(user, query_id, query_bitmap, status,  msg)) {
+      ChromosomeRegionsList bitmap_regions;
+      if (!get_bitmap_regions(user, query_id, bitmap_regions, status, msg)) {
         return false;
       }
 
-      for (const auto& exp: names) {
-        std::bitset<BITMAP_SIZE> exp_bitmap;
-        if (!process_bitmap_experiment(user, exp.id, exp_bitmap, status, msg)) {
+      std::bitset<BITMAP_SIZE> query_bitmap;
+      if (!load(query_id, query_bitmap, msg)) {
+        if (!process_bitmap_query(user, query_id, bitmap_regions, query_bitmap, status,  msg)) {
           return false;
         }
-
-        size_t count = (query_bitmap & exp_bitmap).count();
+        std::cerr << "processed and storing: " << query_bitmap.count() << std::endl;
+        if (!store(query_id, query_bitmap, msg)) {
+          return false;
+        }
+      } else {
+        std::cerr << "loaded: " << query_bitmap.count() << std::endl;
       }
 
+      return true;
+
+      std::cerr << "query count " << query_bitmap.count() << std::endl;
+
+      for (const auto& exp: names) {
+        std::bitset<BITMAP_SIZE> exp_bitmap;
+        if (!process_bitmap_experiment(user, exp.id, bitmap_regions, exp_bitmap, status, msg)) {
+          return false;
+        }
+        size_t count = (query_bitmap & exp_bitmap).count();
+        std::cerr << exp.name << " exp count: " << exp_bitmap.count() << " matches: " << count << std::endl;
+      }
 
       return true;
     }
 
-    bool store(const datatypes::User& user, const std::string &experiment_id,
-               processing::StatusPtr status, std::string& msg)
+    bool store(const std::string &id, const std::bitset<BITMAP_SIZE>& bitmap, std::string& msg)
     {
-      std::bitset<BITMAP_SIZE> bitmap;
-
-      if (!process_bitmap_experiment(user, experiment_id, bitmap, status, msg)) {
-        return false;
-      }
-
       std::stringstream stream;
       boost::archive::binary_oarchive ar(stream, boost::archive::no_header);
       ar & bitmap;
 
+      size_t size = stream.str().size();
       const char* data = stream.str().data();
 
-      Connection c;
-      auto doc = BSON("_id" << experiment_id << "data" << data);
-      c->insert(dba::helpers::collection_name(dba::Collections::SIGNATURES()), doc);
-      c.done();
+      mongo::BSONObjBuilder bob;
+      bob.append("_id", id);
+      bob.appendBinData("data", size, mongo::BinDataGeneral, (void *) data);
 
+      Connection c;
+      c->insert(dba::helpers::collection_name(dba::Collections::SIGNATURES()), bob.obj());
+      c.done();
       return true;
     }
 
-    bool load(const std::string &experiment_id, std::bitset<BITMAP_SIZE>& bitset, std::string& msg)
+    bool load(const std::string &id, std::bitset<BITMAP_SIZE>& bitset, std::string& msg)
     {
-      auto query = BSON("_id" << experiment_id);
+      std::cerr << "LOADING" << std::endl;
+      auto query = BSON("_id" << id);
       mongo::BSONObj result;
-      if (!dba::helpers::get_one(dba::helpers::collection_name(dba::Collections::SIGNATURES()), query, result)) {
-        msg = Error::m(ERR_INVALID_EXPERIMENT_ID, experiment_id);
+      if (!dba::helpers::get_one(dba::Collections::SIGNATURES(), query, result)) {
+        msg = Error::m(ERR_INVALID_EXPERIMENT_ID, id);
+        std::cerr << msg << std::endl;
         return false;
       }
+
+      std::cerr << "WWWW" << std::endl;
 
       int size;
       const auto data = result["data"].binData(size);
       std::istringstream ss(std::string(data,size));
 
+      std::cerr << "XXX" << std::endl;
+
       boost::archive::binary_iarchive ar(ss, boost::archive::no_header);
       ar & bitset;
+
+      std::cerr << "YYYY" << std::endl;
+
+      std::cerr << "loaded!!!" << bitset.count() << std::endl;
 
       return true;
     }
 
 
     bool build_bitmap(const Regions& ranges, const Regions& data,
-                      size_t pos, std::bitset<BITMAP_SIZE>& bitmap, std::string& string)
+                      size_t &pos, std::bitset<BITMAP_SIZE>& bitmap, std::string& string)
     {
       auto it_ranges = ranges.begin();
       auto it_data_begin = data.begin();
@@ -156,9 +191,9 @@ namespace epidb {
       return true;
     }
 
-    bool process_bitmap_query(const datatypes::User& user, const std::string &query_id,
-                              std::bitset<BITMAP_SIZE>& out_bitmap,
-                              processing::StatusPtr status, std::string& msg)
+    bool get_bitmap_regions(const datatypes::User& user, const std::string &query_id,
+                            ChromosomeRegionsList& bitmap_regions,
+                            processing::StatusPtr status, std::string& msg)
     {
       std::string norm_genome;
 
@@ -180,32 +215,37 @@ namespace epidb {
         return false;
       }
 
-      size_t total_genome_size = 0;
+      double total_genome_size = 0;
       for (const auto &chromosome : chromosomes) {
         total_genome_size += chromosome.size;
       }
 
-      size_t tiling_size = total_genome_size / BITMAP_SIZE;
+      double tiling_size = total_genome_size / BITMAP_SIZE;
 
       auto tiling_query = BSON("args" <<
                                BSON(
-                                 "norm_genome" << norm_genome
+                                 "norm_genome" << norm_genome <<
+                                 "size" << (int) tiling_size
                                ));
-
-      ChromosomeRegionsList range_regions;
-      if (!dba::query::retrieve_tiling_query(tiling_query, status, range_regions, msg)) {
+      if (!dba::query::retrieve_tiling_query(tiling_query, status, bitmap_regions, msg)) {
         return false;
       }
 
-      size_t pos = 0;
-      std::bitset<BITMAP_SIZE> bitmap;
+      return true;
+    }
 
+    bool process_bitmap_query(const datatypes::User& user, const std::string &query_id,
+                              const ChromosomeRegionsList& bitmap_regions,
+                              std::bitset<BITMAP_SIZE>& out_bitmap,
+                              processing::StatusPtr status, std::string& msg)
+    {
+      size_t pos = 0;
       ChromosomeRegionsList data_regions;
       if (!dba::query::retrieve_query(user, query_id, status, data_regions, msg, true)) {
         return false;
       }
 
-      for (auto &chromosome : range_regions) {
+      for (auto &chromosome : bitmap_regions) {
         for (auto &datum: data_regions) {
           if (chromosome.first == datum.first) {
             if (!build_bitmap(chromosome.second, datum.second, pos, out_bitmap, msg)) {
@@ -215,11 +255,11 @@ namespace epidb {
         }
       }
 
-      out_bitmap = std::move(bitmap);
       return true;
     }
 
     bool process_bitmap_experiment(const datatypes::User& user, const std::string &id,
+                                   const ChromosomeRegionsList& bitmap_regions,
                                    std::bitset<BITMAP_SIZE>& out_bitmap,
                                    processing::StatusPtr status, std::string& msg)
     {
@@ -227,35 +267,11 @@ namespace epidb {
       if (!dba::experiments::by_id(id, experiment_obj, msg)) {
         return false;
       }
-
       const std::string& norm_exp_name = experiment_obj["norm_name"].String();
       const std::string& norm_genome = experiment_obj["norm_genome"].String();
 
-      std::vector<dba::genomes::ChromosomeInfo> chromosomes;
-      if (!dba::genomes::get_chromosomes(norm_genome, chromosomes, msg)) {
-        return false;
-      }
-
-      size_t total_genome_size = 0;
-      for (const auto &chromosome : chromosomes) {
-        total_genome_size += chromosome.size;
-      }
-
-      size_t tiling_size = total_genome_size / BITMAP_SIZE;
-
-      auto tiling_query = BSON("args" <<
-                               BSON(
-                                 "norm_genome" << norm_genome
-                               ));
-
-      ChromosomeRegionsList range_regions;
-      if (!dba::query::retrieve_tiling_query(tiling_query, status, range_regions, msg)) {
-        return false;
-      }
-
       size_t pos = 0;
-      std::bitset<BITMAP_SIZE> bitmap;
-      for (auto &chromosome : range_regions) {
+      for (auto &chromosome : bitmap_regions) {
         const int BLOCK_SIZE = 100;
 
         for (size_t region_pos = 0; region_pos < chromosome.second.size(); region_pos++) {
@@ -281,7 +297,6 @@ namespace epidb {
         }
       }
 
-      out_bitmap = std::move(bitmap);
       return true;
     }
   };
