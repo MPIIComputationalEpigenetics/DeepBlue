@@ -185,6 +185,11 @@ namespace epidb {
                       const std::string &regions_query_id,
                       processing::StatusPtr status, std::string &matrix, std::string &msg);
 
+
+    bool list_similar_experiments(const datatypes::User& user, const std::string& query_id, const std::vector<utils::IdName>& names,
+                                  processing::StatusPtr status,
+                                  std::vector<utils::IdNameCount> results, std::string& msg);
+
     bool lola(const datatypes::User& user,
               const std::string& query_id, const std::string& universe_query_id,
               const mongo::BSONObj& datasets, const std::string& genome,

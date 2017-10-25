@@ -35,6 +35,7 @@
 #include "../dba/helpers.hpp"
 #include "../dba/queries.hpp"
 
+#include "../extras/math.hpp"
 #include "../extras/utils.hpp"
 
 #include <boost/serialization/bitset.hpp>
@@ -42,17 +43,22 @@
 #include <boost/archive/binary_oarchive.hpp>
 #include <boost/archive/binary_iarchive.hpp>
 
-#include "signature.hpp"
-
 #define BITMAP_SIZE (1024 * 1024)
 
 namespace epidb {
 
-  namespace signature {
+  namespace processing {
 
     bool store(const std::string &id, const std::bitset<BITMAP_SIZE>& bitmap, std::string& msg);
 
     bool load(const std::string &id, std::bitset<BITMAP_SIZE>& bitset, std::string& msg);
+
+    bool compare_to(const datatypes::User& user,
+                    const std::bitset<BITMAP_SIZE>& query_bitmap,
+                    const utils::IdName& exp,
+                    const ChromosomeRegionsList& bitmap_regions,
+                    processing::StatusPtr status,
+                    utils::IdNameCount& result, std::string& msg);
 
     bool get_bitmap_regions(const datatypes::User& user, const std::string &query_id,
                             ChromosomeRegionsList& bitmap_regions,
@@ -93,21 +99,61 @@ namespace epidb {
       std::cerr << "query count " << query_bitmap.count() << std::endl;
 
       for (const auto& exp: names) {
-        std::bitset<BITMAP_SIZE> exp_bitmap;
-        if (!load(exp.id, exp_bitmap, msg)) {
-          if (!process_bitmap_experiment(user, exp.id, bitmap_regions, exp_bitmap, status, msg)) {
-            return false;
-          }
-          if (!store(exp.id, exp_bitmap, msg)) {
-            return false;
-          }
+        utils::IdNameCount result;
+        if (!compare_to(user, query_bitmap, exp, bitmap_regions, status, result, msg)) {
+          return false;
         }
 
-        size_t count = (query_bitmap & exp_bitmap).count();
-        std::cerr << exp.name << " exp count: " << exp_bitmap.count() << " matches: " << count << std::endl;
+        std::cerr << result.name << " exp count: " << result.count << std::endl;
       }
 
       return true;
+    }
+
+    ProcessOverlapResult compare_to(const datatypes::User& user,
+                    const std::bitset<BITMAP_SIZE>& query_bitmap,
+                    const utils::IdName& exp,
+                    const ChromosomeRegionsList& bitmap_regions,
+                    processing::StatusPtr status, threading::SemaphorePtr sem,
+                    std::string& msg)
+    {
+      std::bitset<BITMAP_SIZE> exp_bitmap;
+
+      if (!load(exp.id, exp_bitmap, msg)) {
+        if (!process_bitmap_experiment(user, exp.id, bitmap_regions, exp_bitmap, status, msg)) {
+          sem->up();
+          return std::make_tuple(msg, "", "", "", -1.0, "", -1.0, -1.0, -1.0, -1.0, -1.0, -1.0);
+        }
+        if (!store(exp.id, exp_bitmap, msg)) {
+          sem->up();
+          return std::make_tuple(msg, "", "", "", -1.0, "", -1.0, -1.0, -1.0, -1.0, -1.0, -1.0);
+        }
+      }
+
+      size_t count = (query_bitmap & exp_bitmap).count();
+
+      double a = count;
+      double b = exp_bitmap.count() - a;
+
+      if (b < 0) {
+        sem->up();
+        msg = "Negative b entry in table. This means either: 1) Your user sets contain items outside your universe; or 2) your universe has a region that overlaps multiple user set regions, interfering with the universe set overlap calculation.";
+        return std::make_tuple(msg, "", "", "", -1.0, "", -1.0, -1.0, -1.0, -1.0, -1.0, -1.0);
+      }
+
+      double c = query_bitmap.count()  - a;
+      double d = BITMAP_SIZE - a - b - c;
+
+      double p_value = math::fisher_test(a, b, c, d);
+
+      double negative_natural_log = abs(log10(p_value));
+
+      double log_odds_score = (a/b)/(c/d);
+
+      std::cerr << a << "\t" << b<< "\t" << c<< "\t" << d<< std::endl;
+
+      sem->up();
+      return std::make_tuple(dataset_name, biosource, epigenetic_mark, description, count_database_regions, database_name, negative_natural_log, log_odds_score, a, b, c, d);
     }
 
     bool store(const std::string &id, const std::bitset<BITMAP_SIZE>& bitmap, std::string& msg)
@@ -285,7 +331,13 @@ namespace epidb {
           if (!build_bitmap(ranges, data,  pos, out_bitmap, msg)) {
             return false;
           }
+
+          // Remove the size of the region, keeping only the size of the Stored score.
+          for (const auto& r : data) {
+            status->subtract_size(r->size() - sizeof(Score));
+          }
         }
+
       }
 
       return true;

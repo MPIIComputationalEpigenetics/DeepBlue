@@ -33,8 +33,6 @@
 
 #include "../processing/processing.hpp"
 
-#include "../signature/signature.hpp"
-
 namespace epidb {
   namespace command {
 
@@ -119,7 +117,7 @@ namespace epidb {
         auto status = processing::build_dummy_status();
 
         std::vector<utils::IdNameCount> results;
-        if (!signature::list_similar_experiments(user, query_id, names, status, results, msg)) {
+        if (!processing::list_similar_experiments(user, query_id, names, status, results, msg)) {
           result.add_error(msg);
           return false;
         }
