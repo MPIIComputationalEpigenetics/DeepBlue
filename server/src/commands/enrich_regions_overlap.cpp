@@ -66,7 +66,7 @@ namespace epidb {
       }
 
     public:
-      EnrichRegionsOverlapCommand() : Command("enrich_region_overlap", parameters_(), results_(), desc_()) {}
+      EnrichRegionsOverlapCommand() : Command("enrich_regions_overlap", parameters_(), results_(), desc_()) {}
 
       virtual bool run(const std::string &ip,
                        const serialize::Parameters &parameters, serialize::Parameters &result) const
