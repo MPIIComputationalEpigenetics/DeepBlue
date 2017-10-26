@@ -194,6 +194,23 @@ namespace epidb {
     return true;
   }
 
+
+  bool Engine::queue_region_enrich_fast(const datatypes::User& user,
+                                        const std::string& query_id, const mongo::BSONObj &query,
+                                        std::string &id, std::string &msg)
+  {
+    if (!queue(
+          BSON("command" << "enrich_regions_fast" <<
+               "query_id" << query_id <<
+               "experiments_query" << query <<
+               "user_id" << user.id()),
+          60 * 60, id, msg)) {
+      return false;
+    }
+
+    return true;
+  }
+
   bool Engine::queue_get_experiments_by_query(const datatypes::User& user, const std::string &query_id, std::string &request_id, std::string &msg)
   {
     if (!queue(BSON("command" << "get_experiments_by_query" << "query_id" << query_id << "user_id" << user.id()), 60 * 60, request_id, msg)) {

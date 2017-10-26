@@ -4,7 +4,7 @@ ROOT		= $(shell pwd)/../..
 CXXFLAGS	= $(DEFCXXFLAGS) -I..
 
 OBJLIBS	= ../libprocessing.a
-OBJS	= enrichment_result.o binning.o calculate_enrichment.o lola.o count_regions.o coverage.o distinct.o get_experiments_by_query.o get_regions.o processing.o running_cache.o score_matrix.o signature.o
+OBJS	= enrichment_result.o binning.o calculate_enrichment.o lola.o count_regions.o coverage.o distinct.o get_experiments_by_query.o get_regions.o processing.o running_cache.o score_matrix.o enrich_regions_fast.o
 
 all : $(OBJLIBS)
 

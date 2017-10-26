@@ -18,20 +18,20 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "../engine/commands.hpp"
-
 #include "../dba/dba.hpp"
 #include "../dba/list.hpp"
 #include "../dba/queries.hpp"
 
 #include "../datatypes/user.hpp"
 
+#include "../engine/commands.hpp"
+#include "../engine/engine.hpp"
+
 #include "../extras/utils.hpp"
 #include "../extras/serialize.hpp"
 
 #include "../errors.hpp"
 
-#include "../processing/processing.hpp"
 
 namespace epidb {
   namespace command {
@@ -66,7 +66,7 @@ namespace epidb {
       }
 
     public:
-      FindSimilarExperiments() : Command("find_similar_experiments", parameters_(), results_(), desc_()) {}
+      FindSimilarExperiments() : Command("enrich_regions_fast", parameters_(), results_(), desc_()) {}
 
       virtual bool run(const std::string &ip,
                        const serialize::Parameters &parameters, serialize::Parameters &result) const
@@ -108,21 +108,12 @@ namespace epidb {
           return false;
         }
 
-        std::vector<utils::IdName> names;
-        if (!dba::list::experiments(experiments_query, names, msg)) {
+        std::string request_id;
+        if (!epidb::Engine::instance().queue_region_enrich_fast(user, query_id, experiments_query, request_id, msg)) {
           result.add_error(msg);
           return false;
         }
-
-        auto status = processing::build_dummy_status();
-
-        mongo::BSONObj results_obj;
-        if (!processing::list_similar_experiments(user, query_id, names, status, results_obj, msg)) {
-          result.add_error(msg);
-          return false;
-        }
-
-        result.add_param(utils::bson_to_parameters(results_obj));
+        result.add_string(request_id);
 
         return true;
       }

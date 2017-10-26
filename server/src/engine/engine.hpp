@@ -99,6 +99,8 @@ namespace epidb {
 
     bool queue_get_experiments_by_query(const datatypes::User& user, const std::string &query_id, std::string &request_id, std::string &msg);
 
+    bool queue_region_enrich_fast(const datatypes::User& user, const std::string& query_id, const mongo::BSONObj &query, std::string &id, std::string &msg);
+
     /*
     * \brief Returns whether given user owns given request
     * \return False also if request_id or user_id do not exist

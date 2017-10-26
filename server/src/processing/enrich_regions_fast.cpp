@@ -80,12 +80,9 @@ namespace epidb {
                                    std::bitset<BITMAP_SIZE>& out_bitmap,
                                    processing::StatusPtr status, std::string& msg);
 
-
-
-
-    bool list_similar_experiments(const datatypes::User& user, const std::string& query_id, const std::vector<utils::IdName>& names,
-                                  processing::StatusPtr status,
-                                  mongo::BSONObj& result, std::string& msg)
+    bool enrich_regions_fast(const datatypes::User& user, const std::string& query_id, const std::vector<utils::IdName>& names,
+                             processing::StatusPtr status,
+                             mongo::BSONObj& result, std::string& msg)
     {
       ChromosomeRegionsList bitmap_regions;
       if (!get_bitmap_regions(user, query_id, bitmap_regions, status, msg)) {
@@ -104,7 +101,7 @@ namespace epidb {
 
       std::vector<std::future<ProcessOverlapResult > > threads;
 
-      threading::SemaphorePtr sem = threading::build_semaphore(64);
+      threading::SemaphorePtr sem = threading::build_semaphore(16);
 
       for (const auto& exp: names) {
         utils::IdNameCount result;
@@ -120,6 +117,7 @@ namespace epidb {
         threads.emplace_back(std::move(t));
       }
 
+      std::cerr << "saiu" << std::endl;
       std::vector<std::tuple<std::string, size_t>> datasets_support;
       std::vector<std::tuple<std::string, double>> datasets_log_score;
       std::vector<std::tuple<std::string, double>> datasets_odds_score;
@@ -136,6 +134,7 @@ namespace epidb {
           return false;
         }
 
+        std::cerr << i << "/" << threads.size() << std::endl;
         std::string dataset = std::get<0>(result);
 
         // --------------------- [0] dataseset, [1] biosource, [2] epi mark, [1] description, [2] size, [3] database_name, [4] negative_natural_log, [5] log_odds_score, [6] a, [7] b, [8] c, [9] d)
@@ -145,6 +144,8 @@ namespace epidb {
 
         results.emplace_back(std::move(result));
       }
+
+      std::cerr << "okay" << std::endl;
 
       std::vector<std::shared_ptr<ExperimentResult>> experiment_results =
             sort_results(results, datasets_support, datasets_log_score, datasets_odds_score);
@@ -199,8 +200,6 @@ namespace epidb {
 
       size_t count = (query_bitmap & exp_bitmap).count();
 
-      //std::cerr << exp.name << " "  << query_bitmap.count()  << " " << exp_bitmap.count() << " final: " << count  << std::endl;
-
       double a = count;
       double b = exp_bitmap.count() - a;
 
@@ -231,8 +230,6 @@ namespace epidb {
 
       size_t size = stream.str().size();
       const char* data = stream.str().data();
-
-      std::cerr << "size: " << size << std::endl;
 
       mongo::BSONObjBuilder bob;
       bob.append("_id", id);

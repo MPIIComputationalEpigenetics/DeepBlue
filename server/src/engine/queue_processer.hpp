@@ -73,6 +73,10 @@ namespace epidb {
                         const mongo::BSONObj& datasets, const std::string& genome,
                         processing::StatusPtr status, mongo::BSONObj& result);
 
+      bool process_enrich_regions_fast(const datatypes::User &user,
+                                  const std::string &query_id, const mongo::BSONObj &experiments_query,
+                                  processing::StatusPtr status, mongo::BSONObj& result);
+
       bool is_canceled(processing::StatusPtr status, std::string& msg);
     };
   }

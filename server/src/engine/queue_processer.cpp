@@ -38,6 +38,7 @@
 #include "../datatypes/user.hpp"
 
 #include "../dba/users.hpp"
+#include "../dba/list.hpp"
 
 #include "../extras/stringbuilder.hpp"
 #include "../extras/utils.hpp"
@@ -113,9 +114,12 @@ namespace epidb {
       if (command == "lola") {
         return process_lola(user, job["query_id"].str(), job["universe_query_id"].str(), job["databases"].Obj(), job["genome"].str(), status, result);
       }
+      if (command == "enrich_regions_fast") {
+        return process_enrich_regions_fast(user, job["query_id"].str(), job["experiments_query"].Obj(), status, result);
 
-      else {
-        mongo::BSONObjBuilder bob;      datatypes::User user;
+      } else {
+        mongo::BSONObjBuilder bob;
+        datatypes::User user;
 
         bob.append("__error__", "Invalid command " + command);
         result = BSON("__error__" << ("Invalid command " + command));
@@ -246,6 +250,45 @@ namespace epidb {
         result = bob.obj();
         return false;
       }
+
+      int size = enrichment.objsize();
+      bob.append("enrichment", enrichment);
+      status->set_total_stored_data(size);
+      status->set_total_stored_data_compressed(size);
+      result = bob.obj();
+
+      if (is_canceled(status, msg)) {
+        return false;
+      }
+
+      return true;
+    }
+    bool QueueHandler::process_enrich_regions_fast(const datatypes::User &user,
+        const std::string &query_id, const mongo::BSONObj &experiments_query,
+        processing::StatusPtr status, mongo::BSONObj& result)
+    {
+      std::string msg;
+      std::vector<utils::IdName> names;
+      mongo::BSONObjBuilder bob;
+
+      std::cerr << "oi" << std::endl;
+
+      if (!dba::list::experiments(experiments_query, names, msg)) {
+        bob.append("__error__", msg);
+        result = bob.obj();
+        return false;
+      }
+
+      std::cerr << "experiments" << std::endl;
+
+      mongo::BSONObj enrichment;
+      if (!processing::enrich_regions_fast(user, query_id, names, status, enrichment, msg)) {
+        std::cerr << msg << std::endl;
+        bob.append("__error__", msg);
+        result = bob.obj();
+        return false;
+      }
+      std::cerr << "finished" << std::endl;
 
       int size = enrichment.objsize();
       bob.append("enrichment", enrichment);

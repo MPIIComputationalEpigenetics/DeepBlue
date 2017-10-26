@@ -142,8 +142,10 @@ if __name__ == "__main__":
         "S0145XH1.ERX1007389.H3K27ac.bwa.GRCh38.20151015.bed", None, None, None, USER_KEY)
     print QUERY_ID
 
-    _, result = SERVER.find_similar_experiments(QUERY_ID, None, "h3k27ac", None, None, None, None, USER_KEY)
-    pprint(result)
+    _, request_id = SERVER.enrich_regions_fast(QUERY_ID, "GRCh38", None, None, None, "Chip-Seq", None, USER_KEY)
+
+    data = request_data(request_id)
+    pprint(data)
 
 
     #'CD4-positive, alpha-beta T cell'
