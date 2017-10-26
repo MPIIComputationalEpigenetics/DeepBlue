@@ -25,6 +25,8 @@
 #include <unordered_map>
 #include <utility>
 
+#include <boost/thread.hpp>
+
 #include <mongo/bson/bson.h>
 
 #include "../algorithms/algorithms.hpp"
@@ -68,7 +70,7 @@ namespace epidb {
       // TODO: Merge wtth users cache and use templates
       class NameDatasetIdCache {
       private:
-
+        boost::shared_mutex _access;
         std::unordered_map<std::string, DatasetId> name_dataset_id;
         std::unordered_map<DatasetId, std::string> dataset_id_name;
 
@@ -76,22 +78,30 @@ namespace epidb {
 
         DatasetId get_dataset_id(const std::string &name)
         {
+          boost::shared_lock< boost::shared_mutex > lock(_access);
+
           return name_dataset_id[name];
         }
 
         const std::string& get_name(const DatasetId id)
         {
+          boost::shared_lock< boost::shared_mutex > lock(_access);
+
           return dataset_id_name[id];
         }
 
         void set(const std::string &name, const DatasetId id)
         {
+          boost::unique_lock< boost::shared_mutex > lock(_access);
+
           name_dataset_id[name] = id;
           dataset_id_name[id] = name;
         }
 
         bool exists_dataset_id(const std::string &name)
         {
+          boost::shared_lock< boost::shared_mutex > lock(_access);
+
           if (name_dataset_id.find(name) != name_dataset_id.end()) {
             return true;
           }
@@ -100,6 +110,8 @@ namespace epidb {
 
         bool exists_name(const DatasetId id)
         {
+          boost::shared_lock< boost::shared_mutex > lock(_access);
+
           if (dataset_id_name.find(id) != dataset_id_name.end()) {
             return true;
           }
@@ -108,6 +120,7 @@ namespace epidb {
 
         void invalidate()
         {
+          boost::unique_lock< boost::shared_mutex > lock(_access);
           name_dataset_id.clear();
         }
       };
