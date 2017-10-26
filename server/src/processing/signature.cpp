@@ -104,7 +104,7 @@ namespace epidb {
 
       std::vector<std::future<ProcessOverlapResult > > threads;
 
-      threading::SemaphorePtr sem = threading::build_semaphore(1);
+      threading::SemaphorePtr sem = threading::build_semaphore(64);
 
       for (const auto& exp: names) {
         utils::IdNameCount result;
