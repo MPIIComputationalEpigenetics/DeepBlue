@@ -135,6 +135,7 @@ namespace epidb {
           msg = std::get<0>(result);
           return false;
         }
+
         std::string dataset = std::get<0>(result);
 
         // --------------------- [0] dataseset, [1] biosource, [2] epi mark, [1] description, [2] size, [3] database_name, [4] negative_natural_log, [5] log_odds_score, [6] a, [7] b, [8] c, [9] d)
@@ -198,7 +199,7 @@ namespace epidb {
 
       size_t count = (query_bitmap & exp_bitmap).count();
 
-      std::cerr << exp.name << " "  << query_bitmap.count()  << " " << exp_bitmap.count() << " final: " << count  << std::endl;
+      //std::cerr << exp.name << " "  << query_bitmap.count()  << " " << exp_bitmap.count() << " final: " << count  << std::endl;
 
       double a = count;
       double b = exp_bitmap.count() - a;
@@ -231,6 +232,8 @@ namespace epidb {
       size_t size = stream.str().size();
       const char* data = stream.str().data();
 
+      std::cerr << "size: " << size << std::endl;
+
       mongo::BSONObjBuilder bob;
       bob.append("_id", id);
       bob.appendBinData("data", size, mongo::BinDataGeneral, (void *) data);
@@ -262,7 +265,7 @@ namespace epidb {
 
 
     bool build_bitmap(const Regions& ranges, const Regions& data,
-                      size_t &pos, std::bitset<BITMAP_SIZE>& bitmap, std::string& string)
+                      size_t &pos, std::bitset<BITMAP_SIZE>& bitmap, std::string& msg)
     {
       auto it_ranges = ranges.begin();
       auto it_data_begin = data.begin();
@@ -284,6 +287,10 @@ namespace epidb {
           it_data++;
         }
         if (overlap) {
+          if (pos >= BITMAP_SIZE) {
+            msg = "Invalid position - " + utils::integer_to_string(pos);
+            return false;
+          }
           bitmap.set(pos);
         }
 
@@ -318,12 +325,13 @@ namespace epidb {
         return false;
       }
 
-      double total_genome_size = 0;
+      size_t total_genome_size = 0;
       for (const auto &chromosome : chromosomes) {
         total_genome_size += chromosome.size;
       }
 
-      double tiling_size = total_genome_size / BITMAP_SIZE;
+      size_t d = total_genome_size / BITMAP_SIZE;
+      size_t tiling_size = d + chromosomes.size() + 1;
 
       auto tiling_query = BSON("args" <<
                                BSON(
@@ -349,15 +357,24 @@ namespace epidb {
       }
 
       for (auto &chromosome : bitmap_regions) {
+        bool found = false;
         for (auto &datum: data_regions) {
           if (chromosome.first == datum.first) {
             if (!build_bitmap(chromosome.second, datum.second, pos, out_bitmap, msg)) {
+              msg += " (Query ID: " + query_id + ", chromosome: " + chromosome.first + ")";
               return false;
             }
+            found = true;
+          }
+        }
+        if (!found) {
+          Regions empty_data;
+          if (!build_bitmap(chromosome.second, empty_data, pos, out_bitmap, msg)) {
+            msg += " (Query ID: " + query_id + ", chromosome: " + chromosome.first + "(empty))";
+            return false;
           }
         }
       }
-
       return true;
     }
 
@@ -375,35 +392,25 @@ namespace epidb {
 
       size_t pos = 0;
       for (auto &chromosome : bitmap_regions) {
-        const int BLOCK_SIZE = 100;
-
-        for (size_t region_pos = 0; region_pos < chromosome.second.size(); region_pos++) {
-          Regions ranges;
-          for (size_t i = 0; i < BLOCK_SIZE && region_pos < chromosome.second.size(); i++, region_pos++) {
-            ranges.emplace_back(chromosome.second[region_pos]->clone());
-          }
-
-          Regions data;
-
-          mongo::BSONObj regions_query;
-          if (!dba::query::build_experiment_query(ranges[0]->start(), ranges[ranges.size() - 1]->end(),
-                                                  norm_exp_name, regions_query, msg)) {
-            return false;
-          }
-          if (!dba::retrieve::get_regions(norm_genome, chromosome.first, regions_query, false, status, data, msg)) {
-            return false;
-          }
-
-          if (!build_bitmap(ranges, data,  pos, out_bitmap, msg)) {
-            return false;
-          }
-
-          // Remove the size of the region, keeping only the size of the Stored score.
-          for (const auto& r : data) {
-            status->subtract_size(r->size() - sizeof(Score));
-          }
+        mongo::BSONObj regions_query;
+        if (!dba::query::build_experiment_query(-1, -1, norm_exp_name, regions_query, msg)) {
+          return false;
         }
 
+        Regions data;
+        if (!dba::retrieve::get_regions(norm_genome, chromosome.first, regions_query, false, status, data, msg)) {
+          return false;
+        }
+
+        if (!build_bitmap(chromosome.second, data,  pos, out_bitmap, msg)) {
+          msg += " (Query ID: " + id + ", chromosome: " + chromosome.first + "(empty))";
+          return false;
+        }
+
+        // Remove the size of the region, keeping only the size of the Stored score.
+        for (const auto& r : data) {
+          status->subtract_size(r->size() - sizeof(Score));
+        }
       }
 
       return true;
