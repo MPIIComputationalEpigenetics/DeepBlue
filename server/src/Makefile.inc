@@ -40,14 +40,14 @@ GIT_VERSION := $(shell git describe --abbrev=8 --dirty --always --tags)
 GIT_URL = github
 
 ifeq ($(host),ubuntu)
- CXX = g++ -DBOOST_LOG_DYN_LINK -DGIT_VERSION=\"$(GIT_VERSION)\" -DGIT_URL=\"$(GIT_URL)\" -g
- LD  = g++ -g
+ CXX = g++ -DBOOST_LOG_DYN_LINK -DGIT_VERSION=\"$(GIT_VERSION)\" -DGIT_URL=\"$(GIT_URL)\"
+ LD  = g++
  LDFLAGS   = -pthread
  MONGOLIBS = /opt/mongodb/drivers/lib/libmongoclient.a
  MONGO_INCLUDE = /opt/mongodb/drivers/include/
  BOOST_DIR = /opt/boost/lib
  DEFCXXFLAGS = -std=c++11 -Wall -O3 -ffast-math -march=native -Ofast -I$(MONGO_INCLUDE) -I/opt/boost/include/ -I$(MINILZO) -I$(URDL) -I$(CPPFORMAT) -I$(STRTK) -I$(LUA) -I${JEMALLOC}/include  -DURDL_HEADER_ONLY=1 -DURDL_DISABLE_SSL=1 -Wno-deprecated-declarations -Wno-unused-variable -Wno-unused-parameter -Wno-ignored-qualifiers -Wno-deprecated-declarations
- BOOSTLIBS = -lboost_filesystem -lboost_thread -lboost_system -lboost_regex -lboost_log -lboost_timer -lboost_chrono -lboost_program_options -lboost_iostreams /home/albrecht/DeepBlue/DeepBlue/server/third_party/bzip2/lib/libbz2.a -lrt -L${JEMALLOC}/lib -Wl,-rpath,${JEMALLOC}/lib -ljemalloc
+ BOOSTLIBS = -lboost_filesystem -lboost_thread -lboost_system -lboost_regex -lboost_log -lboost_timer -lboost_chrono -lboost_program_options -lboost_iostreams -lboost_serialization /home/albrecht/DeepBlue/DeepBlue/server/third_party/bzip2/lib/libbz2.a -lrt -L${JEMALLOC}/lib -Wl,-rpath,${JEMALLOC}/lib -ljemalloc
  THIRDLIBS = ../third_party/libexpat_linux.a
 endif
 
