@@ -36,12 +36,12 @@
 namespace epidb {
   namespace command {
 
-    class FindSimilarExperiments: public Command {
+    class EnrichRegionsFastCommand: public Command {
 
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::EXPERIMENTS, " List the DeepBlue Experiments that matches the search criteria defined by this command parameters.");
+        return CommandDescription(categories::ENRICHMENT, "Enrich the regions based on regions bitmap signature comparison.");
       }
 
       static Parameters parameters_()
@@ -61,12 +61,12 @@ namespace epidb {
       static Parameters results_()
       {
         return  {
-          Parameter("experiments", serialize::LIST, "experiment names and IDS")
+          Parameter("request_id", serialize::STRING, "Request ID - Use it to retrieve the result with info() and get_request_data(). The result is a list containing the datasets that overlap with the query_id regions.")
         };
       }
 
     public:
-      FindSimilarExperiments() : Command("enrich_regions_fast", parameters_(), results_(), desc_()) {}
+      EnrichRegionsFastCommand() : Command("enrich_regions_fast", parameters_(), results_(), desc_()) {}
 
       virtual bool run(const std::string &ip,
                        const serialize::Parameters &parameters, serialize::Parameters &result) const
@@ -117,6 +117,6 @@ namespace epidb {
 
         return true;
       }
-    } findSimilarExperiments;
+    } enrichRegionsFastCommand;
   }
 }
