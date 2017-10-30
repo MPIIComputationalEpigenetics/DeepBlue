@@ -237,14 +237,14 @@ namespace epidb {
       for (size_t i = 0; i < threads.size(); ++i) {
         threads[i].wait();
         auto result = threads[i].get();
-        if (std::get<3>(result).empty()) {
+        if (std::get<4>(result) == -1) {
           msg = std::get<0>(result);
           return false;
         }
 
         std::string dataset = std::get<0>(result);
 
-        // --------------------- [0] dataseset, [1] biosource, [2] epi mark, [1] description, [2] size, [3] database_name, [4] negative_natural_log, [5] log_odds_score, [6] a, [7] b, [8] c, [9] d)
+        // --------------------- [0] dataseset, [1] biosource, [2] epi mark, [3] description, [4] size, [5] database_name, [6] ...negative_natural_log, [5] log_odds_score, [6] a, [7] b, [8] c, [9] d)
         datasets_log_score.push_back(std::make_tuple(dataset, std::get<6>(result)));
         datasets_odds_score.push_back(std::make_tuple(dataset, std::get<7>(result)));
         datasets_support.push_back(std::make_tuple(dataset, std::get<8>(result)));
