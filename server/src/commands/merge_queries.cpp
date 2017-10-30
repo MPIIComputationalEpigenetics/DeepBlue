@@ -43,7 +43,7 @@ namespace epidb {
       {
         Parameter p[] = {
           Parameter("query_a_id", serialize::STRING, "id of the first query"),
-          Parameter("query_b_id", serialize::STRING, "id of the second query"),
+          Parameter("query_b_id", serialize::STRING, "id of the second query (or use an array to include multiple queries)", true),
           parameters::UserKey
         };
         Parameters params(&p[0], &p[0] + 3);
@@ -66,12 +66,16 @@ namespace epidb {
                        const serialize::Parameters &parameters, serialize::Parameters &result) const
       {
         const std::string query_a_id = parameters[0]->as_string();
-        const std::string query_b_id = parameters[1]->as_string();
         const std::string user_key = parameters[2]->as_string();
+
+        std::vector<serialize::ParameterPtr> query_b_ids;
+        parameters[1]->children(query_b_ids);
+
 
         std::string msg;
         datatypes::User user;
 
+        std::string prev_query  = query_a_id;
         if (!check_permissions(user_key, datatypes::GET_DATA, user, msg )) {
           result.add_error(msg);
           return false;
@@ -86,27 +90,30 @@ namespace epidb {
           return false;
         }
 
-        if (!dba::exists::query(user, query_b_id, msg)) {
-          if (msg.empty()) {
-            result.add_error("Invalid second query ID: " + query_b_id);
-          } else {
-            result.add_error(msg);
+        for (const serialize::ParameterPtr & query_b_ptr : query_b_ids) {
+          std::string query_b_id = query_b_ptr->as_string();
+
+          if (!dba::exists::query(user, query_b_id, msg)) {
+            if (msg.empty()) {
+              result.add_error("Invalid second query ID: " + query_b_id);
+            } else {
+              result.add_error(msg);
+            }
+            return false;
           }
-          return false;
+
+          // TODO: check if the queries are from same genome
+          mongo::BSONObjBuilder args_builder;
+          args_builder.append("qid_1", prev_query);
+          args_builder.append("qid_2", query_b_id);
+
+          if (!dba::query::store_query(user, "merge", args_builder.obj(), prev_query, msg)) {
+            result.add_error(msg);
+            return false;
+          }
         }
 
-        // TODO: check if query ids from same genome
-        mongo::BSONObjBuilder args_builder;
-        args_builder.append("qid_1", query_a_id);
-        args_builder.append("qid_2", query_b_id);
-
-        std::string query_id;
-        if (!dba::query::store_query(user, "merge", args_builder.obj(), query_id, msg)) {
-          result.add_error(msg);
-          return false;
-        }
-
-        result.add_string(query_id);
+        result.add_string(prev_query);
         return true;
       }
 
