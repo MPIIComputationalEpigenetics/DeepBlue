@@ -49,3 +49,25 @@ class TestMerge(helpers.TestCase):
 
     expected_regions = helpers.get_result("merge_different_chromosomes")
     self.assertEqual(regions, expected_regions)
+
+
+  def test_multiple_merge(self):
+    epidb = DeepBlueClient(address="localhost", port=31415)
+    self.init_base(epidb)
+
+    sizes = [10000, 20000, 25000, 30000, 35000, 40000, 50000]
+    qs = []
+
+    for s in sizes:
+      res, q_t = epidb.tiling_regions(s, "hg19", "chr21", self.admin_key)
+      qs.append(q_t)
+
+    res, qid_3 = epidb.merge_queries(qs[0], qs[1:], self.admin_key)
+    self.assertSuccess(res, qid_3)
+
+    res, req = epidb.count_regions(qid_3, self.admin_key)
+
+    self.assertSuccess(res, req)
+    count = self.count_request(req)
+    self.assertEqual(count, 14287)
+
