@@ -31,7 +31,7 @@ namespace epidb {
 
     bool __count_go_terms(const Regions &regions,
                           std::unordered_map<std::string, size_t>& counts,
-                          size_t& total_genes, size_t& total_found_go_terms,
+                          size_t& total_genes, size_t& total_overlaped_go_terms,
                           std::string &msg)
     {
       for (const auto& region: regions) {
@@ -42,7 +42,7 @@ namespace epidb {
           const std::vector<datatypes::GeneOntologyTermPtr>& go_terms = gene_region->get_gene_ontology_terms();
 
           for (const auto& go_term: go_terms) {
-            total_found_go_terms++;
+            total_overlaped_go_terms++;
             const std::string& go_id = go_term->go_id();
             counts[go_id]++;
           }
@@ -53,12 +53,12 @@ namespace epidb {
 
     bool count_go_terms(const ChromosomeRegionsList &chromosomeRegionsList,
                         std::unordered_map<std::string, size_t>& counts,
-                        size_t& total_genes, size_t& total_found_go_terms,
+                        size_t& total_genes, size_t& total_overlaped_go_terms,
                         std::string &msg)
     {
       total_genes = 0;
       for (auto &chromosomeRegions : chromosomeRegionsList) {
-        if(!__count_go_terms(chromosomeRegions.second, counts, total_genes, total_found_go_terms, msg)) {
+        if(!__count_go_terms(chromosomeRegions.second, counts, total_genes, total_overlaped_go_terms, msg)) {
           return false;
         }
       }

@@ -90,11 +90,13 @@ namespace epidb {
       size_t total_size = count_regions(chromosomeRegionsList);
 
       size_t total_found_genes = 0;
-      size_t total_found_go_terms = 0;
+      size_t total_overlaped_go_terms = 0;
       std::unordered_map<std::string, size_t> go_terms_counts;
-      if (!algorithms::count_go_terms(intersections, go_terms_counts, total_found_genes, total_found_go_terms, msg)) {
+      if (!algorithms::count_go_terms(intersections, go_terms_counts, total_found_genes, total_overlaped_go_terms, msg)) {
         return false;
       }
+
+      size_t total_distinct_go_terms = go_terms_counts.size();
 
       mongo::BSONArrayBuilder ab;
       for (const auto& kv: go_terms_counts) {
@@ -118,7 +120,8 @@ namespace epidb {
       bob.append("total_genes", (long long) total_genes);
       bob.append("total_colocated_genes", (long long) total_found_genes);
       bob.append("total_annotated_go_terms", (long long) total_go_terms);
-      bob.append("total_colocated_annotated_go_terms", (long long) total_go_terms);
+      bob.append("total_colocated_annotated_go_terms", (long long) total_overlaped_go_terms);
+      bob.append("total_distinct_colocated_annotated_go_terms", (long long) total_distinct_go_terms);
       bob.append("go_terms", ab.arr());
 
       result = bob.obj();
