@@ -580,8 +580,7 @@ namespace epidb {
         {
           return (chromosome == other.chromosome
                   && start == other.start
-                  && end == other.end
-                  && strand == other.strand);
+                  && end == other.end);
         }
       };
 
