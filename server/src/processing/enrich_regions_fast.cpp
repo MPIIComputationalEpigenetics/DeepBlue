@@ -216,7 +216,15 @@ namespace epidb {
 
       double negative_natural_log = abs(log10(p_value));
 
-      double log_odds_score = (a/b)/(c/d);
+      double a_b = a/b;
+      double c_d = c/d;
+      double log_odds_score;
+      // Handle when 'b' and 'd' are 0.
+      if (a_b == c_d) {
+        log_odds_score = 1;
+      } else {
+        log_odds_score = a_b/c_d;
+      }
 
       sem->up();
       return std::make_tuple(exp.name, biosource, epigenetic_mark, "", BITMAP_SIZE, "", negative_natural_log, log_odds_score, a, b, c, d);

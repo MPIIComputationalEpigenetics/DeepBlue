@@ -30,8 +30,21 @@
 namespace epidb {
   namespace processing {
 
-    // [0] dataseset, [1] biosource, [2] epigenetic_mark, [3] descroption, [4] size, [5] database_name, [6] negative_natural_log, [7] log_odds_score, [8] a, [9] b, [10] c, [11] d,)
-    using ProcessOverlapResult = std::tuple<std::string, std::string, std::string, std::string, int, std::string, double, double, int, int, int, int>;
+    // , , , , , , , , [8] a, [9] b, [10] c, [11] d,)
+    using ProcessOverlapResult = std::tuple<
+                                 std::string, // [0]  dataseset
+                                 std::string, // [1]  biosource
+                                 std::string, // [2]  epigenetic_mark
+                                 std::string, // [3]  descroption
+                                 int,         // [4]  size
+                                 std::string, // [5]  database_name
+                                 double,      // [6]  negative_natural_log
+                                 double,      // [7]  log_odds_score
+                                 int,         // [8]  a (support)
+                                 int,         // [9]  b
+                                 int,         // [10] c
+                                 int          // [11] d
+                                 >;
 
     void sort_values(std::vector<std::tuple<std::string, size_t>>& datasets_support,
                      std::vector<std::tuple<std::string, double>>& datasets_log_score,
@@ -45,18 +58,6 @@ namespace epidb {
       }
 
       size_t position = 0;
-      size_t s_value = get<1>(datasets_support[0]);
-      std::sort(begin(datasets_support), end(datasets_support), TupleCompare<1>());
-      for(size_t i = 0; i < datasets_support.size(); i++) {
-        if (get<1>(datasets_support[i]) != s_value) {
-          position = i;
-          s_value = get<1>(datasets_support[i]);
-        }
-        datasets_support_rank[get<0>(datasets_support[i])] = position + 1;
-      }
-
-//
-      position = 0;
       double d_value = get<1>(datasets_log_score[0]);
       std::sort(begin(datasets_log_score), end(datasets_log_score), TupleCompare<1>());
       for(size_t i = 0; i < datasets_log_score.size(); i++) {
@@ -78,6 +79,19 @@ namespace epidb {
         }
         datasets_odd_rank[get<0>(datasets_odds_score[i])] = position + 1;
       }
+
+//
+      position = 0;
+      size_t s_value = get<1>(datasets_support[0]);
+      std::sort(begin(datasets_support), end(datasets_support), TupleCompare<1>());
+      for(size_t i = 0; i < datasets_support.size(); i++) {
+        if (get<1>(datasets_support[i]) != s_value) {
+          position = i;
+          s_value = get<1>(datasets_support[i]);
+        }
+        datasets_support_rank[get<0>(datasets_support[i])] = position + 1;
+      }
+
     }
 
     std::vector<std::shared_ptr<ExperimentResult>> sort_results(

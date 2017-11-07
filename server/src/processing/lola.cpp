@@ -144,7 +144,15 @@ namespace epidb {
 
       double negative_natural_log = abs(log10(p_value));
 
-      double log_odds_score = (a/b)/(c/d);
+      double a_b = a/b;
+      double c_d = c/d;
+      double log_odds_score;
+      // Handle when 'b' and 'd' are 0.
+      if (a_b == c_d) {
+        log_odds_score = 1;
+      } else {
+        log_odds_score = a_b/c_d;
+      }
 
       status->subtract_regions(count_database_regions);
       for (const auto& chr : database_regions) {
@@ -244,7 +252,6 @@ namespace epidb {
 
         std::string dataset = std::get<0>(result);
 
-        // --------------------- [0] dataseset, [1] biosource, [2] epi mark, [3] description, [4] size, [5] database_name, [6] ...negative_natural_log, [5] log_odds_score, [6] a, [7] b, [8] c, [9] d)
         datasets_log_score.push_back(std::make_tuple(dataset, std::get<6>(result)));
         datasets_odds_score.push_back(std::make_tuple(dataset, std::get<7>(result)));
         datasets_support.push_back(std::make_tuple(dataset, std::get<8>(result)));
