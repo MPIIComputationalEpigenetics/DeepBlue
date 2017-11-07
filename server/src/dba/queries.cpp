@@ -1266,10 +1266,7 @@ namespace epidb {
         const std::string& type = query["type"].str();
         const mongo::BSONObj& args = query["args"].Obj();
 
-        std::cerr << args.toString() << std::endl;
-
         if (((field_key == "norm_genome") || (field_key == "genome")) && args.hasField("norm_genome")) {
-          std::cerr << args.toString() << std::endl;
           values.emplace_back( args.getFieldDotted("norm_genome").String() );
           return true;
         }
@@ -1634,7 +1631,6 @@ namespace epidb {
       {
         bool is_canceled = false;
         if (!status->is_canceled(is_canceled, msg)) {
-          std::cerr << "was really canceled" << std::endl;
           return true;
         }
         if (is_canceled) {

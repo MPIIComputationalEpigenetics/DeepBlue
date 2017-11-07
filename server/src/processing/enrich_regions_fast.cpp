@@ -117,7 +117,6 @@ namespace epidb {
         threads.emplace_back(std::move(t));
       }
 
-      std::cerr << "saiu" << std::endl;
       std::vector<std::tuple<std::string, size_t>> datasets_support;
       std::vector<std::tuple<std::string, double>> datasets_log_score;
       std::vector<std::tuple<std::string, double>> datasets_odds_score;
@@ -134,7 +133,6 @@ namespace epidb {
           return false;
         }
 
-        std::cerr << i << "/" << threads.size() << std::endl;
         std::string dataset = std::get<0>(result);
 
         // --------------------- [0] dataseset, [1] biosource, [2] epi mark, [3] description, [4] size, [5] database_name, [6] ///negative_natural_log, [5] log_odds_score, [6] a, [7] b, [8] c, [9] d)
@@ -144,8 +142,6 @@ namespace epidb {
 
         results.emplace_back(std::move(result));
       }
-
-      std::cerr << "okay" << std::endl;
 
       std::vector<std::shared_ptr<ExperimentResult>> experiment_results =
             sort_results(results, datasets_support, datasets_log_score, datasets_odds_score);

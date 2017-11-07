@@ -335,9 +335,7 @@ namespace epidb {
           return false;
         }
 
-
         mongo::BSONObjBuilder bob;
-        std::cerr << result.toString() << std::endl;
 
         bob.append(result["_id"]);
         bob.append(result["type"]);

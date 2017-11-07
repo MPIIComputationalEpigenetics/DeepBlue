@@ -271,15 +271,11 @@ namespace epidb {
       std::vector<utils::IdName> names;
       mongo::BSONObjBuilder bob;
 
-      std::cerr << "oi" << std::endl;
-
       if (!dba::list::experiments(experiments_query, names, msg)) {
         bob.append("__error__", msg);
         result = bob.obj();
         return false;
       }
-
-      std::cerr << "experiments" << std::endl;
 
       mongo::BSONObj enrichment;
       if (!processing::enrich_regions_fast(user, query_id, names, status, enrichment, msg)) {
@@ -288,7 +284,6 @@ namespace epidb {
         result = bob.obj();
         return false;
       }
-      std::cerr << "finished" << std::endl;
 
       int size = enrichment.objsize();
       bob.append("enrichment", enrichment);
