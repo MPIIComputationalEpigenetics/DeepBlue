@@ -59,34 +59,44 @@ namespace epidb {
     extern std::string DUMMY_REQUEST;
 
     enum OP {
-      PROCESS_QUERY = 1,
-      GET_EXPERIMENT_BY_QUERY = 10,
-      COUNT_REGIONS = 11,
-      RETRIEVE_EXPERIMENT_SELECT_QUERY = 30,
-      RETRIEVE_ANNOTATION_SELECT_QUERY = 31,
-      RETRIEVE_INTERSECTION_QUERY = 32,
-      RETRIEVE_MERGE_QUERY = 33,
-      RETRIEVE_FILTER_QUERY = 34,
-      RETRIEVE_TILING_QUERY = 35,
-      RETRIEVE_QUERY_REGION_SET = 36,
-      RETRIEVE_GENES_DATA = 37,
-      RETRIEVE_FLANK_QUERY = 38,
-      RETRIEVE_EXPRESSIONS_DATA = 39,
-      RETRIEVE_OVERLAP_QUERY = 40,
-      RETRIEVE_FIND_MOTIF_QUERY = 41,
-      PROCESS_AGGREGATE = 50,
-      PROCESS_DISTINCT = 60,
-      PROCESS_BINNING = 61,
-      PROCESS_CALCULATE_ENRICHMENT = 62,
-      PROCESS_COUNT = 63,
-      PROCESS_COVERAGE = 64,
-      PROCESS_GET_EXPERIMENTS_BY_QUERY = 65,
-      PROCESS_GET_REGIONS = 66,
-      PROCESS_SCORE_MATRIX = 67,
-      PROCESS_LOLA = 68,
-      FORMAT_OUTPUT = 80,
-      BUILDING_OUTPUT = 82,
-      COMPRESSING_OUTPUT = 84
+      PROCESS_QUERY,
+      GET_EXPERIMENT_BY_QUERY,
+      COUNT_REGIONS,
+      RETRIEVE_EXPERIMENT_SELECT_QUERY,
+      RETRIEVE_ANNOTATION_SELECT_QUERY,
+      RETRIEVE_INTERSECTION_QUERY,
+      RETRIEVE_MERGE_QUERY,
+      RETRIEVE_FILTER_QUERY,
+      RETRIEVE_TILING_QUERY,
+      RETRIEVE_QUERY_REGION_SET,
+      RETRIEVE_GENES_DATA,
+      RETRIEVE_FLANK_QUERY,
+      RETRIEVE_EXPRESSIONS_DATA,
+      RETRIEVE_OVERLAP_QUERY,
+      RETRIEVE_FIND_MOTIF_QUERY,
+      PROCESS_AGGREGATE,
+      PROCESS_DISTINCT,
+      PROCESS_BINNING,
+      PROCESS_COUNT,
+      PROCESS_COVERAGE,
+      PROCESS_GET_EXPERIMENTS_BY_QUERY,
+      PROCESS_GET_REGIONS,
+      PROCESS_SCORE_MATRIX,
+      PROCESS_CALCULATE_GO_ENRICHMENT,
+      PROCESS_ENRICH_REGIONS_OVERLAP,
+
+      PROCESS_ENRICH_REGIONS_FAST,
+      PROCESS_ENRICH_REGIONS_FAST_COMPARE_TO,
+      PROCESS_ENRICH_REGIONS_FAST_STORE_BITMAP,
+      PROCESS_ENRICH_REGIONS_FAST_LOAD_BITMAP,
+      PROCESS_ENRICH_REGIONS_FAST_BUILD_BITMAP,
+      PROCESS_ENRICH_REGIONS_FAST_GET_BITMAP_REGIONS,
+      PROCESS_ENRICH_REGIONS_FAST_BITMAP_QUERY,
+      PROCESS_ENRICH_REGIONS_FAST_BITMAP_EXPERIMENT,
+
+      FORMAT_OUTPUT,
+      BUILDING_OUTPUT,
+      COMPRESSING_OUTPUT
     };
 
     extern std::map<OP, std::string> OP_names;
@@ -99,10 +109,15 @@ namespace epidb {
       const OP _op;
       const mongo::BSONObj params;
       const boost::posix_time::ptime _start_time;
+      size_t _steps;
+      size_t _actual_step;
 
     public:
       RunningOp(const std::string& processing_id, const OP& op, const mongo::BSONObj& params);
       ~RunningOp();
+
+      void set_total_steps(size_t steps);
+      void increment_step();
     };
 
     class RunningCache;
@@ -200,6 +215,8 @@ namespace epidb {
                                   processing::StatusPtr status, std::vector<utils::IdName>& experiments, std::string &msg);
 
     bool format_regions(const std::string &output_format, ChromosomeRegionsList &chromosomeRegionsList, processing::StatusPtr status, StringBuilder &sb, std::string &msg);
+
+    bool is_canceled(processing::StatusPtr status, std::string& msg);
   }
 }
 

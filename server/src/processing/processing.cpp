@@ -36,6 +36,7 @@
 #include "../extras/date_time.hpp"
 
 #include "../errors.hpp"
+#include "../macros.hpp"
 
 namespace epidb {
 
@@ -45,32 +46,41 @@ namespace epidb {
     {
       std::map<OP, std::string> m;
 
-      m[PROCESS_QUERY] = "Process query";
-      m[GET_EXPERIMENT_BY_QUERY] =  "Get experiments by query";
-      m[COUNT_REGIONS] = "Count regions";
-      m[RETRIEVE_EXPERIMENT_SELECT_QUERY] = "Retrieve experiments data";
-      m[RETRIEVE_ANNOTATION_SELECT_QUERY] = "Retrieve annotations data";
-      m[RETRIEVE_INTERSECTION_QUERY] = "Intersections";
-      m[RETRIEVE_OVERLAP_QUERY] = "Overlaps";
-      m[RETRIEVE_MERGE_QUERY] = "Merge";
-      m[RETRIEVE_FIND_MOTIF_QUERY] = "Find motif";
-      m[RETRIEVE_FILTER_QUERY] = "Filtering";
-      m[RETRIEVE_TILING_QUERY] = "Tiling regions";
-      m[RETRIEVE_GENES_DATA] = "Getting genes data";
-      m[PROCESS_AGGREGATE] = "Aggregate";
-      m[PROCESS_DISTINCT] = "Process distinct";
-      m[PROCESS_BINNING] = "Process binning";
-      m[PROCESS_CALCULATE_ENRICHMENT] = "Process calculate enrichment";
-      m[PROCESS_COUNT] = "Process count";
-      m[PROCESS_COVERAGE] = "Process coverage";
-      m[PROCESS_GET_EXPERIMENTS_BY_QUERY] = "Process get experiments by query";
-      m[PROCESS_GET_REGIONS] = "Process get regions";
-      m[PROCESS_SCORE_MATRIX] = "Process score matrix";
-      m[PROCESS_LOLA] = "Process LOLA";
-      m[RETRIEVE_QUERY_REGION_SET] = "Retrieve query regions set";
-      m[RETRIEVE_FLANK_QUERY] = "Flanking";
-      m[RETRIEVE_EXPRESSIONS_DATA] = "Getting expressions data";
-      m[FORMAT_OUTPUT] = "Formating output file";
+      m[PROCESS_QUERY]                                  = "" STR(PROCESS_QUERY);
+      m[GET_EXPERIMENT_BY_QUERY]                        = "" STR(GET_EXPERIMENT_BY_QUERY);
+      m[COUNT_REGIONS]                                  = "" STR(COUNT_REGIONS);
+      m[RETRIEVE_EXPERIMENT_SELECT_QUERY]               = "" STR(RETRIEVE_EXPERIMENT_SELECT_QUERY);
+      m[RETRIEVE_ANNOTATION_SELECT_QUERY]               = "" STR(RETRIEVE_ANNOTATION_SELECT_QUERY);
+      m[RETRIEVE_INTERSECTION_QUERY]                    = "" STR(RETRIEVE_INTERSECTION_QUERY);
+      m[RETRIEVE_OVERLAP_QUERY]                         = "" STR(RETRIEVE_OVERLAP_QUERY);
+      m[RETRIEVE_MERGE_QUERY]                           = "" STR(RETRIEVE_MERGE_QUERY);
+      m[RETRIEVE_FIND_MOTIF_QUERY]                      = "" STR(RETRIEVE_FIND_MOTIF_QUERY);
+      m[RETRIEVE_FILTER_QUERY]                          = "" STR(RETRIEVE_FILTER_QUERY);
+      m[RETRIEVE_TILING_QUERY]                          = "" STR(RETRIEVE_TILING_QUERY);
+      m[RETRIEVE_GENES_DATA]                            = "" STR(RETRIEVE_GENES_DATA);
+      m[PROCESS_AGGREGATE]                              = "" STR(PROCESS_AGGREGATE);
+      m[PROCESS_DISTINCT]                               = "" STR(PROCESS_DISTINCT);
+      m[PROCESS_BINNING]                                = "" STR(PROCESS_BINNING);
+      m[PROCESS_ENRICH_REGIONS_OVERLAP]                 = "" STR(PROCESS_ENRICH_REGIONS_OVERLAP);
+      m[PROCESS_CALCULATE_GO_ENRICHMENT]                = "" STR(PROCESS_CALCULATE_GO_ENRICHMENT);
+      m[PROCESS_COUNT]                                  = "" STR(PROCESS_COUNT);
+      m[PROCESS_COVERAGE]                               = "" STR(PROCESS_COVERAGE);
+      m[PROCESS_GET_EXPERIMENTS_BY_QUERY]               = "" STR(PROCESS_GET_EXPERIMENTS_BY_QUERY);
+      m[PROCESS_GET_REGIONS]                            = "" STR(PROCESS_GET_REGIONS);
+      m[PROCESS_SCORE_MATRIX]                           = "" STR(PROCESS_SCORE_MATRIX);
+      m[RETRIEVE_QUERY_REGION_SET]                      = "" STR(RETRIEVE_QUERY_REGION_SET);
+      m[RETRIEVE_FLANK_QUERY]                           = "" STR(RETRIEVE_FLANK_QUERY);
+      m[RETRIEVE_EXPRESSIONS_DATA]                      = "" STR(RETRIEVE_EXPRESSIONS_DATA);
+      m[FORMAT_OUTPUT]                                  = "" STR(FORMAT_OUTPUT);
+      // Enrichment fast
+      m[PROCESS_ENRICH_REGIONS_FAST]                    = "" STR(PROCESS_ENRICH_REGIONS_FAST);
+      m[PROCESS_ENRICH_REGIONS_FAST_COMPARE_TO]         = "" STR(PROCESS_ENRICH_REGIONS_FAST_COMPARE_TO);
+      m[PROCESS_ENRICH_REGIONS_FAST_STORE_BITMAP]       = "" STR(PROCESS_ENRICH_REGIONS_FAST_STORE_BITMAP);
+      m[PROCESS_ENRICH_REGIONS_FAST_LOAD_BITMAP]        = "" STR(PROCESS_ENRICH_REGIONS_FAST_LOAD_BITMAP);
+      m[PROCESS_ENRICH_REGIONS_FAST_BUILD_BITMAP]       = "" STR(PROCESS_ENRICH_REGIONS_FAST_BUILD_BITMAP);
+      m[PROCESS_ENRICH_REGIONS_FAST_GET_BITMAP_REGIONS] = "" STR(PROCESS_ENRICH_REGIONS_FAST_GET_BITMAP_REGIONS);
+      m[PROCESS_ENRICH_REGIONS_FAST_BITMAP_QUERY]       = "" STR(PROCESS_ENRICH_REGIONS_FAST_BITMAP_QUERY);
+      m[PROCESS_ENRICH_REGIONS_FAST_BITMAP_EXPERIMENT]  = "" STR(PROCESS_ENRICH_REGIONS_FAST_BITMAP_EXPERIMENT);
 
       return m;
     }
@@ -84,16 +94,27 @@ namespace epidb {
       _id(mongo::OID::gen()),
       _processing_id(processing_id),
       _op(op),
-      _start_time(extras::universal_date_time())
+      _start_time(extras::universal_date_time()),
+      _steps(0),
+      _actual_step(0)
     {
       Connection c;
-      mongo::BSONObj insert = BSON("_id" << _id <<
-                                   "p_id" << _processing_id <<
-                                   "op" << _op <<
-                                   "op_name" << op_name(op) <<
-                                   "params" << param <<
-                                   "s" << extras::to_mongo_date(_start_time));
 
+      mongo::BSONObj insert;
+      if (param.isEmpty()) {
+        insert = BSON("_id" << _id <<
+                      "p_id" << _processing_id <<
+                      "op" << _op <<
+                      "op_name" << op_name(op) <<
+                      "s" << extras::to_mongo_date(_start_time));
+      } else {
+        insert = BSON("_id" << _id <<
+                      "p_id" << _processing_id <<
+                      "op" << _op <<
+                      "op_name" << op_name(op) <<
+                      "params" << param <<
+                      "s" << extras::to_mongo_date(_start_time));
+      }
       c->insert(dba::helpers::collection_name(dba::Collections::PROCESSING_OPS()), insert);
       c.done();
     }
@@ -105,6 +126,31 @@ namespace epidb {
       boost::posix_time::time_duration  total = now - _start_time;
       mongo::BSONObj query = BSON("_id" << _id);
       mongo::BSONObj update_value = BSON("$set" << BSON("e" << extras::to_mongo_date(now) << "t" << (long long) total.total_milliseconds()));
+      std::cerr << update_value.toString() << std::endl;
+      c->update(dba::helpers::collection_name(dba::Collections::PROCESSING_OPS()), query, update_value, false, false);
+      c.done();
+    }
+
+    void RunningOp::set_total_steps(size_t steps)
+    {
+      _steps = steps;
+
+      Connection c;
+      mongo::BSONObj query = BSON("_id" << _processing_id);
+      mongo::BSONObj update_value = BSON("$set" << BSON("total_steps" << (long long) _steps));
+      std::cerr << update_value.toString() << std::endl;
+      c->update(dba::helpers::collection_name(dba::Collections::PROCESSING_OPS()), query, update_value, false, false);
+      c.done();
+
+    }
+
+    void RunningOp::increment_step()
+    {
+      ++_actual_step;
+
+      Connection c;
+      mongo::BSONObj query = BSON("_id" << _processing_id);
+      mongo::BSONObj update_value = BSON("$set" << BSON("completed_steps" << (long long) _actual_step));
       c->update(dba::helpers::collection_name(dba::Collections::PROCESSING_OPS()), query, update_value, false, false);
       c.done();
     }
@@ -285,5 +331,19 @@ namespace epidb {
 
     std::string DUMMY_REQUEST = "dummy";
     std::map<OP, std::string> OP_names = create_OP_names_map();
+
+    bool is_canceled(processing::StatusPtr status, std::string& msg)
+    {
+      bool is_canceled = false;
+      if (!status->is_canceled(is_canceled, msg)) {
+        return true;
+      }
+      if (is_canceled) {
+        msg = Error::m(ERR_REQUEST_CANCELED);
+        return true;
+      }
+      return false;
+    }
   }
+
 }
