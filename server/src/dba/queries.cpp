@@ -288,7 +288,7 @@ namespace epidb {
                           bool reduced_mode)
       {
         processing::RunningOp runningOp = status->start_operation(processing::PROCESS_QUERY);
-        if (is_canceled(status, msg)) {
+        if (processing::is_canceled(status, msg)) {
           return false;
         }
 
@@ -375,7 +375,7 @@ namespace epidb {
                                     processing::StatusPtr status, std::vector<utils::IdName> &datasets, std::string &msg)
       {
         processing::RunningOp runningOp = status->start_operation(processing::GET_EXPERIMENT_BY_QUERY);
-        if (is_canceled(status, msg)) {
+        if (processing::is_canceled(status, msg)) {
           return false;
         }
 
@@ -412,7 +412,7 @@ namespace epidb {
                          processing::StatusPtr status, size_t &count, std::string &msg)
       {
         processing::RunningOp runningOp = status->start_operation(processing::COUNT_REGIONS);
-        if (is_canceled(status, msg)) {
+        if (processing::is_canceled(status, msg)) {
           return false;
         }
 
@@ -556,7 +556,7 @@ namespace epidb {
                                             bool reduced_mode)
       {
         processing::RunningOp runningOp = status->start_operation(processing::RETRIEVE_EXPERIMENT_SELECT_QUERY, query);
-        if (is_canceled(status, msg)) {
+        if (processing::is_canceled(status, msg)) {
           return false;
         }
 
@@ -623,7 +623,7 @@ namespace epidb {
       {
         mongo::BSONObj args = query["args"].Obj();
         processing::RunningOp runningOp = status->start_operation(processing::RETRIEVE_QUERY_REGION_SET, query);
-        if (is_canceled(status, msg)) {
+        if (processing::is_canceled(status, msg)) {
           return false;
         }
 
@@ -644,7 +644,7 @@ namespace epidb {
                                             processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg)
       {
         processing::RunningOp runningOp = status->start_operation(processing::RETRIEVE_ANNOTATION_SELECT_QUERY, query);
-        if (is_canceled(status, msg)) {
+        if (processing::is_canceled(status, msg)) {
           return false;
         }
 
@@ -703,7 +703,7 @@ namespace epidb {
                                        processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg)
       {
         processing::RunningOp runningOp = status->start_operation(processing::RETRIEVE_GENES_DATA, query);
-        if (is_canceled(status, msg)) {
+        if (processing::is_canceled(status, msg)) {
           return false;
         }
 
@@ -760,7 +760,7 @@ namespace epidb {
                                             processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg)
       {
         processing::RunningOp runningOp = status->start_operation(processing::RETRIEVE_EXPRESSIONS_DATA, query);
-        if (is_canceled(status, msg)) {
+        if (processing::is_canceled(status, msg)) {
           return false;
         }
 
@@ -811,7 +811,7 @@ namespace epidb {
                                      processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg)
       {
         processing::RunningOp runningOp = status->start_operation(processing::RETRIEVE_FIND_MOTIF_QUERY, query);
-        if (is_canceled(status, msg)) {
+        if (processing::is_canceled(status, msg)) {
           return false;
         }
 
@@ -847,7 +847,7 @@ namespace epidb {
                                        processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg)
       {
         processing::RunningOp runningOp = status->start_operation(processing::RETRIEVE_INTERSECTION_QUERY, query);
-        if (is_canceled(status, msg)) {
+        if (processing::is_canceled(status, msg)) {
           return false;
         }
 
@@ -884,7 +884,7 @@ namespace epidb {
                                   processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg)
       {
         processing::RunningOp runningOp = status->start_operation(processing::RETRIEVE_OVERLAP_QUERY, query);
-        if (is_canceled(status, msg)) {
+        if (processing::is_canceled(status, msg)) {
           return false;
         }
 
@@ -926,7 +926,7 @@ namespace epidb {
                                  processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg)
       {
         processing::RunningOp runningOp = status->start_operation(processing::RETRIEVE_FLANK_QUERY, query);
-        if (is_canceled(status, msg)) {
+        if (processing::is_canceled(status, msg)) {
           return false;
         }
 
@@ -949,7 +949,7 @@ namespace epidb {
                                 processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg)
       {
         processing::RunningOp runningOp = status->start_operation(processing::RETRIEVE_FLANK_QUERY, query);
-        if (is_canceled(status, msg)) {
+        if (processing::is_canceled(status, msg)) {
           return false;
         }
 
@@ -974,7 +974,7 @@ namespace epidb {
                                 processing::StatusPtr status, ChromosomeRegionsList & regions, std::string & msg)
       {
         processing::RunningOp runningOp = status->start_operation(processing::RETRIEVE_MERGE_QUERY, query);
-        if (is_canceled(status, msg)) {
+        if (processing::is_canceled(status, msg)) {
           return false;
         }
 
@@ -1037,7 +1037,7 @@ namespace epidb {
                                  processing::StatusPtr status, ChromosomeRegionsList & filtered_regions, std::string & msg)
       {
         processing::RunningOp runningOp = status->start_operation(processing::RETRIEVE_FILTER_QUERY, query);
-        if (is_canceled(status, msg)) {
+        if (processing::is_canceled(status, msg)) {
           return false;
         }
 
@@ -1176,7 +1176,7 @@ namespace epidb {
                                  processing::StatusPtr status, ChromosomeRegionsList & regions, std::string & msg)
       {
         processing::RunningOp runningOp = status->start_operation(processing::RETRIEVE_TILING_QUERY, query);
-        if (is_canceled(status, msg)) {
+        if (processing::is_canceled(status, msg)) {
           return false;
         }
 
@@ -1229,7 +1229,7 @@ namespace epidb {
       {
         processing::RunningOp runningOp = status->start_operation(processing::PROCESS_AGGREGATE, query);
 
-        if (is_canceled(status, msg)) {
+        if (processing::is_canceled(status, msg)) {
           return false;
         }
 
@@ -1623,20 +1623,6 @@ namespace epidb {
         c.done();
 
         msg = Error::m(ERR_DATASET_NOT_FOUND, dataset_id);
-        return false;
-      }
-
-      // TODO: Move to processing file
-      bool is_canceled(processing::StatusPtr status, std::string& msg)
-      {
-        bool is_canceled = false;
-        if (!status->is_canceled(is_canceled, msg)) {
-          return true;
-        }
-        if (is_canceled) {
-          msg = Error::m(ERR_REQUEST_CANCELED);
-          return true;
-        }
         return false;
       }
     }
