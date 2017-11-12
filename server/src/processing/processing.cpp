@@ -126,7 +126,6 @@ namespace epidb {
       boost::posix_time::time_duration  total = now - _start_time;
       mongo::BSONObj query = BSON("_id" << _id);
       mongo::BSONObj update_value = BSON("$set" << BSON("e" << extras::to_mongo_date(now) << "t" << (long long) total.total_milliseconds()));
-      std::cerr << update_value.toString() << std::endl;
       c->update(dba::helpers::collection_name(dba::Collections::PROCESSING_OPS()), query, update_value, false, false);
       c.done();
     }
@@ -138,7 +137,6 @@ namespace epidb {
       Connection c;
       mongo::BSONObj query = BSON("_id" << _processing_id);
       mongo::BSONObj update_value = BSON("$set" << BSON("total_steps" << (long long) _steps));
-      std::cerr << update_value.toString() << std::endl;
       c->update(dba::helpers::collection_name(dba::Collections::PROCESSING_OPS()), query, update_value, false, false);
       c.done();
 

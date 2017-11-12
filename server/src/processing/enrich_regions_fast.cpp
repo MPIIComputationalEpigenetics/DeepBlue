@@ -26,6 +26,7 @@
 #include <thread>
 
 #include <mongo/bson/bson.h>
+#include <mongo/client/dbclient.h>
 
 #include "../connection/connection.hpp"
 
@@ -48,6 +49,8 @@
 #include <boost/archive/binary_iarchive.hpp>
 
 #include "enrichment_result.hpp"
+
+#include "../log.hpp"
 
 #define BITMAP_SIZE (1024 * 1024)
 
@@ -258,8 +261,18 @@ namespace epidb {
       bob.appendBinData("data", size, mongo::BinDataGeneral, (void *) data);
 
       Connection c;
-      c->insert(dba::helpers::collection_name(dba::Collections::SIGNATURES()), bob.obj());
+      try {
+        c->insert(dba::helpers::collection_name(dba::Collections::SIGNATURES()), bob.obj());
+      } catch (const mongo::OperationException& e ) {
+        const auto& info = e.obj();
+        if (info["code"].Int() == 11000) {
+          EPIDB_LOG_TRACE("Error while inserting the bitmap for the ID:" + id + ". It was already inserted.");
+        } else {
+          throw e;
+        }
+      }
       c.done();
+
       return true;
     }
 
