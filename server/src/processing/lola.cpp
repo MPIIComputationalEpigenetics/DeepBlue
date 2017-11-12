@@ -172,7 +172,7 @@ namespace epidb {
               const std::string& genome,
               processing::StatusPtr status, mongo::BSONObj& result, std::string& msg)
     {
-      INIT_PROCESSING(PROCESS_LOLA, status)
+      INIT_PROCESSING(PROCESS_ENRICH_REGIONS_OVERLAP, status)
 
       ChromosomeRegionsList query_regions;
       if (!dba::query::retrieve_query(user, query_id, status, query_regions, msg, /* reduced_mode */ true)) {
