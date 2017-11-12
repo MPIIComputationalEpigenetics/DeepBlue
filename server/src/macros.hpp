@@ -44,3 +44,6 @@
     return false;                                                              \
   }                                                                            \
   GET_EXPRESSION_MANAGER(__EXPRESSION_TYPE_NAME, __EXPRESSION_TYPE)
+
+#define STR1(x)  #x
+#define STR(x)  STR1(x)
