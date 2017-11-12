@@ -55,9 +55,9 @@ namespace epidb {
 
   namespace processing {
 
-    bool store(const std::string &id, const std::bitset<BITMAP_SIZE>& bitmap, std::string& msg);
+    bool store(const std::string &id, const std::bitset<BITMAP_SIZE>& bitmap,  processing::StatusPtr status, std::string& msg);
 
-    bool load(const std::string &id, std::bitset<BITMAP_SIZE>& bitset, std::string& msg);
+    bool load(const std::string &id, std::bitset<BITMAP_SIZE>& bitset,  processing::StatusPtr status, std::string& msg);
 
     ProcessOverlapResult compare_to(const datatypes::User& user,
                                     const std::bitset<BITMAP_SIZE>& query_bitmap,
@@ -80,29 +80,38 @@ namespace epidb {
                                    std::bitset<BITMAP_SIZE>& out_bitmap,
                                    processing::StatusPtr status, std::string& msg);
 
+
+
     bool enrich_regions_fast(const datatypes::User& user, const std::string& query_id, const std::vector<utils::IdName>& names,
                              processing::StatusPtr status,
                              mongo::BSONObj& result, std::string& msg)
     {
+      processing::RunningOp runningOp = status->start_operation(processing::PROCESS_ENRICH_REGIONS_FAST);
+      if (processing::is_canceled(status, msg)) {
+        return false;
+      }
+
       ChromosomeRegionsList bitmap_regions;
       if (!get_bitmap_regions(user, query_id, bitmap_regions, status, msg)) {
         return false;
       }
 
       std::bitset<BITMAP_SIZE> query_bitmap;
-      if (!load(query_id, query_bitmap, msg)) {
+      if (!load(query_id, query_bitmap, status, msg)) {
         if (!process_bitmap_query(user, query_id, bitmap_regions, query_bitmap, status,  msg)) {
           return false;
         }
-        if (!store(query_id, query_bitmap, msg)) {
+        if (!store(query_id, query_bitmap, status, msg)) {
           return false;
         }
       }
 
       std::vector<std::future<ProcessOverlapResult > > threads;
 
-      threading::SemaphorePtr sem = threading::build_semaphore(16);
 
+      runningOp.set_total_steps(names.size());
+
+      threading::SemaphorePtr sem = threading::build_semaphore(16);
       for (const auto& exp: names) {
         utils::IdNameCount result;
 
@@ -123,8 +132,6 @@ namespace epidb {
 
       std::vector<ProcessOverlapResult> results;
 
-      long t = 1;
-
       for (size_t i = 0; i < threads.size(); ++i) {
         threads[i].wait();
         auto result = threads[i].get();
@@ -133,6 +140,7 @@ namespace epidb {
           return false;
         }
 
+        runningOp.increment_step();
         std::string dataset = std::get<0>(result);
 
         // --------------------- [0] dataseset, [1] biosource, [2] epi mark, [3] description, [4] size, [5] database_name, [6] ///negative_natural_log, [5] log_odds_score, [6] a, [7] b, [8] c, [9] d)
@@ -166,14 +174,19 @@ namespace epidb {
                                     processing::StatusPtr status, threading::SemaphorePtr sem,
                                     std::string& msg)
     {
+      processing::RunningOp runningOp = status->start_operation(processing::PROCESS_ENRICH_REGIONS_FAST_COMPARE_TO);
+      if (processing::is_canceled(status, msg)) {
+        return std::make_tuple(msg, "", "", "", -1.0, "", -1.0, -1.0, -1.0, -1.0, -1.0, -1.0);
+      }
+
       std::bitset<BITMAP_SIZE> exp_bitmap;
 
-      if (!load(exp.id, exp_bitmap, msg)) {
+      if (!load(exp.id, exp_bitmap, status, msg)) {
         if (!process_bitmap_experiment(user, exp.id, bitmap_regions, exp_bitmap, status, msg)) {
           sem->up();
           return std::make_tuple(msg, "", "", "", -1.0, "", -1.0, -1.0, -1.0, -1.0, -1.0, -1.0);
         }
-        if (!store(exp.id, exp_bitmap, msg)) {
+        if (!store(exp.id, exp_bitmap, status, msg)) {
           sem->up();
           return std::make_tuple(msg, "", "", "", -1.0, "", -1.0, -1.0, -1.0, -1.0, -1.0, -1.0);
         }
@@ -226,8 +239,13 @@ namespace epidb {
       return std::make_tuple(exp.name, biosource, epigenetic_mark, "", BITMAP_SIZE, "", negative_natural_log, log_odds_score, a, b, c, d);
     }
 
-    bool store(const std::string &id, const std::bitset<BITMAP_SIZE>& bitmap, std::string& msg)
+    bool store(const std::string &id, const std::bitset<BITMAP_SIZE>& bitmap, processing::StatusPtr status, std::string& msg)
     {
+      processing::RunningOp runningOp = status->start_operation(processing::PROCESS_ENRICH_REGIONS_FAST_STORE_BITMAP);
+      if (processing::is_canceled(status, msg)) {
+        return false;
+      }
+
       std::stringstream stream;
       boost::archive::binary_oarchive ar(stream, boost::archive::no_header);
       ar & bitmap;
@@ -245,8 +263,13 @@ namespace epidb {
       return true;
     }
 
-    bool load(const std::string &id, std::bitset<BITMAP_SIZE>& bitset, std::string& msg)
+    bool load(const std::string &id, std::bitset<BITMAP_SIZE>& bitset, processing::StatusPtr status, std::string& msg)
     {
+      processing::RunningOp runningOp = status->start_operation(processing::PROCESS_ENRICH_REGIONS_FAST_LOAD_BITMAP);
+      if (processing::is_canceled(status, msg)) {
+        return false;
+      }
+
       auto query = BSON("_id" << id);
       mongo::BSONObj result;
       if (!dba::helpers::get_one(dba::Collections::SIGNATURES(), query, result)) {
@@ -266,8 +289,14 @@ namespace epidb {
 
 
     bool build_bitmap(const Regions& ranges, const Regions& data,
-                      size_t &pos, std::bitset<BITMAP_SIZE>& bitmap, std::string& msg)
+                      size_t &pos, std::bitset<BITMAP_SIZE>& bitmap,
+                      processing::StatusPtr status, std::string& msg)
     {
+      processing::RunningOp runningOp = status->start_operation(processing::PROCESS_ENRICH_REGIONS_FAST_BUILD_BITMAP);
+      if (processing::is_canceled(status, msg)) {
+        return false;
+      }
+
       auto it_ranges = ranges.begin();
       auto it_data_begin = data.begin();
 
@@ -306,6 +335,11 @@ namespace epidb {
                             ChromosomeRegionsList& bitmap_regions,
                             processing::StatusPtr status, std::string& msg)
     {
+      processing::RunningOp runningOp = status->start_operation(processing::PROCESS_ENRICH_REGIONS_FAST_GET_BITMAP_REGIONS);
+      if (processing::is_canceled(status, msg)) {
+        return false;
+      }
+
       std::string norm_genome;
 
       std::vector<std::string> vector_genome;
@@ -351,6 +385,11 @@ namespace epidb {
                               std::bitset<BITMAP_SIZE>& out_bitmap,
                               processing::StatusPtr status, std::string& msg)
     {
+      processing::RunningOp runningOp = status->start_operation(processing::PROCESS_ENRICH_REGIONS_FAST_BITMAP_QUERY);
+      if (processing::is_canceled(status, msg)) {
+        return false;
+      }
+
       size_t pos = 0;
       ChromosomeRegionsList data_regions;
       if (!dba::query::retrieve_query(user, query_id, status, data_regions, msg, true)) {
@@ -361,16 +400,19 @@ namespace epidb {
         bool found = false;
         for (auto &datum: data_regions) {
           if (chromosome.first == datum.first) {
-            if (!build_bitmap(chromosome.second, datum.second, pos, out_bitmap, msg)) {
+            if (!build_bitmap(chromosome.second, datum.second, pos, out_bitmap, status, msg)) {
               msg += " (Query ID: " + query_id + ", chromosome: " + chromosome.first + ")";
               return false;
+            }
+            for (const auto& r : datum.second) {
+              status->subtract_size(r->size());
             }
             found = true;
           }
         }
         if (!found) {
           Regions empty_data;
-          if (!build_bitmap(chromosome.second, empty_data, pos, out_bitmap, msg)) {
+          if (!build_bitmap(chromosome.second, empty_data, pos, out_bitmap, status, msg)) {
             msg += " (Query ID: " + query_id + ", chromosome: " + chromosome.first + "(empty))";
             return false;
           }
@@ -384,6 +426,11 @@ namespace epidb {
                                    std::bitset<BITMAP_SIZE>& out_bitmap,
                                    processing::StatusPtr status, std::string& msg)
     {
+      processing::RunningOp runningOp = status->start_operation(processing::PROCESS_ENRICH_REGIONS_FAST_BITMAP_EXPERIMENT);
+      if (processing::is_canceled(status, msg)) {
+        return false;
+      }
+
       mongo::BSONObj experiment_obj;
       if (!dba::experiments::by_id(id, experiment_obj, msg)) {
         return false;
@@ -399,18 +446,17 @@ namespace epidb {
         }
 
         Regions data;
-        if (!dba::retrieve::get_regions(norm_genome, chromosome.first, regions_query, false, status, data, msg)) {
+        if (!dba::retrieve::get_regions(norm_genome, chromosome.first, regions_query, false, status, data, msg, true)) {
           return false;
         }
 
-        if (!build_bitmap(chromosome.second, data,  pos, out_bitmap, msg)) {
+        if (!build_bitmap(chromosome.second, data,  pos, out_bitmap, status, msg)) {
           msg += " (Query ID: " + id + ", chromosome: " + chromosome.first + "(empty))";
           return false;
         }
 
-        // Remove the size of the region, keeping only the size of the Stored score.
         for (const auto& r : data) {
-          status->subtract_size(r->size() - sizeof(Score));
+          status->subtract_size(r->size());
         }
       }
 
