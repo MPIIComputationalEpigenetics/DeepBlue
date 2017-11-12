@@ -68,25 +68,13 @@ namespace epidb {
       float              m_interval;
       std::auto_ptr<boost::asio::deadline_timer> m_timer;
 
-
       void update_check(Client *c, const boost::system::error_code &error)
       {
         std::string _id;
         mongo::BSONObj task;
 
-        try {
-          if (c->get_next_task(_id, task)) {
-            c->handle_task(_id, task);
-          }
-        } catch (const mongo::SocketException& e) {
-          EPIDB_LOG_ERR(Error::m(ERR_DATABASE_EXCEPTION, "Client::update_check()", e.what()));
-        } catch (const mongo::UserException& e) {
-          EPIDB_LOG_ERR(Error::m(ERR_DATABASE_EXCEPTION, "Client::update_check()", e.what()));
-        } catch (const std::exception& e) {
-          std::string s(e.what());
-          EPIDB_LOG_ERR(__FILE__ << ":" << __LINE__ << " - exception at Client::update_check()" << ": " << s);
-        } catch (const std::string& ex) {
-          EPIDB_LOG_ERR(__FILE__ << ":" << __LINE__ << " - exception at Client::update_check()" << ": " << ex);
+        if (c->get_next_task(_id, task)) {
+          c->handle_task(_id, task);
         }
 
         if (!error) {

@@ -79,7 +79,30 @@ namespace epidb {
 
       processing::StatusPtr status = processing::build_status(id, user.memory_limit());
       mongo::BSONObj result;
-      bool success = process(user, o, status, result);
+
+      bool success = false;
+
+      try {
+        success = process(user, o, status, result);
+      } catch (const mongo::SocketException& e) {
+        auto err = Error::m(ERR_DATABASE_EXCEPTION, o["command"].str(), e.what());
+        result = BSON("__error__" << err);
+        success = false;
+
+      } catch (const mongo::UserException& e) {
+        auto err = Error::m(ERR_DATABASE_EXCEPTION, o["command"].str(), e.what());
+        result = BSON("__error__" << err);
+        success = false;
+
+      } catch (const std::exception& e) {
+        result = BSON("__error__" << e.what());
+        success = false;
+
+      } catch (const std::string& ex) {
+        result = BSON("__error__" << ex);
+        success = false;
+      }
+
       finish(result, success);
     }
 
@@ -279,7 +302,6 @@ namespace epidb {
 
       mongo::BSONObj enrichment;
       if (!processing::enrich_regions_fast(user, query_id, names, status, enrichment, msg)) {
-        std::cerr << msg << std::endl;
         bob.append("__error__", msg);
         result = bob.obj();
         return false;
