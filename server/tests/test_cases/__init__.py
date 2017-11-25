@@ -13,6 +13,7 @@ import complex_queries
 import coverage
 import distinct
 import epigenetic_marks
+import enrichment
 import experiments
 import experiment_sets
 import extend
