@@ -125,6 +125,8 @@ namespace epidb {
       if (task_state == TS_DONE || task_state == TS_FAILED) {
         remove_request_data(request_id, TS_REMOVED, msg);
       }
+
+      c.done();
       return true;
     }
 
