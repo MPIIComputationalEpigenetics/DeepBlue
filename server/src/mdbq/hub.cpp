@@ -132,7 +132,7 @@ namespace epidb {
       if (ret.isEmpty()) {
         return false;
       } else {
-        if (update && is_cleared(ret)) {
+        if (update && (is_cleared(ret) || is_canceled(ret))) {
           reprocess_job(ret);
         }
         id = ret["_id"].String();
@@ -172,7 +172,6 @@ namespace epidb {
 
     bool Hub::reprocess_job(const mongo::BSONObj &job)
     {
-      std::cerr << "re process job" << std::endl;
       const std::string& _id = job["_id"].str();
 
       boost::posix_time::ptime now = epidb::extras::universal_date_time();
@@ -420,22 +419,30 @@ namespace epidb {
       return o["_id"].String();
     }
 
-    bool Hub::is_done(const mongo::BSONObj &o)
+    bool Hub::is(const mongo::BSONObj &o, const mdbq::TaskState state)
     {
       TaskState task_state = (TaskState) o["state"].numberInt();
-      return task_state == TS_DONE;
+      return task_state == state;
+    }
+
+    bool Hub::is_done(const mongo::BSONObj &o)
+    {
+      return Hub::is(o, TS_DONE);
     }
 
     bool Hub::is_failed(const mongo::BSONObj &o)
     {
-      TaskState task_state = (TaskState) o["state"].numberInt();
-      return task_state == TS_FAILED;
+      return Hub::is(o, TS_FAILED);
     }
 
     bool Hub::is_cleared(const mongo::BSONObj &o)
     {
-      TaskState task_state = (TaskState) o["state"].numberInt();
-      return task_state == TS_CLEARED;
+      return Hub::is(o, TS_CLEARED);
+    }
+
+    bool Hub::is_canceled(const mongo::BSONObj &o)
+    {
+      return Hub::is(o, TS_CANCELLED);
     }
   }
 }

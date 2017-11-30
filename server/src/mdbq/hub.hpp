@@ -59,6 +59,7 @@ namespace epidb {
       /// database plus queue prefix (db.queue)
       const std::string m_prefix;
 
+      static bool is(const mongo::BSONObj &o, const mdbq::TaskState state);
 
     public:
       /**
@@ -179,6 +180,8 @@ namespace epidb {
       static bool is_cleared(const mongo::BSONObj& o);
 
       static bool is_failed(const mongo::BSONObj& o);
+
+      static bool is_canceled(const mongo::BSONObj &o);
     };
   }
 }
