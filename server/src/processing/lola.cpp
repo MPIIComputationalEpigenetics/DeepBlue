@@ -123,17 +123,6 @@ namespace epidb {
 
       double b = testSetsOverlapUniverse - a;
 
-      if (b < 0) {
-        std::cerr << "test_sets_overlap_universe" << testSetsOverlapUniverse << std::endl;
-        std::cerr << "count_query_overlap_with_universe" << count_query_overlap_with_universe << std::endl;
-        std::cerr << "total_universe_regions" << total_universe_regions << std::endl;
-        std::cerr << "A" << a << std::endl;
-        std::cerr << "B" << b << std::endl;
-
-        sem->up();
-        msg = "Negative b entry in table. This means either: 1) Your user sets contain items outside your universe; or 2) your universe has a region that overlaps multiple user set regions, interfering with the universe set overlap calculation. Dataset: " + dataset_name;
-        return std::make_tuple(msg, "", "", "", -1.0, "", -1.0, -1.0, -1.0, -1.0, -1.0, -1.0);
-      }
 
       /*
        c - [non-hits in user query set]. For this I take the size of the user set - support
@@ -146,14 +135,35 @@ namespace epidb {
       //#universe_regions - a - b - c = #universe_regions that do NOT overlap with query_set and that do NOT overlap with dataset_regions
       double d = total_universe_regions - a - b - c;
 
+
+      if (b < 0) {
+        std::cerr << "--------------------------------------" << std::endl;
+        std::cerr << "test_sets_overlap_universe: " << testSetsOverlapUniverse << std::endl;
+        std::cerr << "count_database_regions: " << count_database_regions  << std::endl;
+        std::cerr << "query_overlap_total: " << query_overlap_total  << std::endl;
+        std::cerr << "count_query_overlap_with_universe: " << count_query_overlap_with_universe << std::endl;
+        std::cerr << "total_universe_regions: " << total_universe_regions << std::endl;
+        std::cerr << "A: " << a << std::endl;
+        std::cerr << "B: " << b << std::endl;
+        std::cerr << "--------------------------------------" << std::endl;
+
+        sem->up();
+        msg = "Negative b entry in table. This means either: 1) Your user sets contain items outside your universe; or 2) your universe has a region that overlaps multiple user set regions, interfering with the universe set overlap calculation. Dataset: " + dataset_name;
+        return std::make_tuple(msg, "", "", "", -1.0, "", -1.0, -1.0, -1.0, -1.0, -1.0, -1.0);
+      }
+
       if (d < 0) {
-        std::cerr << "test_sets_overlap_universe" << testSetsOverlapUniverse << std::endl;
-        std::cerr << "count_query_overlap_with_universe" << count_query_overlap_with_universe << std::endl;
-        std::cerr << "total_universe_regions" << total_universe_regions << std::endl;
-        std::cerr << "A" << a << std::endl;
-        std::cerr << "B" << b << std::endl;
-        std::cerr << "C" << c << std::endl;
-        std::cerr << "D" << d << std::endl;
+        std::cerr << "--------------------------------------" << std::endl;
+        std::cerr << "test_sets_overlap_universe: " << testSetsOverlapUniverse << std::endl;
+        std::cerr << "count_database_regions: " << count_database_regions  << std::endl;
+        std::cerr << "query_overlap_total: " << query_overlap_total  << std::endl;
+        std::cerr << "count_query_overlap_with_universe: " << count_query_overlap_with_universe << std::endl;
+        std::cerr << "total_universe_regions: " << total_universe_regions << std::endl;
+        std::cerr << "A: " << a << std::endl;
+        std::cerr << "B: " << b << std::endl;
+        std::cerr << "C: " << c << std::endl;
+        std::cerr << "D: " << d << std::endl;
+        std::cerr << "--------------------------------------" << std::endl;
 
         sem->up();
         msg = "Negative d entry in table. This means either: 1) Your user sets contain items outside your universe; or 2) your universe has a region that overlaps multiple user set regions, interfering with the universe set overlap calculation. Dataset: " + dataset_name ;
