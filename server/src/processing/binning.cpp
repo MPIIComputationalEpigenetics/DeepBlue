@@ -34,7 +34,8 @@ namespace epidb {
                  const std::string& column_name, const int bars,
                  processing::StatusPtr status, mongo::BSONObj& result, std::string& msg)
     {
-      INIT_PROCESSING(PROCESS_BINNING, status)
+      IS_PROCESSING_CANCELLED(status);
+      processing::RunningOp runningOp =  status->start_operation(PROCESS_BINNING);
 
       if (bars <= 0) {
         msg = "There must be at least one bar in the binning";

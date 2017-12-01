@@ -36,11 +36,6 @@
 
 namespace epidb {
 
-#define INIT_PROCESSING(_WHAT, _STATUS) {                  \
-    IS_PROCESSING_CANCELLED(_STATUS)                         \
-    status->start_operation(_WHAT);                          \
-  }                                                          \
-
 #define IS_PROCESSING_CANCELLED(_STATUS) {                 \
     bool is_canceled = false;                                \
     if (!_STATUS->is_canceled(is_canceled, msg)) {           \
@@ -96,7 +91,10 @@ namespace epidb {
 
       FORMAT_OUTPUT,
       BUILDING_OUTPUT,
-      COMPRESSING_OUTPUT
+      COMPRESSING_OUTPUT,
+
+      ALGORITHM_OVERLAP,
+      ALGORITHM_OVERLAP_CHROMOSOME
     };
 
     extern std::map<OP, std::string> OP_names;

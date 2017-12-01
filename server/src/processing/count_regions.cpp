@@ -29,7 +29,9 @@ namespace epidb {
                        const std::string &query_id,
                        processing::StatusPtr status, size_t &count, std::string &msg)
     {
-      INIT_PROCESSING(PROCESS_COUNT, status)
+      IS_PROCESSING_CANCELLED(status);
+      processing::RunningOp runningOp =  status->start_operation(PROCESS_COUNT);
+
       if (!dba::query::count_regions(user, query_id, status, count, msg)) {
         return false;
       }

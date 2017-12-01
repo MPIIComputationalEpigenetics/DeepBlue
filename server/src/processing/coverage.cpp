@@ -33,7 +33,8 @@ namespace epidb {
                   const std::string &query_id, const std::string &genome,
                   processing::StatusPtr status, std::vector<CoverageInfo> &coverage_infos, std::string &msg)
     {
-      INIT_PROCESSING(PROCESS_COVERAGE, status)
+      IS_PROCESSING_CANCELLED(status);
+      processing::RunningOp runningOp =  status->start_operation(PROCESS_COVERAGE);
 
       ChromosomeRegionsList chromosomeRegionsList;
       if (!dba::query::retrieve_query(user, query_id, status, chromosomeRegionsList, msg)) {

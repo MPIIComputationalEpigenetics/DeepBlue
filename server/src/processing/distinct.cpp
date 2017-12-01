@@ -34,7 +34,9 @@ namespace epidb {
                   const std::string& query_id, const std::string& column_name,
                   processing::StatusPtr status, mongo::BSONObj& result, std::string& msg)
     {
-      INIT_PROCESSING(PROCESS_DISTINCT, status)
+      IS_PROCESSING_CANCELLED(status);
+      processing::RunningOp runningOp =  status->start_operation(PROCESS_DISTINCT);
+
 
       ChromosomeRegionsList chromosomeRegionsList;
       if (!dba::query::retrieve_query(user, query_id, status, chromosomeRegionsList, msg)) {

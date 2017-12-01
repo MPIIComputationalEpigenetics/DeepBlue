@@ -31,7 +31,9 @@ namespace epidb {
     bool get_experiments_by_query(const datatypes::User& user,
                                   const std::string &query_id, StatusPtr status, std::vector<utils::IdName> &experiments, std::string &msg)
     {
-      INIT_PROCESSING(PROCESS_GET_EXPERIMENTS_BY_QUERY, status)
+      IS_PROCESSING_CANCELLED(status);
+      processing::RunningOp runningOp =  status->start_operation(PROCESS_GET_EXPERIMENTS_BY_QUERY);
+
       if (!dba::query::get_experiments_by_query(user, query_id, status, experiments, msg)) {
         return false;
       }
