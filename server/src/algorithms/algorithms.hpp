@@ -54,11 +54,11 @@ namespace epidb {
                ChromosomeRegionsList &result, std::string &msg);
 
     bool intersect(ChromosomeRegionsList &regions_data, ChromosomeRegionsList &regions_overlap,
-                   ChromosomeRegionsList &intersections);
+                   processing::StatusPtr status, ChromosomeRegionsList &intersections, std::string &msg);
 
     bool overlap(ChromosomeRegionsList &regions_data, ChromosomeRegionsList &regions_overlap,
                  const bool overlap, const double amount, const std::string amount_type,
-                 ChromosomeRegionsList &intersections);
+                 processing::StatusPtr status,  ChromosomeRegionsList &overlaps, std::string &msg);
 
     bool intersect_count(const ChromosomeRegionsList &regions_data, const ChromosomeRegionsList &regions_overlap,
                          size_t& count);

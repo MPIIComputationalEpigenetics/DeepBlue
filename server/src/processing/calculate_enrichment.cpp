@@ -39,7 +39,8 @@ namespace epidb {
                               const std::string& query_id, const std::string& gene_model,
                               processing::StatusPtr status, mongo::BSONObj& result, std::string& msg)
     {
-      INIT_PROCESSING(PROCESS_CALCULATE_GO_ENRICHMENT, status)
+      IS_PROCESSING_CANCELLED(status);
+      processing::RunningOp runningOp =  status->start_operation(PROCESS_CALCULATE_GO_ENRICHMENT);
 
       const std::string norm_gene_model = utils::normalize_name(gene_model);
 
@@ -83,7 +84,7 @@ namespace epidb {
       }
 
       ChromosomeRegionsList intersections;
-      if (!algorithms::intersect(genesRegionsList, chromosomeRegionsList,intersections)) {
+      if (!algorithms::intersect(genesRegionsList, chromosomeRegionsList, status, intersections, msg)) {
         return false;
       }
 

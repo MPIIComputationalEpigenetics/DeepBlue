@@ -27,16 +27,21 @@
 
 #include "../datatypes/regions.hpp"
 
+#include "../processing/processing.hpp"
+
 #include "algorithms.hpp"
 
 namespace epidb {
   namespace algorithms {
 
     ChromosomeRegions overlap_regions(Regions &&regions_data, Regions &&regions_overlap, const std::string& chromosome,
-                                      const bool overlap, const double amount, const std::string amount_type);
+                                      const bool overlap, const double amount, const std::string amount_type,
+                                      processing::StatusPtr status, std::string &msg);
+
     bool overlap(ChromosomeRegionsList &regions_data, ChromosomeRegionsList &regions_overlap,
                  const bool overlap, const double amount, const std::string amount_type,
-                 ChromosomeRegionsList &overlaps);
+                 processing::StatusPtr status,
+                 ChromosomeRegionsList &overlaps, std::string &msg);
 
     bool get_chromosome_regions(ChromosomeRegionsList &qr, const std::string &chr, Regions &chr_regions)
     {
@@ -50,9 +55,21 @@ namespace epidb {
     }
 
     ChromosomeRegions overlap_regions(Regions &&regions_data, Regions &&regions_overlap, const std::string& chromosome,
-                                      const bool overlap, const double amount, const std::string amount_type)
+                                      const bool overlap, const double amount, const std::string amount_type,
+                                      processing::StatusPtr status, std::string &msg)
     {
+      processing::RunningOp runningOp = status->start_operation(processing::ALGORITHM_OVERLAP_CHROMOSOME,
+                                        BSON(
+                                          "total_regions_data" << (int) regions_data.size() <<
+                                          "total_regions_overlap" << (int) regions_overlap.size() <<
+                                          "chromosome" << chromosome
+                                        ));
       Regions regions = Regions();
+
+      if (processing::is_canceled(status, msg)) {
+        return ChromosomeRegions(chromosome, std::move(regions));
+      }
+
 
       bool dynamic_overlap_length = amount_type == "bp" ? false : true;
 
@@ -92,10 +109,10 @@ namespace epidb {
         }
 
         while ((data_pos < data_size) &&
-              ((*it_ranges)->end() >= regions_data[data_pos]->start()) )  {
+               ((*it_ranges)->end() >= regions_data[data_pos]->start()) )  {
 
           if (((*it_ranges)->start() < regions_data[data_pos]->end()) &&
-             ((*it_ranges)->end() > regions_data[data_pos]->start())) {
+              ((*it_ranges)->end() > regions_data[data_pos]->start())) {
 
             if (overlap) {
               if (dynamic_overlap_length) {
@@ -152,15 +169,21 @@ namespace epidb {
       return ChromosomeRegions(chromosome, std::move(regions));
     }
 
-    bool intersect(ChromosomeRegionsList &regions_data, ChromosomeRegionsList &regions_overlap, ChromosomeRegionsList &intersections)
+    bool intersect(ChromosomeRegionsList &regions_data, ChromosomeRegionsList &regions_overlap,
+                   processing::StatusPtr status, ChromosomeRegionsList &intersections, std::string &msg)
     {
-      return overlap(regions_data, regions_overlap, true, 0.0, "bp", intersections);
+      return overlap(regions_data, regions_overlap, true, 0.0, "bp", status, intersections, msg);
     }
 
     bool overlap(ChromosomeRegionsList &regions_data, ChromosomeRegionsList &regions_overlap,
                  const bool overlap, const double amount, const std::string amount_type,
-                 ChromosomeRegionsList &overlaps)
+                 processing::StatusPtr status,  ChromosomeRegionsList &overlaps, std::string &msg)
     {
+      processing::RunningOp runningOp = status->start_operation(processing::ALGORITHM_OVERLAP);
+      if (processing::is_canceled(status, msg)) {
+        return false;
+      }
+
       // long times = clock();
       std::set<std::string> chromosomes;
       merge_chromosomes(regions_data, regions_overlap, chromosomes);
@@ -187,13 +210,13 @@ namespace epidb {
 
         // If I do not want overlaps, but nothing to overlap to... Add them all!
         if (!overlap && !has_overlap) {
-            overlaps.emplace_back(ChromosomeRegions(chr, std::move(chr_regions_data)));
-            continue;
+          overlaps.emplace_back(ChromosomeRegions(chr, std::move(chr_regions_data)));
+          continue;
         }
 
         auto t = std::async(std::launch::async, &overlap_regions,
                             std::move(chr_regions_data), std::move(chr_regions_overlap), std::ref(chr),
-                            std::ref(overlap), std::ref(amount), std::ref(amount_type));
+                            std::ref(overlap), std::ref(amount), std::ref(amount_type), std::ref(status), std::ref(msg));
 
         threads.emplace_back(std::move(t));
       }
@@ -205,6 +228,8 @@ namespace epidb {
           overlaps.emplace_back(std::move(result));
         }
       }
+
+
 
       // long diffticks = clock() - times;
       // "OVERLAP: " << ((diffticks) / (CLOCKS_PER_SEC / 1000)) << std::endl;

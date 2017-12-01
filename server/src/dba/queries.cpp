@@ -876,7 +876,7 @@ namespace epidb {
           return false;
         }
 
-        return algorithms::intersect(regions_a, range_regions, regions);
+        return algorithms::intersect(regions_a, range_regions, status, regions, msg);
       }
 
       bool retrieve_overlap_query(const datatypes::User& user,
@@ -917,7 +917,7 @@ namespace epidb {
         const double amount = args["amount"].Number();
         const std::string amount_type = args["amount_type"].str();
 
-        return algorithms::overlap(regions_a, range_regions, overlap, amount, amount_type, regions);
+        return algorithms::overlap(regions_a, range_regions, overlap, amount, amount_type, status, regions, msg);
       }
 
 

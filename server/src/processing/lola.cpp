@@ -201,7 +201,9 @@ namespace epidb {
               const std::string& genome,
               processing::StatusPtr status, mongo::BSONObj& result, std::string& msg)
     {
-      INIT_PROCESSING(PROCESS_ENRICH_REGIONS_OVERLAP, status)
+      IS_PROCESSING_CANCELLED(status);
+      processing::RunningOp runningOp =  status->start_operation(PROCESS_ENRICH_REGIONS_OVERLAP);
+
 
       ChromosomeRegionsList query_regions;
       if (!dba::query::retrieve_query(user, query_id, status, query_regions, msg, /* reduced_mode */ true)) {
@@ -220,7 +222,7 @@ namespace epidb {
 
       universe_regions = std::move(disjoin_set);
       ChromosomeRegionsList query_overlap_with_universe;
-      if (!algorithms::intersect(query_regions, universe_regions, query_overlap_with_universe)) {
+      if (!algorithms::intersect(query_regions, universe_regions, status, query_overlap_with_universe, msg)) {
         return false;
       }
       size_t count_query_overlap_with_universe = count_regions(query_overlap_with_universe);
