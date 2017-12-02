@@ -233,6 +233,21 @@ namespace epidb {
       return _total_size;
     }
 
+    bool Status::is_allowed_size(size_t output_size)
+    {
+      if (_request_id == DUMMY_REQUEST) {
+        return true;
+      }
+      return (output_size <= static_cast<size_t>(_maximum_memory));
+    }
+
+
+    bool Status::sum_and_check_size(size_t to_sum)
+    {
+      sum_size(to_sum);
+      return is_allowed_size(_total_size);
+    }
+
     long long Status::subtract_size(const long long size)
     {
       _total_size -= size;
@@ -261,14 +276,6 @@ namespace epidb {
       mongo::BSONObj update_value = BSON("$set" << BSON("total_stored_data_compressed" << (long long) _total_stored_data_compressed.load()));
       c->update(dba::helpers::collection_name(dba::Collections::PROCESSING()), query, update_value, false, false);
       c.done();
-    }
-
-    bool Status::is_allowed_size(size_t output_size)
-    {
-      if (_request_id == DUMMY_REQUEST) {
-        return true;
-      }
-      return (output_size <= static_cast<size_t>(_maximum_memory));
     }
 
     long long Status::total_regions()

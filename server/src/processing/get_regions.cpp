@@ -107,8 +107,8 @@ namespace epidb {
           // ***
 
           if (!status->is_allowed_size(sb.size())) {
-            msg = "The output string is bigger than the size that you are allowed to use: '" + utils::size_t_to_string(status->maximum_size()/1024/104) +
-                  "Megabytes'. We recomend you to select fewer experiments, chromosomes, or check the metafields that you are using, for example the @SEQUENCE metafield.";
+            msg = "The output string ("  + utils::size_t_to_string(sb.size()/1024/1024) + "MBytes) is bigger than the size that you are allowed to use: '" + utils::size_t_to_string(status->maximum_size()/1024/1024) +
+                  " MBytes'. We recomend you to select fewer experiments, chromosomes, or check the metafields that you are using, for example the @SEQUENCE metafield.";
             return false;
           }
 

@@ -321,6 +321,17 @@ namespace epidb {
             rp.read_region(o);
             status->sum_regions(rp._it_count);
 
+            // Check memory consumption
+            if (!status->sum_and_check_size(rp._it_size)) {
+              msg = "Memory exhausted. Used "  + utils::size_t_to_string(status->total_size()) + "bytes of " + utils::size_t_to_string(status->maximum_size()) + "bytes allowed. Please, select a smaller initial dataset, for example, selecting fewer chromosomes)"; // TODO: put a better error msg.
+              c.done();
+              return false;
+            }
+
+            // Reset iteration stats
+            rp._it_count = 0;
+            rp._it_size = 0;
+
             // Check if processing was canceled
             bool is_canceled = false;
             if (!status->is_canceled(is_canceled, msg)) {
@@ -332,19 +343,6 @@ namespace epidb {
               msg = Error::m(ERR_REQUEST_CANCELED);
               return false;
             }
-            // ***
-
-            // Check memory consumption
-            if (!status->is_allowed_size(rp._it_size)) {
-              msg = "Memory exhausted. Used "  + utils::size_t_to_string(status->total_size()) + "bytes of " + utils::size_t_to_string(status->maximum_size()) + "bytes allowed. Please, select a smaller initial dataset, for example, selecting fewer chromosomes)"; // TODO: put a better error msg.
-              c.done();
-              return false;
-            }
-            // ***
-
-            // Reset iteration stats
-            rp._it_count = 0;
-            rp._it_size = 0;
           }
         }
 
