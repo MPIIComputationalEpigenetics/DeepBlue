@@ -1215,7 +1215,13 @@ namespace epidb {
           }
           Regions regs = Regions();
           for (size_t i = 0; i + tiling_size < chromosome_info.size; i += tiling_size) {
-            regs.emplace_back(build_simple_region(i, i + tiling_size, tiling_id));
+            auto r = build_simple_region(i, i + tiling_size, tiling_id);
+            if (!status->sum_and_check_size(r->size())) {
+              msg = "Memory exhausted. Used "  + utils::size_t_to_string(status->total_size()) + "bytes of " + utils::size_t_to_string(status->maximum_size()) + "bytes allowed. Please, select a smaller initial dataset, for example, selecting fewer chromosomes)"; // TODO: put a better error msg.
+              return false;
+            }
+            regs.emplace_back(std::move(r));
+
           }
           regions.push_back(ChromosomeRegions(*cit, std::move(regs)));
         }
