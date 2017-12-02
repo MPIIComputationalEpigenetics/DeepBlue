@@ -578,9 +578,17 @@ namespace epidb {
 
         bool operator==(const GeneLocation &other) const
         {
-          return (chromosome == other.chromosome
-                  && start == other.start
-                  && end == other.end);
+          if (other.strand == ".") {
+            return (chromosome == other.chromosome
+                    && start == other.start
+                    && end == other.end);
+          }
+          else {
+            return (chromosome == other.chromosome
+              && start == other.start
+              && end == other.end
+              && strand == other.strand);
+          }
         }
       };
 
