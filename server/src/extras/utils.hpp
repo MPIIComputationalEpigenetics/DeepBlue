@@ -40,12 +40,20 @@ namespace epidb {
 
     class IdName {
     public:
-      IdName() :
-        id(""), name("") {}
-      IdName(std::string i, std::string n) :
-        id(i), name(n) {}
       std::string id;
       std::string name;
+
+      IdName() :
+        id(""), name("") {}
+
+      IdName(std::string i, std::string n) :
+        id(i), name(n) {}
+
+      bool operator<(const IdName& other) const
+      {
+        return name.compare(other.name) < 0;
+      }
+
     };
 
     std::ostream &operator<<(std::ostream &os, const IdName &o);
