@@ -45,21 +45,17 @@ namespace epidb {
 
       static  Parameters parameters_()
       {
-        Parameter p[] = {
+        return {
           parameters::BioSource,
           parameters::UserKey
         };
-        Parameters params(&p[0], &p[0] + 2);
-        return params;
       }
 
       static Parameters results_()
       {
-        Parameter p[] = {
+        return {
           Parameter("biosources", serialize::LIST, "parents biosources")
         };
-        Parameters results(&p[0], &p[0] + 1);
-        return results;
       }
 
     public:
