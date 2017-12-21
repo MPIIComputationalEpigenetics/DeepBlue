@@ -373,9 +373,39 @@ namespace epidb {
         }
         if (args.hasField("norm_experiment_name")) {
           if (args["norm_experiment_name"].type() == mongo::Array) {
-            experiments_query_builder.append("norm_name", BSON("$in" << args["norm_experiment_name"]));
+            auto experiment_names = utils::build_vector(args["norm_experiment_name"].Array());
+
+            std::vector<std::string> exp_names_string;
+            std::vector<std::string> md5sums;
+
+            for (auto& name: experiment_names) {
+              if (name.empty()) {
+                continue;
+              }
+              if (name[0] == '#') {
+                md5sums.push_back(name.erase(0, 1));
+              } else {
+                exp_names_string.push_back(name);
+              }
+            }
+
+            if (!exp_names_string.empty()) {
+              experiments_query_builder.append("norm_name", BSON("$in" << utils::build_array(exp_names_string)));
+            }
+
+            if (!md5sums.empty()) {
+              experiments_query_builder.append("extra_metadata.md5sum", BSON("$in" << utils::build_array(exp_names_string)));
+            }
           } else {
-            experiments_query_builder.append("norm_name", args["norm_experiment_name"].str());
+            auto exp_name = args["norm_experiment_name"].str();
+            if (!exp_name.empty()) {
+              if (exp_name[0] == '#') {
+                experiments_query_builder.append("extra_metadata.md5sum", exp_name);
+              } else {
+                experiments_query_builder.append("norm_name", exp_name);
+              }
+            }
+
           }
         }
         if (args.hasField("norm_epigenetic_mark")) {
