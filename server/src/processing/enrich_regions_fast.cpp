@@ -179,7 +179,7 @@ namespace epidb {
     {
       processing::RunningOp runningOp = status->start_operation(processing::PROCESS_ENRICH_REGIONS_FAST_COMPARE_TO);
       if (processing::is_canceled(status, msg)) {
-        return std::make_tuple(msg, "", "", "", -1.0, "", -1.0, -1.0, -1.0, -1.0, -1.0, -1.0);
+        return std::make_tuple(exp.name, "", "", "", -1.0, "", -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, true, msg);
       }
 
       std::bitset<BITMAP_SIZE> exp_bitmap;
@@ -187,18 +187,18 @@ namespace epidb {
       if (!load(exp.id, exp_bitmap, status, msg)) {
         if (!process_bitmap_experiment(user, exp.id, bitmap_regions, exp_bitmap, status, msg)) {
           sem->up();
-          return std::make_tuple(msg, "", "", "", -1.0, "", -1.0, -1.0, -1.0, -1.0, -1.0, -1.0);
+          return std::make_tuple(exp.name, "", "", "", -1.0, "", -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, true, msg);
         }
         if (!store(exp.id, exp_bitmap, status, msg)) {
           sem->up();
-          return std::make_tuple(msg, "", "", "", -1.0, "", -1.0, -1.0, -1.0, -1.0, -1.0, -1.0);
+          return std::make_tuple(exp.name, "", "", "", -1.0, "", -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, true, msg);
         }
       }
 
       mongo::BSONObj experiment_obj;
       if (!dba::experiments::by_name(exp.name, experiment_obj, msg)) {
         sem->up();
-        return std::make_tuple(msg, "", "", "", -1.0, "", -1.0, -1.0, -1.0, -1.0, -1.0, -1.0);
+        return std::make_tuple(exp.name, "", "", "", -1.0, "", -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, true, msg);
       }
 
       std::string biosource;
@@ -218,7 +218,7 @@ namespace epidb {
       if (b < 0) {
         sem->up();
         msg = "Negative b entry in table. This means either: 1) Your user sets contain items outside your universe; or 2) your universe has a region that overlaps multiple user set regions, interfering with the universe set overlap calculation.";
-        return std::make_tuple(msg, "", "", "", -1.0, "", -1.0, -1.0, -1.0, -1.0, -1.0, -1.0);
+        return std::make_tuple(exp.name, biosource, epigenetic_mark, description, -1, "", -1, -1, -1, -1, -1, -1, true, msg);
       }
 
       double c = query_bitmap.count()  - a;
@@ -239,7 +239,7 @@ namespace epidb {
       }
 
       sem->up();
-      return std::make_tuple(exp.name, biosource, epigenetic_mark, "", BITMAP_SIZE, "", negative_natural_log, log_odds_score, a, b, c, d);
+      return std::make_tuple(exp.name, biosource, epigenetic_mark, "", BITMAP_SIZE, "", negative_natural_log, log_odds_score, a, b, c, d, false, msg);
     }
 
     bool store(const std::string &id, const std::bitset<BITMAP_SIZE>& bitmap, processing::StatusPtr status, std::string& msg)
@@ -477,4 +477,3 @@ namespace epidb {
     }
   };
 };
-

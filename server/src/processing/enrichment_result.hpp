@@ -35,8 +35,8 @@ struct TupleCompare {
 namespace epidb {
   namespace processing {
 
-    // [0] dataseset, [1] biosource, [2] epigenetic_mark, [3] descroption, [4] size, [5] database_name, [6] negative_natural_log, [7] log_odds_score, [8] a, [9] b, [10] c, [11] d,)
-    using ProcessOverlapResult = std::tuple<std::string, std::string, std::string, std::string, int, std::string, double, double, int, int, int, int>;
+    // [0] dataseset, [1] biosource, [2] epigenetic_mark, [3] descroption, [4] size, [5] database_name, [6] negative_natural_log, [7] log_odds_score, [8] a, [9] b, [10] c, [11] d, error, msg)
+    using ProcessOverlapResult = std::tuple<std::string, std::string, std::string, std::string, int, std::string, double, double, int, int, int, int, bool, std::string>;
 
     struct ExperimentResult {
       std::string dataset;
@@ -63,6 +63,9 @@ namespace epidb {
       int max_rank;
       double mean_rank;
 
+      bool error;
+      std::string msg;
+
       mongo::BSONObj toBSON()
       {
         return BSON(
@@ -82,7 +85,9 @@ namespace epidb {
                  "log_rank" << log_rank <<
                  "odd_rank" << odd_rank <<
                  "max_rank" << max_rank <<
-                 "mean_rank" << mean_rank
+                 "mean_rank" << mean_rank <<
+                 "error" << error <<
+                 "msg" << msg
                );
       }
     };

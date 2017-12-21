@@ -46,7 +46,7 @@ namespace epidb {
 
     ProcessOverlapResult process_overlap(const datatypes::User& user,
                                          const std::string& genome, const std::vector<std::string>& chromosomes,
-                                         const ChromosomeRegionsList &query_overlap_with_universe, const long count_query_overlap_with_universe,
+                                         const ChromosomeRegionsList &redefined_universe_overlap_query, const long count_redefined_universe_overlap_query,
                                          const std::string dataset_name, const std::string description,
                                          const std::string database_name,
                                          const ChromosomeRegionsList &universe_regions, const long total_universe_regions,
@@ -61,19 +61,19 @@ namespace epidb {
       if (utils::is_id(dataset_name, "q")) {
         if (!dba::query::retrieve_query(user, dataset_name, status, database_regions, msg, /* reduced_mode */ true)) {
           sem->up();
-          return std::make_tuple(msg, "", "", "", -1.0, "", -1.0, -1.0, -1.0, -1.0, -1.0, -1.0);
+          return std::make_tuple(dataset_name, biosource, epigenetic_mark, description, -1, database_name, -1, -1, -1, -1, -1, -1, true, msg);
         }
 
         std::vector<std::string> exp_biosources;
         const std::string bs_field_name = "sample_info.biosource_name";
         if (!dba::query::get_main_experiment_data(user, dataset_name, bs_field_name, status, exp_biosources, msg)) {
-          return std::make_tuple(msg, "", "", "", -1.0, "", -1.0, -1.0, -1.0, -1.0, -1.0, -1.0);
+          return std::make_tuple(dataset_name, biosource, epigenetic_mark, description, -1, database_name, -1, -1, -1, -1, -1, -1, true, msg);
         }
 
         std::vector<std::string> exp_epigenetic_marks;
         const std::string em_field_name = "epigenetic_mark";
         if (!dba::query::get_main_experiment_data(user, dataset_name, em_field_name, status, exp_epigenetic_marks, msg)) {
-          return std::make_tuple(msg, "", "", "", -1.0, "", -1.0, -1.0, -1.0, -1.0, -1.0, -1.0);
+          return std::make_tuple(dataset_name, biosource, epigenetic_mark, description, -1, database_name, -1, -1, -1, -1, -1, -1, true, msg);
         }
 
         biosource = utils::vector_to_string(exp_biosources);
@@ -83,18 +83,18 @@ namespace epidb {
 
         if (!dba::query::build_experiment_query(-1, -1, utils::normalize_name(dataset_name), regions_query, msg)) {
           sem->up();
-          return std::make_tuple(msg, "", "", "", -1.0, "", -1.0, -1.0, -1.0, -1.0, -1.0, -1.0);
+          return std::make_tuple(dataset_name, biosource, epigenetic_mark, description, -1, database_name, -1, -1, -1, -1, -1, -1, true, msg);
         }
 
         if (!dba::retrieve::get_regions(genome, chromosomes, regions_query, false, status, database_regions, msg, /* reduced_mode */ true)) {
           sem->up();
-          return std::make_tuple(msg, "", "", "", -1.0, "", -1.0, -1.0, -1.0, -1.0, -1.0, -1.0);
+          return std::make_tuple(dataset_name, biosource, epigenetic_mark, description, -1, database_name, -1, -1, -1, -1, -1, -1, true, msg);
         }
 
         mongo::BSONObj experiment_obj;
         if (!dba::experiments::by_name(dataset_name, experiment_obj, msg)) {
           sem->up();
-          return std::make_tuple(msg, "", "", "", -1.0, "", -1.0, -1.0, -1.0, -1.0, -1.0, -1.0);
+          return std::make_tuple(dataset_name, biosource, epigenetic_mark, description, -1, database_name, -1, -1, -1, -1, -1, -1, true, msg);
         }
 
         if (!experiment_obj.isEmpty()) {
@@ -103,71 +103,53 @@ namespace epidb {
         }
       }
 
-      size_t count_database_regions = count_regions(database_regions);
-      size_t query_overlap_total;
-      if (!algorithms::intersect_count(query_overlap_with_universe, database_regions, query_overlap_total)) {
-        sem->up();
-        return std::make_tuple(msg, "", "", "", -1.0, "", -1.0, -1.0, -1.0, -1.0, -1.0, -1.0);
-      }
 
-      // a = #query_overlap_with_universe overlapping with at least one region in dataset_regions
+      size_t count_database_regions = count_regions(database_regions);
+
+
+      // This will become "support" -- the number of regions in the
+      // userSet (which I implicitly assume is ALSO the number of regions
+      // in the universe) that overlap anything in each database set.
+      // Turn results into an overlap matrix. It is
+      // dbSets (rows) by userSets (columns), counting overlap.
+      size_t query_overlap_total;
+      if (!algorithms::intersect_count(redefined_universe_overlap_query, database_regions, query_overlap_total)) {
+        sem->up();
+        return std::make_tuple(dataset_name, biosource, epigenetic_mark, description, count_database_regions, database_name, -1, -1, -1, -1, -1, -1, true, msg);
+      }
       double a = query_overlap_total;
 
-      /*
-        b - the # of items *in the universe* that overlap each dbSet less the support;
-        This is the number of items in the universe that are in the dbSet ONLY (not in userSet).
-        b = #query_overlap_with_universe NOT overlapping with at least one region in dataset_regions
-      */
-      size_t testSetsOverlapUniverse;
-      algorithms::intersect_count(database_regions, universe_regions, testSetsOverlapUniverse);
 
-      double b = testSetsOverlapUniverse - a;
+      // b = the # of items *in the universe* that overlap each dbSet,
+      // less the support; This is the number of items in the universe
+      // that are in the dbSet ONLY (not in userSet)
+      size_t universe_overlap_with_database_total;
+      if (!algorithms::intersect_count(universe_regions, database_regions, universe_overlap_with_database_total)) {
+        sem->up();
+        return std::make_tuple(dataset_name, biosource, epigenetic_mark, description, count_database_regions, database_name, -1, -1, -1, -1, -1, -1, true, msg);
+      }
+      double b = universe_overlap_with_database_total - a;
 
 
-      /*
-       c - [non-hits in user query set]. For this I take the size of the user set - support
-       this is the rest of the user set that did not have any overlaps to the test set.
-      */
-      // c = #universe_overlap_with_dataset that are NOT contained in query
-      double c = count_query_overlap_with_universe  - a;
+      // c = the size of userSet, less the support; This is the opposite:
+      // Items in the userSet ONLY (not in the dbSet)
+      double c = count_redefined_universe_overlap_query - a;
 
-      //# d - [size of universe - b -c -a]
+
       //#universe_regions - a - b - c = #universe_regions that do NOT overlap with query_set and that do NOT overlap with dataset_regions
       double d = total_universe_regions - a - b - c;
 
 
       if (b < 0) {
-        std::cerr << "--------------------------------------" << std::endl;
-        std::cerr << "test_sets_overlap_universe: " << testSetsOverlapUniverse << std::endl;
-        std::cerr << "count_database_regions: " << count_database_regions  << std::endl;
-        std::cerr << "query_overlap_total: " << query_overlap_total  << std::endl;
-        std::cerr << "count_query_overlap_with_universe: " << count_query_overlap_with_universe << std::endl;
-        std::cerr << "total_universe_regions: " << total_universe_regions << std::endl;
-        std::cerr << "A: " << a << std::endl;
-        std::cerr << "B: " << b << std::endl;
-        std::cerr << "--------------------------------------" << std::endl;
-
         sem->up();
         msg = "Negative b entry in table. This means either: 1) Your user sets contain items outside your universe; or 2) your universe has a region that overlaps multiple user set regions, interfering with the universe set overlap calculation. Dataset: " + dataset_name;
-        return std::make_tuple(msg, "", "", "", -1.0, "", -1.0, -1.0, -1.0, -1.0, -1.0, -1.0);
+        return std::make_tuple(dataset_name, biosource, epigenetic_mark, description, count_database_regions, database_name, -1, -1, a, b, c, d, true, msg);
       }
 
       if (d < 0) {
-        std::cerr << "--------------------------------------" << std::endl;
-        std::cerr << "test_sets_overlap_universe: " << testSetsOverlapUniverse << std::endl;
-        std::cerr << "count_database_regions: " << count_database_regions  << std::endl;
-        std::cerr << "query_overlap_total: " << query_overlap_total  << std::endl;
-        std::cerr << "count_query_overlap_with_universe: " << count_query_overlap_with_universe << std::endl;
-        std::cerr << "total_universe_regions: " << total_universe_regions << std::endl;
-        std::cerr << "A: " << a << std::endl;
-        std::cerr << "B: " << b << std::endl;
-        std::cerr << "C: " << c << std::endl;
-        std::cerr << "D: " << d << std::endl;
-        std::cerr << "--------------------------------------" << std::endl;
-
         sem->up();
         msg = "Negative d entry in table. This means either: 1) Your user sets contain items outside your universe; or 2) your universe has a region that overlaps multiple user set regions, interfering with the universe set overlap calculation. Dataset: " + dataset_name ;
-        return std::make_tuple(msg, "", "", "", -1.0, "", -1.0, -1.0, -1.0, -1.0, -1.0, -1.0);
+        return std::make_tuple(dataset_name, biosource, epigenetic_mark, description, count_database_regions, database_name, -1, -1, a, b, c, d, true, msg);
       }
 
       double p_value = math::fisher_test(a, b, c, d);
@@ -191,7 +173,7 @@ namespace epidb {
       }
 
       sem->up();
-      return std::make_tuple(dataset_name, biosource, epigenetic_mark, description, count_database_regions, database_name, negative_natural_log, log_odds_score, a, b, c, d);
+      return std::make_tuple(dataset_name, biosource, epigenetic_mark, description, count_database_regions, database_name, negative_natural_log, log_odds_score, a, b, c, d, false, "");
     }
 
 
@@ -221,11 +203,11 @@ namespace epidb {
       size_t disjoin_set_count = count_regions(disjoin_set);
 
       universe_regions = std::move(disjoin_set);
-      ChromosomeRegionsList query_overlap_with_universe;
-      if (!algorithms::intersect(query_regions, universe_regions, status, query_overlap_with_universe, msg)) {
+      ChromosomeRegionsList redefined_universe_overlap_query;
+      if (!algorithms::intersect(universe_regions, query_regions, status, redefined_universe_overlap_query, msg)) {
         return false;
       }
-      size_t count_query_overlap_with_universe = count_regions(query_overlap_with_universe);
+      size_t count_redefined_universe_overlap_query = count_regions(redefined_universe_overlap_query);
 
 
       std::set<std::string> chromosomes_s;
@@ -261,7 +243,7 @@ namespace epidb {
           auto t = std::async(std::launch::async, &process_overlap,
                               std::ref(user),
                               std::ref(genome), std::ref(chromosomes),
-                              std::ref(query_overlap_with_universe), count_query_overlap_with_universe,
+                              std::ref(redefined_universe_overlap_query), count_redefined_universe_overlap_query,
                               dataset_name, description, database_name,
                               std::ref(universe_regions), total_universe_regions,
                               status, sem,

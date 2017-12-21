@@ -43,7 +43,9 @@ namespace epidb {
                                  int,         // [8]  a (support)
                                  int,         // [9]  b
                                  int,         // [10] c
-                                 int          // [11] d
+                                 int,         // [11] d
+                                 bool,        // [12] error
+                                 std::string  // [13] error message
                                  >;
 
     void sort_values(std::vector<std::tuple<std::string, size_t>>& datasets_support,
