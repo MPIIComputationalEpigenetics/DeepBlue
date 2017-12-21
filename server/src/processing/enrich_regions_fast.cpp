@@ -138,11 +138,6 @@ namespace epidb {
       for (size_t i = 0; i < threads.size(); ++i) {
         threads[i].wait();
         auto result = threads[i].get();
-        if (std::get<4>(result) == -1) {
-          msg = std::get<0>(result);
-          return false;
-        }
-
         runningOp.increment_step();
         std::string dataset = std::get<0>(result);
 
