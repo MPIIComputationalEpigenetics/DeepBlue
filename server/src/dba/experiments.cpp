@@ -61,6 +61,22 @@ namespace epidb {
         return true;
       }
 
+      bool by_hash(const std::string &id, mongo::BSONObj &experiment, std::string &msg)
+      {
+        if (id.empty()) {
+          msg = Error::m(ERR_INVALID_EXPERIMENT_ID, id);
+          return false;
+        }
+
+        auto _new_id = id;
+        _new_id.erase(0, 1);
+        if (!helpers::get_one(Collections::EXPERIMENTS(), BSON("extra_metadata.md5sum" << _new_id), experiment)) {
+          msg = Error::m(ERR_INVALID_EXPERIMENT_ID, id);
+          return false;
+        }
+        return true;
+      }
+
       bool get_genome(const std::string &norm_name, std::string &norm_genome, std::string &msg)
       {
         mongo::BSONObj experiment;
@@ -74,9 +90,21 @@ namespace epidb {
 
       bool get_experiment_name(const std::string &name_id, std::string &name, std::string &norm_name, std::string &msg)
       {
+        if (name_id.empty()) {
+          msg == Error::m(ERR_INVALID_EXPERIMENT, name_id);
+          return false;
+        }
+
         if (utils::is_id(name_id, "e")) {
           mongo::BSONObj experiment;
           if (!by_id(name_id, experiment, msg)) {
+            return false;
+          }
+          name = experiment["name"].str();
+          norm_name = utils::normalize_name(name);
+        } else if (name_id[0] == '#') {
+          mongo::BSONObj experiment;
+          if (!by_hash(name_id, experiment, msg)) {
             return false;
           }
           name = experiment["name"].str();

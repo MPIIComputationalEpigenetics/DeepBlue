@@ -132,14 +132,30 @@ namespace epidb {
       bool experiment(const std::string &id, const std::vector<std::string>& user_projects,
                       mongo::BSONObj &result, std::string &msg)
       {
+        if (id.empty()) {
+          msg = Error::m(ERR_INVALID_EXPERIMENT_ID, id);
+          return false;
+        }
+
+        mongo::BSONObjBuilder bob;
+
+        if (id[0] == '#') {
+          auto _new_id = id;
+          _new_id.erase(0, 1);
+          bob.append("extra_metadata.md5sum", _new_id);
+        } else  {
+          bob.append("_id", id);
+        }
+
         mongo::BSONObj query = BSON("$and" <<
                                     BSON_ARRAY(
-                                      BSON("_id" << id) <<
+                                      bob.obj() <<
                                       BSON("norm_project" <<
                                            BSON("$in" << utils::build_array(user_projects))
                                           )
                                     )
                                    );
+
         if (helpers::get_one(Collections::EXPERIMENTS(), mongo::Query(query), result)) {
           return true;
         } else {
