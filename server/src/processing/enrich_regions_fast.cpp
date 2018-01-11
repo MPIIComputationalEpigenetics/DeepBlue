@@ -141,7 +141,7 @@ namespace epidb {
         runningOp.increment_step();
         std::string dataset = std::get<0>(result);
 
-        // --------------------- [0] dataseset, [1] biosource, [2] epi mark, [3] description, [4] size, [5] database_name, [6] ///negative_natural_log, [5] log_odds_score, [6] a, [7] b, [8] c, [9] d)
+        // --------------------- [0] dataseset, [1] biosource, [2] epi mark, [3] description, [4] size, [5] database_name, [6] ///negative_natural_log, [5] odds_score, [6] a, [7] b, [8] c, [9] d)
         datasets_log_score.push_back(std::make_tuple(dataset, std::get<6>(result)));
         datasets_odds_score.push_back(std::make_tuple(dataset, std::get<7>(result)));
         datasets_support.push_back(std::make_tuple(dataset, std::get<8>(result)));
@@ -225,16 +225,16 @@ namespace epidb {
 
       double a_b = a/b;
       double c_d = c/d;
-      double log_odds_score;
+      double odds_score;
       // Handle when 'b' and 'd' are 0.
       if (a_b == c_d) {
-        log_odds_score = 1;
+        odds_score = 1;
       } else {
-        log_odds_score = a_b/c_d;
+        odds_score = a_b/c_d;
       }
 
       sem->up();
-      return std::make_tuple(exp.name, biosource, epigenetic_mark, "", BITMAP_SIZE, "", negative_natural_log, log_odds_score, a, b, c, d, false, msg);
+      return std::make_tuple(exp.name, biosource, epigenetic_mark, "", BITMAP_SIZE, "", negative_natural_log, odds_score, a, b, c, d, false, msg);
     }
 
     bool store(const std::string &id, const std::bitset<BITMAP_SIZE>& bitmap, processing::StatusPtr status, std::string& msg)

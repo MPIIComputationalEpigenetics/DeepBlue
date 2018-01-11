@@ -157,12 +157,12 @@ namespace epidb {
 
       double a_b = a/b;
       double c_d = c/d;
-      double log_odds_score;
+      double odds_score;
       // Handle when 'b' and 'd' are 0.
       if (a_b == c_d) {
-        log_odds_score = 1;
+        odds_score = 1;
       } else {
-        log_odds_score = a_b/c_d;
+        odds_score = a_b/c_d;
       }
 
       status->subtract_regions(count_database_regions);
@@ -173,7 +173,7 @@ namespace epidb {
       }
 
       sem->up();
-      return std::make_tuple(dataset_name, biosource, epigenetic_mark, description, count_database_regions, database_name, negative_natural_log, log_odds_score, a, b, c, d, false, "");
+      return std::make_tuple(dataset_name, biosource, epigenetic_mark, description, count_database_regions, database_name, negative_natural_log, odds_score, a, b, c, d, false, "");
     }
 
 

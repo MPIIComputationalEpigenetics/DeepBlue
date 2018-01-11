@@ -35,7 +35,7 @@ struct TupleCompare {
 namespace epidb {
   namespace processing {
 
-    // [0] dataseset, [1] biosource, [2] epigenetic_mark, [3] descroption, [4] size, [5] database_name, [6] negative_natural_log, [7] log_odds_score, [8] a, [9] b, [10] c, [11] d, error, msg)
+    // [0] dataseset, [1] biosource, [2] epigenetic_mark, [3] descroption, [4] size, [5] database_name, [6] negative_natural_log, [7] odds_score, [8] a, [9] b, [10] c, [11] d, error, msg)
     using ProcessOverlapResult = std::tuple<std::string, std::string, std::string, std::string, int, std::string, double, double, int, int, int, int, bool, std::string>;
 
     struct ExperimentResult {
@@ -49,7 +49,7 @@ namespace epidb {
       std::string database_name;
 
       double negative_natural_log;
-      double log_odds_ratio;
+      double odds_ratio;
 
       int a;
       int b;
@@ -76,7 +76,7 @@ namespace epidb {
                  "experiment_size" << experiment_size <<
                  "database_name" << database_name <<
                  "p_value_log" << negative_natural_log <<
-                 "odds_ratio" << log_odds_ratio <<
+                 "odds_ratio" << odds_ratio <<
                  "support" << a <<
                  "b" << b <<
                  "c" << c <<

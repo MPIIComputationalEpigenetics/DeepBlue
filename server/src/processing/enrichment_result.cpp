@@ -39,7 +39,7 @@ namespace epidb {
                                  int,         // [4]  size
                                  std::string, // [5]  database_name
                                  double,      // [6]  negative_natural_log
-                                 double,      // [7]  log_odds_score
+                                 double,      // [7]  odds_score
                                  int,         // [8]  a (support)
                                  int,         // [9]  b
                                  int,         // [10] c
@@ -120,7 +120,7 @@ namespace epidb {
         er->experiment_size = get<4>(result);
         er->database_name = get<5>(result);
         er->negative_natural_log = get<6>(result);
-        er->log_odds_ratio = get<7>(result);
+        er->odds_ratio = get<7>(result);
         er->a = get<8>(result);
         er->b = get<9>(result);
         er->c = get<10>(result);
