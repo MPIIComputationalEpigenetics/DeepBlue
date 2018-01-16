@@ -1,0 +1,15 @@
+{
+  "links": {
+        "sidebar": {
+            "DeepBlue Epigenomic Web Server": "deepblue.mpi-inf.mpg.de"
+        },
+
+        "sharing": {
+            "google": null,
+            "facebook": null,
+            "twitter": null,
+            "weibo": null,
+            "all": null
+        }
+    }
+}
