@@ -197,7 +197,11 @@ namespace epidb {
               return false;
             }
 
-            if (id.compare(0, 1, "a") == 0) {
+            if (id.compare(0, 1, "#") == 0) {
+              ok = dba::info::get_experiment(id, user_projects, metadata, extra_metadata, sample_info, columns, upload_info, msg);
+              ok = ok && dba::info::id_to_name(upload_info, msg);
+              type = "experiment";
+            } else if (id.compare(0, 1, "a") == 0) {
               ok = dba::info::get_annotation(id, metadata, extra_metadata, columns, upload_info, msg);
               ok = ok && dba::info::id_to_name(upload_info, msg);
               type = "annotation";
