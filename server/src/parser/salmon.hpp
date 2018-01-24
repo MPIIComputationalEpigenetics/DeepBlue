@@ -25,19 +25,19 @@ namespace epidb {
     class TPMRow : public ISerializable {
 
     private:
-      std::string _gene_id;
+      std::string _tracking_id;
       Length _length;
-      Length _effective_length;
+      double _effective_length;
       double _tpm;
       double _num_reads;
 
     public:
-      TPMRow(const std::string &gene_id, const Length length, const Length effective_length,
+      TPMRow(const std::string &tracking_id, const double length, const double effective_length,
               double tpm, double num_reads);
 
-      const std::string& gene_id() const { return _gene_id; }
+      const std::string& tracking_id() const { return _tracking_id; }
       const Length length() const { return _length; }
-      const Length effective_length() const { return _effective_length; }
+      const double effective_length() const { return _effective_length; }
       const double tpm() const { return _tpm; }
       const double num_reads() const { return _num_reads; }
 
@@ -46,7 +46,7 @@ namespace epidb {
 
     class TPMFile : public ISerializableFile {
     public:
-      void add_row(const std::string &gene_id, const Length length, const Length effective_length,
+      void add_row(const std::string &tracking_id, const double length, const double effective_length,
                     double tpm, double num_reads);
     };
   }

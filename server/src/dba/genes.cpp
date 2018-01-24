@@ -721,11 +721,14 @@ namespace epidb {
         const auto &cache_tracking_id = gene_models_cache_tracking_id[gene_model];
         auto it = cache_tracking_id.find(gene_tracking_id_parts[0]);
 
+        std::cerr << "LOOKING FOR " << gene_tracking_id_parts[0] << std::endl;
+
         if (it == cache_tracking_id.end()) {
           const auto &cache_gene_name = gene_models_cache_gene_name[gene_model];
           it = cache_gene_name.find(gene_name);
           if (it == cache_gene_name.end()) {
             if (gene_tracking_id.empty()) {
+              std::cerr << gene_tracking_id[0] << " " << gene_name << " " << gene_model << std::endl;
               msg = "Gene name '" + gene_name + "' not found in the gene model " + gene_model;
             } else {
               msg = "Gene tracking_id '" + gene_tracking_id + "' with gene name: '" + gene_name + "' not found in the gene model " + gene_model;

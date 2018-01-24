@@ -139,8 +139,8 @@ namespace epidb {
         }
 
         std::string norm_file_format = utils::normalize_name(format);
-        if (norm_file_format != "cufflinks" && norm_file_format != "grape2") {
-          msg  = "Only the formats 'cufflinks' or 'grape2' are currently supported. ('"+format+"')";
+        if (norm_file_format != "cufflinks" && norm_file_format != "grape2" && norm_file_format != "salmon") {
+          msg  = "Only the formats 'cufflinks', 'grape2', or 'salmon' are currently supported. ('"+format+"')";
           result.add_error(msg);
           return false;
         }

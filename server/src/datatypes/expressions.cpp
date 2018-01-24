@@ -75,6 +75,10 @@ namespace epidb {
         const auto& grape2_format = parser::FileFormat::grape2_format();
         gene_model_metadata_builder.append("format", grape2_format.format());
         gene_model_metadata_builder.append("columns", grape2_format.to_bson());
+      } else if (format == "salmon") {
+        const auto& salmon_format = parser::FileFormat::salmon_format();
+        gene_model_metadata_builder.append("format", salmon_format.format());
+        gene_model_metadata_builder.append("columns", salmon_format.to_bson());
       } else {
         msg = "Format '" + format + "' is unknow";
         return false;

@@ -148,6 +148,7 @@ namespace epidb {
 
       std::string column_id;
 
+      // TODO: Move the columns creation process all to an external file.
       if (!dba::columns::create_column_type_simple(admin_user, "CHROMOSOME", utils::normalize_name("CHROMOSOME"),
           "Chromosome name column. This column should be used to store the Chromosome value in all experiments and annotations",
           utils::normalize_name("Chromosome name column. This column should be used to store the Chromosome value in all experiments and annotations"),
@@ -313,6 +314,12 @@ namespace epidb {
       if (!dba::columns::create_column_type_simple(admin_user, "FPKM_CI_UPPER_BOUND", utils::normalize_name("FPKM_CI_UPPER_BOUND"),
           "FPKM - Credibility interval - upper bound.",
           utils::normalize_name("FPKM - Credibility interval - upper bound"),
+          "double", column_id, msg)) {
+        return false;
+      }
+      if (!dba::columns::create_column_type_simple(admin_user, "NUM_READS", utils::normalize_name("NUM_READS"),
+          "Number of Reads for TPM or FPKM calculation.",
+          utils::normalize_name("Number of Reads for TPM or FPKM calculation."),
           "double", column_id, msg)) {
         return false;
       }

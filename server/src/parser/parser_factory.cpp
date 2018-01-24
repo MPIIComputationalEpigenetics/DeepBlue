@@ -243,6 +243,12 @@ namespace epidb {
       return GRAPE2_FORMAT;
     }
 
+    const FileFormat FileFormat::salmon_format()
+    {
+      static FileFormat SALMON_FORMAT = FileFormat::salmon_format_builder();
+      return SALMON_FORMAT;
+    }
+
     const FileFormat FileFormat::default_format_builder()
     {
       FileFormat format;
@@ -418,6 +424,47 @@ namespace epidb {
       format.add(fpkm_lo);
       format.add(fpkm_hi);
       format.add(fpkm_status);
+      return format;
+    }
+
+    const FileFormat FileFormat::salmon_format_builder()
+    {
+      FileFormat format;
+
+      dba::columns::ColumnTypePtr gene_id;
+      dba::columns::ColumnTypePtr length;
+      dba::columns::ColumnTypePtr effective_length;
+      dba::columns::ColumnTypePtr tpm;
+      dba::columns::ColumnTypePtr num_reads;
+
+      std::string msg;
+
+      format.set_format("GENE_ID,LENGTH,EFFECTIVE_LENGTH,TPM,NUM_READS");
+
+      processing::StatusPtr status = processing::build_dummy_status();
+
+      if (!dba::columns::load_column_type("GENE_ID", status, gene_id, msg)) {
+        EPIDB_LOG_ERR(msg);
+      }
+      if (!dba::columns::load_column_type("LENGTH", status, length, msg)) {
+        EPIDB_LOG_ERR(msg);
+      }
+      if (!dba::columns::load_column_type("EFFECTIVE_LENGTH", status, effective_length, msg)) {
+        EPIDB_LOG_ERR(msg);
+      }
+      if (!dba::columns::load_column_type("TPM", status,  tpm, msg)) {
+        EPIDB_LOG_ERR(msg);
+      }
+      if (!dba::columns::load_column_type("NUM_READS", status, num_reads, msg)) {
+        EPIDB_LOG_ERR(msg);
+      }
+
+      format.add(gene_id);
+      format.add(length);
+      format.add(effective_length);
+      format.add(tpm);
+      format.add(num_reads);
+
       return format;
     }
 

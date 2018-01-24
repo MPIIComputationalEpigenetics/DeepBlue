@@ -1,7 +1,7 @@
 //
-//  cufflinks_parser.hpp
+//  salmon_parser.hpp
 //  DeepBlue Epigenomic Data Server
-//  File created by Felipe Albrecht on 29.06.16.
+//  File created by Felipe Albrecht on 24.01.17.
 //  Copyright (c) 2016 Max Planck Institute for Informatics. All rights reserved.
 
 //  This program is free software: you can redistribute it and/or modify
@@ -18,8 +18,8 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef CUFFLINKES_PARSER_HPP
-#define CUFFLINKES_PARSER_HPP
+#ifndef SALMON_PARSER_HPP
+#define SALMON_PARSER_HPP
 
 #include <string>
 #include <sstream>
@@ -32,12 +32,12 @@
 namespace epidb {
   namespace parser {
 
-    class CufflinksParser: public IGeneExpressionParser {
+    class SalmonParser: public IGeneExpressionParser {
     public:
-      CufflinksParser(std::unique_ptr<std::istream> &&input);
+      SalmonParser(std::unique_ptr<std::istream> &&input);
       virtual bool parse(ISerializableFilePtr &file, std::string &msg);
     };
   }
 }
 
-#endif /* defined(CUFFLINKES_PARSER_HPP) */
+#endif /* defined(SALMON_PARSER_HPP) */

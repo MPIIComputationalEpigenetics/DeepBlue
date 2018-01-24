@@ -28,6 +28,7 @@
 
 #include "cufflinks_parser.hpp"
 #include "grape2_parser.hpp"
+#include "salmon_parser.hpp"
 
 namespace epidb {
   namespace parser {
@@ -41,6 +42,10 @@ namespace epidb {
 
         if (format == "grape2") {
           return std::unique_ptr<IGeneExpressionParser>(new Grape2Parser(std::move(input)));
+        }
+
+        if (format == "salmon") {
+          return std::unique_ptr<IGeneExpressionParser>(new SalmonParser(std::move(input)));
         }
 
         msg = "Unknow format " + format;

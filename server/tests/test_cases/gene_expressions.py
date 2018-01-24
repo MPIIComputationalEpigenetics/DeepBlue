@@ -267,3 +267,28 @@ class TestExpressions(helpers.TestCase):
     s, regions = epidb.get_request_data(req, user_key)
 
     self.assertEquals(regions, "ENSG00000240755.1\tLOWDATA\ts1\tK562\nENSG00000256386.1\tLOWDATA\ts1\tK562\nENSG00000198743.5\tLOWDATA\ts1\tK562\nENSG00000267937.1\tLOWDATA\ts1\tK562\nENSG00000238556.1\tLOWDATA\ts1\tK562\nENSG00000255902.1\tLOWDATA\ts1\tK562\nENSG00000266692.1\tLOWDATA\ts1\tK562")
+
+
+  def test_salmon_include_retrieve(self):
+    epidb = DeepBlueClient(address="localhost", port=31415)
+    self.init_base(epidb)
+
+    data = gzip.open("data/gtf/gencode.v19.annotation.ONLY_GENES.gtf.gz").read()
+    (s, ss) = epidb.add_gene_model("gencode v19", "hg19", "Test One Description", data, "GTF", {}, self.admin_key)
+    self.assertSuccess(s, ss)
+
+    (s, project) = epidb.add_project("BLUEPRINT", "BLUEPRINT", self.admin_key)
+    self.assertSuccess(s, project)
+
+    data = gzip.open("data/tpm/test.genes.sf.gz").read()
+    (s, gene_expression) = epidb.add_expression("gene", "s2", 1, data, "salmon", "BLUEPRINT", None, self.admin_key)
+    self.assertSuccess(s, gene_expression)
+
+    (status, gx_query) = epidb.select_expressions("gene", "s2", 1, None, "BLUEPRINT", "gencode v19", self.admin_key)
+    self.assertSuccess(status, gx_query)
+
+    (status, r_id) = epidb.get_regions(gx_query, "GENE_ID,LENGTH,EFFECTIVE_LENGTH,TPM,NUM_READS", self.admin_key)
+    self.assertSuccess(status, r_id)
+    data = self.get_regions_request(r_id)
+
+    self.assertEquals(data, 'ENSG00000198712.1\t684\t508.2220\t238.0270\t10249.0000\nENSG00000210164.1\t68\t20.0000\t9.4425\t16.0000\nENSG00000212907.2\t297\t134.0000\t178.6330\t2028.0000\nENSG00000210176.1\t69\t20.0000\t151.6710\t257.0000\nENSG00000198786.2\t1812\t1477.8101\t33.5372\t4198.9902\nENSG00000198695.2\t525\t330.2690\t14.8310\t414.9930\nENSG00000210194.1\t69\t20.0000\t37.7701\t64.0000\nENSG00000198727.2\t1141\t867.7130\t90.2670\t6636.0000\nENSG00000210196.2\t68\t20.0000\t112.7200\t191.0000')

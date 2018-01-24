@@ -34,9 +34,9 @@
 namespace epidb {
   namespace parser {
 
-    TPMRow::TPMRow(const std::string &gene_id, const Length length, const Length effective_length,
+    TPMRow::TPMRow(const std::string &tracking_id, const double length, const double effective_length,
                    double tpm, double num_reads):
-      _gene_id(gene_id),
+      _tracking_id(tracking_id),
       _length(length),
       _effective_length(effective_length),
       _tpm(tpm),
@@ -47,7 +47,7 @@ namespace epidb {
     {
       mongo::BSONObjBuilder bob;
 
-      bob.append(dba::KeyMapper::GENE_ID(), _gene_id);
+      bob.append(dba::KeyMapper::TRACKING_ID(), _tracking_id);
       bob.append(dba::KeyMapper::LENGTH(), _length);
       bob.append(dba::KeyMapper::EFFECTIVE_LENGTH(), _effective_length);
       bob.append(dba::KeyMapper::TPM(), _tpm);
@@ -56,12 +56,12 @@ namespace epidb {
       return bob.obj();
     }
 
-    void TPMFile::add_row(const std::string &gene_id, const Length length, const Length effective_length,
+    void TPMFile::add_row(const std::string &tracking_id, const double length, const double effective_length,
                           double tpm, double num_reads)
     {
       _data.emplace_back(
         std::unique_ptr<TPMRow>(
-          new TPMRow(gene_id, length, effective_length, tpm, num_reads)
+          new TPMRow(tracking_id, length, effective_length, tpm, num_reads)
         )
       );
     }

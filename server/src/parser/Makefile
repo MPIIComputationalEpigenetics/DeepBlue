@@ -4,7 +4,7 @@ ROOT		= $(shell pwd)/../..
 CXXFLAGS	= $(DEFCXXFLAGS) -I..
 
 OBJLIBS	= ../libparser.a
-OBJS	= cufflinks_parser.o salmon.o fpkm.o parser_factory.o grape2.o grape2_parser.o genome_data.o gtf.o gtf_parser.o wig.o bedgraph_parser.o wig_parser.o fasta_parser.o
+OBJS	= cufflinks_parser.o salmon_parser.o salmon.o fpkm.o parser_factory.o grape2.o grape2_parser.o genome_data.o gtf.o gtf_parser.o wig.o bedgraph_parser.o wig_parser.o fasta_parser.o
 
 all : $(OBJLIBS)
 

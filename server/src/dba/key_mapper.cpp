@@ -276,6 +276,12 @@ namespace epidb {
       return FPKM_HI;
     }
 
+    const std::string& KeyMapper::FPKM_STATUS()
+    {
+      static std::string FPKM_STATUS = epidb::dba::KeyMapper::build_default("FPKM_STATUS");
+      return FPKM_STATUS;
+    }
+
     const std::string& KeyMapper::NUM_READS()
     {
       static std::string NUM_READS = epidb::dba::KeyMapper::build_default("NUM_READS");
