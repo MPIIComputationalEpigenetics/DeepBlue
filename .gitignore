@@ -38,3 +38,4 @@ server/tests/.vscode/tags
 server/tests/.vscode/tags
 server/src/npm-debug.log
 server/src/.vscode/tags
+server/third_party/luajit-2.0
