@@ -80,7 +80,7 @@ namespace epidb {
       static const std::string& TPM_CI_UPPER_BOUND();
       static const std::string& FPKM_CI_LOWER_BOUND();
       static const std::string& FPKM_CI_UPPER_BOUND();
-
+      static const std::string& NUM_READS();
 
     private:
       static bool set_shortcut(const std::string &s, const std::string &l, std::string &err);
