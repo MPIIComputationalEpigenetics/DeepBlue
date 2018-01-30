@@ -787,7 +787,7 @@ namespace epidb {
 
         mongo::BSONObjBuilder builder;
         builder.append("shardCollection", collection);
-        builder.append("key", BSON(KeyMapper::DATASET() << "hash"));
+        builder.append("key", BSON(KeyMapper::DATASET() << "hashed"));
         mongo::BSONObj objShard = builder.obj();
         mongo::BSONObj info;
         EPIDB_LOG_DBG("Sharding: " << objShard.toString());
