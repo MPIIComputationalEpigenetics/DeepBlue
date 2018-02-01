@@ -100,7 +100,18 @@ def list_users(context):
     for user in users:
         print user
 
-commands_callback = {'e': from_email, 'create_user': create_user, 'list_users': list_users}
+def add_to_project(context):
+    epidb = context.epidb
+    user = raw_input("Use ID")
+    project = raw_input("Project name or ID")
+
+    (s, q) = epidb.add_user_to_project ( user, project, True, context.user_key )
+
+    print s, q
+
+
+
+commands_callback = {'e': from_email, 'create_user': create_user, 'list_users': list_users, "add_to_project": add_to_project}
 
 
 def get_command(name):
