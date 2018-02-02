@@ -200,17 +200,19 @@ namespace epidb {
     {
       auto current_second = std::chrono::duration_cast< std::chrono::seconds >(std::chrono::system_clock::now().time_since_epoch());
       if (current_second - _last_update > _update_time_out) {
-        Connection c;
+        _last_update = current_second;
+
         mongo::BSONObj query = BSON("_id" << _processing_id);
         mongo::BSONObj update_value = BSON("$set" <<
                                            BSON("total_regions" << (long long) _total_regions.load() <<
                                                 "total_size" << (long long) _total_size.load())
                                           );
+
+        Connection c;
         c->update(dba::helpers::collection_name(dba::Collections::PROCESSING()), query, update_value, false, false);
         c.done();
-        _last_update = current_second;
-      }
 
+      }
     }
 
     void Status::sum_regions(const long long qtd)
@@ -303,8 +305,9 @@ namespace epidb {
 
       auto current_second = std::chrono::duration_cast< std::chrono::seconds >(std::chrono::system_clock::now().time_since_epoch());
       if (current_second - _last_update > _update_time_out) {
-        mongo::BSONObj result;
+        _last_update = current_second;
 
+        mongo::BSONObj result;
         if (!dba::helpers::get_one(dba::Collections::JOBS(),
                                    mongo::Query(BSON("_id" << _request_id)), result)) {
           msg = Error::m(ERR_REQUEST_CANCELED);
