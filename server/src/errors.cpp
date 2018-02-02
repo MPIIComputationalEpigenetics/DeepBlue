@@ -136,7 +136,7 @@ namespace epidb {
   Error ERR_DUPLICATED_GENE_MODEL_NAME("113001", "The Gene Model '{}' is already being used.");
   Error ERR_INVALID_GENE_MODEL_ID("113003", "Unable to find Gene Model ID '{}'.");
 
-  Error ERR_DUPLICATE_EXPRESSION("131001", "A Expression of the type '{}' with sample_id '{}' and replicate '{}' already exists.");
+  Error ERR_DUPLICATE_EXPRESSION("131001", "A Expression of the type '{}' with sample_id '{}' and replica '{}' already exists.");
   Error ERR_INVALID_EXPRESSION_ID("131003", "Unable to find Gene Expression ID '{}'.");
   Error ERR_INVALID_EXPRESSION_TYPE("131003", "Unable to find Expression Type '{}'.");
 
