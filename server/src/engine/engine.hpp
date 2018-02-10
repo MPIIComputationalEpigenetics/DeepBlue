@@ -79,6 +79,8 @@ namespace epidb {
 
     bool request_download_data(const datatypes::User& user, const std::string & request_id, std::string &request_data, std::string& msg);
 
+    bool reprocess_request(const datatypes::User& user, const std::string & request_id, std::string & msg);
+
     bool request_data(const datatypes::User& user, const std::string & request_id,  serialize::Parameters &request_data);
 
     bool queue_count_regions(const datatypes::User& user, const std::string &query_id, std::string &request_id, std::string &msg);
