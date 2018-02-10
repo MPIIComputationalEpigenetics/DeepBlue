@@ -49,21 +49,17 @@ namespace epidb {
 
       static  Parameters parameters_()
       {
-        Parameter p[] = {
+        return {
           Parameter("request_id", serialize::STRING, "ID of the request"),
           parameters::UserKey
         };
-        Parameters params(&p[0], &p[0] + 2);
-        return params;
       }
 
       static Parameters results_()
       {
-        Parameter p[] = {
+        return {
           Parameter("data", serialize::STRING, "the request data", true)
         };
-        Parameters results(&p[0], &p[0] + 1);
-        return results;
       }
 
     public:

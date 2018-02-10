@@ -41,21 +41,17 @@ namespace epidb {
 
       static  Parameters parameters_()
       {
-        Parameter p[] = {
+        return {
           Parameter("id", serialize::STRING, "Request ID to be canceled, stopped or removed."),
           parameters::UserKey
         };
-        Parameters params(&p[0], &p[0] + 2);
-        return params;
       }
 
       static Parameters results_()
       {
-        Parameter p[] = {
+        return {
           Parameter("id", serialize::STRING, "ID of the canceled request")
         };
-        Parameters results(&p[0], &p[0] + 1);
-        return results;
       }
 
     public:

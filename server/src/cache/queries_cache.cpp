@@ -42,7 +42,6 @@ namespace epidb {
     query::QUERY_RESULT fn(const query::QUERY_KEY& qk)
     {
       query::QUERY_RESULT result;
-      std::cerr << "processing: " << qk.query_id << std::endl;
       result.success = dba::query::retrieve_query(qk.user, qk.query_id, qk.status, result.regions, result.msg);
 
       return result;
