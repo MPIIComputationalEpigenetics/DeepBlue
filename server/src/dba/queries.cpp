@@ -1277,6 +1277,15 @@ namespace epidb {
           return true;
         }
 
+        if (((field_key == "norm_genome") || (field_key == "genome")) && args.hasField("gene_model")) {
+          mongo::BSONObj gene_model_obj;
+          if (!genes::get_gene_model_obj(args["gene_model"].String(), gene_model_obj, msg)) {
+            return false;
+          }
+          values.emplace_back( gene_model_obj.getFieldDotted("norm_genome").String() );
+          return true;
+        }
+
         if (type == "experiment_select") {
           std::vector<std::string> norm_names = utils::build_vector(args["norm_experiment_name"].Array());
           if (!norm_names.empty()) {

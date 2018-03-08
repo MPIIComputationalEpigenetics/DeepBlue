@@ -362,7 +362,6 @@ namespace epidb {
       }
 
       norm_genome = vector_genome[0];
-
       std::vector<dba::genomes::ChromosomeInfo> chromosomes;
       if (!dba::genomes::get_chromosomes(norm_genome, chromosomes, msg)) {
         return false;
