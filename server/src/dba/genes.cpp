@@ -349,13 +349,15 @@ namespace epidb {
         DatasetId dataset_id = gene_model_obj[KeyMapper::DATASET()].Int();
         bob.append(KeyMapper::DATASET(), dataset_id);
 
+        mongo::BSONArrayBuilder data;
+
         if (!genes.empty()) {
           mongo::BSONArray genes_array = utils::build_array(genes);
           mongo::BSONArray genes_array_2 = genes_array;
 
           mongo::BSONObj b_in_gene_name = BSON((KeyMapper::ATTRIBUTES() + ".gene_name") << BSON("$in" << genes_array));
           mongo::BSONObj b_in_gene_id = BSON((KeyMapper::ATTRIBUTES() + ".gene_id") << BSON("$in" << genes_array_2));
-          bob.append("$or", BSON_ARRAY(b_in_gene_name << b_in_gene_id));
+          data.append(BSON("$or" << BSON_ARRAY(b_in_gene_name << b_in_gene_id)));
         }
 
         if (!go_terms.empty()) {
@@ -364,8 +366,10 @@ namespace epidb {
 
           mongo::BSONObj b_in_go_name = BSON("go_annotation.go_id" << BSON("$in" << go_array));
           mongo::BSONObj b_in_go_id = BSON("go_annotation.go_label" << BSON("$in" << go_array_2));
-          bob.append("$or", BSON_ARRAY(b_in_go_name << b_in_go_id));
+          data.append(BSON("$or" << BSON_ARRAY(b_in_go_name << b_in_go_id)));
         }
+
+        bob.append("$or", data.arr());
 
         if (!chromosomes.empty()) {
           bob.append(KeyMapper::CHROMOSOME(), BSON("$in" << utils::build_array(chromosomes)));
