@@ -369,7 +369,9 @@ namespace epidb {
           data.append(BSON("$or" << BSON_ARRAY(b_in_go_name << b_in_go_id)));
         }
 
-        bob.append("$or", data.arr());
+        if (data.arrSize() > 0) {
+          bob.append("$or", data.arr());
+        }
 
         if (!chromosomes.empty()) {
           bob.append(KeyMapper::CHROMOSOME(), BSON("$in" << utils::build_array(chromosomes)));
