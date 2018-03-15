@@ -163,7 +163,7 @@ class TestExpressions(helpers.TestCase):
 
     data = gzip.open("data/grape2/SP8-TH91.gene_quantification.rsem_grape2_crg.GRCh38.20150622.results.txt.gz").read()
     (s, gene_expression) = epidb.add_expression("gene", "s1", 1, data, "grape2", "ENCODE", None, self.admin_key)
-    self.assertEquals(gene_expression, "131001:A Expression of the type 'gene' with sample_id 's1' and replicate '1' already exists.")
+    self.assertEquals(gene_expression, "131001:A Expression of the type 'gene' with sample_id 's1' and replica '1' already exists.")
 
     (s, gene_expression) = epidb.add_expression("gene", "s1", 2, data, "grape2", "ENCODE", None, self.admin_key)
     self.assertSuccess(s, gene_expression)

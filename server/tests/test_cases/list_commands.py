@@ -11,7 +11,7 @@ class TestListCommandsCommand(helpers.TestCase):
 
     res, cmds = epidb.commands()
     self.assertSuccess(res, cmds)
-    self.assertEqual(len(cmds), 94)
+    self.assertEqual(len(cmds), 96)
     self.assertEqual(cmds["add_experiment"]["parameters"][0], ['name', 'string', False, 'experiment name'])
     self.assertEqual(cmds["add_experiment"]["parameters"][1], ['genome', 'string', False, 'the target genome'])
     self.assertEqual(cmds["add_experiment"]["parameters"][2], ['epigenetic_mark', 'string', False, 'epigenetic mark of the experiment'])
