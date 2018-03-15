@@ -65,6 +65,7 @@
 #include "key_mapper.hpp"
 #include "queries.hpp"
 #include "retrieve.hpp"
+#include "sequence_retriever.hpp"
 #include "info.hpp"
 
 #include "../errors.hpp"
@@ -1286,7 +1287,7 @@ namespace epidb {
     {
       std::string norm_genome = utils::normalize_name(genome);
 
-      retrieve::SequenceRetriever retriever;
+      retrieve::SequenceRetriever &retriever = retrieve::SequenceRetriever::singleton();
       std::vector<std::string> missing;
       for (const std::string &chromosome_name : chromosomes) {
         if (!retriever.exists(genome, chromosome_name)) {

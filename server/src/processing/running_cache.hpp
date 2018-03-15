@@ -1,5 +1,5 @@
 //
-//  running_cache.cpp
+//  running_cache.hpp
 //  DeepBlue Epigenomic Data Server
 //  File created by Felipe Albrecht on 01.11.16.
 //  Copyright (c) 2016 Max Planck Institute for Informatics. All rights reserved.
@@ -24,8 +24,6 @@
 #include <memory>
 #include <string>
 
-#include "../dba/sequence_retriever.hpp"
-
 namespace epidb {
   namespace processing {
 
@@ -35,7 +33,6 @@ namespace epidb {
     class DatasetCache {
 
     private:
-      dba::retrieve::SequenceRetriever _sequence_retriever;
       std::string _genome;
       StatusPtr _status;
       std::string current_chromosome;
@@ -45,7 +42,6 @@ namespace epidb {
 
     public:
       DatasetCache(const std::string& g, StatusPtr s):
-        _sequence_retriever(),
         _genome(g),
         _status(s),
         _sequence() {}

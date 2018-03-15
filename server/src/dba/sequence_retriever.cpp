@@ -41,6 +41,12 @@ namespace epidb {
   namespace dba {
     namespace retrieve {
 
+      SequenceRetriever& SequenceRetriever::singleton()
+      {
+        static SequenceRetriever DEFAULT_RETRIEVER;
+        return DEFAULT_RETRIEVER;
+      }
+
       bool SequenceRetriever::exists(const std::string &genome, const std::string &chromosome)
       {
         std::string norm_genome = utils::normalize_name(genome);

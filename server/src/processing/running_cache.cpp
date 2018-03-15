@@ -24,6 +24,7 @@
 
 #include "../dba/genomes.hpp"
 #include "../dba/retrieve.hpp"
+#include "../dba/sequence_retriever.hpp"
 #include "../dba/key_mapper.hpp"
 
 #include "processing.hpp"
@@ -39,13 +40,19 @@ namespace epidb {
       if (!dba::genomes::chromosome_size(_genome, chromosome, size, msg)) {
         return false;
       }
-      return _sequence_retriever.retrieve(_genome, chromosome, 0, size, _sequence, msg);
+
+      return dba::retrieve::SequenceRetriever::singleton().retrieve(_genome, chromosome, 0, size, _sequence, msg);
     }
 
     bool DatasetCache::count_regions(const std::string& pattern,
                                      const std::string& chromosome, const Position start, const Position end,
                                      size_t& count, std::string& msg)
     {
+      if (pattern.empty()) {
+        msg = "Motif can't be empty.";
+        return false;
+      }
+
       count = 0;
 
       if (chromosome != current_chromosome) {
@@ -56,6 +63,7 @@ namespace epidb {
       }
 
       std::string sub = _sequence.substr(start, end - start);
+
       boost::regex e(pattern);
       boost::match_results<std::string::const_iterator> what;
       std::string::const_iterator begin_it = sub.begin();

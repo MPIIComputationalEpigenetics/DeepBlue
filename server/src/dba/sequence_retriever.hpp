@@ -21,7 +21,7 @@
 #ifndef EPIDB_DBA_SEQUENCE_RETRIEVER_HPP
 #define EPIDB_DBA_SEQUENCE_RETRIEVER_HPP
 
-#include <map>
+#include <unordered_map>
 #include <string>
 #include <vector>
 
@@ -35,10 +35,14 @@ namespace epidb {
 
       class SequenceRetriever {
       private:
-        std::map<std::string, std::tuple<size_t, size_t>> chunk_sizes_;
-        std::map<std::string, mongo::OID> file_ids_;
+        std::unordered_map<std::string, std::tuple<size_t, size_t>> chunk_sizes_;
+        std::unordered_map<std::string, mongo::OID> file_ids_;
 
-        std::map<std::string, std::map<size_t, std::string> > chunks_;
+        std::unordered_map<std::string, std::map<size_t, std::string> > chunks_;
+
+        SequenceRetriever() {}
+
+        ~SequenceRetriever() {}
 
         bool get_file_id(const std::string &filename, mongo::OID &oid, std::string &msg);
 
@@ -51,9 +55,7 @@ namespace epidb {
                           const size_t start, const size_t end, std::string &sequence, std::string &msg);
 
       public:
-        SequenceRetriever() {}
-
-        ~SequenceRetriever() {}
+        static SequenceRetriever& singleton();
 
         bool exists(const std::string &genome, const std::string &chromosome);
 
