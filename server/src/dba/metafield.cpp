@@ -163,14 +163,6 @@ namespace epidb {
       return false;
     }
 
-    const std::string get_by_region_set(const mongo::BSONObj &obj, const std::string &field)
-    {
-      if (!obj.hasField(field)) {
-        return "";
-      }
-      return obj.getField(field).str();
-    }
-
     bool Metafield::length(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion *region_ref,
                            processing::StatusPtr status, std::string &result, std::string &msg)
     {
@@ -201,7 +193,7 @@ namespace epidb {
     bool Metafield::name(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion *region_ref,
                          processing::StatusPtr status, std::string &result, std::string &msg)
     {
-      std::string name = get_by_region_set(obj, "name");
+      std::string name = utils::get_by_region_set(obj, "name");
       result = name;
       return true;
     }
@@ -209,14 +201,14 @@ namespace epidb {
     bool Metafield::epigenetic_mark(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion *region_ref,
                                     processing::StatusPtr status,  std::string &result, std::string &msg)
     {
-      result = get_by_region_set(obj, "epigenetic_mark");
+      result = utils::get_by_region_set(obj, "epigenetic_mark");
       return true;
     }
 
     bool Metafield::project(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion *region_ref,
                             processing::StatusPtr status, std::string &result, std::string &msg)
     {
-      result = get_by_region_set(obj, "project");
+      result = utils::get_by_region_set(obj, "project");
       return true;
     }
 
@@ -234,21 +226,21 @@ namespace epidb {
     bool Metafield::genome(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion *region_ref,
                            processing::StatusPtr status, std::string &result, std::string &msg)
     {
-      result = get_by_region_set(obj, "genome");
+      result = utils::get_by_region_set(obj, "genome");
       return true;
     }
 
     bool Metafield::sample_id(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion *region_ref,
                               processing::StatusPtr status, std::string &result, std::string &msg)
     {
-      result = get_by_region_set(obj, "sample_id");
+      result = utils::get_by_region_set(obj, "sample_id");
       return true;
     }
 
     bool Metafield::sequence(const std::string &op, const std::string &chrom, const mongo::BSONObj &obj, const AbstractRegion *region_ref,
                              processing::StatusPtr status, std::string &result, std::string &msg)
     {
-      std::string genome = get_by_region_set(obj, "norm_genome");
+      std::string genome = utils::get_by_region_set(obj, "norm_genome");
 
       if (!status->running_cache()->get_sequence(genome, chrom,
           region_ref->start(), region_ref->end(), result, status, msg)) {
@@ -263,7 +255,7 @@ namespace epidb {
     {
       std::string pattern = metafield_attribute(op);
 
-      std::string genome = get_by_region_set(obj, "genome");
+      std::string genome = utils::get_by_region_set(obj, "genome");
       size_t count = 0;
 
       if (!status->running_cache()->count_regions(genome, chrom, pattern,
