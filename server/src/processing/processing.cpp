@@ -56,6 +56,7 @@ namespace epidb {
       m[RETRIEVE_MERGE_QUERY]                           = "" STR(RETRIEVE_MERGE_QUERY);
       m[RETRIEVE_FIND_MOTIF_QUERY]                      = "" STR(RETRIEVE_FIND_MOTIF_QUERY);
       m[RETRIEVE_FILTER_QUERY]                          = "" STR(RETRIEVE_FILTER_QUERY);
+      m[RETRIEVE_FILTER_MOTIF_QUERY]                    = "" STR(RETRIEVE_FILTER_MOTIF_QUERY);
       m[RETRIEVE_TILING_QUERY]                          = "" STR(RETRIEVE_TILING_QUERY);
       m[RETRIEVE_GENES_DATA]                            = "" STR(RETRIEVE_GENES_DATA);
       m[PROCESS_AGGREGATE]                              = "" STR(PROCESS_AGGREGATE);

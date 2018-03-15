@@ -45,6 +45,8 @@
 
 #include "../extras/utils.hpp"
 
+#include "../processing/running_cache.hpp"
+
 #include "annotations.hpp"
 #include "collections.hpp"
 #include "dba.hpp"
@@ -347,6 +349,10 @@ namespace epidb {
           }
         } else if (type == "filter") {
           if (!retrieve_filter_query(user, query, status, regions, msg)) {
+            return false;
+          }
+        } else if (type == "filter_by_motif") {
+          if (!retrieve_filter_by_motif_query(user, query, status, regions, msg)) {
             return false;
           }
         } else if (type == "tiling") {
@@ -1092,7 +1098,6 @@ namespace epidb {
                   return false;
                 }
               }
-              dataset_id = region->dataset_id();
             }
             total++;
 
@@ -1110,6 +1115,86 @@ namespace epidb {
             ChromosomeRegions chr_region(chromosome, std::move(saved));
             filtered_regions.push_back(std::move(chr_region));
           }
+        }
+
+        return true;
+      }
+
+      bool retrieve_filter_by_motif_query(const datatypes::User& user,
+                                          const mongo::BSONObj & query,
+                                          processing::StatusPtr status, ChromosomeRegionsList & filtered_regions, std::string & msg)
+      {
+        processing::RunningOp runningOp = status->start_operation(processing::RETRIEVE_FILTER_MOTIF_QUERY, query);
+        if (processing::is_canceled(status, msg)) {
+          return false;
+        }
+
+        mongo::BSONObj args = query["args"].Obj();
+
+        // load original query
+        ChromosomeRegionsList regions;
+        bool ret = retrieve_query(user, args["query"].str(), status, regions, msg);
+        if (!ret) {
+          return false;
+        }
+
+        std::string motif = args["motif"].str();
+        if (motif.empty()) {
+          msg = "Motif can't be empty";
+          return false;
+        }
+
+        bool error;
+
+        std::string genome;
+        DatasetId dataset_id = -1;
+
+        long total = 0;
+        Metafield metafield;
+
+        for (auto& chromosome_regions_list : regions) {
+
+          const std::string &chromosome = chromosome_regions_list.first;
+          Regions saved = Regions();
+
+          for (auto& region : chromosome_regions_list.second) {
+            mongo::BSONObj dataset_obj;
+            if (region->dataset_id() != dataset_id) {
+
+              // TODO: Workaround - because aggregates does not have a region_set_id
+              if (region->dataset_id() == DATASET_EMPTY_ID) {
+                msg = "It is (yet) not possible to filter by DNA Motif on aggregated regions";
+                return false;
+              }
+
+              if (!cache::get_bson_by_dataset_id(region->dataset_id(), dataset_obj, msg)) {
+                return false;
+              }
+
+              genome = utils::get_by_region_set(dataset_obj, "genome");
+            }
+
+            size_t count = 0;
+
+            if (!status->running_cache()->count_regions(genome, chromosome, motif,
+                region->start(), region->end(), count, status, msg)) {
+              count = 0;
+              return false;
+            }
+
+            if (count > 0) {
+              saved.emplace_back(std::move(region));
+            } else {
+              status->subtract_size(region->size());
+              status->subtract_regions(1);
+            }
+          }
+
+          if (!saved.empty()) {
+            ChromosomeRegions chr_region(chromosome, std::move(saved));
+            filtered_regions.push_back(std::move(chr_region));
+          }
+
         }
 
         return true;
@@ -1387,6 +1472,9 @@ namespace epidb {
           const std::string query_id = args["query"].str();
           return get_main_experiment_data(user, query_id, field_key, status, values, msg);
 
+        } else if (type == "filter_by_motif") {
+          const std::string query_id = args["query"].str();
+          return get_main_experiment_data(user, query_id, field_key, status, values, msg);
 
         } else if (type == "tiling") {
           std::string name = utils::integer_to_string(args["size"].Int()) + " (tiling regions)";
