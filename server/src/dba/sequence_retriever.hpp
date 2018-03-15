@@ -62,6 +62,8 @@ namespace epidb {
         bool retrieve(const std::string &genome, const std::string &chromosome,
                       const size_t start, const size_t end, std::string &sequence, std::string &msg);
 
+        void invalidade_cache();
+
       };
     }
   }

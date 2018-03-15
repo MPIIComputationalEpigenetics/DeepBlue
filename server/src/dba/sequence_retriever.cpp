@@ -197,6 +197,13 @@ namespace epidb {
         return true;
       }
 
+      void SequenceRetriever::invalidade_cache()
+      {
+        chunk_sizes_.clear();
+        file_ids_.clear();
+        chunks_.clear();
+      }
+
     }
   }
 }
