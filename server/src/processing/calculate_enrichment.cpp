@@ -112,8 +112,7 @@ namespace epidb {
         bob.append("go_overlap", (long long) kv.second);
         bob.append("go_total", (long long) total_counts[kv.first]);
         bob.append("ratio", (float(kv.second) / float(total_counts[kv.first])));
-        bob.append("p_value", (math::fisher_test(aa, bb, cc, dd)));
-
+        bob.append("p_value", (abs(log10(math::fisher_test(aa, bb, cc, dd)))));
         ab.append(bob.obj());
       }
 

@@ -66,30 +66,7 @@ namespace epidb {
       bool error;
       std::string msg;
 
-      mongo::BSONObj toBSON()
-      {
-        return BSON(
-                 "dataset" << dataset <<
-                 "biosource" << biosource <<
-                 "epigenetic_mark" << epigenetic_mark <<
-                 "description" << description <<
-                 "experiment_size" << experiment_size <<
-                 "database_name" << database_name <<
-                 "p_value_log" << negative_natural_log <<
-                 "odds_ratio" << odds_ratio <<
-                 "support" << a <<
-                 "b" << b <<
-                 "c" << c <<
-                 "d" << d <<
-                 "support_rank" << support_rank <<
-                 "log_rank" << log_rank <<
-                 "odd_rank" << odd_rank <<
-                 "max_rank" << max_rank <<
-                 "mean_rank" << mean_rank <<
-                 "error" << error <<
-                 "msg" << msg
-               );
-      }
+      mongo::BSONObj toBSON();
     };
 
     struct ERCompare {
