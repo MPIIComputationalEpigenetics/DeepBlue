@@ -224,7 +224,17 @@ namespace epidb {
 
     void Status::subtract_regions(const long long qtd)
     {
-      _total_regions -= qtd;
+      if (_total_regions == 0) {
+        return;
+      }
+
+      size_t new_total = _total_regions - qtd;
+
+      if (new_total > _total_regions) {
+        _total_regions = 0;
+      } else {
+        _total_regions = new_total;
+      }
       update_values_in_db();
     }
 
@@ -253,7 +263,15 @@ namespace epidb {
 
     long long Status::subtract_size(const long long size)
     {
-      _total_size -= size;
+      if (_total_size == 0) {
+        return;
+      }
+      size_t new_size = _total_size - size;
+      if (new_size > _total_size) {
+        _total_size = 0;
+      } else {
+        _total_size = new_size;
+      }
       update_values_in_db();
 
       return _total_size;

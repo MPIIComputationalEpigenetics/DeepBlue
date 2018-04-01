@@ -139,7 +139,7 @@ namespace epidb {
       std::unique_ptr<RunningCache> _running_cache;
 
       mongo::BSONObj toBson();
-      long long sum_size(const long long size);
+
       void update_values_in_db();
 
     public:
@@ -148,6 +148,7 @@ namespace epidb {
       RunningOp start_operation(OP op, const mongo::BSONObj& params = mongo::BSONObj());
       void sum_regions(const long long qtd);
       void subtract_regions(const long long qtd);
+      long long sum_size(const long long size);
       long long subtract_size(const long long qtd);
       void set_total_stored_data(long long size);
       void set_total_stored_data_compressed(long long size);
