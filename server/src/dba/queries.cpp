@@ -1084,6 +1084,7 @@ namespace epidb {
 
         size_t total = 0;
         size_t removed = 0;
+        size_t total_removed_size = 0;
         size_t keep = 0;
 
         Metafield metafield;
@@ -1106,16 +1107,19 @@ namespace epidb {
               saved.emplace_back(std::move(region));
               keep++;
             } else {
-              status->subtract_size(region->size());
-              status->subtract_regions(1);
+              total_removed_size += region->size();
               removed++;
             }
           }
+
           if (!saved.empty()) {
             ChromosomeRegions chr_region(chromosome, std::move(saved));
             filtered_regions.push_back(std::move(chr_region));
           }
         }
+
+        status->subtract_regions(removed);
+        status->subtract_size(total_removed_size);
 
         return true;
       }
