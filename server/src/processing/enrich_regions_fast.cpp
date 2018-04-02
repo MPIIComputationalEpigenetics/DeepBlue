@@ -155,10 +155,17 @@ namespace epidb {
       mongo::BSONObjBuilder bob;
 
       mongo::BSONArrayBuilder ab;
+      bool has_data = false;
       for (const auto& er: experiment_results) {
         ab.append(er->toBSON());
+        has_data = true;
       }
-      bob.append("results", ab.obj());
+
+      if (has_data) {
+        bob.append("results", ab.obj());
+      } else {
+        bob.append("results", mongo::BSONArray());
+      }
 
       result = bob.obj();
 
