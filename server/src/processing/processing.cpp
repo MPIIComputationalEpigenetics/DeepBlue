@@ -264,7 +264,7 @@ namespace epidb {
     long long Status::subtract_size(const long long size)
     {
       if (_total_size == 0) {
-        return;
+        return _total_size;
       }
       size_t new_size = _total_size - size;
       if (new_size > _total_size) {
