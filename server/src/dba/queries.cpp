@@ -45,6 +45,8 @@
 
 #include "../extras/utils.hpp"
 
+#include "../parser/parser_factory.hpp"
+
 #include "../processing/running_cache.hpp"
 
 #include "annotations.hpp"
@@ -1620,8 +1622,53 @@ namespace epidb {
 
         cursor = c->query(helpers::collection_name(Collections::QUERIES()), BSON("type" << "input_regions" << "args.dataset_id" << dataset_id));
         if (cursor->more()) {
-          for (const auto& column : parser::FileFormat::default_format()) {
-            columns.push_back(column->BSONObj());
+          parser::FileFormat file_format;
+          mongo::BSONObj input_regions = cursor->next()["args"].Obj().getOwned();
+
+          if (input_regions.hasField("format")) {
+            if (!parser::FileFormatBuilder::build(input_regions["format"].str(), file_format, msg)) {
+              return false;
+            }
+          } else {
+            file_format = parser::FileFormat::default_format();
+          }
+
+          int s_count = 0;
+          int n_count = 0;
+
+          for (const auto& column : file_format) {
+            mongo::BSONObj columnObj = column->BSONObj();
+            const std::string &column_type = columnObj["column_type"].str();
+            const std::string &column_name = columnObj["name"].str();
+
+            mongo::BSONObjBuilder bob;
+            bob.appendElements(columnObj);
+
+            if (column_name != "CHROMOSOME" && column_name != "START" &&  column_name != "END") {
+              int pos = -1;
+              if (column_type == "string") {
+                pos = s_count++;
+              } else if (column_type == "integer") {
+                pos = n_count++;
+              } else if (column_type == "double") {
+                pos = n_count++;
+              } else if (column_type == "range") {
+                pos = n_count++;
+              } else if (column_type == "category") {
+                pos = s_count++;
+              } else if (column_type == "calculated") {
+                msg = "Calculated field does not have data";
+                return false;
+              } else {
+                msg = "Unknown column type: " + column_type;
+                return false;
+              }
+              bob.append("pos", pos);
+              mongo::BSONObj o = bob.obj();
+              columns.push_back(o);
+            }
+            found = true;
+
           }
           c.done();
           return true;

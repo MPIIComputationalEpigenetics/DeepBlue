@@ -92,7 +92,7 @@ namespace epidb {
         parser::FileFormat fileFormat;
         parser::ChromosomeRegionsMap map_regions;
 
-        if (!parser::FileFormatBuilder::build("", fileFormat, msg)) {
+        if (!parser::FileFormatBuilder::deduce_format(data, fileFormat, msg)) {
           result.add_error(msg);
           return false;
         }
@@ -159,6 +159,7 @@ namespace epidb {
         args_builder.append("genome", genome);
         args_builder.append("norm_genome", norm_genome);
         args_builder.append("chromosomes", utils::build_array(chromosomes));
+        args_builder.append("format", fileFormat.format());
 
         std::string query_id;
         if (!dba::query::store_query(user, "input_regions", args_builder.obj(), query_id, msg)) {
