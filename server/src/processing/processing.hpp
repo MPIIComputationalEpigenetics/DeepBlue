@@ -199,7 +199,7 @@ namespace epidb {
     bool score_matrix(const datatypes::User& user,
                       const std::vector<std::pair<std::string, std::string>> &experiments_formats, const std::string &aggregation_function,
                       const std::string &regions_query_id,
-                      processing::StatusPtr status, std::string &matrix, std::string &msg);
+                      processing::StatusPtr status, StringBuilder &sb, std::string &msg);
 
 
     bool enrich_regions_fast(const datatypes::User& user, const std::string& query_id, const std::vector<utils::IdName>& names,

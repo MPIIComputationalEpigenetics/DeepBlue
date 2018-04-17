@@ -151,7 +151,7 @@ namespace epidb {
     bool score_matrix(const datatypes::User& user,
                       const std::vector<std::pair<std::string, std::string>> &experiments_formats,
                       const std::string & aggregation_function, const std::string & regions_query_id,
-                      processing::StatusPtr status, std::string & matrix, std::string & msg)
+                      processing::StatusPtr status, StringBuilder &sb, std::string & msg)
     {
 
       ChromosomeRegionsList range_regions;
@@ -222,19 +222,19 @@ namespace epidb {
         chromosome_accs[std::get<2>(result)][std::get<3>(result)] = std::get<4>(result);
       }
 
-      std::stringstream ss;
-      ss << "CHROMOSOME\t";
-      ss << "START\t";
-      ss << "END\t";
+      sb.append("CHROMOSOME\t");
+      sb.append("START\t");
+      sb.append("END\t");
+
       bool first = true;
       for (auto &experiments_format : experiments_formats) {
         if (!first) {
-          ss << "\t";
+          sb.tab();
         }
-        ss << experiments_format.first;
+        sb.append(experiments_format.first);
         first = false;
       }
-      ss << std::endl;
+      sb.endLine();
 
       for (auto &chromosome : range_regions) {
         size_t pos = 0;
@@ -253,15 +253,18 @@ namespace epidb {
           }
 
           // ***
-          ss << chromosome_name << "\t";
-          ss << region->start() << "\t";
-          ss << region->end() << "\t";
+          sb.append(chromosome_name);
+          sb.tab();
+          sb.append(utils::integer_to_string(region->start()));
+          sb.tab();
+          sb.append(utils::integer_to_string(region->end()));
+          sb.tab();
 
           bool first = true;
           for (auto &experiment_format : norm_experiments_formats) {
             auto *acc = &chromosome_accs[experiment_format.first][chromosome_name]->at(pos);
             if (!first) {
-              ss << "\t";
+              sb.tab();
             } else {
               first = false;
             }
@@ -269,18 +272,21 @@ namespace epidb {
             std::string value = acc->string("|");
             if (!value.empty()) {
               if (data_ptr) {
-                ss << (*acc.*data_ptr)();
+                sb.append(
+                  utils::score_to_string(
+                    (*acc.*data_ptr)()
+                    )
+                );
               } else {
-                ss << acc->string("|");
+                sb.append(acc->string("|"));
               }
             }
           }
-          ss << std::endl;
+          sb.endLine();
           pos++;
         }
       }
 
-      matrix = ss.str();
       return true;
     }
   }

@@ -415,7 +415,6 @@ namespace epidb {
                                             processing::StatusPtr status, mongo::BSONObj& result)
     {
       std::string msg;
-      StringBuilder sb;
       mongo::BSONObjBuilder bob;
 
       std::vector<std::pair<std::string, std::string>> experiments_formats;
@@ -429,13 +428,15 @@ namespace epidb {
         experiments_formats.emplace_back(experiment_name, columns_name);
       }
 
-      std::string matrix;
-      if (!processing::score_matrix(user, experiments_formats, aggregation_function, regions_query_id, status, matrix, msg)) {
+      StringBuilder sb;
+      if (!processing::score_matrix(user, experiments_formats, aggregation_function, regions_query_id, status, sb, msg)) {
         bob.append("__error__", msg);
         result = bob.obj();
         return false;
       }
 
+      std::string matrix = sb.to_string();
+      size_t matrix_size = matrix.size();
       std::stringbuf inStream(std::move(matrix));
       std::stringbuf outStream;
       boost::iostreams::filtering_streambuf< boost::iostreams::input> in;
@@ -448,10 +449,10 @@ namespace epidb {
 
       std::string filename = store_result(compressed, compressed_s.size());
       bob.append("__file__", filename);
-      bob.append("__original_size__", (long long) matrix.size());
+      bob.append("__original_size__", (long long) matrix_size);
       bob.append("__compressed_size__", (long long) compressed_s.size());
 
-      status->set_total_stored_data(matrix.size());
+      status->set_total_stored_data(matrix_size);
       status->set_total_stored_data_compressed(compressed_s.size());
 
       result = bob.obj();
