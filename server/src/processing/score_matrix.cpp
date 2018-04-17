@@ -140,7 +140,7 @@ namespace epidb {
 
         // Remove the size of the region, keeping only the size of the Stored score.
         for (const auto& r : data) {
-          status->subtract_size(r->size() - sizeof(Score));
+          status->subtract_size(r->size());
         }
       }
 

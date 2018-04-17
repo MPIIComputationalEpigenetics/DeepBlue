@@ -48,7 +48,7 @@ namespace epidb {
 
     size_t Accumulator::size() const
     {
-      return values.size() * sizeof(Score);
+      return sizeof(Accumulator) + (values.size() * sizeof(Score));
     }
 
     Score Accumulator::min() const
