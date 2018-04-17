@@ -69,6 +69,7 @@ namespace epidb {
       m[PROCESS_GET_EXPERIMENTS_BY_QUERY]               = "" STR(PROCESS_GET_EXPERIMENTS_BY_QUERY);
       m[PROCESS_GET_REGIONS]                            = "" STR(PROCESS_GET_REGIONS);
       m[PROCESS_SCORE_MATRIX]                           = "" STR(PROCESS_SCORE_MATRIX);
+      m[PROCESS_SCORE_MATRIX_THREAD]                    = "" STR(PROCESS_SCORE_MATRIX_THREAD);
       m[RETRIEVE_QUERY_REGION_SET]                      = "" STR(RETRIEVE_QUERY_REGION_SET);
       m[RETRIEVE_FLANK_QUERY]                           = "" STR(RETRIEVE_FLANK_QUERY);
       m[RETRIEVE_EXPRESSIONS_DATA]                      = "" STR(RETRIEVE_EXPRESSIONS_DATA);

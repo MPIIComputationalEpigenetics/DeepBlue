@@ -59,7 +59,7 @@ namespace epidb {
                          const ChromosomeRegions& chromosome, threading::SemaphorePtr sem,
                          processing::StatusPtr status)
     {
-      status->start_operation(PROCESS_SCORE_MATRIX);
+      processing::RunningOp threadRunningOp = status->start_operation(PROCESS_SCORE_MATRIX_THREAD);
 
       std::string msg;
       std::shared_ptr<std::vector<std::string>> regions_accs = std::make_shared<std::vector<std::string>>();
@@ -72,6 +72,7 @@ namespace epidb {
 
       const int BLOCK_SIZE = 100;
       size_t region_pos = 0;
+
       while (region_pos < chromosome.second.size()) {
 
         // Check if processing was canceled
@@ -88,8 +89,18 @@ namespace epidb {
         ////////////////////////////////////////////////////////////
 
         Regions ranges;
+        size_t ranges_size = 0;
+        size_t ranges_count = 0;
         for (size_t i = 0; i < BLOCK_SIZE && region_pos < chromosome.second.size(); i++, region_pos++) {
           ranges.emplace_back(chromosome.second[region_pos]->clone());
+          ranges_size += chromosome.second[region_pos]->size();
+          ranges_count++;
+        }
+
+        status->sum_regions(ranges_count);
+        if (!status->sum_and_check_size(ranges_size)) {
+          msg = "Memory exhausted. Used "  + utils::size_t_to_string(status->total_size()) + "bytes of " + utils::size_t_to_string(status->maximum_size()) + "bytes allowed. Please, select a smaller initial dataset, for example, selecting fewer chromosomes)"; // TODO: put a better error msg.
+          return std::make_tuple(false, msg, "", "", regions_accs);
         }
 
         mongo::BSONObj regions_query;
@@ -111,6 +122,8 @@ namespace epidb {
         while (it_ranges != ranges.end()) {
           algorithms::Accumulator acc;
 
+          size_t acc_count = 0;
+
           while ( it_data_begin != data.end()
                   && (*it_data_begin)->end() < (*it_ranges)->start() )  {
             it_data_begin++;
@@ -131,7 +144,15 @@ namespace epidb {
 
             if (((*it_ranges)->start() <= (*it_data)->end()) && ((*it_ranges)->end() >= (*it_data)->start())) {
               acc.push((*it_data)->value(experiment_format.second->pos()) * correct_offset);
+              acc_count++;
             }
+
+            status->sum_regions(acc_count);
+            if (!status->sum_and_check_size(acc_count * sizeof(Score))) {
+              msg = "Memory exhausted. Used "  + utils::size_t_to_string(status->total_size()) + "bytes of " + utils::size_t_to_string(status->maximum_size()) + "bytes allowed. Please, select a smaller initial dataset, for example, selecting fewer chromosomes)"; // TODO: put a better error msg.
+              return std::make_tuple(false, msg, "", "", regions_accs);
+            }
+
             it_data++;
           }
 
@@ -149,16 +170,20 @@ namespace epidb {
             return std::make_tuple(false, msg, "", "", regions_accs);
           }
 
-          std::cerr << value << std::endl;
-
           regions_accs->push_back(value);
+
+          status->subtract_regions(acc_count);
+          status->subtract_size(acc_count * sizeof(Score));
+
           it_ranges++;
         }
 
-        // Remove the size of the region, keeping only the size of the Stored score.
+        // Remove the size of the region, ranges
         for (const auto& r : data) {
           status->subtract_size(r->size());
         }
+        status->subtract_size(ranges_size);
+        status->subtract_regions(ranges_count);
       }
 
       sem->up();
@@ -170,6 +195,7 @@ namespace epidb {
                       const std::string & aggregation_function, const std::string & regions_query_id,
                       processing::StatusPtr status, StringBuilder &sb, std::string & msg)
     {
+      processing::RunningOp runningOp = status->start_operation(PROCESS_SCORE_MATRIX);
 
       ChromosomeRegionsList range_regions;
       if (!dba::query::retrieve_query(user, regions_query_id, status, range_regions, msg)) {
@@ -235,56 +261,61 @@ namespace epidb {
         chromosome_accs[std::get<2>(result)][std::get<3>(result)] = std::get<4>(result);
       }
 
-      sb.append("CHROMOSOME\t");
-      sb.append("START\t");
-      sb.append("END\t");
 
-      bool first = true;
-      for (auto &experiments_format : experiments_formats) {
-        if (!first) {
-          sb.tab();
+      {
+        processing::RunningOp formatOp = status->start_operation(FORMAT_OUTPUT);
+
+        sb.append("CHROMOSOME\t");
+        sb.append("START\t");
+        sb.append("END\t");
+
+        bool first = true;
+        for (auto &experiments_format : experiments_formats) {
+          if (!first) {
+            sb.tab();
+          }
+          sb.append(experiments_format.first);
+          first = false;
         }
-        sb.append(experiments_format.first);
-        first = false;
-      }
-      sb.endLine();
+        sb.endLine();
 
-      for (auto &chromosome : range_regions) {
-        size_t pos = 0;
-        const auto &chromosome_name = chromosome.first;
-        const auto &regions = chromosome.second;
+        for (auto &chromosome : range_regions) {
+          size_t pos = 0;
+          const auto &chromosome_name = chromosome.first;
+          const auto &regions = chromosome.second;
 
-        for (const auto& region : regions) {
-          // Check if processing was canceled
-          bool is_canceled = false;
-          if (!status->is_canceled(is_canceled, msg)) {
-            return true;
-          }
-          if (is_canceled) {
-            msg = Error::m(ERR_REQUEST_CANCELED);
-            return false;
-          }
-
-          // ***
-          sb.append(chromosome_name);
-          sb.tab();
-          sb.append(utils::integer_to_string(region->start()));
-          sb.tab();
-          sb.append(utils::integer_to_string(region->end()));
-          sb.tab();
-
-          bool first = true;
-          for (auto &experiment_format : norm_experiments_formats) {
-            auto *acc = &chromosome_accs[experiment_format.first][chromosome_name]->at(pos);
-            if (!first) {
-              sb.tab();
-            } else {
-              first = false;
+          for (const auto& region : regions) {
+            // Check if processing was canceled
+            bool is_canceled = false;
+            if (!status->is_canceled(is_canceled, msg)) {
+              return true;
             }
-            sb.append(*acc);
+            if (is_canceled) {
+              msg = Error::m(ERR_REQUEST_CANCELED);
+              return false;
+            }
+
+            // ***
+            sb.append(chromosome_name);
+            sb.tab();
+            sb.append(utils::integer_to_string(region->start()));
+            sb.tab();
+            sb.append(utils::integer_to_string(region->end()));
+            sb.tab();
+
+            bool first = true;
+            for (auto &experiment_format : norm_experiments_formats) {
+              auto *acc = &chromosome_accs[experiment_format.first][chromosome_name]->at(pos);
+              if (!first) {
+                sb.tab();
+              } else {
+                first = false;
+              }
+              sb.append(*acc);
+            }
+            sb.endLine();
+            pos++;
           }
-          sb.endLine();
-          pos++;
         }
       }
 
