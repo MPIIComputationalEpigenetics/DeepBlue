@@ -128,6 +128,12 @@ namespace epidb {
             }
             it_data++;
           }
+
+          if (!status->sum_and_check_size(acc.size())) {
+            msg = "Memory exhausted. Used "  + utils::size_t_to_string(status->total_size()) + "bytes of " + utils::size_t_to_string(status->maximum_size()) + "bytes allowed. Please, select a smaller initial dataset, for example, selecting fewer chromosomes)"; // TODO: put a better error msg.
+            return std::make_tuple(false, msg, "", "", regions_accs);
+          }
+
           regions_accs->push_back(acc);
           it_ranges++;
         }

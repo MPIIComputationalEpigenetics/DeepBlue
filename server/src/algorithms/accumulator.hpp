@@ -46,6 +46,7 @@ namespace epidb {
     public:
       Accumulator();
       void push(Score value);
+      size_t size() const;
       Score min() const;
       Score max() const;
       Score sum() const;
