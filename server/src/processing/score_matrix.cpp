@@ -147,13 +147,13 @@ namespace epidb {
           }
 
           size_t value_size = sizeof(std::string) + ((value.capacity() + 1) * sizeof(char));
+          status->sum_regions(1);
           if (!status->sum_and_check_size(value_size)) {
             msg = "Memory exhausted. Used "  + utils::size_t_to_string(status->total_size()) + "bytes of " + utils::size_t_to_string(status->maximum_size()) + "bytes allowed. Please, select a smaller initial dataset, for example, selecting fewer chromosomes)"; // TODO: put a better error msg.
             return std::make_tuple(false, msg, "", "", regions_accs);
           }
 
           regions_accs->push_back(value);
-
           it_ranges++;
         }
 
@@ -161,6 +161,7 @@ namespace epidb {
         for (const auto& r : data) {
           status->subtract_size(r->size());
         }
+        status->subtract_regions(data.size());
       }
 
       sem->up();
