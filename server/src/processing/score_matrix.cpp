@@ -53,8 +53,8 @@ namespace epidb {
   namespace processing {
 
     //         Okay,    msg,   experiment name, chromosome,  regions
-    std::tuple<bool, std::string, std::string, std::string, std::shared_ptr<std::vector<algorithms::Accumulator>>>
-    summarize_experiment(const std::string& norm_genome,
+    std::tuple<bool, std::string, std::string, std::string, std::shared_ptr<std::vector<std::string>>>
+    summarize_experiment(const std::string& aggregation_function, const std::string& norm_genome,
                          const std::pair<std::string, dba::columns::ColumnTypePtr>& experiment_format,
                          const ChromosomeRegions& chromosome, threading::SemaphorePtr sem,
                          processing::StatusPtr status)
@@ -62,7 +62,13 @@ namespace epidb {
       status->start_operation(PROCESS_SCORE_MATRIX);
 
       std::string msg;
-      std::shared_ptr<std::vector<algorithms::Accumulator>> regions_accs = std::make_shared<std::vector<algorithms::Accumulator>>();
+      std::shared_ptr<std::vector<std::string>> regions_accs = std::make_shared<std::vector<std::string>>();
+
+      algorithms::GetDataPtr data_ptr = algorithms::get_function_data(aggregation_function);
+      if (!data_ptr && aggregation_function != "acc") {
+        msg = "Aggregation function " + aggregation_function + " is invalid.";
+        return std::make_tuple(false, msg, "", "", regions_accs);
+      }
 
       const int BLOCK_SIZE = 100;
       size_t region_pos = 0;
@@ -129,12 +135,23 @@ namespace epidb {
             it_data++;
           }
 
-          if (!status->sum_and_check_size(acc.size())) {
+          std::string value;
+          if (acc.count()) {
+            if (data_ptr) {
+              value = utils::score_to_string( (acc.*data_ptr)() );
+            } else {
+              value = acc.string("|");
+            }
+          }
+
+          if (!status->sum_and_check_size(value.length() * sizeof(char))) {
             msg = "Memory exhausted. Used "  + utils::size_t_to_string(status->total_size()) + "bytes of " + utils::size_t_to_string(status->maximum_size()) + "bytes allowed. Please, select a smaller initial dataset, for example, selecting fewer chromosomes)"; // TODO: put a better error msg.
             return std::make_tuple(false, msg, "", "", regions_accs);
           }
 
-          regions_accs->push_back(acc);
+          std::cerr << value << std::endl;
+
+          regions_accs->push_back(value);
           it_ranges++;
         }
 
@@ -156,12 +173,6 @@ namespace epidb {
 
       ChromosomeRegionsList range_regions;
       if (!dba::query::retrieve_query(user, regions_query_id, status, range_regions, msg)) {
-        return false;
-      }
-
-      algorithms::GetDataPtr data_ptr = algorithms::get_function_data(aggregation_function);
-      if (!data_ptr && aggregation_function != "acc") {
-        msg = "Aggregation function " + aggregation_function + " is invalid.";
         return false;
       }
 
@@ -195,17 +206,19 @@ namespace epidb {
         norm_genome = experiment["norm_genome"].String();
       }
 
-      std::map<std::string, std::map<std::string, std::shared_ptr<std::vector<algorithms::Accumulator>>>> chromosome_accs;
+      std::map<std::string, std::map<std::string, std::shared_ptr<std::vector<std::string>>>> chromosome_accs;
 
       // We only allow 32 simultaneous threads
       threading::SemaphorePtr sem = threading::build_semaphore(32);
 
-      std::vector<std::future<std::tuple<bool, std::string, std::string, std::string, std::shared_ptr<std::vector<algorithms::Accumulator>>>>> threads;
+      std::vector<std::future<std::tuple<bool, std::string, std::string, std::string, std::shared_ptr<std::vector<std::string>>>>> threads;
       for (auto &experiment_format : norm_experiments_formats) {
         for (auto &chromosome : range_regions) {
           sem->down();
           auto t = std::async(std::launch::async, &summarize_experiment,
-                              std::ref(norm_genome), std::ref(experiment_format), std::ref(chromosome), sem, status);
+                              std::ref(aggregation_function), std::ref(norm_genome),
+                              std::ref(experiment_format), std::ref(chromosome),
+                              sem, status);
           threads.push_back(std::move(t));
         }
       }
@@ -268,19 +281,7 @@ namespace epidb {
             } else {
               first = false;
             }
-
-            std::string value = acc->string("|");
-            if (!value.empty()) {
-              if (data_ptr) {
-                sb.append(
-                  utils::score_to_string(
-                    (*acc.*data_ptr)()
-                    )
-                );
-              } else {
-                sb.append(acc->string("|"));
-              }
-            }
+            sb.append(*acc);
           }
           sb.endLine();
           pos++;
