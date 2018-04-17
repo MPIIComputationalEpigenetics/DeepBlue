@@ -89,18 +89,8 @@ namespace epidb {
         ////////////////////////////////////////////////////////////
 
         Regions ranges;
-        size_t ranges_size = 0;
-        size_t ranges_count = 0;
         for (size_t i = 0; i < BLOCK_SIZE && region_pos < chromosome.second.size(); i++, region_pos++) {
           ranges.emplace_back(chromosome.second[region_pos]->clone());
-          ranges_size += chromosome.second[region_pos]->size();
-          ranges_count++;
-        }
-
-        status->sum_regions(ranges_count);
-        if (!status->sum_and_check_size(ranges_size)) {
-          msg = "Memory exhausted. Used "  + utils::size_t_to_string(status->total_size()) + "bytes of " + utils::size_t_to_string(status->maximum_size()) + "bytes allowed. Please, select a smaller initial dataset, for example, selecting fewer chromosomes)"; // TODO: put a better error msg.
-          return std::make_tuple(false, msg, "", "", regions_accs);
         }
 
         mongo::BSONObj regions_query;
@@ -122,8 +112,6 @@ namespace epidb {
         while (it_ranges != ranges.end()) {
           algorithms::Accumulator acc;
 
-          size_t acc_count = 0;
-
           while ( it_data_begin != data.end()
                   && (*it_data_begin)->end() < (*it_ranges)->start() )  {
             it_data_begin++;
@@ -144,13 +132,6 @@ namespace epidb {
 
             if (((*it_ranges)->start() <= (*it_data)->end()) && ((*it_ranges)->end() >= (*it_data)->start())) {
               acc.push((*it_data)->value(experiment_format.second->pos()) * correct_offset);
-              acc_count++;
-            }
-
-            status->sum_regions(acc_count);
-            if (!status->sum_and_check_size(acc_count * sizeof(Score))) {
-              msg = "Memory exhausted. Used "  + utils::size_t_to_string(status->total_size()) + "bytes of " + utils::size_t_to_string(status->maximum_size()) + "bytes allowed. Please, select a smaller initial dataset, for example, selecting fewer chromosomes)"; // TODO: put a better error msg.
-              return std::make_tuple(false, msg, "", "", regions_accs);
             }
 
             it_data++;
@@ -165,15 +146,13 @@ namespace epidb {
             }
           }
 
-          if (!status->sum_and_check_size(value.length() * sizeof(char))) {
+          size_t value_size = sizeof(std::string) + ((value.capacity() + 1) * sizeof(char));
+          if (!status->sum_and_check_size(value_size)) {
             msg = "Memory exhausted. Used "  + utils::size_t_to_string(status->total_size()) + "bytes of " + utils::size_t_to_string(status->maximum_size()) + "bytes allowed. Please, select a smaller initial dataset, for example, selecting fewer chromosomes)"; // TODO: put a better error msg.
             return std::make_tuple(false, msg, "", "", regions_accs);
           }
 
           regions_accs->push_back(value);
-
-          status->subtract_regions(acc_count);
-          status->subtract_size(acc_count * sizeof(Score));
 
           it_ranges++;
         }
@@ -182,8 +161,6 @@ namespace epidb {
         for (const auto& r : data) {
           status->subtract_size(r->size());
         }
-        status->subtract_size(ranges_size);
-        status->subtract_regions(ranges_count);
       }
 
       sem->up();

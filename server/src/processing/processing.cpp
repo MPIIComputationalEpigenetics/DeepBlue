@@ -219,7 +219,7 @@ namespace epidb {
 
     void Status::sum_regions(const long long qtd)
     {
-      _total_regions += qtd;
+      _total_regions.fetch_add(qtd, std::memory_order_relaxed);
       update_values_in_db();
     }
 
@@ -229,19 +229,19 @@ namespace epidb {
         return;
       }
 
-      size_t new_total = _total_regions - qtd;
-
-      if (new_total > _total_regions) {
-        _total_regions = 0;
+      if (qtd > _total_regions) {
+        _total_regions = 0 ;
       } else {
-        _total_regions = new_total;
+        _total_regions.fetch_sub(qtd);
       }
+
       update_values_in_db();
     }
 
     long long Status::sum_size(const long long size)
     {
-      _total_size += size;
+      _total_size.fetch_add(size, std::memory_order_relaxed);
+      std::cerr << _total_size << std::endl;
       update_values_in_db();
 
       return _total_size;
@@ -267,12 +267,13 @@ namespace epidb {
       if (_total_size == 0) {
         return _total_size;
       }
-      size_t new_size = _total_size - size;
-      if (new_size > _total_size) {
-        _total_size = 0;
+
+      if (size > _total_size) {
+        _total_size = 0 ;
       } else {
-        _total_size = new_size;
+        _total_size.fetch_sub(size);
       }
+
       update_values_in_db();
 
       return _total_size;
