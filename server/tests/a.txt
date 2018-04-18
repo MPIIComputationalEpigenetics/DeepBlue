@@ -1,0 +1,8 @@
+----- starting mongodb cluster -----
+
+
+----- clearing database -----
+
+
+
+

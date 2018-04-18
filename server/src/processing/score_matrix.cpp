@@ -146,7 +146,7 @@ namespace epidb {
             }
           }
 
-          size_t value_size = sizeof(std::string) + ((value.capacity() + 1) * sizeof(char));
+          size_t value_size = sizeof(std::string) + (value.capacity() * sizeof(char));
           status->sum_regions(1);
           if (!status->sum_and_check_size(value_size)) {
             msg = "Memory exhausted. Used "  + utils::size_t_to_string(status->total_size()) + "bytes of " + utils::size_t_to_string(status->maximum_size()) + "bytes allowed. Please, select a smaller initial dataset, for example, selecting fewer chromosomes)"; // TODO: put a better error msg.
@@ -177,6 +177,18 @@ namespace epidb {
 
       ChromosomeRegionsList range_regions;
       if (!dba::query::retrieve_query(user, regions_query_id, status, range_regions, msg)) {
+        return false;
+      }
+
+      size_t total_rows = count_regions(range_regions);
+      size_t total_columns = experiments_formats.size();
+
+      size_t total_cells = total_rows * total_columns;
+
+      size_t MAX_LIMIT_CELLS = 1 * 1000 * 1000 * 1000; // 1 billion cells
+
+      if (total_cells > MAX_LIMIT_CELLS) {
+        msg = Error::m(ERR_SCORE_MATRIX_TOO_MANY_CELLS, MAX_LIMIT_CELLS, total_cells, total_rows, total_columns);
         return false;
       }
 
