@@ -188,6 +188,8 @@ namespace epidb {
   extern Error ERR_REQUEST_ID_INVALID;
 
   extern Error ERR_INVALID_INTERNAL_NAME;
+
+  extern Error ERR_SCORE_MATRIX_TOO_MANY_CELLS;
 }
 
 #endif
