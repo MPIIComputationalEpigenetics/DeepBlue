@@ -28,6 +28,8 @@ endif
 #Root Directory
 ROOT=$(shell pwd)/..
 
+host=ubuntu
+
 LUA=$(ROOT)/third_party/luajit-2.0/src
 MINILZO=$(ROOT)/third_party/minilzo
 STRTK=$(ROOT)/third_party/strtk
@@ -47,7 +49,7 @@ ifeq ($(host),ubuntu)
  MONGO_INCLUDE = /opt/mongodb/drivers/include/
  BOOST_DIR = /opt/boost/lib
  DEFCXXFLAGS = -std=c++11 -Wall -O3 -ffast-math -march=native -Ofast -I$(MONGO_INCLUDE) -I/opt/boost/include/ -I$(MINILZO) -I$(URDL) -I$(CPPFORMAT) -I$(STRTK) -I$(LUA) -I${JEMALLOC}/include  -DURDL_HEADER_ONLY=1 -DURDL_DISABLE_SSL=1 -Wno-deprecated-declarations -Wno-unused-variable -Wno-unused-parameter -Wno-ignored-qualifiers -Wno-deprecated-declarations
- BOOSTLIBS = -lboost_filesystem -lboost_thread -lboost_system -lboost_regex -lboost_log -lboost_timer -lboost_chrono -lboost_program_options -lboost_iostreams -lboost_serialization /home/albrecht/DeepBlue/DeepBlue/server/third_party/bzip2/lib/libbz2.a -lrt -L${JEMALLOC}/lib -Wl,-rpath,${JEMALLOC}/lib -ljemalloc
+ BOOSTLIBS = -lboost_filesystem -lboost_thread -lboost_system -lboost_regex -lboost_log -lboost_timer -lboost_chrono -lboost_program_options -lboost_iostreams -lboost_serialization ${ROOT}/third_party/bzip2/lib/libbz2.a -lrt -L${JEMALLOC}/lib -Wl,-rpath,${JEMALLOC}/lib -ljemalloc
  THIRDLIBS = ../third_party/libexpat_linux.a
 endif
 
