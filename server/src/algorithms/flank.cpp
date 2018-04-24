@@ -48,8 +48,9 @@ namespace epidb {
         bool positve_strand = true;
         if (use_strand) {
           int pos;
+          // If the dataset does not have STRAND column, use positive strand
           if (!cache::get_column_position_from_dataset(region->dataset_id(), "STRAND", pos, msg)) {
-            return false;
+            positve_strand = true;
           }
           std::string strand = region->get_string(pos);
           if (strand == "-") {

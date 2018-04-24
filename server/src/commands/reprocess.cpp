@@ -1,7 +1,7 @@
 //
-//  get_request_data.cpp
+//  reprocess.cpp
 //  DeepBlue Epigenomic Data Server
-//  File created by Felipe Albrecht on 27.01.15.
+//  File created by Felipe Albrecht on 10.02.18.
 //  Copyright (c) 2016 Max Planck Institute for Informatics. All rights reserved.
 
 //  This program is free software: you can redistribute it and/or modify
@@ -39,12 +39,12 @@
 namespace epidb {
   namespace command {
 
-    class GetRequestDataCommand: public Command {
+    class ReprocessCommand: public Command {
 
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::REQUESTS, "Download the requested data. The output can be (i) a string (get_regions, score_matrix, and count_regions), or (ii) a list of ID and names (get_experiments_by_query), or (iii) a struct (coverage).");
+        return CommandDescription(categories::REQUESTS, "Reprocess the request. Useful when the request was cancelled or removed.");
       }
 
       static  Parameters parameters_()
@@ -58,12 +58,12 @@ namespace epidb {
       static Parameters results_()
       {
         return {
-          Parameter("data", serialize::STRING, "the request data", true)
+          Parameter("id", serialize::STRING, "ID of the reprocessed request")
         };
       }
 
     public:
-      GetRequestDataCommand() : Command("get_request_data", parameters_(), results_(), desc_()) {}
+      ReprocessCommand() : Command("reprocess", parameters_(), results_(), desc_()) {}
 
       virtual bool run(const std::string &ip,
                        const serialize::Parameters &parameters, serialize::Parameters &result) const
@@ -79,14 +79,20 @@ namespace epidb {
           return false;
         }
 
-        std::string file_content;
         if (!epidb::Engine::instance().user_owns_request(request_id, user.id())) {
           result.add_error("Request ID " + request_id + " not found.");
           return false;
         }
 
-        return epidb::Engine::instance().request_data(user, request_id, result);
+        if (!epidb::Engine::instance().reprocess_request(user, request_id, msg)) {
+          result.add_error(msg);
+          return false;
+        }
+
+        result.add_string(request_id);
+
+        return true;
       }
-    } getRequestDataCommand;
+    } reprocessCommand;
   }
 }

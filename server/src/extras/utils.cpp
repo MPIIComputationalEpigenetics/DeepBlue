@@ -174,7 +174,8 @@ namespace epidb {
       // Get the digits before decimal point
       while (std::isdigit(*p)) {
         r = (r * 10.0) + (*p - '0');
-        ++p; ++c;
+        ++p;
+        ++c;
       }
 
       // Get the digits after decimal point
@@ -214,7 +215,8 @@ namespace epidb {
         c = 0;
         while (std::isdigit(*p)) {
           e = (e * 10) + (*p - '0');
-          ++p; ++c;
+          ++p;
+          ++c;
         }
         if ( !neg && e > std::numeric_limits<T>::max_exponent10 ) {
           e = std::numeric_limits<T>::max_exponent10;
@@ -323,7 +325,8 @@ namespace epidb {
         char c = *it;
         if (isalnum(c)) {
           out += tolower(c);
-        } if (c == '+') {
+        }
+        if (c == '+') {
           out += c;
         }
       }
@@ -526,12 +529,24 @@ namespace epidb {
       buffer.reserve(data.size() * 1.05);
       for (size_t pos = 0; pos != data.size(); ++pos) {
         switch (data[pos]) {
-        case '&':  buffer.append("&amp;");       break;
-        case '\"': buffer.append("&quot;");      break;
-        case '\'': buffer.append("&apos;");      break;
-        case '<':  buffer.append("&lt;");        break;
-        case '>':  buffer.append("&gt;");        break;
-        default:   buffer.append(&data[pos], 1); break;
+        case '&':
+          buffer.append("&amp;");
+          break;
+        case '\"':
+          buffer.append("&quot;");
+          break;
+        case '\'':
+          buffer.append("&apos;");
+          break;
+        case '<':
+          buffer.append("&lt;");
+          break;
+        case '>':
+          buffer.append("&gt;");
+          break;
+        default:
+          buffer.append(&data[pos], 1);
+          break;
         }
       }
       return buffer;
@@ -706,6 +721,14 @@ namespace epidb {
         }
       }
       return true;
+    }
+
+    const std::string get_by_region_set(const mongo::BSONObj &obj, const std::string &field)
+    {
+      if (!obj.hasField(field)) {
+        return "";
+      }
+      return obj.getField(field).str();
     }
 
 

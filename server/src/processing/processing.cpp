@@ -56,6 +56,7 @@ namespace epidb {
       m[RETRIEVE_MERGE_QUERY]                           = "" STR(RETRIEVE_MERGE_QUERY);
       m[RETRIEVE_FIND_MOTIF_QUERY]                      = "" STR(RETRIEVE_FIND_MOTIF_QUERY);
       m[RETRIEVE_FILTER_QUERY]                          = "" STR(RETRIEVE_FILTER_QUERY);
+      m[RETRIEVE_FILTER_MOTIF_QUERY]                    = "" STR(RETRIEVE_FILTER_MOTIF_QUERY);
       m[RETRIEVE_TILING_QUERY]                          = "" STR(RETRIEVE_TILING_QUERY);
       m[RETRIEVE_GENES_DATA]                            = "" STR(RETRIEVE_GENES_DATA);
       m[PROCESS_AGGREGATE]                              = "" STR(PROCESS_AGGREGATE);
@@ -68,6 +69,7 @@ namespace epidb {
       m[PROCESS_GET_EXPERIMENTS_BY_QUERY]               = "" STR(PROCESS_GET_EXPERIMENTS_BY_QUERY);
       m[PROCESS_GET_REGIONS]                            = "" STR(PROCESS_GET_REGIONS);
       m[PROCESS_SCORE_MATRIX]                           = "" STR(PROCESS_SCORE_MATRIX);
+      m[PROCESS_SCORE_MATRIX_THREAD]                    = "" STR(PROCESS_SCORE_MATRIX_THREAD);
       m[RETRIEVE_QUERY_REGION_SET]                      = "" STR(RETRIEVE_QUERY_REGION_SET);
       m[RETRIEVE_FLANK_QUERY]                           = "" STR(RETRIEVE_FLANK_QUERY);
       m[RETRIEVE_EXPRESSIONS_DATA]                      = "" STR(RETRIEVE_EXPRESSIONS_DATA);
@@ -223,7 +225,17 @@ namespace epidb {
 
     void Status::subtract_regions(const long long qtd)
     {
-      _total_regions -= qtd;
+      if (_total_regions == 0) {
+        return;
+      }
+
+      size_t new_total = _total_regions - qtd;
+
+      if (new_total > _total_regions) {
+        _total_regions = 0;
+      } else {
+        _total_regions = new_total;
+      }
       update_values_in_db();
     }
 
@@ -252,7 +264,15 @@ namespace epidb {
 
     long long Status::subtract_size(const long long size)
     {
-      _total_size -= size;
+      if (_total_size == 0) {
+        return _total_size;
+      }
+      size_t new_size = _total_size - size;
+      if (new_size > _total_size) {
+        _total_size = 0;
+      } else {
+        _total_size = new_size;
+      }
       update_values_in_db();
 
       return _total_size;

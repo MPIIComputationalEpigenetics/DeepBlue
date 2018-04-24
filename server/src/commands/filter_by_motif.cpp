@@ -1,7 +1,7 @@
 //
-//  get_request_data.cpp
+//  filter_by_motif.cpp
 //  DeepBlue Epigenomic Data Server
-//  File created by Felipe Albrecht on 27.01.15.
+//  File created by Felipe Albrecht on 14.03.18.
 //  Copyright (c) 2016 Max Planck Institute for Informatics. All rights reserved.
 
 //  This program is free software: you can redistribute it and/or modify
@@ -18,39 +18,35 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include <iostream>
-#include <sstream>
-#include <map>
-
-#include "../dba/dba.hpp"
-#include "../dba/queries.hpp"
-#include "../dba/users.hpp"
-
 #include "../datatypes/user.hpp"
 
-#include "../engine/commands.hpp"
-#include "../engine/engine.hpp"
+#include "../dba/dba.hpp"
+#include "../dba/exists.hpp"
+#include "../dba/queries.hpp"
 
-#include "../extras/serialize.hpp"
+#include "../engine/commands.hpp"
+
 #include "../extras/utils.hpp"
+#include "../extras/serialize.hpp"
 
 #include "../errors.hpp"
 
 namespace epidb {
   namespace command {
 
-    class GetRequestDataCommand: public Command {
+    class FilterByMotifCommand: public Command {
 
     private:
       static CommandDescription desc_()
       {
-        return CommandDescription(categories::REQUESTS, "Download the requested data. The output can be (i) a string (get_regions, score_matrix, and count_regions), or (ii) a list of ID and names (get_experiments_by_query), or (iii) a struct (coverage).");
+        return CommandDescription(categories::OPERATIONS, "Filter the genomic regions by a regular expression motif.");
       }
 
-      static  Parameters parameters_()
+      static Parameters parameters_()
       {
         return {
-          Parameter("request_id", serialize::STRING, "ID of the request"),
+          parameters::QueryId,
+          Parameter("motif", serialize::STRING, "motif (PERL regular expression)"),
           parameters::UserKey
         };
       }
@@ -58,18 +54,19 @@ namespace epidb {
       static Parameters results_()
       {
         return {
-          Parameter("data", serialize::STRING, "the request data", true)
+          Parameter("id", serialize::STRING, "id of filtered query")
         };
       }
 
     public:
-      GetRequestDataCommand() : Command("get_request_data", parameters_(), results_(), desc_()) {}
+      FilterByMotifCommand() : Command("filter_by_motif", parameters_(), results_(), desc_()) {}
 
       virtual bool run(const std::string &ip,
                        const serialize::Parameters &parameters, serialize::Parameters &result) const
       {
-        const std::string request_id = parameters[0]->as_string();
-        const std::string user_key = parameters[1]->as_string();
+        const std::string query_id = parameters[0]->as_string();
+        const std::string motif = parameters[1]->as_string();
+        const std::string user_key = parameters[2]->as_string();
 
         std::string msg;
         datatypes::User user;
@@ -79,14 +76,30 @@ namespace epidb {
           return false;
         }
 
-        std::string file_content;
-        if (!epidb::Engine::instance().user_owns_request(request_id, user.id())) {
-          result.add_error("Request ID " + request_id + " not found.");
+        if (!dba::exists::query(user, query_id, msg)) {
+          result.add_error("Invalid query id: '" + query_id + "'" + msg);
           return false;
         }
 
-        return epidb::Engine::instance().request_data(user, request_id, result);
+        if (motif.empty()) {
+          result.add_error(Error::m(ERR_USER_MOTIF_MISSING));
+          return false;
+        }
+
+        mongo::BSONObjBuilder args_builder;
+        args_builder.append("query", query_id);
+        args_builder.append("motif", motif);
+
+        std::string filtered_query_id;
+        if (!dba::query::store_query(user, "filter_by_motif", args_builder.obj(), filtered_query_id, msg)) {
+          result.add_error(msg);
+          return false;
+        }
+
+        result.add_string(filtered_query_id);
+        return true;
       }
-    } getRequestDataCommand;
+
+    } filterByMotifCommand;
   }
 }

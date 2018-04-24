@@ -62,6 +62,7 @@ namespace epidb {
       RETRIEVE_INTERSECTION_QUERY,
       RETRIEVE_MERGE_QUERY,
       RETRIEVE_FILTER_QUERY,
+      RETRIEVE_FILTER_MOTIF_QUERY,
       RETRIEVE_TILING_QUERY,
       RETRIEVE_QUERY_REGION_SET,
       RETRIEVE_GENES_DATA,
@@ -77,6 +78,7 @@ namespace epidb {
       PROCESS_GET_EXPERIMENTS_BY_QUERY,
       PROCESS_GET_REGIONS,
       PROCESS_SCORE_MATRIX,
+      PROCESS_SCORE_MATRIX_THREAD,
       PROCESS_CALCULATE_GO_ENRICHMENT,
       PROCESS_ENRICH_REGIONS_OVERLAP,
 
@@ -138,7 +140,7 @@ namespace epidb {
       std::unique_ptr<RunningCache> _running_cache;
 
       mongo::BSONObj toBson();
-      long long sum_size(const long long size);
+
       void update_values_in_db();
 
     public:
@@ -147,6 +149,7 @@ namespace epidb {
       RunningOp start_operation(OP op, const mongo::BSONObj& params = mongo::BSONObj());
       void sum_regions(const long long qtd);
       void subtract_regions(const long long qtd);
+      long long sum_size(const long long size);
       long long subtract_size(const long long qtd);
       void set_total_stored_data(long long size);
       void set_total_stored_data_compressed(long long size);
@@ -197,7 +200,7 @@ namespace epidb {
     bool score_matrix(const datatypes::User& user,
                       const std::vector<std::pair<std::string, std::string>> &experiments_formats, const std::string &aggregation_function,
                       const std::string &regions_query_id,
-                      processing::StatusPtr status, std::string &matrix, std::string &msg);
+                      processing::StatusPtr status, StringBuilder &sb, std::string &msg);
 
 
     bool enrich_regions_fast(const datatypes::User& user, const std::string& query_id, const std::vector<utils::IdName>& names,

@@ -390,10 +390,13 @@ namespace epidb {
 
   bool Engine::user_owns_request(const std::string & request_id, const std::string & user_id)
   {
-    if (_hub.job_has_user_id(request_id, user_id)) {
-      return true;
-    }
-    return false;
+    return _hub.job_has_user_id(request_id, user_id);
+  }
+
+  bool Engine::reprocess_request(const datatypes::User& user, const std::string & request_id, std::string & msg)
+  {
+    mongo::BSONObj o = _hub.get_job(request_id);
+    return _hub.reprocess_job(o);
   }
 
   bool Engine::cancel_request(const datatypes::User& user, const std::string & request_id, std::string & msg)

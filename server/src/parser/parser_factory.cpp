@@ -723,5 +723,52 @@ namespace epidb {
       }
       return dba::columns::column_type_simple(op, type, column_type, msg);
     }
+
+    bool FileFormatBuilder::deduce_format(const std::string &content, FileFormat &file_format, std::string &msg)
+    {
+      std::istringstream f(content);
+      std::string line;
+
+      if (!std::getline(f, line)) {
+        msg = "File content is empty";
+        return false;
+      }
+
+      boost::trim(line);
+
+      std::vector<std::string> strs;
+      boost::split(strs, line, boost::is_any_of("\t"));
+
+      size_t tokens = strs.size();
+
+      if (tokens == 3) {
+        file_format = FileFormat::default_format();
+        return true;
+      }
+
+      std::string format;
+      if (tokens == 4) {
+        double d;
+        if (utils::string_to_double(strs[3], d)) {
+          format = "CHROMOSOME,START,END,SCORE";
+        } else {
+          format = "CHROMOSOME,START,END,NAME";
+        }
+      }
+
+      if (tokens == 5) {
+        format = "CHROMOSOME,START,END,SCORE,NAME";
+      }
+
+      if (tokens == 10) {
+        format = "CHROMOSOME,START,END,NAME,SCORE,STRAND,SIGNAL_VALUE,P_VALUE,Q_VALUE,PEAK";
+      }
+
+      if (tokens == 12) {
+        format = "CHROMOSOME,START,END,NAME,SCORE,STRAND,THICK_START,THICK_END,ITEM_RGB,BLOCK_COUNT,BLOCK_SIZES,BLOCK_STARTS";
+      }
+
+      return build(format, file_format, msg);
+    }
   }
 }

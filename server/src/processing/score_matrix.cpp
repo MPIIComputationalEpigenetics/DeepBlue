@@ -53,19 +53,26 @@ namespace epidb {
   namespace processing {
 
     //         Okay,    msg,   experiment name, chromosome,  regions
-    std::tuple<bool, std::string, std::string, std::string, std::shared_ptr<std::vector<algorithms::Accumulator>>>
-    summarize_experiment(const std::string& norm_genome,
+    std::tuple<bool, std::string, std::string, std::string, std::shared_ptr<std::vector<std::string>>>
+    summarize_experiment(const std::string& aggregation_function, const std::string& norm_genome,
                          const std::pair<std::string, dba::columns::ColumnTypePtr>& experiment_format,
                          const ChromosomeRegions& chromosome, threading::SemaphorePtr sem,
                          processing::StatusPtr status)
     {
-      status->start_operation(PROCESS_SCORE_MATRIX);
+      processing::RunningOp threadRunningOp = status->start_operation(PROCESS_SCORE_MATRIX_THREAD);
 
       std::string msg;
-      std::shared_ptr<std::vector<algorithms::Accumulator>> regions_accs = std::make_shared<std::vector<algorithms::Accumulator>>();
+      std::shared_ptr<std::vector<std::string>> regions_accs = std::make_shared<std::vector<std::string>>();
+
+      algorithms::GetDataPtr data_ptr = algorithms::get_function_data(aggregation_function);
+      if (!data_ptr && aggregation_function != "acc") {
+        msg = "Aggregation function " + aggregation_function + " is invalid.";
+        return std::make_tuple(false, msg, "", "", regions_accs);
+      }
 
       const int BLOCK_SIZE = 100;
       size_t region_pos = 0;
+
       while (region_pos < chromosome.second.size()) {
 
         // Check if processing was canceled
@@ -126,16 +133,35 @@ namespace epidb {
             if (((*it_ranges)->start() <= (*it_data)->end()) && ((*it_ranges)->end() >= (*it_data)->start())) {
               acc.push((*it_data)->value(experiment_format.second->pos()) * correct_offset);
             }
+
             it_data++;
           }
-          regions_accs->push_back(acc);
+
+          std::string value;
+          if (acc.count()) {
+            if (data_ptr) {
+              value = utils::score_to_string( (acc.*data_ptr)() );
+            } else {
+              value = acc.string("|");
+            }
+          }
+
+          size_t value_size = sizeof(std::string) + (value.capacity() * sizeof(char));
+          status->sum_regions(1);
+          if (!status->sum_and_check_size(value_size)) {
+            msg = "Memory exhausted. Used "  + utils::size_t_to_string(status->total_size()) + "bytes of " + utils::size_t_to_string(status->maximum_size()) + "bytes allowed. Please, select a smaller initial dataset, for example, selecting fewer chromosomes)"; // TODO: put a better error msg.
+            return std::make_tuple(false, msg, "", "", regions_accs);
+          }
+
+          regions_accs->push_back(value);
           it_ranges++;
         }
 
-        // Remove the size of the region, keeping only the size of the Stored score.
+        // Remove the size of the region, ranges
         for (const auto& r : data) {
-          status->subtract_size(r->size() - sizeof(Score));
+          status->subtract_size(r->size());
         }
+        status->subtract_regions(data.size());
       }
 
       sem->up();
@@ -145,17 +171,24 @@ namespace epidb {
     bool score_matrix(const datatypes::User& user,
                       const std::vector<std::pair<std::string, std::string>> &experiments_formats,
                       const std::string & aggregation_function, const std::string & regions_query_id,
-                      processing::StatusPtr status, std::string & matrix, std::string & msg)
+                      processing::StatusPtr status, StringBuilder &sb, std::string & msg)
     {
+      processing::RunningOp runningOp = status->start_operation(PROCESS_SCORE_MATRIX);
 
       ChromosomeRegionsList range_regions;
       if (!dba::query::retrieve_query(user, regions_query_id, status, range_regions, msg)) {
         return false;
       }
 
-      algorithms::GetDataPtr data_ptr = algorithms::get_function_data(aggregation_function);
-      if (!data_ptr && aggregation_function != "acc") {
-        msg = "Aggregation function " + aggregation_function + " is invalid.";
+      size_t total_rows = count_regions(range_regions);
+      size_t total_columns = experiments_formats.size();
+
+      size_t total_cells = total_rows * total_columns;
+
+      size_t MAX_LIMIT_CELLS = 1 * 1000 * 1000 * 1000; // 1 billion cells
+
+      if (total_cells > MAX_LIMIT_CELLS) {
+        msg = Error::m(ERR_SCORE_MATRIX_TOO_MANY_CELLS, MAX_LIMIT_CELLS, total_cells, total_rows, total_columns);
         return false;
       }
 
@@ -189,17 +222,19 @@ namespace epidb {
         norm_genome = experiment["norm_genome"].String();
       }
 
-      std::map<std::string, std::map<std::string, std::shared_ptr<std::vector<algorithms::Accumulator>>>> chromosome_accs;
+      std::map<std::string, std::map<std::string, std::shared_ptr<std::vector<std::string>>>> chromosome_accs;
 
       // We only allow 32 simultaneous threads
       threading::SemaphorePtr sem = threading::build_semaphore(32);
 
-      std::vector<std::future<std::tuple<bool, std::string, std::string, std::string, std::shared_ptr<std::vector<algorithms::Accumulator>>>>> threads;
+      std::vector<std::future<std::tuple<bool, std::string, std::string, std::string, std::shared_ptr<std::vector<std::string>>>>> threads;
       for (auto &experiment_format : norm_experiments_formats) {
         for (auto &chromosome : range_regions) {
           sem->down();
           auto t = std::async(std::launch::async, &summarize_experiment,
-                              std::ref(norm_genome), std::ref(experiment_format), std::ref(chromosome), sem, status);
+                              std::ref(aggregation_function), std::ref(norm_genome),
+                              std::ref(experiment_format), std::ref(chromosome),
+                              sem, status);
           threads.push_back(std::move(t));
         }
       }
@@ -216,65 +251,64 @@ namespace epidb {
         chromosome_accs[std::get<2>(result)][std::get<3>(result)] = std::get<4>(result);
       }
 
-      std::stringstream ss;
-      ss << "CHROMOSOME\t";
-      ss << "START\t";
-      ss << "END\t";
-      bool first = true;
-      for (auto &experiments_format : experiments_formats) {
-        if (!first) {
-          ss << "\t";
+
+      {
+        processing::RunningOp formatOp = status->start_operation(FORMAT_OUTPUT);
+
+        sb.append("CHROMOSOME\t");
+        sb.append("START\t");
+        sb.append("END\t");
+
+        bool first = true;
+        for (auto &experiments_format : experiments_formats) {
+          if (!first) {
+            sb.tab();
+          }
+          sb.append(experiments_format.first);
+          first = false;
         }
-        ss << experiments_format.first;
-        first = false;
-      }
-      ss << std::endl;
+        sb.endLine();
 
-      for (auto &chromosome : range_regions) {
-        size_t pos = 0;
-        const auto &chromosome_name = chromosome.first;
-        const auto &regions = chromosome.second;
+        for (auto &chromosome : range_regions) {
+          size_t pos = 0;
+          const auto &chromosome_name = chromosome.first;
+          const auto &regions = chromosome.second;
 
-        for (const auto& region : regions) {
-          // Check if processing was canceled
-          bool is_canceled = false;
-          if (!status->is_canceled(is_canceled, msg)) {
-            return true;
-          }
-          if (is_canceled) {
-            msg = Error::m(ERR_REQUEST_CANCELED);
-            return false;
-          }
-
-          // ***
-          ss << chromosome_name << "\t";
-          ss << region->start() << "\t";
-          ss << region->end() << "\t";
-
-          bool first = true;
-          for (auto &experiment_format : norm_experiments_formats) {
-            auto *acc = &chromosome_accs[experiment_format.first][chromosome_name]->at(pos);
-            if (!first) {
-              ss << "\t";
-            } else {
-              first = false;
+          for (const auto& region : regions) {
+            // Check if processing was canceled
+            bool is_canceled = false;
+            if (!status->is_canceled(is_canceled, msg)) {
+              return true;
+            }
+            if (is_canceled) {
+              msg = Error::m(ERR_REQUEST_CANCELED);
+              return false;
             }
 
-            std::string value = acc->string("|");
-            if (!value.empty()) {
-              if (data_ptr) {
-                ss << (*acc.*data_ptr)();
+            // ***
+            sb.append(chromosome_name);
+            sb.tab();
+            sb.append(utils::integer_to_string(region->start()));
+            sb.tab();
+            sb.append(utils::integer_to_string(region->end()));
+            sb.tab();
+
+            bool first = true;
+            for (auto &experiment_format : norm_experiments_formats) {
+              auto *acc = &chromosome_accs[experiment_format.first][chromosome_name]->at(pos);
+              if (!first) {
+                sb.tab();
               } else {
-                ss << acc->string("|");
+                first = false;
               }
+              sb.append(*acc);
             }
+            sb.endLine();
+            pos++;
           }
-          ss << std::endl;
-          pos++;
         }
       }
 
-      matrix = ss.str();
       return true;
     }
   }

@@ -25,6 +25,7 @@ import gene_ontology
 import gene_expressions
 import genomes
 import info
+import input_regions
 import init
 import intersection
 import janitor

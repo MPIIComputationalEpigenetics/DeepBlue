@@ -2,14 +2,12 @@ import xmlrpclib
 from Queue import Queue
 from threading import Thread
 
-uk = "USER_KEY"
-
-project = "DEEP"
+uk = "1kbgOVXjTJuQ4v8s"
 
 q = Queue()
 
 def worker():
-	__server = xmlrpclib.Server("http://deepblue.mpi-inf.mpg.de/xmlrpc", allow_none=True)
+	__server = xmlrpclib.Server("http://localhost:31415", allow_none=True)
 	while True:
 	    	_id = q.get()
         	print "removing " +  _id
@@ -27,20 +25,12 @@ for i in xrange(4):
 	t.start()
 
 
-server = xmlrpclib.Server("http://deepblue.mpi-inf.mpg.de/xmlrpc", allow_none=True)
-experiments = server.list_experiments("", "", "", "", "", "", project, uk)[1]
+server = xmlrpclib.Server("http://localhost:31415", allow_none=True)
+experiments = server.list_experiments("", "peaks", "flrna", None, None, None,	"BLUEPRINT Epigenome", uk)[1]
+
+print experiments
 
 exp_ids = server.extract_ids(experiments)[1]
 for _id in exp_ids:
 	q.put(_id)
-
-
-gene_expressions = server.list_expressions("gene", "", None, project, uk)[1]
-print gene_expressions
-
-gx_ids = server.extract_ids(gene_expressions)[1]
-for _id in gx_ids:
-       q.put(_id)
-
 q.join()
-

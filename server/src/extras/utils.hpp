@@ -174,6 +174,8 @@ namespace epidb {
     bool check_parameters(const std::vector<std::string> &params, const std::function<std::string(const std::string&)> &normalizer, const std::function<bool(const std::string&)> &checker, std::string &wrong);
 
     bool is_id(const std::string &id, const std::string &prefix);
+
+    const std::string get_by_region_set(const mongo::BSONObj &obj, const std::string &field);
   }
 }
 

@@ -183,7 +183,7 @@ namespace epidb {
                                             "update" << BSON("$addToSet" << BSON("tags" << shard)));
 
         if (!c->runCommand("config", findandmodify, info)) {
-          EPIDB_LOG_ERR("Problem while setting shard tag ' << " << shard << " for shard " << shard << ":" << info.toString());
+          EPIDB_LOG_ERR("Problem while setting shard tag " << shard << " for shard " << shard << ":" << info.toString());
           return false;
         }
 

@@ -42,13 +42,12 @@ namespace epidb {
     query::QUERY_RESULT fn(const query::QUERY_KEY& qk)
     {
       query::QUERY_RESULT result;
-      std::cerr << "processing: " << qk.query_id << std::endl;
       result.success = dba::query::retrieve_query(qk.user, qk.query_id, qk.status, result.regions, result.msg);
 
       return result;
     }
 
-    lru_cache_using_boost<query::QUERY_KEY, query::QUERY_RESULT, boost::bimaps::set_of> QUERY_CACHE(fn, 32);
+    lru_cache_using_boost<query::QUERY_KEY, query::QUERY_RESULT, boost::bimaps::set_of> QUERY_CACHE(fn, 16);
 
 
     bool get_query_cache(const datatypes::User& user,
@@ -72,7 +71,9 @@ namespace epidb {
         std::lock_guard<std::mutex> guard(m);
         waiting_list.insert(qk.query_id);
       }
+
       query::QUERY_RESULT qr = QUERY_CACHE(qk);
+
       {
         std::lock_guard<std::mutex> guard(m);
         waiting_list.erase(qk.query_id);
@@ -80,6 +81,17 @@ namespace epidb {
       }
 
       regions = std::move(qr.regions);
+      status->sum_regions(count_regions(regions));
+      size_t total_size = 0;
+
+      for (auto& chromosome_regions_list : regions) {
+        const std::string &chromosome = chromosome_regions_list.first;
+        for (auto& region : chromosome_regions_list.second) {
+          total_size += region->size();
+        }
+      }
+
+      status->sum_size(total_size);
       msg = qr.msg;
 
       return qr.success;

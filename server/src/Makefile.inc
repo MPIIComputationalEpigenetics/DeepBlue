@@ -25,6 +25,8 @@ ifeq ($(UNAME_S),Darwin)
 	host = macosx
 endif
 
+host = ubuntu
+
 #Root Directory
 ROOT=$(shell pwd)/..
 

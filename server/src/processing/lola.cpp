@@ -67,12 +67,14 @@ namespace epidb {
         std::vector<std::string> exp_biosources;
         const std::string bs_field_name = "sample_info.biosource_name";
         if (!dba::query::get_main_experiment_data(user, dataset_name, bs_field_name, status, exp_biosources, msg)) {
+          sem->up();
           return std::make_tuple(dataset_name, biosource, epigenetic_mark, description, -1, database_name, -1, -1, -1, -1, -1, -1, true, msg);
         }
 
         std::vector<std::string> exp_epigenetic_marks;
         const std::string em_field_name = "epigenetic_mark";
         if (!dba::query::get_main_experiment_data(user, dataset_name, em_field_name, status, exp_epigenetic_marks, msg)) {
+          sem->up();
           return std::make_tuple(dataset_name, biosource, epigenetic_mark, description, -1, database_name, -1, -1, -1, -1, -1, -1, true, msg);
         }
 
@@ -102,7 +104,6 @@ namespace epidb {
           epigenetic_mark = experiment_obj["epigenetic_mark"].str();
         }
       }
-
 
       size_t count_database_regions = count_regions(database_regions);
 
@@ -166,11 +167,15 @@ namespace epidb {
       }
 
       status->subtract_regions(count_database_regions);
+      size_t total_size_to_remove = 0;
+
       for (const auto& chr : database_regions) {
         for (const auto& rs :chr.second) {
-          status->subtract_size(rs->size());
+          total_size_to_remove += rs->size();
         }
       }
+
+      status->subtract_size(total_size_to_remove);
 
       sem->up();
       return std::make_tuple(dataset_name, biosource, epigenetic_mark, description, count_database_regions, database_name, negative_natural_log, odds_score, a, b, c, d, false, "");
@@ -185,7 +190,6 @@ namespace epidb {
     {
       IS_PROCESSING_CANCELLED(status);
       processing::RunningOp runningOp =  status->start_operation(PROCESS_ENRICH_REGIONS_OVERLAP);
-
 
       ChromosomeRegionsList query_regions;
       if (!dba::query::retrieve_query(user, query_id, status, query_regions, msg, /* reduced_mode */ true)) {
@@ -223,7 +227,9 @@ namespace epidb {
 
       std::vector<std::future<ProcessOverlapResult > > threads;
 
-      threading::SemaphorePtr sem = threading::build_semaphore(64);
+      threading::SemaphorePtr sem = threading::build_semaphore(128);
+
+      std::vector<std::pair<mongo::BSONObj, std::string>> all_datasets;
 
       auto databases_it = databases.begin();
       while ( databases_it.more() ) {
@@ -234,23 +240,35 @@ namespace epidb {
 
         auto datasets_it = datasets.begin();
         while (datasets_it.more()) {
-          long times = clock();
-          const auto& dataset = datasets_it.next().Obj();
-          const auto& dataset_name = dataset["name"].String();
-          const auto& description = dataset["description"].String();
-
-          sem->down();
-          auto t = std::async(std::launch::async, &process_overlap,
-                              std::ref(user),
-                              std::ref(genome), std::ref(chromosomes),
-                              std::ref(redefined_universe_overlap_query), count_redefined_universe_overlap_query,
-                              dataset_name, description, database_name,
-                              std::ref(universe_regions), total_universe_regions,
-                              status, sem,
-                              std::ref(msg));
-
-          threads.emplace_back(std::move(t));
+          all_datasets.push_back(std::pair<mongo::BSONObj, std::string>(datasets_it.next().Obj(), database_name));
         }
+      }
+
+      // sort using a lambda expression
+      std::sort(all_datasets.begin(), all_datasets.end(), [](const std::pair<mongo::BSONObj, std::string>& a, const std::pair<mongo::BSONObj, std::string>& b) {
+        return a.first["name"].str().compare(b.first["name"].str()) > 0;
+      });
+
+
+
+      for (const auto& dataset_database : all_datasets) {
+        const auto dataset = dataset_database.first;
+        const auto database_name = dataset_database.second;
+        const auto dataset_name = dataset["name"].String();
+        const auto description = dataset["description"].String();
+
+        sem->down();
+        auto t = std::async(std::launch::async, &process_overlap,
+                            std::ref(user),
+                            std::ref(genome), std::ref(chromosomes),
+                            std::ref(redefined_universe_overlap_query), count_redefined_universe_overlap_query,
+                            dataset_name, description, database_name,
+                            std::ref(universe_regions), total_universe_regions,
+                            status, sem,
+                            std::ref(msg));
+
+        threads.emplace_back(std::move(t));
+
       }
 
       std::vector<ProcessOverlapResult> results;

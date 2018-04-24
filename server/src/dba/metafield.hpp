@@ -28,7 +28,6 @@
 #include "../datatypes/regions.hpp"
 
 #include "../dba/retrieve.hpp"
-#include "../dba/sequence_retriever.hpp"
 
 namespace epidb {
   namespace dba {
@@ -41,8 +40,6 @@ namespace epidb {
       static std::map<std::string, std::string> functionsReturns;
 
       std::map<DatasetId, mongo::BSONObj> obj_by_dataset_id;
-
-      dba::retrieve::SequenceRetriever seq_retr;
 
       static const std::map<std::string, Function> createFunctionsMap();
 

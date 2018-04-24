@@ -1,0 +1,246 @@
+test_add_user_by_non_admin (test_cases.admin.TestAdminCommands) ... 	0.238	ok
+test_anonymous (test_cases.admin.TestAdminCommands) ... 	0.157	ok
+test_echo (test_cases.admin.TestAdminCommands) ... 	0.121	ok
+test_unequal_keys (test_cases.admin.TestAdminCommands) ... 	0.124	ok
+test_users (test_cases.admin.TestAdminCommands) ... 	0.158	ok
+test_aggregation (test_cases.aggregate.TestAggregateCommand) ... 	3.641	ok
+test_aggregation_bug_on_normalfields (test_cases.aggregate.TestAggregateCommand) ... 	2.303	ok
+test_aggregation_bug_on_normalfields_better_data (test_cases.aggregate.TestAggregateCommand) ... 	1.627	ok
+test_correct_limits (test_cases.aggregate.TestAggregateCommand) ... 	1.236	ok
+test_correction_score (test_cases.aggregate.TestAggregateCommand) ... 	1.805	ok
+test_annotation (test_cases.annotations.TestAnnotationCommands) ... 	1.223	ok
+test_annotation_full_cpg_islands (test_cases.annotations.TestAnnotationCommands) ... 	1.304	ok
+test_annotation_shuffle (test_cases.annotations.TestAnnotationCommands) ... 	3.081	ok
+test_annotation_signal_bedgraph (test_cases.annotations.TestAnnotationCommands) ... 	1.908	ok
+test_annotation_signal_wig (test_cases.annotations.TestAnnotationCommands) ... 	1.202	ok
+test_invalid_annotation (test_cases.annotations.TestAnnotationCommands) ... 	1.454	ok
+test_list_annotations (test_cases.annotations.TestAnnotationCommands) ... 	1.430	ok
+test_list_annotations2 (test_cases.annotations.TestAnnotationCommands) ... 	0.133	ok
+test_missing_annotation_name (test_cases.annotations.TestAnnotationCommands) ... 	1.065	ok
+test_bed_graph_files (test_cases.bedgraph_parser.TestBedgraphFiles) ... 	6.786	ok
+test_basic_binning (test_cases.binning.TestBinning) ... 	4.206	ok
+test_big_file (test_cases.binning.TestBinning) ... [{'user_id': 'u1', 'state': 'running', 'create_time': '2017-Dec-15 18:23:46.024000', 'command': 'binning', 'query_id': 'q1', 'message': '', '_id': 'r1', 'type': 'request'}]
+[{'user_id': 'u1', 'finish_time': '2017-Dec-15 18:23:57.140000', 'state': 'done', 'create_time': '2017-Dec-15 18:23:46.024000', 'command': 'binning', 'query_id': 'q1', 'message': '', '_id': 'r1', 'type': 'request'}]
+[{'user_id': 'u1', 'state': 'running', 'create_time': '2017-Dec-15 18:23:57.309000', 'command': 'binning', 'query_id': 'q3', 'message': '', '_id': 'r2', 'type': 'request'}]
+[{'user_id': 'u1', 'finish_time': '2017-Dec-15 18:24:08.167000', 'state': 'done', 'create_time': '2017-Dec-15 18:23:57.309000', 'command': 'binning', 'query_id': 'q3', 'message': '', '_id': 'r2', 'type': 'request'}]
+	26.439	ok
+test_biosource (test_cases.biosources.TestBioSourceCommands) ... 	0.133	ok
+test_biosource_related (test_cases.biosources.TestBioSourceCommands) ... 	0.149	ok
+test_biosource_scope (test_cases.biosources.TestBioSourceCommands) ... ['okay', ['god master', 'mesoderm']]
+['okay', ['K562', 'shitty']]
+['okay', ['weirdo', 'K562']]
+	0.165	ok
+test_check_embracing_bug (test_cases.biosources.TestBioSourceCommands) ... 	0.146	ok
+test_duplicated_biosource_with_synonym (test_cases.biosources.TestBioSourceCommands) ... 	0.129ok
+test_biosource_true_hierarchy (test_cases.bugs.TestBugs) ... 	1.799	ok
+test_bug_do_not_reuse_existing_query (test_cases.bugs.TestBugs) ... 	1.044	ok
+test_empty_no_permission_column_type (test_cases.bugs.TestBugs) ... 	1.127	ok
+test_empty_result (test_cases.bugs.TestBugs) ... 	0.170	ok
+test_include_invalid_regions (test_cases.bugs.TestBugs) ... 	1.172	ok
+test_info_on_user_queries (test_cases.bugs.TestBugs) ... 	1.061	ok
+test_invalid_eamp_character (test_cases.bugs.TestBugs) ... 	1.037	ok
+test_no_start_position (test_cases.bugs.TestBugs) ... 	1.143	ok
+test_not_find_genome_and_in_order_chromosoms (test_cases.bugs.TestBugs) ... 	1.044	ok
+test_sample_search_from_synonym (test_cases.bugs.TestBugs) ... 	1.034	ok
+test_wrong_chromosomes_usage (test_cases.bugs.TestBugs) ... 	3.858	ok
+test_cancel_aggregation (test_cases.cancel.TestAggregateCommand) ... 	2.198	ok
+test_change_extra_metadata (test_cases.changes.TestChanges) ... 	1.084	ok
+test_better_names (test_cases.clone.TestClone) ... 	1.068	ok
+test_clone_annotatation (test_cases.clone.TestClone) ... 	1.055	ok
+test_clone_experiment (test_cases.clone.TestClone) ... 	1.082	ok
+test_invalid_column (test_cases.clone.TestClone) ... 	1.056	ok
+test_invalid_format_size (test_cases.clone.TestClone) ... 	1.071	ok
+test_invalid_format_types (test_cases.clone.TestClone) ... 	1.232	ok
+test_wig_clone (test_cases.clone.TestClone) ... 	2.727	ok
+test_wig_clone_calculated (test_cases.clone.TestClone) ... 	1.975	ok
+test_basic_column_types (test_cases.column_types.TestColumnTypes) ... 	0.127	ok
+test_category_fail (test_cases.column_types.TestColumnTypes) ... 	1.145	ok
+test_column_complex_types (test_cases.column_types.TestColumnTypes) ... 	0.127	ok
+test_duplicate_column_type (test_cases.column_types.TestColumnTypes) ... 	0.124	ok
+test_insert_experiment_fail (test_cases.column_types.TestColumnTypes) ... 	1.093	ok
+test_list_column_types (test_cases.column_types.TestColumnTypes) ... 	0.132	ok
+test_no_ignore_if (test_cases.column_types.TestColumnTypes) ... 	0.133	ok
+test_range_fail (test_cases.column_types.TestColumnTypes) ... 	1.077	ok
+test_remove_column (test_cases.column_types.TestColumnTypes) ... 	0.141	ok
+test_complex1 (test_cases.complex_queries.TestComplexQueries) ... 	2.001	ok
+test_complex2 (test_cases.complex_queries.TestComplexQueries) ... 	6.230	ok
+test_complex_input_regions (test_cases.complex_queries.TestComplexQueries) ... 	2.138	ok
+test_select_only_peaks_cached (test_cases.complex_queries.TestComplexQueries) ... 	1.619	ok
+test_select_only_peaks_not_cached (test_cases.complex_queries.TestComplexQueries) ... 	1.488	ok
+test_select_only_signal (test_cases.complex_queries.TestComplexQueries) ... 	2.321	ok
+test_coverage (test_cases.coverage.TestCoverageCommand) ... 	3.280	ok
+test_basic_distinct (test_cases.distinct.TestDistinct) ... 	6.234	ok
+test_enriochment_overlap (test_cases.enrichment.TestEnrichment) ... 	2.272	ok
+test_epigenetic_mark (test_cases.epigenetic_marks.TestEpigeneticMarkCommands) ... 	0.148	ok
+test_insert_histone_modifications (test_cases.epigenetic_marks.TestEpigeneticMarkCommands) ... 	0.415ok
+test_normalize_histone_modifications (test_cases.epigenetic_marks.TestEpigeneticMarkCommands) ... 	0.162	ok
+test_experiment_sets (test_cases.experiment_sets.TestExperimentSets) ... ['hg19_chr2_1', 'hg18_chr1_1', 'deepshitty', 'hg19_chr1_1', 'hg19_chr1_2', 'hg19_chr1_3', 'hg19_small']
+
+okay
+es1
+[{'experiments': ['hg19_chr2_1', 'hg18_chr1_1', 'deepshitty', 'hg19_chr1_1', 'hg19_chr1_2', 'hg19_chr1_3', 'hg19_small'], 'public': True, '_id': 'es1', 'name': 'Test 1', 'description': 'set test one'}]
+	1.222	ok
+test_add_with_invalid_chromosome (test_cases.experiments.TestExperiments) ... 	1.337	ok
+test_add_with_invalid_epigenetic_mark (test_cases.experiments.TestExperiments) ... 	1.364	ok
+test_add_with_invalid_genome (test_cases.experiments.TestExperiments) ... 	1.277	ok
+test_add_with_invalid_project (test_cases.experiments.TestExperiments) ... 	1.222	ok
+test_add_with_invalid_sample (test_cases.experiments.TestExperiments) ... 	1.156	ok
+test_add_with_out_of_bound_region (test_cases.experiments.TestExperiments) ... 	1.394	ok
+test_double_experiment_fail (test_cases.experiments.TestExperiments) ... 	1.271	ok
+test_double_experiment_same_user_fail (test_cases.experiments.TestExperiments) ... 	1.249	ok
+test_experiments_pass (test_cases.experiments.TestExperiments) ... 	1.228	ok
+test_experiments_preview (test_cases.experiments.TestExperiments) ... 	1.107	ok
+test_get_by_query (test_cases.experiments.TestExperiments) ... 	2.809	ok
+test_insert_local_file (test_cases.experiments.TestExperiments) ... 	2.011	ok
+test_list_recent (test_cases.experiments.TestExperiments) ... 	9.147	ok
+test_load_bedgraph (test_cases.experiments.TestExperiments) ... 	5.639	ok
+test_shitty_deep_file (test_cases.experiments.TestExperiments) ... 	2.616	ok
+test_extend (test_cases.extend.TestExtend) ... 	2.556	ok
+test_collection_experiments_count (test_cases.faceting.TestFacetingCommand) ... 	1.116	ok
+test_faceting (test_cases.faceting.TestFacetingCommand) ... 	1.112	ok
+test_filter_regions (test_cases.filters.TestFilterCommand) ... 	1.655	ok
+test_filter_two_genomes (test_cases.filters.TestFilterCommand) ... 	1.896	ok
+test_remove_full_chromosome_data (test_cases.filters.TestFilterCommand) ... 	2.745	ok
+test_flank_genes (test_cases.flank.TestFlank) ... [{'name': 'Test One', 'format': 'GTF', 'total_genes': 20, 'genome': 'hg19', '_id': 'gs1', 'description': 'Test One Description'}]
+	3.630	ok
+test_duplicated (test_cases.gene_expressions.TestExpressions) ... 	1.245	ok
+test_gene_expression (test_cases.gene_expressions.TestExpressions) ... 	55.763	ok
+test_gene_retrieve (test_cases.gene_expressions.TestExpressions) ... 	3.238	ok
+test_performance (test_cases.gene_expressions.TestExpressions) ... 	35.564	ok
+test_gene_case_insensitive (test_cases.gene_models.TestGenes) ... 	1.924	ok
+test_gene_retrieve (test_cases.gene_models.TestGenes) ... 	3.001	ok
+test_genes_location (test_cases.gene_models.TestGenes) ... 	21.177	ok
+test_select_genes (test_cases.gene_models.TestGenes) ... 	1.764	ok
+test_gene_retrieve (test_cases.gene_ontology.TestGenes) ... 	1.855	ok
+test_chromosomes (test_cases.genomes.TestGenomeCommands) ... 	0.922	ok
+test_genome_duplicate (test_cases.genomes.TestGenomeCommands) ... 	0.338	ok
+test_genome_empty (test_cases.genomes.TestGenomeCommands) ... 	0.502	ok
+test_genome_hg19 (test_cases.genomes.TestGenomeCommands) ... 	0.514	ok
+test_genome_info (test_cases.genomes.TestGenomeCommands) ... 	0.338	ok
+test_incomplete_chromosome (test_cases.genomes.TestGenomeCommands) ... 	2.114	ok
+test_annotation_info (test_cases.info.TestGetInfoCommand) ... 	1.078	ok
+test_biosource_info (test_cases.info.TestGetInfoCommand) ... 	0.123	ok
+test_empty_info (test_cases.info.TestGetInfoCommand) ... 	0.121	ok
+test_epigenetic_mark_info (test_cases.info.TestGetInfoCommand) ... 	0.127	ok
+test_experiment_info (test_cases.info.TestGetInfoCommand) ... 	1.201	ok
+test_genome_info (test_cases.info.TestGetInfoCommand) ... 	0.563	ok
+test_me_info (test_cases.info.TestGetInfoCommand) ... 	0.135	ok
+test_query_info (test_cases.info.TestGetInfoCommand) ... 	1.101	ok
+test_request_info_permission (test_cases.info.TestGetInfoCommand) ... 	1.178	ok
+test_sample_info (test_cases.info.TestGetInfoCommand) ... 	0.128	ok
+test_init_system (test_cases.init.TestInitCommands) ... 	0.123	ok
+test_uninitialized_system (test_cases.init.TestInitCommands) ... 	0.030	ok
+test_big_files_intersect (test_cases.intersection.TestIntersection) ... 	6.620	ok
+test_intersection (test_cases.intersection.TestIntersection) ... 	1.270	ok
+test_intersection_two_genomes (test_cases.intersection.TestIntersection) ... 	1.150	ok
+test_overlap (test_cases.intersection.TestIntersection) ... 	9.624	ok
+test_janitor (test_cases.janitor.TestJanitor) ... 	10.285	ok
+test_commands (test_cases.list_commands.TestListCommandsCommand) ... 	0.053	ok
+test_result_ids_new (test_cases.list_requests.TestListRequests) ... 	1.177	ok
+test_result_ids_reuse (test_cases.list_requests.TestListRequests) ... 	1.190	ok
+test_list_similar_experiments (test_cases.list_similar.TestListSimilarCommands) ... 	1.054	ok
+test_calculated_get_region (test_cases.lua.TestExperiments) ... 	1.234	ok
+test_calculated_math (test_cases.lua.TestExperiments) ... 	2.166	ok
+test_calculated_metafield (test_cases.lua.TestExperiments) ... 	1.823	ok
+test_calculated_string (test_cases.lua.TestExperiments) ... 	1.867	ok
+test_error_calculated_get_region (test_cases.lua.TestExperiments) ... 	1.188	ok
+test_error_maximum_number_of_instructions (test_cases.lua.TestExperiments) ... 	1.300	ok
+test_wrong_column_creation (test_cases.lua.TestExperiments) ... 	1.104	ok
+test_merge_different_chromosomes (test_cases.merge.TestMerge) ... 	1.855	ok
+test_merge_queries (test_cases.merge.TestMerge) ... 	1.851	ok
+test_multiple_merge (test_cases.merge.TestMerge) ... 	1.211	ok
+test_nonexisting_key (test_cases.modify_user.TestModifyUserCommand) ... 	1.656	ok
+test_success (test_cases.modify_user.TestModifyUserCommand) ... 	1.089	ok
+test_output_format (test_cases.output.TestOutput) ... 	2.001	ok
+test_multiple_overlap (test_cases.overlaps.TestOverlaps) ... 	2.727	ok
+test_overlap_experiment_annotation (test_cases.overlaps.TestOverlaps) ... 	1.427	ok
+test_overlap_simple (test_cases.overlaps.TestOverlaps) ... 	2.394	ok
+test_pattern_chromosome (test_cases.patterns.TestPattern) ... 	28.130	ok
+test_admin (test_cases.permissions.TestPermissions) ... 	1.293	ok
+test_change_extra_metadata (test_cases.permissions.TestPermissions) ... 	1.311	ok
+test_get_data (test_cases.permissions.TestPermissions) ... 	1.086	ok
+test_include_annotations (test_cases.permissions.TestPermissions) ... 	1.084	ok
+test_include_collection_terms (test_cases.permissions.TestPermissions) ... 	1.043	ok
+test_list_collections (test_cases.permissions.TestPermissions) ... 	1.210	ok
+test_set_project_public (test_cases.projects.TestProjects) ... 	1.057	ok
+test_set_project_public_by_user (test_cases.projects.TestProjects) ... 	1.477	ok
+test_set_project_public_by_user_no_permission (test_cases.projects.TestProjects) ... 	1.152	ok
+test_set_project_public_no_permisson (test_cases.projects.TestProjects) ... 	1.141	ok
+test_set_project_publictest_project (test_cases.projects.TestProjects) ... 	0.146	ok
+test_remove_annotation (test_cases.remove.TestRemoveCommands) ... 	1.472	ok
+test_remove_biosource (test_cases.remove.TestRemoveCommands) ... 	1.161	ok
+test_remove_epigenetic_mark (test_cases.remove.TestRemoveCommands) ... 	1.194	ok
+test_remove_genome (test_cases.remove.TestRemoveCommands) ... 	1.124	ok
+test_remove_project (test_cases.remove.TestRemoveCommands) ... 	1.131	ok
+test_remove_sample (test_cases.remove.TestRemoveCommands) ... 	1.127	ok
+test_remove_technique (test_cases.remove.TestRemoveCommands) ... 	1.108	ok
+test_find_sample (test_cases.samples.TestSamples) ... 	0.134	ok
+test_find_samples (test_cases.samples.TestSamples) ... 	0.145	ok
+test_list_samples (test_cases.samples.TestSamples) ... 	0.140	ok
+test_multiple_biosources_samples (test_cases.samples.TestSamples) ... 	0.156	ok
+test_ascore_simple (test_cases.score_matrix.TestScoreMatrixCommand) ... 	2.033	ok
+test_score_matrix_wrong_experiment (test_cases.score_matrix.TestScoreMatrixCommand) ... 	1.063ok
+test_biosource (test_cases.search.TestSearch) ... 	0.136	ok
+test_column_types_search (test_cases.search.TestSearch) ... 	0.161	ok
+test_epigenetic_mark (test_cases.search.TestSearch) ... 	0.135	ok
+test_exclude (test_cases.search.TestSearch) ... 	0.134	ok
+test_experiment (test_cases.search.TestSearch) ... 	1.100	ok
+test_experiment_metadata (test_cases.search.TestSearch) ... 	1.098	ok
+test_genome (test_cases.search.TestSearch) ... 	0.533	ok
+test_invalid_search (test_cases.search.TestSearch) ... 	0.116	ok
+test_project (test_cases.search.TestSearch) ... 	0.133	ok
+test_sample (test_cases.search.TestSearch) ... 	0.136	ok
+test_search_embracing (test_cases.search.TestSearch) ... 	0.171	ok
+test_search_experiment_related (test_cases.search.TestSearch) ... 	1.159	ok
+test_search_sample_related (test_cases.search.TestSearch) ... 	0.142	ok
+test_search_synonyms (test_cases.search.TestSearch) ... 	1.091	ok
+test_type_restricted (test_cases.search.TestSearch) ... 	0.131	ok
+test_argument_normalization (test_cases.select_regions.TestSelectRegions) ... 	1.915	ok
+test_chromosome_explicit (test_cases.select_regions.TestSelectRegions) ... 	2.933	ok
+test_experiment_name_metacolumn (test_cases.select_regions.TestSelectRegions) ... 	1.889	ok
+test_experiment_name_metacolumn2 (test_cases.select_regions.TestSelectRegions) ... 	2.010	ok
+test_malformed_format (test_cases.select_regions.TestSelectRegions) ... 	1.120	ok
+test_minimum_parameters (test_cases.select_regions.TestSelectRegions) ... 	3.066	ok
+test_multiple_experiments (test_cases.select_regions.TestSelectRegions) ... 	1.186	ok
+test_multiple_genomes (test_cases.select_regions.TestSelectRegions) ... 	2.036	ok
+test_multiple_genomes_2 (test_cases.select_regions.TestSelectRegions) ... 	2.286	ok
+test_retrieve_with_defaults (test_cases.select_regions.TestSelectRegions) ... 	1.893	ok
+test_select_all (test_cases.select_regions.TestSelectRegions) ... 	0.120	ok
+test_select_full_experiment (test_cases.select_regions.TestSelectRegions) ... 	6.127	ok
+test_select_range (test_cases.select_regions.TestSelectRegions) ... 	1.929	ok
+test_unknown_parameters (test_cases.select_regions.TestSelectRegions) ... 	1.147	ok
+test_double_upload (test_cases.sequence.TestSequence) ... 	3.205	ok
+test_get_sequences (test_cases.sequence.TestSequence) ... 	2.009	ok
+test_long_sequence_content (test_cases.sequence.TestSequence) ... [{'user_id': 'u1', 'format': '@SEQUENCE', 'finish_time': '2017-Dec-15 18:31:10.533000', 'state': 'done', 'create_time': '2017-Dec-15 18:31:04.349000', 'command': 'get_regions', 'query_id': 'q1', 'message': '', '_id': 'r1', 'type': 'request'}]
+	15.658	ok
+test_multiple_sequences (test_cases.sequence.TestSequence) ... 	2.502	ok
+test_nonexisting_chromosome (test_cases.sequence.TestSequence) ... 	1.151	ok
+test_nonexisting_genome (test_cases.sequence.TestSequence) ... 	1.113	ok
+test_result (test_cases.sequence.TestSequence) ... 	2.633	ok
+test_tiling_regions (test_cases.sequence.TestSequence) ... [{'user_id': 'u1', 'format': 'CHROMOSOME,START,END,@NAME,@LENGTH,@EPIGENETIC_MARK,@PROJECT,@BIOSOURCE,@SAMPLE_ID,@SEQUENCE', 'finish_time': '2017-Dec-15 18:31:33.315000', 'state': 'done', 'create_time': '2017-Dec-15 18:31:26.629000', 'command': 'get_regions', 'query_id': 'q1', 'message': '', '_id': 'r1', 'type': 'request'}]
+	14.787	ok
+test_upload_sequence (test_cases.sequence.TestSequence) ... 	3.659	ok
+test_wrong_sequence_length (test_cases.sequence.TestSequence) ... 	1.671	ok
+test_state (test_cases.states.TestState)
+Tests state after insert and remove for all data-types except experiments. ... 	5.559	ok
+test_state_experiments (test_cases.states.TestState)
+Tests state after insert and remove for experiments. ... 	5.194	ok
+test_add_techniques (test_cases.techniques.TestTechniques) ... 	0.126	ok
+test_duplicate (test_cases.techniques.TestTechniques) ... 	0.133	ok
+test_list_similar_techniques (test_cases.techniques.TestTechniques) ... 	0.127	ok
+test_list_techniques (test_cases.techniques.TestTechniques) ... 	0.127	ok
+test_chromosomes (test_cases.tiling.TestTilingRegions) ... 	4.950	ok
+test_filter_tiling (test_cases.tiling.TestTilingRegions) ... 	5.271	ok
+test_full_genome (test_cases.tiling.TestTilingRegions) ... 	4.890	ok
+test_intersect_tiling (test_cases.tiling.TestTilingRegions) ... 	4.902	ok
+test_merge_tiling (test_cases.tiling.TestTilingRegions) ... 	4.319	ok
+test_metacolumn_experiment_name (test_cases.tiling.TestTilingRegions) ... 	4.939	ok
+test_metacolumn_sequence (test_cases.tiling.TestTilingRegions) ... 	4.366	ok
+test_success (test_cases.user_auth.TestUserAuthCommand) ... 	4.133	ok
+test_wrong_email (test_cases.user_auth.TestUserAuthCommand) ... 	4.123	ok
+test_wrong_password (test_cases.user_auth.TestUserAuthCommand) ... 	4.157	ok
+test_wig_files (test_cases.wig_parser.TestWigFiles) ... 	4.859	ok
+test_wig_files_fail (test_cases.wig_parser.TestWigFiles) ... 	4.366	ok
+test_wig_files_pass (test_cases.wig_parser.TestWigFiles) ... 	4.132	ok
+test_int_for_string (test_cases.xml.TestXML) ... 	0.123	ok
+test_types (test_cases.xml.TestXML) ... 	0.032	ok

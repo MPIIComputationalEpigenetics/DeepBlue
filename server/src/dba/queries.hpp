@@ -130,6 +130,10 @@ namespace epidb {
                                  const mongo::BSONObj &query,
                                  processing::StatusPtr status, ChromosomeRegionsList &regions, std::string &msg);
 
+      bool retrieve_filter_by_motif_query(const datatypes::User& user,
+                                          const mongo::BSONObj & query,
+                                          processing::StatusPtr status, ChromosomeRegionsList & filtered_regions, std::string & msg);
+
       bool add_tiling(const std::string &genome, const size_t &tiling_size,
                       std::string &tiling_id, std::string &msg);
 

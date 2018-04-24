@@ -65,6 +65,7 @@
 #include "key_mapper.hpp"
 #include "queries.hpp"
 #include "retrieve.hpp"
+#include "sequence_retriever.hpp"
 #include "info.hpp"
 
 #include "../errors.hpp"
@@ -334,6 +335,7 @@ namespace epidb {
       cache::queries_cache_invalidate();
       config::set_old_request_age_in_sec(config::get_default_old_request_age_in_sec());
       config::set_janitor_periodicity(config::get_default_janitor_periodicity());
+      retrieve::SequenceRetriever::singleton().invalidade_cache();
 
       c.done();
       return true;
@@ -1286,7 +1288,7 @@ namespace epidb {
     {
       std::string norm_genome = utils::normalize_name(genome);
 
-      retrieve::SequenceRetriever retriever;
+      retrieve::SequenceRetriever &retriever = retrieve::SequenceRetriever::singleton();
       std::vector<std::string> missing;
       for (const std::string &chromosome_name : chromosomes) {
         if (!retriever.exists(genome, chromosome_name)) {

@@ -71,7 +71,7 @@ public:
       // We do have it:
       // Update the access record view.
       {
-       // std::lock_guard<std::mutex> guard(m);
+        //std::lock_guard<std::mutex> guard(m);
         _container.right.relocate(
           _container.right.end(),
           _container.project_right(it)

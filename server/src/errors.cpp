@@ -71,6 +71,7 @@
  * 60 - Input
  * 61 - Input sub-item
  * 66 - Internal
+ * 77 - Score Matrix
  * 88 - Name
  * 99 - Identifier
  */
@@ -96,6 +97,8 @@
  *
  * 555 - Connection Error
  * 666 - Internal Error
+ *
+ * 700 - Too many
  *
  * // Controlled vocabulary errors
  * 901 - More Embracing
@@ -236,5 +239,7 @@ namespace epidb {
   Error ERR_DATABASE_INVALID_BIOSOURCE("404666", "BioSource '{}' not found.");
 
   Error ERR_INVALID_INTERNAL_NAME("366000", "Unable to retrieve the name of the internal name '{}'.");
+
+  Error ERR_SCORE_MATRIX_TOO_MANY_CELLS("177700", "This score_matrix request exceeds the limit of {} cells. It requests {} cells, being from {} rows (ranges) and {} experiments");
 
 };
