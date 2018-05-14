@@ -98,11 +98,6 @@ namespace epidb {
           return false;
         }
 
-        if (sample_ids.empty()) {
-          result.add_error(Error::m(ERR_USER_SAMPLE_MISSING));
-          return false;
-        }
-
         if (gene_model.empty()) {
           result.add_error(Error::m(ERR_USER_GENE_MODEL_MISSING));
           return false;
