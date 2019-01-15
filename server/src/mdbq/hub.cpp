@@ -126,24 +126,15 @@ namespace epidb {
     bool Hub::exists_job(const mongo::BSONObj &job, std::string &id, bool update)
     {
       mongo::BSONObj ret;
-      std::cerr << job.toString() << std::endl;
-      // Silly and efficient optimization for DIVE.
-      // As DIVE sents hundreds of 'count_regions' request, we improve how we can fetch this requests.
-      if (job.hasField("command") && job.hasField("query_id") && job.hasField("user_id") && (job["command"].str() == std::string("count_regions"))) {
-        mongo::BSONObjBuilder bob;
-        bob.append("misc.command", job["command"].str());
-        bob.append("misc.query_id", job["query_id"].str());
-        bob.append("misc.user_id", job["user_id"].str());
-
-        epidb::Connection c;
-        ret = c->findOne(dba::helpers::collection_name(dba::Collections::JOBS()), bob.obj());
-        c.done();
-
-      } else {
-        epidb::Connection c;
-        ret = c->findOne(dba::helpers::collection_name(dba::Collections::JOBS()), BSON("misc" << job));
-        c.done();
+      mongo::BSONObjBuilder bob;
+      for (auto it = job.begin(); it.more(); ) {          
+        mongo::BSONElement e = it.next();
+        bob.append("misc." + std::string(e.fieldName()), e);
       }
+
+      epidb::Connection c;
+      ret = c->findOne(dba::helpers::collection_name(dba::Collections::JOBS()), bob.obj());
+      c.done();
 
       if (ret.isEmpty()) {
         return false;
