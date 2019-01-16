@@ -150,6 +150,8 @@ namespace epidb {
 
     serialize::ParameterPtr element_to_parameter(const mongo::BSONElement& e);
 
+    mongo::BSONObj unroll_object(const std::string &prefix, const mongo::BSONObj &o);
+
     std::string sanitize(const std::string &data);
 
     mongo::BSONArray build_array(const std::vector<std::string> &params);

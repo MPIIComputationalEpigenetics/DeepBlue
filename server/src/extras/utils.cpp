@@ -522,6 +522,56 @@ namespace epidb {
       return parameter;
     }
 
+    mongo::BSONObj unroll_object(const std::string &prefix, const mongo::BSONObj &o) 
+    {
+      mongo::BSONObjBuilder bob;
+
+      if (o.couldBeArray()) {
+        return bob.obj();
+      }
+
+      for (auto it = o.begin(); it.more(); ) {
+        mongo::BSONElement e = it.next();
+        std::string fieldname = e.fieldName();
+
+        std::cerr << e.toString() << std::endl;
+        std::cerr << e.type() << std::endl;
+
+        switch ( e.type() ) {
+        case mongo::NumberDouble: {
+          bob.append(prefix + fieldname, e.Double());
+          break;
+        }
+        case mongo::NumberInt: 
+        case mongo::NumberLong: {
+          bob.append(prefix + fieldname, e.numberLong());
+          break;
+        }
+        case mongo::Object: {
+          bob.append(prefix + fieldname, e.Obj());
+          break;
+        }
+        case mongo::Array: {
+          bob.append(prefix + fieldname, e.Array());
+          break;
+        }
+        case mongo::Bool: {
+          bob.append(prefix + fieldname, e.boolean());
+          break;
+        }
+        case mongo::Date: {
+          bob.append(prefix + fieldname, e.date());;
+          break;
+        }
+        default: {
+          bob.append(prefix + fieldname, e.String());
+        }
+        }
+      }
+
+      return bob.obj();
+    }
+
 
     std::string sanitize(const std::string &data)
     {

@@ -125,18 +125,16 @@ namespace epidb {
 
     bool Hub::exists_job(const mongo::BSONObj &job, std::string &id, bool update)
     {
-      mongo::BSONObj ret;
-      mongo::BSONObjBuilder bob;
-      for (auto it = job.begin(); it.more(); ) {          
-        mongo::BSONElement e = it.next();
-        bob.append("misc." + std::string(e.fieldName()), e);
-      }
-
+      mongo::BSONObj ret;      
       epidb::Connection c;
-      ret = c->findOne(dba::helpers::collection_name(dba::Collections::JOBS()), bob.obj());
+
+      std::cerr << job.toString() << std::endl;
+      
+      ret = c->findOne(dba::helpers::collection_name(dba::Collections::JOBS()), job);
       c.done();
 
       if (ret.isEmpty()) {
+        std::cerr << "not found" << std::endl;
         return false;
       } else {
         if (update && (is_cleared(ret) || is_canceled(ret))) {

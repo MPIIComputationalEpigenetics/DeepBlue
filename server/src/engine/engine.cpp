@@ -90,7 +90,7 @@ namespace epidb {
 
   bool Engine::queue(const mongo::BSONObj &job, unsigned int timeout, std::string &id, std::string &msg)
   {
-    if (_hub.exists_job(job, id, true)) {
+    if (_hub.exists_job(utils::unroll_object("misc.", job), id, true)) {
       return true;
     }
 
