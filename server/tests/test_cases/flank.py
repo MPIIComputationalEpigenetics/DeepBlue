@@ -31,7 +31,7 @@ class TestFlank(helpers.TestCase):
     (s, f_id) = epidb.flank(query_id, -2500, 2000, True, self.admin_key)
     (s, r_id) = epidb.get_regions(f_id, "CHROMOSOME,START,END,STRAND", self.admin_key)
     regions = self.get_regions_request(r_id)
-    self.assertEqual(regions, 'chr1\t9369\t11369\t+\nchr1\t136223\t138223\t-')
+    self.assertEqual(regions, 'chr1\t9369\t11369\t+\nchr1\t134223\t136223\t-')
 
     (s, f_id) = epidb.flank(query_id, 2500, 2000, False, self.admin_key)
     (s, r_id) = epidb.get_regions(f_id, "CHROMOSOME,START,END,STRAND", self.admin_key)
